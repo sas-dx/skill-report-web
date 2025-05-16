@@ -9,6 +9,11 @@
 | **責任者** | 黒澤 (@yusuke-kurosawa) |
 | **PM** | 中島 (@SAS-nakajima) |
 | **PL** | 笹尾 (@SAS-sasao) |
+|**メンバー**|柏崎（@MichihiroKashiwazaki）|
+|**メンバー**|室山（@kmuroyama）|
+|**メンバー**|杉本（@sas-sugimoto）|
+|**メンバー**|市川（@sas-ichikawa）|
+|**メンバー**|金子晄士 （@Akito-Kaneko）|
 
 ## プロジェクトの目的
 
@@ -86,8 +91,7 @@
 
 ## プロトタイプの扱い
 
-- 検証完了後は **archive ブランチ** に移動
-- 本番用プロジェクトへ知見を引き継いで廃止予定
+- 今後検討する
 
 ## 開発・利用方法
 
