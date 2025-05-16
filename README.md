@@ -23,7 +23,7 @@ AI駆動開発をチームで行い、AI駆動チーム開発を行う上でのP
 | NFR‑01 | **パフォーマンス**  | API 〜 UI までレスポンス 1 秒以内           |
 | NFR‑02 | **アクセシビリティ** | WCAG 2.1 AA 相当（キーボード操作 & 画面読み上げ） |
 
-## 開発・検証の進め方
+## 開発・検証の進め方（例）
 
 1. **イテレーション**: 1 週間スプリントで計画 → 実装 → レビュー
 2. **レビュー方法**: GitHub Pull Request + 毎週金曜ステークホルダーミーティング
@@ -56,8 +56,8 @@ AI駆動開発をチームで行い、AI駆動チーム開発を行う上でのP
 
 ```
 cline-dev-starter/
-├── memory-bank/                  # Clineメモリバンク
-├── .clinerules/                  # Cline開発ルール
+├── memory-bank/                  # Clineメモリバンク（要件定義や設計、技術スタック等を記載）
+├── .clinerules/                  # Cline開発ルール（コーディング規約やテスト規約、gitルール等を記載）
 ├── CustomInstructions/           # Clineカスタムインストラクション
 ├── src/                          # ソースコード
 └── README.md                     # このファイル
@@ -67,11 +67,10 @@ cline-dev-starter/
 
 | 役割          | 名前 / GitHub | 連絡先                                               |
 | ----------- | ----------- | ------------------------------------------------- |
-| PM / 責任者    | 豊樹 (@sasao) | [example@example.com](mailto:example@example.com) |
-| FE リード      | @user1      |                                                   |
-| BE リード      | @user2      |                                                   |
-| QA / DevOps | @user3      |                                                   |
-
+|  責任者    | 黒澤 (@yusuke-kurosawa) | [kurosawa@sas-com.com](kurosawa@sas-com.com) |
+|  PM      |  中島 (@SAS-nakajima)       | [nakajima@sas-com.com](nakajima@sas-com.com) |
+|  PL     | 笹尾（@SAS-sasao）      | [sasao@sas-com.com](sasao@sas-com.com) |
+                                                 
 ## ライセンス
 
 This project is licensed under the **MIT License**.
