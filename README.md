@@ -10,7 +10,7 @@
 | **PM** | 中島 (@SAS-nakajima) |
 | **PL** | 笹尾 (@SAS-sasao) |
 |**メンバー**|柏崎（@MichihiroKashiwazaki）|
-|**メンバー**|室山（@kmuroyama）|
+|**メンバー**|室山（@muroyama）|
 |**メンバー**|杉本（@sas-sugimoto）|
 |**メンバー**|市川（@sas-ichikawa）|
 |**メンバー**|金子晄士 （@Akito-Kaneko）|
