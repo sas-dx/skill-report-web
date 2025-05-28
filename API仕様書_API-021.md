@@ -4,10 +4,10 @@
 
 - **API ID**: API-021
 - **API名称**: スキル情報取得API
-- **概要**: ユーザーのスキル情報を取得する
+- **概要**: 指定されたユーザーのスキル情報を取得する
 - **エンドポイント**: `/api/skills/{user_id}`
 - **HTTPメソッド**: GET
-- **リクエスト形式**: URLパス・クエリパラメータ
+- **リクエスト形式**: URL Path Parameter + Query Parameter
 - **レスポンス形式**: JSON
 - **認証要件**: 必須（JWT認証）
 - **利用画面**: [SCR-SKILL](画面設計書_SCR-SKILL.md)
@@ -19,34 +19,24 @@
 
 ## 2. リクエスト仕様
 
-### 2.1 リクエストヘッダ
-
-| ヘッダ名 | 必須 | 説明 | 備考 |
-|---------|------|------|------|
-| Authorization | ○ | 認証トークン | Bearer {JWT} 形式 |
-| Accept | - | レスポンス形式 | application/json |
-
-### 2.2 パスパラメータ
+### 2.1 パスパラメータ
 
 | パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
 |------------|------|------|------|------------|
-| user_id | string | ○ | ユーザーID | 自身のIDまたは閲覧権限のあるユーザーID |
+| user_id | string | ○ | 取得対象のユーザーID | 半角英数字、4〜20文字 |
 
-### 2.3 クエリパラメータ
+### 2.2 クエリパラメータ
 
 | パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
 |------------|------|------|------|------------|
-| year | number | - | 対象年度 | 指定がない場合は最新年度<br>例: 2025 |
-| category | string | - | スキルカテゴリ | 指定がない場合は全カテゴリ<br>例: "technical", "business", "language" |
-| include_history | boolean | - | 履歴を含めるか | true: 過去の履歴を含める<br>false: 最新のみ（デフォルト） |
+| year | number | - | 取得対象年度 | 西暦4桁<br>指定なしの場合は最新年度 |
+| include_history | boolean | - | 過去のスキル評価履歴を含めるか | デフォルト：false |
+| detail_level | string | - | 詳細レベル | "summary", "standard", "detail"のいずれか<br>デフォルト："standard" |
 
-### 2.4 リクエスト例
+### 2.3 リクエスト例
 
 ```
-GET /api/skills/U12345?year=2025&include_history=true HTTP/1.1
-Host: api.example.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Accept: application/json
+GET /api/skills/tanaka.taro?year=2025&include_history=true&detail_level=detail
 ```
 
 ---
@@ -58,228 +48,142 @@ Accept: application/json
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
 | user_id | string | ユーザーID | |
-| year | number | 対象年度 | |
-| last_updated | string | 最終更新日時 | ISO 8601形式 |
-| skills | array | スキル情報の配列 | |
-| history | array | 過去のスキル履歴 | include_history=trueの場合のみ |
+| year | number | 年度 | 西暦4桁 |
+| last_updated_at | string | 最終更新日時 | ISO 8601形式 |
+| status | string | ステータス | "draft", "submitted", "reviewed", "approved"のいずれか |
+| skills | array | スキル情報の配列 | 詳細は以下参照 |
+| skill_summary | object | スキルサマリー情報 | 詳細は以下参照 |
+| history | array | 過去のスキル評価履歴 | include_history=trueの場合のみ |
 
 #### skills 配列要素
 
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
+| category_id | string | スキルカテゴリID | |
+| category_name | string | スキルカテゴリ名 | |
+| items | array | スキル項目の配列 | 詳細は以下参照 |
+
+#### items 配列要素
+
+| パラメータ名 | 型 | 説明 | 備考 |
+|------------|------|------|------|
 | skill_id | string | スキルID | |
-| category | string | スキルカテゴリ | "technical", "business", "language"など |
-| name | string | スキル名 | |
-| level | number | スキルレベル | 1-5（5が最高） |
-| experience_years | number | 経験年数 | 小数点以下1桁まで（例: 2.5） |
-| description | string | 詳細説明 | ユーザーによる補足情報 |
-| projects | array | 関連プロジェクト | |
-| certifications | array | 関連資格 | |
+| skill_name | string | スキル名 | |
+| level | number | スキルレベル | 0: 未評価, 1: 初級, 2: 中級, 3: 上級, 4: エキスパート |
+| self_evaluation | string | 自己評価コメント | detail_level="detail"の場合のみ |
+| manager_evaluation | string | 上長評価コメント | detail_level="detail"かつstatus="reviewed"または"approved"の場合のみ |
+| experience_years | number | 経験年数 | |
 | last_used_date | string | 最終使用日 | ISO 8601形式（YYYY-MM-DD） |
-| self_assessment | object | 自己評価情報 | |
+| projects | array | 関連プロジェクト | detail_level="detail"の場合のみ |
 
-#### projects 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| project_id | string | プロジェクトID | |
-| name | string | プロジェクト名 | |
-| period | string | 期間 | "2024/04-2024/09"形式 |
-| role | string | 役割 | |
-
-#### certifications 配列要素
+#### skill_summary オブジェクト
 
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
-| certification_id | string | 資格ID | |
-| name | string | 資格名 | |
-| acquisition_date | string | 取得日 | ISO 8601形式（YYYY-MM-DD） |
-
-#### self_assessment オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| strengths | string | 強み | |
-| weaknesses | string | 弱み | |
-| improvement_plan | string | 改善計画 | |
-
-#### history 配列要素（include_history=trueの場合のみ）
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| year | number | 年度 | |
-| skills | array | その年度のスキル情報 | 上記skillsと同じ構造 |
-| updated_at | string | 更新日時 | ISO 8601形式 |
+| total_skills | number | 総スキル数 | |
+| average_level | number | 平均スキルレベル | 小数点第2位まで |
+| top_skills | array | トップスキル（レベル3以上） | 最大5件 |
+| improvement_areas | array | 改善推奨スキル | 最大5件 |
+| skill_distribution | object | スキルレベル分布 | レベルごとの件数 |
 
 ### 3.2 正常時レスポンス例
 
 ```json
 {
-  "user_id": "U12345",
+  "user_id": "tanaka.taro",
   "year": 2025,
-  "last_updated": "2025-05-15T10:30:00+09:00",
+  "last_updated_at": "2025-05-15T14:30:45+09:00",
+  "status": "reviewed",
   "skills": [
     {
-      "skill_id": "S001",
-      "category": "technical",
-      "name": "Java",
-      "level": 4,
-      "experience_years": 5.5,
-      "description": "Spring Boot、JUnit、Gradleを使用した開発経験あり",
-      "projects": [
+      "category_id": "programming",
+      "category_name": "プログラミング言語",
+      "items": [
         {
-          "project_id": "P001",
-          "name": "顧客管理システム開発",
-          "period": "2023/04-2023/09",
-          "role": "バックエンド開発リーダー"
+          "skill_id": "java",
+          "skill_name": "Java",
+          "level": 3,
+          "self_evaluation": "Spring Bootを用いたWebアプリケーション開発経験あり。並列処理やパフォーマンスチューニングも実施。",
+          "manager_evaluation": "プロジェクトでのコード品質が高く、チーム内でも技術的なリードができている。",
+          "experience_years": 5,
+          "last_used_date": "2025-04-30",
+          "projects": ["販売管理システム刷新", "顧客ポータル開発"]
         },
         {
-          "project_id": "P002",
-          "name": "ECサイトリニューアル",
-          "period": "2024/01-2024/06",
-          "role": "アプリケーションアーキテクト"
+          "skill_id": "typescript",
+          "skill_name": "TypeScript",
+          "level": 2,
+          "self_evaluation": "React/Next.jsでのフロントエンド開発経験あり。型定義の活用は得意。",
+          "manager_evaluation": "基本的な実装は問題ないが、より高度な型活用やパフォーマンス最適化の経験を積むと良い。",
+          "experience_years": 2,
+          "last_used_date": "2025-05-10",
+          "projects": ["顧客ポータル開発"]
         }
-      ],
-      "certifications": [
-        {
-          "certification_id": "C001",
-          "name": "Oracle Certified Professional, Java SE 11 Developer",
-          "acquisition_date": "2022-06-15"
-        }
-      ],
-      "last_used_date": "2025-04-30",
-      "self_assessment": {
-        "strengths": "大規模アプリケーションの設計・実装経験が豊富",
-        "weaknesses": "最新のJava機能（モジュール化など）の活用が不十分",
-        "improvement_plan": "Java 17の新機能を学習し、既存プロジェクトに適用する"
-      }
+      ]
     },
     {
-      "skill_id": "S002",
-      "category": "technical",
-      "name": "React",
-      "level": 3,
-      "experience_years": 2.0,
-      "description": "Hooks、Redux、TypeScriptを使用した開発経験あり",
-      "projects": [
+      "category_id": "framework",
+      "category_name": "フレームワーク",
+      "items": [
         {
-          "project_id": "P002",
-          "name": "ECサイトリニューアル",
-          "period": "2024/01-2024/06",
-          "role": "フロントエンド開発者"
+          "skill_id": "spring",
+          "skill_name": "Spring Framework",
+          "level": 3,
+          "self_evaluation": "DI、AOP、Spring MVC、Spring Bootの実務経験あり。マイクロサービス構築も経験。",
+          "manager_evaluation": "設計面での知識も深く、適切なアーキテクチャ選定ができている。",
+          "experience_years": 4,
+          "last_used_date": "2025-04-30",
+          "projects": ["販売管理システム刷新", "在庫管理API開発"]
         }
-      ],
-      "certifications": [],
-      "last_used_date": "2025-04-30",
-      "self_assessment": {
-        "strengths": "UIコンポーネント設計が得意",
-        "weaknesses": "パフォーマンス最適化の知識が不足",
-        "improvement_plan": "React Profilerを使ったパフォーマンス分析を学ぶ"
-      }
-    },
-    {
-      "skill_id": "S003",
-      "category": "business",
-      "name": "プロジェクト管理",
-      "level": 3,
-      "experience_years": 3.0,
-      "description": "5名程度の小規模チームのリーダー経験あり",
-      "projects": [
-        {
-          "project_id": "P001",
-          "name": "顧客管理システム開発",
-          "period": "2023/04-2023/09",
-          "role": "バックエンド開発リーダー"
-        }
-      ],
-      "certifications": [
-        {
-          "certification_id": "C002",
-          "name": "PMP (Project Management Professional)",
-          "acquisition_date": "2023-11-20"
-        }
-      ],
-      "last_used_date": "2024-09-30",
-      "self_assessment": {
-        "strengths": "タスク管理とチーム内コミュニケーションが得意",
-        "weaknesses": "リスク管理の経験が少ない",
-        "improvement_plan": "リスク管理手法を学び、次のプロジェクトで実践する"
-      }
-    },
-    {
-      "skill_id": "S004",
-      "category": "language",
-      "name": "英語",
-      "level": 3,
-      "experience_years": 10.0,
-      "description": "技術文書の読み書き、海外チームとの打ち合わせ経験あり",
-      "projects": [],
-      "certifications": [
-        {
-          "certification_id": "C003",
-          "name": "TOEIC 750点",
-          "acquisition_date": "2022-03-10"
-        }
-      ],
-      "last_used_date": "2025-05-10",
-      "self_assessment": {
-        "strengths": "技術文書の読解力が高い",
-        "weaknesses": "スピーキングに自信がない",
-        "improvement_plan": "オンライン英会話を週1回受講する"
-      }
+      ]
     }
   ],
+  "skill_summary": {
+    "total_skills": 15,
+    "average_level": 2.47,
+    "top_skills": [
+      {"skill_id": "java", "skill_name": "Java", "level": 3},
+      {"skill_id": "spring", "skill_name": "Spring Framework", "level": 3},
+      {"skill_id": "sql", "skill_name": "SQL", "level": 3}
+    ],
+    "improvement_areas": [
+      {"skill_id": "aws", "skill_name": "AWS", "level": 1},
+      {"skill_id": "docker", "skill_name": "Docker", "level": 1}
+    ],
+    "skill_distribution": {
+      "level0": 2,
+      "level1": 3,
+      "level2": 5,
+      "level3": 4,
+      "level4": 1
+    }
+  },
   "history": [
     {
       "year": 2024,
-      "skills": [
-        {
-          "skill_id": "S001",
-          "category": "technical",
-          "name": "Java",
-          "level": 3,
-          "experience_years": 4.5,
-          "description": "Spring Bootを使用した開発経験あり",
-          "projects": [
-            {
-              "project_id": "P001",
-              "name": "顧客管理システム開発",
-              "period": "2023/04-2023/09",
-              "role": "バックエンド開発者"
-            }
-          ],
-          "certifications": [
-            {
-              "certification_id": "C001",
-              "name": "Oracle Certified Professional, Java SE 11 Developer",
-              "acquisition_date": "2022-06-15"
-            }
-          ],
-          "last_used_date": "2024-03-31",
-          "self_assessment": {
-            "strengths": "基本的な実装スキルは高い",
-            "weaknesses": "アーキテクチャ設計の経験が少ない",
-            "improvement_plan": "設計パターンを学び、実践する"
-          }
-        },
-        {
-          "skill_id": "S002",
-          "category": "technical",
-          "name": "React",
-          "level": 2,
-          "experience_years": 1.0,
-          "description": "基本的なコンポーネント開発の経験あり",
-          "projects": [],
-          "certifications": [],
-          "last_used_date": "2024-03-31",
-          "self_assessment": {
-            "strengths": "UIデザインの実装が得意",
-            "weaknesses": "状態管理の知識が不足",
-            "improvement_plan": "Reduxを学習する"
-          }
-        }
-      ],
-      "updated_at": "2024-05-20T14:30:00+09:00"
+      "last_updated_at": "2024-05-20T11:20:15+09:00",
+      "status": "approved",
+      "average_level": 2.13,
+      "skill_distribution": {
+        "level0": 3,
+        "level1": 4,
+        "level2": 5,
+        "level3": 2,
+        "level4": 0
+      }
+    },
+    {
+      "year": 2023,
+      "last_updated_at": "2023-05-18T10:45:30+09:00",
+      "status": "approved",
+      "average_level": 1.86,
+      "skill_distribution": {
+        "level0": 4,
+        "level1": 5,
+        "level2": 4,
+        "level3": 1,
+        "level4": 0
+      }
     }
   ]
 }
@@ -289,11 +193,11 @@ Accept: application/json
 
 | ステータスコード | エラーコード | エラーメッセージ | 説明 |
 |----------------|------------|----------------|------|
-| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | パラメータ形式不正 |
+| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | リクエストパラメータの形式不正 |
 | 401 Unauthorized | UNAUTHORIZED | 認証が必要です | 認証トークンなし/無効 |
-| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 他ユーザーのスキル情報閲覧権限なし |
-| 404 Not Found | USER_NOT_FOUND | ユーザーが見つかりません | 指定されたユーザーIDが存在しない |
-| 404 Not Found | SKILL_DATA_NOT_FOUND | 指定された年度のスキル情報が見つかりません | 指定年度のデータなし |
+| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 他者のスキル情報閲覧権限なし |
+| 404 Not Found | USER_NOT_FOUND | 指定されたユーザーが見つかりません | 存在しないユーザーID |
+| 404 Not Found | SKILL_DATA_NOT_FOUND | 指定された年度のスキル情報が見つかりません | 存在しない年度のデータ |
 | 500 Internal Server Error | SYSTEM_ERROR | システムエラーが発生しました | サーバー内部エラー |
 
 ### 3.4 エラー時レスポンス例
@@ -303,7 +207,7 @@ Accept: application/json
   "error": {
     "code": "PERMISSION_DENIED",
     "message": "権限がありません",
-    "details": "他ユーザーのスキル情報を閲覧する権限がありません。"
+    "details": "他のユーザーのスキル情報を閲覧するには適切な権限が必要です。"
   }
 }
 ```
@@ -316,35 +220,41 @@ Accept: application/json
 
 1. リクエストの認証・認可チェック
    - JWTトークンの検証
-   - 自身のスキル情報または閲覧権限（PERM_VIEW_SKILLS）の確認
+   - スキル情報閲覧権限の確認
+   - 他者のスキル情報閲覧権限の確認（自分以外のuser_idの場合）
 2. リクエストパラメータの検証
-   - user_idの存在確認
+   - user_idの形式チェック
    - yearの形式チェック（指定されている場合）
-   - categoryの値チェック（指定されている場合）
-3. スキル情報の取得
-   - 指定されたuser_idのスキル情報を取得
-   - yearが指定されている場合は該当年度のデータを取得
-   - categoryが指定されている場合は該当カテゴリのみ取得
-   - include_historyがtrueの場合は過去の履歴も取得
-4. レスポンスの生成
-   - 取得したスキル情報を整形
-5. レスポンス返却
+   - detail_levelの値チェック
+3. ユーザーの存在確認
+   - 指定されたuser_idのユーザーが存在するか確認
+4. スキル情報の取得
+   - 指定された年度のスキル情報を取得
+   - 年度指定がない場合は最新年度のデータを取得
+5. 詳細レベルに応じたデータの絞り込み
+   - detail_level="summary"の場合、概要情報のみ
+   - detail_level="standard"の場合、標準的な情報
+   - detail_level="detail"の場合、詳細情報を含む
+6. 履歴情報の取得（include_history=trueの場合）
+   - 過去年度のスキル評価サマリーを取得
+7. レスポンスの生成
+   - 取得したデータを整形してJSONレスポンスを生成
+8. レスポンス返却
 
-### 4.2 スキル情報取得ルール
+### 4.2 アクセス制御ルール
 
-- 自身のスキル情報は常に閲覧可能
-- 他ユーザーのスキル情報閲覧には権限（PERM_VIEW_SKILLS）が必要
-- 管理者（ROLE_ADMIN）は全ユーザーのスキル情報を閲覧可能
-- 上長は自部門のメンバーのスキル情報を閲覧可能
-- スキルレベルは1-5の5段階評価（1:初級、2:初中級、3:中級、4:中上級、5:上級）
-- 経験年数は0.5年単位で記録
-- 過去5年分のスキル履歴を保持
+- 自分自身のスキル情報：閲覧可能
+- 部下のスキル情報：マネージャーは閲覧可能
+- 同部署のスキル情報：部署管理者は閲覧可能
+- 全社員のスキル情報：人事担当者・管理者は閲覧可能
+- 詳細レベル"detail"：本人・直属の上司・人事担当者のみ閲覧可能
 
 ### 4.3 パフォーマンス要件
 
-- レスポンスタイム：平均200ms以内
-- キャッシュ：ユーザーごとに1時間キャッシュ
-- 同時リクエスト：最大50リクエスト/秒
+- 応答時間：平均500ms以内
+- タイムアウト：10秒
+- キャッシュ：ユーザー別・年度別に1時間キャッシュ
+- 同時リクエスト：最大100リクエスト/秒
 
 ---
 
@@ -354,7 +264,7 @@ Accept: application/json
 
 | API ID | API名称 | 関連内容 |
 |--------|--------|----------|
-| [API-022](API仕様書_API-022.md) | スキル情報更新API | ユーザースキル情報更新 |
+| [API-022](API仕様書_API-022.md) | スキル情報更新API | スキル情報の更新 |
 | [API-023](API仕様書_API-023.md) | スキルマスタ取得API | スキルマスタ情報取得 |
 | [API-025](API仕様書_API-025.md) | スキル検索API | 条件指定によるスキル検索 |
 | [API-026](API仕様書_API-026.md) | スキルマップ生成API | スキルマップデータ生成 |
@@ -363,344 +273,418 @@ Accept: application/json
 
 | テーブル名 | 用途 | 主な操作 |
 |-----------|------|----------|
-| user_skills | ユーザースキル情報 | 参照（R） |
-| skill_masters | スキルマスタ | 参照（R） |
+| users | ユーザー情報 | 参照（R） |
+| skills | スキル情報 | 参照（R） |
+| skill_evaluations | スキル評価情報 | 参照（R） |
 | skill_categories | スキルカテゴリ | 参照（R） |
-| user_skill_history | スキル履歴 | 参照（R） |
+| skill_masters | スキルマスタ | 参照（R） |
+| skill_history | スキル履歴 | 参照（R） |
 | projects | プロジェクト情報 | 参照（R） |
-| user_projects | ユーザープロジェクト関連 | 参照（R） |
-| certifications | 資格情報 | 参照（R） |
-| user_certifications | ユーザー資格関連 | 参照（R） |
 
 ### 5.3 注意事項・補足
 
-- スキル情報は年度ごとに管理され、前年度からコピーして作成される
-- スキルカテゴリは「technical（技術）」「business（業務知識）」「language（言語）」「soft（ソフトスキル）」「management（マネジメント）」の5種類
-- スキルレベルの定義は以下の通り
-  - レベル1：基本的な知識を有し、指導のもとで作業可能
-  - レベル2：基本的なタスクを独力で実行可能
-  - レベル3：一般的なタスクを独力で実行可能、他者への基本的な指導可能
-  - レベル4：複雑なタスクを実行可能、他者への指導可能
-  - レベル5：専門家レベル、高度な問題解決と他者への指導が可能
-- 関連プロジェクトは最大10件まで表示
-- 関連資格は最大5件まで表示
-- 履歴データは最大5年分まで取得可能
+- スキル情報は年度ごとに管理
+- 年度の切り替えは4月1日
+- 過去3年分のスキル履歴を保持
+- スキルレベルの定義：
+  - レベル0：未評価/該当なし
+  - レベル1：初級（基本的な知識あり）
+  - レベル2：中級（実務で活用可能）
+  - レベル3：上級（他者に指導可能）
+  - レベル4：エキスパート（社内トップレベル）
+- 自己評価と上長評価の両方が揃った場合のみ"reviewed"ステータスとなる
+- 部門長の承認後に"approved"ステータスとなる
 
 ---
 
 ## 6. サンプルコード
 
-### 6.1 フロントエンド実装例（React/TypeScript）
+### 6.1 スキル情報取得例（JavaScript/Fetch API）
 
-```typescript
+```javascript
+/**
+ * ユーザーのスキル情報を取得する関数
+ * @param {string} userId - ユーザーID
+ * @param {Object} options - オプション
+ * @param {number} [options.year] - 取得対象年度
+ * @param {boolean} [options.includeHistory] - 過去のスキル評価履歴を含めるか
+ * @param {string} [options.detailLevel] - 詳細レベル
+ * @returns {Promise<Object>} スキル情報
+ */
+async function getUserSkills(userId, options = {}) {
+  try {
+    // クエリパラメータの構築
+    const queryParams = new URLSearchParams();
+    if (options.year) queryParams.append('year', options.year);
+    if (options.includeHistory !== undefined) queryParams.append('include_history', options.includeHistory);
+    if (options.detailLevel) queryParams.append('detail_level', options.detailLevel);
+    
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+    
+    // APIリクエスト
+    const response = await fetch(`https://api.example.com/api/skills/${userId}${queryString}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error.message || 'スキル情報の取得に失敗しました');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('スキル情報取得エラー:', error);
+    throw error;
+  }
+}
+```
+
+### 6.2 スキル情報表示コンポーネント例（React）
+
+```jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { getUserSkills } from '../api/skillApi';
+import SkillCategoryCard from './SkillCategoryCard';
+import SkillSummaryChart from './SkillSummaryChart';
+import SkillHistoryGraph from './SkillHistoryGraph';
+import LoadingSpinner from '../common/LoadingSpinner';
+import ErrorMessage from '../common/ErrorMessage';
 
-interface Certification {
-  certification_id: string;
-  name: string;
-  acquisition_date: string;
-}
-
-interface Project {
-  project_id: string;
-  name: string;
-  period: string;
-  role: string;
-}
-
-interface SelfAssessment {
-  strengths: string;
-  weaknesses: string;
-  improvement_plan: string;
-}
-
-interface Skill {
-  skill_id: string;
-  category: string;
-  name: string;
-  level: number;
-  experience_years: number;
-  description: string;
-  projects: Project[];
-  certifications: Certification[];
-  last_used_date: string;
-  self_assessment: SelfAssessment;
-}
-
-interface SkillHistory {
-  year: number;
-  skills: Skill[];
-  updated_at: string;
-}
-
-interface SkillData {
-  user_id: string;
-  year: number;
-  last_updated: string;
-  skills: Skill[];
-  history?: SkillHistory[];
-}
-
-const SkillView: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
-  const [searchParams] = useSearchParams();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [skillData, setSkillData] = useState<SkillData | null>(null);
+const UserSkillsView = ({ userId, year }) => {
+  const [skillData, setSkillData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [detailLevel, setDetailLevel] = useState('standard');
+  const [includeHistory, setIncludeHistory] = useState(false);
   
-  const year = searchParams.get('year') || new Date().getFullYear();
-  const category = searchParams.get('category') || '';
-  const includeHistory = searchParams.get('include_history') === 'true';
-  
+  // スキル情報の取得
   useEffect(() => {
     const fetchSkillData = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         setError(null);
         
-        // APIリクエストURLの構築
-        let url = `/api/skills/${userId}?year=${year}`;
-        if (category) {
-          url += `&category=${category}`;
-        }
-        if (includeHistory) {
-          url += '&include_history=true';
-        }
-        
-        // APIリクエスト
-        const response = await axios.get<SkillData>(url, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-            'Accept': 'application/json'
-          }
+        const data = await getUserSkills(userId, {
+          year,
+          detailLevel,
+          includeHistory
         });
         
-        // データの設定
-        setSkillData(response.data);
-        
+        setSkillData(data);
       } catch (err) {
-        if (axios.isAxiosError(err) && err.response) {
-          const errorData = err.response.data;
-          setError(errorData.error?.message || 'スキル情報の取得に失敗しました');
-        } else {
-          setError('スキル情報の取得中にエラーが発生しました');
-        }
+        setError(err.message || 'スキル情報の取得に失敗しました');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
     fetchSkillData();
-  }, [userId, year, category, includeHistory]);
+  }, [userId, year, detailLevel, includeHistory]);
   
-  const renderSkillLevel = (level: number) => {
-    const maxLevel = 5;
-    return (
-      <div className="skill-level">
-        {Array.from({ length: maxLevel }).map((_, index) => (
-          <span 
-            key={index} 
-            className={`level-dot ${index < level ? 'filled' : 'empty'}`}
-          />
-        ))}
-        <span className="level-text">{level}/5</span>
-      </div>
-    );
+  // 詳細レベル変更ハンドラ
+  const handleDetailLevelChange = (e) => {
+    setDetailLevel(e.target.value);
   };
   
-  const renderSkillItem = (skill: Skill) => {
-    return (
-      <div key={skill.skill_id} className="skill-item">
-        <div className="skill-header">
-          <h3 className="skill-name">{skill.name}</h3>
-          <span className="skill-category">{getCategoryLabel(skill.category)}</span>
-        </div>
-        
-        <div className="skill-details">
-          <div className="skill-metrics">
-            {renderSkillLevel(skill.level)}
-            <div className="experience-years">
-              <span>経験年数: </span>
-              <strong>{skill.experience_years}年</strong>
-            </div>
-            <div className="last-used">
-              <span>最終使用: </span>
-              <strong>{formatDate(skill.last_used_date)}</strong>
-            </div>
-          </div>
-          
-          <div className="skill-description">
-            <p>{skill.description}</p>
-          </div>
-          
-          {skill.projects.length > 0 && (
-            <div className="related-projects">
-              <h4>関連プロジェクト</h4>
-              <ul>
-                {skill.projects.map(project => (
-                  <li key={project.project_id}>
-                    <strong>{project.name}</strong>
-                    <span className="project-period">{project.period}</span>
-                    <span className="project-role">{project.role}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {skill.certifications.length > 0 && (
-            <div className="related-certifications">
-              <h4>関連資格</h4>
-              <ul>
-                {skill.certifications.map(cert => (
-                  <li key={cert.certification_id}>
-                    <strong>{cert.name}</strong>
-                    <span className="cert-date">取得日: {formatDate(cert.acquisition_date)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          <div className="self-assessment">
-            <h4>自己評価</h4>
-            <div className="assessment-item">
-              <span className="label">強み:</span>
-              <p>{skill.self_assessment.strengths}</p>
-            </div>
-            <div className="assessment-item">
-              <span className="label">弱み:</span>
-              <p>{skill.self_assessment.weaknesses}</p>
-            </div>
-            <div className="assessment-item">
-              <span className="label">改善計画:</span>
-              <p>{skill.self_assessment.improvement_plan}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // 履歴表示切替ハンドラ
+  const handleHistoryToggle = () => {
+    setIncludeHistory(!includeHistory);
   };
   
-  const getCategoryLabel = (category: string): string => {
-    const categories: Record<string, string> = {
-      'technical': '技術',
-      'business': '業務知識',
-      'language': '言語',
-      'soft': 'ソフトスキル',
-      'management': 'マネジメント'
-    };
-    return categories[category] || category;
-  };
-  
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ja-JP');
-  };
-  
-  if (loading) {
-    return <div className="loading">スキル情報を読み込み中...</div>;
+  if (isLoading) {
+    return <LoadingSpinner message="スキル情報を読み込み中..." />;
   }
   
   if (error) {
-    return <div className="error">{error}</div>;
+    return <ErrorMessage message={error} />;
   }
   
   if (!skillData) {
-    return <div className="no-data">スキル情報がありません</div>;
+    return <div className="no-data-message">スキル情報がありません</div>;
   }
   
   return (
-    <div className="skill-view">
-      <div className="skill-header-container">
-        <h2>スキル情報 ({skillData.year}年度)</h2>
+    <div className="user-skills-container">
+      <div className="skill-header">
+        <h2>{year}年度 スキル情報</h2>
+        <div className="skill-status">
+          ステータス: <span className={`status-badge status-${skillData.status}`}>
+            {skillData.status === 'draft' && '下書き'}
+            {skillData.status === 'submitted' && '提出済'}
+            {skillData.status === 'reviewed' && 'レビュー済'}
+            {skillData.status === 'approved' && '承認済'}
+          </span>
+        </div>
         <div className="last-updated">
-          最終更新: {new Date(skillData.last_updated).toLocaleString()}
+          最終更新: {new Date(skillData.last_updated_at).toLocaleString('ja-JP')}
         </div>
       </div>
       
-      <div className="skill-filter">
-        <select 
-          value={category}
-          onChange={(e) => {
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.set('category', e.target.value);
-            window.location.search = newSearchParams.toString();
-          }}
-        >
-          <option value="">全カテゴリ</option>
-          <option value="technical">技術</option>
-          <option value="business">業務知識</option>
-          <option value="language">言語</option>
-          <option value="soft">ソフトスキル</option>
-          <option value="management">マネジメント</option>
-        </select>
+      <div className="skill-controls">
+        <div className="detail-level-selector">
+          <label htmlFor="detailLevel">詳細レベル:</label>
+          <select 
+            id="detailLevel" 
+            value={detailLevel} 
+            onChange={handleDetailLevelChange}
+          >
+            <option value="summary">サマリー</option>
+            <option value="standard">標準</option>
+            <option value="detail">詳細</option>
+          </select>
+        </div>
         
-        <select
-          value={year.toString()}
-          onChange={(e) => {
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.set('year', e.target.value);
-            window.location.search = newSearchParams.toString();
-          }}
-        >
-          {Array.from({ length: 5 }).map((_, index) => {
-            const yearValue = new Date().getFullYear() - index;
-            return (
-              <option key={yearValue} value={yearValue}>
-                {yearValue}年度
-              </option>
-            );
-          })}
-        </select>
-        
-        <label>
-          <input 
-            type="checkbox" 
-            checked={includeHistory}
-            onChange={(e) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set('include_history', e.target.checked.toString());
-              window.location.search = newSearchParams.toString();
-            }}
-          />
-          履歴を表示
-        </label>
+        <div className="history-toggle">
+          <label>
+            <input 
+              type="checkbox" 
+              checked={includeHistory} 
+              onChange={handleHistoryToggle} 
+            />
+            履歴を表示
+          </label>
+        </div>
       </div>
       
-      <div className="skills-container">
-        {skillData.skills.length > 0 ? (
-          skillData.skills.map(skill => renderSkillItem(skill))
-        ) : (
-          <div className="no-skills">
-            この条件に該当するスキル情報はありません
+      <div className="skill-summary-section">
+        <h3>スキルサマリー</h3>
+        <div className="summary-stats">
+          <div className="stat-item">
+            <span className="stat-label">総スキル数</span>
+            <span className="stat-value">{skillData.skill_summary.total_skills}</span>
           </div>
-        )}
+          <div className="stat-item">
+            <span className="stat-label">平均レベル</span>
+            <span className="stat-value">{skillData.skill_summary.average_level.toFixed(2)}</span>
+          </div>
+        </div>
+        
+        <SkillSummaryChart distribution={skillData.skill_summary.skill_distribution} />
+        
+        <div className="top-skills">
+          <h4>トップスキル</h4>
+          <ul>
+            {skillData.skill_summary.top_skills.map(skill => (
+              <li key={skill.skill_id}>
+                {skill.skill_name} (レベル{skill.level})
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div className="improvement-areas">
+          <h4>改善推奨スキル</h4>
+          <ul>
+            {skillData.skill_summary.improvement_areas.map(skill => (
+              <li key={skill.skill_id}>
+                {skill.skill_name} (現在レベル{skill.level})
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      
+      <div className="skill-categories-section">
+        <h3>スキルカテゴリ</h3>
+        {skillData.skills.map(category => (
+          <SkillCategoryCard 
+            key={category.category_id}
+            category={category}
+            detailLevel={detailLevel}
+          />
+        ))}
       </div>
       
       {includeHistory && skillData.history && skillData.history.length > 0 && (
-        <div className="skill-history">
+        <div className="skill-history-section">
           <h3>スキル履歴</h3>
-          {skillData.history.map(historyItem => (
-            <div key={historyItem.year} className="history-year">
-              <h4>{historyItem.year}年度</h4>
-              <div className="history-skills">
-                {historyItem.skills.map(skill => renderSkillItem(skill))}
-              </div>
-            </div>
-          ))}
+          <SkillHistoryGraph 
+            currentYear={skillData.year}
+            currentLevel={skillData.skill_summary.average_level}
+            history={skillData.history}
+          />
+          
+          <table className="history-table">
+            <thead>
+              <tr>
+                <th>年度</th>
+                <th>ステータス</th>
+                <th>平均レベル</th>
+                <th>最終更新日</th>
+              </tr>
+            </thead>
+            <tbody>
+              {skillData.history.map(item => (
+                <tr key={item.year}>
+                  <td>{item.year}</td>
+                  <td>{item.status}</td>
+                  <td>{item.average_level.toFixed(2)}</td>
+                  <td>{new Date(item.last_updated_at).toLocaleDateString('ja-JP')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
 };
 
-export default SkillView;
+export default UserSkillsView;
 ```
 
-### 6.2 バックエンド実装例（Java/Spring Boot）
+### 6.3 スキルレベル比較ユーティリティ例（TypeScript）
 
-```java
-package com.example.skillreport.
+```typescript
+/**
+ * スキルレベル比較ユーティリティ
+ */
+export class SkillComparisonUtil {
+  /**
+   * 2つの年度間のスキル成長を分析
+   * @param currentYearData 現在年度のスキルデータ
+   * @param previousYearData 前年度のスキルデータ
+   * @returns 成長分析結果
+   */
+  public static analyzeGrowth(
+    currentYearData: SkillData,
+    previousYearData: SkillData
+  ): SkillGrowthAnalysis {
+    // 平均レベルの変化
+    const averageLevelChange = 
+      currentYearData.skill_summary.average_level - 
+      previousYearData.skill_summary.average_level;
+    
+    // スキルレベル分布の変化
+    const distributionChange = {
+      level0: this.calculateChange(
+        currentYearData.skill_summary.skill_distribution.level0,
+        previousYearData.skill_summary.skill_distribution.level0
+      ),
+      level1: this.calculateChange(
+        currentYearData.skill_summary.skill_distribution.level1,
+        previousYearData.skill_summary.skill_distribution.level1
+      ),
+      level2: this.calculateChange(
+        currentYearData.skill_summary.skill_distribution.level2,
+        previousYearData.skill_summary.skill_distribution.level2
+      ),
+      level3: this.calculateChange(
+        currentYearData.skill_summary.skill_distribution.level3,
+        previousYearData.skill_summary.skill_distribution.level3
+      ),
+      level4: this.calculateChange(
+        currentYearData.skill_summary.skill_distribution.level4,
+        previousYearData.skill_summary.skill_distribution.level4
+      )
+    };
+    
+    // 最も成長したスキル
+    const improvedSkills = this.findImprovedSkills(
+      currentYearData.skills,
+      previousYearData.skills
+    );
+    
+    // 新規獲得スキル
+    const newSkills = this.findNewSkills(
+      currentYearData.skills,
+      previousYearData.skills
+    );
+    
+    return {
+      averageLevelChange,
+      distributionChange,
+      improvedSkills,
+      newSkills,
+      growthRate: this.calculateGrowthRate(averageLevelChange, previousYearData.skill_summary.average_level)
+    };
+  }
+  
+  /**
+   * 変化量を計算
+   */
+  private static calculateChange(current: number, previous: number): number {
+    return current - previous;
+  }
+  
+  /**
+   * 成長率を計算
+   */
+  private static calculateGrowthRate(change: number, previousValue: number): number {
+    if (previousValue === 0) return 0;
+    return (change / previousValue) * 100;
+  }
+  
+  /**
+   * 向上したスキルを特定
+   */
+  private static findImprovedSkills(
+    currentSkills: SkillCategory[],
+    previousSkills: SkillCategory[]
+  ): ImprovedSkill[] {
+    const improvedSkills: ImprovedSkill[] = [];
+    
+    // 全カテゴリのスキルをフラット化
+    const currentSkillsFlat = this.flattenSkills(currentSkills);
+    const previousSkillsFlat = this.flattenSkills(previousSkills);
+    
+    // 前年度から向上したスキルを特定
+    currentSkillsFlat.forEach(currentSkill => {
+      const previousSkill = previousSkillsFlat.find(
+        s => s.skill_id === currentSkill.skill_id
+      );
+      
+      if (previousSkill && currentSkill.level > previousSkill.level) {
+        improvedSkills.push({
+          skill_id: currentSkill.skill_id,
+          skill_name: currentSkill.skill_name,
+          previous_level: previousSkill.level,
+          current_level: currentSkill.level,
+          improvement: currentSkill.level - previousSkill.level
+        });
+      }
+    });
+    
+    // 改善幅の大きい順にソート
+    return improvedSkills.sort((a, b) => b.improvement - a.improvement);
+  }
+  
+  /**
+   * 新規獲得スキルを特定
+   */
+  private static findNewSkills(
+    currentSkills: SkillCategory[],
+    previousSkills: SkillCategory[]
+  ): NewSkill[] {
+    const newSkills: NewSkill[] = [];
+    
+    // 全カテゴリのスキルをフラット化
+    const currentSkillsFlat = this.flattenSkills(currentSkills);
+    const previousSkillsFlat = this.flattenSkills(previousSkills);
+    
+    // 前年度になかった新規スキルを特定
+    currentSkillsFlat.forEach(currentSkill => {
+      const previousSkill = previousSkillsFlat.find(
+        s => s.skill_id === currentSkill.skill_id
+      );
+      
+      if (!previousSkill && currentSkill.level > 0) {
+        newSkills.push({
+          skill_id: currentSkill.skill_id,
+          skill_name: currentSkill.skill_name,
+          level: currentSkill.level,
+          category_name: currentSkill.category_name
+        });
+      }
+    });
+    
+    // レベルの高い順にソート
+    return newSkills.sort((a, b) => b.level - a.level);
+  }
+  
+  /**
+   * スキル

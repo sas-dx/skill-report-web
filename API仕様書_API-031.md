@@ -4,10 +4,10 @@
 
 - **API ID**: API-031
 - **API名称**: キャリア目標取得API
-- **概要**: ユーザーのキャリア目標情報を取得する
+- **概要**: 指定されたユーザーのキャリア目標情報を取得する
 - **エンドポイント**: `/api/career-goals/{user_id}`
 - **HTTPメソッド**: GET
-- **リクエスト形式**: URLパラメータ
+- **リクエスト形式**: URL Path Parameter + Query Parameter
 - **レスポンス形式**: JSON
 - **認証要件**: 必須（JWT認証）
 - **利用画面**: [SCR-CAREER](画面設計書_SCR-CAREER.md)
@@ -19,33 +19,24 @@
 
 ## 2. リクエスト仕様
 
-### 2.1 リクエストヘッダ
-
-| ヘッダ名 | 必須 | 説明 | 備考 |
-|---------|------|------|------|
-| Authorization | ○ | 認証トークン | Bearer {JWT} 形式 |
-| Accept | - | レスポンス形式 | application/json |
-
-### 2.2 パスパラメータ
+### 2.1 パスパラメータ
 
 | パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
 |------------|------|------|------|------------|
-| user_id | string | ○ | ユーザーID | 自身のIDまたは部下のIDを指定可能 |
+| user_id | string | ○ | 取得対象のユーザーID | 半角英数字、4〜20文字 |
 
-### 2.3 クエリパラメータ
+### 2.2 クエリパラメータ
 
 | パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
 |------------|------|------|------|------------|
-| year | number | - | 年度 | 指定がない場合は現在の年度<br>例: 2025 |
-| include_history | boolean | - | 過去の履歴を含めるか | true/false<br>デフォルト: false |
+| year | number | - | 取得対象年度 | 西暦4桁<br>指定なしの場合は最新年度 |
+| include_history | boolean | - | 過去のキャリア目標履歴を含めるか | デフォルト：false |
+| include_templates | boolean | - | 推奨テンプレートを含めるか | デフォルト：false |
 
-### 2.4 リクエスト例
+### 2.3 リクエスト例
 
 ```
-GET /api/career-goals/U12345?year=2025&include_history=true HTTP/1.1
-Host: api.example.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Accept: application/json
+GET /api/career-goals/tanaka.taro?year=2025&include_history=true&include_templates=true
 ```
 
 ---
@@ -57,240 +48,274 @@ Accept: application/json
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
 | user_id | string | ユーザーID | |
-| year | number | 年度 | |
-| career_goals | array | キャリア目標情報の配列 | |
+| year | number | 年度 | 西暦4桁 |
+| last_updated_at | string | 最終更新日時 | ISO 8601形式 |
+| status | string | ステータス | "draft", "submitted", "reviewed", "approved"のいずれか |
+| career_vision | object | キャリアビジョン | 詳細は以下参照 |
+| goals | array | 目標情報の配列 | 詳細は以下参照 |
+| skill_development_plan | object | スキル開発計画 | 詳細は以下参照 |
+| feedback | object | フィードバック情報 | status="reviewed"または"approved"の場合のみ |
 | history | array | 過去のキャリア目標履歴 | include_history=trueの場合のみ |
-| last_updated | string | 最終更新日時 | ISO 8601形式 |
-| last_updated_by | string | 最終更新者 | |
+| templates | array | 推奨テンプレート | include_templates=trueの場合のみ |
 
-#### career_goals 配列要素
+#### career_vision オブジェクト
 
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
-| goal_id | string | 目標ID | |
-| goal_type | string | 目標タイプ | "short_term", "mid_term", "long_term" |
-| title | string | 目標タイトル | |
-| description | string | 目標詳細 | |
-| target_date | string | 目標達成予定日 | ISO 8601形式（YYYY-MM-DD） |
-| status | string | 目標ステータス | "not_started", "in_progress", "completed", "postponed", "cancelled" |
-| priority | number | 優先度 | 1-5（5が最高） |
-| related_skills | array | 関連スキル | |
-| action_plans | array | 行動計画 | |
-| feedback | array | フィードバック | |
-| created_at | string | 作成日時 | ISO 8601形式 |
-| updated_at | string | 更新日時 | ISO 8601形式 |
+| short_term | string | 短期ビジョン（1年） | |
+| mid_term | string | 中期ビジョン（3年） | |
+| long_term | string | 長期ビジョン（5年以上） | |
+| focus_areas | array | 注力領域 | 最大5つ |
 
-#### related_skills 配列要素
+#### goals 配列要素
+
+| パラメータ名 | 型 | 説明 | 備考 |
+|------------|------|------|------|
+| goal_id | string | 目標ID | UUID形式 |
+| category | string | カテゴリ | "technical", "business", "management", "communication", "other"のいずれか |
+| title | string | 目標タイトル | 100文字以内 |
+| description | string | 目標詳細 | 1000文字以内 |
+| priority | number | 優先度 | 1: 低, 2: 中, 3: 高 |
+| target_date | string | 目標達成予定日 | ISO 8601形式（YYYY-MM-DD） |
+| metrics | array | 評価指標 | 詳細は以下参照 |
+| related_skills | array | 関連スキル | スキルIDの配列 |
+
+#### metrics 配列要素
+
+| パラメータ名 | 型 | 説明 | 備考 |
+|------------|------|------|------|
+| metric_id | string | 指標ID | UUID形式 |
+| name | string | 指標名 | 50文字以内 |
+| target_value | string | 目標値 | 100文字以内 |
+| current_value | string | 現在値 | 100文字以内 |
+| unit | string | 単位 | 20文字以内 |
+
+#### skill_development_plan オブジェクト
+
+| パラメータ名 | 型 | 説明 | 備考 |
+|------------|------|------|------|
+| focus_skills | array | 注力スキル | スキルIDと目標レベルの配列 |
+| training_plans | array | 研修計画 | 詳細は以下参照 |
+| self_development | string | 自己啓発計画 | 1000文字以内 |
+
+#### focus_skills 配列要素
 
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
 | skill_id | string | スキルID | |
-| name | string | スキル名 | |
-| category | string | スキルカテゴリ | |
-| target_level | number | 目標レベル | 1-5（5が最高） |
-| current_level | number | 現在のレベル | 1-5（5が最高） |
+| skill_name | string | スキル名 | |
+| current_level | number | 現在レベル | 0-4 |
+| target_level | number | 目標レベル | 1-4 |
+| actions | array | 習得アクション | 文字列の配列 |
 
-#### action_plans 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| action_id | string | 行動計画ID | |
-| title | string | タイトル | |
-| description | string | 詳細 | |
-| due_date | string | 期限 | ISO 8601形式（YYYY-MM-DD） |
-| status | string | ステータス | "not_started", "in_progress", "completed" |
-| completed_date | string | 完了日 | ISO 8601形式（YYYY-MM-DD）、完了時のみ |
-
-#### feedback 配列要素
+#### training_plans 配列要素
 
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
-| feedback_id | string | フィードバックID | |
-| commenter_id | string | コメント者ID | |
-| commenter_name | string | コメント者名 | |
-| comment | string | コメント内容 | |
-| created_at | string | 作成日時 | ISO 8601形式 |
+| training_id | string | 研修ID | |
+| training_name | string | 研修名 | |
+| category | string | カテゴリ | |
+| scheduled_date | string | 予定日 | ISO 8601形式（YYYY-MM-DD） |
+| status | string | ステータス | "planned", "registered", "completed", "cancelled"のいずれか |
 
-#### history 配列要素
+#### feedback オブジェクト
 
 | パラメータ名 | 型 | 説明 | 備考 |
 |------------|------|------|------|
-| year | number | 年度 | |
-| career_goals | array | その年度のキャリア目標情報 | career_goals配列と同じ構造 |
-| last_updated | string | 最終更新日時 | ISO 8601形式 |
+| reviewer_id | string | レビュアーID | |
+| reviewer_name | string | レビュアー名 | |
+| review_date | string | レビュー日 | ISO 8601形式 |
+| comments | string | コメント | 2000文字以内 |
+| suggestions | array | 提案 | 文字列の配列 |
+| approval_status | string | 承認ステータス | "pending", "approved", "rejected"のいずれか |
 
 ### 3.2 正常時レスポンス例
 
 ```json
 {
-  "user_id": "U12345",
+  "user_id": "tanaka.taro",
   "year": 2025,
-  "career_goals": [
+  "last_updated_at": "2025-05-15T14:30:45+09:00",
+  "status": "reviewed",
+  "career_vision": {
+    "short_term": "バックエンド開発のスキルを向上させ、チーム内での技術的リーダーシップを発揮する。マイクロサービスアーキテクチャの設計・実装経験を積む。",
+    "mid_term": "フルスタックエンジニアとしての能力を高め、プロジェクト全体の技術設計を担当できるレベルに達する。クラウドネイティブ開発の専門性を確立する。",
+    "long_term": "技術アーキテクトとして複数プロジェクトの技術戦略を策定し、後進の育成にも携わる。社内の技術標準化にも貢献する。",
+    "focus_areas": ["バックエンド開発", "クラウドネイティブ", "アーキテクチャ設計", "技術リーダーシップ"]
+  },
+  "goals": [
     {
-      "goal_id": "G001",
-      "goal_type": "short_term",
-      "title": "Reactの実践的スキル習得",
-      "description": "実務でReactを使用したプロジェクトに参加し、実践的なスキルを身につける",
-      "target_date": "2025-12-31",
-      "status": "in_progress",
-      "priority": 5,
-      "related_skills": [
-        {
-          "skill_id": "S007",
-          "name": "React",
-          "category": "technical",
-          "target_level": 4,
-          "current_level": 2
-        },
-        {
-          "skill_id": "S008",
-          "name": "TypeScript",
-          "category": "technical",
-          "target_level": 3,
-          "current_level": 2
-        }
-      ],
-      "action_plans": [
-        {
-          "action_id": "A001",
-          "title": "Reactの公式チュートリアルを完了する",
-          "description": "Reactの公式ドキュメントに沿ってチュートリアルを実施",
-          "due_date": "2025-06-30",
-          "status": "completed",
-          "completed_date": "2025-06-15"
-        },
-        {
-          "action_id": "A002",
-          "title": "社内のReactプロジェクトに参加する",
-          "description": "プロジェクトマネージャーに相談し、Reactを使用するプロジェクトにアサインしてもらう",
-          "due_date": "2025-07-31",
-          "status": "in_progress",
-          "completed_date": null
-        }
-      ],
-      "feedback": [
-        {
-          "feedback_id": "F001",
-          "commenter_id": "U67890",
-          "commenter_name": "鈴木 花子",
-          "comment": "Reactの学習計画が具体的で良いと思います。実際のプロジェクト参加も良い経験になるでしょう。",
-          "created_at": "2025-05-15T10:30:00+09:00"
-        }
-      ],
-      "created_at": "2025-04-01T09:00:00+09:00",
-      "updated_at": "2025-06-15T15:45:00+09:00"
-    },
-    {
-      "goal_id": "G002",
-      "goal_type": "mid_term",
-      "title": "フロントエンドアーキテクト資格取得",
-      "description": "フロントエンド開発のアーキテクチャ設計スキルを向上させ、認定資格を取得する",
-      "target_date": "2026-06-30",
-      "status": "not_started",
+      "goal_id": "g-12345-abcde-67890",
+      "category": "technical",
+      "title": "マイクロサービスアーキテクチャの設計・実装スキル習得",
+      "description": "実際のプロジェクトでマイクロサービスアーキテクチャを採用し、設計から実装までを経験する。特にサービス間通信、データ整合性、障害対応パターンについて理解を深める。",
       "priority": 3,
-      "related_skills": [
+      "target_date": "2025-12-31",
+      "metrics": [
         {
-          "skill_id": "S015",
-          "name": "フロントエンドアーキテクチャ",
-          "category": "technical",
-          "target_level": 4,
-          "current_level": 2
-        }
-      ],
-      "action_plans": [
-        {
-          "action_id": "A003",
-          "title": "アーキテクチャ設計の書籍を3冊読む",
-          "description": "推奨書籍リストから選定して学習する",
-          "due_date": "2025-09-30",
-          "status": "not_started",
-          "completed_date": null
-        }
-      ],
-      "feedback": [],
-      "created_at": "2025-04-01T09:15:00+09:00",
-      "updated_at": "2025-04-01T09:15:00+09:00"
-    },
-    {
-      "goal_id": "G003",
-      "goal_type": "long_term",
-      "title": "テックリード職への昇進",
-      "description": "技術的なリーダーシップスキルを磨き、チームのテックリードとして活躍する",
-      "target_date": "2027-12-31",
-      "status": "not_started",
-      "priority": 4,
-      "related_skills": [
-        {
-          "skill_id": "S030",
-          "name": "技術リーダーシップ",
-          "category": "soft",
-          "target_level": 4,
-          "current_level": 2
+          "metric_id": "m-12345-abcde-11111",
+          "name": "マイクロサービス設計ドキュメント作成",
+          "target_value": "3件以上",
+          "current_value": "1件",
+          "unit": "件"
         },
         {
-          "skill_id": "S031",
-          "name": "コードレビュー",
-          "category": "technical",
-          "target_level": 5,
-          "current_level": 3
+          "metric_id": "m-12345-abcde-22222",
+          "name": "マイクロサービス実装完了",
+          "target_value": "2サービス以上",
+          "current_value": "0サービス",
+          "unit": "サービス"
         }
       ],
-      "action_plans": [
+      "related_skills": ["microservices", "api-design", "spring-cloud", "docker", "kubernetes"]
+    },
+    {
+      "goal_id": "g-67890-fghij-12345",
+      "category": "business",
+      "title": "業務知識の拡充と要件定義スキルの向上",
+      "description": "金融ドメインの業務知識を深め、顧客要件を技術要件に落とし込むスキルを向上させる。特に決済システムの知識を重点的に学習する。",
+      "priority": 2,
+      "target_date": "2025-09-30",
+      "metrics": [
         {
-          "action_id": "A004",
-          "title": "社内勉強会でリーダーを務める",
-          "description": "フロントエンド技術の勉強会を企画・運営する",
-          "due_date": "2025-12-31",
-          "status": "not_started",
-          "completed_date": null
+          "metric_id": "m-67890-fghij-33333",
+          "name": "業務知識研修受講",
+          "target_value": "3コース",
+          "current_value": "1コース",
+          "unit": "コース"
+        },
+        {
+          "metric_id": "m-67890-fghij-44444",
+          "name": "要件定義ドキュメント作成",
+          "target_value": "2件",
+          "current_value": "0件",
+          "unit": "件"
         }
       ],
-      "feedback": [],
-      "created_at": "2025-04-01T09:30:00+09:00",
-      "updated_at": "2025-04-01T09:30:00+09:00"
+      "related_skills": ["requirement-analysis", "financial-domain", "payment-systems"]
     }
   ],
+  "skill_development_plan": {
+    "focus_skills": [
+      {
+        "skill_id": "microservices",
+        "skill_name": "マイクロサービス",
+        "current_level": 1,
+        "target_level": 3,
+        "actions": [
+          "社内研修「マイクロサービスアーキテクチャ入門」受講",
+          "書籍「Microservices Patterns」を読破",
+          "実際のプロジェクトでの実装経験を積む"
+        ]
+      },
+      {
+        "skill_id": "kubernetes",
+        "skill_name": "Kubernetes",
+        "current_level": 1,
+        "target_level": 2,
+        "actions": [
+          "Kubernetes認定資格（CKA）取得",
+          "社内クラウドネイティブ勉強会への参加",
+          "小規模なアプリケーションをKubernetesにデプロイする練習"
+        ]
+      }
+    ],
+    "training_plans": [
+      {
+        "training_id": "t-12345",
+        "training_name": "マイクロサービスアーキテクチャ入門",
+        "category": "技術研修",
+        "scheduled_date": "2025-06-15",
+        "status": "registered"
+      },
+      {
+        "training_id": "t-67890",
+        "training_name": "Kubernetes実践ワークショップ",
+        "category": "技術研修",
+        "scheduled_date": "2025-08-20",
+        "status": "planned"
+      }
+    ],
+    "self_development": "技術書籍の読破（月1冊）、技術ブログの定期的な執筆（月2回）、社外技術コミュニティへの参加（四半期に1回）を継続的に行う。特にマイクロサービス、クラウドネイティブ技術に関する知識を深める。また、英語力向上のためオンライン英会話を週1回受講する。"
+  },
+  "feedback": {
+    "reviewer_id": "yamada.manager",
+    "reviewer_name": "山田 部長",
+    "review_date": "2025-05-20T10:15:30+09:00",
+    "comments": "技術的な目標設定は具体的で良いと思います。マイクロサービスの知識習得は今後のキャリアにとって重要です。一方で、チームメンバーとの協業やコミュニケーションに関する目標も追加すると良いでしょう。また、目標達成のためのタイムラインをより細かく設定することをお勧めします。",
+    "suggestions": [
+      "コミュニケーションスキル向上に関する目標の追加を検討してください",
+      "四半期ごとの中間目標を設定するとより進捗管理がしやすくなります",
+      "社外の技術コミュニティ活動も検討してみてはいかがでしょうか"
+    ],
+    "approval_status": "approved"
+  },
   "history": [
     {
       "year": 2024,
-      "career_goals": [
-        {
-          "goal_id": "G001-2024",
-          "goal_type": "short_term",
-          "title": "JavaScript基礎の習得",
-          "description": "モダンJavaScriptの基礎を習得し、簡単なWebアプリケーションを開発できるようになる",
-          "target_date": "2024-12-31",
-          "status": "completed",
-          "priority": 5,
-          "related_skills": [
-            {
-              "skill_id": "S005",
-              "name": "JavaScript",
-              "category": "technical",
-              "target_level": 3,
-              "current_level": 3
-            }
-          ],
-          "action_plans": [
-            {
-              "action_id": "A001-2024",
-              "title": "JavaScript入門コースを受講",
-              "description": "オンライン学習プラットフォームでJavaScript入門コースを受講",
-              "due_date": "2024-06-30",
-              "status": "completed",
-              "completed_date": "2024-06-20"
-            }
-          ],
-          "feedback": [],
-          "created_at": "2024-04-01T09:00:00+09:00",
-          "updated_at": "2024-12-15T15:45:00+09:00"
-        }
-      ],
-      "last_updated": "2024-12-15T15:45:00+09:00"
+      "last_updated_at": "2024-05-18T11:20:15+09:00",
+      "status": "approved",
+      "summary": {
+        "career_vision_short": "Javaバックエンド開発のスキル向上とチーム開発での貢献",
+        "main_goals": [
+          "Spring Frameworkの実践的スキル習得",
+          "コードレビュースキルの向上",
+          "アジャイル開発手法の習得"
+        ],
+        "achievement_rate": 85
+      }
+    },
+    {
+      "year": 2023,
+      "last_updated_at": "2023-05-15T10:45:30+09:00",
+      "status": "approved",
+      "summary": {
+        "career_vision_short": "Webアプリケーション開発の基礎スキル習得",
+        "main_goals": [
+          "Java言語の基礎習得",
+          "データベース設計の基礎習得",
+          "チーム開発への参画"
+        ],
+        "achievement_rate": 90
+      }
     }
   ],
-  "last_updated": "2025-06-15T15:45:00+09:00",
-  "last_updated_by": "U12345"
+  "templates": [
+    {
+      "template_id": "tpl-12345",
+      "template_name": "バックエンド開発者キャリアパス",
+      "description": "バックエンド開発者向けの標準的なキャリア目標テンプレート",
+      "recommended_goals": [
+        {
+          "category": "technical",
+          "title": "クラウドネイティブアプリケーション開発スキルの習得",
+          "description": "クラウドネイティブ技術（コンテナ、オーケストレーション、サーバーレス等）を学び、実際のプロジェクトで活用する"
+        },
+        {
+          "category": "technical",
+          "title": "セキュアコーディングスキルの向上",
+          "description": "OWASP Top 10を理解し、セキュリティを考慮したコーディング手法を習得する"
+        }
+      ]
+    },
+    {
+      "template_id": "tpl-67890",
+      "template_name": "テックリード育成パス",
+      "description": "将来的にテックリードを目指す開発者向けのキャリア目標テンプレート",
+      "recommended_goals": [
+        {
+          "category": "management",
+          "title": "技術的意思決定プロセスの習得",
+          "description": "アーキテクチャ選定や技術スタック決定などの技術的意思決定プロセスを学び、小規模な決定から実践する"
+        },
+        {
+          "category": "communication",
+          "title": "技術的なコミュニケーション能力の向上",
+          "description": "技術的な内容を非技術者にも分かりやすく説明するスキルを習得し、社内勉強会などで実践する"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -298,12 +323,11 @@ Accept: application/json
 
 | ステータスコード | エラーコード | エラーメッセージ | 説明 |
 |----------------|------------|----------------|------|
-| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | パラメータ形式不正 |
-| 400 Bad Request | INVALID_YEAR | 年度が不正です | 存在しない年度指定 |
+| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | リクエストパラメータの形式不正 |
 | 401 Unauthorized | UNAUTHORIZED | 認証が必要です | 認証トークンなし/無効 |
-| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 他ユーザーの情報閲覧権限なし |
-| 404 Not Found | USER_NOT_FOUND | ユーザーが見つかりません | 指定されたユーザーIDが存在しない |
-| 404 Not Found | CAREER_GOALS_NOT_FOUND | キャリア目標が見つかりません | 指定された年度のキャリア目標が存在しない |
+| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 他者のキャリア目標閲覧権限なし |
+| 404 Not Found | USER_NOT_FOUND | 指定されたユーザーが見つかりません | 存在しないユーザーID |
+| 404 Not Found | CAREER_GOAL_NOT_FOUND | 指定された年度のキャリア目標が見つかりません | 存在しない年度のデータ |
 | 500 Internal Server Error | SYSTEM_ERROR | システムエラーが発生しました | サーバー内部エラー |
 
 ### 3.4 エラー時レスポンス例
@@ -313,7 +337,7 @@ Accept: application/json
   "error": {
     "code": "PERMISSION_DENIED",
     "message": "権限がありません",
-    "details": "指定されたユーザーのキャリア目標情報を閲覧する権限がありません。"
+    "details": "他のユーザーのキャリア目標を閲覧するには適切な権限が必要です。"
   }
 }
 ```
@@ -326,37 +350,41 @@ Accept: application/json
 
 1. リクエストの認証・認可チェック
    - JWTトークンの検証
-   - ユーザーIDの権限チェック（自身または部下のIDかどうか）
+   - キャリア目標閲覧権限の確認
+   - 他者のキャリア目標閲覧権限の確認（自分以外のuser_idの場合）
 2. リクエストパラメータの検証
-   - ユーザーIDの存在チェック
-   - 年度の妥当性チェック
-3. キャリア目標情報の取得
-   - 指定されたユーザーIDと年度のキャリア目標を取得
-   - include_history=trueの場合は過去の履歴も取得
-4. レスポンスの生成
-   - 取得したキャリア目標情報を整形
-5. レスポンス返却
+   - user_idの形式チェック
+   - yearの形式チェック（指定されている場合）
+3. ユーザーの存在確認
+   - 指定されたuser_idのユーザーが存在するか確認
+4. キャリア目標情報の取得
+   - 指定された年度のキャリア目標情報を取得
+   - 年度指定がない場合は最新年度のデータを取得
+5. 関連情報の取得
+   - 関連スキル情報の取得
+   - フィードバック情報の取得（status="reviewed"または"approved"の場合）
+6. 履歴情報の取得（include_history=trueの場合）
+   - 過去年度のキャリア目標サマリーを取得
+7. テンプレート情報の取得（include_templates=trueの場合）
+   - ユーザーの役割・スキルに基づいた推奨テンプレートを取得
+8. レスポンスの生成
+   - 取得したデータを整形してJSONレスポンスを生成
+9. レスポンス返却
 
-### 4.2 権限チェック
+### 4.2 アクセス制御ルール
 
-- 自身のキャリア目標は常に閲覧可能
-- 他ユーザーのキャリア目標閲覧には以下のいずれかの条件を満たす必要がある
-  - 対象ユーザーの直属の上長である
-  - キャリア目標閲覧権限（PERM_VIEW_CAREER_GOALS）を持っている
-  - 管理者権限（ROLE_ADMIN）を持っている
+- 自分自身のキャリア目標：閲覧可能
+- 部下のキャリア目標：マネージャーは閲覧可能
+- 同部署のキャリア目標サマリー：部署管理者は閲覧可能
+- 全社員のキャリア目標サマリー：人事担当者・管理者は閲覧可能
+- フィードバック情報：本人・直属の上司・人事担当者のみ閲覧可能
 
-### 4.3 年度の扱い
+### 4.3 パフォーマンス要件
 
-- 年度は4月1日から翌年3月31日までの期間
-- 年度の指定がない場合は、リクエスト時点の年度を使用
-- 過去の年度のキャリア目標は読み取り専用
-- 未来の年度のキャリア目標は作成可能だが、現在の年度が優先表示される
-
-### 4.4 関連データの取得
-
-- 関連スキル情報はスキルマスタから最新の情報を取得
-- 現在のスキルレベルはユーザースキル情報から取得
-- フィードバック情報は直近の3件のみデフォルトで取得（全件取得オプションあり）
+- 応答時間：平均300ms以内
+- タイムアウト：5秒
+- キャッシュ：ユーザー別・年度別に1時間キャッシュ
+- 同時リクエスト：最大50リクエスト/秒
 
 ---
 
@@ -366,10 +394,10 @@ Accept: application/json
 
 | API ID | API名称 | 関連内容 |
 |--------|--------|----------|
-| [API-021](API仕様書_API-021.md) | スキル情報取得API | ユーザースキル情報取得 |
-| [API-023](API仕様書_API-023.md) | スキルマスタ取得API | スキルマスタ情報取得 |
-| [API-032](API仕様書_API-032.md) | キャリア目標更新API | キャリア目標情報更新 |
+| [API-032](API仕様書_API-032.md) | キャリア目標更新API | キャリア目標情報の更新 |
 | [API-033](API仕様書_API-033.md) | 目標進捗取得API | 目標進捗情報取得 |
+| [API-034](API仕様書_API-034.md) | 目標進捗更新API | 目標進捗情報更新 |
+| [API-021](API仕様書_API-021.md) | スキル情報取得API | ユーザースキル情報取得 |
 
 ### 5.2 使用テーブル
 
@@ -377,280 +405,166 @@ Accept: application/json
 |-----------|------|----------|
 | users | ユーザー情報 | 参照（R） |
 | career_goals | キャリア目標情報 | 参照（R） |
-| career_goal_skills | キャリア目標関連スキル | 参照（R） |
-| career_goal_actions | キャリア目標行動計画 | 参照（R） |
-| career_goal_feedback | キャリア目標フィードバック | 参照（R） |
-| user_skills | ユーザースキル情報 | 参照（R） |
-| skill_masters | スキルマスタ | 参照（R） |
+| career_visions | キャリアビジョン情報 | 参照（R） |
+| goals | 目標情報 | 参照（R） |
+| goal_metrics | 目標評価指標 | 参照（R） |
+| skill_development_plans | スキル開発計画 | 参照（R） |
+| training_plans | 研修計画 | 参照（R） |
+| goal_feedbacks | フィードバック情報 | 参照（R） |
+| career_goal_history | キャリア目標履歴 | 参照（R） |
+| career_goal_templates | キャリア目標テンプレート | 参照（R） |
 
 ### 5.3 注意事項・補足
 
-- キャリア目標は短期（1年以内）、中期（1-3年）、長期（3-5年）の3種類に分類
-- 各目標タイプごとに複数の目標を設定可能
-- 目標の優先度は1-5の範囲で設定（5が最高優先度）
-- 関連スキルは目標達成に必要なスキルを指定
-- 行動計画は目標達成のための具体的なステップ
-- フィードバックは上長や同僚からのコメント
-- 過去の履歴は最大5年分まで保持
+- キャリア目標情報は年度ごとに管理
+- 年度の切り替えは4月1日
+- 過去5年分のキャリア目標履歴を保持
+- キャリアビジョンは短期（1年）、中期（3年）、長期（5年以上）の3段階で設定
+- 目標は優先度（高・中・低）で管理
+- 目標には具体的な評価指標（メトリクス）を設定
+- 自己評価と上長評価の両方が揃った場合のみ"reviewed"ステータスとなる
+- 部門長の承認後に"approved"ステータスとなる
+- テンプレートはユーザーの役割・スキルに基づいて推奨される
 
 ---
 
 ## 6. サンプルコード
 
-### 6.1 フロントエンド実装例（React/TypeScript）
+### 6.1 キャリア目標取得例（JavaScript/Fetch API）
 
-```typescript
+```javascript
+/**
+ * ユーザーのキャリア目標情報を取得する関数
+ * @param {string} userId - ユーザーID
+ * @param {Object} options - オプション
+ * @param {number} [options.year] - 取得対象年度
+ * @param {boolean} [options.includeHistory] - 過去のキャリア目標履歴を含めるか
+ * @param {boolean} [options.includeTemplates] - 推奨テンプレートを含めるか
+ * @returns {Promise<Object>} キャリア目標情報
+ */
+async function getUserCareerGoals(userId, options = {}) {
+  try {
+    // クエリパラメータの構築
+    const queryParams = new URLSearchParams();
+    if (options.year) queryParams.append('year', options.year);
+    if (options.includeHistory !== undefined) queryParams.append('include_history', options.includeHistory);
+    if (options.includeTemplates !== undefined) queryParams.append('include_templates', options.includeTemplates);
+    
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+    
+    // APIリクエスト
+    const response = await fetch(`https://api.example.com/api/career-goals/${userId}${queryString}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error.message || 'キャリア目標情報の取得に失敗しました');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('キャリア目標情報取得エラー:', error);
+    throw error;
+  }
+}
+```
+
+### 6.2 キャリア目標表示コンポーネント例（React）
+
+```jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { getUserCareerGoals } from '../api/careerApi';
+import CareerVisionCard from './CareerVisionCard';
+import GoalsList from './GoalsList';
+import SkillDevelopmentPlan from './SkillDevelopmentPlan';
+import FeedbackSection from './FeedbackSection';
+import HistoryTimeline from './HistoryTimeline';
+import TemplateSelector from './TemplateSelector';
+import LoadingSpinner from '../common/LoadingSpinner';
+import ErrorMessage from '../common/ErrorMessage';
 
-interface RelatedSkill {
-  skill_id: string;
-  name: string;
-  category: string;
-  target_level: number;
-  current_level: number;
-}
-
-interface ActionPlan {
-  action_id: string;
-  title: string;
-  description: string;
-  due_date: string;
-  status: 'not_started' | 'in_progress' | 'completed';
-  completed_date: string | null;
-}
-
-interface Feedback {
-  feedback_id: string;
-  commenter_id: string;
-  commenter_name: string;
-  comment: string;
-  created_at: string;
-}
-
-interface CareerGoal {
-  goal_id: string;
-  goal_type: 'short_term' | 'mid_term' | 'long_term';
-  title: string;
-  description: string;
-  target_date: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'postponed' | 'cancelled';
-  priority: number;
-  related_skills: RelatedSkill[];
-  action_plans: ActionPlan[];
-  feedback: Feedback[];
-  created_at: string;
-  updated_at: string;
-}
-
-interface HistoryItem {
-  year: number;
-  career_goals: CareerGoal[];
-  last_updated: string;
-}
-
-interface CareerGoalsResponse {
-  user_id: string;
-  year: number;
-  career_goals: CareerGoal[];
-  history?: HistoryItem[];
-  last_updated: string;
-  last_updated_by: string;
-}
-
-const CareerGoalsView: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [includeHistory, setIncludeHistory] = useState<boolean>(false);
-  const [careerGoals, setCareerGoals] = useState<CareerGoalsResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const UserCareerGoalsView = ({ userId, year }) => {
+  const [careerData, setCareerData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [includeHistory, setIncludeHistory] = useState(false);
+  const [includeTemplates, setIncludeTemplates] = useState(false);
   
+  // キャリア目標情報の取得
   useEffect(() => {
-    const fetchCareerGoals = async () => {
+    const fetchCareerData = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         setError(null);
         
-        const response = await axios.get<CareerGoalsResponse>(
-          `/api/career-goals/${userId}`,
-          {
-            params: {
-              year,
-              include_history: includeHistory
-            },
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
+        const data = await getUserCareerGoals(userId, {
+          year,
+          includeHistory,
+          includeTemplates
+        });
         
-        setCareerGoals(response.data);
-        
+        setCareerData(data);
       } catch (err) {
-        if (axios.isAxiosError(err) && err.response) {
-          const errorData = err.response.data;
-          setError(errorData.error?.message || 'キャリア目標の取得に失敗しました');
-        } else {
-          setError('キャリア目標の取得中にエラーが発生しました');
-        }
+        setError(err.message || 'キャリア目標情報の取得に失敗しました');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
-    fetchCareerGoals();
-  }, [userId, year, includeHistory]);
+    fetchCareerData();
+  }, [userId, year, includeHistory, includeTemplates]);
   
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setYear(parseInt(e.target.value, 10));
-  };
-  
+  // 履歴表示切替ハンドラ
   const handleHistoryToggle = () => {
     setIncludeHistory(!includeHistory);
   };
   
-  const getGoalTypeLabel = (goalType: string): string => {
-    const labels: Record<string, string> = {
-      'short_term': '短期目標（1年以内）',
-      'mid_term': '中期目標（1-3年）',
-      'long_term': '長期目標（3-5年）'
-    };
-    return labels[goalType] || goalType;
+  // テンプレート表示切替ハンドラ
+  const handleTemplatesToggle = () => {
+    setIncludeTemplates(!includeTemplates);
   };
   
-  const getStatusLabel = (status: string): string => {
-    const labels: Record<string, string> = {
-      'not_started': '未着手',
-      'in_progress': '進行中',
-      'completed': '完了',
-      'postponed': '延期',
-      'cancelled': '中止'
-    };
-    return labels[status] || status;
-  };
+  if (isLoading) {
+    return <LoadingSpinner message="キャリア目標情報を読み込み中..." />;
+  }
   
-  const getStatusColor = (status: string): string => {
-    const colors: Record<string, string> = {
-      'not_started': '#6c757d', // グレー
-      'in_progress': '#007bff', // 青
-      'completed': '#28a745', // 緑
-      'postponed': '#ffc107', // 黄
-      'cancelled': '#dc3545' // 赤
-    };
-    return colors[status] || '#6c757d';
-  };
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
   
-  const renderSkillLevel = (level: number, maxLevel: number = 5) => {
-    return (
-      <div className="skill-level">
-        {Array.from({ length: maxLevel }).map((_, index) => (
-          <span
-            key={index}
-            className={`level-dot ${index < level ? 'filled' : 'empty'}`}
-            title={`レベル ${level}/${maxLevel}`}
-          />
-        ))}
-        <span className="level-text">{level}/{maxLevel}</span>
+  if (!careerData) {
+    return <div className="no-data-message">キャリア目標情報がありません</div>;
+  }
+  
+  return (
+    <div className="user-career-container">
+      <div className="career-header">
+        <h2>{year}年度 キャリア目標</h2>
+        <div className="career-status">
+          ステータス: <span className={`status-badge status-${careerData.status}`}>
+            {careerData.status === 'draft' && '下書き'}
+            {careerData.status === 'submitted' && '提出済'}
+            {careerData.status === 'reviewed' && 'レビュー済'}
+            {careerData.status === 'approved' && '承認済'}
+          </span>
+        </div>
+        <div className="last-updated">
+          最終更新: {new Date(careerData.last_updated_at).toLocaleString('ja-JP')}
+        </div>
       </div>
-    );
-  };
-  
-  const renderGoalCard = (goal: CareerGoal) => {
-    return (
-      <div key={goal.goal_id} className="goal-card">
-        <div className="goal-header">
-          <span className={`goal-type ${goal.goal_type}`}>
-            {getGoalTypeLabel(goal.goal_type)}
-          </span>
-          <span 
-            className="goal-status" 
-            style={{ backgroundColor: getStatusColor(goal.status) }}
-          >
-            {getStatusLabel(goal.status)}
-          </span>
-          <span className="goal-priority">
-            優先度: {Array.from({ length: goal.priority }).map((_, i) => '★').join('')}
-          </span>
-        </div>
-        
-        <h3 className="goal-title">{goal.title}</h3>
-        <p className="goal-description">{goal.description}</p>
-        
-        <div className="goal-target-date">
-          目標達成予定日: {new Date(goal.target_date).toLocaleDateString()}
-        </div>
-        
-        {goal.related_skills.length > 0 && (
-          <div className="related-skills-section">
-            <h4>関連スキル</h4>
-            <div className="related-skills-list">
-              {goal.related_skills.map(skill => (
-                <div key={skill.skill_id} className="related-skill-item">
-                  <div className="skill-info">
-                    <span className="skill-name">{skill.name}</span>
-                    <span className="skill-category">{skill.category}</span>
-                  </div>
-                  <div className="skill-levels">
-                    <div className="current-level">
-                      <span>現在:</span>
-                      {renderSkillLevel(skill.current_level)}
-                    </div>
-                    <div className="target-level">
-                      <span>目標:</span>
-                      {renderSkillLevel(skill.target_level)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {goal.action_plans.length > 0 && (
-          <div className="action-plans-section">
-            <h4>行動計画</h4>
-            <div className="action-plans-list">
-              {goal.action_plans.map(plan => (
-                <div key={plan.action_id} className="action-plan-item">
-                  <div className="action-plan-header">
-                    <h5>{plan.title}</h5>
-                    <span className={`action-status ${plan.status}`}>
-                      {getStatusLabel(plan.status)}
-                    </span>
-                  </div>
-                  <p>{plan.description}</p>
-                  <div className="action-dates">
-                    <span>期限: {new Date(plan.due_date).toLocaleDateString()}</span>
-                    {plan.completed_date && (
-                      <span>完了日: {new Date(plan.completed_date).toLocaleDateString()}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {goal.feedback.length > 0 && (
-          <div className="feedback-section">
-            <h4>フィードバック</h4>
-            <div className="feedback-list">
-              {goal.feedback.map(item => (
-                <div key={item.feedback_id} className="feedback-item">
-                  <div className="feedback-header">
-                    <span className="commenter-name">{item.commenter_name}</span>
-                    <span className="feedback-date">
-                      {new Date(item.created_at).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="feedback-comment">{item.comment}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <div className="goal-footer
+      
+      <div className="career-controls">
+        <div className="history-toggle">
+          <label>
+            <input 
+              type="checkbox" 
+              checked={includeHistory} 
+              onChange={handleHistoryToggle} 
+            />
+            履歴を表示
+          </label>
