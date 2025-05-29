@@ -197,16 +197,22 @@ flowchart TD
 
 ```bash
 # 通常実行（当月のレポート生成）
-java -jar batch-executor.jar BATCH-006
+npm run batch:skill-report
 
 # 特定月のレポート生成
-java -jar batch-executor.jar BATCH-006 --target-month=2025-04
+npm run batch:skill-report -- --target-month=2025-04
 
 # 特定部署のレポート生成
-java -jar batch-executor.jar BATCH-006 --dept-id=D001
+npm run batch:skill-report -- --dept-id=D001
 
 # 特定スキルカテゴリのレポート生成
-java -jar batch-executor.jar BATCH-006 --skill-category=TECHNICAL
+npm run batch:skill-report -- --skill-category=TECHNICAL
+
+# TypeScript直接実行
+npx tsx src/batch/skill-report.ts
+
+# パラメータ付きTypeScript実行
+npx tsx src/batch/skill-report.ts --target-month=2025-04 --dept-id=D001
 ```
 
 ## 9. 運用上の注意点

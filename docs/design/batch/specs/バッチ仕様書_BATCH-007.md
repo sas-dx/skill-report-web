@@ -222,19 +222,25 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-007
+npm run batch:cert-alert
 
 # 特定資格種別のみ通知
-java -jar batch-executor.jar BATCH-007 --cert-type-id=CT001
+npm run batch:cert-alert -- --cert-type-id=CT001
 
 # 特定部署のみ通知
-java -jar batch-executor.jar BATCH-007 --dept-id=D001
+npm run batch:cert-alert -- --dept-id=D001
 
 # 通知日数設定を上書き（90,45,15日前に通知）
-java -jar batch-executor.jar BATCH-007 --days-override=90,45,15
+npm run batch:cert-alert -- --days-override=90,45,15
 
 # メール通知のみ実施
-java -jar batch-executor.jar BATCH-007 --email-only
+npm run batch:cert-alert -- --email-only
+
+# TypeScript直接実行
+npx tsx src/batch/cert-alert.ts
+
+# パラメータ付きTypeScript実行
+npx tsx src/batch/cert-alert.ts --cert-type-id=CT001 --dept-id=D001
 ```
 
 ## 9. 運用上の注意点

@@ -234,19 +234,25 @@ SKILL-002,Python,PROG-LANG,プログラミング,言語,3,4,Pythonプログラ�
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-005
+npm run batch:skill-sync
 
 # CSVファイルを指定して実行
-java -jar batch-executor.jar BATCH-005 --source-type=CSV --source-path=/data/new_skills.csv
+npm run batch:skill-sync -- --source-type=CSV --source-path=/data/new_skills.csv
 
 # APIから同期
-java -jar batch-executor.jar BATCH-005 --source-type=API
+npm run batch:skill-sync -- --source-type=API
 
 # ドライラン（同期対象確認のみ）
-java -jar batch-executor.jar BATCH-005 --dry-run
+npm run batch:skill-sync -- --dry-run
 
 # 特定カテゴリのみ同期
-java -jar batch-executor.jar BATCH-005 --category-filter="プログラミング"
+npm run batch:skill-sync -- --category-filter="プログラミング"
+
+# TypeScript直接実行
+npx tsx src/batch/skill-sync.ts
+
+# パラメータ付きTypeScript実行
+npx tsx src/batch/skill-sync.ts --source-type=CSV --source-path=/data/new_skills.csv --dry-run
 ```
 
 ## 9. 運用上の注意点

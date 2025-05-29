@@ -224,16 +224,22 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-004
+npm run batch:org-sync
 
 # 強制同期モード
-java -jar batch-executor.jar BATCH-004 --force-sync
+npm run batch:org-sync -- --force-sync
 
 # ドライラン（同期対象確認のみ）
-java -jar batch-executor.jar BATCH-004 --dry-run
+npm run batch:org-sync -- --dry-run
 
 # 特定日付のデータを同期
-java -jar batch-executor.jar BATCH-004 --target-date=2025-06-01
+npm run batch:org-sync -- --target-date=2025-06-01
+
+# TypeScript直接実行
+npx tsx src/batch/org-sync.ts
+
+# パラメータ付きTypeScript実行
+npx tsx src/batch/org-sync.ts --force-sync --dry-run --target-date=2025-06-01
 ```
 
 ## 9. 運用上の注意点

@@ -112,13 +112,19 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-001
+npm run batch:unlock-accounts
 
 # 強制解除モード
-java -jar batch-executor.jar BATCH-001 --force-unlock-all
+npm run batch:unlock-accounts -- --force-unlock-all
 
 # ドライラン（解除対象確認のみ）
-java -jar batch-executor.jar BATCH-001 --dry-run
+npm run batch:unlock-accounts -- --dry-run
+
+# TypeScript直接実行
+npx tsx src/batch/unlock-accounts.ts
+
+# パラメータ付きTypeScript実行
+npx tsx src/batch/unlock-accounts.ts --force-unlock-all --dry-run
 ```
 
 ## 9. 運用上の注意点
