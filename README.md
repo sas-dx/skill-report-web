@@ -808,6 +808,9 @@ Cline Rulesは、システムレベルのガイダンスをClineに提供する�
 | `03-frontend-guidelines.md`    | フロントエンド設計原則、コンポーネント設計、状態管理など |
 | `04-backend-guidelines.md`     | バックエンド設計原則、API設計、データベース設計など      |
 | `05-requirements-analysis.md`  | 要件分析・設計ガイドライン、非機能要件、KPIなど          |
+| `06-development-workflow.md`   | 開発ワークフロー・プロセス管理、タスク管理、Gitフローなど |
+| `07-testing-strategy.md`       | テスト戦略・品質保証、テストレベル別戦略、自動化など     |
+| `08-ai-driven-development.md`  | AI駆動開発ガイドライン、AI活用領域、効果測定など         |
 
 これらのファイルは、プロジェクトの初期段階で定義された開発標準、設計原則、品質基準などを網羅しており、AIと人間の協働開発において共通の理解と効率的な作業を促進します。
 
@@ -887,10 +890,54 @@ Cline Rulesは、システムレベルのガイダンスをClineに提供する�
 
 ```
 skill-report-web/
-├── memory-bank/                  # Clineメモリバンク（要件定義や設計、技術スタック等を記載）
 ├── .clinerules/                  # Cline開発ルール（コーディング規約やテスト規約、gitルール等を記載）
+│   ├── 01-project-context.md    # プロジェクト基本方針、AI駆動開発の方針
+│   ├── 02-coding-standards.md   # 技術スタック非依存のコーディング規約
+│   ├── 03-frontend-guidelines.md # フロントエンド設計原則、コンポーネント設計
+│   ├── 04-backend-guidelines.md # バックエンド設計原則、API設計
+│   ├── 05-requirements-analysis.md # 要件分析・設計ガイドライン
+│   ├── 06-development-workflow.md # 開発ワークフロー・プロセス管理
+│   ├── 07-testing-strategy.md   # テスト戦略・品質保証
+│   └── 08-ai-driven-development.md # AI駆動開発ガイドライン
+├── memory-bank/                  # Clineメモリバンク（要件定義や設計、技術スタック等を記載）
+│   ├── projectbrief.md          # プロジェクトの基本情報、目的、背景、スコープ
+│   ├── productContext.md        # 解決する課題、ユーザー体験、業務フロー
+│   ├── systemPatterns.md        # システムアーキテクチャ、設計パターン
+│   ├── techContext.md           # 採用技術、開発環境、技術的制約
+│   ├── activeContext.md         # 現在の開発フォーカス、最近の変更
+│   └── progress.md              # 実装済み機能、未実装機能、進捗状況
 ├── CustomInstructions/           # Clineカスタムインストラクション
-├── src/                          # ソースコード
+│   ├── act_customInstructions.md # ACTモード用カスタムインストラクション
+│   └── plan_custominstructions.md # PLANモード用カスタムインストラクション
+├── docs/                         # 設計ドキュメント
+│   ├── requirements/             # 要件定義関連
+│   │   ├── プロジェクト基本情報_改訂版.md
+│   │   ├── 技術スタック選定.md
+│   │   └── 要件定義.md
+│   ├── design/                   # 設計書関連
+│   │   ├── screens/              # 画面設計
+│   │   │   ├── 画面一覧.md
+│   │   │   └── specs/            # 画面設計書（15画面）
+│   │   ├── api/                  # API設計
+│   │   │   ├── API一覧.md
+│   │   │   └── specs/            # API仕様書（34API）
+│   │   ├── database/             # データベース設計
+│   │   │   ├── エンティティ関連図.md
+│   │   │   ├── テーブル一覧.md
+│   │   │   └── tables/           # テーブル定義書（25テーブル）
+│   │   ├── batch/                # バッチ設計
+│   │   │   ├── バッチ一覧.md
+│   │   │   └── specs/            # バッチ仕様書（17バッチ）
+│   │   └── interfaces/           # インターフェース設計
+│   │       ├── インターフェース一覧.md
+│   │       └── specs/            # インターフェース仕様書
+│   └── testing/                  # テスト関連
+│       ├── テスト計画書.md
+│       ├── ユニットテスト実装ガイド.md
+│       ├── 機能テスト実行計画書.md
+│       └── E2Eテスト実行手順書.md
+├── src/                          # ソースコード（開発開始後に作成予定）
+├── .gitignore                    # Git除外設定
 └── README.md                     # このファイル
 ```
 
