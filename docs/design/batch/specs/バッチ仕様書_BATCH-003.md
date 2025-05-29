@@ -229,19 +229,22 @@ flowchart TD
 
 ```bash
 # 通常実行（前日の権限変更を分析）
-java -jar batch-executor.jar BATCH-003
+npm run batch:permission-audit
+
+# TypeScript直接実行
+npx tsx src/batch/permissionAudit.ts
 
 # 特定日の権限変更を分析
-java -jar batch-executor.jar BATCH-003 --target-date=2025-05-28
+npm run batch:permission-audit -- --target-date=2025-05-28
 
 # HTML形式でレポート生成
-java -jar batch-executor.jar BATCH-003 --report-format=HTML
+npm run batch:permission-audit -- --report-format=HTML
 
 # アラート検出のみ実行
-java -jar batch-executor.jar BATCH-003 --alert-only
+npm run batch:permission-audit -- --alert-only
 
 # 特定操作者の権限変更のみ分析
-java -jar batch-executor.jar BATCH-003 --actor-id=U10023
+npm run batch:permission-audit -- --actor-id=U10023
 ```
 
 ## 9. 運用上の注意点

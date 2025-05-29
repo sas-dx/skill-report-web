@@ -284,23 +284,26 @@ PDU証明書は以下のリンクからダウンロードできます。
 ## 8. 実行例
 
 ```bash
-# 通常実行（デフォルト期間で集計）
-java -jar batch-executor.jar BATCH-011
+# 通常実行（ファイルアップロード時に自動実行）
+npm run batch:training-aggregate
+
+# TypeScript直接実行
+npx tsx src/batch/trainingAggregate.ts
 
 # 過去6ヶ月間のデータを集計
-java -jar batch-executor.jar BATCH-011 --period-months=6
+npm run batch:training-aggregate -- --period-months=6
 
 # 特定期間のデータを集計
-java -jar batch-executor.jar BATCH-011 --start-date=2024-11-01 --end-date=2025-04-30
+npm run batch:training-aggregate -- --start-date=2024-11-01 --end-date=2025-04-30
 
 # 特定社員のみ集計
-java -jar batch-executor.jar BATCH-011 --emp-no=E10023
+npm run batch:training-aggregate -- --emp-no=E10023
 
 # 特定部署のみ集計
-java -jar batch-executor.jar BATCH-011 --dept-id=D001
+npm run batch:training-aggregate -- --dept-id=D001
 
 # 証明書生成をスキップして実行
-java -jar batch-executor.jar BATCH-011 --skip-certificate
+npm run batch:training-aggregate -- --skip-certificate
 ```
 
 ## 9. 運用上の注意点

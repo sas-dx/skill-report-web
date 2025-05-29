@@ -190,19 +190,22 @@ flowchart TD
 
 ```bash
 # 通常実行（前日のログイン履歴を分析）
-java -jar batch-executor.jar BATCH-002
+npm run batch:login-history
+
+# TypeScript直接実行
+npx tsx src/batch/loginHistoryAnalysis.ts
 
 # 特定日のログイン履歴を分析
-java -jar batch-executor.jar BATCH-002 --target-date=2025-05-28
+npm run batch:login-history -- --target-date=2025-05-28
 
 # アラート検出のみ実行
-java -jar batch-executor.jar BATCH-002 --alert-only
+npm run batch:login-history -- --alert-only
 
 # 特定ユーザーのみ分析
-java -jar batch-executor.jar BATCH-002 --user-id=U10023
+npm run batch:login-history -- --user-id=U10023
 
 # 不審ログイン判定閾値を変更して実行
-java -jar batch-executor.jar BATCH-002 --threshold-override=3
+npm run batch:login-history -- --threshold-override=3
 ```
 
 ## 9. 運用上の注意点

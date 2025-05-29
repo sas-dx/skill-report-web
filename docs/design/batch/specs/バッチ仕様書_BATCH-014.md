@@ -245,25 +245,25 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-014
+npm run batch:log-rotation
 
 # 特定ログタイプのみローテーション
-java -jar batch-executor.jar BATCH-014 --log-type=AUDIT
+npm run batch:log-rotation -- --log-type=AUDIT
 
 # 強制ローテーション実行
-java -jar batch-executor.jar BATCH-014 --force-rotation
+npm run batch:log-rotation -- --force-rotation
 
 # アーカイブなしで実行
-java -jar batch-executor.jar BATCH-014 --skip-archive
+npm run batch:log-rotation -- --skip-archive
 
 # 長期保存ストレージ転送なしで実行
-java -jar batch-executor.jar BATCH-014 --skip-long-term
+npm run batch:log-rotation -- --skip-long-term
 
 # 保持期間を180日に設定して実行
-java -jar batch-executor.jar BATCH-014 --retention-override=180
+npm run batch:log-rotation -- --retention-override=180
 
 # 実行シミュレーション（ドライラン）
-java -jar batch-executor.jar BATCH-014 --dry-run
+npm run batch:log-rotation -- --dry-run
 ```
 
 ## 9. 運用上の注意点

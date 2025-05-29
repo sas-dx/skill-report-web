@@ -183,22 +183,22 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-017
+npm run batch:token-invalidation
 
 # 特定トークンタイプのみ処理
-java -jar batch-executor.jar BATCH-017 --token-type=ACCESS
+npm run batch:token-invalidation -- --token-type=ACCESS
 
 # 特定ユーザーのトークンのみ処理
-java -jar batch-executor.jar BATCH-017 --user-id=U10023
+npm run batch:token-invalidation -- --user-id=U10023
 
 # バッチサイズを変更して実行
-java -jar batch-executor.jar BATCH-017 --batch-size=500
+npm run batch:token-invalidation -- --batch-size=500
 
 # すべての無効トークンを強制削除
-java -jar batch-executor.jar BATCH-017 --force-all
+npm run batch:token-invalidation -- --force-all
 
 # 実行シミュレーション（ドライラン）
-java -jar batch-executor.jar BATCH-017 --dry-run
+npm run batch:token-invalidation -- --dry-run
 ```
 
 ## 9. 運用上の注意点

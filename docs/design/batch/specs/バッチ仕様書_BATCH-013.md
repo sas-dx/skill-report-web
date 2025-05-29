@@ -234,22 +234,22 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-013
+npm run batch:backup
 
 # フルバックアップを強制実行
-java -jar batch-executor.jar BATCH-013 --backup-type=FULL
+npm run batch:backup -- --backup-type=FULL
 
 # 特定対象のみバックアップ
-java -jar batch-executor.jar BATCH-013 --target-name=main_db
+npm run batch:backup -- --target-name=main_db
 
 # クラウド転送なしで実行
-java -jar batch-executor.jar BATCH-013 --skip-cloud
+npm run batch:backup -- --skip-cloud
 
 # 保持期間を90日に設定して実行
-java -jar batch-executor.jar BATCH-013 --retention-override=90
+npm run batch:backup -- --retention-override=90
 
 # 実行シミュレーション（ドライラン）
-java -jar batch-executor.jar BATCH-013 --dry-run
+npm run batch:backup -- --dry-run
 ```
 
 ## 9. 運用上の注意点

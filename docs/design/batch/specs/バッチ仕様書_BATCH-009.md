@@ -281,22 +281,25 @@ flowchart TD
 
 ```bash
 # 通常実行（デフォルト期間で集計）
-java -jar batch-executor.jar BATCH-009
+npm run batch:work-performance
+
+# TypeScript直接実行
+npx tsx src/batch/workPerformance.ts
 
 # 過去60日間のデータを集計
-java -jar batch-executor.jar BATCH-009 --period-days=60
+npm run batch:work-performance -- --period-days=60
 
 # 特定期間のデータを集計
-java -jar batch-executor.jar BATCH-009 --start-date=2025-04-01 --end-date=2025-04-30
+npm run batch:work-performance -- --start-date=2025-04-01 --end-date=2025-04-30
 
 # 特定プロジェクトのみ集計
-java -jar batch-executor.jar BATCH-009 --project-id=P10023
+npm run batch:work-performance -- --project-id=P10023
 
 # 特定部署のみ集計
-java -jar batch-executor.jar BATCH-009 --dept-id=D001
+npm run batch:work-performance -- --dept-id=D001
 
 # 集計のみ実行（レポート生成とデータウェアハウス連携をスキップ）
-java -jar batch-executor.jar BATCH-009 --skip-report --skip-dw-sync
+npm run batch:work-performance -- --skip-report --skip-dw-sync
 ```
 
 ## 9. 運用上の注意点

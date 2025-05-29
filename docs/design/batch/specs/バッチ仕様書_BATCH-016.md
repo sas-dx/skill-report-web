@@ -179,16 +179,16 @@ IPアドレス: {IPアドレス}
 
 ```bash
 # 通常実行（設定変更イベント発生時に自動実行）
-java -jar batch-executor.jar BATCH-016 --event-id=EVT12345
+npm run batch:config-history -- --event-id=EVT12345
 
 # 通知なしで実行
-java -jar batch-executor.jar BATCH-016 --event-id=EVT12345 --skip-notification
+npm run batch:config-history -- --event-id=EVT12345 --skip-notification
 
 # 重要度を上書きして実行
-java -jar batch-executor.jar BATCH-016 --event-id=EVT12345 --force-importance=HIGH
+npm run batch:config-history -- --event-id=EVT12345 --force-importance=HIGH
 
 # 実行シミュレーション（ドライラン）
-java -jar batch-executor.jar BATCH-016 --event-id=EVT12345 --dry-run
+npm run batch:config-history -- --event-id=EVT12345 --dry-run
 ```
 
 ## 9. 運用上の注意点

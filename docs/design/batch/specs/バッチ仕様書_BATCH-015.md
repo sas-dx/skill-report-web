@@ -236,25 +236,25 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-015
+npm run batch:master-sync
 
 # 特定マスタタイプのみ同期
-java -jar batch-executor.jar BATCH-015 --master-type=CODE
+npm run batch:master-sync -- --master-type=CODE
 
 # 特定マスタ名のみ同期
-java -jar batch-executor.jar BATCH-015 --master-name=DEPARTMENT_MASTER
+npm run batch:master-sync -- --master-name=DEPARTMENT_MASTER
 
 # 強制同期実行
-java -jar batch-executor.jar BATCH-015 --force-sync
+npm run batch:master-sync -- --force-sync
 
 # キャッシュ更新なしで実行
-java -jar batch-executor.jar BATCH-015 --skip-cache-update
+npm run batch:master-sync -- --skip-cache-update
 
 # バッチサイズを変更して実行
-java -jar batch-executor.jar BATCH-015 --batch-size=500
+npm run batch:master-sync -- --batch-size=500
 
 # 実行シミュレーション（ドライラン）
-java -jar batch-executor.jar BATCH-015 --dry-run
+npm run batch:master-sync -- --dry-run
 ```
 
 ## 9. 運用上の注意点

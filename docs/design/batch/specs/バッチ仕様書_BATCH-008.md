@@ -228,19 +228,22 @@ flowchart TD
 
 ```bash
 # 通常実行
-java -jar batch-executor.jar BATCH-008
+npm run batch:skill-reminder
+
+# TypeScript直接実行
+npx tsx src/batch/skillReminder.ts
 
 # 閾値を変更して実行（5日間未更新でリマインド）
-java -jar batch-executor.jar BATCH-008 --threshold-override=5
+npm run batch:skill-reminder -- --threshold-override=5
 
 # メール通知のみ実施
-java -jar batch-executor.jar BATCH-008 --email-only
+npm run batch:skill-reminder -- --email-only
 
 # 特定部署のみ通知
-java -jar batch-executor.jar BATCH-008 --dept-id=D001
+npm run batch:skill-reminder -- --dept-id=D001
 
 # 特定社員のみ通知（テスト用）
-java -jar batch-executor.jar BATCH-008 --emp-no=E10023
+npm run batch:skill-reminder -- --emp-no=E10023
 ```
 
 ## 9. 運用上の注意点

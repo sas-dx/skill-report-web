@@ -198,16 +198,19 @@ E10002,P001,T0102,2025-05-28,8.0,0.0,"JavaScript,React",DEVELOPMENT,UI実装,コ
 
 ```bash
 # 通常実行（ファイルアップロード時に自動実行）
-java -jar batch-executor.jar BATCH-010 --file_path=/uploads/records.csv
+npm run batch:bulk-import -- --file_path=/uploads/records.csv
+
+# TypeScript直接実行
+npx tsx src/batch/bulkImport.ts --file_path=/uploads/records.csv
 
 # 重複ポリシーを指定して実行
-java -jar batch-executor.jar BATCH-010 --file_path=/uploads/records.xlsx --duplicate_policy=OVERWRITE
+npm run batch:bulk-import -- --file_path=/uploads/records.xlsx --duplicate_policy=OVERWRITE
 
 # マスタ参照チェックを無効化して実行
-java -jar batch-executor.jar BATCH-010 --file_path=/uploads/records.csv --validate_references=false
+npm run batch:bulk-import -- --file_path=/uploads/records.csv --validate_references=false
 
 # 上長通知を有効にして実行
-java -jar batch-executor.jar BATCH-010 --file_path=/uploads/records.xlsx --notify_manager=true
+npm run batch:bulk-import -- --file_path=/uploads/records.xlsx --notify_manager=true
 ```
 
 ## 9. 運用上の注意点

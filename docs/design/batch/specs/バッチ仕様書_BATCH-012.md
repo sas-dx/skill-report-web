@@ -275,23 +275,26 @@ flowchart TD
 ## 8. 実行例
 
 ```bash
-# 通常実行
-java -jar batch-executor.jar BATCH-012
+# 通常実行（毎日深夜に自動実行）
+npm run batch:notification-aggregate
 
-# 特定テンプレートのみ実行
-java -jar batch-executor.jar BATCH-012 --template-id=TMPL001
+# TypeScript直接実行
+npx tsx src/batch/notificationAggregate.ts
 
-# 基準日を指定して実行
-java -jar batch-executor.jar BATCH-012 --reference-date=2025-04-30
+# 過去7日間のデータを集計
+npm run batch:notification-aggregate -- --period-days=7
 
-# 生成のみ実行（配信なし）
-java -jar batch-executor.jar BATCH-012 --skip-delivery
+# 特定期間のデータを集計
+npm run batch:notification-aggregate -- --start-date=2025-05-01 --end-date=2025-05-31
 
-# テストモードで実行
-java -jar batch-executor.jar BATCH-012 --test-mode
+# 特定社員のみ集計
+npm run batch:notification-aggregate -- --emp-no=E10023
 
-# パラメータを上書きして実行
-java -jar batch-executor.jar BATCH-012 --parameter-override='{"dept_id":"D001","period":"2025Q1"}'
+# 特定部署のみ集計
+npm run batch:notification-aggregate -- --dept-id=D001
+
+# 通知をスキップして実行
+npm run batch:notification-aggregate -- --skip-notification
 ```
 
 ## 9. 運用上の注意点
