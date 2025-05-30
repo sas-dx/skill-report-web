@@ -113,3 +113,20 @@ flowchart TD
 Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state.
 
 REMEMBER: After every memory reset, I begin completely fresh. The Memory Bank is my only link to previous work. It must be maintained with precision and clarity, as my effectiveness depends entirely on its accuracy.
+
+## ファイル名規則
+
+### バッチ定義書ファイル名規則
+- **形式**: `バッチ定義書_[バッチID]_[バッチ名称].md`
+- **例**: 
+  - `バッチ定義書_BATCH-101_データベースバックアップバッチ.md`
+  - `バッチ定義書_BATCH-302_テナント課金計算バッチ.md`
+  - `バッチ定義書_BATCH-401_定期通知送信バッチ.md`
+- **配置**: `docs/design/batch/specs/`
+- **目的**: バッチIDとバッチ名称を含めることで、ファイルの識別性と管理効率を向上
+
+### その他の設計書ファイル名規則
+- **API仕様書**: `API仕様書_API-XXX_API名称.md`
+- **テーブル定義書**: `テーブル定義書_TBL-XXX_テーブル名称.md`
+- **画面設計書**: `画面設計書_SCR-XXX_画面名称.md`
+- **インターフェース仕様書**: `インターフェース仕様書_IF-XXX_インターフェース名称.md`
