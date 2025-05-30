@@ -2275,6 +2275,586 @@ export const Select: React.FC<SelectProps> = ({
 - **アニメーション**: Framer Motion
 - **テスト**: Jest, Testing Library, axe-core
 
+# UI/UX共通仕様書 完全版: HTMLプロトタイプ・Storybook・Mermaidダイアグラム
+
+## 17. HTMLプロトタイプ作成
+
+### 17.1 プロトタイプ作成方針
+
+#### 目的
+- 仕様書のCSSを実際に動作するサンプルとして実装
+- 開発者が視覚的に確認でき、実装時の参考となるプロトタイプ提供
+- インタラクティブな要素（ホバー、フォーカス、アニメーション）の動作確認
+
+#### 作成対象
+- 全コンポーネントの基本動作サンプル
+- レスポンシブ動作の確認用サンプル
+- アクセシビリティ機能の実装例
+
+### 17.2 コンポーネント別サンプル
+
+#### ボタンプロトタイプ
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ボタンコンポーネント - プロトタイプ</title>
+    <style>
+        /* CSS変数定義 */
+        :root {
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --gray-300: #d1d5db;
+            --space-3: 0.75rem;
+            --space-6: 1.5rem;
+        }
+        
+        /* ボタン基本スタイル */
+        .btn-primary {
+            background-color: var(--primary-500);
+            color: white;
+            padding: var(--space-3) var(--space-6);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-600);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:active {
+            background-color: var(--primary-700);
+            transform: translateY(0);
+        }
+        
+        .btn-primary:disabled {
+            background-color: var(--gray-300);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-primary:focus {
+            outline: 2px solid var(--primary-500);
+            outline-offset: 2px;
+        }
+        
+        /* デモ用スタイル */
+        .demo-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+        
+        .demo-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>ボタンコンポーネント - インタラクティブプロトタイプ</h1>
+        
+        <div class="demo-section">
+            <h2 class="demo-title">基本ボタン</h2>
+            <div class="demo-grid">
+                <button class="btn-primary">保存</button>
+                <button class="btn-primary">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                    追加
+                </button>
+                <button class="btn-primary" disabled>無効状態</button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="demo-title">インタラクション確認</h2>
+            <p>以下のボタンをクリック・ホバー・フォーカスして動作を確認してください：</p>
+            <button class="btn-primary" onclick="alert('ボタンがクリックされました！')">
+                クリックテスト
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // キーボードアクセシビリティのデモ
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                console.log('Tab navigation detected');
+            }
+        });
+        
+        // ボタンフォーカス時の動作
+        document.querySelectorAll('.btn-primary').forEach(button => {
+            button.addEventListener('focus', function() {
+                console.log('Button focused:', this.textContent);
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+---
+
+## 18. Storybookセットアップ
+
+### 18.1 環境構築手順
+
+#### Next.js 14 + TypeScript環境でのStorybook導入
+
+```bash
+# Storybookインストール
+npx storybook@latest init
+
+# 必要な依存関係追加
+npm install --save-dev @storybook/addon-essentials @storybook/addon-a11y @storybook/addon-docs @storybook/addon-controls @storybook/addon-viewport
+```
+
+#### Storybook設定ファイル
+```typescript
+// .storybook/main.ts
+import type { StorybookConfig } from '@storybook/nextjs';
+
+const config: StorybookConfig = {
+  stories: ['../src/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
+  addons: [
+    '@storybook/addon-essentials',
+    '@storybook/addon-a11y',
+    '@storybook/addon-docs',
+    '@storybook/addon-controls',
+    '@storybook/addon-viewport',
+    '@storybook/addon-interactions'
+  ],
+  framework: {
+    name: '@storybook/nextjs',
+    options: {}
+  },
+  typescript: {
+    check: false,
+    reactDocgen: 'react-docgen-typescript',
+    reactDocgenTypescriptOptions: {
+      shouldExtractLiteralValuesFromEnum: true,
+      propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true),
+    },
+  },
+  docs: {
+    autodocs: 'tag',
+  },
+};
+
+export default config;
+```
+
+---
+
+## 19. コンポーネント構造図（Mermaidダイアグラム）
+
+### 19.1 Mermaidダイアグラム仕様
+
+#### 基本記法
+```mermaid
+graph TD
+    A[コンポーネント名] --> B[子コンポーネント1]
+    A --> C[子コンポーネント2]
+    B --> D[孫コンポーネント]
+    
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+    classDef secondary fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    
+    class A primary
+    class B,C,D secondary
+```
+
+### 19.2 主要コンポーネント構造図
+
+#### DataTableコンポーネント構造
+```mermaid
+graph TD
+    DT[DataTable] --> DTH[DataTableHeader]
+    DT --> DTB[DataTableBody]
+    DT --> DTF[DataTableFooter]
+    
+    DTH --> DTT[DataTableTitle]
+    DTH --> DTA[DataTableActions]
+    
+    DTB --> DTFilters[DataTableFilters]
+    DTB --> Table[Table]
+    DTB --> Empty[EmptyState]
+    
+    Table --> THead[TableHead]
+    Table --> TBody[TableBody]
+    
+    TBody --> TR[TableRow]
+    TR --> TD[TableCell]
+    TD --> Badge[StatusBadge]
+    TD --> Button[ActionButton]
+    
+    DTF --> Pagination[Pagination]
+    
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+    classDef secondary fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    classDef tertiary fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#92400e
+    
+    class DT primary
+    class DTH,DTB,DTF secondary
+    class Table,Pagination tertiary
+```
+
+#### フォームコンポーネント構造
+```mermaid
+graph TD
+    Form[Form] --> FF[FormField]
+    FF --> Label[FormLabel]
+    FF --> Input[FormInput]
+    FF --> Error[FormError]
+    FF --> Help[FormHelp]
+    
+    Form --> FG[FormGroup]
+    FG --> CB[CheckboxGroup]
+    FG --> RG[RadioGroup]
+    FG --> Select[FormSelect]
+    
+    CB --> CBI[CheckboxItem]
+    RG --> RI[RadioItem]
+    
+    Form --> FA[FormActions]
+    FA --> PrimaryBtn[PrimaryButton]
+    FA --> SecondaryBtn[SecondaryButton]
+    
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+    classDef secondary fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    classDef input fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e40af
+    classDef action fill:#dcfce7,stroke:#22c55e,stroke-width:1px,color:#166534
+    
+    class Form primary
+    class FF,FG secondary
+    class Input,Select,CBI,RI input
+    class FA,PrimaryBtn,SecondaryBtn action
+```
+
+#### ナビゲーションコンポーネント構造
+```mermaid
+graph TD
+    Layout[Layout] --> Header[Header]
+    Layout --> Sidebar[Sidebar]
+    Layout --> Main[MainContent]
+    Layout --> Footer[Footer]
+    
+    Header --> Logo[Logo]
+    Header --> Nav[HeaderNav]
+    Header --> User[UserMenu]
+    Header --> Hamburger[HamburgerMenu]
+    
+    Nav --> NavItem[NavItem]
+    User --> Dropdown[UserDropdown]
+    
+    Sidebar --> SideNav[SidebarNav]
+    SideNav --> SideItem[SidebarItem]
+    SideItem --> SubMenu[SubMenu]
+    
+    Hamburger --> MobileMenu[MobileMenu]
+    MobileMenu --> MobileNav[MobileNavigation]
+    MobileNav --> MobileItem[MobileMenuItem]
+    
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+    classDef secondary fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    classDef navigation fill:#e0e7ff,stroke:#6366f1,stroke-width:1px,color:#4338ca
+    classDef mobile fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#92400e
+    
+    class Layout primary
+    class Header,Sidebar,Main,Footer secondary
+    class Nav,SideNav,NavItem,SideItem navigation
+    class Hamburger,MobileMenu,MobileNav,MobileItem mobile
+```
+
+#### スキル管理コンポーネント構造
+```mermaid
+graph TD
+    SkillPage[SkillPage] --> SkillHeader[SkillHeader]
+    SkillPage --> SkillTabs[SkillTabs]
+    SkillPage --> SkillContent[SkillContent]
+    
+    SkillHeader --> Title[PageTitle]
+    SkillHeader --> Actions[HeaderActions]
+    Actions --> AddBtn[AddSkillButton]
+    Actions --> ExportBtn[ExportButton]
+    
+    SkillTabs --> Tab1[個人スキル]
+    SkillTabs --> Tab2[チームスキル]
+    SkillTabs --> Tab3[スキルマップ]
+    
+    SkillContent --> SkillForm[SkillForm]
+    SkillContent --> SkillList[SkillList]
+    SkillContent --> SkillChart[SkillChart]
+    
+    SkillForm --> CategorySelect[CategorySelect]
+    SkillForm --> LevelSelect[LevelSelect]
+    SkillForm --> DatePicker[DatePicker]
+    
+    SkillList --> DataTable[DataTable]
+    DataTable --> SkillRow[SkillRow]
+    SkillRow --> LevelBadge[LevelBadge]
+    SkillRow --> StatusBadge[StatusBadge]
+    
+    SkillChart --> RadarChart[RadarChart]
+    SkillChart --> BarChart[BarChart]
+    SkillChart --> HeatMap[HeatMap]
+    
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+    classDef secondary fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    classDef form fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e40af
+    classDef data fill:#dcfce7,stroke:#22c55e,stroke-width:1px,color:#166534
+    classDef chart fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#92400e
+    
+    class SkillPage primary
+    class SkillHeader,SkillTabs,SkillContent secondary
+    class SkillForm,CategorySelect,LevelSelect,DatePicker form
+    class SkillList,DataTable,SkillRow data
+    class SkillChart,RadarChart,BarChart,HeatMap chart
+```
+
+### 19.3 画面遷移図
+
+#### メイン画面遷移フロー
+```mermaid
+graph TD
+    Login[ログイン画面] --> Home[ホーム画面]
+    Home --> Profile[プロフィール管理]
+    Home --> Skill[スキル情報]
+    Home --> Career[目標・キャリア]
+    Home --> Work[作業実績]
+    Home --> Training[研修・セミナー]
+    Home --> Report[レポート出力]
+    
+    Profile --> ProfileEdit[プロフィール編集]
+    ProfileEdit --> Profile
+    
+    Skill --> SkillAdd[スキル追加]
+    Skill --> SkillEdit[スキル編集]
+    Skill --> SkillSearch[スキル検索]
+    Skill --> SkillMap[スキルマップ]
+    
+    SkillAdd --> Skill
+    SkillEdit --> Skill
+    SkillSearch --> SkillDetail[スキル詳細]
+    SkillDetail --> Skill
+    
+    Career --> CareerPlan[キャリアプラン]
+    Career --> GoalSetting[目標設定]
+    CareerPlan --> Career
+    GoalSetting --> Career
+    
+    Work --> WorkAdd[作業実績追加]
+    Work --> WorkBulk[一括登録]
+    WorkAdd --> Work
+    WorkBulk --> Work
+    
+    Training --> TrainingAdd[研修登録]
+    Training --> TrainingHistory[研修履歴]
+    TrainingAdd --> Training
+    TrainingHistory --> Training
+    
+    Report --> ReportGenerate[レポート生成]
+    Report --> ReportDownload[ダウンロード]
+    
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+    classDef secondary fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    classDef action fill:#dcfce7,stroke:#22c55e,stroke-width:1px,color:#166534
+    
+    class Login,Home primary
+    class Profile,Skill,Career,Work,Training,Report secondary
+    class ProfileEdit,SkillAdd,SkillEdit,CareerPlan,GoalSetting,WorkAdd,TrainingAdd action
+```
+
+#### 権限別アクセス制御フロー
+```mermaid
+graph TD
+    User[ユーザー] --> Role{権限チェック}
+    
+    Role -->|一般ユーザー| UserPages[一般ユーザー画面]
+    Role -->|管理者| AdminPages[管理者画面]
+    Role -->|システム管理者| SystemPages[システム管理画面]
+    
+    UserPages --> PersonalData[個人データ管理]
+    UserPages --> SkillInput[スキル入力]
+    UserPages --> ReportView[レポート閲覧]
+    
+    AdminPages --> UserManagement[ユーザー管理]
+    AdminPages --> SkillMaster[スキルマスタ管理]
+    AdminPages --> ReportManagement[レポート管理]
+    AdminPages --> PersonalData
+    AdminPages --> SkillInput
+    
+    SystemPages --> SystemConfig[システム設定]
+    SystemPages --> AccessControl[アクセス制御]
+    SystemPages --> AuditLog[監査ログ]
+    SystemPages --> UserManagement
+    SystemPages --> SkillMaster
+    
+    classDef user fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e40af
+    classDef admin fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#92400e
+    classDef system fill:#fee2e2,stroke:#ef4444,stroke-width:1px,color:#dc2626
+    classDef common fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    
+    class User,Role common
+    class UserPages,PersonalData,SkillInput,ReportView user
+    class AdminPages,UserManagement,SkillMaster,ReportManagement admin
+    class SystemPages,SystemConfig,AccessControl,AuditLog system
+```
+
+### 19.4 データフロー図
+
+#### スキル情報管理データフロー
+```mermaid
+graph TD
+    UI[ユーザーインターフェース] --> API[API Layer]
+    API --> Validation[バリデーション]
+    Validation --> Business[ビジネスロジック]
+    Business --> Repository[リポジトリ]
+    Repository --> Database[(データベース)]
+    
+    API --> Cache[キャッシュ]
+    Cache --> Redis[(Redis)]
+    
+    Business --> Event[イベント発行]
+    Event --> Queue[メッセージキュー]
+    Queue --> Notification[通知サービス]
+    
+    Database --> Backup[(バックアップ)]
+    Database --> AuditLog[(監査ログ)]
+    
+    External[外部システム] --> Integration[統合API]
+    Integration --> API
+    
+    classDef ui fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e40af
+    classDef api fill:#dcfce7,stroke:#22c55e,stroke-width:1px,color:#166534
+    classDef business fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#92400e
+    classDef data fill:#fee2e2,stroke:#ef4444,stroke-width:1px,color:#dc2626
+    classDef external fill:#f3f4f6,stroke:#d1d5db,stroke-width:1px,color:#374151
+    
+    class UI ui
+    class API,Validation,Integration api
+    class Business,Event,Queue,Notification business
+    class Repository,Database,Cache,Redis,Backup,AuditLog data
+    class External external
+```
+
+---
+
+## 20. 実装ガイドライン
+
+### 20.1 HTMLプロトタイプの活用方法
+
+#### 開発フェーズでの活用
+1. **設計フェーズ**: デザイナー・開発者間での仕様確認
+2. **実装フェーズ**: 実装時の参考・動作確認
+3. **テストフェーズ**: 期待動作との比較検証
+4. **レビューフェーズ**: ステークホルダーへのデモ
+
+#### プロトタイプ更新フロー
+```mermaid
+graph LR
+    Design[デザイン更新] --> Prototype[プロトタイプ更新]
+    Prototype --> Review[レビュー]
+    Review --> Approve{承認}
+    Approve -->|OK| Implementation[実装]
+    Approve -->|NG| Design
+    Implementation --> Test[テスト]
+    Test --> Deploy[デプロイ]
+```
+
+### 20.2 Storybookの運用方針
+
+#### 継続的更新
+- **コンポーネント追加時**: 対応するストーリーを必ず作成
+- **仕様変更時**: ストーリーとドキュメントを同期更新
+- **リリース前**: 全ストーリーの動作確認
+
+#### 品質管理
+- **ビジュアルリグレッションテスト**: Chromaticによる自動検証
+- **アクセシビリティテスト**: a11yアドオンによる継続的チェック
+- **インタラクションテスト**: play関数による動作検証
+
+### 20.3 Mermaidダイアグラムの保守
+
+#### 更新タイミング
+- **新機能追加時**: コンポーネント構造図の更新
+- **アーキテクチャ変更時**: データフロー図の見直し
+- **画面追加時**: 画面遷移図の拡張
+
+#### バージョン管理
+- **図表のバージョニング**: 変更履歴の記録
+- **差分管理**: 変更点の明確化
+- **承認プロセス**: 重要な変更の承認フロー
+
+---
+
+## 21. まとめ
+
+### 21.1 本仕様書の活用効果
+
+#### 開発効率の向上
+- **HTMLプロトタイプ**: 実装前の動作確認による手戻り削減
+- **Storybook**: コンポーネントの独立開発・テスト
+- **Mermaidダイアグラム**: 視覚的な設計理解の促進
+
+#### 品質の向上
+- **一貫性**: 統一されたUI/UX基準
+- **保守性**: 体系化されたコンポーネント管理
+- **可読性**: 図表による分かりやすい仕様表現
+
+#### チーム協力の促進
+- **共通理解**: 視覚的な仕様共有
+- **効率的レビュー**: プロトタイプによる迅速な確認
+- **知識共有**: Storybookによるコンポーネントライブラリ
+
+### 21.2 継続的改善
+
+#### 定期的な見直し
+- **月次レビュー**: 仕様書の内容確認・更新
+- **四半期評価**: 活用効果の測定・改善
+- **年次改訂**: 大幅な仕様変更・技術更新
+
+#### フィードバック収集
+- **開発者**: 実装時の課題・改善提案
+- **デザイナー**: UI/UX観点での改善点
+- **ユーザー**: 実際の使用感・要望
+
+この拡張版UI/UX共通仕様書により、年間スキル報告書WEB化プロジェクトの開発効率と品質の向上を実現します。
+
 ---
 
 この共通仕様書に従って、一貫性のある高品質なUI/UXを実現し、ユーザビリティとアクセシビリティを両立したWebアプリケーションを構築します。
