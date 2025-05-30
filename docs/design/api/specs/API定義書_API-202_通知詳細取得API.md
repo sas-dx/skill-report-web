@@ -1,447 +1,353 @@
-# API定義書：API-202 通知詳細取得API
+# API仕様書：通知詳細取得API (API-202)
 
 ## 1. 基本情報
 
-- **API ID**: API-202
-- **API名称**: 通知詳細取得API
-- **概要**: 指定された通知IDの詳細情報を取得する
-- **エンドポイント**: `/api/notifications/{id}`
-- **HTTPメソッド**: GET
-- **リクエスト形式**: URL パラメータ
-- **レスポンス形式**: JSON
-- **認証要件**: 必須（JWT認証）
-- **利用画面**: [SCR-NOTIFY](画面設計書_SCR-NOTIFY.md)
-- **作成日**: 2025/05/28
-- **作成者**: API設計担当
-- **改訂履歴**: 2025/05/28 初版作成
+| 項目 | 内容 |
+|------|------|
+| **API ID** | API-202 |
+| **API名称** | 通知詳細取得API |
+| **HTTPメソッド** | GET |
+| **エンドポイント** | /api/notifications/{id} |
+| **優先度** | 中 |
+| **ステータス** | 実装完了 |
+| **作成日** | 2025-05-31 |
+| **最終更新日** | 2025-05-31 |
 
----
+## 2. API概要
 
-## 2. リクエスト仕様
+### 2.1 概要・目的
+指定された通知IDの詳細情報を取得するAPIです。通知の内容、送信者情報、関連データ、アクション情報などの詳細な情報を提供し、通知詳細画面での表示や、通知に関連するアクションの実行に必要な情報を取得できます。
 
-### 2.1 パスパラメータ
+### 2.2 関連画面
+- [SCR-NOTIFY-DETAIL](../screens/specs/画面設計書_SCR-NOTIFY-DETAIL.md) - 通知詳細画面
+- [SCR-NOTIFY](../screens/specs/画面設計書_SCR-NOTIFY.md) - 通知一覧画面
 
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| id | string | ○ | 通知ID | 取得対象の通知の一意識別子 |
+### 2.3 関連テーブル
+- [TBL-021](../database/tables/テーブル定義書_TBL-021.md) - 通知テーブル
+- [TBL-022](../database/tables/テーブル定義書_TBL-022.md) - 通知設定テーブル
+- [TBL-001](../database/tables/テーブル定義書_TBL-001.md) - ユーザーテーブル
 
-### 2.2 リクエスト例
+## 3. API仕様
 
+### 3.1 リクエスト仕様
+
+#### 3.1.1 URL
 ```
-GET /api/notifications/notif_20250520001 HTTP/1.1
-Host: api.example.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+GET /api/notifications/{id}
 ```
 
----
+#### 3.1.2 ヘッダー
+| ヘッダー名 | 必須 | 説明 | 例 |
+|------------|------|------|-----|
+| Content-Type | ○ | リクエスト形式 | application/json |
+| Authorization | ○ | 認証トークン | Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... |
+| X-Tenant-ID | ○ | テナントID | tenant001 |
 
-## 3. レスポンス仕様
+#### 3.1.3 パスパラメータ
+| パラメータ名 | データ型 | 必須 | 説明 | 例 |
+|--------------|----------|------|------|-----|
+| id | string | ○ | 通知ID | notif_001 |
 
-### 3.1 正常時レスポンス（200 OK）
+#### 3.1.4 クエリパラメータ
+| パラメータ名 | データ型 | 必須 | 説明 | 例 | デフォルト値 |
+|--------------|----------|------|------|-----|-------------|
+| mark_as_read | boolean | × | 取得時に既読にするか | true | false |
 
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| id | string | 通知ID | |
-| type | string | 通知種別 | "system", "certification", "goal", "training", "other"のいずれか |
-| priority | string | 重要度 | "high", "medium", "low"のいずれか |
-| title | string | タイトル | |
-| summary | string | 概要 | 通知の短い説明 |
-| content | string | 詳細内容 | 通知の詳細内容（HTML形式可） |
-| date | string | 通知日時 | ISO 8601形式 |
-| is_read | boolean | 既読状態 | true: 既読, false: 未読 |
-| action_required | boolean | アクション要否 | true: 要アクション, false: 情報のみ |
-| action_deadline | string | アクション期限 | ISO 8601形式（任意） |
-| action_type | string | アクション種別 | "update", "confirm", "submit"など（任意） |
-| link | string | 関連リンク | 詳細画面へのリンクパス（任意） |
-| related_items | array | 関連項目 | 関連する項目情報（任意） |
-| attachments | array | 添付ファイル | 添付ファイル情報（任意） |
-| created_at | string | 作成日時 | ISO 8601形式 |
-| updated_at | string | 更新日時 | ISO 8601形式 |
+## 4. レスポンス仕様
 
-#### related_items 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| id | string | 関連項目ID | |
-| type | string | 関連項目種別 | "certification", "goal", "training"など |
-| name | string | 関連項目名 | |
-| link | string | 関連項目リンク | 関連項目へのリンクパス |
-
-#### attachments 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| id | string | 添付ファイルID | |
-| name | string | ファイル名 | |
-| size | number | ファイルサイズ | バイト単位 |
-| mime_type | string | MIMEタイプ | |
-| url | string | ダウンロードURL | |
-
-### 3.2 正常時レスポンス例
-
+### 4.1 正常時レスポンス（200 OK）
 ```json
 {
-  "id": "notif_20250520001",
-  "type": "certification",
-  "priority": "high",
-  "title": "資格Aの期限が近づいています",
-  "summary": "資格Aの有効期限が2025年6月30日に到来します。更新手続きを行ってください。",
-  "content": "<p>資格Aの有効期限が2025年6月30日に到来します。</p><p>更新手続きを行うには、以下の手順に従ってください：</p><ol><li>更新申請書をダウンロード</li><li>必要事項を記入</li><li>上長の承認を得る</li><li>人事部に提出（6月15日締切）</li></ol><p>ご不明点は人事部（<a href='mailto:jinji@example.com'>jinji@example.com</a>）までお問い合わせください。</p>",
-  "date": "2025-05-20T10:30:00+09:00",
-  "is_read": false,
-  "action_required": true,
-  "action_deadline": "2025-06-15T23:59:59+09:00",
-  "action_type": "submit",
-  "link": "/certifications/details/cert001",
-  "related_items": [
-    {
-      "id": "cert001",
-      "type": "certification",
-      "name": "資格A",
-      "link": "/certifications/details/cert001"
+  "status": "success",
+  "data": {
+    "notification": {
+      "id": "notif_001",
+      "type": "approval_request",
+      "title": "作業実績の承認依頼",
+      "message": "山田太郎さんから2025年5月の作業実績の承認依頼が届いています。",
+      "content": {
+        "html": "<div><h3>承認依頼詳細</h3><p>以下の作業実績について承認をお願いします。</p><ul><li>期間：2025年5月1日〜2025年5月31日</li><li>総作業時間：160時間</li><li>主要プロジェクト：スキル管理システム開発</li></ul></div>",
+        "plain_text": "承認依頼詳細\n以下の作業実績について承認をお願いします。\n期間：2025年5月1日〜2025年5月31日\n総作業時間：160時間\n主要プロジェクト：スキル管理システム開発"
+      },
+      "priority": "high",
+      "status": "unread",
+      "sender": {
+        "id": "user_002",
+        "name": "山田 太郎",
+        "email": "yamada@example.com",
+        "department": "開発部",
+        "position": "エンジニア",
+        "avatar_url": "/avatars/user_002.jpg",
+        "type": "user"
+      },
+      "recipient_id": "user_001",
+      "actions": [
+        {
+          "id": "approve",
+          "label": "承認する",
+          "type": "primary",
+          "method": "POST",
+          "url": "/api/work-records/wr_202505_002/approve",
+          "confirm_message": "この作業実績を承認しますか？",
+          "icon": "check-circle"
+        },
+        {
+          "id": "reject",
+          "label": "却下する",
+          "type": "danger",
+          "method": "POST",
+          "url": "/api/work-records/wr_202505_002/reject",
+          "confirm_message": "この作業実績を却下しますか？",
+          "icon": "x-circle",
+          "requires_comment": true
+        },
+        {
+          "id": "view_detail",
+          "label": "詳細を確認",
+          "type": "secondary",
+          "method": "GET",
+          "url": "/work-records/wr_202505_002",
+          "icon": "eye",
+          "open_in_new_tab": true
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_001",
+          "name": "作業実績詳細.pdf",
+          "size": 1024000,
+          "type": "application/pdf",
+          "url": "/api/files/att_001/download",
+          "thumbnail_url": "/api/files/att_001/thumbnail"
+        }
+      ],
+      "metadata": {
+        "work_record_id": "wr_202505_002",
+        "employee_id": "user_002",
+        "period": "2025-05",
+        "total_hours": 160,
+        "project_name": "スキル管理システム開発",
+        "deadline": "2025-06-05T23:59:59Z"
+      },
+      "related_notifications": [
+        {
+          "id": "notif_003",
+          "title": "作業実績提出完了",
+          "created_at": "2025-05-30T09:00:00Z"
+        }
+      ],
+      "created_at": "2025-05-30T10:00:00Z",
+      "read_at": null,
+      "expires_at": "2025-06-05T23:59:59Z",
+      "updated_at": "2025-05-30T10:00:00Z"
     }
-  ],
-  "attachments": [
-    {
-      "id": "file001",
-      "name": "更新申請書.pdf",
-      "size": 258420,
-      "mime_type": "application/pdf",
-      "url": "/api/files/download/file001"
-    },
-    {
-      "id": "file002",
-      "name": "更新手続きガイド.pdf",
-      "size": 524288,
-      "mime_type": "application/pdf",
-      "url": "/api/files/download/file002"
-    }
-  ],
-  "created_at": "2025-05-20T10:30:00+09:00",
-  "updated_at": "2025-05-20T10:30:00+09:00"
+  }
 }
 ```
 
-### 3.3 エラー時レスポンス
-
-| ステータスコード | エラーコード | エラーメッセージ | 説明 |
-|----------------|------------|----------------|------|
-| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | リクエストパラメータの形式不正 |
-| 401 Unauthorized | UNAUTHORIZED | 認証が必要です | 認証トークンなし/無効 |
-| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 通知閲覧権限なし |
-| 404 Not Found | NOTIFICATION_NOT_FOUND | 通知が見つかりません | 指定IDの通知が存在しない |
-| 500 Internal Server Error | SYSTEM_ERROR | システムエラーが発生しました | サーバー内部エラー |
-
-### 3.4 エラー時レスポンス例
+### 4.2 エラーレスポンス
+| HTTPステータス | エラーコード | エラーメッセージ | 発生条件 |
+|----------------|--------------|------------------|----------|
+| 400 | BAD_REQUEST | リクエストが不正です | パラメータ不正 |
+| 401 | UNAUTHORIZED | 認証が必要です | 認証トークン不正 |
+| 403 | FORBIDDEN | アクセス権限がありません | 権限不足・他人の通知 |
+| 404 | NOT_FOUND | 通知が見つかりません | 通知存在しない |
+| 500 | INTERNAL_ERROR | サーバー内部エラーです | システムエラー |
 
 ```json
 {
+  "status": "error",
   "error": {
-    "code": "NOTIFICATION_NOT_FOUND",
+    "code": "NOT_FOUND",
     "message": "通知が見つかりません",
-    "details": "指定されたID 'notif_20250520999' の通知は存在しないか、削除された可能性があります。"
+    "details": [
+      {
+        "field": "id",
+        "message": "指定された通知IDは存在しません"
+      }
+    ]
   }
 }
 ```
 
----
+## 5. 認証・認可
 
-## 4. 処理仕様
+### 5.1 認証方式
+- JWT（JSON Web Token）
+- Bearer Token形式
 
-### 4.1 処理フロー
+### 5.2 必要権限
+| 権限 | 説明 |
+|------|------|
+| NOTIFICATION_READ | 通知読み取り権限 |
 
-1. リクエストの認証・認可チェック
-   - JWTトークンの検証
-   - 通知閲覧権限の確認
-2. パスパラメータの検証
-   - 通知IDの形式チェック
-3. 通知データの取得
-   - 指定IDの通知レコード取得
-   - ユーザーIDとの紐付け確認（他ユーザーの通知は参照不可）
-4. 関連データの取得
-   - 関連項目情報の取得
-   - 添付ファイル情報の取得
-5. レスポンスの生成
-   - 通知データの整形
-6. レスポンス返却
+### 5.3 テナント制御
+- マルチテナント対応
+- X-Tenant-IDヘッダーによるテナント識別
+- ユーザーは自分宛ての通知のみ取得可能
 
-### 4.2 自動既読化処理
+### 5.4 アクセス制御
+- 通知の受信者のみアクセス可能
+- 管理者は全ての通知にアクセス可能（監査目的）
+- 期限切れ通知も取得可能（履歴確認用）
 
-- 通知詳細取得時に自動的に既読状態に更新
-- 既読状態の更新はバックグラウンドで非同期処理
-- 既読状態の更新に失敗してもレスポンス返却には影響しない
-- 既読状態の更新履歴はログに記録
+## 6. バリデーション
 
-### 4.3 パフォーマンス要件
+### 6.1 入力チェック
+| 項目 | チェック内容 | エラーメッセージ |
+|------|--------------|------------------|
+| id | 必須、文字列 | 「通知IDは必須です」 |
+| mark_as_read | boolean型 | 「mark_as_readはtrue/falseで指定してください」 |
 
-- レスポンスタイム：平均200ms以内
-- キャッシュ：ユーザー別に5分間（既読状態変更時に無効化）
-- 添付ファイルURL：署名付きURLで30分間有効
+### 6.2 業務チェック
+| 項目 | チェック内容 | エラーメッセージ |
+|------|--------------|------------------|
+| 通知存在確認 | 指定IDの通知が存在 | 「指定された通知は存在しません」 |
+| アクセス権限 | 受信者または管理者 | 「この通知にアクセスする権限がありません」 |
+| テナント確認 | 同一テナント内の通知 | 「アクセス権限がありません」 |
 
----
+## 7. 処理フロー
 
-## 5. 関連情報
-
-### 5.1 関連API
-
-| API ID | API名称 | 関連内容 |
-|--------|--------|----------|
-| [API-201](API仕様書_API-201.md) | 通知一覧取得API | 通知一覧の取得 |
-| [API-203](API仕様書_API-203.md) | 通知状態更新API | 通知の既読状態更新 |
-| [API-204](API仕様書_API-204.md) | 全通知既読API | 全通知の一括既読化 |
-
-### 5.2 使用テーブル
-
-| テーブル名 | 用途 | 主な操作 |
-|-----------|------|----------|
-| notifications | 通知情報 | 参照（R） |
-| notification_reads | 通知既読状態 | 参照/作成/更新（R/C/U） |
-| notification_attachments | 添付ファイル情報 | 参照（R） |
-| notification_related_items | 関連項目情報 | 参照（R） |
-
-### 5.3 注意事項・補足
-
-- 通知詳細取得時に自動的に既読状態に更新される
-- 添付ファイルのダウンロードURLは署名付きで、30分間有効
-- HTML形式のコンテンツはXSS対策済み（許可タグのみ使用可）
-- 通知種別によって表示項目が異なる場合がある
-- 関連項目へのアクセス権限がない場合は表示されない
-
----
-
-## 6. サンプルコード
-
-### 6.1 通知詳細取得例（JavaScript/Fetch API）
-
-```javascript
-/**
- * 通知詳細を取得する関数
- * @param {string} notificationId - 通知ID
- * @returns {Promise<Object>} 通知詳細データ
- */
-async function fetchNotificationDetail(notificationId) {
-  try {
-    const response = await fetch(`https://api.example.com/api/notifications/${notificationId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`,
-        'Accept': 'application/json'
-      }
-    });
+### 7.1 処理概要
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Auth
+    participant DB
+    participant FileService
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error.message || '通知の取得に失敗しました');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('通知詳細取得エラー:', error);
-    throw error;
-  }
-}
+    Client->>API: GET /api/notifications/{id}
+    API->>Auth: 認証・認可チェック
+    Auth->>API: 認証結果
+    API->>API: パラメータバリデーション
+    API->>DB: 通知詳細取得
+    DB->>API: 通知データ
+    API->>API: アクセス権限チェック
+    alt mark_as_read=true
+        API->>DB: 既読状態更新
+        DB->>API: 更新結果
+    end
+    API->>FileService: 添付ファイル情報取得
+    FileService->>API: ファイル情報
+    API->>Client: レスポンス返却
 ```
 
-### 6.2 通知詳細表示例（React）
+### 7.2 詳細処理
+1. リクエスト受信
+2. 認証トークン検証
+3. テナントID検証
+4. パラメータバリデーション
+5. 通知データ取得
+6. アクセス権限チェック
+7. 既読状態更新（mark_as_read=trueの場合）
+8. 添付ファイル情報取得
+9. 関連通知情報取得
+10. レスポンス生成・返却
 
-```jsx
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { fetchNotificationDetail } from '../api/notificationApi';
-import { formatDate } from '../utils/dateUtils';
+## 8. 非機能要件
 
-const NotificationDetail = () => {
-  const { id } = useParams();
-  const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  useEffect(() => {
-    const loadNotificationDetail = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchNotificationDetail(id);
-        setNotification(data);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadNotificationDetail();
-  }, [id]);
-  
-  // 通知の優先度に応じたスタイルクラスを返す
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case 'high': return 'notification-high-priority';
-      case 'medium': return 'notification-medium-priority';
-      case 'low': return 'notification-low-priority';
-      default: return '';
-    }
-  };
-  
-  // 通知種別に応じたアイコンを返す
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case 'system': return 'system-icon';
-      case 'certification': return 'certification-icon';
-      case 'goal': return 'goal-icon';
-      case 'training': return 'training-icon';
-      default: return 'info-icon';
-    }
-  };
-  
-  if (loading) return <div className="loading">読み込み中...</div>;
-  if (error) return <div className="error">エラー: {error}</div>;
-  if (!notification) return <div className="not-found">通知が見つかりません</div>;
-  
-  return (
-    <div className="notification-detail-container">
-      <div className="notification-header">
-        <Link to="/notifications" className="back-link">← 通知一覧に戻る</Link>
-        <div className={`notification-priority ${getPriorityClass(notification.priority)}`}>
-          {notification.priority === 'high' ? '重要' : 
-           notification.priority === 'medium' ? '中程度' : '低'}
-        </div>
-      </div>
-      
-      <div className="notification-meta">
-        <div className={`notification-type ${getTypeIcon(notification.type)}`}>
-          {notification.type === 'system' ? 'システム' : 
-           notification.type === 'certification' ? '資格' : 
-           notification.type === 'goal' ? '目標' : 
-           notification.type === 'training' ? '研修' : 'その他'}
-        </div>
-        <div className="notification-date">
-          {formatDate(notification.date, 'YYYY年MM月DD日 HH:mm')}
-        </div>
-      </div>
-      
-      <h1 className="notification-title">{notification.title}</h1>
-      
-      <div className="notification-summary">{notification.summary}</div>
-      
-      <div 
-        className="notification-content"
-        dangerouslySetInnerHTML={{ __html: notification.content }}
-      />
-      
-      {notification.action_required && (
-        <div className="notification-action-required">
-          <h3>必要なアクション</h3>
-          <div className="action-type">
-            {notification.action_type === 'update' ? '更新' : 
-             notification.action_type === 'confirm' ? '確認' : 
-             notification.action_type === 'submit' ? '提出' : 'アクション'}
-          </div>
-          {notification.action_deadline && (
-            <div className="action-deadline">
-              期限: {formatDate(notification.action_deadline, 'YYYY年MM月DD日')}
-            </div>
-          )}
-          {notification.link && (
-            <Link to={notification.link} className="action-link">
-              アクションを実行する →
-            </Link>
-          )}
-        </div>
-      )}
-      
-      {notification.related_items && notification.related_items.length > 0 && (
-        <div className="related-items">
-          <h3>関連項目</h3>
-          <ul>
-            {notification.related_items.map(item => (
-              <li key={item.id}>
-                <Link to={item.link}>
-                  {item.name} ({item.type})
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      
-      {notification.attachments && notification.attachments.length > 0 && (
-        <div className="attachments">
-          <h3>添付ファイル</h3>
-          <ul>
-            {notification.attachments.map(file => (
-              <li key={file.id} className="attachment-item">
-                <a 
-                  href={file.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="attachment-link"
-                >
-                  {file.name} ({(file.size / 1024).toFixed(1)} KB)
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-};
+### 8.1 パフォーマンス
+- レスポンス時間：200ms以内
+- スループット：1000リクエスト/秒
+- 同時接続数：200接続
 
-export default NotificationDetail;
+### 8.2 可用性
+- 稼働率：99.9%以上
+- 障害時の自動復旧機能
+
+### 8.3 セキュリティ
+- HTTPS通信必須
+- CSRF対策
+- XSS対策（HTMLコンテンツのサニタイズ）
+- SQLインジェクション対策
+- 個人情報の適切な取り扱い
+
+## 9. キャッシュ戦略
+
+### 9.1 キャッシュ対象
+- 通知詳細情報（10分間キャッシュ）
+- ユーザー情報（30分間キャッシュ）
+- 添付ファイル情報（1時間キャッシュ）
+
+### 9.2 キャッシュ無効化
+- 通知状態更新時
+- 通知内容更新時
+- ユーザー情報変更時
+
+## 10. テスト仕様
+
+### 10.1 正常系テスト
+| テストケース | 入力値 | 期待結果 |
+|--------------|--------|----------|
+| 通常取得 | 有効な通知ID | 200 OK、通知詳細取得 |
+| 既読化付き取得 | mark_as_read=true | 200 OK、既読状態で取得 |
+| 添付ファイル付き | 添付ファイルありの通知 | 200 OK、ファイル情報含む |
+| 期限切れ通知 | 期限切れの通知ID | 200 OK、期限切れ通知取得 |
+
+### 10.2 異常系テスト
+| テストケース | 入力値 | 期待結果 |
+|--------------|--------|----------|
+| 存在しない通知 | 無効な通知ID | 404 Not Found |
+| 他人の通知 | 他ユーザーの通知ID | 403 Forbidden |
+| 認証なし | Authorizationヘッダーなし | 401 Unauthorized |
+| 不正なID形式 | 空文字・null | 400 Bad Request |
+
+## 11. 実装メモ
+
+### 11.1 技術仕様
+- フレームワーク：Express.js
+- ORM：Prisma
+- バリデーション：Joi
+- 認証：JWT
+- HTMLサニタイズ：DOMPurify
+
+### 11.2 データベースクエリ最適化
+```sql
+-- 通知詳細取得用インデックス
+CREATE INDEX idx_notifications_id_tenant ON notifications(id, tenant_id);
+CREATE INDEX idx_notification_attachments_notification_id ON notification_attachments(notification_id);
+CREATE INDEX idx_users_id_tenant ON users(id, tenant_id);
 ```
 
-### 6.3 添付ファイルダウンロード例（TypeScript）
+### 11.3 注意事項
+- HTMLコンテンツのXSS対策必須
+- 添付ファイルのアクセス制御
+- 大容量添付ファイルの処理
+- 関連通知の循環参照防止
+- マルチテナント対応必須
 
-```typescript
-interface Attachment {
-  id: string;
-  name: string;
-  size: number;
-  mime_type: string;
-  url: string;
-}
+## 12. セキュリティ考慮事項
 
-/**
- * 添付ファイルをダウンロードする関数
- * @param attachment 添付ファイル情報
- * @returns ダウンロード成功時はtrue、失敗時はfalse
- */
-async function downloadAttachment(attachment: Attachment): Promise<boolean> {
-  try {
-    // ファイルのダウンロード
-    const response = await fetch(attachment.url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('ファイルのダウンロードに失敗しました');
-    }
-    
-    // Blobとしてレスポンスを取得
-    const blob = await response.blob();
-    
-    // ダウンロードリンクの作成
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = attachment.name;
-    document.body.appendChild(a);
-    
-    // リンクをクリックしてダウンロード開始
-    a.click();
-    
-    // 後処理
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    return true;
-  } catch (error) {
-    console.error('ファイルダウンロードエラー:', error);
-    showErrorMessage(`ファイルのダウンロードに失敗しました: ${error.message}`);
-    return false;
-  }
-}
+### 12.1 HTMLコンテンツの処理
+- サーバーサイドでのHTMLサニタイズ
+- 許可されたタグ・属性のみ通過
+- JavaScriptの実行防止
+
+### 12.2 添付ファイルセキュリティ
+- ファイルアクセス権限の確認
+- ウイルススキャン結果の確認
+- ファイルタイプの検証
+
+### 12.3 個人情報保護
+- 送信者情報の適切なマスキング
+- ログ出力時の個人情報除外
+- データ保持期間の遵守
+
+## 13. 関連API
+
+| API ID | API名称 | 関係 |
+|--------|--------|------|
+| [API-201](API仕様書_API-201.md) | 通知一覧取得API | 一覧表示 |
+| [API-203](API仕様書_API-203.md) | 通知状態更新API | 既読状態更新 |
+| [API-204](API仕様書_API-204.md) | 全通知既読API | 一括既読化 |
+| [API-028](API仕様書_API-028.md) | 通知設定API | 通知設定取得 |
+| [API-029](API仕様書_API-029.md) | 通知送信API | 通知送信 |
+
+---
+
+**改訂履歴**
+
+| バージョン | 日付 | 変更者 | 変更内容 |
+|------------|------|--------|----------|
+| 1.0 | 2025-05-31 | システムアーキテクト | 初版作成 |

@@ -1,483 +1,320 @@
-# API定義書：API-201 通知一覧取得API
+# API仕様書：通知一覧取得API (API-201)
 
 ## 1. 基本情報
 
-- **API ID**: API-201
-- **API名称**: 通知一覧取得API
-- **概要**: ユーザー向けの通知・アラート情報の一覧を取得する
-- **エンドポイント**: `/api/notifications`
-- **HTTPメソッド**: GET
-- **リクエスト形式**: URL パラメータ
-- **レスポンス形式**: JSON
-- **認証要件**: 必須（JWT認証）
-- **利用画面**: [SCR-NOTIFY](画面設計書_SCR-NOTIFY.md)
-- **作成日**: 2025/05/28
-- **作成者**: API設計担当
-- **改訂履歴**: 2025/05/28 初版作成
+| 項目 | 内容 |
+|------|------|
+| **API ID** | API-201 |
+| **API名称** | 通知一覧取得API |
+| **HTTPメソッド** | GET |
+| **エンドポイント** | /api/notifications |
+| **優先度** | 高 |
+| **ステータス** | 実装完了 |
+| **作成日** | 2025-05-31 |
+| **最終更新日** | 2025-05-31 |
 
----
+## 2. API概要
 
-## 2. リクエスト仕様
+### 2.1 概要・目的
+ユーザーに送信された通知の一覧を取得するAPIです。未読・既読状態、通知種別、期間などの条件で絞り込み検索が可能で、ページネーション機能により大量の通知データを効率的に取得できます。
 
-### 2.1 リクエストパラメータ
+### 2.2 関連画面
+- [SCR-NOTIFY](../screens/specs/画面設計書_SCR-NOTIFY.md) - 通知一覧画面
+- [SCR-HOME](../screens/specs/画面設計書_SCR-HOME.md) - ホーム画面（通知バッジ表示）
 
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| filter_type | string | - | 通知種別フィルター | "all", "system", "certification", "goal", "training", "other"のいずれか<br>デフォルト："all" |
-| read_status | string | - | 既読状態フィルター | "all", "read", "unread"のいずれか<br>デフォルト："all" |
-| page | number | - | ページ番号 | 1以上の整数<br>デフォルト：1 |
-| size | number | - | 1ページあたりの件数 | 1～100の整数<br>デフォルト：10 |
-| sort | string | - | ソート条件 | "date_desc", "date_asc", "priority_desc"のいずれか<br>デフォルト："date_desc" |
-| from_date | string | - | 開始日 | YYYY-MM-DD形式 |
-| to_date | string | - | 終了日 | YYYY-MM-DD形式 |
+### 2.3 関連テーブル
+- [TBL-021](../database/tables/テーブル定義書_TBL-021.md) - 通知テーブル
+- [TBL-022](../database/tables/テーブル定義書_TBL-022.md) - 通知設定テーブル
+- [TBL-001](../database/tables/テーブル定義書_TBL-001.md) - ユーザーテーブル
 
-### 2.2 リクエスト例
+## 3. API仕様
 
+### 3.1 リクエスト仕様
+
+#### 3.1.1 URL
 ```
-GET /api/notifications?filter_type=certification&read_status=unread&page=1&size=10 HTTP/1.1
-Host: api.example.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+GET /api/notifications
 ```
 
----
+#### 3.1.2 ヘッダー
+| ヘッダー名 | 必須 | 説明 | 例 |
+|------------|------|------|-----|
+| Content-Type | ○ | リクエスト形式 | application/json |
+| Authorization | ○ | 認証トークン | Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... |
+| X-Tenant-ID | ○ | テナントID | tenant001 |
 
-## 3. レスポンス仕様
+#### 3.1.3 クエリパラメータ
+| パラメータ名 | データ型 | 必須 | 説明 | 例 | デフォルト値 |
+|--------------|----------|------|------|-----|-------------|
+| page | number | × | ページ番号（1から開始） | 1 | 1 |
+| limit | number | × | 1ページあたりの取得件数 | 20 | 20 |
+| status | string | × | 通知状態（unread/read/all） | unread | all |
+| type | string | × | 通知種別 | system_maintenance | - |
+| priority | string | × | 優先度（high/medium/low） | high | - |
+| from_date | string | × | 開始日（YYYY-MM-DD） | 2025-05-01 | - |
+| to_date | string | × | 終了日（YYYY-MM-DD） | 2025-05-31 | - |
+| sort | string | × | ソート順（created_at_desc/created_at_asc/priority_desc） | created_at_desc | created_at_desc |
 
-### 3.1 正常時レスポンス（200 OK）
+#### 3.1.4 通知種別一覧
+| 種別コード | 説明 |
+|------------|------|
+| system_maintenance | システムメンテナンス |
+| skill_reminder | スキル更新リマインダー |
+| goal_deadline | 目標期限通知 |
+| training_reminder | 研修受講リマインダー |
+| approval_request | 承認依頼 |
+| approval_result | 承認結果 |
+| report_ready | レポート生成完了 |
+| tenant_announcement | テナント内お知らせ |
 
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| notifications | array | 通知一覧 | 通知オブジェクトの配列 |
-| total_count | number | 総件数 | フィルター条件に合致する全通知数 |
-| page_info | object | ページング情報 | ページネーション情報 |
+## 4. レスポンス仕様
 
-#### notifications 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| id | string | 通知ID | |
-| type | string | 通知種別 | "system", "certification", "goal", "training", "other"のいずれか |
-| priority | string | 重要度 | "high", "medium", "low"のいずれか |
-| title | string | タイトル | |
-| summary | string | 概要 | 通知の短い説明（一覧表示用） |
-| date | string | 通知日時 | ISO 8601形式 |
-| is_read | boolean | 既読状態 | true: 既読, false: 未読 |
-| action_required | boolean | アクション要否 | true: 要アクション, false: 情報のみ |
-| link | string | 関連リンク | 詳細画面へのリンクパス（任意） |
-
-#### page_info オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| current_page | number | 現在のページ番号 | |
-| page_size | number | 1ページあたりの件数 | |
-| total_pages | number | 総ページ数 | |
-| has_next | boolean | 次ページ有無 | |
-| has_previous | boolean | 前ページ有無 | |
-
-### 3.2 正常時レスポンス例
-
+### 4.1 正常時レスポンス（200 OK）
 ```json
 {
-  "notifications": [
-    {
-      "id": "notif_20250520001",
-      "type": "certification",
-      "priority": "high",
-      "title": "資格Aの期限が近づいています",
-      "summary": "資格Aの有効期限が2025年6月30日に到来します。更新手続きを行ってください。",
-      "date": "2025-05-20T10:30:00+09:00",
-      "is_read": false,
-      "action_required": true,
-      "link": "/certifications/details/cert001"
-    },
-    {
-      "id": "notif_20250519001",
-      "type": "goal",
-      "priority": "medium",
-      "title": "目標Bの進捗報告期限が近づいています",
-      "summary": "目標Bの四半期進捗報告期限が2025年5月31日です。進捗状況を更新してください。",
-      "date": "2025-05-19T09:15:00+09:00",
-      "is_read": true,
-      "action_required": true,
-      "link": "/goals/progress/goal002"
-    },
-    {
-      "id": "notif_20250518001",
-      "type": "system",
-      "priority": "low",
-      "title": "システムメンテナンスのお知らせ",
-      "summary": "2025年5月25日 23:00～翌2:00にシステムメンテナンスを実施します。",
-      "date": "2025-05-18T14:00:00+09:00",
-      "is_read": true,
-      "action_required": false,
-      "link": null
-    }
-  ],
-  "total_count": 25,
-  "page_info": {
-    "current_page": 1,
-    "page_size": 10,
+  "status": "success",
+  "data": {
+    "notifications": [
+      {
+        "id": "notif_001",
+        "type": "skill_reminder",
+        "title": "スキル情報の更新をお願いします",
+        "message": "今四半期のスキル情報更新期限が近づいています。期限：2025-06-30",
+        "priority": "medium",
+        "status": "unread",
+        "sender": {
+          "id": "system",
+          "name": "システム",
+          "type": "system"
+        },
+        "recipient_id": "user_001",
+        "action_url": "/skills/edit",
+        "action_label": "スキル更新画面へ",
+        "metadata": {
+          "deadline": "2025-06-30",
+          "skill_category": "technical"
+        },
+        "created_at": "2025-05-30T10:00:00Z",
+        "read_at": null,
+        "expires_at": "2025-06-30T23:59:59Z"
+      },
+      {
+        "id": "notif_002",
+        "type": "approval_result",
+        "title": "作業実績が承認されました",
+        "message": "2025年5月の作業実績が承認されました。",
+        "priority": "low",
+        "status": "read",
+        "sender": {
+          "id": "user_manager_001",
+          "name": "田中 太郎",
+          "type": "user"
+        },
+        "recipient_id": "user_001",
+        "action_url": "/work-records/2025-05",
+        "action_label": "作業実績を確認",
+        "metadata": {
+          "work_record_id": "wr_202505_001",
+          "approval_date": "2025-05-30"
+        },
+        "created_at": "2025-05-30T09:30:00Z",
+        "read_at": "2025-05-30T14:20:00Z",
+        "expires_at": null
+      }
+    ]
+  },
+  "meta": {
+    "total": 45,
+    "page": 1,
+    "limit": 20,
     "total_pages": 3,
+    "unread_count": 12,
     "has_next": true,
-    "has_previous": false
+    "has_prev": false
   }
 }
 ```
 
-### 3.3 エラー時レスポンス
-
-| ステータスコード | エラーコード | エラーメッセージ | 説明 |
-|----------------|------------|----------------|------|
-| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | リクエストパラメータの形式不正 |
-| 401 Unauthorized | UNAUTHORIZED | 認証が必要です | 認証トークンなし/無効 |
-| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 通知閲覧権限なし |
-| 500 Internal Server Error | SYSTEM_ERROR | システムエラーが発生しました | サーバー内部エラー |
-
-### 3.4 エラー時レスポンス例
+### 4.2 エラーレスポンス
+| HTTPステータス | エラーコード | エラーメッセージ | 発生条件 |
+|----------------|--------------|------------------|----------|
+| 400 | BAD_REQUEST | リクエストパラメータが不正です | パラメータ形式不正 |
+| 401 | UNAUTHORIZED | 認証が必要です | 認証トークン不正 |
+| 403 | FORBIDDEN | アクセス権限がありません | 権限不足 |
+| 500 | INTERNAL_ERROR | サーバー内部エラーです | システムエラー |
 
 ```json
 {
+  "status": "error",
   "error": {
-    "code": "INVALID_PARAMETER",
-    "message": "パラメータが不正です",
-    "details": "filter_typeには'all', 'system', 'certification', 'goal', 'training', 'other'のいずれかを指定してください。"
+    "code": "BAD_REQUEST",
+    "message": "リクエストパラメータが不正です",
+    "details": [
+      {
+        "field": "page",
+        "message": "1以上の数値を指定してください"
+      }
+    ]
   }
 }
 ```
 
----
+## 5. 認証・認可
 
-## 4. 処理仕様
+### 5.1 認証方式
+- JWT（JSON Web Token）
+- Bearer Token形式
 
-### 4.1 処理フロー
+### 5.2 必要権限
+| 権限 | 説明 |
+|------|------|
+| NOTIFICATION_READ | 通知読み取り権限 |
 
-1. リクエストの認証・認可チェック
-   - JWTトークンの検証
-   - 通知閲覧権限の確認
-2. リクエストパラメータの検証
-   - パラメータ形式チェック
-   - 値の範囲チェック
-3. 通知データの取得
-   - ユーザーIDに紐づく通知の抽出
-   - フィルター条件による絞り込み
-   - ソート処理
-   - ページング処理
-4. レスポンスの生成
-   - 通知データの整形
-   - ページング情報の設定
-5. レスポンス返却
+### 5.3 テナント制御
+- マルチテナント対応
+- X-Tenant-IDヘッダーによるテナント識別
+- ユーザーは自分のテナント内の通知のみ取得可能
 
-### 4.2 フィルタリングルール
+## 6. バリデーション
 
-| フィルター種別 | 説明 | 適用条件 |
-|--------------|------|---------|
-| filter_type | 通知種別によるフィルタリング | 指定された種別に完全一致 |
-| read_status | 既読状態によるフィルタリング | "read": is_read=true<br>"unread": is_read=false<br>"all": 条件なし |
-| from_date | 開始日によるフィルタリング | 通知日時 >= from_date 00:00:00 |
-| to_date | 終了日によるフィルタリング | 通知日時 <= to_date 23:59:59 |
+### 6.1 入力チェック
+| 項目 | チェック内容 | エラーメッセージ |
+|------|--------------|------------------|
+| page | 1以上の整数 | 「ページ番号は1以上の数値を指定してください」 |
+| limit | 1-100の整数 | 「取得件数は1-100の範囲で指定してください」 |
+| status | 指定値のみ | 「ステータスはunread/read/allのいずれかを指定してください」 |
+| type | 通知種別マスタに存在 | 「指定された通知種別は存在しません」 |
+| from_date/to_date | YYYY-MM-DD形式 | 「日付はYYYY-MM-DD形式で指定してください」 |
 
-### 4.3 ソートルール
+### 6.2 業務チェック
+| 項目 | チェック内容 | エラーメッセージ |
+|------|--------------|------------------|
+| 日付範囲 | from_date ≤ to_date | 「開始日は終了日以前を指定してください」 |
+| 検索期間 | 最大1年間 | 「検索期間は1年以内で指定してください」 |
 
-| ソート条件 | 説明 |
-|-----------|------|
-| date_desc | 通知日時の降順（新しい順） |
-| date_asc | 通知日時の昇順（古い順） |
-| priority_desc | 重要度の降順（重要な順） |
+## 7. 処理フロー
 
-### 4.4 パフォーマンス要件
-
-- レスポンスタイム：平均300ms以内
-- キャッシュ：ユーザー別に5分間
-- 最大取得件数：1リクエストあたり100件まで
-
----
-
-## 5. 関連情報
-
-### 5.1 関連API
-
-| API ID | API名称 | 関連内容 |
-|--------|--------|----------|
-| [API-202](API仕様書_API-202.md) | 通知詳細取得API | 通知の詳細情報取得 |
-| [API-203](API仕様書_API-203.md) | 通知状態更新API | 通知の既読状態更新 |
-| [API-204](API仕様書_API-204.md) | 全通知既読API | 全通知の一括既読化 |
-
-### 5.2 使用テーブル
-
-| テーブル名 | 用途 | 主な操作 |
-|-----------|------|----------|
-| notifications | 通知情報 | 参照（R） |
-| notification_reads | 通知既読状態 | 参照（R） |
-| notification_settings | ユーザー通知設定 | 参照（R） |
-
-### 5.3 注意事項・補足
-
-- 通知は最大90日間保持、それ以前の通知は自動アーカイブ
-- 通知種別ごとの表示制御はユーザー設定に基づく
-- 重要度の高い通知は未読の場合、優先的に上位表示
-- 通知数が多い場合はページングを活用
-- 通知の詳細内容はAPI-202で取得
-
----
-
-## 6. サンプルコード
-
-### 6.1 リクエスト例（JavaScript/Fetch API）
-
-```javascript
-/**
- * 通知一覧を取得する関数
- * @param {Object} params - 検索条件パラメータ
- * @returns {Promise<Object>} 通知一覧データ
- */
-async function fetchNotifications(params = {}) {
-  // デフォルトパラメータ
-  const defaultParams = {
-    filter_type: 'all',
-    read_status: 'all',
-    page: 1,
-    size: 10,
-    sort: 'date_desc'
-  };
-  
-  // パラメータのマージ
-  const queryParams = { ...defaultParams, ...params };
-  
-  // URLパラメータの構築
-  const queryString = Object.entries(queryParams)
-    .filter(([_, value]) => value !== null && value !== undefined)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-    .join('&');
-  
-  try {
-    const response = await fetch(`https://api.example.com/api/notifications?${queryString}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`,
-        'Accept': 'application/json'
-      }
-    });
+### 7.1 処理概要
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Auth
+    participant DB
+    participant Cache
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error.message || '通知の取得に失敗しました');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('通知取得エラー:', error);
-    throw error;
-  }
-}
+    Client->>API: GET /api/notifications
+    API->>Auth: 認証・認可チェック
+    Auth->>API: 認証結果
+    API->>API: パラメータバリデーション
+    API->>Cache: キャッシュ確認
+    Cache->>API: キャッシュ結果
+    alt キャッシュヒット
+        API->>Client: キャッシュデータ返却
+    else キャッシュミス
+        API->>DB: 通知データ取得
+        DB->>API: 通知データ
+        API->>Cache: キャッシュ更新
+        API->>Client: レスポンス返却
+    end
 ```
 
-### 6.2 通知一覧表示例（React）
+### 7.2 詳細処理
+1. リクエスト受信
+2. 認証トークン検証
+3. テナントID検証
+4. パラメータバリデーション
+5. キャッシュ確認（未読件数など）
+6. データベースクエリ実行
+7. 結果の整形・ページネーション
+8. キャッシュ更新
+9. レスポンス返却
 
-```jsx
-import React, { useState, useEffect } from 'react';
-import { fetchNotifications } from '../api/notificationApi';
+## 8. 非機能要件
 
-const NotificationList = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState({
-    filter_type: 'all',
-    read_status: 'all',
-    page: 1,
-    size: 10
-  });
-  const [pageInfo, setPageInfo] = useState({});
-  
-  // 通知データの取得
-  useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        setLoading(true);
-        const result = await fetchNotifications(filter);
-        setNotifications(result.notifications);
-        setPageInfo(result.page_info);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadNotifications();
-  }, [filter]);
-  
-  // フィルター変更ハンドラ
-  const handleFilterChange = (name, value) => {
-    setFilter(prev => ({
-      ...prev,
-      [name]: value,
-      page: 1 // フィルター変更時は1ページ目に戻す
-    }));
-  };
-  
-  // ページ変更ハンドラ
-  const handlePageChange = (newPage) => {
-    setFilter(prev => ({
-      ...prev,
-      page: newPage
-    }));
-  };
-  
-  // 通知の優先度に応じたスタイルクラスを返す
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case 'high': return 'notification-high-priority';
-      case 'medium': return 'notification-medium-priority';
-      case 'low': return 'notification-low-priority';
-      default: return '';
-    }
-  };
-  
-  if (loading) return <div className="loading">読み込み中...</div>;
-  if (error) return <div className="error">エラー: {error}</div>;
-  
-  return (
-    <div className="notification-container">
-      {/* フィルターコントロール */}
-      <div className="notification-filters">
-        <select 
-          value={filter.filter_type}
-          onChange={(e) => handleFilterChange('filter_type', e.target.value)}
-        >
-          <option value="all">すべての種別</option>
-          <option value="system">システム</option>
-          <option value="certification">資格</option>
-          <option value="goal">目標</option>
-          <option value="training">研修</option>
-          <option value="other">その他</option>
-        </select>
-        
-        <select 
-          value={filter.read_status}
-          onChange={(e) => handleFilterChange('read_status', e.target.value)}
-        >
-          <option value="all">すべての状態</option>
-          <option value="unread">未読のみ</option>
-          <option value="read">既読のみ</option>
-        </select>
-      </div>
-      
-      {/* 通知一覧 */}
-      <div className="notification-list">
-        {notifications.length === 0 ? (
-          <div className="no-notifications">通知はありません</div>
-        ) : (
-          notifications.map(notification => (
-            <div 
-              key={notification.id} 
-              className={`notification-item ${!notification.is_read ? 'unread' : ''} ${getPriorityClass(notification.priority)}`}
-            >
-              <div className="notification-header">
-                <span className="notification-type">{notification.type}</span>
-                <span className="notification-date">{new Date(notification.date).toLocaleString()}</span>
-              </div>
-              <div className="notification-title">{notification.title}</div>
-              <div className="notification-summary">{notification.summary}</div>
-              {notification.action_required && (
-                <div className="notification-action">アクションが必要です</div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-      
-      {/* ページネーション */}
-      {pageInfo.total_pages > 1 && (
-        <div className="pagination">
-          <button 
-            disabled={!pageInfo.has_previous}
-            onClick={() => handlePageChange(filter.page - 1)}
-          >
-            前へ
-          </button>
-          
-          <span className="page-info">
-            {filter.page} / {pageInfo.total_pages}
-          </span>
-          
-          <button 
-            disabled={!pageInfo.has_next}
-            onClick={() => handlePageChange(filter.page + 1)}
-          >
-            次へ
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+### 8.1 パフォーマンス
+- レスポンス時間：300ms以内
+- スループット：2000リクエスト/秒
+- 同時接続数：500接続
 
-export default NotificationList;
+### 8.2 可用性
+- 稼働率：99.9%以上
+- 障害時の自動復旧機能
+
+### 8.3 セキュリティ
+- HTTPS通信必須
+- CSRF対策
+- XSS対策
+- SQLインジェクション対策
+- 個人情報の適切な取り扱い
+
+## 9. キャッシュ戦略
+
+### 9.1 キャッシュ対象
+- 未読通知件数（5分間キャッシュ）
+- 通知種別マスタ（1時間キャッシュ）
+- ユーザー権限情報（30分間キャッシュ）
+
+### 9.2 キャッシュ無効化
+- 通知状態更新時
+- 新規通知作成時
+- ユーザー権限変更時
+
+## 10. テスト仕様
+
+### 10.1 正常系テスト
+| テストケース | 入力値 | 期待結果 |
+|--------------|--------|----------|
+| 通常取得 | デフォルトパラメータ | 200 OK、通知一覧取得 |
+| 未読のみ取得 | status=unread | 200 OK、未読通知のみ |
+| 期間指定取得 | from_date, to_date | 200 OK、期間内通知のみ |
+| ページネーション | page=2, limit=10 | 200 OK、2ページ目取得 |
+
+### 10.2 異常系テスト
+| テストケース | 入力値 | 期待結果 |
+|--------------|--------|----------|
+| 不正ページ番号 | page=0 | 400 Bad Request |
+| 不正取得件数 | limit=101 | 400 Bad Request |
+| 不正ステータス | status=invalid | 400 Bad Request |
+| 認証なし | Authorizationヘッダーなし | 401 Unauthorized |
+
+## 11. 実装メモ
+
+### 11.1 技術仕様
+- フレームワーク：Express.js
+- ORM：Prisma
+- バリデーション：Joi
+- 認証：JWT
+- キャッシュ：Redis
+
+### 11.2 データベースクエリ最適化
+```sql
+-- インデックス要件
+CREATE INDEX idx_notifications_recipient_tenant ON notifications(recipient_id, tenant_id);
+CREATE INDEX idx_notifications_status_created ON notifications(status, created_at DESC);
+CREATE INDEX idx_notifications_type_priority ON notifications(type, priority);
 ```
 
-### 6.3 フィルタリング・ソート例（TypeScript）
+### 11.3 注意事項
+- 大量通知の場合のパフォーマンス考慮
+- 期限切れ通知の自動削除バッチとの連携
+- 通知設定による表示制御
+- マルチテナント対応必須
 
-```typescript
-interface NotificationFilter {
-  filter_type?: 'all' | 'system' | 'certification' | 'goal' | 'training' | 'other';
-  read_status?: 'all' | 'read' | 'unread';
-  page?: number;
-  size?: number;
-  sort?: 'date_desc' | 'date_asc' | 'priority_desc';
-  from_date?: string;
-  to_date?: string;
-}
+## 12. 関連API
 
-/**
- * 通知フィルターの状態を管理するカスタムフック
- */
-function useNotificationFilter() {
-  const [filter, setFilter] = useState<NotificationFilter>({
-    filter_type: 'all',
-    read_status: 'all',
-    page: 1,
-    size: 10,
-    sort: 'date_desc'
-  });
-  
-  // 単一フィルター項目の更新
-  const updateFilter = (key: keyof NotificationFilter, value: any) => {
-    setFilter(prev => ({
-      ...prev,
-      [key]: value,
-      // フィルター条件変更時は1ページ目に戻す（ページ番号自体の変更時は除く）
-      ...(key !== 'page' ? { page: 1 } : {})
-    }));
-  };
-  
-  // 日付範囲フィルターの設定
-  const setDateRange = (fromDate: string | null, toDate: string | null) => {
-    setFilter(prev => ({
-      ...prev,
-      from_date: fromDate || undefined,
-      to_date: toDate || undefined,
-      page: 1
-    }));
-  };
-  
-  // フィルターのリセット
-  const resetFilter = () => {
-    setFilter({
-      filter_type: 'all',
-      read_status: 'all',
-      page: 1,
-      size: 10,
-      sort: 'date_desc'
-    });
-  };
-  
-  return {
-    filter,
-    updateFilter,
-    setDateRange,
-    resetFilter
-  };
-}
+| API ID | API名称 | 関係 |
+|--------|--------|------|
+| [API-202](API仕様書_API-202.md) | 通知詳細取得API | 詳細情報取得 |
+| [API-203](API仕様書_API-203.md) | 通知状態更新API | 既読状態更新 |
+| [API-204](API仕様書_API-204.md) | 全通知既読API | 一括既読化 |
+| [API-028](API仕様書_API-028.md) | 通知設定API | 通知設定取得 |
+| [API-029](API仕様書_API-029.md) | 通知送信API | 通知送信 |
+
+---
+
+**改訂履歴**
+
+| バージョン | 日付 | 変更者 | 変更内容 |
+|------------|------|--------|----------|
+| 1.0 | 2025-05-31 | システムアーキテクト | 初版作成 |
