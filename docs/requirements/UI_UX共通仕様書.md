@@ -364,6 +364,10 @@
   width: 100%;
   border-collapse: collapse;
   background-color: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-200);
 }
 
 .table th {
@@ -373,15 +377,146 @@
   font-weight: var(--font-semibold);
   color: var(--gray-700);
   border-bottom: 1px solid var(--gray-200);
+  font-size: var(--text-sm);
+  white-space: nowrap;
 }
 
 .table td {
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--gray-200);
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  vertical-align: middle;
 }
 
 .table tbody tr:hover {
   background-color: var(--gray-50);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: var(--gray-25);
+}
+
+.table tbody tr:nth-child(even):hover {
+  background-color: var(--gray-75);
+}
+
+/* テーブル内のアクションボタン */
+.table-action-btn {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  border-radius: 0.25rem;
+  border: 1px solid var(--primary-300);
+  background-color: white;
+  color: var(--primary-600);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.table-action-btn:hover {
+  background-color: var(--primary-50);
+  border-color: var(--primary-400);
+}
+
+/* レスポンシブテーブル */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+  .table-responsive .table {
+    min-width: 600px;
+  }
+  
+  .table th,
+  .table td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+}
+```
+
+#### データテーブル（一覧表示）
+```css
+.data-table {
+  background-color: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--gray-200);
+}
+
+.data-table-header {
+  background-color: var(--gray-50);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.data-table-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--gray-900);
+}
+
+.data-table-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.data-table-body {
+  padding: var(--space-4);
+}
+
+.data-table-filters {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.data-table-filter-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.data-table-filter-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+
+/* 空状態 */
+.data-table-empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--gray-500);
+}
+
+.data-table-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-4);
+  color: var(--gray-300);
+}
+
+.data-table-empty-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--gray-900);
+  margin-bottom: var(--space-2);
+}
+
+.data-table-empty-description {
+  font-size: var(--text-sm);
+  color: var(--gray-500);
 }
 ```
 
