@@ -1,730 +1,686 @@
-# API仕様書：API-011 プロフィール取得API
+# API仕様書: API-011 プロフィール取得API
 
-## 1. 基本情報
+## 基本情報
 
-- **API ID**: API-011
-- **API名称**: プロフィール取得API
-- **概要**: ユーザーのプロフィール情報を取得する
-- **エンドポイント**: `/api/profiles/{user_id}`
-- **HTTPメソッド**: GET
-- **リクエスト形式**: URLパラメータ
-- **レスポンス形式**: JSON
-- **認証要件**: 必須（JWT認証）
-- **利用画面**: [SCR-PROFILE](画面設計書_SCR-PROFILE.md)
-- **作成日**: 2025/05/28
-- **作成者**: API設計担当
-- **改訂履歴**: 2025/05/28 初版作成
+| 項目 | 内容 |
+|------|------|
+| API ID | API-011 |
+| API名称 | プロフィール取得API |
+| エンドポイント | /api/profiles/{user_id} |
+| 概要 | ユーザープロフィール情報取得 |
+| 利用画面 | SCR-PROFILE |
+| 優先度 | 最高 |
+| 実装予定 | Week 1-2 |
 
 ---
 
-## 2. リクエスト仕様
+## エンドポイント詳細
 
-### 2.1 リクエストヘッダ
+### 1. ユーザープロフィール取得
 
-| ヘッダ名 | 必須 | 説明 | 備考 |
-|---------|------|------|------|
-| Authorization | ○ | 認証トークン | Bearer {JWT} 形式 |
-| Accept | - | レスポンス形式 | application/json |
-
-### 2.2 パスパラメータ
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| user_id | string | ○ | ユーザーID | "me"を指定した場合は認証済みユーザー自身のプロフィール情報を取得<br>他ユーザーのプロフィール情報取得には適切な権限が必要 |
-
-### 2.3 クエリパラメータ
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| include_skills | boolean | - | スキル情報を含めるか | true: スキル情報を含める, false: 含めない<br>デフォルト: false |
-| include_history | boolean | - | 履歴情報を含めるか | true: 履歴情報を含める, false: 含めない<br>デフォルト: false |
-
-### 2.4 リクエスト例
-
-```
-GET /api/profiles/U12345?include_skills=true&include_history=false HTTP/1.1
-Host: api.example.com
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-Accept: application/json
+#### リクエスト
+```http
+GET /api/profiles/{user_id}
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
 ```
 
----
+#### パスパラメータ
+| パラメータ名 | 型 | 必須 | 説明 |
+|-------------|---|------|------|
+| user_id | string | ○ | ユーザーID |
 
-## 3. レスポンス仕様
+#### クエリパラメータ
+| パラメータ名 | 型 | 必須 | 説明 | 例 |
+|-------------|---|------|------|---|
+| includeHistory | boolean | × | 更新履歴含有フラグ | true, false |
+| includeSkillSummary | boolean | × | スキルサマリー含有フラグ | true, false |
+| includeGoalSummary | boolean | × | 目標サマリー含有フラグ | true, false |
 
-### 3.1 正常時レスポンス（200 OK）
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| user_id | string | ユーザーID | |
-| username | string | ユーザー名 | |
-| email | string | メールアドレス | |
-| display_name | string | 表示名 | |
-| first_name | string | 名 | |
-| last_name | string | 姓 | |
-| first_name_kana | string | 名（カナ） | |
-| last_name_kana | string | 姓（カナ） | |
-| employee_id | string | 社員番号 | |
-| department | object | 部署情報 | |
-| position | object | 役職情報 | |
-| join_date | string | 入社日 | ISO 8601形式（YYYY-MM-DD） |
-| profile_image | string | プロフィール画像URL | |
-| contact_info | object | 連絡先情報 | |
-| skills | array | スキル情報 | include_skills=trueの場合のみ |
-| history | object | 履歴情報 | include_history=trueの場合のみ |
-| last_updated | string | 最終更新日時 | ISO 8601形式 |
-
-#### department オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| department_id | string | 部署ID | |
-| name | string | 部署名 | |
-| code | string | 部署コード | |
-| parent_id | string | 親部署ID | |
-
-#### position オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| position_id | string | 役職ID | |
-| name | string | 役職名 | |
-| level | number | 役職レベル | |
-| is_manager | boolean | 管理職フラグ | |
-
-#### contact_info オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| phone | string | 電話番号 | |
-| extension | string | 内線番号 | |
-| mobile | string | 携帯電話番号 | |
-| emergency_contact | string | 緊急連絡先 | |
-| address | object | 住所情報 | |
-
-#### address オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| postal_code | string | 郵便番号 | |
-| prefecture | string | 都道府県 | |
-| city | string | 市区町村 | |
-| street_address | string | 番地・建物名 | |
-
-#### skills 配列要素（include_skills=trueの場合のみ）
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| skill_id | string | スキルID | |
-| name | string | スキル名 | |
-| category | string | カテゴリ | |
-| level | number | レベル | 1-5の整数値 |
-| years_of_experience | number | 経験年数 | |
-| last_used_date | string | 最終使用日 | ISO 8601形式（YYYY-MM-DD） |
-
-#### history オブジェクト（include_history=trueの場合のみ）
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| department_history | array | 部署履歴 | |
-| position_history | array | 役職履歴 | |
-| education | array | 学歴 | |
-| certifications | array | 資格 | |
-
-### 3.2 正常時レスポンス例（基本情報のみ）
-
+#### レスポンス（成功時）
 ```json
 {
-  "user_id": "U12345",
-  "username": "tanaka.taro",
-  "email": "tanaka.taro@example.com",
-  "display_name": "田中 太郎",
-  "first_name": "太郎",
-  "last_name": "田中",
-  "first_name_kana": "タロウ",
-  "last_name_kana": "タナカ",
-  "employee_id": "EMP001234",
-  "department": {
-    "department_id": "D100",
-    "name": "情報システム部",
-    "code": "IS",
-    "parent_id": "D001"
-  },
-  "position": {
-    "position_id": "P200",
-    "name": "主任",
-    "level": 3,
-    "is_manager": false
-  },
-  "join_date": "2020-04-01",
-  "profile_image": "https://example.com/profiles/U12345/image.jpg",
-  "contact_info": {
-    "phone": "03-1234-5678",
-    "extension": "1234",
-    "mobile": "090-1234-5678",
-    "emergency_contact": "03-8765-4321",
-    "address": {
-      "postal_code": "100-0001",
-      "prefecture": "東京都",
-      "city": "千代田区",
-      "street_address": "丸の内1-1-1 サンプルビル10F"
-    }
-  },
-  "last_updated": "2025-05-15T10:30:00+09:00"
-}
-```
-
-### 3.3 正常時レスポンス例（スキル情報を含む）
-
-```json
-{
-  "user_id": "U12345",
-  "username": "tanaka.taro",
-  "email": "tanaka.taro@example.com",
-  "display_name": "田中 太郎",
-  "first_name": "太郎",
-  "last_name": "田中",
-  "first_name_kana": "タロウ",
-  "last_name_kana": "タナカ",
-  "employee_id": "EMP001234",
-  "department": {
-    "department_id": "D100",
-    "name": "情報システム部",
-    "code": "IS",
-    "parent_id": "D001"
-  },
-  "position": {
-    "position_id": "P200",
-    "name": "主任",
-    "level": 3,
-    "is_manager": false
-  },
-  "join_date": "2020-04-01",
-  "profile_image": "https://example.com/profiles/U12345/image.jpg",
-  "contact_info": {
-    "phone": "03-1234-5678",
-    "extension": "1234",
-    "mobile": "090-1234-5678",
-    "emergency_contact": "03-8765-4321",
-    "address": {
-      "postal_code": "100-0001",
-      "prefecture": "東京都",
-      "city": "千代田区",
-      "street_address": "丸の内1-1-1 サンプルビル10F"
-    }
-  },
-  "skills": [
-    {
-      "skill_id": "SKILL_JAVA",
-      "name": "Java",
-      "category": "プログラミング言語",
-      "level": 4,
-      "years_of_experience": 5,
-      "last_used_date": "2025-05-01"
+  "success": true,
+  "data": {
+    "profile": {
+      "id": "user_001",
+      "email": "tanaka@company-a.com",
+      "employeeId": "EMP001",
+      "personalInfo": {
+        "lastName": "田中",
+        "firstName": "太郎",
+        "lastNameKana": "タナカ",
+        "firstNameKana": "タロウ",
+        "displayName": "田中太郎",
+        "phoneNumber": "090-1234-5678",
+        "emergencyContact": {
+          "name": "田中花子",
+          "relationship": "配偶者",
+          "phoneNumber": "090-8765-4321"
+        }
+      },
+      "organizationInfo": {
+        "tenantId": "tenant_001",
+        "tenantName": "株式会社A",
+        "departmentId": "dept_001",
+        "departmentName": "開発部",
+        "divisionId": "div_001",
+        "divisionName": "システム開発課",
+        "positionId": "pos_001",
+        "positionName": "シニアエンジニア",
+        "employmentType": "正社員",
+        "hireDate": "2020-04-01",
+        "managerUserId": "user_manager_001",
+        "managerName": "佐藤部長"
+      },
+      "workInfo": {
+        "workLocation": "東京本社",
+        "workStyle": "hybrid",
+        "contractHours": 8.0,
+        "overtimeAllowed": true,
+        "remoteWorkAllowed": true,
+        "flexTimeAllowed": true
+      },
+      "systemInfo": {
+        "status": "active",
+        "role": "user",
+        "permissions": [
+          "profile:read",
+          "profile:write",
+          "skills:read",
+          "skills:write",
+          "goals:read",
+          "goals:write"
+        ],
+        "lastLoginAt": "2025-05-30T20:57:00Z",
+        "createdAt": "2020-04-01T09:00:00Z",
+        "updatedAt": "2025-05-30T15:30:00Z"
+      },
+      "preferences": {
+        "language": "ja",
+        "timezone": "Asia/Tokyo",
+        "dateFormat": "YYYY-MM-DD",
+        "notifications": {
+          "email": true,
+          "inApp": true,
+          "skillExpiry": true,
+          "goalReminder": true
+        },
+        "privacy": {
+          "profileVisibility": "team",
+          "skillVisibility": "department",
+          "goalVisibility": "manager"
+        }
+      }
     },
-    {
-      "skill_id": "SKILL_SPRING",
-      "name": "Spring Framework",
-      "category": "フレームワーク",
-      "level": 3,
-      "years_of_experience": 3,
-      "last_used_date": "2025-05-01"
+    "skillSummary": {
+      "totalSkills": 45,
+      "skillsByCategory": {
+        "technical": 25,
+        "business": 12,
+        "management": 8
+      },
+      "skillsByLevel": {
+        "×": 5,
+        "△": 15,
+        "○": 20,
+        "◎": 5
+      },
+      "topSkills": [
+        {
+          "skillId": "skill_001",
+          "skillName": "JavaScript",
+          "level": "◎",
+          "categoryName": "プログラミング言語"
+        },
+        {
+          "skillId": "skill_003",
+          "skillName": "React",
+          "level": "◎",
+          "categoryName": "フレームワーク"
+        },
+        {
+          "skillId": "skill_004",
+          "skillName": "AWS",
+          "level": "○",
+          "categoryName": "クラウド"
+        }
+      ],
+      "certifications": {
+        "total": 5,
+        "active": 4,
+        "expiringSoon": 1
+      },
+      "lastUpdated": "2025-05-30T20:55:00Z"
     },
-    {
-      "skill_id": "SKILL_SQL",
-      "name": "SQL",
-      "category": "データベース",
-      "level": 4,
-      "years_of_experience": 5,
-      "last_used_date": "2025-05-01"
-    }
-  ],
-  "last_updated": "2025-05-15T10:30:00+09:00"
-}
-```
-
-### 3.4 正常時レスポンス例（履歴情報を含む）
-
-```json
-{
-  "user_id": "U12345",
-  "username": "tanaka.taro",
-  "email": "tanaka.taro@example.com",
-  "display_name": "田中 太郎",
-  "first_name": "太郎",
-  "last_name": "田中",
-  "first_name_kana": "タロウ",
-  "last_name_kana": "タナカ",
-  "employee_id": "EMP001234",
-  "department": {
-    "department_id": "D100",
-    "name": "情報システム部",
-    "code": "IS",
-    "parent_id": "D001"
-  },
-  "position": {
-    "position_id": "P200",
-    "name": "主任",
-    "level": 3,
-    "is_manager": false
-  },
-  "join_date": "2020-04-01",
-  "profile_image": "https://example.com/profiles/U12345/image.jpg",
-  "contact_info": {
-    "phone": "03-1234-5678",
-    "extension": "1234",
-    "mobile": "090-1234-5678",
-    "emergency_contact": "03-8765-4321",
-    "address": {
-      "postal_code": "100-0001",
-      "prefecture": "東京都",
-      "city": "千代田区",
-      "street_address": "丸の内1-1-1 サンプルビル10F"
-    }
-  },
-  "history": {
-    "department_history": [
+    "goalSummary": {
+      "currentGoals": 3,
+      "completedGoals": 8,
+      "overallProgress": 75.5,
+      "goalsByStatus": {
+        "not_started": 0,
+        "in_progress": 2,
+        "completed": 1,
+        "on_hold": 0
+      },
+      "upcomingDeadlines": [
+        {
+          "goalId": "goal_001",
+          "goalTitle": "AWS Professional資格取得",
+          "deadline": "2025-08-31",
+          "progress": 60,
+          "daysRemaining": 93
+        }
+      ],
+      "lastUpdated": "2025-05-25T14:20:00Z"
+    },
+    "updateHistory": [
       {
-        "department_id": "D100",
-        "name": "情報システム部",
-        "start_date": "2022-04-01",
-        "end_date": null
+        "id": "hist_001",
+        "fieldName": "organizationInfo.positionName",
+        "previousValue": "エンジニア",
+        "newValue": "シニアエンジニア",
+        "changeReason": "昇進",
+        "updatedBy": "user_manager_001",
+        "updatedByName": "佐藤部長",
+        "updatedAt": "2025-05-30T15:30:00Z",
+        "approvedBy": "user_hr_001",
+        "approvedByName": "人事部",
+        "approvedAt": "2025-05-30T16:00:00Z"
       },
       {
-        "department_id": "D200",
-        "name": "営業部",
-        "start_date": "2020-04-01",
-        "end_date": "2022-03-31"
-      }
-    ],
-    "position_history": [
-      {
-        "position_id": "P200",
-        "name": "主任",
-        "start_date": "2023-04-01",
-        "end_date": null
-      },
-      {
-        "position_id": "P100",
-        "name": "一般社員",
-        "start_date": "2020-04-01",
-        "end_date": "2023-03-31"
-      }
-    ],
-    "education": [
-      {
-        "school_name": "サンプル大学",
-        "degree": "学士（情報工学）",
-        "field_of_study": "情報工学",
-        "start_date": "2016-04-01",
-        "end_date": "2020-03-31"
-      }
-    ],
-    "certifications": [
-      {
-        "name": "応用情報技術者",
-        "issuer": "IPA",
-        "issue_date": "2021-06-15",
-        "expiration_date": null
-      },
-      {
-        "name": "TOEIC 800点",
-        "issuer": "ETS",
-        "issue_date": "2022-03-20",
-        "expiration_date": null
+        "id": "hist_002",
+        "fieldName": "personalInfo.phoneNumber",
+        "previousValue": "090-1111-2222",
+        "newValue": "090-1234-5678",
+        "changeReason": "個人情報更新",
+        "updatedBy": "user_001",
+        "updatedByName": "田中太郎",
+        "updatedAt": "2025-05-15T10:15:00Z",
+        "approvedBy": null,
+        "approvedByName": null,
+        "approvedAt": null
       }
     ]
-  },
-  "last_updated": "2025-05-15T10:30:00+09:00"
+  }
 }
 ```
 
-### 3.5 エラー時レスポンス
-
-| ステータスコード | エラーコード | エラーメッセージ | 説明 |
-|----------------|------------|----------------|------|
-| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | パラメータ形式不正 |
-| 401 Unauthorized | UNAUTHORIZED | 認証が必要です | 認証トークンなし/無効 |
-| 403 Forbidden | PERMISSION_DENIED | 権限がありません | 他ユーザーのプロフィール閲覧権限なし |
-| 404 Not Found | USER_NOT_FOUND | ユーザーが見つかりません | 指定されたユーザーIDが存在しない |
-| 500 Internal Server Error | SYSTEM_ERROR | システムエラーが発生しました | サーバー内部エラー |
-
-### 3.6 エラー時レスポンス例
-
+#### レスポンス（エラー時）
 ```json
 {
+  "success": false,
   "error": {
-    "code": "PERMISSION_DENIED",
-    "message": "権限がありません",
-    "details": "他のユーザーのプロフィール情報を閲覧する権限がありません。"
+    "code": "USER_NOT_FOUND",
+    "message": "指定されたユーザーが見つかりません",
+    "details": "ユーザーID: user_999"
+  }
+}
+```
+
+### 2. 自分のプロフィール取得
+
+#### リクエスト
+```http
+GET /api/profiles/me
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
+```
+
+#### レスポンス（成功時）
+```json
+{
+  "success": true,
+  "data": {
+    "profile": {
+      "id": "user_001",
+      "email": "tanaka@company-a.com",
+      "employeeId": "EMP001",
+      "personalInfo": {
+        "lastName": "田中",
+        "firstName": "太郎",
+        "lastNameKana": "タナカ",
+        "firstNameKana": "タロウ",
+        "displayName": "田中太郎",
+        "phoneNumber": "090-1234-5678",
+        "emergencyContact": {
+          "name": "田中花子",
+          "relationship": "配偶者",
+          "phoneNumber": "090-8765-4321"
+        }
+      },
+      "organizationInfo": {
+        "tenantId": "tenant_001",
+        "tenantName": "株式会社A",
+        "departmentId": "dept_001",
+        "departmentName": "開発部",
+        "divisionId": "div_001",
+        "divisionName": "システム開発課",
+        "positionId": "pos_001",
+        "positionName": "シニアエンジニア",
+        "employmentType": "正社員",
+        "hireDate": "2020-04-01",
+        "managerUserId": "user_manager_001",
+        "managerName": "佐藤部長"
+      },
+      "workInfo": {
+        "workLocation": "東京本社",
+        "workStyle": "hybrid",
+        "contractHours": 8.0,
+        "overtimeAllowed": true,
+        "remoteWorkAllowed": true,
+        "flexTimeAllowed": true
+      },
+      "systemInfo": {
+        "status": "active",
+        "role": "user",
+        "permissions": [
+          "profile:read",
+          "profile:write",
+          "skills:read",
+          "skills:write",
+          "goals:read",
+          "goals:write"
+        ],
+        "lastLoginAt": "2025-05-30T20:57:00Z",
+        "createdAt": "2020-04-01T09:00:00Z",
+        "updatedAt": "2025-05-30T15:30:00Z"
+      },
+      "preferences": {
+        "language": "ja",
+        "timezone": "Asia/Tokyo",
+        "dateFormat": "YYYY-MM-DD",
+        "notifications": {
+          "email": true,
+          "inApp": true,
+          "skillExpiry": true,
+          "goalReminder": true
+        },
+        "privacy": {
+          "profileVisibility": "team",
+          "skillVisibility": "department",
+          "goalVisibility": "manager"
+        }
+      }
+    }
+  }
+}
+```
+
+### 3. プロフィール検索
+
+#### リクエスト
+```http
+GET /api/profiles/search
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
+```
+
+#### クエリパラメータ
+| パラメータ名 | 型 | 必須 | 説明 | 例 |
+|-------------|---|------|------|---|
+| q | string | × | 検索キーワード | 田中 |
+| department | string | × | 部署フィルタ | 開発部 |
+| position | string | × | 役職フィルタ | エンジニア |
+| skill | string | × | スキルフィルタ | JavaScript |
+| page | number | × | ページ番号（デフォルト: 1） | 1 |
+| limit | number | × | 取得件数（デフォルト: 20） | 20 |
+
+#### レスポンス（成功時）
+```json
+{
+  "success": true,
+  "data": {
+    "profiles": [
+      {
+        "id": "user_001",
+        "displayName": "田中太郎",
+        "email": "tanaka@company-a.com",
+        "departmentName": "開発部",
+        "positionName": "シニアエンジニア",
+        "topSkills": [
+          "JavaScript",
+          "React",
+          "AWS"
+        ],
+        "skillCount": 45,
+        "lastLoginAt": "2025-05-30T20:57:00Z"
+      },
+      {
+        "id": "user_002",
+        "displayName": "佐藤花子",
+        "email": "sato@company-a.com",
+        "departmentName": "開発部",
+        "positionName": "エンジニア",
+        "topSkills": [
+          "Python",
+          "Django",
+          "PostgreSQL"
+        ],
+        "skillCount": 32,
+        "lastLoginAt": "2025-05-30T18:30:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 45,
+      "totalPages": 3
+    },
+    "filters": {
+      "departments": [
+        { "id": "dept_001", "name": "開発部", "count": 25 },
+        { "id": "dept_002", "name": "営業部", "count": 15 },
+        { "id": "dept_003", "name": "人事部", "count": 5 }
+      ],
+      "positions": [
+        { "id": "pos_001", "name": "エンジニア", "count": 20 },
+        { "id": "pos_002", "name": "シニアエンジニア", "count": 8 },
+        { "id": "pos_003", "name": "マネージャー", "count": 5 }
+      ]
+    }
   }
 }
 ```
 
 ---
 
-## 4. 処理仕様
+## エラーコード一覧
 
-### 4.1 処理フロー
-
-1. リクエストの認証・認可チェック
-   - JWTトークンの検証
-   - 他ユーザーのプロフィール情報取得の場合は権限チェック（PERM_VIEW_PROFILES）
-2. リクエストパラメータの検証
-   - user_idの形式チェック
-   - クエリパラメータの型チェック
-3. 対象ユーザーの存在確認
-   - 指定されたuser_idのユーザーが存在するか確認
-   - "me"の場合は認証済みユーザーのIDに置換
-   - 存在しない場合は404エラー
-4. プロフィール情報の取得
-   - ユーザーの基本情報取得
-   - 部署・役職情報の取得
-   - 連絡先情報の取得
-   - include_skills=trueの場合はスキル情報も取得
-   - include_history=trueの場合は履歴情報も取得
-5. レスポンスの生成
-   - 取得した情報を整形
-6. レスポンス返却
-
-### 4.2 プロフィール情報取得ルール
-
-- 自分自身のプロフィールは常に閲覧可能
-- 他ユーザーのプロフィール閲覧には権限（PERM_VIEW_PROFILES）が必要
-- 管理者は全ユーザーのプロフィールを閲覧可能
-- 部門管理者は自部門のユーザーのプロフィールを閲覧可能
-- スキル情報・履歴情報は明示的に要求された場合のみ含める
-- 個人情報（住所、緊急連絡先など）は権限に応じて制限される場合あり
-
-### 4.3 パフォーマンス要件
-
-- レスポンスタイム：平均200ms以内
-- キャッシュ：プロフィール情報は30分間キャッシュ
-- 同時リクエスト：最大50リクエスト/秒
+| エラーコード | HTTPステータス | 説明 | 対処法 |
+|-------------|---------------|------|--------|
+| UNAUTHORIZED | 401 | 認証エラー | 有効なJWTトークンを設定 |
+| FORBIDDEN | 403 | アクセス権限なし | 自分のプロフィールまたは管理権限が必要 |
+| USER_NOT_FOUND | 404 | ユーザーが見つからない | 正しいユーザーIDを指定 |
+| TENANT_MISMATCH | 403 | テナント不一致 | 同一テナント内のユーザーのみアクセス可能 |
+| PROFILE_NOT_FOUND | 404 | プロフィールが見つからない | プロフィール情報が未登録 |
+| INVALID_PARAMETER | 400 | パラメータエラー | クエリパラメータを確認 |
+| PRIVACY_RESTRICTION | 403 | プライバシー制限 | ユーザーのプライバシー設定により閲覧不可 |
+| INTERNAL_SERVER_ERROR | 500 | サーバー内部エラー | システム管理者に連絡 |
 
 ---
 
-## 5. 関連情報
+## セキュリティ要件
 
-### 5.1 関連API
+### 認証・認可
+- **認証**: JWT Bearer Token必須
+- **権限**: 自分のプロフィールまたは管理者権限
+- **テナント分離**: テナント内ユーザーのみアクセス可能
 
-| API ID | API名称 | 関連内容 |
-|--------|--------|----------|
-| [API-012](API仕様書_API-012.md) | プロフィール更新API | ユーザープロフィール情報更新 |
-| [API-013](API仕様書_API-013.md) | 組織情報取得API | 組織情報一覧取得 |
-| [API-021](API仕様書_API-021.md) | スキル情報取得API | ユーザースキル情報取得 |
-
-### 5.2 使用テーブル
-
-| テーブル名 | 用途 | 主な操作 |
-|-----------|------|----------|
-| users | ユーザー基本情報 | 参照（R） |
-| user_profiles | ユーザープロフィール情報 | 参照（R） |
-| departments | 部署情報 | 参照（R） |
-| positions | 役職情報 | 参照（R） |
-| user_skills | ユーザースキル情報 | 参照（R） |
-| department_history | 部署履歴 | 参照（R） |
-| position_history | 役職履歴 | 参照（R） |
-| education_history | 学歴情報 | 参照（R） |
-| certification_history | 資格情報 | 参照（R） |
-
-### 5.3 注意事項・補足
-
-- プロフィール画像URLは有効期限付きの署名付きURLで提供
-- 個人情報は適切なアクセス制御のもとで提供
-- 部署・役職情報は最新の組織情報に基づいて提供
-- スキル情報は概要のみ提供し、詳細はスキル情報取得APIで取得
-- 履歴情報は直近5年分のみ提供
+### プライバシー保護
+- **可視性制御**: ユーザーのプライバシー設定に基づく情報制限
+- **個人情報保護**: 機密情報は権限に応じて表示制御
+- **アクセスログ**: 全アクセスを監査ログに記録
 
 ---
 
-## 6. サンプルコード
+## パフォーマンス要件
 
-### 6.1 フロントエンド実装例（React/TypeScript）
+| 項目 | 要件 |
+|------|------|
+| レスポンス時間 | 95%のリクエストが500ms以内 |
+| スループット | 300 req/sec |
+| データサイズ | 1プロフィールあたり最大1MB |
+| キャッシュ | Redis使用、TTL 600秒 |
 
+---
+
+## テスト仕様
+
+### 単体テスト
 ```typescript
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+describe('Profile API', () => {
+  test('GET /api/profiles/{user_id} - 正常取得', async () => {
+    const response = await request(app)
+      .get('/api/profiles/user_001')
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(200);
+    
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.profile.id).toBe('user_001');
+    expect(response.body.data.profile.personalInfo).toBeDefined();
+    expect(response.body.data.profile.organizationInfo).toBeDefined();
+  });
+  
+  test('GET /api/profiles/me - 自分のプロフィール取得', async () => {
+    const response = await request(app)
+      .get('/api/profiles/me')
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(200);
+    
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.profile.email).toBe('tanaka@company-a.com');
+  });
+  
+  test('GET /api/profiles/search - プロフィール検索', async () => {
+    const response = await request(app)
+      .get('/api/profiles/search?q=田中&department=開発部')
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(200);
+    
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.profiles).toBeInstanceOf(Array);
+    expect(response.body.data.pagination).toBeDefined();
+  });
+  
+  test('GET /api/profiles/{user_id} - 権限チェック', async () => {
+    const response = await request(app)
+      .get('/api/profiles/other_user_001')
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(403);
+    
+    expect(response.body.success).toBe(false);
+    expect(response.body.error.code).toBe('FORBIDDEN');
+  });
+});
+```
 
-interface Department {
-  department_id: string;
-  name: string;
-  code: string;
-  parent_id: string;
-}
+### 統合テスト
+```typescript
+describe('Profile Integration', () => {
+  test('プロフィール情報の完全性確認', async () => {
+    // 1. プロフィール取得
+    const profileResponse = await getProfile('user_001');
+    
+    // 2. スキルサマリー確認
+    expect(profileResponse.data.skillSummary).toBeDefined();
+    expect(profileResponse.data.skillSummary.totalSkills).toBeGreaterThan(0);
+    
+    // 3. 目標サマリー確認
+    expect(profileResponse.data.goalSummary).toBeDefined();
+    expect(profileResponse.data.goalSummary.currentGoals).toBeGreaterThanOrEqual(0);
+  });
+  
+  test('プライバシー設定確認', async () => {
+    // 1. プライバシー設定を制限に変更
+    await updatePrivacySettings('user_001', { profileVisibility: 'private' });
+    
+    // 2. 他のユーザーからアクセス
+    const response = await request(app)
+      .get('/api/profiles/user_001')
+      .set('Authorization', `Bearer ${otherUserToken}`)
+      .expect(403);
+    
+    expect(response.body.error.code).toBe('PRIVACY_RESTRICTION');
+  });
+  
+  test('テナント分離確認', async () => {
+    const tenantAToken = await loginAsUser('company-a');
+    const tenantBToken = await loginAsUser('company-b');
+    
+    // テナントAのユーザーでテナントBのプロフィールにアクセス
+    const response = await request(app)
+      .get('/api/profiles/tenant-b-user')
+      .set('Authorization', `Bearer ${tenantAToken}`)
+      .expect(403);
+    
+    expect(response.body.error.code).toBe('TENANT_MISMATCH');
+  });
+});
+```
 
-interface Position {
-  position_id: string;
-  name: string;
-  level: number;
-  is_manager: boolean;
-}
+---
 
-interface Address {
-  postal_code: string;
-  prefecture: string;
-  city: string;
-  street_address: string;
-}
+## 実装メモ
 
-interface ContactInfo {
-  phone: string;
-  extension: string;
-  mobile: string;
-  emergency_contact: string;
-  address: Address;
-}
+### データベーススキーマ
+```sql
+CREATE TABLE user_profiles (
+  id VARCHAR(50) PRIMARY KEY,
+  user_id VARCHAR(50) NOT NULL,
+  employee_id VARCHAR(50) UNIQUE NOT NULL,
+  personal_info JSONB NOT NULL,
+  organization_info JSONB NOT NULL,
+  work_info JSONB,
+  preferences JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  UNIQUE(user_id)
+);
 
-interface Skill {
-  skill_id: string;
-  name: string;
-  category: string;
-  level: number;
-  years_of_experience: number;
-  last_used_date: string;
-}
+CREATE TABLE profile_update_history (
+  id VARCHAR(50) PRIMARY KEY,
+  user_id VARCHAR(50) NOT NULL,
+  field_name VARCHAR(100) NOT NULL,
+  previous_value TEXT,
+  new_value TEXT,
+  change_reason TEXT,
+  updated_by VARCHAR(50) NOT NULL,
+  approved_by VARCHAR(50),
+  approved_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (updated_by) REFERENCES users(id),
+  FOREIGN KEY (approved_by) REFERENCES users(id)
+);
 
-interface History {
-  department_history: Array<{
-    department_id: string;
-    name: string;
-    start_date: string;
-    end_date: string | null;
-  }>;
-  position_history: Array<{
-    position_id: string;
-    name: string;
-    start_date: string;
-    end_date: string | null;
-  }>;
-  education: Array<{
-    school_name: string;
-    degree: string;
-    field_of_study: string;
-    start_date: string;
-    end_date: string;
-  }>;
-  certifications: Array<{
-    name: string;
-    issuer: string;
-    issue_date: string;
-    expiration_date: string | null;
-  }>;
-}
+CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
+CREATE INDEX idx_user_profiles_employee_id ON user_profiles(employee_id);
+CREATE INDEX idx_profile_update_history_user_id ON profile_update_history(user_id);
+CREATE INDEX idx_profile_update_history_updated_by ON profile_update_history(updated_by);
+```
 
-interface UserProfile {
-  user_id: string;
-  username: string;
-  email: string;
-  display_name: string;
-  first_name: string;
-  last_name: string;
-  first_name_kana: string;
-  last_name_kana: string;
-  employee_id: string;
-  department: Department;
-  position: Position;
-  join_date: string;
-  profile_image: string;
-  contact_info: ContactInfo;
-  skills?: Skill[];
-  history?: History;
-  last_updated: string;
-}
+### Next.js実装例
+```typescript
+// pages/api/profiles/[user_id].ts
+import { NextApiRequest, NextApiResponse } from 'next';
+import { authenticateToken, checkProfileAccess } from '@/lib/auth';
+import { ProfileService } from '@/services/ProfileService';
 
-const UserProfileComponent: React.FC<{ userId: string }> = ({ userId }) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [includeSkills, setIncludeSkills] = useState<boolean>(false);
-  const [includeHistory, setIncludeHistory] = useState<boolean>(false);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [userId, includeSkills, includeHistory]);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // APIリクエストURLの構築
-      let url = `/api/profiles/${userId}`;
-      const params = new URLSearchParams();
-      
-      if (includeSkills) {
-        params.append('include_skills', 'true');
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
+  }
+  
+  try {
+    const { user_id } = req.query;
+    const { includeHistory, includeSkillSummary, includeGoalSummary } = req.query;
+    
+    // 認証・認可チェック
+    const currentUser = await authenticateToken(req);
+    await checkProfileAccess(currentUser, user_id as string);
+    
+    const profileService = new ProfileService();
+    
+    // プロフィール情報取得
+    const profileData = await profileService.getProfile(user_id as string, {
+      includeHistory: includeHistory === 'true',
+      includeSkillSummary: includeSkillSummary === 'true',
+      includeGoalSummary: includeGoalSummary === 'true',
+      requesterId: currentUser.id
+    });
+    
+    return res.status(200).json({
+      success: true,
+      data: profileData
+    });
+    
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      error: {
+        code: error.code || 'INTERNAL_SERVER_ERROR',
+        message: error.message
       }
-      
-      if (includeHistory) {
-        params.append('include_history', 'true');
-      }
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
-      
-      // APIリクエスト
-      const response = await axios.get<UserProfile>(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Accept': 'application/json'
-        }
-      });
-      
-      // データの設定
-      setProfile(response.data);
-      
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        const errorData = err.response.data;
-        setError(errorData.error?.message || 'プロフィール情報の取得に失敗しました');
-      } else {
-        setError('プロフィール情報の取得中にエラーが発生しました');
-      }
-    } finally {
-      setLoading(false);
+    });
+  }
+}
+```
+
+### プロフィールサービス実装例
+```typescript
+// services/ProfileService.ts
+export class ProfileService {
+  async getProfile(userId: string, options: ProfileQueryOptions) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundError('USER_NOT_FOUND', 'ユーザーが見つかりません');
     }
-  };
-
-  const toggleSkills = () => {
-    setIncludeSkills(!includeSkills);
-  };
-
-  const toggleHistory = () => {
-    setIncludeHistory(!includeHistory);
-  };
-
-  if (loading) {
-    return <div className="loading">プロフィール情報を読み込み中...</div>;
+    
+    // プロフィール情報取得
+    const profile = await this.profileRepository.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundError('PROFILE_NOT_FOUND', 'プロフィールが見つかりません');
+    }
+    
+    // プライバシー設定チェック
+    const filteredProfile = await this.applyPrivacyFilter(profile, options.requesterId);
+    
+    // 追加情報取得
+    let skillSummary = null;
+    let goalSummary = null;
+    let updateHistory = null;
+    
+    if (options.includeSkillSummary) {
+      skillSummary = await this.skillService.getSkillSummary(userId);
+    }
+    
+    if (options.includeGoalSummary) {
+      goalSummary = await this.goalService.getGoalSummary(userId);
+    }
+    
+    if (options.includeHistory) {
+      updateHistory = await this.profileHistoryRepository.findByUserId(userId);
+    }
+    
+    return {
+      profile: filteredProfile,
+      skillSummary,
+      goalSummary,
+      updateHistory
+    };
   }
-
-  if (error) {
-    return <div className="error">{error}</div>;
+  
+  private async applyPrivacyFilter(profile: any, requesterId: string) {
+    const privacySettings = profile.preferences?.privacy;
+    
+    if (!privacySettings) {
+      return profile;
+    }
+    
+    // プライバシー設定に基づく情報フィルタリング
+    const filteredProfile = { ...profile };
+    
+    if (privacySettings.profileVisibility === 'private' && profile.id !== requesterId) {
+      // プライベート設定の場合、基本情報のみ表示
+      filteredProfile.personalInfo = {
+        displayName: profile.personalInfo.displayName
+      };
+      delete filteredProfile.workInfo;
+      delete filteredProfile.preferences;
+    }
+    
+    return filteredProfile;
   }
+}
+```
 
-  if (!profile) {
-    return <div className="no-data">プロフィール情報がありません</div>;
-  }
+---
 
-  return (
-    <div className="user-profile">
-      <div className="profile-header">
-        <div className="profile-image">
-          <img src={profile.profile_image} alt={profile.display_name} />
-        </div>
-        <div className="profile-info">
-          <h2>{profile.display_name}</h2>
-          <p className="employee-id">社員番号: {profile.employee_id}</p>
-          <p className="department-position">{profile.department.name} / {profile.position.name}</p>
-        </div>
-      </div>
-      
-      <div className="profile-actions">
-        <button onClick={toggleSkills}>
-          {includeSkills ? 'スキル情報を隠す' : 'スキル情報を表示'}
-        </button>
-        <button onClick={toggleHistory}>
-          {includeHistory ? '履歴情報を隠す' : '履歴情報を表示'}
-        </button>
-      </div>
-      
-      <div className="profile-section">
-        <h3>基本情報</h3>
-        <table className="profile-table">
-          <tbody>
-            <tr>
-              <th>氏名</th>
-              <td>{profile.last_name} {profile.first_name}</td>
-            </tr>
-            <tr>
-              <th>氏名（カナ）</th>
-              <td>{profile.last_name_kana} {profile.first_name_kana}</td>
-            </tr>
-            <tr>
-              <th>メールアドレス</th>
-              <td>{profile.email}</td>
-            </tr>
-            <tr>
-              <th>入社日</th>
-              <td>{new Date(profile.join_date).toLocaleDateString()}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div className="profile-section">
-        <h3>連絡先情報</h3>
-        <table className="profile-table">
-          <tbody>
-            <tr>
-              <th>電話番号</th>
-              <td>{profile.contact_info.phone}</td>
-            </tr>
-            <tr>
-              <th>内線番号</th>
-              <td>{profile.contact_info.extension}</td>
-            </tr>
-            <tr>
-              <th>携帯電話</th>
-              <td>{profile.contact_info.mobile}</td>
-            </tr>
-            <tr>
-              <th>住所</th>
-              <td>
-                〒{profile.contact_info.address.postal_code}<br />
-                {profile.contact_info.address.prefecture}
-                {profile.contact_info.address.city}
-                {profile.contact_info.address.street_address}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      {includeSkills && profile.skills && (
-        <div className="profile-section">
-          <h3>スキル情報</h3>
-          <table className="skills-table">
-            <thead>
-              <tr>
-                <th>スキル名</th>
-                <th>カテゴリ</th>
-                <th>レベル</th>
-                <th>経験年数</th>
-                <th>最終使用日</th>
-              </tr>
-            </thead>
-            <tbody>
-              {profile.skills.map(skill => (
-                <tr key={skill.skill_id}>
-                  <td>{skill.name}</td>
-                  <td>{skill.category}</td>
-                  <td>{skill.level}</td>
-                  <td>{skill.years_of_experience}年</td>
-                  <td>{new Date(skill.last_used_date).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      
-      {includeHistory && profile.history && (
-        <div className="profile-section">
-          <h3>履歴情報</h3>
-          
-          <h4>部署履歴</h4>
-          <table className="history-table">
-            <thead>
-              <tr>
-                <th>部署名</th>
-                <th>開始日</th>
-                <th>終了日</th>
-              </tr>
-            </thead>
-            <tbody>
-              {profile.history.department_history.map((dept, index) => (
-                <tr key={index}>
-                  <td>{dept.name}</td>
-                  <td>{new Date(dept.start_date).toLocaleDateString()}</td>
+## 変更履歴
+
+| 日付 | バージョン | 変更内容 | 変更者 |
+|------|-----------|----------|--------|
+| 2025-05-30 | 1.0.0 | 初版作成 | システムアーキテクト |
