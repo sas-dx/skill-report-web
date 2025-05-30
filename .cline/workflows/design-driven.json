@@ -709,10 +709,10 @@
       "priority": "high",
       "actions": [
         {
-          "name": "generate_batch_spec_templates",
-          "description": "新規バッチの仕様書テンプレート生成",
+          "name": "generate_batch_definition_templates",
+          "description": "新規バッチの定義書テンプレート生成",
           "conditions": ["new_batch_detected"],
-          "template_path": "templates/batch_spec_template.md"
+          "template_path": "templates/batch_definition_template.md"
         },
         {
           "name": "sync_batch_basic_info",
@@ -795,8 +795,8 @@
       "path": "templates/api_spec_template.md",
       "variables": ["api_id", "api_name", "method", "endpoint", "priority", "description", "related_screens", "related_tables"]
     },
-    "batch_spec_template": {
-      "path": "templates/batch_spec_template.md",
+    "batch_definition_template": {
+      "path": "templates/batch_definition_template.md",
       "variables": ["batch_id", "batch_name", "schedule", "priority", "description", "related_tables", "related_apis"]
     }
   },

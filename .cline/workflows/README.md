@@ -14,7 +14,7 @@
 │   ├── interface_spec_template.md
 │   ├── table_spec_template.md
 │   ├── api_spec_template.md
-│   └── batch_spec_template.md
+│   └── batch_definition_template.md
 ├── logs/                       # 実行ログ（自動生成）
 └── README.md                   # このファイル
 ```
@@ -146,7 +146,7 @@ cline workflow run design-driven --trigger screen_list_update
 - `interface_spec_template.md`: インターフェース仕様書テンプレート
 - `table_spec_template.md`: テーブル定義書テンプレート
 - `api_spec_template.md`: API定義書テンプレート
-- `batch_spec_template.md`: バッチ仕様書テンプレート
+- `batch_definition_template.md`: バッチ定義書テンプレート
 
 ### テンプレート変数
 各テンプレートで使用可能な変数：

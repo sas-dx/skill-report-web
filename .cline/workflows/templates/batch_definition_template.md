@@ -1,4 +1,4 @@
-# バッチ仕様書：{{batch_name}} ({{batch_id}})
+# バッチ定義書：{{batch_name}} ({{batch_id}})
 
 ## 1. 基本情報
 
