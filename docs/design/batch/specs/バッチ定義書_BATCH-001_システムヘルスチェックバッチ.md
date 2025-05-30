@@ -1,363 +1,244 @@
-# バッチ定義書：システムヘルスチェックバッチ
+# バッチ定義書：システムヘルスチェックバッチ (BATCH-001)
 
-| 項目                | 内容                                                                                |
-|---------------------|------------------------------------------------------------------------------------|
-| **バッチID**        | BATCH-001                                                                          |
-| **バッチ名称**      | システムヘルスチェックバッチ                                                        |
-| **機能カテゴリ**    | 基盤・システム管理                                                                  |
-| **概要・目的**      | システム全体の稼働状況を定期的に監視し、異常を早期発見・通知する                    |
-| **バッチ種別**      | 定期バッチ                                                                          |
-| **実行スケジュール**| 毎時00分                                                                            |
-| **入出力対象**      | システム監視テーブル、ヘルスチェック結果テーブル                                    |
-| **優先度**          | 最高                                                                                |
-| **備考**            | マルチテナント対応、システム全体の健全性監視                                        |
+## 1. 基本情報
 
-## 1. 処理概要
+| 項目 | 内容 |
+|------|------|
+| **バッチID** | BATCH-001 |
+| **バッチ名** | システムヘルスチェックバッチ |
+| **実行スケジュール** | 時間毎（毎時00分） |
+| **優先度** | 高 |
+| **ステータス** | 実装済み |
+| **作成日** | 2025/05/31 |
+| **最終更新日** | 2025/05/31 |
 
-システムヘルスチェックバッチは、マルチテナント環境において各システムコンポーネントの稼働状況を定期的に監視し、異常を早期発見するバッチ処理です。データベース、API、外部サービス、リソース使用状況などを包括的にチェックし、問題があれば即座に管理者に通知します。
+## 2. バッチ概要
 
-## 2. 処理フロー
+### 2.1 概要・目的
+システム全体の稼働状況を定期的に監視し、異常を早期発見することで、システムの安定稼働を確保する。
 
+### 2.2 関連テーブル
+- TBL-030_システム監視ログ
+- TBL-031_アラート履歴
+- TBL-032_システム状態
+
+### 2.3 関連API
+- API-301_システム状態取得API
+- API-302_アラート送信API
+
+## 3. 実行仕様
+
+### 3.1 実行スケジュール
+| 項目 | 設定値 | 備考 |
+|------|--------|------|
+| 実行頻度 | 0 * * * * | cron形式（毎時00分） |
+| 実行時間 | 毎時00分 | 24時間監視 |
+| タイムアウト | 10分 | 最大実行時間 |
+| リトライ回数 | 3回 | 失敗時の再実行 |
+
+### 3.2 実行条件
+| 条件 | 内容 | 備考 |
+|------|------|------|
+| 前提条件 | システム稼働中 | 基本的な稼働状態 |
+| 実行可能時間 | 24時間 | 常時監視 |
+| 排他制御 | 同一バッチの重複実行禁止 | ロックファイル使用 |
+
+### 3.3 実行パラメータ
+| パラメータ名 | データ型 | 必須 | デフォルト値 | 説明 |
+|--------------|----------|------|--------------|------|
+| check_level | string | × | standard | チェックレベル（basic/standard/detailed） |
+| alert_threshold | number | × | 80 | アラート閾値（%） |
+| notification_enabled | boolean | × | true | 通知送信フラグ |
+
+## 4. 処理仕様
+
+### 4.1 処理フロー
 ```mermaid
 flowchart TD
-    A[開始] --> B[システムコンポーネント一覧取得]
-    B --> C{コンポーネントあり?}
-    C -->|Yes| D[データベース接続チェック]
-    C -->|No| Z[終了]
-    D --> E[API エンドポイントチェック]
-    E --> F[外部サービス接続チェック]
-    F --> G[リソース使用状況チェック]
-    G --> H[レスポンス時間測定]
-    H --> I[チェック結果記録]
-    I --> J{異常検知?}
-    J -->|Yes| K[即座にアラート送信]
-    J -->|No| L[正常ログ記録]
-    K --> M[次のコンポーネントへ]
-    L --> M
-    M --> C
-```
-
-## 3. 入力データ
-
-### 3.1 監視対象コンポーネント
-
-| コンポーネント種別  | 監視項目                                               |
-|---------------------|-------------------------------------------------------|
-| データベース        | 接続可能性、レスポンス時間、接続プール状況             |
-| API エンドポイント  | HTTP ステータス、レスポンス時間、エラー率              |
-| 外部サービス        | 認証API、通知サービス、ファイルストレージ              |
-| システムリソース    | CPU使用率、メモリ使用率、ディスク容量                  |
-| ネットワーク        | 接続性、帯域幅、レイテンシ                             |
-
-### 3.2 チェック設定
-
-| 設定項目                | データ型 | デフォルト値 | 説明                                 |
-|-------------------------|----------|--------------|--------------------------------------|
-| database_timeout        | Integer  | 5000         | データベース接続タイムアウト（ms）   |
-| api_timeout             | Integer  | 3000         | API レスポンスタイムアウト（ms）     |
-| cpu_threshold           | Float    | 80.0         | CPU使用率アラート閾値（%）           |
-| memory_threshold        | Float    | 85.0         | メモリ使用率アラート閾値（%）        |
-| disk_threshold          | Float    | 90.0         | ディスク使用率アラート閾値（%）      |
-| response_time_threshold | Integer  | 2000         | レスポンス時間アラート閾値（ms）     |
-
-## 4. 出力データ
-
-### 4.1 ヘルスチェック結果テーブル（新規作成）
-
-| フィールド名      | データ型 | 説明                                           |
-|-------------------|----------|------------------------------------------------|
-| check_id          | String   | チェック実行ID（主キー）                       |
-| component_type    | String   | コンポーネント種別                             |
-| component_name    | String   | コンポーネント名                               |
-| status            | String   | ステータス（HEALTHY/WARNING/CRITICAL/DOWN）    |
-| response_time     | Integer  | レスポンス時間（ms）                           |
-| error_message     | String   | エラーメッセージ                               |
-| cpu_usage         | Float    | CPU使用率（%）                                 |
-| memory_usage      | Float    | メモリ使用率（%）                              |
-| disk_usage        | Float    | ディスク使用率（%）                            |
-| checked_at        | DateTime | チェック実行日時                               |
-
-### 4.2 システム監視履歴テーブル（新規作成）
-
-| フィールド名      | データ型 | 説明                                           |
-|-------------------|----------|------------------------------------------------|
-| execution_id      | String   | 実行ID（主キー）                               |
-| execution_start   | DateTime | 実行開始日時                                   |
-| execution_end     | DateTime | 実行終了日時                                   |
-| total_components  | Integer  | チェック対象コンポーネント数                   |
-| healthy_count     | Integer  | 正常コンポーネント数                           |
-| warning_count     | Integer  | 警告コンポーネント数                           |
-| critical_count    | Integer  | 重要警告コンポーネント数                       |
-| down_count        | Integer  | 停止コンポーネント数                           |
-| overall_status    | String   | 全体ステータス（HEALTHY/DEGRADED/DOWN）        |
-
-### 4.3 アラート通知
-
-重要度がWARNING以上の異常が検出された場合、以下の内容で即座に通知：
-
-- 件名：「システムヘルスチェック：異常を検知」
-- 本文：コンポーネント情報、異常内容、影響範囲、推奨対応
-
-## 5. チェック仕様
-
-### 5.1 データベース接続チェック
-
-```typescript
-async checkDatabaseHealth(): Promise<HealthCheckResult> {
-  const startTime = Date.now();
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    const responseTime = Date.now() - startTime;
+    A[バッチ開始] --> B[パラメータ検証]
+    B --> C[システム状態取得]
+    C --> D[CPU使用率チェック]
+    D --> E[メモリ使用率チェック]
+    E --> F[ディスク使用率チェック]
+    F --> G[データベース接続チェック]
+    G --> H[外部API接続チェック]
+    H --> I[レスポンス時間チェック]
+    I --> J[結果判定]
+    J --> K{異常検知?}
+    K -->|Yes| L[アラート生成]
+    K -->|No| M[正常ログ出力]
+    L --> N[通知送信]
+    N --> O[監視ログ記録]
+    M --> O
+    O --> P[バッチ終了]
     
-    return {
-      componentType: 'database',
-      componentName: 'PostgreSQL',
-      status: responseTime < 1000 ? 'HEALTHY' : 'WARNING',
-      responseTime,
-      errorMessage: null
-    };
-  } catch (error) {
-    return {
-      componentType: 'database',
-      componentName: 'PostgreSQL',
-      status: 'CRITICAL',
-      responseTime: Date.now() - startTime,
-      errorMessage: error.message
-    };
-  }
-}
+    C --> Q[エラー処理]
+    D --> Q
+    E --> Q
+    F --> Q
+    G --> Q
+    H --> Q
+    I --> Q
+    Q --> R[エラーログ出力]
+    R --> S[緊急アラート送信]
+    S --> T[異常終了]
 ```
 
-### 5.2 API エンドポイントチェック
+### 4.2 詳細処理
+1. **初期化処理**
+   - パラメータ検証
+   - ログファイル初期化
+   - 排他制御ロック取得
 
-```typescript
-async checkApiEndpoints(): Promise<HealthCheckResult[]> {
-  const endpoints = [
-    '/api/health',
-    '/api/auth/status',
-    '/api/tenants',
-    '/api/users/me'
-  ];
-  
-  const results = await Promise.all(
-    endpoints.map(async (endpoint) => {
-      const startTime = Date.now();
-      try {
-        const response = await fetch(`${process.env.BASE_URL}${endpoint}`, {
-          timeout: 3000
-        });
-        const responseTime = Date.now() - startTime;
-        
-        return {
-          componentType: 'api',
-          componentName: endpoint,
-          status: response.ok ? 'HEALTHY' : 'WARNING',
-          responseTime,
-          errorMessage: response.ok ? null : `HTTP ${response.status}`
-        };
-      } catch (error) {
-        return {
-          componentType: 'api',
-          componentName: endpoint,
-          status: 'CRITICAL',
-          responseTime: Date.now() - startTime,
-          errorMessage: error.message
-        };
-      }
-    })
-  );
-  
-  return results;
-}
-```
+2. **システム状態チェック**
+   - CPU使用率監視（閾値：80%）
+   - メモリ使用率監視（閾値：85%）
+   - ディスク使用率監視（閾値：90%）
+   - プロセス稼働状況確認
 
-### 5.3 システムリソースチェック
+3. **データベースチェック**
+   - 接続可能性確認
+   - レスポンス時間測定
+   - アクティブ接続数確認
 
-```typescript
-async checkSystemResources(): Promise<HealthCheckResult[]> {
-  const os = require('os');
-  const fs = require('fs').promises;
-  
-  // CPU使用率
-  const cpuUsage = await this.getCpuUsage();
-  
-  // メモリ使用率
-  const totalMemory = os.totalmem();
-  const freeMemory = os.freemem();
-  const memoryUsage = ((totalMemory - freeMemory) / totalMemory) * 100;
-  
-  // ディスク使用率
-  const diskUsage = await this.getDiskUsage();
-  
-  return [
-    {
-      componentType: 'resource',
-      componentName: 'CPU',
-      status: cpuUsage < 80 ? 'HEALTHY' : cpuUsage < 90 ? 'WARNING' : 'CRITICAL',
-      cpuUsage,
-      errorMessage: null
-    },
-    {
-      componentType: 'resource',
-      componentName: 'Memory',
-      status: memoryUsage < 85 ? 'HEALTHY' : memoryUsage < 95 ? 'WARNING' : 'CRITICAL',
-      memoryUsage,
-      errorMessage: null
-    },
-    {
-      componentType: 'resource',
-      componentName: 'Disk',
-      status: diskUsage < 90 ? 'HEALTHY' : diskUsage < 95 ? 'WARNING' : 'CRITICAL',
-      diskUsage,
-      errorMessage: null
-    }
-  ];
-}
-```
+4. **外部システムチェック**
+   - 外部API接続確認
+   - ネットワーク疎通確認
+   - SSL証明書有効期限確認
 
-## 6. エラー処理
+5. **結果判定・通知**
+   - 異常レベル判定
+   - アラート生成・送信
+   - 監視ログ記録
 
-| エラーケース                      | 対応方法                                                                 |
-|-----------------------------------|--------------------------------------------------------------------------|
-| データベース接続失敗              | 即座にCRITICALアラート送信、自動復旧試行                                 |
-| API エンドポイント応答なし        | WARNINGアラート送信、継続監視                                            |
-| 外部サービス接続失敗              | サービス別にアラート送信、代替手段の提案                                 |
-| システムリソース閾値超過          | 段階的アラート送信、自動スケーリング検討                                 |
-| 監視システム自体の異常            | フェイルセーフ機能で最低限の監視継続                                     |
+## 5. データ仕様
 
-## 7. アラート通知仕様
+### 5.1 入力データ
+| データ名 | 形式 | 取得元 | 説明 |
+|----------|------|--------|------|
+| システム情報 | API | OS/ミドルウェア | CPU、メモリ、ディスク情報 |
+| データベース情報 | DB | PostgreSQL | 接続状況、パフォーマンス |
+| 外部API情報 | HTTP | 各種外部サービス | 接続状況、レスポンス時間 |
 
-### 7.1 通知レベル
+### 5.2 出力データ
+| データ名 | 形式 | 出力先 | 説明 |
+|----------|------|--------|------|
+| 監視ログ | DB | TBL-030 | システム状態記録 |
+| アラート情報 | DB | TBL-031 | 異常検知情報 |
+| 実行ログ | LOG | /logs/batch/ | 実行履歴ログ |
 
-| レベル    | 条件                                   | 通知方法                    | 通知先           |
-|-----------|----------------------------------------|-----------------------------|------------------|
-| HEALTHY   | 全コンポーネント正常                   | ログ記録のみ                | -                |
-| WARNING   | 一部コンポーネントで軽微な問題         | Slack通知                   | 運用チーム       |
-| CRITICAL  | 重要コンポーネントで深刻な問題         | Slack + メール + SMS        | 運用チーム + 管理者 |
-| DOWN      | システム全体またはコアサービス停止     | 全通知手段 + 電話           | 全関係者         |
+### 5.3 データ量見積もり
+| 項目 | 件数 | 備考 |
+|------|------|------|
+| 監視ログ件数 | 24件/日 | 時間毎実行 |
+| アラート件数 | 0-10件/日 | 異常発生時のみ |
+| 処理時間 | 2-5分 | 平均実行時間 |
 
-### 7.2 通知内容
+## 6. エラーハンドリング
 
-```typescript
-interface AlertNotification {
-  level: 'WARNING' | 'CRITICAL' | 'DOWN';
-  title: string;
-  components: {
-    name: string;
-    status: string;
-    responseTime?: number;
-    errorMessage?: string;
-  }[];
-  systemOverview: {
-    totalComponents: number;
-    healthyCount: number;
-    warningCount: number;
-    criticalCount: number;
-    downCount: number;
-  };
-  recommendedActions: string[];
-  timestamp: Date;
-}
-```
+### 6.1 エラー分類
+| エラー種別 | 対応方法 | 通知要否 | 備考 |
+|------------|----------|----------|------|
+| システムエラー | 処理中断・緊急アラート | ○ | CPU/メモリ/ディスク異常 |
+| 接続エラー | リトライ・アラート | ○ | DB/外部API接続失敗 |
+| 設定エラー | エラーログ出力 | △ | パラメータ不正等 |
 
-## 8. 依存関係
+### 6.2 リトライ仕様
+| 条件 | リトライ回数 | 間隔 | 備考 |
+|------|--------------|------|------|
+| DB接続エラー | 3回 | 30秒 | 指数バックオフ |
+| 外部API呼び出しエラー | 2回 | 10秒 | 固定間隔 |
+| システム情報取得エラー | 1回 | 5秒 | 即座にリトライ |
 
-- 全システムコンポーネント
-- データベース（PostgreSQL）
-- 外部API（認証、通知、ストレージ）
-- 監視ツール（Prometheus、Grafana）
-- 通知サービス（Slack、メール、SMS）
+### 6.3 異常終了時の処理
+1. 処理中断
+2. 緊急アラート送信
+3. エラーログ出力
+4. 運用チームへ通知
+5. 排他制御ロック解除
 
-## 9. 実行パラメータ
+## 7. 監視・運用
 
-| パラメータ名        | 必須 | デフォルト値 | 説明                                           |
-|---------------------|------|--------------|------------------------------------------------|
-| --component-type    | No   | all          | 特定コンポーネント種別のみチェック             |
-| --skip-alerts       | No   | false        | アラート送信をスキップ                         |
-| --detailed-check    | No   | false        | 詳細チェックモードを有効化                     |
-| --timeout           | No   | 5000         | 各チェックのタイムアウト（ms）                 |
+### 7.1 監視項目
+| 監視項目 | 閾値 | アラート条件 | 対応方法 |
+|----------|------|--------------|----------|
+| CPU使用率 | 80% | 超過時 | プロセス確認・最適化 |
+| メモリ使用率 | 85% | 超過時 | メモリリーク調査 |
+| ディスク使用率 | 90% | 超過時 | ディスククリーンアップ |
+| DB接続数 | 最大接続数の80% | 超過時 | 接続プール調整 |
+| レスポンス時間 | 5秒 | 超過時 | パフォーマンス調査 |
 
-## 10. 実行例
+### 7.2 ログ出力
+| ログ種別 | 出力レベル | 出力内容 | 保存期間 |
+|----------|------------|----------|----------|
+| 実行ログ | INFO | 処理開始・終了・各チェック結果 | 3ヶ月 |
+| エラーログ | ERROR | エラー詳細・スタックトレース | 1年 |
+| アラートログ | WARN | 閾値超過・異常検知 | 6ヶ月 |
 
-```bash
-# 通常実行
-npm run batch:system-health-check
+### 7.3 アラート通知
+| 通知条件 | 通知先 | 通知方法 | 備考 |
+|----------|--------|----------|------|
+| 緊急異常 | 運用チーム | メール・Slack・電話 | 即座に通知 |
+| 警告レベル | 開発チーム | Slack | 業務時間内のみ |
+| 情報レベル | 監視ダッシュボード | Web画面 | リアルタイム表示 |
 
-# データベースのみチェック
-npm run batch:system-health-check -- --component-type=database
+## 8. 非機能要件
 
-# アラート送信なし
-npm run batch:system-health-check -- --skip-alerts
+### 8.1 パフォーマンス
+- 処理時間：10分以内
+- メモリ使用量：512MB以内
+- CPU使用率：20%以内
 
-# 詳細チェック
-npm run batch:system-health-check -- --detailed-check
+### 8.2 可用性
+- 成功率：99.9%以上
+- 24時間365日稼働
+- 障害時の自動復旧機能
 
-# TypeScript直接実行
-npx tsx src/batch/system-health-check.ts
-```
+### 8.3 セキュリティ
+- 実行権限の制限
+- 監視データの暗号化
+- アクセスログの記録
 
-## 11. 運用上の注意点
+## 9. テスト仕様
 
-- 本バッチは他の全バッチの基盤となるため、最優先で実行してください。
-- 異常検知時は迅速な対応が必要です。エスカレーション手順を明確にしてください。
-- システム負荷を考慮し、チェック間隔と詳細度のバランスを調整してください。
-- 外部サービスの一時的な障害と恒久的な問題を区別して対応してください。
+### 9.1 単体テスト
+| テストケース | 入力条件 | 期待結果 |
+|--------------|----------|----------|
+| 正常処理 | 全システム正常 | 正常終了・正常ログ出力 |
+| CPU高負荷 | CPU使用率85% | 警告アラート生成 |
+| メモリ不足 | メモリ使用率90% | 警告アラート生成 |
+| ディスク容量不足 | ディスク使用率95% | 緊急アラート生成 |
 
-## 12. パフォーマンス最適化
+### 9.2 異常系テスト
+| テストケース | 入力条件 | 期待結果 |
+|--------------|----------|----------|
+| DB接続エラー | DB停止状態 | リトライ後緊急アラート |
+| 外部API障害 | API応答なし | 警告アラート生成 |
+| システム情報取得失敗 | OS情報取得不可 | エラーログ出力・アラート |
 
-### 12.1 並列処理
+## 10. 実装メモ
 
-```typescript
-class SystemHealthChecker {
-  async executeHealthChecks(): Promise<HealthCheckResult[]> {
-    const [
-      databaseResults,
-      apiResults,
-      resourceResults,
-      externalResults
-    ] = await Promise.all([
-      this.checkDatabaseHealth(),
-      this.checkApiEndpoints(),
-      this.checkSystemResources(),
-      this.checkExternalServices()
-    ]);
-    
-    return [
-      ...databaseResults,
-      ...apiResults,
-      ...resourceResults,
-      ...externalResults
-    ];
-  }
-}
-```
+### 10.1 技術仕様
+- 言語：Node.js
+- フレームワーク：Express.js
+- 監視ライブラリ：node-os-utils, systeminformation
+- 通知：Slack API, メール送信
 
-### 12.2 キャッシュ活用
+### 10.2 注意事項
+- システムリソース監視時の負荷を最小限に抑制
+- 大量アラート発生時の通知制限機能
+- 監視対象システムの動的追加・削除対応
 
-```typescript
-class HealthCheckCache {
-  private cache = new Map<string, HealthCheckResult>();
-  private readonly CACHE_TTL = 30000; // 30秒
-  
-  async getCachedResult(componentName: string): Promise<HealthCheckResult | null> {
-    const cached = this.cache.get(componentName);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-      return cached;
-    }
-    return null;
-  }
-  
-  setCachedResult(componentName: string, result: HealthCheckResult): void {
-    this.cache.set(componentName, {
-      ...result,
-      timestamp: Date.now()
-    });
-  }
-}
-```
+### 10.3 デプロイ・実行環境
+- 実行サーバー：監視サーバー
+- 実行ユーザー：monitor_user
+- 実行ディレクトリ：/opt/batch/health-check/
+- 設定ファイル：/etc/batch/health-check.json
 
-## 13. 改訂履歴
+---
 
-| 改訂日     | 改訂者 | 改訂内容                                         |
-|------------|--------|--------------------------------------------------|
-| 2025/05/31 | 初版   | 初版作成                                         |
+**改訂履歴**
+
+| バージョン | 日付 | 変更者 | 変更内容 |
+|------------|------|--------|----------|
+| 1.0 | 2025/05/31 | システムアーキテクト | 初版作成 |
