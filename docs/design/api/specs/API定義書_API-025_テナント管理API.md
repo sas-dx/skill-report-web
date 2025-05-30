@@ -1,37 +1,36 @@
-# API定義書: API-025 テナント管理API
+# API仕様書：テナント管理API
 
-## 基本情報
+| 項目                | 内容                                                                                |
+|---------------------|------------------------------------------------------------------------------------|
+| **API ID**          | API-025                                                                            |
+| **API名称**         | テナント管理API                                                                    |
+| **エンドポイント**  | /api/tenants                                                                       |
+| **HTTPメソッド**    | GET/POST/PUT/DELETE                                                                |
+| **概要・目的**      | マルチテナント環境でのテナント作成・編集・削除・一覧取得を行う                      |
+| **利用画面**        | SCR-TENANT-ADMIN                                                                   |
+| **優先度**          | 高                                                                                  |
+| **認証要件**        | 必須（システム管理者権限）                                                          |
+| **レート制限**      | 100 req/min                                                                        |
 
-| 項目 | 内容 |
-|------|------|
-| API ID | API-025 |
-| API名称 | テナント管理API |
-| エンドポイント | /api/tenants |
-| 概要 | テナント作成・編集・削除・一覧取得 |
-| 利用画面 | SCR-TENANT-ADMIN |
-| 優先度 | 最高 |
-| 実装予定 | Week 1-2 |
+## 1. エンドポイント詳細
 
----
-
-## エンドポイント詳細
-
-### 1. テナント一覧取得
+### 1.1 テナント一覧取得
 
 #### リクエスト
 ```http
-GET /api/tenants
+GET /api/tenants?page=1&limit=20&status=active&search=company
 Authorization: Bearer {jwt_token}
-Content-Type: application/json
 ```
 
 #### クエリパラメータ
-| パラメータ名 | 型 | 必須 | 説明 | 例 |
-|-------------|---|------|------|---|
-| page | number | × | ページ番号（デフォルト: 1） | 1 |
-| limit | number | × | 取得件数（デフォルト: 20） | 20 |
-| status | string | × | ステータスフィルタ | active, inactive |
-| search | string | × | 検索キーワード | company |
+| パラメータ名 | 型      | 必須 | 説明                                           |
+|--------------|---------|------|------------------------------------------------|
+| page         | Integer | No   | ページ番号（デフォルト: 1）                    |
+| limit        | Integer | No   | 1ページあたりの件数（デフォルト: 20、最大: 100）|
+| status       | String  | No   | ステータスフィルタ（active/inactive/all）      |
+| search       | String  | No   | 検索キーワード（名前・コードで部分一致）       |
+| sortBy       | String  | No   | ソート項目（name/code/createdAt）              |
+| sortOrder    | String  | No   | ソート順（asc/desc、デフォルト: asc）          |
 
 #### レスポンス（成功時）
 ```json
@@ -43,49 +42,144 @@ Content-Type: application/json
         "id": "tenant_001",
         "code": "company-a",
         "name": "株式会社A",
+        "domain": "company-a.com",
         "status": "active",
-        "plan": "standard",
-        "maxUsers": 100,
-        "currentUsers": 45,
-        "createdAt": "2025-01-01T00:00:00Z",
-        "updatedAt": "2025-01-15T10:30:00Z",
-        "settings": {
-          "theme": {
-            "primaryColor": "#0066cc",
-            "secondaryColor": "#f0f0f0",
-            "logo": "https://storage.example.com/logos/company-a.png"
-          },
-          "features": {
-            "ssoEnabled": true,
-            "notificationEnabled": true,
-            "reportingEnabled": true
-          }
-        }
+        "plan": "enterprise",
+        "userCount": 150,
+        "maxUsers": 200,
+        "storageUsed": 2048,
+        "storageLimit": 10240,
+        "features": {
+          "ssoEnabled": true,
+          "apiAccess": true,
+          "customBranding": true,
+          "advancedReporting": true
+        },
+        "billing": {
+          "monthlyFee": 50000,
+          "currency": "JPY",
+          "billingCycle": "monthly",
+          "nextBillingDate": "2025-06-30"
+        },
+        "createdAt": "2025-01-15T09:00:00Z",
+        "updatedAt": "2025-05-30T10:30:00Z"
       }
     ],
     "pagination": {
-      "page": 1,
-      "limit": 20,
-      "total": 5,
-      "totalPages": 1
+      "currentPage": 1,
+      "totalPages": 5,
+      "totalItems": 95,
+      "itemsPerPage": 20,
+      "hasNext": true,
+      "hasPrev": false
     }
   }
 }
 ```
 
-#### レスポンス（エラー時）
+### 1.2 テナント詳細取得
+
+#### リクエスト
+```http
+GET /api/tenants/{tenant_id}
+Authorization: Bearer {jwt_token}
+```
+
+#### パスパラメータ
+| パラメータ名 | 型     | 必須 | 説明       |
+|--------------|--------|------|------------|
+| tenant_id    | String | Yes  | テナントID |
+
+#### レスポンス（成功時）
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "認証が必要です",
-    "details": "有効なJWTトークンが必要です"
+  "success": true,
+  "data": {
+    "tenant": {
+      "id": "tenant_001",
+      "code": "company-a",
+      "name": "株式会社A",
+      "domain": "company-a.com",
+      "description": "大手製造業企業",
+      "status": "active",
+      "plan": "enterprise",
+      "settings": {
+        "theme": {
+          "primaryColor": "#0066cc",
+          "secondaryColor": "#f0f0f0",
+          "logo": "https://storage.example.com/logos/company-a.png",
+          "favicon": "https://storage.example.com/favicons/company-a.ico"
+        },
+        "features": {
+          "ssoEnabled": true,
+          "apiAccess": true,
+          "customBranding": true,
+          "advancedReporting": true,
+          "dataExport": true,
+          "auditLog": true
+        },
+        "security": {
+          "passwordPolicy": {
+            "minLength": 8,
+            "requireUppercase": true,
+            "requireLowercase": true,
+            "requireNumbers": true,
+            "requireSymbols": true,
+            "maxAge": 90
+          },
+          "sessionTimeout": 3600,
+          "ipWhitelist": ["192.168.1.0/24", "10.0.0.0/8"],
+          "mfaRequired": false
+        },
+        "notifications": {
+          "emailEnabled": true,
+          "slackEnabled": true,
+          "teamsEnabled": false,
+          "lineWorksEnabled": false
+        }
+      },
+      "usage": {
+        "userCount": 150,
+        "maxUsers": 200,
+        "storageUsed": 2048,
+        "storageLimit": 10240,
+        "apiCallsThisMonth": 45000,
+        "apiCallsLimit": 100000
+      },
+      "billing": {
+        "plan": "enterprise",
+        "monthlyFee": 50000,
+        "currency": "JPY",
+        "billingCycle": "monthly",
+        "nextBillingDate": "2025-06-30",
+        "paymentMethod": "bank_transfer",
+        "billingContact": {
+          "name": "経理部",
+          "email": "billing@company-a.com",
+          "phone": "03-1234-5678"
+        }
+      },
+      "contacts": {
+        "primary": {
+          "name": "田中太郎",
+          "email": "tanaka@company-a.com",
+          "phone": "03-1234-5678",
+          "role": "システム管理者"
+        },
+        "billing": {
+          "name": "経理部",
+          "email": "billing@company-a.com",
+          "phone": "03-1234-5679"
+        }
+      },
+      "createdAt": "2025-01-15T09:00:00Z",
+      "updatedAt": "2025-05-30T10:30:00Z"
+    }
   }
 }
 ```
 
-### 2. テナント作成
+### 1.3 テナント作成
 
 #### リクエスト
 ```http
@@ -99,13 +193,11 @@ Content-Type: application/json
 {
   "code": "company-b",
   "name": "株式会社B",
+  "domain": "company-b.com",
+  "description": "IT企業",
   "plan": "standard",
-  "maxUsers": 50,
-  "adminUser": {
-    "email": "admin@company-b.com",
-    "name": "管理者",
-    "password": "SecurePassword123!"
-  },
+  "maxUsers": 100,
+  "storageLimit": 5120,
   "settings": {
     "theme": {
       "primaryColor": "#ff6600",
@@ -113,8 +205,33 @@ Content-Type: application/json
     },
     "features": {
       "ssoEnabled": false,
-      "notificationEnabled": true,
-      "reportingEnabled": true
+      "apiAccess": true,
+      "customBranding": false,
+      "advancedReporting": false
+    },
+    "security": {
+      "passwordPolicy": {
+        "minLength": 8,
+        "requireUppercase": true,
+        "requireLowercase": true,
+        "requireNumbers": true,
+        "requireSymbols": false
+      },
+      "sessionTimeout": 3600,
+      "mfaRequired": false
+    }
+  },
+  "contacts": {
+    "primary": {
+      "name": "佐藤花子",
+      "email": "sato@company-b.com",
+      "phone": "03-9876-5432",
+      "role": "システム管理者"
+    },
+    "billing": {
+      "name": "経理部",
+      "email": "billing@company-b.com",
+      "phone": "03-9876-5433"
     }
   }
 }
@@ -123,13 +240,12 @@ Content-Type: application/json
 #### バリデーションルール
 | フィールド | ルール |
 |-----------|--------|
-| code | 必須、3-20文字、英数字とハイフンのみ、ユニーク |
+| code | 必須、3-20文字、英数字とハイフンのみ、一意 |
 | name | 必須、1-100文字 |
-| plan | 必須、enum: standard, premium, enterprise |
-| maxUsers | 必須、1-10000の整数 |
-| adminUser.email | 必須、有効なメールアドレス形式 |
-| adminUser.name | 必須、1-50文字 |
-| adminUser.password | 必須、8文字以上、英数字記号含む |
+| domain | 必須、有効なドメイン形式、一意 |
+| plan | 必須、有効なプラン（trial/standard/enterprise） |
+| maxUsers | 必須、1以上の整数 |
+| storageLimit | 必須、1以上の整数（MB単位） |
 
 #### レスポンス（成功時）
 ```json
@@ -140,25 +256,22 @@ Content-Type: application/json
       "id": "tenant_002",
       "code": "company-b",
       "name": "株式会社B",
+      "domain": "company-b.com",
       "status": "active",
       "plan": "standard",
-      "maxUsers": 50,
-      "currentUsers": 1,
-      "createdAt": "2025-05-30T20:53:00Z",
-      "updatedAt": "2025-05-30T20:53:00Z"
+      "createdAt": "2025-05-30T11:00:00Z"
     },
     "adminUser": {
-      "id": "user_001",
-      "email": "admin@company-b.com",
-      "name": "管理者",
-      "role": "tenant_admin",
-      "tenantId": "tenant_002"
+      "id": "user_admin_002",
+      "email": "sato@company-b.com",
+      "temporaryPassword": "TempPass123!",
+      "passwordResetRequired": true
     }
   }
 }
 ```
 
-### 3. テナント更新
+### 1.4 テナント更新
 
 #### リクエスト
 ```http
@@ -167,28 +280,24 @@ Authorization: Bearer {jwt_token}
 Content-Type: application/json
 ```
 
-#### パスパラメータ
-| パラメータ名 | 型 | 必須 | 説明 |
-|-------------|---|------|------|
-| tenant_id | string | ○ | テナントID |
-
 #### リクエストボディ
 ```json
 {
-  "name": "株式会社B（更新）",
-  "plan": "premium",
-  "maxUsers": 100,
-  "status": "active",
+  "name": "株式会社B（更新後）",
+  "description": "IT企業（更新）",
+  "plan": "enterprise",
+  "maxUsers": 200,
+  "storageLimit": 10240,
   "settings": {
     "theme": {
-      "primaryColor": "#ff6600",
-      "secondaryColor": "#f5f5f5",
-      "logo": "https://storage.example.com/logos/company-b-new.png"
+      "primaryColor": "#0066cc",
+      "secondaryColor": "#f0f0f0"
     },
     "features": {
       "ssoEnabled": true,
-      "notificationEnabled": true,
-      "reportingEnabled": true
+      "apiAccess": true,
+      "customBranding": true,
+      "advancedReporting": true
     }
   }
 }
@@ -202,34 +311,21 @@ Content-Type: application/json
     "tenant": {
       "id": "tenant_002",
       "code": "company-b",
-      "name": "株式会社B（更新）",
-      "status": "active",
-      "plan": "premium",
-      "maxUsers": 100,
-      "currentUsers": 1,
-      "updatedAt": "2025-05-30T21:00:00Z"
+      "name": "株式会社B（更新後）",
+      "plan": "enterprise",
+      "updatedAt": "2025-05-30T11:30:00Z"
     }
   }
 }
 ```
 
-### 4. テナント削除
+### 1.5 テナント削除
 
 #### リクエスト
 ```http
 DELETE /api/tenants/{tenant_id}
 Authorization: Bearer {jwt_token}
 ```
-
-#### パスパラメータ
-| パラメータ名 | 型 | 必須 | 説明 |
-|-------------|---|------|------|
-| tenant_id | string | ○ | テナントID |
-
-#### クエリパラメータ
-| パラメータ名 | 型 | 必須 | 説明 |
-|-------------|---|------|------|
-| force | boolean | × | 強制削除フラグ（デフォルト: false） |
 
 #### レスポンス（成功時）
 ```json
@@ -238,178 +334,77 @@ Authorization: Bearer {jwt_token}
   "data": {
     "message": "テナントが正常に削除されました",
     "deletedTenantId": "tenant_002",
-    "deletedAt": "2025-05-30T21:05:00Z"
+    "deletedAt": "2025-05-30T12:00:00Z"
   }
 }
 ```
 
----
+## 2. エラーレスポンス
 
-## エラーコード一覧
-
-| エラーコード | HTTPステータス | 説明 | 対処法 |
-|-------------|---------------|------|--------|
-| UNAUTHORIZED | 401 | 認証エラー | 有効なJWTトークンを設定 |
-| FORBIDDEN | 403 | 権限不足 | システム管理者権限が必要 |
-| TENANT_NOT_FOUND | 404 | テナントが見つからない | 正しいテナントIDを指定 |
-| TENANT_CODE_DUPLICATE | 409 | テナントコードが重複 | 別のテナントコードを指定 |
-| VALIDATION_ERROR | 400 | バリデーションエラー | リクエストデータを確認 |
-| TENANT_HAS_USERS | 409 | ユーザーが存在するため削除不可 | forceフラグを使用するか、ユーザーを先に削除 |
-| INTERNAL_SERVER_ERROR | 500 | サーバー内部エラー | システム管理者に連絡 |
-
----
-
-## セキュリティ要件
-
-### 認証・認可
-- **認証**: JWT Bearer Token必須
-- **権限**: システム管理者（system_admin）権限必須
-- **テナント分離**: 各テナントのデータは完全分離
-
-### データ保護
-- **暗号化**: 機密データはAES-256で暗号化
-- **監査ログ**: 全操作を監査ログに記録
-- **入力検証**: SQLインジェクション、XSS対策
-
----
-
-## パフォーマンス要件
-
-| 項目 | 要件 |
-|------|------|
-| レスポンス時間 | 95%のリクエストが1秒以内 |
-| スループット | 100 req/sec |
-| 同時接続数 | 50接続 |
-| データベース接続 | コネクションプール使用 |
-
----
-
-## テスト仕様
-
-### 単体テスト
-```typescript
-describe('Tenant Management API', () => {
-  test('GET /api/tenants - 正常系', async () => {
-    const response = await request(app)
-      .get('/api/tenants')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
-    
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.tenants).toBeInstanceOf(Array);
-  });
-  
-  test('POST /api/tenants - テナント作成', async () => {
-    const newTenant = {
-      code: 'test-tenant',
-      name: 'テストテナント',
-      plan: 'standard',
-      maxUsers: 10,
-      adminUser: {
-        email: 'admin@test-tenant.com',
-        name: 'テスト管理者',
-        password: 'TestPassword123!'
-      }
-    };
-    
-    const response = await request(app)
-      .post('/api/tenants')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send(newTenant)
-      .expect(201);
-    
-    expect(response.body.success).toBe(true);
-    expect(response.body.data.tenant.code).toBe('test-tenant');
-  });
-});
+### 2.1 共通エラーフォーマット
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "エラーメッセージ",
+    "details": "詳細情報",
+    "field": "エラーフィールド（バリデーションエラーの場合）"
+  }
+}
 ```
 
-### 統合テスト
-```typescript
-describe('Tenant Management Integration', () => {
-  test('テナント作成からユーザー登録まで', async () => {
-    // 1. テナント作成
-    const tenant = await createTenant();
-    
-    // 2. テナント管理者でログイン
-    const adminToken = await loginAsTenantAdmin(tenant.id);
-    
-    // 3. 一般ユーザー作成
-    const user = await createUser(tenant.id, adminToken);
-    
-    // 4. データ分離確認
-    const otherTenantData = await getUsersFromOtherTenant(user.id);
-    expect(otherTenantData).toHaveLength(0);
-  });
-});
-```
+### 2.2 エラーコード一覧
+| エラーコード | HTTPステータス | 説明 |
+|-------------|---------------|------|
+| TENANT_NOT_FOUND | 404 | テナントが見つからない |
+| TENANT_CODE_DUPLICATE | 409 | テナントコードが重複 |
+| TENANT_DOMAIN_DUPLICATE | 409 | ドメインが重複 |
+| INVALID_PLAN | 400 | 無効なプラン |
+| INSUFFICIENT_PERMISSIONS | 403 | 権限不足 |
+| TENANT_HAS_USERS | 409 | ユーザーが存在するため削除不可 |
+| VALIDATION_ERROR | 400 | バリデーションエラー |
 
----
+## 3. 実装仕様
 
-## 実装メモ
-
-### データベーススキーマ
+### 3.1 データベーススキーマ
 ```sql
 CREATE TABLE tenants (
   id VARCHAR(50) PRIMARY KEY,
   code VARCHAR(20) UNIQUE NOT NULL,
   name VARCHAR(100) NOT NULL,
+  domain VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
   status VARCHAR(20) DEFAULT 'active',
   plan VARCHAR(20) NOT NULL,
   max_users INTEGER NOT NULL,
-  current_users INTEGER DEFAULT 0,
-  settings JSONB,
+  storage_limit INTEGER NOT NULL,
+  settings JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_tenants_code ON tenants(code);
-CREATE INDEX idx_tenants_status ON tenants(status);
+CREATE TABLE tenant_contacts (
+  id VARCHAR(50) PRIMARY KEY,
+  tenant_id VARCHAR(50) NOT NULL,
+  contact_type VARCHAR(20) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  role VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+);
 ```
 
-### Next.js実装例
-```typescript
-// pages/api/tenants/index.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { authenticateToken, requireSystemAdmin } from '@/lib/auth';
-import { TenantService } from '@/services/TenantService';
+### 3.2 セキュリティ要件
+- システム管理者権限必須
+- テナント間データ完全分離
+- 監査ログ記録
+- レート制限適用
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    // 認証・認可チェック
-    const user = await authenticateToken(req);
-    requireSystemAdmin(user);
-    
-    const tenantService = new TenantService();
-    
-    switch (req.method) {
-      case 'GET':
-        const tenants = await tenantService.getTenants(req.query);
-        return res.status(200).json({ success: true, data: tenants });
-        
-      case 'POST':
-        const newTenant = await tenantService.createTenant(req.body);
-        return res.status(201).json({ success: true, data: newTenant });
-        
-      default:
-        return res.status(405).json({ success: false, error: 'Method not allowed' });
-    }
-  } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      error: {
-        code: error.code || 'INTERNAL_SERVER_ERROR',
-        message: error.message
-      }
-    });
-  }
-}
-```
+## 4. 改訂履歴
 
----
-
-## 変更履歴
-
-| 日付 | バージョン | 変更内容 | 変更者 |
-|------|-----------|----------|--------|
-| 2025-05-30 | 1.0.0 | 初版作成 | システムアーキテクト |
+| 改訂日     | 改訂者 | 改訂内容                                         |
+|------------|--------|--------------------------------------------------|
+| 2025/05/30 | 初版   | 初版作成                                         |

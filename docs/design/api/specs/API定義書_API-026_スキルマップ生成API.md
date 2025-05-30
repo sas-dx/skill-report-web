@@ -1,686 +1,391 @@
-# API定義書：API-026 スキルマップ生成API
+# API仕様書：スキルマップ生成API
 
-## 1. 基本情報
+| 項目                | 内容                                                                                |
+|---------------------|------------------------------------------------------------------------------------|
+| **API ID**          | API-026                                                                            |
+| **API名称**         | スキルマップ生成API                                                                |
+| **エンドポイント**  | /api/skills/map                                                                    |
+| **HTTPメソッド**    | POST                                                                               |
+| **概要・目的**      | 組織・部署・個人のスキルマップデータを生成し、視覚的なスキル分析を提供する          |
+| **利用画面**        | SCR-SKILL-MAP                                                                      |
+| **優先度**          | 中                                                                                  |
+| **認証要件**        | 必須（ユーザー権限以上）                                                            |
+| **レート制限**      | 50 req/min                                                                         |
 
-- **API ID**: API-026
-- **API名称**: スキルマップ生成API
-- **概要**: スキルマップデータを生成する
-- **エンドポイント**: `/api/skills/map`
-- **HTTPメソッド**: POST
-- **リクエスト形式**: JSON
-- **レスポンス形式**: JSON
-- **認証要件**: 必須（JWT認証）
-- **利用画面**: [SCR-SKILL-MAP](画面設計書_SCR-SKILL-MAP.md)
-- **作成日**: 2025/05/28
-- **作成者**: API設計担当
-- **改訂履歴**: 2025/05/28 初版作成
+## 1. エンドポイント詳細
 
----
+### 1.1 スキルマップ生成
 
-## 2. リクエスト仕様
-
-### 2.1 リクエストヘッダ
-
-| ヘッダ名 | 必須 | 説明 | 備考 |
-|---------|------|------|------|
-| Authorization | ○ | 認証トークン | Bearer {JWT} 形式 |
-| Content-Type | ○ | リクエスト形式 | application/json |
-| Accept | - | レスポンス形式 | application/json |
-
-### 2.2 リクエストボディ
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| map_type | string | ○ | マップタイプ | "radar", "bubble", "heatmap", "network" |
-| target_users | array | - | 対象ユーザーID配列 | 指定なしの場合は自身のみ |
-| department_id | string | - | 部署ID | 指定された部署に所属するユーザーが対象 |
-| skill_categories | array | - | スキルカテゴリ配列 | 指定なしの場合は全カテゴリ |
-| skill_ids | array | - | スキルID配列 | 指定なしの場合は全スキル |
-| year | number | - | 対象年度 | 指定なしの場合は最新年度 |
-| include_average | boolean | - | 平均値を含めるか | デフォルト: false |
-| group_by | string | - | グループ化 | "department", "position", "none"<br>デフォルト: "none" |
-| visualization_options | object | - | 可視化オプション | マップタイプ別のオプション |
-
-#### visualization_options オブジェクト（マップタイプ別）
-
-##### radar マップの場合
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| max_skills | number | - | 最大スキル数 | デフォルト: 10 |
-| sort_by | string | - | ソート条件 | "level", "name", "category"<br>デフォルト: "level" |
-| fill_area | boolean | - | 塗りつぶし表示 | デフォルト: true |
-
-##### bubble マップの場合
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| max_skills | number | - | 最大スキル数 | デフォルト: 50 |
-| size_by | string | - | サイズ基準 | "level", "experience_years", "popularity"<br>デフォルト: "level" |
-| color_by | string | - | 色分け基準 | "category", "level", "experience_years"<br>デフォルト: "category" |
-
-##### heatmap マップの場合
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| max_users | number | - | 最大ユーザー数 | デフォルト: 20 |
-| max_skills | number | - | 最大スキル数 | デフォルト: 30 |
-| sort_users_by | string | - | ユーザーソート条件 | "name", "department", "position"<br>デフォルト: "department" |
-| sort_skills_by | string | - | スキルソート条件 | "name", "category", "popularity"<br>デフォルト: "category" |
-
-##### network マップの場合
-
-| パラメータ名 | 型 | 必須 | 説明 | 制約・備考 |
-|------------|------|------|------|------------|
-| max_nodes | number | - | 最大ノード数 | デフォルト: 100 |
-| node_size_by | string | - | ノードサイズ基準 | "level", "experience_years", "popularity"<br>デフォルト: "level" |
-| edge_threshold | number | - | エッジ閾値 | 0.0-1.0の範囲<br>デフォルト: 0.5 |
-| layout | string | - | レイアウト | "force", "circular", "hierarchical"<br>デフォルト: "force" |
-
-### 2.3 リクエスト例
-
-```json
-{
-  "map_type": "radar",
-  "target_users": ["U12345", "U67890"],
-  "skill_categories": ["technical", "business"],
-  "year": 2025,
-  "include_average": true,
-  "visualization_options": {
-    "max_skills": 8,
-    "sort_by": "level",
-    "fill_area": true
-  }
-}
+#### リクエスト
+```http
+POST /api/skills/map
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
 ```
 
----
-
-## 3. レスポンス仕様
-
-### 3.1 正常時レスポンス（200 OK）
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| map_type | string | マップタイプ | |
-| generated_at | string | 生成日時 | ISO 8601形式 |
-| year | number | 対象年度 | |
-| data | object | マップデータ | マップタイプ別のデータ構造 |
-| metadata | object | メタデータ | |
-
-#### metadata オブジェクト
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| user_count | number | ユーザー数 | |
-| skill_count | number | スキル数 | |
-| categories | array | カテゴリ情報 | |
-| visualization_options | object | 可視化オプション | リクエストと同じ構造 |
-
-#### data オブジェクト（マップタイプ別）
-
-##### radar マップの場合
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| axes | array | 軸情報の配列 | |
-| series | array | データ系列の配列 | |
-
-###### axes 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| skill_id | string | スキルID | |
-| name | string | スキル名 | |
-| category | string | カテゴリ | |
-| max_value | number | 最大値 | 通常は5（最大レベル） |
-
-###### series 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| user_id | string | ユーザーID | average の場合は "average" |
-| name | string | ユーザー名/グループ名 | |
-| color | string | 表示色 | HEX形式（例: "#007bff"） |
-| values | array | 値の配列 | axes配列と同じ順序 |
-| is_average | boolean | 平均値かどうか | |
-
-##### bubble マップの場合
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| nodes | array | ノード情報の配列 | |
-| categories | array | カテゴリ情報の配列 | |
-
-###### nodes 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| id | string | ノードID | スキルID |
-| name | string | スキル名 | |
-| category | string | カテゴリ | |
-| value | number | 値（サイズ） | |
-| color_value | number | 色分け値 | |
-| user_data | array | ユーザー別データ | |
-
-###### user_data 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| user_id | string | ユーザーID | |
-| name | string | ユーザー名 | |
-| level | number | スキルレベル | |
-| experience_years | number | 経験年数 | |
-
-##### heatmap マップの場合
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| x_axis | array | X軸情報（スキル） | |
-| y_axis | array | Y軸情報（ユーザー） | |
-| values | array | 値の二次元配列 | |
-
-###### x_axis 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| skill_id | string | スキルID | |
-| name | string | スキル名 | |
-| category | string | カテゴリ | |
-
-###### y_axis 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| user_id | string | ユーザーID | |
-| name | string | ユーザー名 | |
-| department | string | 部署名 | |
-| position | string | 役職名 | |
-
-##### network マップの場合
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| nodes | array | ノード情報の配列 | |
-| edges | array | エッジ情報の配列 | |
-
-###### nodes 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| id | string | ノードID | スキルIDまたはユーザーID |
-| name | string | 名前 | スキル名またはユーザー名 |
-| type | string | タイプ | "skill" または "user" |
-| category | string | カテゴリ | スキルの場合はスキルカテゴリ<br>ユーザーの場合は部署名 |
-| size | number | サイズ | |
-
-###### edges 配列要素
-
-| パラメータ名 | 型 | 説明 | 備考 |
-|------------|------|------|------|
-| source | string | 始点ノードID | |
-| target | string | 終点ノードID | |
-| weight | number | 重み | 0.0-1.0の範囲 |
-| type | string | タイプ | "user_skill", "skill_relation" |
-
-### 3.2 正常時レスポンス例（radar マップの場合）
-
+#### リクエストボディ
 ```json
 {
-  "map_type": "radar",
-  "generated_at": "2025-05-28T15:30:00+09:00",
-  "year": 2025,
-  "data": {
-    "axes": [
-      {
-        "skill_id": "S001",
-        "name": "Java",
-        "category": "technical",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S002",
-        "name": "Spring Framework",
-        "category": "technical",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S005",
-        "name": "JavaScript",
-        "category": "technical",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S007",
-        "name": "React",
-        "category": "technical",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S010",
-        "name": "SQL",
-        "category": "technical",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S020",
-        "name": "プロジェクト管理",
-        "category": "business",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S021",
-        "name": "要件定義",
-        "category": "business",
-        "max_value": 5
-      },
-      {
-        "skill_id": "S022",
-        "name": "システム設計",
-        "category": "business",
-        "max_value": 5
-      }
-    ],
-    "series": [
-      {
-        "user_id": "U12345",
-        "name": "山田 太郎",
-        "color": "#007bff",
-        "values": [4, 3, 3, 2, 4, 3, 3, 4],
-        "is_average": false
-      },
-      {
-        "user_id": "U67890",
-        "name": "鈴木 花子",
-        "color": "#28a745",
-        "values": [3, 2, 4, 4, 3, 2, 3, 2],
-        "is_average": false
-      },
-      {
-        "user_id": "average",
-        "name": "平均",
-        "color": "#dc3545",
-        "values": [3.5, 2.5, 3.5, 3, 3.5, 2.5, 3, 3],
-        "is_average": true
-      }
-    ]
+  "mapType": "organization",
+  "targetId": "org_001",
+  "filters": {
+    "departments": ["engineering", "design"],
+    "skillCategories": ["technical", "business"],
+    "experienceLevels": ["beginner", "intermediate", "advanced"],
+    "dateRange": {
+      "from": "2024-01-01",
+      "to": "2025-05-30"
+    }
   },
-  "metadata": {
-    "user_count": 2,
-    "skill_count": 8,
-    "categories": [
-      {
-        "id": "technical",
-        "name": "技術スキル",
-        "color": "#007bff"
-      },
-      {
-        "id": "business",
-        "name": "業務知識",
-        "color": "#28a745"
-      }
-    ],
-    "visualization_options": {
-      "max_skills": 8,
-      "sort_by": "level",
-      "fill_area": true
-    }
+  "visualization": {
+    "type": "heatmap",
+    "groupBy": "department",
+    "aggregation": "average",
+    "includeGaps": true,
+    "showTrends": true
+  },
+  "options": {
+    "includeSubordinates": true,
+    "anonymize": false,
+    "exportFormat": "json"
   }
 }
 ```
 
-### 3.3 エラー時レスポンス
+#### リクエストパラメータ
+| パラメータ名 | 型     | 必須 | 説明                                           |
+|--------------|--------|------|------------------------------------------------|
+| mapType      | String | Yes  | マップ種別（organization/department/team/individual） |
+| targetId     | String | Yes  | 対象ID（組織・部署・チーム・個人のID）         |
+| filters      | Object | No   | フィルタ条件                                   |
+| visualization| Object | No   | 可視化設定                                     |
+| options      | Object | No   | 追加オプション                                 |
 
-| ステータスコード | エラーコード | エラーメッセージ | 説明 |
-|----------------|------------|----------------|------|
-| 400 Bad Request | INVALID_PARAMETER | パラメータが不正です | パラメータ形式不正 |
-| 400 Bad Request | INVALID_MAP_TYPE | マップタイプが不正です | 存在しないマップタイプ |
-| 400 Bad Request | INVALID_USER_ID | ユーザーIDが不正です | 存在しないユーザーID |
-| 400 Bad Request | INVALID_DEPARTMENT_ID | 部署IDが不正です | 存在しない部署ID |
-| 400 Bad Request | INVALID_SKILL_CATEGORY | スキルカテゴリが不正です | 存在しないスキルカテゴリ |
-| 400 Bad Request | INVALID_SKILL_ID | スキルIDが不正です | 存在しないスキルID |
-| 401 Unauthorized | UNAUTHORIZED | 認証が必要です | 認証トークンなし/無効 |
-| 403 Forbidden | PERMISSION_DENIED | 権限がありません | スキルマップ生成権限なし |
-| 500 Internal Server Error | SYSTEM_ERROR | システムエラーが発生しました | サーバー内部エラー |
-
-### 3.4 エラー時レスポンス例
-
+#### レスポンス（成功時）
 ```json
 {
-  "error": {
-    "code": "INVALID_MAP_TYPE",
-    "message": "マップタイプが不正です",
-    "details": "指定されたマップタイプ 'tree' は存在しません。有効なマップタイプ: radar, bubble, heatmap, network"
-  }
-}
-```
-
----
-
-## 4. 処理仕様
-
-### 4.1 処理フロー
-
-1. リクエストの認証・認可チェック
-   - JWTトークンの検証
-   - スキルマップ生成権限（PERM_GENERATE_SKILL_MAP）の確認
-2. リクエストパラメータの検証
-   - マップタイプの検証
-   - ユーザーID、部署ID、スキルカテゴリ、スキルIDの存在チェック
-   - 可視化オプションの検証
-3. 対象ユーザーの決定
-   - target_usersが指定されている場合はそのユーザー
-   - department_idが指定されている場合はその部署のユーザー
-   - どちらも指定がない場合は自身のみ
-4. スキルデータの取得
-   - 対象ユーザーのスキルデータを取得
-   - 指定された年度のデータを取得
-   - スキルカテゴリ、スキルIDでフィルタリング
-5. マップデータの生成
-   - マップタイプに応じたデータ構造の生成
-   - 可視化オプションに基づく処理
-   - 平均値の計算（include_average=trueの場合）
-6. レスポンスの生成
-   - 生成したマップデータを整形
-7. レスポンス返却
-
-### 4.2 マップタイプ別処理
-
-#### radar マップ
-
-- 各スキルを軸とするレーダーチャート形式
-- max_skillsで指定された数のスキルを選択
-- sort_byに基づいてスキルをソート
-- 各ユーザーのスキルレベルを値として設定
-- include_average=trueの場合は平均値も計算
-
-#### bubble マップ
-
-- スキルをノードとするバブルチャート形式
-- max_skillsで指定された数のスキルを選択
-- size_byに基づいてノードサイズを決定
-- color_byに基づいてノード色を決定
-- 各ユーザーのスキル情報をノードに紐づけ
-
-#### heatmap マップ
-
-- ユーザー×スキルのマトリクス形式
-- max_users, max_skillsで指定された数のユーザー・スキルを選択
-- sort_users_by, sort_skills_byに基づいてソート
-- スキルレベルを色の濃さで表現
-
-#### network マップ
-
-- スキルとユーザーをノードとするネットワーク形式
-- max_nodesで指定された数のノードを選択
-- node_size_byに基づいてノードサイズを決定
-- edge_thresholdを超える関連のみエッジとして表示
-- layoutに基づいてノードの配置を決定
-
-### 4.3 権限チェック
-
-- 自身のスキルマップは常に生成可能
-- 他ユーザーのスキルマップ生成には権限（PERM_GENERATE_SKILL_MAP）が必要
-- 管理者（ROLE_ADMIN）は全ユーザーのスキルマップを生成可能
-- 上長は自部門のメンバーのスキルマップを生成可能
-
-### 4.4 パフォーマンス要件
-
-- 大量のユーザー・スキルデータを処理する場合、処理時間が長くなる可能性がある
-- 複雑なマップ（特にnetworkタイプ）の生成は、バックグラウンドジョブとして実行することも検討
-- 生成結果はキャッシュされ、同一条件での再生成時に高速化
-- 対象ユーザー数が多い場合（100人以上）は、サンプリングや集約処理を適用
-
----
-
-## 5. 関連情報
-
-### 5.1 関連API
-
-| API ID | API名称 | 関連内容 |
-|--------|--------|----------|
-| [API-021](API仕様書_API-021.md) | スキル情報取得API | ユーザースキル情報取得 |
-| [API-023](API仕様書_API-023.md) | スキルマスタ取得API | スキルマスタ情報取得 |
-| [API-025](API仕様書_API-025.md) | スキル検索API | 条件指定によるスキル検索 |
-
-### 5.2 使用テーブル
-
-| テーブル名 | 用途 | 主な操作 |
-|-----------|------|----------|
-| users | ユーザー情報 | 参照（R） |
-| departments | 部署情報 | 参照（R） |
-| positions | 役職情報 | 参照（R） |
-| user_skills | ユーザースキル情報 | 参照（R） |
-| skill_masters | スキルマスタ | 参照（R） |
-| skill_categories | スキルカテゴリ | 参照（R） |
-| skill_relations | スキル関連情報 | 参照（R） |
-
-### 5.3 注意事項・補足
-
-- スキルマップは人材育成・組織分析・プロジェクト編成などに活用
-- マップデータは可視化ライブラリ（Chart.js, D3.js, ECharts等）で表示することを想定
-- 生成されたマップデータは一時的に保存され、URLで共有可能
-- 保存期間は生成から30日間
-- エクスポート機能を利用する場合は別APIを使用（API-061 レポート生成API）
-- 大規模なマップ生成はシステム負荷が高いため、利用頻度や時間帯に注意
-
----
-
-## 6. サンプルコード
-
-### 6.1 フロントエンド実装例（React/TypeScript + Chart.js）
-
-```typescript
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
-import { useParams } from 'react-router-dom';
-
-// Chart.jsコンポーネントの登録
-Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
-
-interface SkillMapParams {
-  map_type: 'radar' | 'bubble' | 'heatmap' | 'network';
-  target_users?: string[];
-  department_id?: string;
-  skill_categories?: string[];
-  skill_ids?: string[];
-  year?: number;
-  include_average?: boolean;
-  group_by?: 'department' | 'position' | 'none';
-  visualization_options?: any;
-}
-
-interface RadarMapData {
-  axes: {
-    skill_id: string;
-    name: string;
-    category: string;
-    max_value: number;
-  }[];
-  series: {
-    user_id: string;
-    name: string;
-    color: string;
-    values: number[];
-    is_average: boolean;
-  }[];
-}
-
-interface SkillMapResponse {
-  map_type: string;
-  generated_at: string;
-  year: number;
-  data: RadarMapData | any;
-  metadata: {
-    user_count: number;
-    skill_count: number;
-    categories: {
-      id: string;
-      name: string;
-      color: string;
-    }[];
-    visualization_options: any;
-  };
-}
-
-const RadarSkillMap: React.FC = () => {
-  const { departmentId } = useParams<{ departmentId?: string }>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [mapData, setMapData] = useState<SkillMapResponse | null>(null);
-  const chartRef = useRef<HTMLCanvasElement>(null);
-  const chartInstance = useRef<Chart | null>(null);
-  
-  // マップ生成パラメータ
-  const [mapParams, setMapParams] = useState<SkillMapParams>({
-    map_type: 'radar',
-    skill_categories: ['technical', 'business'],
-    include_average: true,
-    visualization_options: {
-      max_skills: 8,
-      sort_by: 'level',
-      fill_area: true
-    }
-  });
-  
-  // 部署IDが指定されている場合は設定
-  useEffect(() => {
-    if (departmentId) {
-      setMapParams(prev => ({
-        ...prev,
-        department_id: departmentId
-      }));
-    }
-  }, [departmentId]);
-  
-  // スキルマップデータの取得
-  useEffect(() => {
-    const fetchSkillMap = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // APIリクエスト
-        const response = await axios.post<SkillMapResponse>('/api/skills/map', mapParams, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        setMapData(response.data);
-        
-      } catch (err) {
-        if (axios.isAxiosError(err) && err.response) {
-          const errorData = err.response.data;
-          setError(errorData.error?.message || 'スキルマップの生成に失敗しました');
-        } else {
-          setError('スキルマップの生成中にエラーが発生しました');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchSkillMap();
-  }, [mapParams]);
-  
-  // Chart.jsでのレーダーチャート描画
-  useEffect(() => {
-    if (!mapData || mapData.map_type !== 'radar' || !chartRef.current) {
-      return;
-    }
-    
-    // 既存のチャートを破棄
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
-    
-    const radarData = mapData.data as RadarMapData;
-    
-    // チャートデータの準備
-    const data = {
-      labels: radarData.axes.map(axis => axis.name),
-      datasets: radarData.series.map(series => ({
-        label: series.name,
-        data: series.values,
-        backgroundColor: series.is_average 
-          ? 'rgba(220, 53, 69, 0.2)' // 平均値は赤色半透明
-          : `${series.color}33`, // 透明度20%
-        borderColor: series.color,
-        borderWidth: series.is_average ? 2 : 1,
-        pointBackgroundColor: series.color,
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: series.color,
-        fill: mapData.metadata.visualization_options.fill_area
-      }))
-    };
-    
-    // チャートオプションの準備
-    const options = {
-      scales: {
-        r: {
-          angleLines: {
-            display: true
+  "success": true,
+  "data": {
+    "skillMap": {
+      "id": "map_001",
+      "type": "organization",
+      "targetId": "org_001",
+      "targetName": "エンジニアリング部",
+      "generatedAt": "2025-05-30T11:00:00Z",
+      "summary": {
+        "totalUsers": 45,
+        "totalSkills": 120,
+        "averageSkillLevel": 3.2,
+        "skillCoverage": 0.75,
+        "topSkillCategories": [
+          {
+            "category": "プログラミング",
+            "skillCount": 25,
+            "averageLevel": 3.8
           },
-          suggestedMin: 0,
-          suggestedMax: 5,
-          ticks: {
-            stepSize: 1
+          {
+            "category": "データベース",
+            "skillCount": 15,
+            "averageLevel": 3.1
           }
-        }
+        ]
       },
-      plugins: {
-        legend: {
-          position: 'top' as const,
-        },
-        tooltip: {
-          callbacks: {
-            title: (items: any) => {
-              const index = items[0].dataIndex;
-              return radarData.axes[index].name;
+      "skillMatrix": {
+        "categories": [
+          {
+            "id": "programming",
+            "name": "プログラミング",
+            "skills": [
+              {
+                "id": "javascript",
+                "name": "JavaScript",
+                "levels": {
+                  "beginner": 5,
+                  "intermediate": 15,
+                  "advanced": 8,
+                  "expert": 2
+                },
+                "averageLevel": 3.2,
+                "trend": "increasing",
+                "gapAnalysis": {
+                  "currentLevel": 3.2,
+                  "targetLevel": 3.5,
+                  "gap": 0.3,
+                  "priority": "medium"
+                }
+              },
+              {
+                "id": "python",
+                "name": "Python",
+                "levels": {
+                  "beginner": 8,
+                  "intermediate": 12,
+                  "advanced": 5,
+                  "expert": 1
+                },
+                "averageLevel": 2.8,
+                "trend": "stable",
+                "gapAnalysis": {
+                  "currentLevel": 2.8,
+                  "targetLevel": 3.2,
+                  "gap": 0.4,
+                  "priority": "high"
+                }
+              }
+            ]
+          }
+        ],
+        "departments": [
+          {
+            "id": "frontend",
+            "name": "フロントエンド",
+            "userCount": 15,
+            "skillDistribution": {
+              "javascript": {
+                "average": 4.1,
+                "distribution": [2, 5, 6, 2]
+              },
+              "react": {
+                "average": 3.8,
+                "distribution": [1, 4, 8, 2]
+              }
+            }
+          },
+          {
+            "id": "backend",
+            "name": "バックエンド",
+            "userCount": 20,
+            "skillDistribution": {
+              "python": {
+                "average": 3.5,
+                "distribution": [3, 7, 8, 2]
+              },
+              "nodejs": {
+                "average": 3.2,
+                "distribution": [2, 8, 8, 2]
+              }
+            }
+          }
+        ]
+      },
+      "visualization": {
+        "type": "heatmap",
+        "data": {
+          "heatmapData": [
+            {
+              "skill": "JavaScript",
+              "department": "フロントエンド",
+              "value": 4.1,
+              "color": "#ff6b6b"
             },
-            label: (context: any) => {
-              const value = context.raw;
-              const seriesName = context.dataset.label;
-              return `${seriesName}: ${value}`;
+            {
+              "skill": "Python",
+              "department": "バックエンド",
+              "value": 3.5,
+              "color": "#4ecdc4"
+            }
+          ],
+          "chartConfig": {
+            "width": 800,
+            "height": 600,
+            "colorScale": ["#e8f5e8", "#2d5a2d"],
+            "legend": {
+              "min": 1,
+              "max": 5,
+              "labels": ["初級", "中級", "上級", "エキスパート"]
             }
           }
         }
+      },
+      "recommendations": [
+        {
+          "type": "skill_gap",
+          "priority": "high",
+          "title": "Pythonスキル強化",
+          "description": "バックエンドチームのPythonスキルレベルを向上させることを推奨",
+          "targetSkill": "python",
+          "targetDepartment": "backend",
+          "currentLevel": 2.8,
+          "targetLevel": 3.2,
+          "suggestedActions": [
+            "Python上級研修の実施",
+            "メンタリングプログラムの導入",
+            "実践プロジェクトへの参加"
+          ]
+        },
+        {
+          "type": "knowledge_sharing",
+          "priority": "medium",
+          "title": "フロントエンド知識共有",
+          "description": "JavaScriptエキスパートによる知識共有セッション",
+          "experts": ["user_001", "user_015"],
+          "targetAudience": "初級・中級者",
+          "suggestedFormat": "週次勉強会"
+        }
+      ],
+      "exportUrls": {
+        "pdf": "https://api.example.com/exports/skillmap_001.pdf",
+        "excel": "https://api.example.com/exports/skillmap_001.xlsx",
+        "png": "https://api.example.com/exports/skillmap_001.png"
       }
-    };
-    
-    // チャートの作成
-    chartInstance.current = new Chart(chartRef.current, {
-      type: 'radar',
-      data,
-      options
-    });
-    
-    // クリーンアップ関数
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
+    }
+  }
+}
+```
+
+### 1.2 スキルマップ履歴取得
+
+#### リクエスト
+```http
+GET /api/skills/map/history?targetId=org_001&limit=10
+Authorization: Bearer {jwt_token}
+```
+
+#### クエリパラメータ
+| パラメータ名 | 型      | 必須 | 説明                                           |
+|--------------|---------|------|------------------------------------------------|
+| targetId     | String  | Yes  | 対象ID                                         |
+| limit        | Integer | No   | 取得件数（デフォルト: 10、最大: 50）           |
+| dateFrom     | String  | No   | 開始日（YYYY-MM-DD形式）                       |
+| dateTo       | String  | No   | 終了日（YYYY-MM-DD形式）                       |
+
+#### レスポンス（成功時）
+```json
+{
+  "success": true,
+  "data": {
+    "history": [
+      {
+        "id": "map_001",
+        "generatedAt": "2025-05-30T11:00:00Z",
+        "type": "organization",
+        "targetName": "エンジニアリング部",
+        "summary": {
+          "totalUsers": 45,
+          "totalSkills": 120,
+          "averageSkillLevel": 3.2
+        },
+        "downloadUrl": "https://api.example.com/skillmaps/map_001"
+      },
+      {
+        "id": "map_002",
+        "generatedAt": "2025-05-15T11:00:00Z",
+        "type": "organization",
+        "targetName": "エンジニアリング部",
+        "summary": {
+          "totalUsers": 43,
+          "totalSkills": 115,
+          "averageSkillLevel": 3.1
+        },
+        "downloadUrl": "https://api.example.com/skillmaps/map_002"
       }
-    };
-  }, [mapData]);
-  
-  // マップパラメータの更新
-  const handleParamChange = (field: keyof SkillMapParams, value: any) => {
-    setMapParams(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-  
-  // 可視化オプションの更新
-  const handleOptionChange = (field: string, value: any) => {
-    setMapParams(prev => ({
-      ...prev,
-      visualization_options: {
-        ...prev.visualization_options,
-        [field]: value
-      }
-    }));
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 3,
+      "totalItems": 25,
+      "hasNext": true
+    }
+  }
+}
+```
+
+### 1.3 スキルマップ詳細取得
+
+#### リクエスト
+```http
+GET /api/skills/map/{map_id}
+Authorization: Bearer {jwt_token}
+```
+
+#### パスパラメータ
+| パラメータ名 | 型     | 必須 | 説明           |
+|--------------|--------|------|----------------|
+| map_id       | String | Yes  | スキルマップID |
+
+#### レスポンス（成功時）
+```json
+{
+  "success": true,
+  "data": {
+    "skillMap": {
+      "id": "map_001",
+      "type": "organization",
+      "targetId": "org_001",
+      "targetName": "エンジニアリング部",
+      "generatedAt": "2025-05-30T11:00:00Z",
+      "parameters": {
+        "filters": {
+          "departments": ["engineering", "design"],
+          "skillCategories": ["technical", "business"]
+        },
+        "visualization": {
+          "type": "heatmap",
+          "groupBy": "department"
+        }
+      },
+      "data": "... (1.1と同じ詳細データ)"
+    }
+  }
+}
+```
+
+## 2. エラーレスポンス
+
+### 2.1 共通エラーフォーマット
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "エラーメッセージ",
+    "details": "詳細情報"
+  }
+}
+```
+
+### 2.2 エラーコード一覧
+| エラーコード | HTTPステータス | 説明 |
+|-------------|---------------|------|
+| INVALID_MAP_TYPE | 400 | 無効なマップ種別 |
+| TARGET_NOT_FOUND | 404 | 対象が見つからない |
+| INSUFFICIENT_DATA | 400 | データ不足でマップ生成不可 |
+| INVALID_VISUALIZATION | 400 | 無効な可視化設定 |
+| MAP_NOT_FOUND | 404 | スキルマップが見つからない |
+| GENERATION_FAILED | 500 | マップ生成処理失敗 |
+| EXPORT_FAILED | 500 | エクスポート処理失敗 |
+
+## 3. 実装仕様
+
+### 3.1 マップ種別
+- **organization**: 組織全体のスキルマップ
+- **department**: 部署別スキルマップ
+- **team**: チーム別スキルマップ
+- **individual**: 個人スキルマップ
+
+### 3.2 可視化タイプ
+- **heatmap**: ヒートマップ形式
+- **radar**: レーダーチャート形式
+- **bar**: 棒グラフ形式
+- **bubble**: バブルチャート形式
+
+### 3.3 集計方法
+- **average**: 平均値
+- **median**: 中央値
+- **max**: 最大値
+- **distribution**: 分布
+
+## 4. パフォーマンス要件
+
+| 項目 | 要件 |
+|------|------|
+| 生成時間 | 組織レベル: 30秒以内、部署レベル: 10秒以内 |
+| 同時生成数 | 10件まで |
+| データ保持期間 | 生成から6ヶ月 |
+| エクスポートサイズ | PDF: 10MB以内、Excel: 5MB以内 |
+
+## 5. 改訂履歴
+
+| 改訂日     | 改訂者 | 改訂内容                                         |
+|------------|--------|--------------------------------------------------|
+| 2025/05/30 | 初版   | 初版作成                                         |
