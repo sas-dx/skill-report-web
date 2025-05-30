@@ -1,616 +1,271 @@
-# バッチ定義書：外部システム連携バッチ
+# バッチ定義書：ログクリーンアップバッチ (BATCH-002)
 
-| 項目                | 内容                                                                                |
-|---------------------|------------------------------------------------------------------------------------|
-| **バッチID**        | BATCH-403                                                                          |
-| **バッチ名称**      | 外部システム連携バッチ                                                              |
-| **機能カテゴリ**    | 通知・連携                                                                          |
-| **概要・目的**      | Teams/Slack/LINE WORKS等の外部システムとのデータ同期・連携処理を実行する           |
-| **バッチ種別**      | 定期バッチ                                                                          |
-| **実行スケジュール**| 日次（06:00）                                                                       |
-| **入出力対象**      | 外部システムAPI、ユーザー情報、チーム情報、通知設定                                 |
-| **優先度**          | 中                                                                                  |
-| **備考**            | マルチテナント対応、API制限考慮、エラー処理強化                                     |
+## 1. 基本情報
 
-## 1. 処理概要
+| 項目 | 内容 |
+|------|------|
+| **バッチID** | BATCH-002 |
+| **バッチ名** | ログクリーンアップバッチ |
+| **実行スケジュール** | 日次（03:00） |
+| **優先度** | 中 |
+| **ステータス** | 未着手 |
+| **作成日** | 2025/05/31 |
+| **最終更新日** | 2025/05/31 |
 
-外部システム連携バッチは、マルチテナント環境において各テナントが利用する外部システム（Teams、Slack、LINE WORKS等）との連携を管理するバッチ処理です。ユーザー情報の同期、チーム・チャンネル情報の更新、認証トークンの更新、連携状態の監視を行い、外部システムとの連携を安定的に維持します。
+## 2. バッチ概要
 
-## 2. 処理フロー
+### 2.1 概要・目的
+システム全体のログファイルの整理・削除を行い、ディスク容量の最適化とログ管理の効率化を図る。
 
+### 2.2 関連テーブル
+- TBL-010_ログ
+- TBL-020_ログクリーンアップ設定
+- TBL-021_ログクリーンアップ履歴
+
+### 2.3 関連API
+- API-020_ログクリーンアップ設定取得API
+- API-021_ログクリーンアップ結果登録API
+
+## 3. 実行仕様
+
+### 3.1 実行スケジュール
+| 項目 | 設定値 | 備考 |
+|------|--------|------|
+| 実行頻度 | 0 3 * * * | cron形式（毎日03:00） |
+| 実行時間 | 03:00 | 深夜バッチ |
+| タイムアウト | 120分 | 最大実行時間 |
+| リトライ回数 | 2回 | 失敗時の再実行 |
+
+### 3.2 実行条件
+| 条件 | 内容 | 備考 |
+|------|------|------|
+| 前提条件 | ファイルシステム稼働中 | ディスクアクセス権限確認 |
+| 実行可能時間 | 03:00-05:00 | 深夜メンテナンス時間 |
+| 排他制御 | 同一バッチの重複実行禁止 | ロックファイル使用 |
+
+### 3.3 実行パラメータ
+| パラメータ名 | データ型 | 必須 | デフォルト値 | 説明 |
+|--------------|----------|------|--------------|------|
+| retention_days | number | × | 30 | ログ保持日数 |
+| log_types | string[] | × | all | 対象ログ種別 |
+| compress_before_delete | boolean | × | true | 削除前圧縮フラグ |
+| dry_run | boolean | × | false | テスト実行フラグ |
+
+## 4. 処理仕様
+
+### 4.1 処理フロー
 ```mermaid
 flowchart TD
-    A[開始] --> B[連携設定テナント取得]
-    B --> C[外部システム種別判定]
-    C --> D{Teams連携?}
-    C --> E{Slack連携?}
-    C --> F{LINE WORKS連携?}
+    A[バッチ開始] --> B[パラメータ検証]
+    B --> C[ログクリーンアップ設定取得]
+    C --> D[対象ログディレクトリ確認]
+    D --> E[アプリケーションログ処理]
+    E --> F[システムログ処理]
+    F --> G[エラーログ処理]
+    G --> H[アクセスログ処理]
+    H --> I[バッチログ処理]
+    I --> J[古いログファイル特定]
+    J --> K[ログ圧縮処理]
+    K --> L[ログ削除処理]
+    L --> M[ディスク容量確認]
+    M --> N[クリーンアップ結果保存]
+    N --> O[レポート生成]
+    O --> P[バッチ終了]
     
-    D -->|Yes| G[Teams API接続]
-    E -->|Yes| H[Slack API接続]
-    F -->|Yes| I[LINE WORKS API接続]
+    E --> Q[エラー処理]
+    F --> Q
+    G --> Q
+    H --> Q
+    I --> Q
+    J --> Q
+    K --> Q
+    L --> Q
+    Q --> R[エラーログ出力]
+    R --> S[アラート送信]
+    S --> T[異常終了]
     
-    G --> J[Teamsユーザー同期]
-    H --> K[Slackユーザー同期]
-    I --> L[LINE WORKSユーザー同期]
-    
-    J --> M[Teamsチーム同期]
-    K --> N[Slackチャンネル同期]
-    L --> O[LINE WORKSグループ同期]
-    
-    M --> P[Teams通知設定更新]
-    N --> Q[Slack通知設定更新]
-    O --> R[LINE WORKS通知設定更新]
-    
-    P --> S[連携状態記録]
-    Q --> S
-    R --> S
-    
-    S --> T[次のテナントへ]
-    T --> U{全テナント処理完了?}
-    U -->|No| C
-    U -->|Yes| V[連携レポート生成]
-    V --> Z[終了]
+    subgraph "ログ処理詳細"
+        E1[アプリケーションログ確認]
+        E2[保持期間チェック]
+        E3[ログローテーション確認]
+        E1 --> E2 --> E3
+        
+        K1[圧縮対象ファイル選択]
+        K2[gzip圧縮実行]
+        K3[圧縮結果確認]
+        K1 --> K2 --> K3
+        
+        L1[削除対象ファイル選択]
+        L2[安全性確認]
+        L3[ファイル削除実行]
+        L1 --> L2 --> L3
+    end
 ```
 
-## 3. 入力データ
+### 4.2 詳細処理
+1. **初期化処理**
+   - パラメータ検証・設定確認
+   - 対象ログディレクトリの確認
+   - 排他制御ロック取得
 
-### 3.1 外部システム連携設定
+2. **ログファイル分析**
+   - 各ログ種別の確認
+   - ファイルサイズ・作成日時の取得
+   - 保持期間との比較
 
-| 項目                | データ型 | 説明                                           |
-|---------------------|----------|------------------------------------------------|
-| tenant_id           | String   | テナントID                                     |
-| system_type         | String   | システム種別（TEAMS/SLACK/LINE_WORKS）         |
-| api_endpoint        | String   | API エンドポイント                             |
-| client_id           | String   | クライアントID                                 |
-| client_secret       | String   | クライアントシークレット（暗号化）             |
-| access_token        | String   | アクセストークン（暗号化）                     |
-| refresh_token       | String   | リフレッシュトークン（暗号化）                 |
-| token_expires_at    | DateTime | トークン有効期限                               |
-| sync_enabled        | Boolean  | 同期有効フラグ                                 |
-| last_sync_at        | DateTime | 最終同期日時                                   |
+3. **アプリケーションログ処理**
+   - アプリケーション実行ログの整理
+   - デバッグログの削除
+   - パフォーマンスログの圧縮
 
-### 3.2 同期設定
+4. **システムログ処理**
+   - OS レベルのシステムログ整理
+   - セキュリティログの保持期間確認
+   - 監査ログの適切な保管
 
-| 設定項目                | データ型 | デフォルト値 | 説明                                 |
-|-------------------------|----------|--------------|--------------------------------------|
-| sync_users              | Boolean  | true         | ユーザー情報同期有効/無効            |
-| sync_teams              | Boolean  | true         | チーム/チャンネル同期有効/無効       |
-| sync_notifications      | Boolean  | true         | 通知設定同期有効/無効                |
-| batch_size              | Integer  | 100          | 一度に処理するレコード数             |
-| api_rate_limit          | Integer  | 60           | API呼び出し制限（回/分）             |
-| retry_attempts          | Integer  | 3            | リトライ回数                         |
-| timeout_seconds         | Integer  | 30           | タイムアウト時間（秒）               |
+5. **エラーログ処理**
+   - エラーログの重要度別分類
+   - 重要エラーログの長期保持
+   - 一般エラーログの削除
 
-## 4. 出力データ
+6. **ログ圧縮・削除**
+   - 保持期間内ログの圧縮
+   - 保持期間超過ログの削除
+   - 圧縮・削除結果の確認
 
-### 4.1 外部システム同期履歴テーブル（新規作成）
+7. **結果確認・レポート**
+   - ディスク容量削減効果の確認
+   - クリーンアップ統計の生成
+   - 処理結果レポートの作成
 
-| フィールド名      | データ型 | 説明                                           |
-|-------------------|----------|------------------------------------------------|
-| sync_id           | String   | 同期ID（主キー）                               |
-| tenant_id         | String   | テナントID                                     |
-| system_type       | String   | システム種別                                   |
-| sync_type         | String   | 同期種別（USERS/TEAMS/NOTIFICATIONS）          |
-| started_at        | DateTime | 同期開始日時                                   |
-| completed_at      | DateTime | 同期完了日時                                   |
-| status            | String   | 同期ステータス（SUCCESS/FAILED/PARTIAL）       |
-| records_processed | Integer  | 処理レコード数                                 |
-| records_updated   | Integer  | 更新レコード数                                 |
-| records_created   | Integer  | 新規作成レコード数                             |
-| records_deleted   | Integer  | 削除レコード数                                 |
-| error_message     | Text     | エラーメッセージ                               |
+## 5. データ仕様
 
-### 4.2 外部システムユーザーマッピングテーブル（新規作成）
+### 5.1 入力データ
+| データ名 | 形式 | 取得元 | 説明 |
+|----------|------|--------|------|
+| ログクリーンアップ設定 | DB | TBL-020 | 保持期間・対象ディレクトリ設定 |
+| ログファイル | FILE | /logs/ | 各種ログファイル |
+| ディスク使用量情報 | OS | システム | 現在のディスク使用状況 |
 
-| フィールド名      | データ型 | 説明                                           |
-|-------------------|----------|------------------------------------------------|
-| mapping_id        | String   | マッピングID（主キー）                         |
-| tenant_id         | String   | テナントID                                     |
-| internal_user_id  | String   | 内部ユーザーID                                 |
-| system_type       | String   | システム種別                                   |
-| external_user_id  | String   | 外部システムユーザーID                         |
-| external_username | String   | 外部システムユーザー名                         |
-| external_email    | String   | 外部システムメールアドレス                     |
-| sync_status       | String   | 同期ステータス（ACTIVE/INACTIVE/ERROR）        |
-| last_synced_at    | DateTime | 最終同期日時                                   |
+### 5.2 出力データ
+| データ名 | 形式 | 出力先 | 説明 |
+|----------|------|--------|------|
+| クリーンアップ履歴 | DB | TBL-021 | 削除・圧縮ファイル履歴 |
+| 実行ログ | LOG | /logs/batch/ | バッチ実行ログ |
+| クリーンアップレポート | JSON | /reports/ | 詳細なクリーンアップ結果 |
+| 圧縮ログファイル | FILE | /logs/archive/ | 圧縮されたログファイル |
 
-## 5. 外部システム連携仕様
+### 5.3 データ量見積もり
+| 項目 | 件数 | 備考 |
+|------|------|------|
+| 処理対象ログファイル数 | 1,000-10,000ファイル | ログ種別・期間による |
+| 削除対象ファイルサイズ | 1-10GB | 保持期間・ログ量による |
+| 処理時間 | 60-120分 | ファイル数・サイズによる |
 
-### 5.1 Teams連携
+## 6. エラーハンドリング
 
-```typescript
-class TeamsIntegrationService {
-  async syncTeamsData(tenantId: string): Promise<TeamsSyncResult> {
-    const config = await this.getTeamsConfig(tenantId);
-    const client = new TeamsAPIClient(config);
-    
-    try {
-      // アクセストークンの有効性確認・更新
-      await this.validateAndRefreshToken(client, config);
-      
-      // ユーザー同期
-      const userSyncResult = await this.syncTeamsUsers(client, tenantId);
-      
-      // チーム同期
-      const teamSyncResult = await this.syncTeamsTeams(client, tenantId);
-      
-      // 通知設定同期
-      const notificationSyncResult = await this.syncTeamsNotifications(client, tenantId);
-      
-      return {
-        tenantId,
-        systemType: 'TEAMS',
-        userSync: userSyncResult,
-        teamSync: teamSyncResult,
-        notificationSync: notificationSyncResult,
-        status: 'SUCCESS',
-        syncedAt: new Date()
-      };
-    } catch (error) {
-      await this.handleTeamsError(tenantId, error);
-      throw error;
-    }
-  }
-  
-  private async syncTeamsUsers(client: TeamsAPIClient, tenantId: string): Promise<UserSyncResult> {
-    const teamsUsers = await client.getUsers();
-    const internalUsers = await this.getInternalUsers(tenantId);
-    
-    const syncResults = {
-      processed: 0,
-      created: 0,
-      updated: 0,
-      deleted: 0,
-      errors: []
-    };
-    
-    for (const teamsUser of teamsUsers) {
-      try {
-        const internalUser = this.findMatchingUser(teamsUser, internalUsers);
-        
-        if (internalUser) {
-          // 既存ユーザーの更新
-          await this.updateUserMapping(tenantId, internalUser.id, teamsUser);
-          syncResults.updated++;
-        } else {
-          // 新規ユーザーマッピングの作成
-          await this.createUserMapping(tenantId, teamsUser);
-          syncResults.created++;
-        }
-        
-        syncResults.processed++;
-      } catch (error) {
-        syncResults.errors.push({
-          userId: teamsUser.id,
-          error: error.message
-        });
-      }
-    }
-    
-    return syncResults;
-  }
-  
-  private async syncTeamsTeams(client: TeamsAPIClient, tenantId: string): Promise<TeamSyncResult> {
-    const teamsTeams = await client.getTeams();
-    const syncResults = {
-      processed: 0,
-      created: 0,
-      updated: 0,
-      errors: []
-    };
-    
-    for (const team of teamsTeams) {
-      try {
-        const existingTeam = await this.findExistingTeam(tenantId, team.id);
-        
-        if (existingTeam) {
-          await this.updateTeamInfo(tenantId, team);
-          syncResults.updated++;
-        } else {
-          await this.createTeamInfo(tenantId, team);
-          syncResults.created++;
-        }
-        
-        // チャンネル情報の同期
-        const channels = await client.getTeamChannels(team.id);
-        await this.syncTeamChannels(tenantId, team.id, channels);
-        
-        syncResults.processed++;
-      } catch (error) {
-        syncResults.errors.push({
-          teamId: team.id,
-          error: error.message
-        });
-      }
-    }
-    
-    return syncResults;
-  }
-}
-```
+### 6.1 エラー分類
+| エラー種別 | 対応方法 | 通知要否 | 備考 |
+|------------|----------|----------|------|
+| ファイルアクセスエラー | エラーログ出力・スキップ | △ | 権限・ロックエラー |
+| ディスク容量不足エラー | 処理中断・アラート | ○ | 容量不足 |
+| 圧縮処理エラー | エラーログ出力・継続 | △ | 圧縮失敗 |
+| 削除処理エラー | エラーログ出力・継続 | △ | 削除失敗 |
 
-### 5.2 Slack連携
+### 6.2 リトライ仕様
+| 条件 | リトライ回数 | 間隔 | 備考 |
+|------|--------------|------|------|
+| ファイルロックエラー | 3回 | 30秒 | 固定間隔 |
+| 一時的なI/Oエラー | 2回 | 60秒 | 固定間隔 |
+| 圧縮処理エラー | 1回 | 10秒 | 短間隔リトライ |
 
-```typescript
-class SlackIntegrationService {
-  async syncSlackData(tenantId: string): Promise<SlackSyncResult> {
-    const config = await this.getSlackConfig(tenantId);
-    const client = new SlackAPIClient(config);
-    
-    try {
-      // ワークスペース情報の取得
-      const workspaceInfo = await client.getWorkspaceInfo();
-      
-      // ユーザー同期
-      const userSyncResult = await this.syncSlackUsers(client, tenantId);
-      
-      // チャンネル同期
-      const channelSyncResult = await this.syncSlackChannels(client, tenantId);
-      
-      // Bot設定同期
-      const botSyncResult = await this.syncSlackBots(client, tenantId);
-      
-      return {
-        tenantId,
-        systemType: 'SLACK',
-        workspaceInfo,
-        userSync: userSyncResult,
-        channelSync: channelSyncResult,
-        botSync: botSyncResult,
-        status: 'SUCCESS',
-        syncedAt: new Date()
-      };
-    } catch (error) {
-      await this.handleSlackError(tenantId, error);
-      throw error;
-    }
-  }
-  
-  private async syncSlackUsers(client: SlackAPIClient, tenantId: string): Promise<UserSyncResult> {
-    const slackUsers = await client.getUsers();
-    const syncResults = {
-      processed: 0,
-      created: 0,
-      updated: 0,
-      deleted: 0,
-      errors: []
-    };
-    
-    for (const slackUser of slackUsers) {
-      try {
-        // ボットユーザーは除外
-        if (slackUser.is_bot || slackUser.deleted) {
-          continue;
-        }
-        
-        const existingMapping = await this.findUserMapping(tenantId, 'SLACK', slackUser.id);
-        
-        if (existingMapping) {
-          await this.updateSlackUserMapping(existingMapping, slackUser);
-          syncResults.updated++;
-        } else {
-          await this.createSlackUserMapping(tenantId, slackUser);
-          syncResults.created++;
-        }
-        
-        syncResults.processed++;
-      } catch (error) {
-        syncResults.errors.push({
-          userId: slackUser.id,
-          error: error.message
-        });
-      }
-    }
-    
-    return syncResults;
-  }
-  
-  private async syncSlackChannels(client: SlackAPIClient, tenantId: string): Promise<ChannelSyncResult> {
-    const channels = await client.getChannels();
-    const syncResults = {
-      processed: 0,
-      created: 0,
-      updated: 0,
-      errors: []
-    };
-    
-    for (const channel of channels) {
-      try {
-        // プライベートチャンネルで参加していないものは除外
-        if (channel.is_private && !channel.is_member) {
-          continue;
-        }
-        
-        const existingChannel = await this.findChannelMapping(tenantId, 'SLACK', channel.id);
-        
-        if (existingChannel) {
-          await this.updateSlackChannelMapping(existingChannel, channel);
-          syncResults.updated++;
-        } else {
-          await this.createSlackChannelMapping(tenantId, channel);
-          syncResults.created++;
-        }
-        
-        syncResults.processed++;
-      } catch (error) {
-        syncResults.errors.push({
-          channelId: channel.id,
-          error: error.message
-        });
-      }
-    }
-    
-    return syncResults;
-  }
-}
-```
+### 6.3 異常終了時の処理
+1. 処理中断
+2. 部分的な処理結果保存
+3. エラーログ出力
+4. システム管理者への通知
+5. 排他制御ロック解除
 
-### 5.3 LINE WORKS連携
+## 7. 監視・運用
 
-```typescript
-class LineWorksIntegrationService {
-  async syncLineWorksData(tenantId: string): Promise<LineWorksSyncResult> {
-    const config = await this.getLineWorksConfig(tenantId);
-    const client = new LineWorksAPIClient(config);
-    
-    try {
-      // アクセストークンの取得・更新
-      await this.refreshLineWorksToken(client, config);
-      
-      // ユーザー同期
-      const userSyncResult = await this.syncLineWorksUsers(client, tenantId);
-      
-      // グループ同期
-      const groupSyncResult = await this.syncLineWorksGroups(client, tenantId);
-      
-      // Bot設定同期
-      const botSyncResult = await this.syncLineWorksBots(client, tenantId);
-      
-      return {
-        tenantId,
-        systemType: 'LINE_WORKS',
-        userSync: userSyncResult,
-        groupSync: groupSyncResult,
-        botSync: botSyncResult,
-        status: 'SUCCESS',
-        syncedAt: new Date()
-      };
-    } catch (error) {
-      await this.handleLineWorksError(tenantId, error);
-      throw error;
-    }
-  }
-  
-  private async syncLineWorksUsers(client: LineWorksAPIClient, tenantId: string): Promise<UserSyncResult> {
-    const lineWorksUsers = await client.getUsers();
-    const syncResults = {
-      processed: 0,
-      created: 0,
-      updated: 0,
-      deleted: 0,
-      errors: []
-    };
-    
-    for (const lineWorksUser of lineWorksUsers) {
-      try {
-        // 削除済みユーザーは除外
-        if (lineWorksUser.deletedTime) {
-          continue;
-        }
-        
-        const existingMapping = await this.findUserMapping(tenantId, 'LINE_WORKS', lineWorksUser.userId);
-        
-        if (existingMapping) {
-          await this.updateLineWorksUserMapping(existingMapping, lineWorksUser);
-          syncResults.updated++;
-        } else {
-          await this.createLineWorksUserMapping(tenantId, lineWorksUser);
-          syncResults.created++;
-        }
-        
-        syncResults.processed++;
-      } catch (error) {
-        syncResults.errors.push({
-          userId: lineWorksUser.userId,
-          error: error.message
-        });
-      }
-    }
-    
-    return syncResults;
-  }
-}
-```
+### 7.1 監視項目
+| 監視項目 | 閾値 | アラート条件 | 対応方法 |
+|----------|------|--------------|----------|
+| 処理時間 | 120分 | 超過時 | ログ量・処理見直し |
+| 削除ファイル数 | 期待値±30% | 乖離時 | ログ生成量確認 |
+| 容量削減率 | 10%以上 | 未達時 | 設定見直し |
+| エラー率 | 5% | 超過時 | 原因調査 |
 
-## 6. API制限・エラー処理
+### 7.2 ログ出力
+| ログ種別 | 出力レベル | 出力内容 | 保存期間 |
+|----------|------------|----------|----------|
+| 実行ログ | INFO | 処理開始・終了・削除件数・容量削減 | 3ヶ月 |
+| エラーログ | ERROR | エラー詳細・対象ファイルパス | 6ヶ月 |
+| 詳細ログ | DEBUG | 削除対象ファイル詳細 | 1ヶ月 |
 
-### 6.1 レート制限対応
+### 7.3 アラート通知
+| 通知条件 | 通知先 | 通知方法 | 備考 |
+|----------|--------|----------|------|
+| 異常終了 | システム管理者 | メール・Slack | 即座に通知 |
+| 容量削減未達 | 運用チーム | メール | 翌営業日まで |
+| 大量ファイル削除 | 運用チーム | Slack | 確認要請 |
 
-```typescript
-class APIRateLimiter {
-  private rateLimits: Map<string, RateLimit> = new Map();
-  
-  async executeWithRateLimit<T>(
-    systemType: string,
-    operation: () => Promise<T>
-  ): Promise<T> {
-    const rateLimit = this.getRateLimit(systemType);
-    
-    await this.waitForRateLimit(rateLimit);
-    
-    try {
-      const result = await operation();
-      this.updateRateLimit(rateLimit, true);
-      return result;
-    } catch (error) {
-      this.updateRateLimit(rateLimit, false);
-      
-      if (this.isRateLimitError(error)) {
-        const retryAfter = this.extractRetryAfter(error);
-        await this.sleep(retryAfter * 1000);
-        return this.executeWithRateLimit(systemType, operation);
-      }
-      
-      throw error;
-    }
-  }
-  
-  private getRateLimit(systemType: string): RateLimit {
-    if (!this.rateLimits.has(systemType)) {
-      const limits = {
-        'TEAMS': { maxRequests: 600, windowMs: 60000 }, // 600/分
-        'SLACK': { maxRequests: 100, windowMs: 60000 },  // 100/分
-        'LINE_WORKS': { maxRequests: 300, windowMs: 60000 } // 300/分
-      };
-      
-      this.rateLimits.set(systemType, {
-        ...limits[systemType],
-        requests: [],
-        lastReset: Date.now()
-      });
-    }
-    
-    return this.rateLimits.get(systemType)!;
-  }
-  
-  private async waitForRateLimit(rateLimit: RateLimit): Promise<void> {
-    const now = Date.now();
-    
-    // ウィンドウ外のリクエストを削除
-    rateLimit.requests = rateLimit.requests.filter(
-      time => now - time < rateLimit.windowMs
-    );
-    
-    // レート制限チェック
-    if (rateLimit.requests.length >= rateLimit.maxRequests) {
-      const oldestRequest = Math.min(...rateLimit.requests);
-      const waitTime = rateLimit.windowMs - (now - oldestRequest);
-      
-      if (waitTime > 0) {
-        await this.sleep(waitTime);
-      }
-    }
-  }
-}
-```
+## 8. 非機能要件
 
-### 6.2 エラー処理・リトライ
+### 8.1 パフォーマンス
+- 処理時間：120分以内
+- メモリ使用量：1GB以内
+- CPU使用率：40%以内
 
-```typescript
-class ExternalSystemErrorHandler {
-  async handleWithRetry<T>(
-    operation: () => Promise<T>,
-    maxRetries: number = 3,
-    backoffMs: number = 1000
-  ): Promise<T> {
-    let lastError: Error;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        return await operation();
-      } catch (error) {
-        lastError = error;
-        
-        if (!this.isRetryableError(error) || attempt === maxRetries) {
-          throw error;
-        }
-        
-        const delay = backoffMs * Math.pow(2, attempt - 1);
-        await this.sleep(delay);
-      }
-    }
-    
-    throw lastError!;
-  }
-  
-  private isRetryableError(error: any): boolean {
-    // ネットワークエラー
-    if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
-      return true;
-    }
-    
-    // HTTPステータスコードによる判定
-    if (error.response?.status) {
-      const status = error.response.status;
-      return status >= 500 || status === 429; // サーバーエラーまたはレート制限
-    }
-    
-    return false;
-  }
-  
-  async handleSystemError(tenantId: string, systemType: string, error: Error): Promise<void> {
-    const errorRecord = {
-      tenantId,
-      systemType,
-      errorType: this.classifyError(error),
-      errorMessage: error.message,
-      stackTrace: error.stack,
-      occurredAt: new Date()
-    };
-    
-    await this.saveErrorRecord(errorRecord);
-    
-    // 重要なエラーの場合は即座に通知
-    if (this.isCriticalError(error)) {
-      await this.sendCriticalErrorNotification(tenantId, systemType, error);
-    }
-  }
-  
-  private classifyError(error: Error): string {
-    if (error.message.includes('authentication')) return 'AUTH_ERROR';
-    if (error.message.includes('rate limit')) return 'RATE_LIMIT';
-    if (error.message.includes('timeout')) return 'TIMEOUT';
-    if (error.message.includes('network')) return 'NETWORK_ERROR';
-    return 'UNKNOWN_ERROR';
-  }
-}
-```
+### 8.2 可用性
+- 成功率：98%以上
+- 部分的な処理継続機能
+- ファイル整合性の保証
 
-## 7. 依存関係
+### 8.3 セキュリティ
+- 削除ログの完全消去
+- 圧縮ファイルのアクセス制御
+- 削除履歴の改ざん防止
 
-- テナント管理システム
-- 認証・認可システム
-- 通知サービス
-- ユーザー管理システム
-- 暗号化サービス
-- ログ管理システム
+## 9. テスト仕様
 
-## 8. 実行パラメータ
+### 9.1 単体テスト
+| テストケース | 入力条件 | 期待結果 |
+|--------------|----------|----------|
+| 正常処理 | 削除対象ログファイルあり | 正常終了・ファイル削除完了 |
+| 削除対象なし | 削除対象ファイル0件 | 正常終了（削除件数0） |
+| 大量ファイル | 10,000ファイルの削除対象 | 正常終了・適切な処理時間 |
 
-| パラメータ名        | 必須 | デフォルト値 | 説明                                           |
-|---------------------|------|--------------|------------------------------------------------|
-| --tenant-id         | No   | all          | 特定テナントのみ同期                           |
-| --system-type       | No   | all          | 特定システム種別のみ同期                       |
-| --sync-type         | No   | all          | 同期種別（users/teams/notifications）          |
-| --dry-run           | No   | false        | 実際の同期を行わず結果のみ表示                 |
-| --force-refresh     | No   | false        | トークンを強制的に更新                         |
-| --batch-size        | No   | 100          | 一度に処理するレコード数                       |
+### 9.2 異常系テスト
+| テストケース | 入力条件 | 期待結果 |
+|--------------|----------|----------|
+| ファイルロック | 使用中ファイル | エラーログ出力・スキップ |
+| 容量不足 | ディスク容量不足 | 処理中断・アラート |
+| 権限エラー | 削除権限なし | エラーログ出力・スキップ |
 
-## 9. 実行例
+## 10. 実装メモ
 
-```bash
-# 通常実行
-npm run batch:external-system-integration
+### 10.1 技術仕様
+- 言語：Node.js
+- ファイル操作：fs/promises
+- 圧縮：zlib (gzip)
+- 並列処理：worker_threads
 
-# 特定テナントのみ
-npm run batch:external-system-integration -- --tenant-id=tenant-123
+### 10.2 注意事項
+- 重要ログファイルの誤削除防止
+- 圧縮処理時のメモリ使用量制御
+- ログローテーション中のファイル処理
 
-# Slackのみ同期
-npm run batch:external-system-integration -- --system-type=SLACK
+### 10.3 デプロイ・実行環境
+- 実行サーバー：バッチサーバー
+- 実行ユーザー：log_cleanup_user
+- 実行ディレクトリ：/opt/batch/log-cleanup/
+- 設定ファイル：/etc/batch/log-cleanup.json
 
-# ユーザー情報のみ同期
-npm run batch:external-system-integration -- --sync-type=users
+---
 
-# ドライラン
-npm run batch:external-system-integration -- --dry-run
+**改訂履歴**
 
-# TypeScript直接実行
-npx tsx src/batch/external-system-integration.ts
-```
-
-## 10. 改訂履歴
-
-| 改訂日     | 改訂者 | 改訂内容                                         |
-|------------|--------|--------------------------------------------------|
-| 2025/05/31 | 初版   | 初版作成                                         |
+| バージョン | 日付 | 変更者 | 変更内容 |
+|------------|------|--------|----------|
+| 1.0 | 2025/05/31 | システムアーキテクト | 初版作成 |
