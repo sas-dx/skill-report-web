@@ -1,0 +1,890 @@
+{
+  "name": "design-driven-workflow",
+  "description": "要件定義起点の包括的設計書ベース修正ワークフロー",
+  "version": "2.0.0",
+  "created": "2025-05-31",
+  "author": "システムアーキテクト",
+  "metadata": {
+    "project": "年間スキル報告書WEB化PJT - マルチテナント対応",
+    "target_system": "ホールディングス・グループ会社向けマルチテナントSaaS基盤",
+    "workflow_type": "design_synchronization"
+  },
+  "triggers": [
+    {
+      "name": "requirements_change",
+      "description": "要件定義変更",
+      "file_patterns": ["docs/requirements/*.md"],
+      "priority": "critical"
+    },
+    {
+      "name": "screen_list_update",
+      "description": "画面一覧更新",
+      "file_patterns": ["docs/design/screens/画面一覧.md"],
+      "priority": "high"
+    },
+    {
+      "name": "screen_spec_update",
+      "description": "画面設計書更新",
+      "file_patterns": ["docs/design/screens/specs/画面設計書_*.md"],
+      "priority": "high"
+    },
+    {
+      "name": "interface_list_update",
+      "description": "インターフェース一覧更新",
+      "file_patterns": ["docs/design/interface/インターフェース一覧.md"],
+      "priority": "high"
+    },
+    {
+      "name": "interface_spec_update",
+      "description": "インターフェース定義書更新",
+      "file_patterns": ["docs/design/interfaces/specs/インターフェース仕様書_*.md"],
+      "priority": "high"
+    },
+    {
+      "name": "table_list_update",
+      "description": "テーブル一覧更新",
+      "file_patterns": ["docs/design/database/テーブル一覧.md"],
+      "priority": "high"
+    },
+    {
+      "name": "table_spec_update",
+      "description": "テーブル定義書更新",
+      "file_patterns": ["docs/design/database/tables/テーブル定義書_*.md"],
+      "priority": "high"
+    },
+    {
+      "name": "entity_diagram_update",
+      "description": "エンティティ関連図更新",
+      "file_patterns": ["docs/design/database/エンティティ関連図.md"],
+      "priority": "high"
+    },
+    {
+      "name": "api_list_update",
+      "description": "API一覧更新",
+      "file_patterns": ["docs/design/api/API一覧.md"],
+      "priority": "high"
+    },
+    {
+      "name": "api_spec_update",
+      "description": "API定義書更新",
+      "file_patterns": ["docs/design/api/specs/API定義書_*.md"],
+      "priority": "high"
+    },
+    {
+      "name": "batch_list_update",
+      "description": "バッチ一覧更新",
+      "file_patterns": ["docs/design/batch/バッチ一覧.md"],
+      "priority": "high"
+    },
+    {
+      "name": "batch_spec_update",
+      "description": "バッチ仕様書更新",
+      "file_patterns": ["docs/design/batch/specs/バッチ仕様書_*.md"],
+      "priority": "high"
+    },
+    {
+      "name": "manual_sync_request",
+      "description": "手動同期要求",
+      "file_patterns": [],
+      "priority": "medium"
+    }
+  ],
+  "cross_reference_rules": {
+    "screen_designs": {
+      "list_to_spec": {
+        "source": "docs/design/screens/画面一覧.md",
+        "targets": "docs/design/screens/specs/画面設計書_*.md",
+        "sync_fields": [
+          "screen_name",
+          "priority",
+          "function_overview",
+          "related_apis",
+          "related_batches",
+          "related_tables",
+          "related_interfaces"
+        ],
+        "template_generation": true,
+        "auto_create_missing": true
+      },
+      "spec_to_list": {
+        "source": "docs/design/screens/specs/画面設計書_*.md",
+        "target": "docs/design/screens/画面一覧.md",
+        "sync_fields": [
+          "priority",
+          "status",
+          "function_details",
+          "user_actors",
+          "related_elements",
+          "implementation_status"
+        ],
+        "update_strategy": "merge"
+      }
+    },
+    "interface_designs": {
+      "list_to_spec": {
+        "source": "docs/design/interface/インターフェース一覧.md",
+        "targets": "docs/design/interfaces/specs/インターフェース仕様書_*.md",
+        "sync_fields": [
+          "interface_name",
+          "interface_type",
+          "priority",
+          "description",
+          "related_screens",
+          "related_apis"
+        ],
+        "template_generation": true,
+        "auto_create_missing": true
+      },
+      "spec_to_list": {
+        "source": "docs/design/interfaces/specs/インターフェース仕様書_*.md",
+        "target": "docs/design/interface/インターフェース一覧.md",
+        "sync_fields": [
+          "interface_type",
+          "priority",
+          "status",
+          "implementation_details",
+          "data_flow",
+          "validation_rules"
+        ],
+        "update_strategy": "merge"
+      }
+    },
+    "database_designs": {
+      "table_list_to_spec": {
+        "source": "docs/design/database/テーブル一覧.md",
+        "targets": "docs/design/database/tables/テーブル定義書_*.md",
+        "sync_fields": [
+          "table_name",
+          "logical_name",
+          "category",
+          "description",
+          "related_apis",
+          "related_batches",
+          "priority"
+        ],
+        "template_generation": true,
+        "auto_create_missing": true
+      },
+      "table_spec_to_list": {
+        "source": "docs/design/database/tables/テーブル定義書_*.md",
+        "target": "docs/design/database/テーブル一覧.md",
+        "sync_fields": [
+          "logical_name",
+          "category",
+          "priority",
+          "status",
+          "column_count",
+          "relationships",
+          "indexes"
+        ],
+        "update_strategy": "merge"
+      },
+      "table_to_entity": {
+        "source": "docs/design/database/tables/テーブル定義書_*.md",
+        "target": "docs/design/database/エンティティ関連図.md",
+        "sync_fields": [
+          "entity_name",
+          "relationships",
+          "foreign_keys",
+          "indexes",
+          "constraints"
+        ],
+        "diagram_update": true
+      },
+      "entity_to_table": {
+        "source": "docs/design/database/エンティティ関連図.md",
+        "targets": "docs/design/database/tables/テーブル定義書_*.md",
+        "sync_fields": [
+          "relationship_definitions",
+          "cardinality",
+          "constraints",
+          "referential_integrity"
+        ],
+        "update_strategy": "merge"
+      },
+      "list_to_entity": {
+        "source": "docs/design/database/テーブル一覧.md",
+        "target": "docs/design/database/エンティティ関連図.md",
+        "sync_fields": [
+          "table_list",
+          "categories",
+          "priorities",
+          "overview_structure"
+        ],
+        "diagram_update": true
+      }
+    },
+    "api_designs": {
+      "list_to_spec": {
+        "source": "docs/design/api/API一覧.md",
+        "targets": "docs/design/api/specs/API定義書_*.md",
+        "sync_fields": [
+          "api_name",
+          "method",
+          "endpoint",
+          "priority",
+          "description",
+          "related_screens",
+          "related_tables"
+        ],
+        "template_generation": true,
+        "auto_create_missing": true
+      },
+      "spec_to_list": {
+        "source": "docs/design/api/specs/API定義書_*.md",
+        "target": "docs/design/api/API一覧.md",
+        "sync_fields": [
+          "method",
+          "endpoint",
+          "priority",
+          "status",
+          "request_response_details",
+          "authentication_required"
+        ],
+        "update_strategy": "merge"
+      }
+    },
+    "batch_designs": {
+      "list_to_spec": {
+        "source": "docs/design/batch/バッチ一覧.md",
+        "targets": "docs/design/batch/specs/バッチ仕様書_*.md",
+        "sync_fields": [
+          "batch_name",
+          "schedule",
+          "priority",
+          "description",
+          "related_tables",
+          "related_apis"
+        ],
+        "template_generation": true,
+        "auto_create_missing": true
+      },
+      "spec_to_list": {
+        "source": "docs/design/batch/specs/バッチ仕様書_*.md",
+        "target": "docs/design/batch/バッチ一覧.md",
+        "sync_fields": [
+          "schedule",
+          "priority",
+          "status",
+          "execution_details",
+          "dependencies",
+          "error_handling"
+        ],
+        "update_strategy": "merge"
+      }
+    }
+  },
+  "phases": [
+    {
+      "name": "change_detection",
+      "description": "変更検知・分析フェーズ",
+      "order": 1,
+      "steps": [
+        {
+          "name": "detect_source_changes",
+          "description": "変更元ファイルの特定",
+          "actions": [
+            "identify_changed_files",
+            "determine_change_type",
+            "extract_change_details",
+            "map_file_relationships"
+          ],
+          "timeout": 30
+        },
+        {
+          "name": "analyze_impact_scope",
+          "description": "影響範囲の分析",
+          "actions": [
+            "map_cross_dependencies",
+            "identify_affected_documents",
+            "calculate_update_priority",
+            "detect_circular_dependencies"
+          ],
+          "timeout": 60
+        }
+      ]
+    },
+    {
+      "name": "cross_reference_sync",
+      "description": "相互参照同期フェーズ",
+      "order": 2,
+      "parallel": true,
+      "steps": [
+        {
+          "name": "sync_screen_designs",
+          "description": "画面設計の相互同期",
+          "actions": [
+            "sync_screen_list_to_specs",
+            "sync_screen_specs_to_list",
+            "update_screen_interface_mapping",
+            "validate_screen_consistency"
+          ],
+          "timeout": 120
+        },
+        {
+          "name": "sync_interface_designs",
+          "description": "インターフェース設計の相互同期",
+          "actions": [
+            "sync_interface_list_to_specs",
+            "sync_interface_specs_to_list",
+            "update_interface_screen_mapping",
+            "validate_interface_consistency"
+          ],
+          "timeout": 120
+        },
+        {
+          "name": "sync_database_designs",
+          "description": "データベース設計の相互同期",
+          "actions": [
+            "sync_table_list_to_specs",
+            "sync_table_specs_to_list",
+            "sync_table_specs_to_entity_diagram",
+            "sync_entity_diagram_to_table_specs",
+            "sync_table_list_to_entity_diagram",
+            "validate_database_consistency",
+            "check_referential_integrity"
+          ],
+          "timeout": 180
+        },
+        {
+          "name": "sync_api_designs",
+          "description": "API設計の相互同期",
+          "actions": [
+            "sync_api_list_to_specs",
+            "sync_api_specs_to_list",
+            "update_api_table_mapping",
+            "validate_api_consistency"
+          ],
+          "timeout": 120
+        },
+        {
+          "name": "sync_batch_designs",
+          "description": "バッチ設計の相互同期",
+          "actions": [
+            "sync_batch_list_to_specs",
+            "sync_batch_specs_to_list",
+            "update_batch_table_mapping",
+            "validate_batch_consistency"
+          ],
+          "timeout": 120
+        }
+      ]
+    },
+    {
+      "name": "design_integration",
+      "description": "設計統合フェーズ",
+      "order": 3,
+      "steps": [
+        {
+          "name": "integrate_screen_interface",
+          "description": "画面-インターフェース統合",
+          "actions": [
+            "map_screen_to_interface",
+            "validate_interface_coverage",
+            "update_data_flow_diagrams",
+            "check_ui_consistency"
+          ],
+          "timeout": 90
+        },
+        {
+          "name": "integrate_api_database",
+          "description": "API-データベース統合",
+          "actions": [
+            "map_api_to_tables",
+            "validate_data_access_patterns",
+            "update_crud_operations",
+            "check_performance_implications"
+          ],
+          "timeout": 90
+        },
+        {
+          "name": "integrate_batch_database",
+          "description": "バッチ-データベース統合",
+          "actions": [
+            "map_batch_to_tables",
+            "validate_batch_data_flow",
+            "update_data_processing_patterns",
+            "check_resource_usage"
+          ],
+          "timeout": 90
+        }
+      ]
+    },
+    {
+      "name": "project_info_sync",
+      "description": "プロジェクト基本情報同期フェーズ",
+      "order": 4,
+      "steps": [
+        {
+          "name": "update_project_basic_info",
+          "description": "プロジェクト基本情報更新",
+          "actions": [
+            "update_readme_basic_info",
+            "update_requirements_basic_info",
+            "update_memory_bank_info",
+            "update_implementation_plan",
+            "sync_architecture_overview"
+          ],
+          "timeout": 120
+        }
+      ]
+    },
+    {
+      "name": "implementation_sync",
+      "description": "実装同期フェーズ",
+      "order": 5,
+      "steps": [
+        {
+          "name": "generate_implementation_updates",
+          "description": "実装更新の生成",
+          "actions": [
+            "update_implementation_plan",
+            "generate_code_templates",
+            "update_test_specifications",
+            "generate_migration_scripts",
+            "update_deployment_configs"
+          ],
+          "timeout": 180
+        }
+      ]
+    },
+    {
+      "name": "validation",
+      "description": "整合性検証フェーズ",
+      "order": 6,
+      "steps": [
+        {
+          "name": "validate_design_consistency",
+          "description": "設計書整合性検証",
+          "actions": [
+            "check_cross_references",
+            "validate_naming_conventions",
+            "verify_requirement_traceability",
+            "check_data_model_integrity",
+            "validate_interface_contracts",
+            "generate_validation_report"
+          ],
+          "timeout": 120
+        }
+      ]
+    }
+  ],
+  "automation_rules": {
+    "interface_list_update": {
+      "trigger": "インターフェース一覧.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "generate_interface_spec_templates",
+          "description": "新規インターフェースの定義書テンプレート生成",
+          "conditions": ["new_interface_detected"],
+          "template_path": "templates/interface_spec_template.md"
+        },
+        {
+          "name": "sync_interface_basic_info",
+          "description": "既存インターフェース定義書の基本情報同期",
+          "conditions": ["existing_interface_modified"],
+          "sync_fields": ["interface_name", "priority", "description"]
+        },
+        {
+          "name": "update_interface_mappings",
+          "description": "関連画面・APIとのマッピング更新",
+          "conditions": ["relationship_changed"],
+          "affected_files": ["docs/design/screens/specs/*.md", "docs/design/api/specs/*.md"]
+        }
+      ],
+      "notifications": {
+        "success": "インターフェース一覧の変更が正常に反映されました",
+        "error": "インターフェース一覧の同期中にエラーが発生しました"
+      }
+    },
+    "interface_spec_update": {
+      "trigger": "インターフェース仕様書_*.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "update_interface_list",
+          "description": "インターフェース一覧の該当行更新",
+          "conditions": ["spec_details_changed"],
+          "sync_fields": ["interface_type", "priority", "status"]
+        },
+        {
+          "name": "sync_data_flow_details",
+          "description": "データフロー・仕様詳細の同期",
+          "conditions": ["data_flow_modified"],
+          "affected_files": ["docs/design/interface/インターフェース一覧.md"]
+        },
+        {
+          "name": "reflect_to_screen_designs",
+          "description": "関連画面設計書への影響反映",
+          "conditions": ["interface_contract_changed"],
+          "affected_files": ["docs/design/screens/specs/*.md"]
+        }
+      ],
+      "notifications": {
+        "success": "インターフェース仕様書の変更が正常に反映されました",
+        "error": "インターフェース仕様書の同期中にエラーが発生しました"
+      }
+    },
+    "table_list_update": {
+      "trigger": "テーブル一覧.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "generate_table_spec_templates",
+          "description": "新規テーブルの定義書テンプレート生成",
+          "conditions": ["new_table_detected"],
+          "template_path": "templates/table_spec_template.md"
+        },
+        {
+          "name": "add_entity_to_diagram",
+          "description": "エンティティ関連図への新規エンティティ追加",
+          "conditions": ["new_table_detected"],
+          "affected_files": ["docs/design/database/エンティティ関連図.md"]
+        },
+        {
+          "name": "sync_table_basic_info",
+          "description": "既存テーブル定義書の基本情報同期",
+          "conditions": ["existing_table_modified"],
+          "sync_fields": ["table_name", "logical_name", "category", "priority"]
+        }
+      ],
+      "notifications": {
+        "success": "テーブル一覧の変更が正常に反映されました",
+        "error": "テーブル一覧の同期中にエラーが発生しました"
+      }
+    },
+    "table_spec_update": {
+      "trigger": "テーブル定義書_*.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "update_table_list",
+          "description": "テーブル一覧の該当行更新",
+          "conditions": ["table_structure_changed"],
+          "sync_fields": ["logical_name", "category", "column_count", "relationships"]
+        },
+        {
+          "name": "update_entity_relations",
+          "description": "エンティティ関連図のリレーション更新",
+          "conditions": ["relationships_changed"],
+          "affected_files": ["docs/design/database/エンティティ関連図.md"]
+        },
+        {
+          "name": "reflect_to_api_batch_designs",
+          "description": "関連API・バッチ設計書への影響反映",
+          "conditions": ["table_schema_changed"],
+          "affected_files": ["docs/design/api/specs/*.md", "docs/design/batch/specs/*.md"]
+        }
+      ],
+      "notifications": {
+        "success": "テーブル定義書の変更が正常に反映されました",
+        "error": "テーブル定義書の同期中にエラーが発生しました"
+      }
+    },
+    "entity_diagram_update": {
+      "trigger": "エンティティ関連図.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "update_table_relations",
+          "description": "関連テーブル定義書のリレーション情報更新",
+          "conditions": ["entity_relationships_changed"],
+          "affected_files": ["docs/design/database/tables/*.md"]
+        },
+        {
+          "name": "check_referential_integrity",
+          "description": "外部キー制約の整合性確認",
+          "conditions": ["foreign_key_changed"],
+          "validation_rules": ["referential_integrity", "cascade_rules"]
+        },
+        {
+          "name": "sync_table_list_relations",
+          "description": "テーブル一覧のリレーション情報同期",
+          "conditions": ["relationship_overview_changed"],
+          "affected_files": ["docs/design/database/テーブル一覧.md"]
+        }
+      ],
+      "notifications": {
+        "success": "エンティティ関連図の変更が正常に反映されました",
+        "error": "エンティティ関連図の同期中にエラーが発生しました"
+      }
+    },
+    "screen_list_update": {
+      "trigger": "画面一覧.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "generate_screen_spec_templates",
+          "description": "新規画面の設計書テンプレート生成",
+          "conditions": ["new_screen_detected"],
+          "template_path": "templates/screen_spec_template.md"
+        },
+        {
+          "name": "sync_screen_basic_info",
+          "description": "既存画面設計書の基本情報同期",
+          "conditions": ["existing_screen_modified"],
+          "sync_fields": ["screen_name", "priority", "function_overview"]
+        },
+        {
+          "name": "update_related_elements",
+          "description": "関連API・バッチ・テーブルのリンク更新",
+          "conditions": ["relationships_changed"],
+          "affected_files": ["docs/design/screens/specs/*.md"]
+        }
+      ],
+      "notifications": {
+        "success": "画面一覧の変更が正常に反映されました",
+        "error": "画面一覧の同期中にエラーが発生しました"
+      }
+    },
+    "screen_spec_update": {
+      "trigger": "画面設計書_*.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "update_screen_list",
+          "description": "画面一覧の該当行更新",
+          "conditions": ["screen_details_changed"],
+          "sync_fields": ["priority", "status", "function_details", "user_actors"]
+        },
+        {
+          "name": "sync_priority_status",
+          "description": "優先度・ステータス・機能概要の同期",
+          "conditions": ["priority_or_status_changed"],
+          "affected_files": ["docs/design/screens/画面一覧.md"]
+        },
+        {
+          "name": "update_dependency_relations",
+          "description": "関連要素の依存関係更新",
+          "conditions": ["dependencies_changed"],
+          "affected_files": ["docs/design/api/specs/*.md", "docs/design/interfaces/specs/*.md"]
+        }
+      ],
+      "notifications": {
+        "success": "画面設計書の変更が正常に反映されました",
+        "error": "画面設計書の同期中にエラーが発生しました"
+      }
+    },
+    "api_list_update": {
+      "trigger": "API一覧.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "generate_api_spec_templates",
+          "description": "新規APIの定義書テンプレート生成",
+          "conditions": ["new_api_detected"],
+          "template_path": "templates/api_spec_template.md"
+        },
+        {
+          "name": "sync_api_basic_info",
+          "description": "既存API定義書の基本情報同期",
+          "conditions": ["existing_api_modified"],
+          "sync_fields": ["api_name", "method", "endpoint", "priority"]
+        }
+      ],
+      "notifications": {
+        "success": "API一覧の変更が正常に反映されました",
+        "error": "API一覧の同期中にエラーが発生しました"
+      }
+    },
+    "api_spec_update": {
+      "trigger": "API定義書_*.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "update_api_list",
+          "description": "API一覧の該当行更新",
+          "conditions": ["api_details_changed"],
+          "sync_fields": ["method", "endpoint", "priority", "status"]
+        }
+      ],
+      "notifications": {
+        "success": "API定義書の変更が正常に反映されました",
+        "error": "API定義書の同期中にエラーが発生しました"
+      }
+    },
+    "batch_list_update": {
+      "trigger": "バッチ一覧.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "generate_batch_spec_templates",
+          "description": "新規バッチの仕様書テンプレート生成",
+          "conditions": ["new_batch_detected"],
+          "template_path": "templates/batch_spec_template.md"
+        },
+        {
+          "name": "sync_batch_basic_info",
+          "description": "既存バッチ仕様書の基本情報同期",
+          "conditions": ["existing_batch_modified"],
+          "sync_fields": ["batch_name", "schedule", "priority"]
+        }
+      ],
+      "notifications": {
+        "success": "バッチ一覧の変更が正常に反映されました",
+        "error": "バッチ一覧の同期中にエラーが発生しました"
+      }
+    },
+    "batch_spec_update": {
+      "trigger": "バッチ仕様書_*.md変更時",
+      "priority": "high",
+      "actions": [
+        {
+          "name": "update_batch_list",
+          "description": "バッチ一覧の該当行更新",
+          "conditions": ["batch_details_changed"],
+          "sync_fields": ["schedule", "priority", "status", "execution_details"]
+        }
+      ],
+      "notifications": {
+        "success": "バッチ仕様書の変更が正常に反映されました",
+        "error": "バッチ仕様書の同期中にエラーが発生しました"
+      }
+    },
+    "requirements_update": {
+      "trigger": "要件定義.md変更時",
+      "priority": "critical",
+      "actions": [
+        {
+          "name": "analyze_requirement_impact",
+          "description": "要件変更の影響分析",
+          "conditions": ["functional_requirements_changed"],
+          "analysis_scope": ["all_design_documents"]
+        },
+        {
+          "name": "update_all_affected_designs",
+          "description": "影響する全設計書の更新",
+          "conditions": ["impact_analysis_complete"],
+          "affected_files": ["docs/design/**/*.md"]
+        },
+        {
+          "name": "sync_project_basic_info",
+          "description": "プロジェクト基本情報の同期",
+          "conditions": ["project_scope_changed"],
+          "affected_files": ["README.md", "docs/requirements/プロジェクト基本情報_改訂版.md", "memory-bank/projectbrief.md"]
+        },
+        {
+          "name": "regenerate_implementation_plan",
+          "description": "実装計画の再生成",
+          "conditions": ["implementation_scope_changed"],
+          "affected_files": ["docs/implementation/実装計画書.md"]
+        }
+      ],
+      "notifications": {
+        "success": "要件定義の変更が全設計書に正常に反映されました",
+        "error": "要件定義の同期中にエラーが発生しました",
+        "warning": "要件変更により大規模な設計変更が必要です"
+      }
+    }
+  },
+  "templates": {
+    "screen_spec_template": {
+      "path": "templates/screen_spec_template.md",
+      "variables": ["screen_id", "screen_name", "priority", "function_overview", "related_apis", "related_tables"]
+    },
+    "interface_spec_template": {
+      "path": "templates/interface_spec_template.md",
+      "variables": ["interface_id", "interface_name", "interface_type", "priority", "description", "related_screens"]
+    },
+    "table_spec_template": {
+      "path": "templates/table_spec_template.md",
+      "variables": ["table_id", "table_name", "logical_name", "category", "description", "related_apis", "related_batches"]
+    },
+    "api_spec_template": {
+      "path": "templates/api_spec_template.md",
+      "variables": ["api_id", "api_name", "method", "endpoint", "priority", "description", "related_screens", "related_tables"]
+    },
+    "batch_spec_template": {
+      "path": "templates/batch_spec_template.md",
+      "variables": ["batch_id", "batch_name", "schedule", "priority", "description", "related_tables", "related_apis"]
+    }
+  },
+  "validation_rules": {
+    "naming_conventions": {
+      "screen_id_pattern": "^SCR-[A-Z0-9-]+$",
+      "interface_id_pattern": "^IF-[0-9]{3}$",
+      "table_id_pattern": "^TBL-[0-9]{3}$",
+      "api_id_pattern": "^API-[0-9]{3}$",
+      "batch_id_pattern": "^BATCH-[0-9]{3}$"
+    },
+    "cross_reference_validation": {
+      "required_fields": ["priority", "status", "description"],
+      "relationship_validation": true,
+      "circular_dependency_check": true
+    },
+    "data_integrity": {
+      "foreign_key_validation": true,
+      "referential_integrity_check": true,
+      "constraint_validation": true
+    }
+  },
+  "notification_settings": {
+    "channels": {
+      "console": {
+        "enabled": true,
+        "log_level": "info"
+      },
+      "file": {
+        "enabled": true,
+        "log_file": ".cline/logs/workflow.log",
+        "log_level": "debug"
+      }
+    },
+    "message_templates": {
+      "sync_start": "設計書同期を開始しました: {source_file}",
+      "sync_complete": "設計書同期が完了しました: {affected_files_count}個のファイルを更新",
+      "sync_error": "設計書同期中にエラーが発生しました: {error_message}",
+      "validation_warning": "整合性チェックで警告が検出されました: {warning_details}"
+    }
+  },
+  "performance_settings": {
+    "max_parallel_operations": 5,
+    "timeout_settings": {
+      "file_read": 10,
+      "file_write": 30,
+      "validation": 60,
+      "template_generation": 45
+    },
+    "cache_settings": {
+      "enabled": true,
+      "cache_duration": 300,
+      "max_cache_size": "50MB"
+    }
+  },
+  "error_handling": {
+    "retry_policy": {
+      "max_retries": 3,
+      "retry_delay": 1000,
+      "exponential_backoff": true
+    },
+    "fallback_strategies": {
+      "template_generation_failure": "use_minimal_template",
+      "sync_failure": "log_and_continue",
+      "validation_failure": "report_and_skip"
+    },
+    "recovery_actions": {
+      "backup_before_sync": true,
+      "rollback_on_critical_error": true,
+      "create_error_report": true
+    }
+  },
+  "monitoring": {
+    "metrics": {
+      "sync_operations_count": true,
+      "sync_duration": true,
+      "error_rate": true,
+      "file_modification_frequency": true
+    },
+    "alerts": {
+      "high_error_rate": {
+        "threshold": 0.1,
+        "action": "notify_admin"
+      },
+      "long_sync_duration": {
+        "threshold": 300,
+        "action": "log_warning"
+      }
+    }
+  }
+}
