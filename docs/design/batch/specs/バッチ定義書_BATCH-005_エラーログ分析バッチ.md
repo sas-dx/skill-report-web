@@ -1,254 +1,482 @@
-# バッチ定義書：トークン無効化バッチ (BATCH-005)
+# バッチ定義書：エラーログ分析バッチ
 
-## 1. 基本情報
+| 項目                | 内容                                                                                |
+|---------------------|------------------------------------------------------------------------------------|
+| **バッチID**        | BATCH-005                                                                          |
+| **バッチ名称**      | エラーログ分析バッチ                                                                |
+| **機能カテゴリ**    | 基盤・システム管理                                                                  |
+| **概要・目的**      | エラーログを自動分析し、パターン検出・アラート生成・改善提案を行う                  |
+| **バッチ種別**      | 定期バッチ                                                                          |
+| **実行スケジュール**| 日次（05:00）                                                                       |
+| **入出力対象**      | エラーログファイル、分析結果テーブル、アラート通知                                  |
+| **優先度**          | 高                                                                                  |
+| **備考**            | マルチテナント対応、AI分析、自動分類、トレンド分析                                  |
 
-| 項目 | 内容 |
-|------|------|
-| **バッチID** | BATCH-005 |
-| **バッチ名** | トークン無効化バッチ |
-| **実行スケジュール** | 時間毎（毎時30分） |
-| **優先度** | 高 |
-| **ステータス** | 実装済み |
-| **作成日** | 2025/05/31 |
-| **最終更新日** | 2025/05/31 |
+## 1. 処理概要
 
-## 2. バッチ概要
+エラーログ分析バッチは、マルチテナント環境において各システムコンポーネントで発生するエラーログを自動的に収集・分析し、エラーパターンの検出、重要度判定、トレンド分析を実行するバッチ処理です。機械学習アルゴリズムを活用してエラーの分類・予測を行い、問題の早期発見と改善提案を自動化します。
 
-### 2.1 概要・目的
-期限切れや無効化されたアクセストークン・リフレッシュトークンを定期的に削除し、セキュリティを確保する。
+## 2. 処理フロー
 
-### 2.2 関連テーブル
-- TBL-015_アクセストークン
-- TBL-016_リフレッシュトークン
-- TBL-017_セッション管理
-- TBL-018_トークン無効化履歴
-
-### 2.3 関連API
-- API-105_トークン検証API
-- API-106_トークン無効化API
-
-## 3. 実行仕様
-
-### 3.1 実行スケジュール
-| 項目 | 設定値 | 備考 |
-|------|--------|------|
-| 実行頻度 | 30 * * * * | cron形式（毎時30分） |
-| 実行時間 | 毎時30分 | 定期実行 |
-| タイムアウト | 15分 | 最大実行時間 |
-| リトライ回数 | 3回 | 失敗時の再実行 |
-
-### 3.2 実行条件
-| 条件 | 内容 | 備考 |
-|------|------|------|
-| 前提条件 | データベース稼働中 | 基本的な稼働状態 |
-| 実行可能時間 | 24時間 | 常時実行 |
-| 排他制御 | 同一バッチの重複実行禁止 | ロックファイル使用 |
-
-### 3.3 実行パラメータ
-| パラメータ名 | データ型 | 必須 | デフォルト値 | 説明 |
-|--------------|----------|------|--------------|------|
-| access_token_ttl | number | × | 3600 | アクセストークン有効期間（秒） |
-| refresh_token_ttl | number | × | 2592000 | リフレッシュトークン有効期間（秒） |
-| batch_size | number | × | 1000 | 一括処理件数 |
-| cleanup_expired_sessions | boolean | × | true | 期限切れセッション削除フラグ |
-
-## 4. 処理仕様
-
-### 4.1 処理フロー
 ```mermaid
 flowchart TD
-    A[バッチ開始] --> B[パラメータ検証]
-    B --> C[期限切れトークン検索]
-    C --> D[アクセストークン処理]
-    D --> E[リフレッシュトークン処理]
-    E --> F[無効化トークン処理]
-    F --> G[期限切れセッション処理]
-    G --> H[関連データクリーンアップ]
-    H --> I[統計情報更新]
-    I --> J[処理結果サマリー]
-    J --> K[バッチ終了]
-    
-    C --> L[エラー処理]
-    D --> L
-    E --> L
-    F --> L
-    G --> L
-    H --> L
-    L --> M[エラーログ出力]
-    M --> N[ロールバック処理]
-    N --> O[アラート送信]
-    O --> P[異常終了]
-    
-    subgraph "アクセストークン処理"
-        D1[期限切れトークン特定]
-        D2[トークン無効化]
-        D3[履歴記録]
-        D4[データベース削除]
-        D1 --> D2 --> D3 --> D4
-    end
-    
-    subgraph "リフレッシュトークン処理"
-        E1[期限切れトークン特定]
-        E2[関連アクセストークン無効化]
-        E3[トークン削除]
-        E4[履歴記録]
-        E1 --> E2 --> E3 --> E4
-    end
+    A[開始] --> B[ログ収集設定取得]
+    B --> C[対象ログファイル取得]
+    C --> D{ログファイルあり?}
+    D -->|Yes| E[新規エラーログ抽出]
+    D -->|No| Z[終了]
+    E --> F[エラー分類・パターン分析]
+    F --> G[重要度判定]
+    G --> H[類似エラー検索]
+    H --> I[トレンド分析]
+    I --> J[根本原因分析]
+    J --> K[改善提案生成]
+    K --> L{重要エラー検出?}
+    L -->|Yes| M[即座にアラート送信]
+    L -->|No| P[分析結果記録]
+    M --> N[エスカレーション判定]
+    N --> O[自動修復試行]
+    O --> P
+    P --> Q[レポート生成]
+    Q --> R[次のログファイルへ]
+    R --> D
 ```
 
-### 4.2 詳細処理
-1. **初期化処理**
-   - パラメータ検証
-   - データベース接続確認
-   - 排他制御ロック取得
+## 3. 入力データ
 
-2. **期限切れアクセストークン処理**
-   - 現在時刻と有効期限の比較
-   - 期限切れトークンの特定
-   - トークン無効化処理
-   - データベースからの削除
+### 3.1 対象ログファイル
 
-3. **期限切れリフレッシュトークン処理**
-   - 期限切れリフレッシュトークンの特定
-   - 関連するアクセストークンの無効化
-   - リフレッシュトークンの削除
+| ログ種別            | ファイルパス                    | 分析対象エラー                 |
+|---------------------|--------------------------------|--------------------------------|
+| アプリケーションログ | /var/log/app/*.log             | 例外、エラー、警告             |
+| システムログ        | /var/log/system/*.log          | システムエラー、クラッシュ     |
+| データベースログ    | /var/log/postgresql/*.log      | SQLエラー、接続エラー          |
+| Webサーバーログ     | /var/log/nginx/*.log           | HTTP エラー、アクセスエラー    |
+| セキュリティログ    | /var/log/security/*.log        | 認証エラー、不正アクセス       |
+| バッチ実行ログ      | /var/log/batch/*.log           | バッチエラー、処理失敗         |
 
-4. **手動無効化トークン処理**
-   - 無効化フラグが設定されたトークンの処理
-   - 関連セッションの終了
-   - トークンの完全削除
+### 3.2 分析設定
 
-5. **セッション管理**
-   - 期限切れセッションの特定
-   - セッションデータの削除
-   - セッション統計の更新
+| 設定項目                | データ型 | デフォルト値 | 説明                                 |
+|-------------------------|----------|--------------|--------------------------------------|
+| analysis_period_hours   | Integer  | 24           | 分析対象期間（時間）                 |
+| error_threshold         | Integer  | 10           | アラート発生エラー数閾値             |
+| pattern_similarity      | Float    | 0.8          | パターン類似度閾値                   |
+| ml_analysis_enabled     | Boolean  | true         | 機械学習分析有効/無効                |
+| auto_categorization     | Boolean  | true         | 自動分類有効/無効                    |
+| trend_analysis_days     | Integer  | 7            | トレンド分析期間（日）               |
 
-## 5. データ仕様
+## 4. 出力データ
 
-### 5.1 入力データ
-| データ名 | 形式 | 取得元 | 説明 |
-|----------|------|--------|------|
-| アクセストークン | DB | TBL-015 | 有効期限・無効化フラグ |
-| リフレッシュトークン | DB | TBL-016 | 有効期限・使用状況 |
-| セッション情報 | DB | TBL-017 | セッション有効期限 |
+### 4.1 エラーログ分析結果テーブル（新規作成）
 
-### 5.2 出力データ
-| データ名 | 形式 | 出力先 | 説明 |
-|----------|------|--------|------|
-| 無効化履歴 | DB | TBL-018 | トークン無効化記録 |
-| 実行ログ | LOG | /logs/batch/ | バッチ実行ログ |
-| 統計レポート | JSON | /reports/ | 処理統計情報 |
+| フィールド名      | データ型 | 説明                                           |
+|-------------------|----------|------------------------------------------------|
+| analysis_id       | String   | 分析ID（主キー）                               |
+| log_file_path     | String   | ログファイルパス                               |
+| error_timestamp   | DateTime | エラー発生日時                                 |
+| error_level       | String   | エラーレベル（ERROR/WARN/FATAL/CRITICAL）      |
+| error_category    | String   | エラーカテゴリ                                 |
+| error_pattern_id  | String   | エラーパターンID                               |
+| error_message     | String   | エラーメッセージ                               |
+| stack_trace       | String   | スタックトレース                               |
+| affected_component| String   | 影響コンポーネント                             |
+| severity_score    | Float    | 重要度スコア（0-10）                           |
+| frequency_count   | Integer  | 発生頻度                                       |
+| tenant_id         | String   | テナントID                                     |
+| analyzed_at       | DateTime | 分析実行日時                                   |
 
-### 5.3 データ量見積もり
-| 項目 | 件数 | 備考 |
-|------|------|------|
-| 処理対象トークン数 | 500-2000件/時間 | アクティブユーザー数による |
-| 削除セッション数 | 100-500件/時間 | セッション有効期限による |
-| 処理時間 | 5-10分 | データ量による |
+### 4.2 エラーパターンテーブル（新規作成）
 
-## 6. エラーハンドリング
+| フィールド名      | データ型 | 説明                                           |
+|-------------------|----------|------------------------------------------------|
+| pattern_id        | String   | パターンID（主キー）                           |
+| pattern_name      | String   | パターン名                                     |
+| pattern_regex     | String   | パターン正規表現                               |
+| category          | String   | カテゴリ                                       |
+| severity          | String   | 重要度                                         |
+| description       | String   | パターン説明                                   |
+| solution_template | String   | 解決策テンプレート                             |
+| occurrence_count  | Integer  | 発生回数                                       |
+| first_seen        | DateTime | 初回検出日時                                   |
+| last_seen         | DateTime | 最終検出日時                                   |
+| auto_fix_available| Boolean  | 自動修復可能フラグ                             |
 
-### 6.1 エラー分類
-| エラー種別 | 対応方法 | 通知要否 | 備考 |
-|------------|----------|----------|------|
-| データベースエラー | 処理中断・リトライ | ○ | 接続エラー・ロック競合 |
-| データ整合性エラー | エラーログ出力・継続 | △ | 外部キー制約違反等 |
-| トークン検証エラー | エラーログ出力・スキップ | × | 不正なトークン形式 |
+### 4.3 エラートレンド分析結果テーブル（新規作成）
 
-### 6.2 リトライ仕様
-| 条件 | リトライ回数 | 間隔 | 備考 |
-|------|--------------|------|------|
-| DB接続エラー | 3回 | 30秒 | 指数バックオフ |
-| ロック競合エラー | 5回 | 10秒 | 固定間隔 |
-| 一時的なDB負荷 | 2回 | 60秒 | 負荷軽減待ち |
+| フィールド名      | データ型 | 説明                                           |
+|-------------------|----------|------------------------------------------------|
+| trend_id          | String   | トレンドID（主キー）                           |
+| analysis_date     | Date     | 分析日                                         |
+| error_category    | String   | エラーカテゴリ                                 |
+| daily_count       | Integer  | 日次エラー数                                   |
+| weekly_average    | Float    | 週平均エラー数                                 |
+| trend_direction   | String   | トレンド方向（INCREASING/DECREASING/STABLE）   |
+| change_percentage | Float    | 変化率（%）                                    |
+| prediction_next_week| Integer | 来週予測エラー数                            |
+| risk_level        | String   | リスクレベル（LOW/MEDIUM/HIGH/CRITICAL）       |
 
-### 6.3 異常終了時の処理
-1. 処理中断
-2. トランザクションロールバック
-3. エラーログ出力
-4. セキュリティアラート送信
-5. 排他制御ロック解除
+## 5. 分析仕様
 
-## 7. 監視・運用
+### 5.1 エラーログ抽出・解析
 
-### 7.1 監視項目
-| 監視項目 | 閾値 | アラート条件 | 対応方法 |
-|----------|------|--------------|----------|
-| 処理時間 | 15分 | 超過時 | データベース負荷確認 |
-| エラー率 | 5% | 超過時 | データ整合性確認 |
-| 削除トークン数 | 期待値±50% | 乖離時 | トークン発行状況確認 |
-| データベース負荷 | CPU80% | 超過時 | 処理タイミング調整 |
+```typescript
+class ErrorLogAnalyzer {
+  async analyzeErrorLogs(): Promise<ErrorAnalysisResult[]> {
+    const results: ErrorAnalysisResult[] = [];
+    const logFiles = await this.getLogFiles();
+    
+    for (const logFile of logFiles) {
+      const errors = await this.extractErrors(logFile);
+      
+      for (const error of errors) {
+        const analysis = await this.analyzeError(error);
+        results.push(analysis);
+      }
+    }
+    
+    return results;
+  }
+  
+  private async extractErrors(logFile: LogFile): Promise<ErrorEntry[]> {
+    const content = await fs.readFile(logFile.path, 'utf-8');
+    const lines = content.split('\n');
+    const errors: ErrorEntry[] = [];
+    
+    const errorPatterns = [
+      /ERROR\s+(.+)/i,
+      /FATAL\s+(.+)/i,
+      /Exception\s+(.+)/i,
+      /\[error\]\s+(.+)/i,
+      /HTTP\/\d\.\d"\s+[45]\d{2}/i
+    ];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      for (const pattern of errorPatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          const error = await this.parseErrorEntry(line, lines, i);
+          errors.push(error);
+          break;
+        }
+      }
+    }
+    
+    return errors;
+  }
+  
+  private async analyzeError(error: ErrorEntry): Promise<ErrorAnalysisResult> {
+    // パターンマッチング
+    const pattern = await this.identifyPattern(error);
+    
+    // 重要度判定
+    const severity = await this.calculateSeverity(error, pattern);
+    
+    // 類似エラー検索
+    const similarErrors = await this.findSimilarErrors(error);
+    
+    // 根本原因分析
+    const rootCause = await this.analyzeRootCause(error, similarErrors);
+    
+    return {
+      errorId: generateId(),
+      timestamp: error.timestamp,
+      level: error.level,
+      category: pattern?.category || 'UNKNOWN',
+      patternId: pattern?.id,
+      message: error.message,
+      stackTrace: error.stackTrace,
+      severityScore: severity,
+      rootCause,
+      recommendedAction: await this.generateRecommendation(error, pattern)
+    };
+  }
+}
+```
 
-### 7.2 ログ出力
-| ログ種別 | 出力レベル | 出力内容 | 保存期間 |
-|----------|------------|----------|----------|
-| 実行ログ | INFO | 処理開始・終了・統計情報 | 3ヶ月 |
-| エラーログ | ERROR | エラー詳細・トークンID | 1年 |
-| セキュリティログ | WARN | 不正トークン検知・大量削除 | 2年 |
+### 5.2 機械学習による分類・予測
 
-### 7.3 アラート通知
-| 通知条件 | 通知先 | 通知方法 | 備考 |
-|----------|--------|----------|------|
-| 異常終了 | セキュリティチーム | メール・Slack | 即座に通知 |
-| 大量トークン削除 | 開発チーム | Slack | 業務時間内のみ |
-| データベース負荷 | インフラチーム | メール | 翌営業日まで |
+```typescript
+class MLErrorClassifier {
+  private model: any;
+  
+  async classifyError(error: ErrorEntry): Promise<ErrorClassification> {
+    // 特徴量抽出
+    const features = this.extractFeatures(error);
+    
+    // モデル予測
+    const prediction = await this.model.predict(features);
+    
+    return {
+      category: prediction.category,
+      severity: prediction.severity,
+      confidence: prediction.confidence,
+      suggestedActions: prediction.actions
+    };
+  }
+  
+  private extractFeatures(error: ErrorEntry): number[] {
+    const features: number[] = [];
+    
+    // メッセージ長
+    features.push(error.message.length);
+    
+    // キーワード頻度
+    const keywords = ['null', 'undefined', 'timeout', 'connection', 'permission'];
+    for (const keyword of keywords) {
+      features.push((error.message.toLowerCase().match(new RegExp(keyword, 'g')) || []).length);
+    }
+    
+    // スタックトレース深度
+    features.push(error.stackTrace ? error.stackTrace.split('\n').length : 0);
+    
+    // 時間帯（0-23）
+    features.push(error.timestamp.getHours());
+    
+    // 曜日（0-6）
+    features.push(error.timestamp.getDay());
+    
+    return features;
+  }
+  
+  async trainModel(trainingData: ErrorEntry[]): Promise<void> {
+    const features = trainingData.map(error => this.extractFeatures(error));
+    const labels = trainingData.map(error => ({
+      category: error.category,
+      severity: error.severity
+    }));
+    
+    // モデル訓練（TensorFlow.js等を使用）
+    await this.model.fit(features, labels);
+  }
+}
+```
 
-## 8. 非機能要件
+### 5.3 トレンド分析
 
-### 8.1 パフォーマンス
-- 処理時間：15分以内
-- メモリ使用量：512MB以内
-- CPU使用率：30%以内
+```typescript
+class ErrorTrendAnalyzer {
+  async analyzeTrends(): Promise<ErrorTrend[]> {
+    const trends: ErrorTrend[] = [];
+    const categories = await this.getErrorCategories();
+    
+    for (const category of categories) {
+      const trend = await this.analyzeCategory(category);
+      trends.push(trend);
+    }
+    
+    return trends;
+  }
+  
+  private async analyzeCategory(category: string): Promise<ErrorTrend> {
+    const dailyCounts = await this.getDailyErrorCounts(category, 30);
+    const weeklyAverage = this.calculateWeeklyAverage(dailyCounts);
+    const trendDirection = this.calculateTrendDirection(dailyCounts);
+    const changePercentage = this.calculateChangePercentage(dailyCounts);
+    const prediction = await this.predictNextWeek(dailyCounts);
+    
+    return {
+      category,
+      dailyCounts,
+      weeklyAverage,
+      trendDirection,
+      changePercentage,
+      prediction,
+      riskLevel: this.assessRiskLevel(trendDirection, changePercentage)
+    };
+  }
+  
+  private calculateTrendDirection(counts: number[]): 'INCREASING' | 'DECREASING' | 'STABLE' {
+    const recent = counts.slice(-7);
+    const previous = counts.slice(-14, -7);
+    
+    const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+    const previousAvg = previous.reduce((a, b) => a + b, 0) / previous.length;
+    
+    const changeRatio = (recentAvg - previousAvg) / previousAvg;
+    
+    if (changeRatio > 0.1) return 'INCREASING';
+    if (changeRatio < -0.1) return 'DECREASING';
+    return 'STABLE';
+  }
+  
+  private async predictNextWeek(historicalData: number[]): Promise<number> {
+    // 簡単な線形回帰による予測
+    const x = historicalData.map((_, i) => i);
+    const y = historicalData;
+    
+    const n = x.length;
+    const sumX = x.reduce((a, b) => a + b, 0);
+    const sumY = y.reduce((a, b) => a + b, 0);
+    const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+    const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    // 来週の予測値
+    return Math.max(0, Math.round(slope * n + intercept));
+  }
+}
+```
 
-### 8.2 可用性
-- 成功率：99%以上
-- リトライ機能による自動復旧
-- 部分的な処理継続機能
+## 6. 自動修復機能
 
-### 8.3 セキュリティ
-- トークンデータの完全削除
-- 処理ログの暗号化
-- アクセス権限の厳格な制御
+### 6.1 自動修復パターン
 
-## 9. テスト仕様
+```typescript
+class AutoFixManager {
+  private fixPatterns: AutoFixPattern[] = [
+    {
+      patternId: 'DISK_SPACE_LOW',
+      condition: (error) => error.message.includes('No space left on device'),
+      action: async () => await this.cleanupTempFiles(),
+      description: 'Clean up temporary files'
+    },
+    {
+      patternId: 'MEMORY_LEAK',
+      condition: (error) => error.message.includes('OutOfMemoryError'),
+      action: async () => await this.restartService(),
+      description: 'Restart affected service'
+    },
+    {
+      patternId: 'DB_CONNECTION_POOL',
+      condition: (error) => error.message.includes('connection pool exhausted'),
+      action: async () => await this.resetConnectionPool(),
+      description: 'Reset database connection pool'
+    }
+  ];
+  
+  async attemptAutoFix(error: ErrorAnalysisResult): Promise<AutoFixResult> {
+    const applicablePattern = this.fixPatterns.find(pattern => 
+      pattern.condition(error)
+    );
+    
+    if (!applicablePattern) {
+      return {
+        attempted: false,
+        reason: 'No applicable auto-fix pattern found'
+      };
+    }
+    
+    try {
+      await applicablePattern.action();
+      
+      return {
+        attempted: true,
+        success: true,
+        patternId: applicablePattern.patternId,
+        description: applicablePattern.description,
+        executedAt: new Date()
+      };
+    } catch (fixError) {
+      return {
+        attempted: true,
+        success: false,
+        patternId: applicablePattern.patternId,
+        error: fixError.message,
+        executedAt: new Date()
+      };
+    }
+  }
+}
+```
 
-### 9.1 単体テスト
-| テストケース | 入力条件 | 期待結果 |
-|--------------|----------|----------|
-| 正常処理 | 期限切れトークン存在 | 正常終了・トークン削除 |
-| トークンなし | 期限切れトークン0件 | 正常終了（処理件数0） |
-| 大量トークン | 10000件の期限切れトークン | 正常終了・適切な処理時間 |
+## 7. アラート・通知
 
-### 9.2 異常系テスト
-| テストケース | 入力条件 | 期待結果 |
-|--------------|----------|----------|
-| DB接続エラー | データベース停止 | リトライ後異常終了 |
-| ロック競合 | 他プロセスによるロック | リトライ後正常処理 |
-| 不正トークン | 破損したトークンデータ | エラーログ出力・スキップ |
+### 7.1 重要度別アラート
 
-## 10. 実装メモ
+```typescript
+class ErrorAlertManager {
+  async processAlerts(analysisResults: ErrorAnalysisResult[]): Promise<void> {
+    const criticalErrors = analysisResults.filter(r => r.severityScore >= 8);
+    const highErrors = analysisResults.filter(r => r.severityScore >= 6 && r.severityScore < 8);
+    
+    // 重要エラーの即座通知
+    for (const error of criticalErrors) {
+      await this.sendCriticalAlert(error);
+    }
+    
+    // 高重要度エラーのバッチ通知
+    if (highErrors.length > 0) {
+      await this.sendHighPriorityAlert(highErrors);
+    }
+    
+    // トレンド異常の通知
+    const trends = await this.analyzeTrends();
+    const anomalies = trends.filter(t => t.riskLevel === 'HIGH' || t.riskLevel === 'CRITICAL');
+    
+    if (anomalies.length > 0) {
+      await this.sendTrendAlert(anomalies);
+    }
+  }
+  
+  private async sendCriticalAlert(error: ErrorAnalysisResult): Promise<void> {
+    const message = `
+🚨 重要エラー検出
 
-### 10.1 技術仕様
-- 言語：Node.js
-- ORM：Prisma
-- トークン処理：jsonwebtoken
-- 暗号化：crypto
+エラー: ${error.message}
+重要度: ${error.severityScore}/10
+発生時刻: ${error.timestamp.toISOString()}
+コンポーネント: ${error.affectedComponent}
+根本原因: ${error.rootCause}
 
-### 10.2 注意事項
-- 大量データ処理時のメモリ管理
-- トークン削除の原子性保証
-- セキュリティログの確実な記録
+推奨対応: ${error.recommendedAction}
+    `;
+    
+    await this.notificationService.sendImmediate({
+      level: 'CRITICAL',
+      title: 'システム重要エラー検出',
+      message,
+      channels: ['slack', 'email', 'sms']
+    });
+  }
+}
+```
 
-### 10.3 デプロイ・実行環境
-- 実行サーバー：アプリケーションサーバー
-- 実行ユーザー：token_cleanup_user
-- 実行ディレクトリ：/opt/batch/token-cleanup/
-- 設定ファイル：/etc/batch/token-cleanup.json
+## 8. 依存関係
 
----
+- ログファイルアクセス権限
+- 機械学習ライブラリ（TensorFlow.js等）
+- 自然言語処理ライブラリ
+- 通知サービス
+- データベース
+- 自動修復スクリプト
 
-**改訂履歴**
+## 9. 実行パラメータ
 
-| バージョン | 日付 | 変更者 | 変更内容 |
-|------------|------|--------|----------|
-| 1.0 | 2025/05/31 | システムアーキテクト | 初版作成 |
+| パラメータ名        | 必須 | デフォルト値 | 説明                                           |
+|---------------------|------|--------------|------------------------------------------------|
+| --log-type          | No   | all          | 特定ログ種別のみ分析                           |
+| --analysis-period   | No   | 24           | 分析対象期間（時間）                           |
+| --severity-filter   | No   | all          | 特定重要度以上のみ処理                         |
+| --enable-ml         | No   | true         | 機械学習分析有効/無効                          |
+| --auto-fix          | No   | false        | 自動修復機能有効/無効                          |
+| --trend-analysis    | No   | true         | トレンド分析有効/無効                          |
+
+## 10. 実行例
+
+```bash
+# 通常実行
+npm run batch:error-log-analysis
+
+# 特定ログ種別のみ
+npm run batch:error-log-analysis -- --log-type=application
+
+# 重要エラーのみ
+npm run batch:error-log-analysis -- --severity-filter=high
+
+# 自動修復有効
+npm run batch:error-log-analysis -- --auto-fix
+
+# TypeScript直接実行
+npx tsx src/batch/error-log-analysis.ts
+```
+
+## 11. 改訂履歴
+
+| 改訂日     | 改訂者 | 改訂内容                                         |
+|------------|--------|--------------------------------------------------|
+| 2025/05/31 | 初版   | 初版作成                                         |
