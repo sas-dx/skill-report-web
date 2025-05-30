@@ -445,6 +445,291 @@
 }
 ```
 
+#### ハンバーガーメニュー
+
+##### 基本仕様
+- **表示条件**: 画面幅768px未満（タブレット・スマートフォン）
+- **配置**: ヘッダー左上、ロゴの左側
+- **サイズ**: 44px × 44px（タッチフレンドリー）
+- **アニメーション**: 開閉時のスムーズなトランジション
+
+##### ハンバーガーアイコン
+```css
+.hamburger-menu {
+  display: none;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.hamburger-menu:hover {
+  background-color: var(--gray-100);
+}
+
+.hamburger-menu:focus {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* ハンバーガーアイコンの線 */
+.hamburger-lines {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--gray-700);
+  border-radius: 1px;
+  transition: all 0.3s ease-in-out;
+  transform-origin: center;
+}
+
+/* アクティブ状態（×マーク） */
+.hamburger-menu.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger-menu.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-menu.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* レスポンシブ表示 */
+@media (max-width: 767px) {
+  .hamburger-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+```
+
+##### モバイルメニューオーバーレイ
+```css
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.mobile-menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 280px;
+  height: 100%;
+  background-color: white;
+  z-index: 999;
+  overflow-y: auto;
+  transition: left 0.3s ease-in-out;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu.active {
+  left: 0;
+}
+
+.mobile-menu-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-menu-close {
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: 0.25rem;
+  color: var(--gray-500);
+}
+
+.mobile-menu-close:hover {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.mobile-menu-nav {
+  padding: var(--space-4) 0;
+}
+
+.mobile-menu-item {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  color: var(--gray-700);
+  text-decoration: none;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.mobile-menu-item:hover {
+  background-color: var(--gray-50);
+}
+
+.mobile-menu-item.active {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+  border-left: 3px solid var(--primary-500);
+}
+
+/* サブメニュー */
+.mobile-submenu {
+  background-color: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+}
+
+.mobile-submenu-item {
+  padding: var(--space-2) var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+}
+```
+
+##### JavaScript実装例
+```typescript
+// MobileMenu.tsx
+interface MobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  menuItems: MenuItem[];
+}
+
+export const MobileMenu: React.FC<MobileMenuProps> = ({
+  isOpen,
+  onClose,
+  menuItems
+}) => {
+  // ESCキーでメニューを閉じる
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
+  // メニューが開いている間はボディのスクロールを無効化
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  return (
+    <>
+      {/* オーバーレイ */}
+      <div
+        className={`mobile-menu-overlay ${isOpen ? 'active' : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      
+      {/* メニュー本体 */}
+      <nav
+        className={`mobile-menu ${isOpen ? 'active' : ''}`}
+        role="navigation"
+        aria-label="モバイルメニュー"
+      >
+        <div className="mobile-menu-header">
+          <h2 className="text-lg font-semibold">メニュー</h2>
+          <button
+            className="mobile-menu-close"
+            onClick={onClose}
+            aria-label="メニューを閉じる"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="mobile-menu-nav">
+          {menuItems.map((item) => (
+            <a
+              key={item.id}
+              href={item.href}
+              className={`mobile-menu-item ${item.active ? 'active' : ''}`}
+              onClick={onClose}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </nav>
+    </>
+  );
+};
+
+// ハンバーガーボタンコンポーネント
+export const HamburgerButton: React.FC<{
+  isOpen: boolean;
+  onClick: () => void;
+}> = ({ isOpen, onClick }) => {
+  return (
+    <button
+      className={`hamburger-menu ${isOpen ? 'active' : ''}`}
+      onClick={onClick}
+      aria-label={isOpen ? 'メニューを閉じる' : 'メニューを開く'}
+      aria-expanded={isOpen}
+    >
+      <div className="hamburger-lines">
+        <span className="hamburger-line" />
+        <span className="hamburger-line" />
+        <span className="hamburger-line" />
+      </div>
+    </button>
+  );
+};
+```
+
+##### アクセシビリティ要件
+- **ARIA属性**: `aria-label`, `aria-expanded`, `role="navigation"`
+- **キーボード操作**: Escキーでメニューを閉じる
+- **フォーカス管理**: メニュー開閉時の適切なフォーカス移動
+- **スクリーンリーダー**: メニューの状態を音声で通知
+
+##### UX設計指針
+- **タッチターゲット**: 最小44px×44pxのタッチ領域確保
+- **アニメーション**: 300ms以内のスムーズなトランジション
+- **直感的操作**: オーバーレイタップ・Escキーでメニューを閉じる
+- **視覚的フィードバック**: ホバー・アクティブ状態の明確な表示
+
 ---
 
 ## 7. アラート・メッセージ
