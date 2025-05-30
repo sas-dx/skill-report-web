@@ -2275,8 +2275,6 @@ export const Select: React.FC<SelectProps> = ({
 - **アニメーション**: Framer Motion
 - **テスト**: Jest, Testing Library, axe-core
 
-# UI/UX共通仕様書 完全版: HTMLプロトタイプ・Storybook・Mermaidダイアグラム
-
 ## 17. HTMLプロトタイプ作成
 
 ### 17.1 プロトタイプ作成方針
