@@ -11,8 +11,29 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- タイムゾーンの設定
 SET timezone = 'Asia/Tokyo';
 
--- 初期化完了ログ
-INSERT INTO pg_stat_statements_info (dealloc) VALUES (0) ON CONFLICT DO NOTHING;
+-- アプリケーション用ユーザーの作成
+DO $$
+BEGIN
+    -- skill_userが存在しない場合のみ作成
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'skill_user') THEN
+        CREATE USER skill_user WITH PASSWORD 'skill_password';
+        RAISE NOTICE 'ユーザー skill_user を作成しました';
+    ELSE
+        RAISE NOTICE 'ユーザー skill_user は既に存在します';
+    END IF;
+END $$;
+
+-- データベースへの権限付与
+GRANT ALL PRIVILEGES ON DATABASE skill_report_db TO skill_user;
+GRANT ALL PRIVILEGES ON SCHEMA public TO skill_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO skill_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO skill_user;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO skill_user;
+
+-- 将来作成されるオブジェクトへの権限付与
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO skill_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO skill_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO skill_user;
 
 -- データベース初期化完了メッセージ
 DO $$
