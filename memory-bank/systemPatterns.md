@@ -331,3 +331,57 @@ GitHub Actions
 - **帯域**: 帯域幅拡張
 
 これらのパターンにより、スケーラブルで保守性の高いマルチテナントシステムを実現します。
+
+## 画面構成・優先度別実装計画
+
+### 最高優先度画面（Phase 1）
+- **SCR-LOGIN**: ログイン画面 - マルチテナント認証対応
+- **SCR-TENANT-SELECT**: テナント選択画面 - 全ユーザー用
+- **SCR-TENANT-ADMIN**: テナント管理画面 - ホールディングス管理者用
+- **SCR-PROFILE**: プロフィール管理画面 - 基本情報・組織管理
+- **SCR-SKILL**: スキル情報管理画面 - スキル入力・編集
+
+### 高優先度画面（Phase 2）
+- **SCR-HOME**: ホームダッシュボード - テナント別カスタマイズ
+- **SCR-ACCESS**: 権限管理画面 - RBAC対応
+- **SCR-SKILL-M**: スキルマスタ管理画面 - 管理者用
+- **SCR-SKILL-SEARCH**: スキル検索画面 - 検索・抽出
+- **SCR-ADMIN**: システム管理画面
+- **SCR-NOTIFY-ADMIN**: 通知設定管理画面 - テナント管理者用
+
+### 中優先度画面（Phase 3）
+- **SCR-CAR-PLAN**: キャリアプラン・目標設定
+- **SCR-CAR-EVAL**: 目標進捗・評価画面
+- **SCR-WORK**: 作業実績入力画面
+- **SCR-TRAIN**: 研修参加記録画面
+- **SCR-TRAIN-M**: 継続教育管理画面
+- **SCR-NOTIFY**: 通知・アラート画面
+
+### 低優先度画面（Phase 4）
+- **SCR-WORK-BULK**: 一括実績登録画面
+- **SCR-REPORT**: レポート出力画面
+- **SCR-SKILL-MAP**: スキルマップ・分析画面
+
+### 画面遷移パターン
+```
+マルチテナント認証フロー:
+SCR-LOGIN → SCR-TENANT-SELECT → SCR-HOME
+
+メイン業務フロー:
+SCR-HOME → SCR-PROFILE/SCR-SKILL/SCR-CAR-PLAN/SCR-WORK/SCR-TRAIN
+
+管理者フロー:
+SCR-HOME → SCR-ADMIN → SCR-ACCESS/SCR-SKILL-M/SCR-TENANT-ADMIN
+
+レポート・分析フロー:
+SCR-SKILL → SCR-SKILL-SEARCH → SCR-SKILL-MAP → SCR-REPORT
+```
+
+### 画面別利用者・権限
+- **ホールディングス管理者**: SCR-TENANT-ADMIN
+- **テナント管理者**: SCR-NOTIFY-ADMIN, SCR-ADMIN
+- **システム管理者**: SCR-ACCESS, SCR-SKILL-M, SCR-ADMIN
+- **上司・管理者**: SCR-SKILL-SEARCH, SCR-SKILL-MAP, SCR-REPORT
+- **社員**: SCR-PROFILE, SCR-SKILL, SCR-CAR-PLAN, SCR-WORK, SCR-TRAIN
+- **人事**: SCR-PROFILE, SCR-TRAIN, SCR-REPORT
+- **全ユーザー**: SCR-LOGIN, SCR-TENANT-SELECT, SCR-HOME, SCR-NOTIFY
