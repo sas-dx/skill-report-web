@@ -31,7 +31,22 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:restart": "docker-compose restart",
+    "docker:logs": "docker-compose logs -f",
+    "docker:logs:app": "docker-compose logs -f app",
+    "docker:logs:db": "docker-compose logs -f postgres",
+    "docker:shell:app": "docker-compose exec app sh",
+    "docker:shell:db": "docker-compose exec postgres psql -U skill_user -d skill_report_db",
+    "docker:clean": "docker-compose down -v --remove-orphans",
+    "docker:dev": "docker-compose up --build",
+    "docker:dev:detached": "docker-compose up --build -d",
+    "docker:db:migrate": "docker-compose exec app npm run db:migrate",
+    "docker:db:seed": "docker-compose exec app npm run db:seed",
+    "docker:db:studio": "docker-compose exec app npm run db:studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
