@@ -52,8 +52,8 @@
 | 19 | expiry_date | 有効終了日 | DATE | - | ○ | - | - | NULL | 部署の有効終了日 |
 | 20 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
 | 21 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| 22 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
-| 23 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 22 | created_by | 作成者ID | VARCHAR | 50 | × | - | - | - | レコード作成者のユーザーID |
+| 23 | updated_by | 更新者ID | VARCHAR | 50 | × | - | - | - | レコード更新者のユーザーID |
 
 ### 3.2 インデックス定義
 
@@ -78,8 +78,8 @@
 | fk_parent_department | FOREIGN KEY | parent_department_id | MST_Department.department_id |
 | fk_manager | FOREIGN KEY | manager_id | MST_Employee.employee_id |
 | fk_tenant | FOREIGN KEY | tenant_id | MST_Tenant.tenant_id |
-| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
-| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
+| fk_created_by | FOREIGN KEY | tenant_id, created_by | MST_UserAuth(tenant_id, user_id) |
+| fk_updated_by | FOREIGN KEY | tenant_id, updated_by | MST_UserAuth(tenant_id, user_id) |
 | chk_department_level | CHECK | department_level | department_level >= 1 AND department_level <= 10 |
 | chk_expiry_date | CHECK | expiry_date | expiry_date IS NULL OR expiry_date >= effective_date |
 
@@ -91,7 +91,7 @@
 | MST_Department | parent_department_id | 1:N | 親部署（自己参照） |
 | MST_Employee | manager_id | 1:N | 部署長 |
 | MST_Tenant | tenant_id | 1:N | テナント情報 |
-| MST_UserAuth | created_by, updated_by | 1:N | 作成者・更新者 |
+| MST_UserAuth | tenant_id, created_by / tenant_id, updated_by | 1:N | 作成者・更新者 |
 
 ### 4.2 子テーブル
 | テーブル名 | 関連カラム | カーディナリティ | 説明 |
@@ -227,8 +227,8 @@ CREATE TABLE MST_Department (
     CONSTRAINT fk_department_parent FOREIGN KEY (parent_department_id) REFERENCES MST_Department(department_id) ON UPDATE CASCADE ON DELETE SET NULL,
     CONSTRAINT fk_department_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(employee_id) ON UPDATE CASCADE ON DELETE SET NULL,
     CONSTRAINT fk_department_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_department_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT fk_department_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_department_created_by FOREIGN KEY (tenant_id, created_by) REFERENCES MST_UserAuth(tenant_id, user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_department_updated_by FOREIGN KEY (tenant_id, updated_by) REFERENCES MST_UserAuth(tenant_id, user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT chk_department_level CHECK (department_level >= 1 AND department_level <= 10),
     CONSTRAINT chk_department_expiry_date CHECK (expiry_date IS NULL OR expiry_date >= effective_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
