@@ -1,209 +1,646 @@
-# 技術コンテキスト: 年間スキル報告書WEB化
+# 技術コンテキスト
 
-## 技術スタック（確定）
+## 技術スタック概要
 
-要件定義書の完成に伴い、以下の技術スタックが確定しました。
+### フロントエンド技術
+- **Next.js 14**: App Router、Server Components、Server Actions
+- **React 18**: Concurrent Features、Suspense、Error Boundaries
+- **TypeScript 5.x**: 厳密な型チェック、最新言語機能
+- **Tailwind CSS 3.x**: ユーティリティファースト、レスポンシブ対応
+- **Zustand**: 軽量状態管理、TypeScript完全対応
 
-### 11.1 採用技術一覧
+### バックエンド技術
+- **Next.js API Routes**: サーバーサイド処理、ミドルウェア
+- **Prisma ORM**: タイプセーフなデータベースアクセス
+- **NextAuth.js**: 認証・セッション管理、マルチテナント対応
+- **Zod**: スキーマバリデーション、型安全性
 
-| カテゴリ | 技術 | バージョン | 選定理由 |
-|---------|------|-----------|----------|
-| フレームワーク | Next.js | 14 | TypeScript + React 18対応、SSR/SSG、API Routes |
-| 言語 | TypeScript | 最新 | 型安全性、開発効率向上 |
-| UIライブラリ | React | 18 | コンポーネントベース開発 |
-| CSSフレームワーク | Tailwind CSS | 最新 | ユーティリティファースト、レスポンシブ対応 |
-| データベース | PostgreSQL | 最新 | ACID特性、JSON対応、スケーラビリティ |
-| デプロイ先 | Vercel | - | Next.js最適化、CI/CD統合、スケーラビリティ |
-| コンテナ | Docker + Docker Compose | 最新 | 開発環境統一、ポータビリティ |
+### データベース・インフラ
+- **PostgreSQL 15**: Row Level Security、JSON型、パフォーマンス最適化
+- **Vercel Platform**: サーバーレス、エッジ配信、自動スケーリング
+- **Docker**: 開発環境統一、コンテナ化
 
-### 11.2 アーキテクチャ構成
+## 開発環境構成
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend       │    │   Database      │
-│   (Next.js 14)  │◄──►│   (API Routes)  │◄──►│  (PostgreSQL)   │
-│   + React 18    │    │   + TypeScript  │    │                 │
-│   + Tailwind    │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │     Vercel      │
-                    │   (Deployment)  │
-                    └─────────────────┘
-```
-
-### 11.3 開発環境
-
-- **ローカル開発**: Docker + Docker Compose
-- **パッケージ管理**: npm/yarn
-- **バージョン管理**: Git + GitHub
-- **CI/CD**: Vercel自動デプロイ
-- **コード品質**: ESLint + Prettier + TypeScript
-
-## 開発環境セットアップ
-
-### ローカル開発環境
-
-```bash
-# 技術スタック確定後に詳細を記載予定
-# 以下は仮のセットアップ手順
-
-# 1. リポジトリのクローン
-git clone https://github.com/sas-dx/skill-report-web.git
-cd skill-report-web
-
-# 2. 依存関係のインストール
-npm install  # または yarn install
-
-# 3. 環境変数の設定
-cp .env.example .env
-# .envファイルを編集して必要な環境変数を設定
-
-# 4. 開発サーバーの起動
-npm run dev  # または yarn dev
+### Docker開発環境
+```yaml
+# docker-compose.yml 構成
+services:
+  app:                    # Next.js アプリケーション
+    - ポート: 3000
+    - ホットリロード対応
+    - 環境変数設定
+  
+  postgres:               # PostgreSQL データベース
+    - ポート: 5433
+    - データ永続化
+    - 初期化スクリプト
+  
+  pgadmin:               # データベース管理ツール
+    - ポート: 8080
+    - GUI管理インターフェース
 ```
 
-### Docker開発環境（検討中）
-
-```bash
-# 技術スタック確定後に詳細を記載予定
-# 以下は仮のセットアップ手順
-
-# 1. リポジトリのクローン
-git clone https://github.com/sas-dx/skill-report-web.git
-cd skill-report-web
-
-# 2. Dockerコンテナのビルドと起動
-docker-compose up -d
-
-# 3. アプリケーションへのアクセス
-# ブラウザで http://localhost:3000 にアクセス
+### 開発ツール設定
+```json
+// package.json 主要依存関係
+{
+  "dependencies": {
+    "next": "14.x",
+    "react": "18.x",
+    "typescript": "5.x",
+    "prisma": "latest",
+    "next-auth": "latest",
+    "zustand": "latest",
+    "tailwindcss": "3.x",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "eslint": "latest",
+    "prettier": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest"
+  }
+}
 ```
 
-### 必要なツール
+## マルチテナント技術実装
 
-- **Git**: バージョン管理
-- **Node.js**: JavaScript実行環境（バージョン16以上推奨）
-- **npm / Yarn / pnpm**: パッケージマネージャー
-- **Docker**: コンテナ化（オプション）
-- **VSCode / IntelliJ IDEA**: 推奨IDE
-- **Postman / Insomnia**: API開発・テスト
-- **GitHub CLI / GitKraken**: Git操作の効率化
+### Row Level Security (RLS)
+```sql
+-- PostgreSQL RLS 設定パターン
+ALTER TABLE table_name ENABLE ROW LEVEL SECURITY;
 
-## 技術的制約
+CREATE POLICY tenant_isolation ON table_name
+    FOR ALL TO authenticated
+    USING (tenant_id = current_setting('app.current_tenant_id')::UUID);
 
-### パフォーマンス要件
+-- セッション設定
+SET app.current_tenant_id = 'tenant-uuid-here';
+```
 
-- **レスポンス時間**: API〜UIまでのレスポンスは1秒以内（要件定義書の非機能要件NFR-01に基づく）
-- **同時接続ユーザー**: 最大100ユーザー程度の同時アクセスを想定
-- **データ量**: 1ユーザーあたり年間数MBのデータ
-- **初期ロード時間**: 3秒以内
-- **ページ遷移**: 500ms以内
+### テナント認証フロー
+```typescript
+// NextAuth.js マルチテナント設定
+export const authOptions: NextAuthOptions = {
+  providers: [
+    // 認証プロバイダー設定
+  ],
+  callbacks: {
+    async session({ session, token }) {
+      // テナント情報をセッションに追加
+      session.tenantId = token.tenantId;
+      return session;
+    },
+    async jwt({ token, user, account }) {
+      // JWTにテナント情報を含める
+      if (user) {
+        token.tenantId = user.tenantId;
+      }
+      return token;
+    }
+  }
+};
+```
 
-### セキュリティ要件
+### データアクセス層
+```typescript
+// Prisma マルチテナント対応
+class TenantAwarePrismaClient {
+  private prisma: PrismaClient;
+  
+  constructor(private tenantId: string) {
+    this.prisma = new PrismaClient();
+  }
+  
+  async executeQuery<T>(query: () => Promise<T>): Promise<T> {
+    // RLS設定
+    await this.prisma.$executeRaw`
+      SET app.current_tenant_id = ${this.tenantId}
+    `;
+    
+    // クエリ実行
+    return await query();
+  }
+}
+```
 
-- **認証**: 安全な認証メカニズム（JWT/OAuth検討中）
-- **データ保護**: センシティブデータの暗号化
-- **HTTPS**: すべての通信をTLS/SSL経由で行う
-- **入力検証**: すべてのユーザー入力の厳格な検証
-- **CSRF/XSS対策**: クロスサイトリクエストフォージェリ/クロスサイトスクリプティング対策
-- **権限管理**: ロールベースのアクセス制御
+## API設計・実装パターン
 
-### アクセシビリティ要件
+### API Route構造
+```typescript
+// /app/api/v1/[resource]/route.ts
+export async function GET(request: NextRequest) {
+  try {
+    // 1. 認証チェック
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // 2. テナント情報取得
+    const tenantId = session.tenantId;
+    
+    // 3. ビジネスロジック実行
+    const result = await service.getData(tenantId);
+    
+    // 4. レスポンス返却
+    return NextResponse.json({
+      success: true,
+      data: result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+```
 
-- **WCAG 2.1 AA**: アクセシビリティ基準への準拠（要件定義書の非機能要件NFR-02に基づく）
-- **キーボード操作**: すべての機能をキーボードで操作可能に
-- **スクリーンリーダー**: 支援技術との互換性確保
-- **コントラスト比**: テキストと背景のコントラスト比の確保
-- **フォーカス可視化**: キーボード操作時のフォーカス状態の明示
+### バリデーション・型安全性
+```typescript
+// Zod スキーマ定義
+const CreateUserSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  department: z.string().optional(),
+  skills: z.array(z.object({
+    skillId: z.string().uuid(),
+    level: z.number().min(1).max(4)
+  }))
+});
 
-## 依存関係
+type CreateUserRequest = z.infer<typeof CreateUserSchema>;
 
-### 外部システム連携
+// API での使用
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const validatedData = CreateUserSchema.parse(body);
+  // 型安全な処理続行
+}
+```
 
-- **社内認証システム**: SSOまたはLDAP連携（検討中）
-- **メール通知システム**: 通知機能用
-- **ファイルストレージ**: レポート出力・保存用（必要に応じて）
-- **Excel API**: 既存Excelファイルの読み込み・変換
+## フロントエンド技術実装
 
-### サードパーティサービス
+### App Router活用
+```typescript
+// app/layout.tsx - ルートレイアウト
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ja">
+      <body>
+        <SessionProvider>
+          <TenantProvider>
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
+          </TenantProvider>
+        </SessionProvider>
+      </body>
+    </html>
+  );
+}
 
-- **分析ツール**: Google Analytics等（オプション）
-- **エラー監視**: Sentry等（検討中）
-- **ログ管理**: ELKスタック等（検討中）
-- **CI/CD**: GitHub Actions / CircleCI（検討中）
-- **コード品質**: SonarQube / CodeClimate（検討中）
+// app/(dashboard)/page.tsx - ダッシュボード
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  const data = await fetchDashboardData(session.tenantId);
+  
+  return <DashboardComponent data={data} />;
+}
+```
 
-## テスト戦略
+### 状態管理（Zustand）
+```typescript
+// stores/appStore.ts
+interface AppState {
+  // 認証状態
+  auth: {
+    user: User | null;
+    isAuthenticated: boolean;
+  };
+  
+  // テナント状態
+  tenant: {
+    currentTenant: Tenant | null;
+    availableTenants: Tenant[];
+  };
+  
+  // アクション
+  setUser: (user: User | null) => void;
+  setCurrentTenant: (tenant: Tenant) => void;
+  switchTenant: (tenantId: string) => Promise<void>;
+}
 
-### テスト階層
+export const useAppStore = create<AppState>((set, get) => ({
+  auth: {
+    user: null,
+    isAuthenticated: false,
+  },
+  tenant: {
+    currentTenant: null,
+    availableTenants: [],
+  },
+  
+  setUser: (user) => set((state) => ({
+    auth: { ...state.auth, user, isAuthenticated: !!user }
+  })),
+  
+  setCurrentTenant: (tenant) => set((state) => ({
+    tenant: { ...state.tenant, currentTenant: tenant }
+  })),
+  
+  switchTenant: async (tenantId) => {
+    // テナント切り替えロジック
+    const response = await fetch(`/api/v1/tenants/${tenantId}/switch`, {
+      method: 'POST'
+    });
+    
+    if (response.ok) {
+      const tenant = await response.json();
+      get().setCurrentTenant(tenant.data);
+      window.location.reload(); // データ再取得のため
+    }
+  }
+}));
+```
 
-1. **ユニットテスト**: 個々の関数・コンポーネントのテスト
-2. **統合テスト**: コンポーネント間の相互作用テスト
-3. **E2Eテスト**: ユーザーフローの検証
-4. **パフォーマンステスト**: レスポンス時間、負荷テスト
-5. **アクセシビリティテスト**: WCAG準拠の検証
+### コンポーネント設計
+```typescript
+// components/ui/Button.tsx - 共通UIコンポーネント
+interface ButtonProps {
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
 
-### テストツール（検討中）
+export const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  children,
+  onClick
+}) => {
+  const baseClasses = 'font-medium rounded-md transition-colors';
+  const variantClasses = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+    danger: 'bg-red-600 text-white hover:bg-red-700'
+  };
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-6 py-3 text-lg'
+  };
+  
+  return (
+    <button
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`}
+      onClick={onClick}
+      disabled={loading}
+    >
+      {loading ? <Spinner /> : children}
+    </button>
+  );
+};
+```
 
-- **Jest / Vitest**: JavaScript/TypeScriptのテストフレームワーク
-- **React Testing Library**: Reactコンポーネントのテスト
-- **Cypress / Playwright**: E2Eテスト
-- **Postman / Supertest**: APIテスト
-- **Lighthouse / axe**: パフォーマンス・アクセシビリティテスト
-- **k6 / Artillery**: 負荷テスト
+## データベース技術実装
 
-## デプロイメント戦略
+### Prisma スキーマ設計
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
-### 環境
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-- **開発環境**: 開発者用、頻繁な更新
-- **テスト環境**: QA用、安定版のテスト
-- **ステージング環境**: 本番に近い環境でのテスト
-- **本番環境**: エンドユーザー向け
-- **プレビュー環境**: PR単位の一時的な環境（検討中）
+model MST_Tenant {
+  tenant_id     String   @id @default(uuid()) @db.Uuid
+  tenant_name   String   @db.VarChar(100)
+  tenant_code   String   @unique @db.VarChar(20)
+  status        String   @db.VarChar(20)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  
+  // リレーション
+  users         TRN_UserProfile[]
+  settings      MST_TenantSettings[]
+  
+  @@map("MST_Tenant")
+}
 
-### CI/CD
+model TRN_UserProfile {
+  user_id       String   @id @default(uuid()) @db.Uuid
+  tenant_id     String   @db.Uuid
+  emp_no        String   @db.VarChar(20)
+  name          String   @db.VarChar(100)
+  email         String   @db.VarChar(255)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  
+  // リレーション
+  tenant        MST_Tenant @relation(fields: [tenant_id], references: [tenant_id])
+  skills        TRN_SkillAssessment[]
+  
+  @@unique([tenant_id, emp_no])
+  @@map("TRN_UserProfile")
+}
+```
 
-- **自動ビルド**: コミットごとにビルド・テスト実行
-- **自動デプロイ**: テスト通過後に適切な環境へデプロイ
-- **ブランチ戦略**: GitFlow または GitHub Flow を検討中
-- **環境分離**: 環境ごとの設定・シークレット管理
-- **ロールバック戦略**: 問題発生時の迅速な復旧手順
+### マイグレーション管理
+```sql
+-- migrations/001_enable_rls.sql
+-- Row Level Security 有効化
+ALTER TABLE "TRN_UserProfile" ENABLE ROW LEVEL SECURITY;
 
-## モニタリングと運用
+CREATE POLICY tenant_isolation_users ON "TRN_UserProfile"
+    FOR ALL TO authenticated
+    USING (tenant_id = current_setting('app.current_tenant_id')::UUID);
 
-### 監視項目
+-- インデックス作成
+CREATE INDEX idx_user_profile_tenant_id ON "TRN_UserProfile"(tenant_id);
+CREATE INDEX idx_user_profile_emp_no ON "TRN_UserProfile"(tenant_id, emp_no);
+```
 
-- **アプリケーションパフォーマンス**: レスポンスタイム、エラー率
-- **サーバーリソース**: CPU、メモリ、ディスク使用率
-- **ユーザーアクティビティ**: アクセス数、機能使用状況
-- **SLA指標**: 可用性、レスポンス時間の遵守率
-- **セキュリティイベント**: 異常アクセス、認証失敗
+## バッチ処理技術実装
 
-### ログ管理
+### バッチ基盤アーキテクチャ
+```typescript
+// lib/batch/BaseBatch.ts
+export abstract class BaseBatch {
+  protected batchId: string;
+  protected tenantId?: string;
+  
+  constructor(batchId: string, tenantId?: string) {
+    this.batchId = batchId;
+    this.tenantId = tenantId;
+  }
+  
+  abstract execute(): Promise<void>;
+  
+  async run(): Promise<void> {
+    const startTime = Date.now();
+    
+    try {
+      await this.beforeExecute();
+      await this.execute();
+      await this.afterExecute();
+      
+      await this.logSuccess(Date.now() - startTime);
+    } catch (error) {
+      await this.logError(error);
+      throw error;
+    }
+  }
+  
+  protected async beforeExecute(): Promise<void> {
+    // 前処理（ログ出力、リソース確保等）
+  }
+  
+  protected async afterExecute(): Promise<void> {
+    // 後処理（リソース解放、通知等）
+  }
+  
+  protected async logSuccess(duration: number): Promise<void> {
+    // 成功ログ出力
+  }
+  
+  protected async logError(error: any): Promise<void> {
+    // エラーログ出力
+  }
+}
+```
 
-- **アプリケーションログ**: エラー、警告、情報ログ
-- **アクセスログ**: ユーザーアクション、API呼び出し
-- **セキュリティログ**: 認証イベント、異常アクセス
-- **パフォーマンスログ**: レスポンス時間、リソース使用率
-- **監査ログ**: 重要なデータ変更、管理者操作
+### 具体的バッチ実装例
+```typescript
+// batches/SystemHealthCheckBatch.ts
+export class SystemHealthCheckBatch extends BaseBatch {
+  constructor() {
+    super('BATCH-001');
+  }
+  
+  async execute(): Promise<void> {
+    // データベース接続チェック
+    await this.checkDatabase();
+    
+    // API エンドポイントチェック
+    await this.checkApiEndpoints();
+    
+    // リソース使用量チェック
+    await this.checkResourceUsage();
+    
+    // 外部サービス接続チェック
+    await this.checkExternalServices();
+  }
+  
+  private async checkDatabase(): Promise<void> {
+    // PostgreSQL 接続・性能チェック
+  }
+  
+  private async checkApiEndpoints(): Promise<void> {
+    // 主要API エンドポイントの応答チェック
+  }
+  
+  private async checkResourceUsage(): Promise<void> {
+    // CPU、メモリ、ディスク使用量チェック
+  }
+  
+  private async checkExternalServices(): Promise<void> {
+    // 外部API、メール送信等のチェック
+  }
+}
+```
 
-## 技術的負債と課題
+## セキュリティ技術実装
 
-現時点では、以下の技術的課題を認識しています：
+### 認証・認可
+```typescript
+// middleware.ts - Next.js ミドルウェア
+export async function middleware(request: NextRequest) {
+  // 1. 認証チェック
+  const token = await getToken({ req: request });
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+  
+  // 2. テナント情報設定
+  const tenantId = token.tenantId as string;
+  if (!tenantId) {
+    return NextResponse.redirect(new URL('/tenant-select', request.url));
+  }
+  
+  // 3. 権限チェック
+  const hasPermission = await checkPermission(token.userId, request.nextUrl.pathname);
+  if (!hasPermission) {
+    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  }
+  
+  // 4. リクエストヘッダーにテナント情報追加
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-tenant-id', tenantId);
+  
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
 
-1. **技術スタックの確定**: 要件定義書に基づいた最適な技術選定を行う必要がある
-2. **データモデルの詳細化**: 現在のExcelフォーマットからの移行方法と要件定義書に基づいたデータモデルの設計
-3. **認証方式の決定**: 社内システムとの連携方法と要件定義書の認証要件の実装
-4. **パフォーマンス最適化**: 特に大量データ表示時の対応と要件定義書の非機能要件（1秒以内のレスポンス）達成
-5. **アクセシビリティ対応**: 要件定義書の非機能要件（WCAG 2.1 AA相当）達成
+export const config = {
+  matcher: [
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|login|tenant-select).*)',
+  ],
+};
+```
 
-## 今後の技術検討事項
+### データ暗号化
+```typescript
+// lib/encryption.ts
+import crypto from 'crypto';
 
-1. **オフライン対応**: オフライン時のデータ入力・同期機能
-2. **多言語対応**: 将来的な国際化対応
-3. **モバイル対応**: レスポンシブデザインまたはPWA対応
-4. **データ分析機能**: 高度な分析・レポート機能の追加
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY!;
+const ALGORITHM = 'aes-256-gcm';
+
+export function encrypt(text: string): string {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipher(ALGORITHM, ENCRYPTION_KEY);
+  cipher.setAAD(Buffer.from('additional-data'));
+  
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  
+  const authTag = cipher.getAuthTag();
+  
+  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+}
+
+export function decrypt(encryptedText: string): string {
+  const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+  
+  const iv = Buffer.from(ivHex, 'hex');
+  const authTag = Buffer.from(authTagHex, 'hex');
+  
+  const decipher = crypto.createDecipher(ALGORITHM, ENCRYPTION_KEY);
+  decipher.setAAD(Buffer.from('additional-data'));
+  decipher.setAuthTag(authTag);
+  
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  
+  return decrypted;
+}
+```
+
+## 監視・ログ技術実装
+
+### 構造化ログ
+```typescript
+// lib/logger.ts
+import winston from 'winston';
+
+interface LogContext {
+  tenantId?: string;
+  userId?: string;
+  action: string;
+  resource?: string;
+  details?: any;
+  traceId?: string;
+}
+
+class Logger {
+  private winston: winston.Logger;
+  
+  constructor() {
+    this.winston = winston.createLogger({
+      level: process.env.LOG_LEVEL || 'info',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.json()
+      ),
+      transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'app.log' })
+      ]
+    });
+  }
+  
+  info(message: string, context: LogContext) {
+    this.winston.info(message, {
+      ...context,
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  error(message: string, error: Error, context: LogContext) {
+    this.winston.error(message, {
+      ...context,
+      error: {
+        message: error.message,
+        stack: error.stack
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  warn(message: string, context: LogContext) {
+    this.winston.warn(message, {
+      ...context,
+      timestamp: new Date().toISOString()
+    });
+  }
+}
+
+export const logger = new Logger();
+```
+
+## パフォーマンス最適化
+
+### キャッシュ戦略
+```typescript
+// lib/cache.ts
+import { Redis } from 'ioredis';
+
+class CacheManager {
+  private redis: Redis;
+  
+  constructor() {
+    this.redis = new Redis(process.env.REDIS_URL!);
+  }
+  
+  async get<T>(key: string): Promise<T | null> {
+    const cached = await this.redis.get(key);
+    return cached ? JSON.parse(cached) : null;
+  }
+  
+  async set<T>(key: string, value: T, ttl: number = 3600): Promise<void> {
+    await this.redis.setex(key, ttl, JSON.stringify(value));
+  }
+  
+  async invalidate(pattern: string): Promise<void> {
+    const keys = await this.redis.keys(pattern);
+    if (keys.length > 0) {
+      await this.redis.del(...keys);
+    }
+  }
+  
+  // テナント別キャッシュキー生成
+  tenantKey(tenantId: string, resource: string, id?: string): string {
+    return `tenant:${tenantId}:${resource}${id ? `:${id}` : ''}`;
+  }
+}
+
+export const cache = new CacheManager();
+```
+
+この技術コンテキストにより、マルチテナント対応の高性能・高セキュリティなシステムを実現します。
