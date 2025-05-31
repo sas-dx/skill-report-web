@@ -49,12 +49,19 @@
 | 15 | work_location | 勤務地 | VARCHAR | 100 | ○ | - | - | NULL | 主な勤務地 |
 | 16 | profile_image_url | プロフィール画像URL | VARCHAR | 500 | ○ | - | - | NULL | プロフィール画像のURL |
 | 17 | self_introduction | 自己紹介 | TEXT | - | ○ | - | - | NULL | 自己紹介文 |
-| 18 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | 所属テナントのID |
-| 19 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | 社員が有効かどうか |
-| 20 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
-| 21 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| 22 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
-| 23 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 18 | current_job_type_id | 現在の職種ID | VARCHAR | 20 | ○ | - | ○ | NULL | 現在の職種ID |
+| 19 | current_skill_grade_id | 現在のスキルグレードID | VARCHAR | 20 | ○ | - | ○ | NULL | 現在のスキルグレードID |
+| 20 | job_type_assigned_date | 職種割当日 | DATE | - | ○ | - | - | NULL | 現在の職種に割り当てられた日 |
+| 21 | skill_grade_assigned_date | スキルグレード割当日 | DATE | - | ○ | - | - | NULL | 現在のスキルグレードに割り当てられた日 |
+| 22 | next_target_grade_id | 次期目標グレードID | VARCHAR | 20 | ○ | - | ○ | NULL | 次期昇格目標のスキルグレードID |
+| 23 | grade_promotion_target_date | グレード昇格目標日 | DATE | - | ○ | - | - | NULL | スキルグレード昇格の目標日 |
+| 24 | career_path_notes | キャリアパス備考 | TEXT | - | ○ | - | - | NULL | キャリアパスに関する備考 |
+| 25 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | 所属テナントのID |
+| 26 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | 社員が有効かどうか |
+| 27 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 28 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 29 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 30 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
 ### 3.2 インデックス定義
 
