@@ -1,0 +1,54 @@
+# 要求仕様ID: PLT.1-DB.1 - PostgreSQL データベース設定
+
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: skill-report-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: skill_report_db
+      POSTGRES_USER: skill_user
+      POSTGRES_PASSWORD: skill_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - skill-report-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skill_user -d skill_report_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 開発用 pgAdmin（オプション）
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: skill-report-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - skill-report-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  skill-report-network:
+    driver: bridge
