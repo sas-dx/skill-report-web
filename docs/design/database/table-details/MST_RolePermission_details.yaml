@@ -1,0 +1,413 @@
+# MST_RolePermission テーブル詳細定義
+table_name: "MST_RolePermission"
+logical_name: "ロール権限紐付け"
+category: "マスタ系"
+
+# テーブル概要・目的
+overview: |
+  MST_RolePermission（ロール権限紐付け）は、ロールと権限の関連付けを管理するマスタテーブルです。
+  
+  主な目的：
+  - ロールと権限の多対多関係管理
+  - 動的な権限割り当て・解除
+  - 権限セットの柔軟な組み合わせ
+  - ロールベースアクセス制御（RBAC）の実装
+  - 権限継承・委譲の管理
+  - 最小権限の原則実装
+  - 監査・コンプライアンス対応
+  
+  このテーブルは、ロールに具体的な権限を付与する重要な関連テーブルであり、
+  システムセキュリティの実装において中核的な役割を果たします。
+
+# 業務固有カラム定義
+business_columns:
+  - name: role_id
+    logical: ロールID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: ロールのID（MST_Roleへの外部キー）
+    
+  - name: permission_id
+    logical: 権限ID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: 権限のID（MST_Permissionへの外部キー）
+    
+  - name: assignment_type
+    logical: 割り当て種別
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 権限割り当ての種別（DIRECT:直接、INHERITED:継承、CONDITIONAL:条件付き）
+    enum_values: ['DIRECT', 'INHERITED', 'CONDITIONAL']
+    default: 'DIRECT'
+    
+  - name: granted_by
+    logical: 付与者ID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: 権限を付与した管理者のID（MST_UserAuthへの外部キー）
+    
+  - name: grant_reason
+    logical: 付与理由
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 権限付与の理由・根拠
+    
+  - name: effective_from
+    logical: 有効開始日時
+    type: TIMESTAMP
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 権限付与の有効開始日時
+    default: 'CURRENT_TIMESTAMP'
+    
+  - name: effective_to
+    logical: 有効終了日時
+    type: TIMESTAMP
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 権限付与の有効終了日時
+    
+  - name: conditions
+    logical: 適用条件
+    type: JSON
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 権限適用の条件（時間帯、場所、状況等をJSON形式）
+    
+  - name: priority_order
+    logical: 優先順序
+    type: INT
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 同一権限の複数付与時の優先順序（数値が小さいほど高優先）
+    default: 999
+    
+  - name: is_mandatory
+    logical: 必須権限フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: ロールに必須の権限かどうか（削除不可）
+    default: false
+    
+  - name: is_inherited
+    logical: 継承権限フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 下位ロールに継承される権限かどうか
+    default: false
+    
+  - name: inheritance_depth
+    logical: 継承深度
+    type: INT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 権限継承の深度（何階層まで継承するか）
+    
+  - name: requires_approval
+    logical: 承認要求フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 権限行使に承認が必要かどうか
+    default: false
+    
+  - name: approval_status
+    logical: 承認状態
+    type: ENUM
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 承認の状態（PENDING:承認待ち、APPROVED:承認済み、REJECTED:却下）
+    enum_values: ['PENDING', 'APPROVED', 'REJECTED']
+    
+  - name: approved_by
+    logical: 承認者ID
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 権限付与を承認した管理者のID
+    
+  - name: approved_at
+    logical: 承認日時
+    type: TIMESTAMP
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 権限付与が承認された日時
+    
+  - name: assignment_status
+    logical: 割り当て状態
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 割り当ての状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、EXPIRED:期限切れ）
+    enum_values: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED']
+    default: 'ACTIVE'
+    
+  - name: last_used_at
+    logical: 最終使用日時
+    type: TIMESTAMP
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: この権限が最後に使用された日時
+    
+  - name: usage_count
+    logical: 使用回数
+    type: INT
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: この権限が使用された回数
+    default: 0
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_role_permission
+    columns: [role_id, permission_id]
+    unique: true
+    description: ロール・権限組み合わせ検索用（一意）
+    
+  - name: idx_role_id
+    columns: [role_id]
+    unique: false
+    description: ロール別検索用
+    
+  - name: idx_permission_id
+    columns: [permission_id]
+    unique: false
+    description: 権限別検索用
+    
+  - name: idx_assignment_type
+    columns: [assignment_type]
+    unique: false
+    description: 割り当て種別検索用
+    
+  - name: idx_granted_by
+    columns: [granted_by]
+    unique: false
+    description: 付与者別検索用
+    
+  - name: idx_effective_period
+    columns: [effective_from, effective_to]
+    unique: false
+    description: 有効期間検索用
+    
+  - name: idx_mandatory_permission
+    columns: [role_id, is_mandatory]
+    unique: false
+    description: 必須権限検索用
+    
+  - name: idx_assignment_status
+    columns: [assignment_status]
+    unique: false
+    description: 割り当て状態別検索用
+    
+  - name: idx_approval_status
+    columns: [approval_status]
+    unique: false
+    description: 承認状態別検索用
+    
+  - name: idx_inherited_permission
+    columns: [is_inherited]
+    unique: false
+    description: 継承権限検索用
+
+# 業務固有制約
+business_constraints:
+  - name: uk_role_permission_active
+    type: UNIQUE
+    columns: [role_id, permission_id, assignment_status]
+    description: アクティブなロール・権限組み合わせ一意制約
+    
+  - name: chk_assignment_type
+    type: CHECK
+    condition: "assignment_type IN ('DIRECT', 'INHERITED', 'CONDITIONAL')"
+    description: 割り当て種別値チェック制約
+    
+  - name: chk_assignment_status
+    type: CHECK
+    condition: "assignment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED')"
+    description: 割り当て状態値チェック制約
+    
+  - name: chk_approval_status
+    type: CHECK
+    condition: "approval_status IS NULL OR approval_status IN ('PENDING', 'APPROVED', 'REJECTED')"
+    description: 承認状態値チェック制約
+    
+  - name: chk_effective_period
+    type: CHECK
+    condition: "effective_to IS NULL OR effective_from <= effective_to"
+    description: 有効期間整合性チェック制約
+    
+  - name: chk_inheritance_depth
+    type: CHECK
+    condition: "inheritance_depth IS NULL OR inheritance_depth > 0"
+    description: 継承深度正値チェック制約
+    
+  - name: chk_priority_order
+    type: CHECK
+    condition: "priority_order > 0"
+    description: 優先順序正値チェック制約
+    
+  - name: chk_usage_count
+    type: CHECK
+    condition: "usage_count >= 0"
+    description: 使用回数非負値チェック制約
+
+# 外部キー関係
+foreign_keys:
+  - name: fk_rolepermission_role
+    column: role_id
+    reference_table: MST_Role
+    reference_column: id
+    on_update: CASCADE
+    on_delete: CASCADE
+    description: ロールへの外部キー
+    
+  - name: fk_rolepermission_permission
+    column: permission_id
+    reference_table: MST_Permission
+    reference_column: id
+    on_update: CASCADE
+    on_delete: CASCADE
+    description: 権限への外部キー
+    
+  - name: fk_rolepermission_granted_by
+    column: granted_by
+    reference_table: MST_UserAuth
+    reference_column: user_id
+    on_update: CASCADE
+    on_delete: SET NULL
+    description: 付与者への外部キー
+    
+  - name: fk_rolepermission_approved_by
+    column: approved_by
+    reference_table: MST_UserAuth
+    reference_column: user_id
+    on_update: CASCADE
+    on_delete: SET NULL
+    description: 承認者への外部キー
+
+# サンプルデータ
+sample_data:
+  - role_id: "ROLE003"
+    permission_id: "PERM_USER_READ"
+    assignment_type: "DIRECT"
+    granted_by: "USER000000"
+    grant_reason: "一般ユーザーの基本権限として付与"
+    effective_from: "2025-01-01 00:00:00"
+    effective_to: null
+    conditions: null
+    priority_order: 1
+    is_mandatory: true
+    is_inherited: true
+    inheritance_depth: 2
+    requires_approval: false
+    approval_status: null
+    approved_by: null
+    approved_at: null
+    assignment_status: "ACTIVE"
+    last_used_at: "2025-06-01 09:00:00"
+    usage_count: 1250
+    
+  - role_id: "ROLE002"
+    permission_id: "PERM_USER_UPDATE"
+    assignment_type: "DIRECT"
+    granted_by: "USER000001"
+    grant_reason: "テナント管理者の権限として付与"
+    effective_from: "2025-02-01 00:00:00"
+    effective_to: null
+    conditions: '{"scope": "tenant"}'
+    priority_order: 1
+    is_mandatory: true
+    is_inherited: false
+    inheritance_depth: null
+    requires_approval: false
+    approval_status: null
+    approved_by: null
+    approved_at: null
+    assignment_status: "ACTIVE"
+    last_used_at: "2025-06-01 10:30:00"
+    usage_count: 85
+    
+  - role_id: "ROLE001"
+    permission_id: "PERM_SYSTEM_ADMIN"
+    assignment_type: "DIRECT"
+    granted_by: "USER000000"
+    grant_reason: "システム管理者の最高権限として付与"
+    effective_from: "2025-01-01 00:00:00"
+    effective_to: null
+    conditions: null
+    priority_order: 1
+    is_mandatory: true
+    is_inherited: false
+    inheritance_depth: null
+    requires_approval: true
+    approval_status: "APPROVED"
+    approved_by: "USER000000"
+    approved_at: "2025-01-01 00:00:00"
+    assignment_status: "ACTIVE"
+    last_used_at: "2025-06-01 08:00:00"
+    usage_count: 45
+
+# 特記事項
+notes:
+  - "ロールと権限の多対多関係を管理"
+  - "権限継承による階層的権限管理"
+  - "条件付き権限による柔軟なアクセス制御"
+  - "承認フローによる高リスク権限の制御"
+  - "使用状況の追跡・監査が可能"
+  - "必須権限による基本権限の保護"
+
+# 業務ルール
+business_rules:
+  - "同一ロール・権限の重複割り当ては不可"
+  - "必須権限（is_mandatory=true）は削除不可"
+  - "継承権限は下位ロールに自動付与"
+  - "有効期間外の権限割り当ては自動的に EXPIRED 状態に変更"
+  - "承認要求権限は承認完了まで使用不可"
+  - "権限使用時は last_used_at と usage_count を更新"
+  - "ロールまたは権限が削除された場合は関連する紐付けも削除"
