@@ -1,5 +1,5 @@
 -- MST_Certification (資格情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Certification (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

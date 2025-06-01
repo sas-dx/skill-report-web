@@ -1,8 +1,8 @@
 -- 全テーブル統合DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 -- MST_UserAuth (ユーザー認証情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_UserAuth (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -46,7 +46,7 @@ ALTER TABLE MST_UserAuth ADD CONSTRAINT fk_userauth_employee FOREIGN KEY (employ
 
 
 -- MST_Role (ロール情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Role (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -89,7 +89,7 @@ ALTER TABLE MST_Role ADD CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) 
 
 
 -- MST_Permission (権限情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Permission (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -135,7 +135,7 @@ ALTER TABLE MST_Permission ADD CONSTRAINT fk_permission_parent FOREIGN KEY (pare
 
 
 -- MST_UserRole (ユーザーロール紐付け) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_UserRole (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -187,7 +187,7 @@ ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_approved_by FOREIGN KEY (app
 
 
 -- MST_Employee (社員基本情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Employee (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -228,7 +228,7 @@ ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager FOREIGN KEY (manager
 
 
 -- MST_Department (部署マスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Department (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -274,7 +274,7 @@ ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy FOREIGN KEY (depu
 
 
 -- MST_Position (役職マスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Position (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -316,7 +316,7 @@ CREATE INDEX idx_sort_order ON MST_Position (sort_order);
 
 
 -- MST_SkillHierarchy (スキル階層マスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_SkillHierarchy (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -331,7 +331,7 @@ CREATE TABLE MST_SkillHierarchy (
 
 
 -- MST_Certification (資格情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Certification (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -346,7 +346,7 @@ CREATE TABLE MST_Certification (
 
 
 -- MST_CareerPlan (目標・キャリアプラン) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_CareerPlan (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -361,7 +361,7 @@ CREATE TABLE MST_CareerPlan (
 
 
 -- MST_ReportTemplate (帳票テンプレート) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_ReportTemplate (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -376,7 +376,7 @@ CREATE TABLE MST_ReportTemplate (
 
 
 -- MST_SystemConfig (システム設定) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_SystemConfig (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -391,7 +391,7 @@ CREATE TABLE MST_SystemConfig (
 
 
 -- MST_Tenant (テナント管理) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_Tenant (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -406,7 +406,7 @@ CREATE TABLE MST_Tenant (
 
 
 -- MST_TenantSettings (テナント設定) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_TenantSettings (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -421,7 +421,7 @@ CREATE TABLE MST_TenantSettings (
 
 
 -- MST_NotificationSettings (通知設定) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_NotificationSettings (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -436,7 +436,7 @@ CREATE TABLE MST_NotificationSettings (
 
 
 -- MST_NotificationTemplate (通知テンプレート) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_NotificationTemplate (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -451,7 +451,7 @@ CREATE TABLE MST_NotificationTemplate (
 
 
 -- MST_SkillCategory (スキルカテゴリマスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_SkillCategory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -500,7 +500,7 @@ ALTER TABLE MST_SkillCategory ADD CONSTRAINT fk_skillcategory_parent FOREIGN KEY
 
 
 -- MST_JobType (職種マスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_JobType (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -515,7 +515,7 @@ CREATE TABLE MST_JobType (
 
 
 -- MST_SkillGrade (スキルグレードマスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_SkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -530,7 +530,7 @@ CREATE TABLE MST_SkillGrade (
 
 
 -- MST_CertificationRequirement (資格要件マスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_CertificationRequirement (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -545,7 +545,7 @@ CREATE TABLE MST_CertificationRequirement (
 
 
 -- MST_EmployeeJobType (社員職種関連) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_EmployeeJobType (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -560,7 +560,7 @@ CREATE TABLE MST_EmployeeJobType (
 
 
 -- MST_JobTypeSkillGrade (職種スキルグレード関連) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_JobTypeSkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -575,7 +575,7 @@ CREATE TABLE MST_JobTypeSkillGrade (
 
 
 -- MST_SkillGradeRequirement (スキルグレード要件) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_SkillGradeRequirement (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -590,7 +590,7 @@ CREATE TABLE MST_SkillGradeRequirement (
 
 
 -- MST_JobTypeSkill (職種スキル関連) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_JobTypeSkill (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -605,7 +605,7 @@ CREATE TABLE MST_JobTypeSkill (
 
 
 -- MST_EmployeeDepartment (社員部署関連) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_EmployeeDepartment (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -620,7 +620,7 @@ CREATE TABLE MST_EmployeeDepartment (
 
 
 -- MST_EmployeePosition (社員役職関連) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_EmployeePosition (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -635,7 +635,7 @@ CREATE TABLE MST_EmployeePosition (
 
 
 -- MST_SkillItem (スキル項目マスタ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_SkillItem (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -658,7 +658,7 @@ CREATE INDEX idx_skill_category ON MST_SkillItem (skill_category_id);
 
 
 -- MST_TrainingProgram (研修プログラム) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_TrainingProgram (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -673,7 +673,7 @@ CREATE TABLE MST_TrainingProgram (
 
 
 -- TRN_SkillRecord (スキル情報) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_SkillRecord (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -720,7 +720,7 @@ ALTER TABLE TRN_SkillRecord ADD CONSTRAINT fk_skill_assessor FOREIGN KEY (assess
 
 
 -- TRN_GoalProgress (目標進捗) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_GoalProgress (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -741,7 +741,7 @@ CREATE INDEX idx_employee ON TRN_GoalProgress (employee_id);
 
 
 -- TRN_ProjectRecord (案件実績) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_ProjectRecord (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -756,7 +756,7 @@ CREATE TABLE TRN_ProjectRecord (
 
 
 -- TRN_TrainingHistory (研修参加履歴) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_TrainingHistory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -771,7 +771,7 @@ CREATE TABLE TRN_TrainingHistory (
 
 
 -- TRN_PDU (継続教育ポイント) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_PDU (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -786,7 +786,7 @@ CREATE TABLE TRN_PDU (
 
 
 -- TRN_SkillEvidence (スキル証跡) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_SkillEvidence (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -801,7 +801,7 @@ CREATE TABLE TRN_SkillEvidence (
 
 
 -- TRN_Notification (通知履歴) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_Notification (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -816,7 +816,7 @@ CREATE TABLE TRN_Notification (
 
 
 -- TRN_EmployeeSkillGrade (社員スキルグレード) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE TRN_EmployeeSkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -853,7 +853,7 @@ ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_evaluator FOREI
 
 
 -- SYS_SkillIndex (スキル検索インデックス) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_SkillIndex (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -867,7 +867,7 @@ CREATE TABLE SYS_SkillIndex (
 
 
 -- SYS_SkillMatrix (スキルマップ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_SkillMatrix (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -881,7 +881,7 @@ CREATE TABLE SYS_SkillMatrix (
 
 
 -- SYS_BackupHistory (バックアップ履歴) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_BackupHistory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -895,7 +895,7 @@ CREATE TABLE SYS_BackupHistory (
 
 
 -- SYS_SystemLog (システムログ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_SystemLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -942,7 +942,7 @@ ALTER TABLE SYS_SystemLog ADD CONSTRAINT fk_log_user FOREIGN KEY (user_id) REFER
 
 
 -- SYS_TokenStore (トークン管理) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_TokenStore (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -956,7 +956,7 @@ CREATE TABLE SYS_TokenStore (
 
 
 -- SYS_MasterData (マスタデータ全般) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_MasterData (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -970,7 +970,7 @@ CREATE TABLE SYS_MasterData (
 
 
 -- SYS_TenantUsage (テナント使用量) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_TenantUsage (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -984,7 +984,7 @@ CREATE TABLE SYS_TenantUsage (
 
 
 -- SYS_IntegrationConfig (外部連携設定) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE SYS_IntegrationConfig (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -998,7 +998,7 @@ CREATE TABLE SYS_IntegrationConfig (
 
 
 -- HIS_AuditLog (監査ログ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE HIS_AuditLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1013,7 +1013,7 @@ CREATE TABLE HIS_AuditLog (
 
 
 -- HIS_NotificationLog (通知送信履歴) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE HIS_NotificationLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1028,7 +1028,7 @@ CREATE TABLE HIS_NotificationLog (
 
 
 -- HIS_TenantBilling (テナント課金履歴) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE HIS_TenantBilling (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1043,7 +1043,7 @@ CREATE TABLE HIS_TenantBilling (
 
 
 -- WRK_BatchJobLog (一括登録ジョブログ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE WRK_BatchJobLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

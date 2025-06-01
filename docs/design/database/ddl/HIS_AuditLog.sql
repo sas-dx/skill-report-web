@@ -1,5 +1,5 @@
 -- HIS_AuditLog (監査ログ) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE HIS_AuditLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

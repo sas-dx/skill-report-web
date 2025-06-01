@@ -1,5 +1,5 @@
 -- MST_CareerPlan (目標・キャリアプラン) DDL
--- 生成日時: 2025-06-01 13:28:12
+-- 生成日時: 2025-06-01 14:31:00
 
 CREATE TABLE MST_CareerPlan (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
