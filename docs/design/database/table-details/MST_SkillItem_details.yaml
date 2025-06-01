@@ -1,0 +1,115 @@
+# MST_SkillItem テーブル詳細定義
+table_name: "MST_SkillItem"
+logical_name: "スキル項目マスタ"
+category: "マスタ系"
+
+# テーブル概要・目的
+overview: |
+  MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。
+  
+  主な目的：
+  - スキル項目の体系的管理（技術スキル、ビジネススキル、資格等）
+  - スキル評価基準の標準化（レベル定義、評価指標等）
+  - スキルカテゴリ・分類の階層管理
+  - 人材育成計画・研修プログラムの基盤
+  - プロジェクトアサインメント・スキルマッチングの基礎
+  - 組織スキル分析・可視化の基盤
+  - 外部資格・認定との連携管理
+  
+  このテーブルは、人材のスキル管理、キャリア開発、組織能力分析など、
+  戦略的人材マネジメントの基盤となる重要なマスタデータです。
+
+# 業務固有カラム定義
+business_columns:
+  - name: skill_code
+    logical: スキルコード
+    type: VARCHAR
+    length: 20
+    null: false
+    unique: true
+    encrypted: false
+    description: スキル項目を一意に識別するコード（例：SKILL001）
+    
+  - name: skill_name
+    logical: スキル名
+    type: VARCHAR
+    length: 100
+    null: false
+    unique: false
+    encrypted: false
+    description: スキル項目の正式名称
+    
+  - name: skill_category_id
+    logical: スキルカテゴリID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: スキルカテゴリのID
+    
+  - name: skill_type
+    logical: スキル種別
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格）
+    enum_values: ['TECHNICAL', 'BUSINESS', 'CERTIFICATION']
+    
+  - name: difficulty_level
+    logical: 習得難易度
+    type: INT
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: スキル習得の難易度（1-5段階）
+    
+  - name: importance_level
+    logical: 重要度
+    type: INT
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 組織における重要度（1-5段階）
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_skill_code
+    columns: [skill_code]
+    unique: true
+    description: スキルコード検索用
+    
+  - name: idx_skill_category
+    columns: [skill_category_id]
+    unique: false
+    description: スキルカテゴリ別検索用
+
+# 業務固有制約
+business_constraints:
+  - name: uk_skill_code
+    type: UNIQUE
+    columns: [skill_code]
+    description: スキルコード一意制約
+
+# サンプルデータ
+sample_data:
+  - skill_code: "SKILL001"
+    skill_name: "Java"
+    skill_category_id: "CAT001"
+    skill_type: "TECHNICAL"
+    difficulty_level: 3
+    importance_level: 4
+
+# 特記事項
+notes:
+  - "スキル項目は階層構造で管理"
+  - "評価基準は標準化されたレベル定義を使用"
+
+# 業務ルール
+business_rules:
+  - "スキルコードは自動採番（SKILL + 3桁連番）"
+  - "重要度・難易度は1-5の5段階評価"

@@ -1,314 +1,188 @@
-# テーブル定義書_HIS_TenantBilling_テナント課金履歴
+# テーブル定義書：HIS_TenantBilling（テナント課金履歴）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | HIS_TenantBilling |
-| 論理名 | テナント課金履歴 |
-| 用途 | テナントの課金履歴を記録・管理 |
-| カテゴリ | 履歴系 |
-| 作成日 | 2025-05-31 |
-| 最終更新日 | 2025-05-31 |
+| **テーブルID** | TBL-033 |
+| **テーブル名** | HIS_TenantBilling |
+| **論理名** | テナント課金履歴 |
+| **カテゴリ** | 履歴系 |
+| **機能カテゴリ** | マルチテナント管理 |
+| **優先度** | 高 |
+| **個人情報含有** | あり |
+| **機密情報レベル** | 高 |
+| **暗号化要否** | 要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## 概要
+## 2. テーブル概要
 
-テナントごとの課金履歴を記録し、請求書発行、支払い管理、収益分析等に活用するテーブル。使用量ベースの課金計算結果と実際の請求・支払い状況を管理する。
+### 2.1 概要・目的
+SCR-TENANT-ADMIN
 
-## カラム定義
+### 2.3 関連API
+API-025
 
-| No | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト値 | 主キー | 外部キー | 説明 |
-|----|----------|--------|----------|------|------|-------------|--------|----------|------|
-| 1 | billing_id | 課金ID | BIGINT | - | NOT NULL | AUTO_INCREMENT | ○ | - | 課金履歴の一意識別子 |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | MST_Tenant.tenant_id | 対象テナントID |
-| 3 | billing_period_start | 課金期間開始日 | DATE | - | NOT NULL | - | - | - | 課金対象期間の開始日 |
-| 4 | billing_period_end | 課金期間終了日 | DATE | - | NOT NULL | - | - | - | 課金対象期間の終了日 |
-| 5 | billing_type | 課金タイプ | VARCHAR | 20 | NOT NULL | - | - | - | 課金種別 |
-| 6 | plan_id | プランID | VARCHAR | 50 | NULL | NULL | - | - | 適用された料金プランID |
-| 7 | plan_name | プラン名 | VARCHAR | 100 | NULL | NULL | - | - | 適用された料金プラン名 |
-| 8 | base_amount | 基本料金 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 基本料金（固定費） |
-| 9 | usage_amount | 使用量料金 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 使用量ベースの料金 |
-| 10 | additional_amount | 追加料金 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 追加サービス料金 |
-| 11 | discount_amount | 割引額 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 適用された割引額 |
-| 12 | tax_amount | 税額 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 消費税等の税額 |
-| 13 | total_amount | 合計金額 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 請求合計金額 |
-| 14 | currency | 通貨 | VARCHAR | 3 | NOT NULL | 'JPY' | - | - | 通貨コード |
-| 15 | tax_rate | 税率 | DECIMAL | 5,2 | NOT NULL | 0.00 | - | - | 適用税率（%） |
-| 16 | active_users | アクティブユーザー数 | INT | - | NULL | 0 | - | - | 課金対象期間のアクティブユーザー数 |
-| 17 | total_users | 総ユーザー数 | INT | - | NULL | 0 | - | - | 課金対象期間の総ユーザー数 |
-| 18 | storage_used_gb | ストレージ使用量(GB) | DECIMAL | 10,2 | NULL | 0.00 | - | - | ストレージ使用量（ギガバイト） |
-| 19 | api_calls | API呼び出し数 | BIGINT | - | NULL | 0 | - | - | API呼び出し総数 |
-| 20 | data_transfer_gb | データ転送量(GB) | DECIMAL | 10,2 | NULL | 0.00 | - | - | データ転送量（ギガバイト） |
-| 21 | backup_size_gb | バックアップサイズ(GB) | DECIMAL | 10,2 | NULL | 0.00 | - | - | バックアップデータサイズ |
-| 22 | usage_details_json | 使用量詳細 | JSON | - | NULL | NULL | - | - | 詳細な使用量データ（JSON形式） |
-| 23 | pricing_details_json | 料金詳細 | JSON | - | NULL | NULL | - | - | 料金計算詳細（JSON形式） |
-| 24 | invoice_number | 請求書番号 | VARCHAR | 50 | NULL | NULL | - | - | 発行された請求書番号 |
-| 25 | invoice_date | 請求書発行日 | DATE | - | NULL | NULL | - | - | 請求書発行日 |
-| 26 | due_date | 支払期限 | DATE | - | NULL | NULL | - | - | 支払期限日 |
-| 27 | payment_status | 支払いステータス | VARCHAR | 20 | NOT NULL | 'PENDING' | - | - | 支払い状況 |
-| 28 | payment_date | 支払日 | DATE | - | NULL | NULL | - | - | 実際の支払日 |
-| 29 | payment_method | 支払方法 | VARCHAR | 30 | NULL | NULL | - | - | 支払方法 |
-| 30 | payment_reference | 支払参照番号 | VARCHAR | 100 | NULL | NULL | - | - | 支払い時の参照番号 |
-| 31 | billing_status | 課金ステータス | VARCHAR | 20 | NOT NULL | 'CALCULATED' | - | - | 課金処理状況 |
-| 32 | calculation_date | 計算日 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | 課金計算実行日時 |
-| 33 | approval_status | 承認ステータス | VARCHAR | 20 | NOT NULL | 'PENDING' | - | - | 課金承認状況 |
-| 34 | approved_by | 承認者 | VARCHAR | 50 | NULL | NULL | - | - | 課金承認者 |
-| 35 | approved_at | 承認日時 | TIMESTAMP | - | NULL | NULL | - | - | 課金承認日時 |
-| 36 | adjustment_amount | 調整額 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 手動調整額 |
-| 37 | adjustment_reason | 調整理由 | TEXT | - | NULL | NULL | - | - | 調整理由 |
-| 38 | credit_amount | クレジット額 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 適用されたクレジット額 |
-| 39 | refund_amount | 返金額 | DECIMAL | 10,2 | NOT NULL | 0.00 | - | - | 返金額 |
-| 40 | external_billing_id | 外部課金ID | VARCHAR | 100 | NULL | NULL | - | - | 外部課金システムでのID |
-| 41 | billing_cycle | 課金サイクル | VARCHAR | 20 | NOT NULL | 'MONTHLY' | - | - | 課金サイクル |
-| 42 | proration_factor | 日割り係数 | DECIMAL | 5,4 | NOT NULL | 1.0000 | - | - | 日割り計算係数 |
-| 43 | contract_start_date | 契約開始日 | DATE | - | NULL | NULL | - | - | 契約開始日 |
-| 44 | contract_end_date | 契約終了日 | DATE | - | NULL | NULL | - | - | 契約終了日 |
-| 45 | notes | 備考 | TEXT | - | NULL | NULL | - | - | 課金に関する備考 |
-| 46 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | レコード作成日時 |
-| 47 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | - | - | レコード更新日時 |
-| 48 | created_by | 作成者 | VARCHAR | 50 | NOT NULL | 'SYSTEM' | - | - | レコード作成者 |
-| 49 | updated_by | 更新者 | VARCHAR | 50 | NOT NULL | 'SYSTEM' | - | - | レコード更新者 |
+### 2.4 関連バッチ
+BATCH-018-02
 
-## 制約
+## 3. テーブル構造
 
-### 主キー制約
-- PRIMARY KEY (billing_id)
+### 3.1 カラム定義
 
-### 外部キー制約
-- FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id)
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-### ユニーク制約
-- UNIQUE KEY uk_tenant_period (tenant_id, billing_period_start, billing_period_end, billing_type)
 
-### チェック制約
-- CHECK (billing_type IN ('MONTHLY', 'ANNUAL', 'USAGE_BASED', 'ONE_TIME', 'ADJUSTMENT'))
-- CHECK (payment_status IN ('PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'REFUNDED', 'PARTIAL'))
-- CHECK (billing_status IN ('CALCULATED', 'INVOICED', 'SENT', 'COMPLETED', 'CANCELLED'))
-- CHECK (approval_status IN ('PENDING', 'APPROVED', 'REJECTED', 'REVIEW_REQUIRED'))
-- CHECK (billing_cycle IN ('MONTHLY', 'QUARTERLY', 'ANNUAL', 'USAGE_BASED'))
-- CHECK (billing_period_start <= billing_period_end)
-- CHECK (base_amount >= 0)
-- CHECK (usage_amount >= 0)
-- CHECK (additional_amount >= 0)
-- CHECK (discount_amount >= 0)
-- CHECK (tax_amount >= 0)
-- CHECK (total_amount >= 0)
-- CHECK (tax_rate >= 0 AND tax_rate <= 100)
-- CHECK (proration_factor > 0 AND proration_factor <= 1)
+### 3.2 インデックス定義
 
-## インデックス
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
 
-| インデックス名 | 種別 | 対象カラム | 説明 |
-|---------------|------|------------|------|
-| idx_tenant_period | BTREE | tenant_id, billing_period_start | テナント・期間での検索用 |
-| idx_billing_period | BTREE | billing_period_start, billing_period_end | 課金期間での検索用 |
-| idx_payment_status | BTREE | payment_status | 支払いステータスでの検索用 |
-| idx_billing_status | BTREE | billing_status | 課金ステータスでの検索用 |
-| idx_invoice_number | BTREE | invoice_number | 請求書番号での検索用 |
-| idx_due_date | BTREE | due_date | 支払期限での検索用 |
-| idx_calculation_date | BTREE | calculation_date | 計算日での検索用 |
-| idx_approval_status | BTREE | approval_status | 承認ステータスでの検索用 |
-| idx_created_at | BTREE | created_at | 作成日時での検索用 |
 
-## DDL
+### 3.3 制約定義
 
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_his_tenantbilling | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
+
+
+## 4. リレーション
+
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
+
+
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
+
+## 5. データ仕様
+
+### 5.1 データ例
 ```sql
+-- サンプルデータ
+INSERT INTO HIS_TenantBilling (
+    id, tenant_id, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+);
+```
+
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
+
+## 6. 運用仕様
+
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
+
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
+
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
+
+## 7. パフォーマンス
+
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
+
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
+
+## 8. セキュリティ
+
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
+
+### 8.2 データ保護
+- 個人情報：あり
+- 機密情報：高レベル
+- 暗号化：要
+
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- テナント課金履歴テーブル作成DDL
 CREATE TABLE HIS_TenantBilling (
-    billing_id BIGINT NOT NULL AUTO_INCREMENT COMMENT '課金ID',
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
     tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    billing_period_start DATE NOT NULL COMMENT '課金期間開始日',
-    billing_period_end DATE NOT NULL COMMENT '課金期間終了日',
-    billing_type VARCHAR(20) NOT NULL COMMENT '課金タイプ',
-    plan_id VARCHAR(50) COMMENT 'プランID',
-    plan_name VARCHAR(100) COMMENT 'プラン名',
-    base_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '基本料金',
-    usage_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '使用量料金',
-    additional_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '追加料金',
-    discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '割引額',
-    tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '税額',
-    total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '合計金額',
-    currency VARCHAR(3) NOT NULL DEFAULT 'JPY' COMMENT '通貨',
-    tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT '税率',
-    active_users INT DEFAULT 0 COMMENT 'アクティブユーザー数',
-    total_users INT DEFAULT 0 COMMENT '総ユーザー数',
-    storage_used_gb DECIMAL(10,2) DEFAULT 0.00 COMMENT 'ストレージ使用量(GB)',
-    api_calls BIGINT DEFAULT 0 COMMENT 'API呼び出し数',
-    data_transfer_gb DECIMAL(10,2) DEFAULT 0.00 COMMENT 'データ転送量(GB)',
-    backup_size_gb DECIMAL(10,2) DEFAULT 0.00 COMMENT 'バックアップサイズ(GB)',
-    usage_details_json JSON COMMENT '使用量詳細',
-    pricing_details_json JSON COMMENT '料金詳細',
-    invoice_number VARCHAR(50) COMMENT '請求書番号',
-    invoice_date DATE COMMENT '請求書発行日',
-    due_date DATE COMMENT '支払期限',
-    payment_status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT '支払いステータス',
-    payment_date DATE COMMENT '支払日',
-    payment_method VARCHAR(30) COMMENT '支払方法',
-    payment_reference VARCHAR(100) COMMENT '支払参照番号',
-    billing_status VARCHAR(20) NOT NULL DEFAULT 'CALCULATED' COMMENT '課金ステータス',
-    calculation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '計算日',
-    approval_status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT '承認ステータス',
-    approved_by VARCHAR(50) COMMENT '承認者',
-    approved_at TIMESTAMP COMMENT '承認日時',
-    adjustment_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '調整額',
-    adjustment_reason TEXT COMMENT '調整理由',
-    credit_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'クレジット額',
-    refund_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '返金額',
-    external_billing_id VARCHAR(100) COMMENT '外部課金ID',
-    billing_cycle VARCHAR(20) NOT NULL DEFAULT 'MONTHLY' COMMENT '課金サイクル',
-    proration_factor DECIMAL(5,4) NOT NULL DEFAULT 1.0000 COMMENT '日割り係数',
-    contract_start_date DATE COMMENT '契約開始日',
-    contract_end_date DATE COMMENT '契約終了日',
-    notes TEXT COMMENT '備考',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL DEFAULT 'SYSTEM' COMMENT '作成者',
-    updated_by VARCHAR(50) NOT NULL DEFAULT 'SYSTEM' COMMENT '更新者',
-    
-    PRIMARY KEY (billing_id),
-    UNIQUE KEY uk_tenant_period (tenant_id, billing_period_start, billing_period_end, billing_type),
-    
-    CONSTRAINT fk_tenant_billing_tenant 
-        FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id),
-    
-    CONSTRAINT chk_billing_type 
-        CHECK (billing_type IN ('MONTHLY', 'ANNUAL', 'USAGE_BASED', 'ONE_TIME', 'ADJUSTMENT')),
-    CONSTRAINT chk_payment_status 
-        CHECK (payment_status IN ('PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'REFUNDED', 'PARTIAL')),
-    CONSTRAINT chk_billing_status 
-        CHECK (billing_status IN ('CALCULATED', 'INVOICED', 'SENT', 'COMPLETED', 'CANCELLED')),
-    CONSTRAINT chk_approval_status 
-        CHECK (approval_status IN ('PENDING', 'APPROVED', 'REJECTED', 'REVIEW_REQUIRED')),
-    CONSTRAINT chk_billing_cycle 
-        CHECK (billing_cycle IN ('MONTHLY', 'QUARTERLY', 'ANNUAL', 'USAGE_BASED')),
-    CONSTRAINT chk_billing_period 
-        CHECK (billing_period_start <= billing_period_end),
-    CONSTRAINT chk_base_amount 
-        CHECK (base_amount >= 0),
-    CONSTRAINT chk_usage_amount 
-        CHECK (usage_amount >= 0),
-    CONSTRAINT chk_additional_amount 
-        CHECK (additional_amount >= 0),
-    CONSTRAINT chk_discount_amount 
-        CHECK (discount_amount >= 0),
-    CONSTRAINT chk_tax_amount 
-        CHECK (tax_amount >= 0),
-    CONSTRAINT chk_total_amount 
-        CHECK (total_amount >= 0),
-    CONSTRAINT chk_tax_rate 
-        CHECK (tax_rate >= 0 AND tax_rate <= 100),
-    CONSTRAINT chk_proration_factor 
-        CHECK (proration_factor > 0 AND proration_factor <= 1)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
-COMMENT='テナント課金履歴管理テーブル';
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='テナント課金履歴';
 
--- インデックス作成
-CREATE INDEX idx_tenant_period ON HIS_TenantBilling(tenant_id, billing_period_start);
-CREATE INDEX idx_billing_period ON HIS_TenantBilling(billing_period_start, billing_period_end);
-CREATE INDEX idx_payment_status ON HIS_TenantBilling(payment_status);
-CREATE INDEX idx_billing_status ON HIS_TenantBilling(billing_status);
-CREATE INDEX idx_invoice_number ON HIS_TenantBilling(invoice_number);
-CREATE INDEX idx_due_date ON HIS_TenantBilling(due_date);
-CREATE INDEX idx_calculation_date ON HIS_TenantBilling(calculation_date);
-CREATE INDEX idx_approval_status ON HIS_TenantBilling(approval_status);
-CREATE INDEX idx_created_at ON HIS_TenantBilling(created_at);
 ```
 
-## 関連テーブル
+## 10. 特記事項
 
-| テーブル名 | 関係 | 説明 |
-|------------|------|------|
-| MST_Tenant | 親 | テナント基本情報 |
-| SYS_TenantUsage | 関連 | テナント使用量データ |
-| MST_TenantSettings | 関連 | テナント設定情報 |
-| SYS_SystemLog | 関連 | システムログ |
-| SYS_AuditLog | 関連 | 監査ログ |
+1. **設計方針**
+   - 履歴系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
 
-## 利用API
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
 
-| API ID | API名 | 説明 |
-|--------|-------|------|
-| API-025 | テナント管理API | 課金履歴取得 |
-| API-026 | テナント設定API | 課金設定管理 |
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
 
-## 利用バッチ
+4. **関連画面**
+   - 関連画面情報
 
-| バッチ ID | バッチ名 | 説明 |
-|-----------|----------|------|
-| BATCH-018-02 | テナント課金計算バッチ | 課金額計算と履歴作成 |
-| BATCH-018-01 | テナント使用量集計バッチ | 使用量データ集計 |
-| BATCH-302 | テナント課金計算バッチ | 月次課金計算 |
-
-## 運用考慮事項
-
-### セキュリティ
-- 課金データの機密性保護
-- アクセス権限の厳格な制御
-- 監査ログの記録
-- データ改ざん防止
-
-### 精度
-- 課金計算の正確性確保
-- 四捨五入ルールの統一
-- 通貨換算の精度管理
-- 税計算の正確性
-
-### 監査
-- 課金計算過程の透明性
-- 変更履歴の完全な記録
-- 承認プロセスの実装
-- 外部監査への対応
-
-### パフォーマンス
-- 大量データの効率的な処理
-- 集計処理の最適化
-- インデックスの適切な設計
-- アーカイブ戦略
-
-## データサンプル
-
-```sql
--- 月次課金履歴例
-INSERT INTO HIS_TenantBilling (
-    tenant_id, billing_period_start, billing_period_end,
-    billing_type, plan_name, base_amount, usage_amount,
-    tax_amount, total_amount, active_users, total_users,
-    storage_used_gb, api_calls, billing_status,
-    created_by, updated_by
-) VALUES (
-    'tenant001', '2025-05-01', '2025-05-31',
-    'MONTHLY', 'スタンダードプラン', 10000.00, 5000.00,
-    1500.00, 16500.00, 45, 100,
-    50.5, 150000, 'CALCULATED',
-    'SYSTEM', 'SYSTEM'
-);
-
--- 使用量ベース課金例
-INSERT INTO HIS_TenantBilling (
-    tenant_id, billing_period_start, billing_period_end,
-    billing_type, usage_amount, tax_amount, total_amount,
-    api_calls, data_transfer_gb, billing_status,
-    created_by, updated_by
-) VALUES (
-    'tenant002', '2025-05-01', '2025-05-31',
-    'USAGE_BASED', 25000.00, 2500.00, 27500.00,
-    500000, 100.0, 'CALCULATED',
-    'SYSTEM', 'SYSTEM'
-);
-
--- 調整課金例
-INSERT INTO HIS_TenantBilling (
-    tenant_id, billing_period_start, billing_period_end,
-    billing_type, adjustment_amount, adjustment_reason,
-    total_amount, billing_status, created_by, updated_by
-) VALUES (
-    'tenant001', '2025-05-15', '2025-05-15',
-    'ADJUSTMENT', -5000.00, 'システム障害による返金',
-    -5000.00, 'APPROVED', 'admin', 'admin'
-);
-```
-
-## 変更履歴
-
-| 版数 | 変更日 | 変更者 | 変更内容 |
-|------|--------|--------|----------|
-| 1.0 | 2025-05-31 | システム管理者 | 初版作成 |
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

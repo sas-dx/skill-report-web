@@ -1,152 +1,188 @@
-# テーブル定義書_SYS_SkillIndex_スキル検索インデックス
+# テーブル定義書：SYS_SkillIndex（スキル検索インデックス）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | SYS_SkillIndex |
-| 論理名 | スキル検索インデックス |
-| 用途 | スキル情報の高速検索を実現するためのシステムテーブル |
-| カテゴリ | システム系 |
-| 作成日 | 2024-12-19 |
-| 最終更新日 | 2024-12-19 |
+| **テーブルID** | TBL-012 |
+| **テーブル名** | SYS_SkillIndex |
+| **論理名** | スキル検索インデックス |
+| **カテゴリ** | システム系 |
+| **機能カテゴリ** | スキル管理 |
+| **優先度** | 高 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 低 |
+| **暗号化要否** | 不要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-スキル検索インデックステーブル（SYS_SkillIndex）は、スキル情報の高速検索を実現するためのシステムテーブルです。
-TRN_SkillRecordテーブルとMST_SkillHierarchyテーブルから必要な情報を抽出・加工し、検索に最適化された形式で保持します。
-このテーブルにより、特定のスキルを持つ社員の検索や、複数のスキル条件を組み合わせた複雑な検索を効率的に実行できます。
-検索パフォーマンス向上のため、正規化せずに冗長データ（部署名、役職名など）を保持し、全文検索用のテキストデータも格納します。
+### 2.1 概要・目的
+SCR-SKILL-SEARCH
 
-## テーブル構造
+### 2.3 関連API
+API-011
 
-| # | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | PK | FK | インデックス | 説明 |
-|---|----------|--------|----------|------|------|------------|----|----|--------------|------|
-| 1 | index_id | インデックスID | VARCHAR | 50 | NOT NULL | - | ○ | - | PK | インデックスを一意に識別するID |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | テナント識別子 |
-| 3 | emp_no | 社員番号 | VARCHAR | 20 | NOT NULL | - | - | ○ | IDX | 社員を一意に識別する番号 |
-| 4 | skill_id | スキルID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | スキル項目を一意に識別するID |
-| 5 | report_year | 報告年度 | INTEGER | 4 | NOT NULL | - | - | - | IDX | スキル報告書の年度 |
-| 6 | skill_level | 評価レベル | VARCHAR | 1 | NOT NULL | - | - | - | IDX | 評価レベル（×/△/○/◎） |
-| 7 | experience_years | 経験年数 | DECIMAL | 3,1 | NULL | - | - | - | - | スキルの経験年数 |
-| 8 | category_id | スキルカテゴリID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | スキルカテゴリのID |
-| 9 | subcategory_id | サブカテゴリID | VARCHAR | 50 | NULL | - | - | ○ | IDX | スキルサブカテゴリのID |
-| 10 | skill_name | スキル名 | VARCHAR | 200 | NOT NULL | - | - | - | - | スキル項目の名称 |
-| 11 | category_name | カテゴリ名 | VARCHAR | 200 | NOT NULL | - | - | - | - | スキルカテゴリの名称 |
-| 12 | subcategory_name | サブカテゴリ名 | VARCHAR | 200 | NULL | - | - | - | - | スキルサブカテゴリの名称 |
-| 13 | dept_id | 部署ID | VARCHAR | 20 | NOT NULL | - | - | ○ | IDX | 社員の所属部署ID |
-| 14 | dept_name | 部署名 | VARCHAR | 100 | NOT NULL | - | - | - | - | 社員の所属部署名 |
-| 15 | position_id | 役職ID | VARCHAR | 20 | NOT NULL | - | - | ○ | IDX | 社員の役職ID |
-| 16 | position_name | 役職名 | VARCHAR | 100 | NOT NULL | - | - | - | - | 社員の役職名 |
-| 17 | emp_name | 社員名 | VARCHAR | 100 | NOT NULL | - | - | - | - | 社員の氏名 |
-| 18 | search_text | 検索用テキスト | TEXT | - | NOT NULL | - | - | - | FULLTEXT | 全文検索用のテキストデータ |
-| 19 | last_updated | 最終更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | インデックス最終更新日時 |
-| 20 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード作成日時 |
-| 21 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード更新日時 |
+### 2.4 関連バッチ
+BATCH-006
 
-## リレーション
+## 3. テーブル構造
 
-### 参照先テーブル
-- MST_Tenant (tenant_id)
-- MST_Employee (emp_no)
-- MST_SkillHierarchy (skill_id)
-- MST_SkillCategory (category_id, subcategory_id)
-- MST_Department (dept_id)
-- MST_Position (position_id)
+### 3.1 カラム定義
 
-### 参照元テーブル
-- なし（検索専用テーブル）
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-## データ仕様
 
-### skill_level（評価レベル）
-- ×: 未経験・知識なし
-- △: 基礎知識あり・指導下で実行可能
-- ○: 一人で実行可能・経験豊富
-- ◎: 指導・教育が可能・エキスパート
+### 3.2 インデックス定義
 
-### experience_years（経験年数）
-- 0.0〜99.9の範囲
-- 小数点第1位まで記録可能
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
 
-### search_text（検索用テキスト）
-以下の情報を連結して格納：
-- スキル名、カテゴリ名、サブカテゴリ名
-- 社員名、部署名、役職名
-- スキル説明文（MST_SkillHierarchyから）
 
-## 運用仕様
+### 3.3 制約定義
 
-### データ保持期間
-- 3年間（検索パフォーマンス維持のため）
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_sys_skillindex | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
-### バックアップ
-- 日次バックアップ対象
-- インデックス再構築時のバックアップ
 
-### メンテナンス
-- BATCH-006によるインデックス再構築
-- 定期的な全文検索インデックス最適化
+## 4. リレーション
 
-## パフォーマンス
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
-### 想定レコード数
-- 初期: 10,000件
-- 1年後: 50,000件
-- 3年後: 150,000件
 
-### アクセスパターン
-- スキル検索: 高頻度
-- 社員検索: 高頻度
-- 複合条件検索: 中頻度
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
 
-### インデックス設計
-- PRIMARY KEY: index_id
-- INDEX: tenant_id, emp_no, skill_id, skill_level
-- INDEX: report_year, category_id, subcategory_id
-- INDEX: dept_id, position_id
-- FULLTEXT INDEX: search_text
+## 5. データ仕様
 
-## セキュリティ
+### 5.1 データ例
+```sql
+-- サンプルデータ
+INSERT INTO SYS_SkillIndex (
+    id, tenant_id, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+);
+```
 
-### アクセス制御
-- 参照: 全ユーザー（検索機能）
-- 更新: システムバッチのみ
-- 削除: システム管理者のみ
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
-### 機密情報
-- 個人スキル情報の適切な管理
-- 検索ログの監査
+## 6. 運用仕様
 
-## 移行仕様
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-### 初期データ
-- TRN_SkillRecordからのデータ抽出
-- 関連マスタテーブルとの結合
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-### データ移行
-- バッチ処理による自動生成
-- 差分更新による効率化
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
 
-## 特記事項
+## 7. パフォーマンス
 
-### 制約事項
-- 直接の更新は禁止（バッチ処理のみ）
-- 検索専用テーブルとして運用
-- 最新年度のデータを優先的にインデックス化
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
 
-### 拡張予定
-- AI検索機能の追加
-- スキルマッチング機能
-- レコメンデーション機能
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
 
-### 関連システム
-- スキル管理システム
-- 検索システム
-- レポート生成システム
-- バッチ処理システム
+## 8. セキュリティ
 
-### パフォーマンス最適化
-- インデックス再構築はシステム負荷の少ない時間帯に実行
-- 全文検索インデックスの定期最適化
-- 古いデータの自動アーカイブ
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
+
+### 8.2 データ保護
+- 個人情報：なし
+- 機密情報：低レベル
+- 暗号化：不要
+
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- スキル検索インデックステーブル作成DDL
+CREATE TABLE SYS_SkillIndex (
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキル検索インデックス';
+
+```
+
+## 10. 特記事項
+
+1. **設計方針**
+   - システム系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
+
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
+
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
+
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

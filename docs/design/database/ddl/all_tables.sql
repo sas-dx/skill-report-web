@@ -1,0 +1,79 @@
+-- 全テーブル統合DDL
+-- 生成日時: 2025-06-01 13:11:39
+
+-- MST_Employee (社員基本情報) DDL
+-- 生成日時: 2025-06-01 13:11:39
+
+CREATE TABLE MST_Employee (
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
+    tenant_id VARCHAR(50) NOT NULL,
+    employee_code VARCHAR(30),
+    full_name VARCHAR(100),
+    full_name_kana VARCHAR(100),
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    hire_date DATE,
+    birth_date DATE,
+    gender ENUM,
+    department_id VARCHAR(50),
+    position_id VARCHAR(50),
+    job_type_id VARCHAR(50),
+    employment_status ENUM DEFAULT 'FULL_TIME',
+    manager_id VARCHAR(50),
+    employee_status ENUM DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_employee_code ON MST_Employee (employee_code);
+CREATE UNIQUE INDEX idx_email ON MST_Employee (email);
+CREATE INDEX idx_department ON MST_Employee (department_id);
+CREATE INDEX idx_manager ON MST_Employee (manager_id);
+CREATE INDEX idx_status ON MST_Employee (employee_status);
+CREATE INDEX idx_hire_date ON MST_Employee (hire_date);
+
+-- 外部キー制約
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_department FOREIGN KEY (department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_position FOREIGN KEY (position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+-- TRN_EmployeeSkillGrade (社員スキルグレード) DDL
+-- 生成日時: 2025-06-01 13:11:39
+
+CREATE TABLE TRN_EmployeeSkillGrade (
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
+    tenant_id VARCHAR(50) NOT NULL,
+    employee_id VARCHAR(50),
+    job_type_id VARCHAR(50),
+    skill_grade VARCHAR(10),
+    skill_level INT,
+    effective_date DATE,
+    expiry_date DATE,
+    evaluation_date DATE,
+    evaluator_id VARCHAR(50),
+    evaluation_comment TEXT,
+    certification_flag BOOLEAN DEFAULT False,
+    next_evaluation_date DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE INDEX idx_employee_job_effective ON TRN_EmployeeSkillGrade (employee_id, job_type_id, effective_date);
+CREATE INDEX idx_employee_current ON TRN_EmployeeSkillGrade (employee_id, expiry_date);
+CREATE INDEX idx_job_type_grade ON TRN_EmployeeSkillGrade (job_type_id, skill_grade);
+CREATE INDEX idx_evaluation_date ON TRN_EmployeeSkillGrade (evaluation_date);
+CREATE INDEX idx_next_evaluation ON TRN_EmployeeSkillGrade (next_evaluation_date);
+CREATE INDEX idx_certification ON TRN_EmployeeSkillGrade (certification_flag);
+
+-- 外部キー制約
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_evaluator FOREIGN KEY (evaluator_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;

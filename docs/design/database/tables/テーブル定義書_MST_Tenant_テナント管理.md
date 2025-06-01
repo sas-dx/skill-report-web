@@ -1,4 +1,4 @@
-# テーブル定義書：テナント管理 (MST_Tenant)
+# テーブル定義書：MST_Tenant（テナント管理）
 
 ## 1. 基本情報
 
@@ -8,22 +8,25 @@
 | **テーブル名** | MST_Tenant |
 | **論理名** | テナント管理 |
 | **カテゴリ** | マスタ系 |
+| **機能カテゴリ** | マルチテナント管理 |
 | **優先度** | 最高 |
-| **ステータス** | 新規作成 |
-| **作成日** | 2025-05-31 |
-| **最終更新日** | 2025-05-31 |
+| **個人情報含有** | あり |
+| **機密情報レベル** | 高 |
+| **暗号化要否** | 要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-テナント管理テーブル（MST_Tenant）は、マルチテナント環境における各テナント（組織・企業）の基本情報を管理します。テナントごとにデータを分離し、独立したサービス環境を提供するための基盤となるテーブルです。
+SCR-TENANT-ADMIN
 
-### 2.2 関連API
-- [API-025](../api/specs/API仕様書_API-025.md) - テナント管理API
+### 2.3 関連API
+API-025
 
-### 2.3 関連バッチ
-- [BATCH-018-01](../batch/specs/バッチ定義書_BATCH-018-01.md) - テナント使用量集計バッチ
-- [BATCH-018-02](../batch/specs/バッチ定義書_BATCH-018-02.md) - テナント課金計算バッチ
+### 2.4 関連バッチ
+BATCH-018-01, BATCH-018-02
 
 ## 3. テーブル構造
 
@@ -31,102 +34,66 @@
 
 | No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
 |----|----------|--------|----------|------|------|----|----|--------------|------|
-| 1 | tenant_id | テナントID | VARCHAR | 50 | × | ○ | - | - | テナントを一意に識別するID |
-| 2 | tenant_name | テナント名 | VARCHAR | 200 | × | - | - | - | テナントの表示名 |
-| 3 | company_name | 会社名 | VARCHAR | 200 | × | - | - | - | 正式な会社名 |
-| 4 | domain | ドメイン | VARCHAR | 100 | ○ | - | - | NULL | テナント専用ドメイン |
-| 5 | plan_type | プランタイプ | VARCHAR | 20 | × | - | - | 'BASIC' | 契約プラン（BASIC/STANDARD/PREMIUM/ENTERPRISE） |
-| 6 | max_users | 最大ユーザー数 | INTEGER | - | × | - | - | 100 | 契約可能な最大ユーザー数 |
-| 7 | max_storage_gb | 最大ストレージ容量 | INTEGER | - | × | - | - | 10 | 契約可能な最大ストレージ容量（GB） |
-| 8 | contract_start_date | 契約開始日 | DATE | - | × | - | - | - | 契約開始日 |
-| 9 | contract_end_date | 契約終了日 | DATE | - | ○ | - | - | NULL | 契約終了日（NULL=無期限） |
-| 10 | status | ステータス | VARCHAR | 20 | × | - | - | 'ACTIVE' | テナントステータス（ACTIVE/SUSPENDED/TERMINATED） |
-| 11 | timezone | タイムゾーン | VARCHAR | 50 | × | - | - | 'Asia/Tokyo' | テナントのタイムゾーン |
-| 12 | locale | ロケール | VARCHAR | 10 | × | - | - | 'ja_JP' | テナントのロケール |
-| 13 | admin_email | 管理者メール | VARCHAR | 256 | × | - | - | - | テナント管理者のメールアドレス |
-| 14 | admin_phone | 管理者電話番号 | VARCHAR | 20 | ○ | - | - | NULL | テナント管理者の電話番号 |
-| 15 | billing_email | 請求先メール | VARCHAR | 256 | ○ | - | - | NULL | 請求書送付先メールアドレス |
-| 16 | is_trial | トライアルフラグ | BOOLEAN | - | × | - | - | FALSE | トライアル契約かどうか |
-| 17 | trial_end_date | トライアル終了日 | DATE | - | ○ | - | - | NULL | トライアル終了日 |
-| 18 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
-| 19 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| 20 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
-| 21 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+
 
 ### 3.2 インデックス定義
 
 | インデックス名 | 種別 | カラム | 説明 |
 |----------------|------|--------|------|
-| PRIMARY | PRIMARY KEY | tenant_id | 主キー |
-| idx_tenant_name | UNIQUE | tenant_name | テナント名の一意性を保証 |
-| idx_domain | UNIQUE | domain | ドメインの一意性を保証 |
-| idx_status | INDEX | status | ステータスによる検索を高速化 |
-| idx_plan_type | INDEX | plan_type | プランタイプによる検索を高速化 |
-| idx_contract_dates | INDEX | contract_start_date, contract_end_date | 契約期間による検索を高速化 |
-| idx_admin_email | INDEX | admin_email | 管理者メールによる検索を高速化 |
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
+
 
 ### 3.3 制約定義
 
 | 制約名 | 制約種別 | カラム | 制約内容 |
 |--------|----------|--------|----------|
-| pk_tenant | PRIMARY KEY | tenant_id | 主キー制約 |
-| uq_tenant_name | UNIQUE | tenant_name | テナント名の一意性を保証 |
-| uq_domain | UNIQUE | domain | ドメインの一意性を保証（NULL許可） |
+| pk_mst_tenant | PRIMARY KEY | id | 主キー制約 |
 | fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
 | fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
-| chk_plan_type | CHECK | plan_type | plan_type IN ('BASIC', 'STANDARD', 'PREMIUM', 'ENTERPRISE') |
-| chk_status | CHECK | status | status IN ('ACTIVE', 'SUSPENDED', 'TERMINATED') |
-| chk_max_users | CHECK | max_users | max_users > 0 |
-| chk_max_storage | CHECK | max_storage_gb | max_storage_gb > 0 |
+
 
 ## 4. リレーション
 
 ### 4.1 親テーブル
 | テーブル名 | 関連カラム | カーディナリティ | 説明 |
 |------------|------------|------------------|------|
-| MST_UserAuth | created_by, updated_by | 1:N | 作成者・更新者 |
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
+
 
 ### 4.2 子テーブル
 | テーブル名 | 関連カラム | カーディナリティ | 説明 |
 |------------|------------|------------------|------|
-| MST_TenantSettings | tenant_id | 1:1 | テナント設定 |
-| SYS_TenantUsage | tenant_id | 1:N | テナント使用量 |
-| HIS_TenantBilling | tenant_id | 1:N | テナント課金履歴 |
-| MST_Employee | tenant_id | 1:N | 社員情報 |
-| MST_SkillCategory | tenant_id | 1:N | スキルカテゴリ |
+| - | - | - | 必要に応じて追加 |
 
 ## 5. データ仕様
 
 ### 5.1 データ例
 ```sql
+-- サンプルデータ
 INSERT INTO MST_Tenant (
-    tenant_id, tenant_name, company_name, domain, plan_type, 
-    max_users, max_storage_gb, contract_start_date, status,
-    timezone, locale, admin_email, created_by, updated_by
+    id, tenant_id, created_by, updated_by
 ) VALUES (
-    'tenant001',
-    'サンプル株式会社',
-    'サンプル株式会社',
-    'sample.skillreport.com',
-    'STANDARD',
-    500,
-    100,
-    '2025-01-01',
-    'ACTIVE',
-    'Asia/Tokyo',
-    'ja_JP',
-    'admin@sample.com',
-    'system',
-    'system'
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
 );
 ```
 
 ### 5.2 データ量見積もり
 | 項目 | 値 | 備考 |
 |------|----|----- |
-| 初期データ件数 | 10件 | 初期契約テナント |
-| 年間増加件数 | 100件 | 新規契約テナント |
-| 5年後想定件数 | 510件 | 想定値 |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
 ## 6. 運用仕様
 
@@ -139,7 +106,7 @@ INSERT INTO MST_Tenant (
 - パーティション条件：-
 
 ### 6.3 アーカイブ
-- アーカイブ条件：契約終了から3年経過
+- アーカイブ条件：作成から3年経過
 - アーカイブ先：アーカイブDB
 
 ## 7. パフォーマンス
@@ -147,16 +114,15 @@ INSERT INTO MST_Tenant (
 ### 7.1 想定アクセスパターン
 | 操作 | 頻度 | 条件 | 備考 |
 |------|------|------|------|
-| SELECT | 高 | tenant_id | テナント情報取得 |
-| SELECT | 高 | status = 'ACTIVE' | アクティブテナント一覧 |
-| SELECT | 中 | domain | ドメインによる検索 |
-| UPDATE | 中 | tenant_id | テナント情報更新 |
-| INSERT | 低 | - | 新規テナント作成 |
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
 
 ### 7.2 パフォーマンス要件
-- SELECT：10ms以内
-- INSERT：100ms以内
-- UPDATE：100ms以内
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
 - DELETE：100ms以内
 
 ## 8. セキュリティ
@@ -165,75 +131,58 @@ INSERT INTO MST_Tenant (
 | ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
 |--------|--------|--------|--------|--------|------|
 | system_admin | ○ | ○ | ○ | ○ | システム管理者 |
-| tenant_admin | ○ | × | ○ | × | テナント管理者（自テナントのみ） |
-| application | ○ | ○ | ○ | × | アプリケーション |
-| readonly | ○ | × | × | × | 参照専用 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
 
 ### 8.2 データ保護
-- 個人情報：含む（管理者メール、電話番号）
-- 機密情報：含む（契約情報）
-- 暗号化：メールアドレス、電話番号は暗号化推奨
+- 個人情報：あり
+- 機密情報：高レベル
+- 暗号化：要
 
 ## 9. 移行仕様
 
 ### 9.1 データ移行
-- 移行元：既存契約管理システム
+- 移行元：既存システム
 - 移行方法：CSVインポート
 - 移行タイミング：システム移行時
 
 ### 9.2 DDL
 ```sql
+-- テナント管理テーブル作成DDL
 CREATE TABLE MST_Tenant (
-    tenant_id VARCHAR(50) NOT NULL,
-    tenant_name VARCHAR(200) NOT NULL,
-    company_name VARCHAR(200) NOT NULL,
-    domain VARCHAR(100) NULL,
-    plan_type VARCHAR(20) NOT NULL DEFAULT 'BASIC',
-    max_users INTEGER NOT NULL DEFAULT 100,
-    max_storage_gb INTEGER NOT NULL DEFAULT 10,
-    contract_start_date DATE NOT NULL,
-    contract_end_date DATE NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-    timezone VARCHAR(50) NOT NULL DEFAULT 'Asia/Tokyo',
-    locale VARCHAR(10) NOT NULL DEFAULT 'ja_JP',
-    admin_email VARCHAR(256) NOT NULL,
-    admin_phone VARCHAR(20) NULL,
-    billing_email VARCHAR(256) NULL,
-    is_trial BOOLEAN NOT NULL DEFAULT FALSE,
-    trial_end_date DATE NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by VARCHAR(50) NOT NULL,
-    updated_by VARCHAR(50) NOT NULL,
-    PRIMARY KEY (tenant_id),
-    UNIQUE KEY idx_tenant_name (tenant_name),
-    UNIQUE KEY idx_domain (domain),
-    INDEX idx_status (status),
-    INDEX idx_plan_type (plan_type),
-    INDEX idx_contract_dates (contract_start_date, contract_end_date),
-    INDEX idx_admin_email (admin_email),
-    CONSTRAINT fk_tenant_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT fk_tenant_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT chk_tenant_plan_type CHECK (plan_type IN ('BASIC', 'STANDARD', 'PREMIUM', 'ENTERPRISE')),
-    CONSTRAINT chk_tenant_status CHECK (status IN ('ACTIVE', 'SUSPENDED', 'TERMINATED')),
-    CONSTRAINT chk_tenant_max_users CHECK (max_users > 0),
-    CONSTRAINT chk_tenant_max_storage CHECK (max_storage_gb > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='テナント管理';
+
 ```
 
 ## 10. 特記事項
 
-1. テナントIDは一度設定すると変更不可（システム全体で参照されるため）
-2. ドメインは任意設定だが、設定する場合は一意性を保証
-3. 契約終了日がNULLの場合は無期限契約を表す
-4. トライアル契約の場合、trial_end_dateを必ず設定
-5. プラン変更時は履歴を別テーブルで管理することを推奨
-6. テナント削除は論理削除（status='TERMINATED'）を基本とする
+1. **設計方針**
+   - マスタ系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
 
----
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
 
-**改訂履歴**
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
 
-| バージョン | 日付 | 変更者 | 変更内容 |
-|------------|------|--------|----------|
-| 1.0 | 2025-05-31 | システムアーキテクト | 初版作成 |
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

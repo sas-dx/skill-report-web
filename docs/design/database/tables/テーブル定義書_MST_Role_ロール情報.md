@@ -1,195 +1,183 @@
-# テーブル定義書：ロール情報 (MST_Role)
+# テーブル定義書: MST_Role (ロール情報)
 
-## 1. 基本情報
+## 📋 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| **テーブルID** | TBL-002 |
-| **テーブル名** | MST_Role |
-| **論理名** | ロール情報 |
-| **カテゴリ** | マスタ系 |
-| **優先度** | 高 |
-| **ステータス** | 運用中 |
-| **作成日** | 2025-05-29 |
-| **最終更新日** | 2025-05-31 |
+| テーブル名 | MST_Role |
+| 論理名 | ロール情報 |
+| カテゴリ | マスタ系 |
+| 作成日 | 2025-06-01 |
 
-## 2. テーブル概要
+> **注意**: 本テーブル定義書は自動生成されます。手動編集は行わないでください。
+> 詳細定義の変更は `table-details/MST_Role_details.yaml` で行ってください。
 
-### 2.1 概要・目的
-ロール情報テーブル（MST_Role）は、システム内で定義されるロール（役割）の情報を管理します。各ロールには権限レベルが設定され、ユーザーに割り当てることでアクセス制御を実現します。ロールは階層構造を持ち、上位ロールは下位ロールの権限を継承します。
 
-### 2.2 関連API
-- [API-003](../api/specs/API仕様書_API-003.md) - ロール管理API
+## 📝 改版履歴
 
-### 2.3 関連バッチ
-- [BATCH-003](../batch/specs/バッチ定義書_BATCH-003.md) - セキュリティスキャンバッチ
+> **注意**: 改版履歴の詳細は以下のYAMLファイルで管理されています：
+> `table-details/TABLE_NAME_details.yaml`
 
-## 3. テーブル構造
+| バージョン | 更新日 | 更新者 | 主な変更内容 |
+|------------|--------|--------|-------------|
+| 1.1.0 | 2025-06-01 | 開発チーム | 改版履歴管理機能追加、ロール階層・権限継承機能強化 |
+| 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - ロール情報テーブルの詳細定義 |
 
-### 3.1 カラム定義
 
-| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
-|----|----------|--------|----------|------|------|----|----|--------------|------|
-| 1 | role_id | ロールID | VARCHAR | 50 | × | ○ | - | - | ロールを一意に識別するID |
-| 2 | role_name | ロール名 | VARCHAR | 100 | × | - | - | - | ロールの表示名 |
-| 3 | description | 説明 | VARCHAR | 500 | ○ | - | - | NULL | ロールの説明文 |
-| 4 | level | 権限レベル | INTEGER | 2 | × | - | - | 0 | ロールの権限レベル（数値が大きいほど権限が高い） |
-| 5 | parent_role_id | 親ロールID | VARCHAR | 50 | ○ | - | ○ | NULL | 親ロールのID（階層構造用） |
-| 6 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | ロールが有効かどうか |
-| 7 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
-| 8 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| 9 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
-| 10 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+## 📝 テーブル概要
 
-### 3.2 インデックス定義
+MST_Role（ロール情報）は、システム内のロール（役割）を管理するマスタテーブルです。
 
-| インデックス名 | 種別 | カラム | 説明 |
-|----------------|------|--------|------|
-| PRIMARY | PRIMARY KEY | role_id | 主キー |
-| idx_role_name | UNIQUE | role_name | ロール名の一意性を保証するインデックス |
-| idx_parent_role | INDEX | parent_role_id | 親ロールによる検索を高速化 |
-| idx_level | INDEX | level | 権限レベルによる検索を高速化 |
-| idx_active | INDEX | is_active | 有効フラグによる検索を高速化 |
+主な目的：
+- システム内のロール定義・管理（管理者、一般ユーザー、閲覧者等）
+- ロール階層の管理（上位ロール、下位ロール）
+- ロール別権限設定の基盤
+- 職務分離・最小権限の原則実装
+- 動的権限管理・ロールベースアクセス制御（RBAC）
+- 組織変更に対応した柔軟な権限管理
+- 監査・コンプライアンス対応
 
-### 3.3 制約定義
+このテーブルは、システムセキュリティの基盤となり、
+適切なアクセス制御と権限管理を実現する重要なマスタデータです。
 
-| 制約名 | 制約種別 | カラム | 制約内容 |
-|--------|----------|--------|----------|
-| pk_role | PRIMARY KEY | role_id | 主キー制約 |
-| uq_role_name | UNIQUE | role_name | ロール名の一意性を保証する制約 |
-| fk_parent_role | FOREIGN KEY | parent_role_id | MST_Role.role_id |
-| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
-| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
-| chk_level | CHECK | level | 0以上の値のみ許可 |
 
-## 4. リレーション
+## 🗂️ カラム定義
 
-### 4.1 親テーブル
-| テーブル名 | 関連カラム | カーディナリティ | 説明 |
-|------------|------------|------------------|------|
-| MST_Role | parent_role_id | 1:N | 自己参照（親ロール） |
-| MST_UserAuth | created_by, updated_by | 1:N | 作成者・更新者 |
+| カラム名 | 論理名 | データ型 | NULL | デフォルト | 説明 |
+|----------|--------|----------|------|------------|------|
+| id | ID | VARCHAR(50) | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN | × |  | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR(50) | × |  | マルチテナント識別子 |
+| role_code | ロールコード | VARCHAR(20) | ○ |  | ロールを一意に識別するコード（例：ROLE001） |
+| role_name | ロール名 | VARCHAR(100) | ○ |  | ロールの正式名称 |
+| role_name_short | ロール名略称 | VARCHAR(50) | ○ |  | ロールの略称・短縮名 |
+| role_category | ロールカテゴリ | ENUM | ○ |  | ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム） |
+| role_level | ロールレベル | INT | ○ |  | ロールの階層レベル（1:最上位、数値が大きいほど下位） |
+| parent_role_id | 親ロールID | VARCHAR(50) | ○ |  | 上位ロールのID（MST_Roleへの自己参照外部キー） |
+| is_system_role | システムロールフラグ | BOOLEAN | ○ |  | システム標準ロールかどうか（削除・変更不可） |
+| is_tenant_specific | テナント固有フラグ | BOOLEAN | ○ |  | テナント固有のロールかどうか |
+| max_users | 最大ユーザー数 | INT | ○ |  | このロールに割り当て可能な最大ユーザー数 |
+| role_priority | ロール優先度 | INT | ○ | 999 | 複数ロール保持時の優先度（数値が小さいほど高優先） |
+| auto_assign_conditions | 自動割り当て条件 | JSON | ○ |  | 自動ロール割り当ての条件（JSON形式） |
+| role_status | ロール状態 | ENUM | ○ | ACTIVE | ロールの状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨） |
+| effective_from | 有効開始日 | DATE | ○ |  | ロールの有効開始日 |
+| effective_to | 有効終了日 | DATE | ○ |  | ロールの有効終了日 |
+| sort_order | 表示順序 | INT | ○ |  | 画面表示時の順序 |
+| description | ロール説明 | TEXT | ○ |  | ロールの詳細説明・用途 |
+| created_at | 作成日時 | TIMESTAMP | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | 更新日時 | TIMESTAMP | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| created_by | 作成者 | VARCHAR(50) | × |  | レコード作成者のユーザーID |
+| updated_by | 更新者 | VARCHAR(50) | × |  | レコード更新者のユーザーID |
 
-### 4.2 子テーブル
-| テーブル名 | 関連カラム | カーディナリティ | 説明 |
-|------------|------------|------------------|------|
-| MST_UserRole | role_id | 1:N | ロールに割り当てられたユーザー |
-| MST_Permission | role_id | 1:N | ロールに割り当てられた権限 |
-| MST_Role | parent_role_id | 1:N | 自己参照（子ロール） |
+## 🔍 インデックス定義
 
-## 5. データ仕様
+| インデックス名 | カラム | ユニーク | 説明 |
+|----------------|--------|----------|------|
+| idx_role_code | role_code | ○ | ロールコード検索用（一意） |
+| idx_role_category | role_category | × | ロールカテゴリ別検索用 |
+| idx_role_level | role_level | × | ロールレベル別検索用 |
+| idx_parent_role | parent_role_id | × | 親ロール別検索用 |
+| idx_system_role | is_system_role | × | システムロール検索用 |
+| idx_tenant_specific | is_tenant_specific | × | テナント固有ロール検索用 |
+| idx_role_status | role_status | × | ロール状態別検索用 |
+| idx_effective_period | effective_from, effective_to | × | 有効期間検索用 |
+| idx_sort_order | sort_order | × | 表示順序検索用 |
 
-### 5.1 データ例
-```sql
--- 基本ロールの初期データ
-INSERT INTO MST_Role (
-    role_id, role_name, description, level, parent_role_id, 
-    is_active, created_by, updated_by
-) VALUES 
-('ADMIN', '管理者', 'システム全体の管理権限を持つロール', 100, NULL, TRUE, 'system', 'system'),
-('MANAGER', '管理職', '部門管理や承認権限を持つロール', 50, NULL, TRUE, 'system', 'system'),
-('USER', '一般ユーザー', '基本的な操作権限を持つロール', 10, NULL, TRUE, 'system', 'system'),
-('GUEST', 'ゲスト', '参照のみ可能な制限付きロール', 1, NULL, TRUE, 'system', 'system');
+## 🔒 制約定義
+
+| 制約名 | 制約タイプ | 対象カラム | 条件 | 説明 |
+|--------|------------|------------|------|------|
+| uk_role_code | UNIQUE | role_code |  | ロールコード一意制約 |
+| chk_role_level | CHECK |  | role_level > 0 | ロールレベル正値チェック制約 |
+| chk_role_category | CHECK |  | role_category IN ('SYSTEM', 'BUSINESS', 'TENANT', 'CUSTOM') | ロールカテゴリ値チェック制約 |
+| chk_role_status | CHECK |  | role_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED') | ロール状態値チェック制約 |
+| chk_max_users | CHECK |  | max_users IS NULL OR max_users > 0 | 最大ユーザー数正値チェック制約 |
+| chk_role_priority | CHECK |  | role_priority > 0 | ロール優先度正値チェック制約 |
+| chk_effective_period | CHECK |  | effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to | 有効期間整合性チェック制約 |
+| chk_sort_order | CHECK |  | sort_order IS NULL OR sort_order >= 0 | 表示順序非負値チェック制約 |
+
+## 🔗 外部キー関係
+
+| 外部キー名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|------------|--------|--------------|------------|--------|--------|------|
+| fk_role_parent | parent_role_id | MST_Role | id | CASCADE | SET NULL | 親ロールへの自己参照外部キー |
+
+## 📊 サンプルデータ
+
+```json
+[
+  {
+    "role_code": "ROLE001",
+    "role_name": "システム管理者",
+    "role_name_short": "システム管理者",
+    "role_category": "SYSTEM",
+    "role_level": 1,
+    "parent_role_id": null,
+    "is_system_role": true,
+    "is_tenant_specific": false,
+    "max_users": 5,
+    "role_priority": 1,
+    "auto_assign_conditions": null,
+    "role_status": "ACTIVE",
+    "effective_from": "2025-01-01",
+    "effective_to": null,
+    "sort_order": 1,
+    "description": "システム全体の管理権限を持つ最上位ロール"
+  },
+  {
+    "role_code": "ROLE002",
+    "role_name": "テナント管理者",
+    "role_name_short": "テナント管理者",
+    "role_category": "TENANT",
+    "role_level": 2,
+    "parent_role_id": null,
+    "is_system_role": true,
+    "is_tenant_specific": true,
+    "max_users": 10,
+    "role_priority": 2,
+    "auto_assign_conditions": null,
+    "role_status": "ACTIVE",
+    "effective_from": "2025-01-01",
+    "effective_to": null,
+    "sort_order": 2,
+    "description": "テナント内の管理権限を持つロール"
+  },
+  {
+    "role_code": "ROLE003",
+    "role_name": "一般ユーザー",
+    "role_name_short": "一般ユーザー",
+    "role_category": "BUSINESS",
+    "role_level": 3,
+    "parent_role_id": null,
+    "is_system_role": true,
+    "is_tenant_specific": false,
+    "max_users": null,
+    "role_priority": 10,
+    "auto_assign_conditions": "{\"default\": true}",
+    "role_status": "ACTIVE",
+    "effective_from": "2025-01-01",
+    "effective_to": null,
+    "sort_order": 10,
+    "description": "基本的な業務機能を利用できるロール"
+  }
+]
 ```
 
-### 5.2 データ量見積もり
-| 項目 | 値 | 備考 |
-|------|----|----- |
-| 初期データ件数 | 10件 | 基本ロール + カスタムロール |
-| 年間増加件数 | 5件 | 新規ロール追加 |
-| 5年後想定件数 | 35件 | 想定値 |
+## 📌 特記事項
 
-## 6. 運用仕様
+- ロール階層は自己参照外部キーで表現
+- システムロールは削除・変更不可
+- テナント固有ロールはテナント内でのみ有効
+- 複数ロール保持時は優先度で権限を決定
+- 自動割り当て条件はJSON形式で柔軟に設定
+- 有効期間による時限ロール設定が可能
 
-### 6.1 バックアップ
-- 日次バックアップ：毎日2:00実行
-- 週次バックアップ：毎週日曜日3:00実行
+## 📋 業務ルール
 
-### 6.2 パーティション
-- パーティション種別：なし
-- パーティション条件：-
-
-### 6.3 アーカイブ
-- アーカイブ条件：論理削除から3年経過
-- アーカイブ先：アーカイブDB
-
-## 7. パフォーマンス
-
-### 7.1 想定アクセスパターン
-| 操作 | 頻度 | 条件 | 備考 |
-|------|------|------|------|
-| SELECT | 高 | role_id | ロール情報取得 |
-| SELECT | 高 | is_active = TRUE | 有効ロール一覧取得 |
-| SELECT | 中 | parent_role_id | 階層構造取得 |
-| UPDATE | 低 | role_id | ロール情報更新 |
-| INSERT | 低 | - | 新規ロール作成 |
-
-### 7.2 パフォーマンス要件
-- SELECT：10ms以内
-- INSERT：50ms以内
-- UPDATE：50ms以内
-- DELETE：50ms以内
-
-## 8. セキュリティ
-
-### 8.1 アクセス制御
-| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
-|--------|--------|--------|--------|--------|------|
-| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
-| security_admin | ○ | ○ | ○ | × | セキュリティ管理者 |
-| application | ○ | × | × | × | アプリケーション |
-| readonly | ○ | × | × | × | 参照専用 |
-
-### 8.2 データ保護
-- 個人情報：含まない
-- 機密情報：含む（権限情報）
-- 暗号化：不要
-
-## 9. 移行仕様
-
-### 9.1 データ移行
-- 移行元：既存権限管理システム
-- 移行方法：CSVインポート
-- 移行タイミング：システム移行時
-
-### 9.2 DDL
-```sql
-CREATE TABLE MST_Role (
-    role_id VARCHAR(50) NOT NULL,
-    role_name VARCHAR(100) NOT NULL,
-    description VARCHAR(500) NULL,
-    level INTEGER NOT NULL DEFAULT 0,
-    parent_role_id VARCHAR(50) NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by VARCHAR(50) NOT NULL,
-    updated_by VARCHAR(50) NOT NULL,
-    PRIMARY KEY (role_id),
-    UNIQUE KEY idx_role_name (role_name),
-    INDEX idx_parent_role (parent_role_id),
-    INDEX idx_level (level),
-    INDEX idx_active (is_active),
-    CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) REFERENCES MST_Role(role_id) ON UPDATE CASCADE ON DELETE SET NULL,
-    CONSTRAINT fk_role_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT fk_role_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT chk_role_level CHECK (level >= 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
-
-## 10. 特記事項
-
-1. ロールの階層構造は、parent_role_idを使用して表現
-2. 権限の継承は、アプリケーションロジックで実装（親ロールの権限を子ロールが継承）
-3. システム初期構築時に基本ロール（ADMIN, MANAGER, USER, GUEST）を作成
-4. ロールの削除は論理削除（is_active=FALSE）を基本とし、物理削除は慎重に行うこと
-5. 権限レベルは数値が大きいほど高い権限を表す（ADMIN=100, MANAGER=50, USER=10, GUEST=1）
-
----
-
-**改訂履歴**
-
-| バージョン | 日付 | 変更者 | 変更内容 |
-|------------|------|--------|----------|
-| 1.0 | 2025-05-29 | システムアーキテクト | 初版作成 |
-| 1.1 | 2025-05-31 | システムアーキテクト | 新フォーマットに変更、詳細情報追加 |
+- ロールコードは新設時に自動採番（ROLE + 3桁連番）
+- システムロールは is_system_role = true で保護
+- 親ロールが無効化される場合は子ロールも無効化
+- 最大ユーザー数を超える割り当ては不可
+- 有効期間外のロールは自動的に無効化
+- ロール削除時は関連するユーザーロール紐付けも削除
+- テナント固有ロールは該当テナント内でのみ使用可能

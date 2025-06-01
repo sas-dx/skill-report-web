@@ -1,147 +1,188 @@
-# テーブル定義書_TRN_PDU_継続教育ポイント
+# テーブル定義書：TRN_PDU（継続教育ポイント）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | TRN_PDU |
-| 論理名 | 継続教育ポイント |
-| 用途 | 資格維持に必要なPDU・継続教育ポイント管理 |
-| カテゴリ | トランザクション系 |
-| 作成日 | 2024-12-19 |
-| 最終更新日 | 2024-12-19 |
+| **テーブルID** | TBL-018 |
+| **テーブル名** | TRN_PDU |
+| **論理名** | 継続教育ポイント |
+| **カテゴリ** | トランザクション系 |
+| **機能カテゴリ** | 研修・教育管理 |
+| **優先度** | 中 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 低 |
+| **暗号化要否** | 不要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-資格維持に必要なPDU（Professional Development Unit）や継続教育ポイントを管理するトランザクションテーブルです。
-取得ポイント、取得日、有効期限、関連資格、取得方法などの情報を記録し、
-資格の更新要件を満たすための活動を追跡します。
-このテーブルにより、資格保持者の継続的な専門能力開発を支援し、資格の有効期限管理を効率化します。
+### 2.1 概要・目的
+SCR-TRAIN-M
 
-## テーブル構造
+### 2.3 関連API
+API-017
 
-| # | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | PK | FK | インデックス | 説明 |
-|---|----------|--------|----------|------|------|------------|----|----|--------------|------|
-| 1 | pdu_id | PDU ID | VARCHAR | 50 | NOT NULL | - | ○ | - | PK | PDUレコードの一意識別子 |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | テナント識別子 |
-| 3 | emp_no | 社員番号 | VARCHAR | 20 | NOT NULL | - | - | ○ | IDX | PDU取得者の社員番号 |
-| 4 | cert_id | 資格ID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | 関連する資格ID |
-| 5 | pdu_category | PDUカテゴリ | VARCHAR | 50 | NOT NULL | - | - | - | IDX | PDUのカテゴリ |
-| 6 | points | 取得ポイント | DECIMAL | 5,1 | NOT NULL | - | - | - | - | 取得したPDUポイント |
-| 7 | acquisition_date | 取得日 | DATE | - | NOT NULL | - | - | - | IDX | PDUを取得した日付 |
-| 8 | expiry_date | 有効期限 | DATE | - | NULL | - | - | - | IDX | PDUの有効期限 |
-| 9 | activity_name | 活動名 | VARCHAR | 200 | NOT NULL | - | - | - | - | PDU取得活動の名称 |
-| 10 | activity_description | 活動内容 | TEXT | - | NULL | - | - | - | - | 活動の詳細内容 |
-| 11 | training_id | 研修ID | VARCHAR | 50 | NULL | - | - | ○ | IDX | 関連する研修ID |
-| 12 | project_id | 案件ID | VARCHAR | 50 | NULL | - | - | ○ | IDX | 関連する案件ID |
-| 13 | certificate_no | 証明書番号 | VARCHAR | 50 | NULL | - | - | - | - | PDU証明書の番号 |
-| 14 | certificate_url | 証明書URL | VARCHAR | 500 | NULL | - | - | - | - | PDU証明書の添付ファイルURL |
-| 15 | manager_confirmed | 上長確認フラグ | BOOLEAN | - | NOT NULL | false | - | - | IDX | 上長による確認完了フラグ |
-| 16 | manager_confirmed_at | 上長確認日時 | TIMESTAMP | - | NULL | - | - | - | - | 上長による確認日時 |
-| 17 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード作成日時 |
-| 18 | created_by | 作成者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード作成者 |
-| 19 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード更新日時 |
-| 20 | updated_by | 更新者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード更新者 |
+### 2.4 関連バッチ
+BATCH-011
 
-## リレーション
+## 3. テーブル構造
 
-### 参照先テーブル
-- MST_Tenant (tenant_id)
-- MST_Employee (emp_no)
-- MST_Certification (cert_id)
-- TRN_TrainingHistory (training_id)
-- TRN_ProjectRecord (project_id)
-- MST_UserAuth (created_by, updated_by)
+### 3.1 カラム定義
 
-### 参照元テーブル
-- HIS_PDUHistory (pdu_id)
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-## データ仕様
 
-### pdu_category（PDUカテゴリ）
-- 教育: 研修・セミナー・講習会への参加
-- 実務: 実務経験による学習
-- 貢献: 専門分野への貢献活動
-- 自己学習: 書籍・オンライン学習等
-- その他: その他の継続教育活動
+### 3.2 インデックス定義
 
-### points（取得ポイント）
-- 0.1〜999.9の範囲
-- 小数点第1位まで記録可能
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
 
-### 活動例
-- 研修参加: 外部研修・社内研修への参加
-- 資格取得: 新規資格の取得
-- 論文発表: 学会・雑誌への論文投稿
-- 講師活動: セミナー・研修の講師担当
 
-## 運用仕様
+### 3.3 制約定義
 
-### データ保持期間
-- 5年間（資格更新サイクルに対応）
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_trn_pdu | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
-### バックアップ
-- 日次バックアップ対象
-- 月次アーカイブ対象
 
-### メンテナンス
-- 有効期限切れPDUの定期チェック
-- 資格更新要件の充足状況確認
+## 4. リレーション
 
-## パフォーマンス
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
-### 想定レコード数
-- 初期: 500件
-- 1年後: 5,000件
-- 3年後: 20,000件
 
-### アクセスパターン
-- 社員別PDU参照: 高頻度
-- 資格別PDU集計: 中頻度
-- 有効期限チェック: 中頻度
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
 
-### インデックス設計
-- PRIMARY KEY: pdu_id
-- INDEX: tenant_id, emp_no, cert_id, pdu_category
-- INDEX: acquisition_date, expiry_date
-- INDEX: training_id, project_id, manager_confirmed
+## 5. データ仕様
 
-## セキュリティ
+### 5.1 データ例
+```sql
+-- サンプルデータ
+INSERT INTO TRN_PDU (
+    id, tenant_id, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+);
+```
 
-### アクセス制御
-- 参照: 本人、上長、人事担当者、システム管理者
-- 更新: 本人、人事担当者、システム管理者
-- 削除: システム管理者のみ
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
-### 機密情報
-- 個人の継続教育情報の適切な管理
-- 証明書類の機密性確保
+## 6. 運用仕様
 
-## 移行仕様
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-### 初期データ
-- 既存システムからのPDUデータ移行
-- 資格との関連付け
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-### データ移行
-- 研修・案件との紐付け
-- 証明書類の電子化
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
 
-## 特記事項
+## 7. パフォーマンス
 
-### 制約事項
-- 取得ポイントは0より大きい値のみ
-- 有効期限は取得日より後である必要がある
-- 上長確認後は基本的に変更不可
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
 
-### 拡張予定
-- PDU自動計算機能
-- 資格更新アラート機能
-- PDU不足予測機能
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
 
-### 関連システム
-- 資格管理システム
-- 研修管理システム
-- 案件管理システム
-- 通知システム
-- 証明書管理システム
+## 8. セキュリティ
+
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
+
+### 8.2 データ保護
+- 個人情報：なし
+- 機密情報：低レベル
+- 暗号化：不要
+
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- 継続教育ポイントテーブル作成DDL
+CREATE TABLE TRN_PDU (
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='継続教育ポイント';
+
+```
+
+## 10. 特記事項
+
+1. **設計方針**
+   - トランザクション系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
+
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
+
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
+
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

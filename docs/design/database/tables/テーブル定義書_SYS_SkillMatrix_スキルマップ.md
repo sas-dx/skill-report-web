@@ -1,163 +1,188 @@
-# テーブル定義書_SYS_SkillMatrix_スキルマップ
+# テーブル定義書：SYS_SkillMatrix（スキルマップ）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | SYS_SkillMatrix |
-| 論理名 | スキルマップ |
-| 用途 | 組織やプロジェクトにおけるスキル分布状況を可視化するためのデータ管理 |
-| カテゴリ | システム系 |
-| 作成日 | 2024-12-19 |
-| 最終更新日 | 2024-12-19 |
+| **テーブルID** | TBL-020 |
+| **テーブル名** | SYS_SkillMatrix |
+| **論理名** | スキルマップ |
+| **カテゴリ** | システム系 |
+| **機能カテゴリ** | レポート・分析 |
+| **優先度** | 低 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 低 |
+| **暗号化要否** | 不要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-スキルマップテーブル（SYS_SkillMatrix）は、組織やプロジェクトにおけるスキル分布状況を可視化するためのデータを管理するシステムテーブルです。
-部門別・プロジェクト別のスキル充足率、リスク領域の特定、スキルギャップ分析などの情報を集計・保存し、
-戦略的な人材配置や教育計画の立案に活用されます。
-このテーブルにより、組織のスキル状況を定量的に把握し、人材育成戦略の策定やリソース配分の最適化を支援します。
+### 2.1 概要・目的
+SCR-SKILL-MAP
 
-## テーブル構造
+### 2.3 関連API
+API-019
 
-| # | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | PK | FK | インデックス | 説明 |
-|---|----------|--------|----------|------|------|------------|----|----|--------------|------|
-| 1 | matrix_id | マップID | VARCHAR | 50 | NOT NULL | - | ○ | - | PK | スキルマップを一意に識別するID |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | テナント識別子 |
-| 3 | matrix_name | マップ名 | VARCHAR | 200 | NOT NULL | - | - | - | - | スキルマップの名称 |
-| 4 | matrix_type | マップ種別 | VARCHAR | 50 | NOT NULL | - | - | - | IDX | マップの種別（部門/プロジェクト/全社等） |
-| 5 | department_id | 対象部署ID | VARCHAR | 50 | NULL | - | - | ○ | IDX | 対象部署（部門マップの場合） |
-| 6 | project_name | 対象プロジェクト | VARCHAR | 200 | NULL | - | - | - | - | 対象プロジェクト名（プロジェクトマップの場合） |
-| 7 | base_year_month | 基準年月 | VARCHAR | 7 | NOT NULL | - | - | - | IDX | 集計基準年月（YYYY-MM形式） |
-| 8 | skill_hierarchy_id | スキル階層ID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | 対象スキル階層 |
-| 9 | skill_name | スキル名 | VARCHAR | 200 | NOT NULL | - | - | - | - | スキル名 |
-| 10 | required_count | 必要人数 | INTEGER | - | NOT NULL | 0 | - | - | - | 必要な人数 |
-| 11 | current_count | 現在人数 | INTEGER | - | NOT NULL | 0 | - | - | - | 現在の人数 |
-| 12 | level1_count | レベル1人数 | INTEGER | - | NOT NULL | 0 | - | - | - | レベル1（×）の人数 |
-| 13 | level2_count | レベル2人数 | INTEGER | - | NOT NULL | 0 | - | - | - | レベル2（△）の人数 |
-| 14 | level3_count | レベル3人数 | INTEGER | - | NOT NULL | 0 | - | - | - | レベル3（○）の人数 |
-| 15 | level4_count | レベル4人数 | INTEGER | - | NOT NULL | 0 | - | - | - | レベル4（◎）の人数 |
-| 16 | fulfillment_rate | 充足率 | DECIMAL | 5,2 | NOT NULL | 0.00 | - | - | - | スキル充足率（%） |
-| 17 | risk_level | リスクレベル | VARCHAR | 20 | NOT NULL | 'LOW' | - | - | IDX | リスクレベル（HIGH/MEDIUM/LOW） |
-| 18 | avg_skill_level | 平均スキルレベル | DECIMAL | 3,2 | NOT NULL | 0.00 | - | - | - | 平均スキルレベル |
-| 19 | remarks | 備考 | TEXT | - | NULL | - | - | - | - | 備考・コメント |
-| 20 | aggregated_at | 集計日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | 集計実行日時 |
-| 21 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード作成日時 |
-| 22 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード更新日時 |
+### 2.4 関連バッチ
+BATCH-006
 
-## リレーション
+## 3. テーブル構造
 
-### 参照先テーブル
-- MST_Tenant (tenant_id)
-- MST_Department (department_id)
-- MST_SkillHierarchy (skill_hierarchy_id)
+### 3.1 カラム定義
 
-### 参照元テーブル
-- なし（集計・分析専用テーブル）
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-## データ仕様
 
-### matrix_type（マップ種別）
-- DEPARTMENT: 部門別スキルマップ
-- PROJECT: プロジェクト別スキルマップ
-- COMPANY: 全社スキルマップ
-- TEAM: チーム別スキルマップ
+### 3.2 インデックス定義
 
-### risk_level（リスクレベル）
-- HIGH: 充足率60%未満（緊急対応が必要）
-- MEDIUM: 充足率60%以上80%未満（注意が必要）
-- LOW: 充足率80%以上（問題なし）
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
 
-### 充足率計算
-- 充足率 = (現在人数 / 必要人数) × 100
-- 必要人数は部署の業務要件に基づいて設定
 
-### 平均スキルレベル計算
-- レベル1（×）= 1点、レベル2（△）= 2点、レベル3（○）= 3点、レベル4（◎）= 4点
-- 平均スキルレベル = 総得点 / 総人数
+### 3.3 制約定義
 
-## 運用仕様
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_sys_skillmatrix | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
-### データ保持期間
-- 2年間（トレンド分析のため）
 
-### バックアップ
-- 日次バックアップ対象
-- 月次集計時のバックアップ
+## 4. リレーション
 
-### メンテナンス
-- 月次での自動集計・更新
-- 四半期での精度検証
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
-## パフォーマンス
 
-### 想定レコード数
-- 初期: 1,000件
-- 1年後: 5,000件
-- 3年後: 15,000件
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
 
-### アクセスパターン
-- 部門別マップ参照: 高頻度
-- リスク分析: 中頻度
-- トレンド分析: 低頻度
+## 5. データ仕様
 
-### インデックス設計
-- PRIMARY KEY: matrix_id
-- INDEX: tenant_id, matrix_type, department_id
-- INDEX: base_year_month, skill_hierarchy_id
-- INDEX: risk_level
-- COMPOSITE INDEX: matrix_type, base_year_month, department_id
+### 5.1 データ例
+```sql
+-- サンプルデータ
+INSERT INTO SYS_SkillMatrix (
+    id, tenant_id, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+);
+```
 
-## セキュリティ
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
-### アクセス制御
-- 参照: 管理者、部門長、人事担当者
-- 更新: システムバッチのみ
-- 削除: システム管理者のみ
+## 6. 運用仕様
 
-### 機密情報
-- 組織のスキル状況の機密性確保
-- 部門間の比較データの適切な管理
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-## 移行仕様
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-### 初期データ
-- TRN_SkillRecordからの集計データ生成
-- 部門・プロジェクト情報との結合
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
 
-### データ移行
-- 月次バッチによる自動生成
-- 履歴データの段階的移行
+## 7. パフォーマンス
 
-## 特記事項
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
 
-### 制約事項
-- 人数は0以上の値のみ
-- 充足率は0.00以上100.00以下
-- 平均スキルレベルは1.00以上4.00以下
-- 直接更新は禁止（バッチ処理のみ）
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
 
-### 拡張予定
-- AI予測機能の追加
-- スキルギャップ自動分析
-- 人材配置最適化機能
+## 8. セキュリティ
 
-### 関連システム
-- スキル管理システム
-- 人事管理システム
-- プロジェクト管理システム
-- レポート生成システム
-- ダッシュボードシステム
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
 
-### 可視化機能
-- ヒートマップ形式での表示
-- Excel/PDF形式でのエクスポート
-- グラフィカルなダッシュボード表示
-- トレンド分析チャート
+### 8.2 データ保護
+- 個人情報：なし
+- 機密情報：低レベル
+- 暗号化：不要
 
-### 業務ルール
-1. スキルマップは月次で自動生成
-2. 部門マップは各部署ごとに作成
-3. 全社マップは全部署を統合して作成
-4. リスクレベルは充足率に基づいて自動判定
-5. 必要人数は部署の業務要件に基づいて設定
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- スキルマップテーブル作成DDL
+CREATE TABLE SYS_SkillMatrix (
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキルマップ';
+
+```
+
+## 10. 特記事項
+
+1. **設計方針**
+   - システム系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
+
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
+
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
+
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

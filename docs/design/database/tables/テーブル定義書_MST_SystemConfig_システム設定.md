@@ -1,157 +1,188 @@
-# テーブル定義書_MST_SystemConfig_システム設定
+# テーブル定義書：MST_SystemConfig（システム設定）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | MST_SystemConfig |
-| 論理名 | システム設定 |
-| 用途 | システム全体の動作制御設定管理 |
-| カテゴリ | マスタ系 |
-| 作成日 | 2024-12-19 |
-| 最終更新日 | 2024-12-19 |
+| **テーブルID** | TBL-023 |
+| **テーブル名** | MST_SystemConfig |
+| **論理名** | システム設定 |
+| **カテゴリ** | マスタ系 |
+| **機能カテゴリ** | システム管理 |
+| **優先度** | 低 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 中 |
+| **暗号化要否** | 不要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-システム全体の動作を制御する各種設定値を管理するマスタテーブルです。
-アプリケーション設定、セキュリティ設定、パフォーマンス設定、通知設定などを
-キー・バリュー形式で格納し、システムの柔軟な運用と設定変更を可能にします。
-設定値の変更履歴も管理し、設定変更による影響の追跡と復旧を支援します。
+### 2.1 概要・目的
+SCR-ADMIN
 
-## テーブル構造
+### 2.3 関連API
+API-024
 
-| # | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | PK | FK | インデックス | 説明 |
-|---|----------|--------|----------|------|------|------------|----|----|--------------|------|
-| 1 | config_id | 設定ID | VARCHAR | 50 | NOT NULL | - | ○ | - | PK | 設定の一意識別子 |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | テナント識別子 |
-| 3 | config_category | 設定カテゴリ | VARCHAR | 50 | NOT NULL | - | - | - | IDX | 設定のカテゴリ |
-| 4 | config_key | 設定キー | VARCHAR | 100 | NOT NULL | - | - | - | UNQ | 設定のキー名 |
-| 5 | config_name | 設定名 | VARCHAR | 200 | NOT NULL | - | - | - | - | 設定の表示名 |
-| 6 | config_value | 設定値 | TEXT | - | NOT NULL | - | - | - | - | 設定値 |
-| 7 | default_value | デフォルト値 | TEXT | - | NOT NULL | - | - | - | - | デフォルト値 |
-| 8 | data_type | データ型 | VARCHAR | 20 | NOT NULL | - | - | - | - | データ型 |
-| 9 | description | 説明 | TEXT | - | NULL | - | - | - | - | 設定の説明 |
-| 10 | config_group | 設定グループ | VARCHAR | 100 | NULL | - | - | - | IDX | 設定のグループ名 |
-| 11 | display_order | 表示順序 | INTEGER | - | NOT NULL | 0 | - | - | IDX | 表示時の順序 |
-| 12 | is_required | 必須フラグ | BOOLEAN | - | NOT NULL | false | - | - | - | 必須設定かどうか |
-| 13 | is_editable | 編集可能フラグ | BOOLEAN | - | NOT NULL | true | - | - | - | 編集可能かどうか |
-| 14 | is_public | 公開フラグ | BOOLEAN | - | NOT NULL | false | - | - | IDX | 一般ユーザーに公開するか |
-| 15 | is_encrypted | 暗号化フラグ | BOOLEAN | - | NOT NULL | false | - | - | - | 値を暗号化するか |
-| 16 | validation_rule | 検証ルール | TEXT | - | NULL | - | - | - | - | 入力値の検証ルール |
-| 17 | min_value | 最小値 | DECIMAL | 15,2 | NULL | - | - | - | - | 数値型の最小値 |
-| 18 | max_value | 最大値 | DECIMAL | 15,2 | NULL | - | - | - | - | 数値型の最大値 |
-| 19 | options | 選択肢 | TEXT | - | NULL | - | - | - | - | 選択肢（JSON形式） |
-| 20 | is_active | 有効フラグ | BOOLEAN | - | NOT NULL | true | - | - | IDX | 設定が有効かどうか |
-| 21 | last_modified_by | 最終変更者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | 最終変更者のユーザーID |
-| 22 | last_modified_at | 最終変更日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | 最終変更日時 |
-| 23 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード作成日時 |
-| 24 | created_by | 作成者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード作成者 |
-| 25 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード更新日時 |
-| 26 | updated_by | 更新者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード更新者 |
+### 2.4 関連バッチ
+BATCH-016
 
-## リレーション
+## 3. テーブル構造
 
-### 参照先テーブル
-- MST_Tenant (tenant_id)
-- MST_UserAuth (last_modified_by, created_by, updated_by)
+### 3.1 カラム定義
 
-### 参照元テーブル
-- HIS_ConfigHistory (config_id)
-- SYS_SystemLog (config_id)
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-## データ仕様
 
-### config_category（設定カテゴリ）
-- SYSTEM: システム基本設定
-- SECURITY: セキュリティ関連設定
-- PERFORMANCE: パフォーマンス関連設定
-- NOTIFICATION: 通知関連設定
-- UI: ユーザーインターフェース設定
-- INTEGRATION: 外部システム連携設定
+### 3.2 インデックス定義
 
-### data_type（データ型）
-- STRING: 文字列
-- INTEGER: 整数
-- DECIMAL: 小数
-- BOOLEAN: 真偽値
-- JSON: JSON形式データ
-- DATE: 日付
-- DATETIME: 日時
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
 
-### 設定例
-- app.name: アプリケーション名
-- session.timeout: セッションタイムアウト（秒）
-- db.connection.pool.size: DB接続プールサイズ
-- email.smtp.enabled: メール通知有効フラグ
 
-## 運用仕様
+### 3.3 制約定義
 
-### データ保持期間
-- 永続保持（システム運用に必要）
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_mst_systemconfig | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
-### バックアップ
-- 日次バックアップ対象
-- 設定変更前の自動バックアップ
 
-### メンテナンス
-- 設定変更時の影響範囲確認
-- 設定値の妥当性チェック
+## 4. リレーション
 
-## パフォーマンス
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
-### 想定レコード数
-- 初期: 100件
-- 1年後: 200件
-- 3年後: 500件
 
-### アクセスパターン
-- 設定値読み込み: 高頻度
-- 設定値更新: 低頻度
-- 設定一覧表示: 中頻度
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
 
-### インデックス設計
-- PRIMARY KEY: config_id
-- UNIQUE: config_key
-- INDEX: tenant_id, config_category, config_group, display_order
-- INDEX: is_public, is_active
+## 5. データ仕様
 
-## セキュリティ
+### 5.1 データ例
+```sql
+-- サンプルデータ
+INSERT INTO MST_SystemConfig (
+    id, tenant_id, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+);
+```
 
-### アクセス制御
-- 参照: システム管理者、一般ユーザー（公開設定のみ）
-- 更新: システム管理者のみ
-- 削除: システム管理者のみ（必須設定は削除不可）
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
-### 機密情報
-- パスワード、APIキーなどの暗号化
-- 機密設定へのアクセス制御
-- 設定変更の監査ログ記録
+## 6. 運用仕様
 
-## 移行仕様
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-### 初期データ
-- システム基本設定の投入
-- デフォルト値の設定
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-### データ移行
-- 既存システムからの設定移行
-- 設定値の妥当性確認
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
 
-## 特記事項
+## 7. パフォーマンス
 
-### 制約事項
-- 設定キーは一意である必要がある
-- 必須設定は削除できない
-- 編集不可設定は管理者のみ変更可能
-- 最大値は最小値以上である必要がある
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
 
-### 拡張予定
-- 設定値の履歴管理機能
-- 設定変更の承認ワークフロー
-- 設定値の自動検証機能
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
 
-### 関連システム
-- システム管理画面
-- 設定変更履歴システム
-- 監査ログシステム
-- キャッシュシステム
+## 8. セキュリティ
+
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
+
+### 8.2 データ保護
+- 個人情報：なし
+- 機密情報：中レベル
+- 暗号化：不要
+
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- システム設定テーブル作成DDL
+CREATE TABLE MST_SystemConfig (
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='システム設定';
+
+```
+
+## 10. 特記事項
+
+1. **設計方針**
+   - マスタ系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
+
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
+
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
+
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

@@ -1,158 +1,188 @@
-# テーブル定義書_TRN_ProjectRecord_案件実績
+# テーブル定義書：TRN_ProjectRecord（案件実績）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | TRN_ProjectRecord |
-| 論理名 | 案件実績 |
-| 用途 | 社員の案件・プロジェクト実績管理 |
-| カテゴリ | トランザクション系 |
-| 作成日 | 2024-12-19 |
-| 最終更新日 | 2024-12-19 |
+| **テーブルID** | TBL-015 |
+| **テーブル名** | TRN_ProjectRecord |
+| **論理名** | 案件実績 |
+| **カテゴリ** | トランザクション系 |
+| **機能カテゴリ** | 作業実績管理 |
+| **優先度** | 中 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 中 |
+| **暗号化要否** | 不要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-社員が担当した案件・プロジェクトの実績情報を管理するトランザクションテーブルです。
-案件名、期間、役割、使用技術、成果、工数などの情報を記録し、
-社員のスキルプロファイルと実務経験を補完します。
-このテーブルは経歴書作成やスキル評価の裏付け、リソース配置の参考情報として活用されます。
+### 2.1 概要・目的
+SCR-WORK
 
-## テーブル構造
+### 2.3 関連API
+API-014
 
-| # | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | PK | FK | インデックス | 説明 |
-|---|----------|--------|----------|------|------|------------|----|----|--------------|------|
-| 1 | project_id | 案件ID | VARCHAR | 50 | NOT NULL | - | ○ | - | PK | 案件の一意識別子 |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | テナント識別子 |
-| 3 | emp_no | 社員番号 | VARCHAR | 20 | NOT NULL | - | - | ○ | IDX | 案件担当者の社員番号 |
-| 4 | project_name | 案件名 | VARCHAR | 200 | NOT NULL | - | - | - | IDX | 案件の名称 |
-| 5 | client_name | 顧客名 | VARCHAR | 100 | NULL | - | - | - | IDX | 顧客・発注元の名称 |
-| 6 | start_date | 開始日 | DATE | - | NOT NULL | - | - | - | IDX | 案件の開始日 |
-| 7 | end_date | 終了日 | DATE | - | NULL | - | - | - | IDX | 案件の終了日 |
-| 8 | role | 役割 | VARCHAR | 100 | NOT NULL | - | - | - | IDX | 案件での役割 |
-| 9 | process | 担当工程 | VARCHAR | 200 | NULL | - | - | - | - | 担当した工程 |
-| 10 | team_size | チーム規模 | INTEGER | 3 | NULL | - | - | - | - | プロジェクトチームの人数 |
-| 11 | technology1 | 使用技術1 | VARCHAR | 100 | NULL | - | - | - | IDX | 使用した技術・ツール1 |
-| 12 | technology2 | 使用技術2 | VARCHAR | 100 | NULL | - | - | - | - | 使用した技術・ツール2 |
-| 13 | technology3 | 使用技術3 | VARCHAR | 100 | NULL | - | - | - | - | 使用した技術・ツール3 |
-| 14 | technology4 | 使用技術4 | VARCHAR | 100 | NULL | - | - | - | - | 使用した技術・ツール4 |
-| 15 | technology5 | 使用技術5 | VARCHAR | 100 | NULL | - | - | - | - | 使用した技術・ツール5 |
-| 16 | related_skill_id1 | 関連スキルID1 | VARCHAR | 50 | NULL | - | - | ○ | IDX | 案件に関連するスキルID1 |
-| 17 | related_skill_id2 | 関連スキルID2 | VARCHAR | 50 | NULL | - | - | ○ | IDX | 案件に関連するスキルID2 |
-| 18 | related_skill_id3 | 関連スキルID3 | VARCHAR | 50 | NULL | - | - | ○ | IDX | 案件に関連するスキルID3 |
-| 19 | description | 業務内容 | TEXT | - | NOT NULL | - | - | - | - | 案件での業務内容の詳細 |
-| 20 | achievements | 成果・実績 | TEXT | - | NULL | - | - | - | - | 案件での成果・実績 |
-| 21 | man_months | 工数（人月） | DECIMAL | 4,1 | NULL | - | - | - | - | 投入工数（人月） |
-| 22 | manager_confirmed | 上長確認フラグ | BOOLEAN | - | NOT NULL | false | - | - | IDX | 上長による確認完了フラグ |
-| 23 | manager_confirmed_at | 上長確認日時 | TIMESTAMP | - | NULL | - | - | - | - | 上長による確認日時 |
-| 24 | is_public | 公開フラグ | BOOLEAN | - | NOT NULL | true | - | - | IDX | 社内公開するかどうか |
-| 25 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード作成日時 |
-| 26 | created_by | 作成者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード作成者 |
-| 27 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード更新日時 |
-| 28 | updated_by | 更新者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード更新者 |
+### 2.4 関連バッチ
+BATCH-009
 
-## リレーション
+## 3. テーブル構造
 
-### 参照先テーブル
-- MST_Tenant (tenant_id)
-- MST_Employee (emp_no)
-- MST_SkillHierarchy (related_skill_id1, related_skill_id2, related_skill_id3)
-- MST_UserAuth (created_by, updated_by)
+### 3.1 カラム定義
 
-### 参照元テーブル
-- TRN_SkillRecord (related_project_id)
-- WRK_BatchJobLog (project_id)
-- HIS_ProjectRecordHistory (project_id)
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-## データ仕様
 
-### role（役割）
-- PM: プロジェクトマネージャー
-- PL: プロジェクトリーダー
-- SE: システムエンジニア
-- PG: プログラマー
-- テスター: テスト担当者
-- その他: その他の役割
+### 3.2 インデックス定義
 
-### process（担当工程）
-- 要件定義: 要件定義工程
-- 基本設計: 基本設計工程
-- 詳細設計: 詳細設計工程
-- 開発: 開発工程
-- テスト: テスト工程
-- 運用保守: 運用保守工程
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
 
-### technology（使用技術）
-- プログラミング言語、フレームワーク、データベース、ツールなど
 
-## 運用仕様
+### 3.3 制約定義
 
-### データ保持期間
-- 永続保持（キャリア履歴として重要）
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_trn_projectrecord | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
-### バックアップ
-- 日次バックアップ対象
-- 月次アーカイブ対象
 
-### メンテナンス
-- 定期的な案件情報の更新
-- 古い案件データの整理
+## 4. リレーション
 
-## パフォーマンス
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
-### 想定レコード数
-- 初期: 1,000件
-- 1年後: 10,000件
-- 3年後: 50,000件
 
-### アクセスパターン
-- 社員別案件参照: 高頻度
-- 技術別案件検索: 中頻度
-- 期間別案件集計: 低頻度
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
 
-### インデックス設計
-- PRIMARY KEY: project_id
-- INDEX: tenant_id, emp_no, project_name, client_name
-- INDEX: start_date, end_date, role, technology1
-- INDEX: related_skill_id1, related_skill_id2, related_skill_id3
-- INDEX: manager_confirmed, is_public
+## 5. データ仕様
 
-## セキュリティ
+### 5.1 データ例
+```sql
+-- サンプルデータ
+INSERT INTO TRN_ProjectRecord (
+    id, tenant_id, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+);
+```
 
-### アクセス制御
-- 参照: 本人、上長、人事担当者、システム管理者
-- 更新: 本人、人事担当者、システム管理者
-- 削除: システム管理者のみ
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
-### 機密情報
-- 顧客情報の適切な管理
-- 機密案件の公開制御
+## 6. 運用仕様
 
-## 移行仕様
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-### 初期データ
-- 既存システムからの案件データ移行
-- スキルとの関連付け
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-### データ移行
-- 使用技術とスキルの紐付け
-- 案件履歴の継承
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
 
-## 特記事項
+## 7. パフォーマンス
 
-### 制約事項
-- 終了日は開始日より後である必要がある
-- 工数は0より大きい値のみ許可
-- 上長確認後は基本的に変更不可
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
 
-### 拡張予定
-- 案件評価機能
-- 技術トレンド分析機能
-- 案件マッチング機能
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
 
-### 関連システム
-- スキル管理システム
-- 人事評価システム
-- プロジェクト管理システム
-- 経歴書生成システム
-- リソース配置システム
+## 8. セキュリティ
+
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
+
+### 8.2 データ保護
+- 個人情報：なし
+- 機密情報：中レベル
+- 暗号化：不要
+
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- 案件実績テーブル作成DDL
+CREATE TABLE TRN_ProjectRecord (
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='案件実績';
+
+```
+
+## 10. 特記事項
+
+1. **設計方針**
+   - トランザクション系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
+
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
+
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
+
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査

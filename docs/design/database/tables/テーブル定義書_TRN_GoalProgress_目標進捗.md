@@ -1,149 +1,217 @@
-# テーブル定義書_TRN_GoalProgress_目標進捗
+# テーブル定義書：TRN_GoalProgress（目標進捗）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | TRN_GoalProgress |
-| 論理名 | 目標進捗 |
-| 用途 | キャリアプラン目標の進捗管理 |
-| カテゴリ | トランザクション系 |
-| 作成日 | 2024-12-19 |
-| 最終更新日 | 2024-12-19 |
+| **テーブルID** | TBL-014 |
+| **テーブル名** | TRN_GoalProgress |
+| **論理名** | 目標進捗 |
+| **カテゴリ** | トランザクション系 |
+| **機能カテゴリ** | 目標・キャリア管理 |
+| **優先度** | 中 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 低 |
+| **暗号化要否** | 不要 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-社員のキャリアプランに設定された目標の進捗状況を管理するトランザクションテーブルです。
-目標ごとの進捗率、達成状況、進捗コメント、次のアクションなどを記録し、
-定期的な進捗確認と評価のサイクルをサポートします。
-このテーブルにより、目標達成に向けたPDCAサイクルを効果的に回すことができます。
+### 2.1 概要・目的
+TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状況を管理するトランザクションテーブルです。
 
-## テーブル構造
+主な目的：
+- 個人目標の設定・管理（業務目標、スキル向上目標等）
+- 目標達成度の定期的な進捗管理
+- 上司・部下間での目標共有・フィードバック
+- 人事評価・査定の基礎データ
+- 組織目標と個人目標の連携管理
 
-| # | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | PK | FK | インデックス | 説明 |
-|---|----------|--------|----------|------|------|------------|----|----|--------------|------|
-| 1 | progress_id | 進捗ID | VARCHAR | 50 | NOT NULL | - | ○ | - | PK | 進捗記録の一意識別子 |
-| 2 | tenant_id | テナントID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | テナント識別子 |
-| 3 | career_plan_id | キャリアプランID | VARCHAR | 50 | NOT NULL | - | - | ○ | IDX | 関連するキャリアプランID |
-| 4 | emp_no | 社員番号 | VARCHAR | 20 | NOT NULL | - | - | ○ | IDX | 社員識別番号 |
-| 5 | goal_type | 目標種別 | VARCHAR | 10 | NOT NULL | - | - | - | IDX | 目標の種別 |
-| 6 | check_date | 進捗確認日 | DATE | - | NOT NULL | - | - | - | IDX | 進捗確認を行った日付 |
-| 7 | progress_rate | 進捗率 | INTEGER | 3 | NOT NULL | 0 | - | - | - | 目標の進捗率（0-100%） |
-| 8 | achievement_status | 達成状況 | VARCHAR | 20 | NOT NULL | '未着手' | - | - | IDX | 達成状況 |
-| 9 | progress_comment | 進捗コメント | TEXT | - | NULL | - | - | - | - | 進捗に関するコメント |
-| 10 | next_action | 次のアクション | TEXT | - | NULL | - | - | - | - | 次に実施するアクション |
-| 11 | issues | 課題・障害 | TEXT | - | NULL | - | - | - | - | 目標達成における課題や障害 |
-| 12 | self_assessment | 自己評価 | TEXT | - | NULL | - | - | - | - | 進捗に対する自己評価 |
-| 13 | manager_assessment | 上長評価 | TEXT | - | NULL | - | - | - | - | 進捗に対する上長評価 |
-| 14 | manager_confirmed | 上長確認フラグ | BOOLEAN | - | NOT NULL | false | - | - | IDX | 上長による確認完了フラグ |
-| 15 | manager_confirmed_at | 上長確認日時 | TIMESTAMP | - | NULL | - | - | - | - | 上長による確認日時 |
-| 16 | related_skill_id | 関連スキルID | VARCHAR | 50 | NULL | - | - | ○ | IDX | 進捗に関連するスキルID |
-| 17 | related_cert_id | 関連資格ID | VARCHAR | 50 | NULL | - | - | ○ | IDX | 進捗に関連する資格ID |
-| 18 | related_training_id | 関連研修ID | VARCHAR | 50 | NULL | - | - | ○ | IDX | 進捗に関連する研修ID |
-| 19 | created_at | 作成日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード作成日時 |
-| 20 | created_by | 作成者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード作成者 |
-| 21 | updated_at | 更新日時 | TIMESTAMP | - | NOT NULL | CURRENT_TIMESTAMP | - | - | - | レコード更新日時 |
-| 22 | updated_by | 更新者 | VARCHAR | 50 | NOT NULL | - | - | ○ | - | レコード更新者 |
+このテーブルは、人事評価制度、目標管理制度（MBO）、人材育成など、
+組織の成果管理と人材開発の基盤となる重要なデータを提供します。
 
-## リレーション
 
-### 参照先テーブル
-- MST_Tenant (tenant_id)
-- MST_CareerPlan (career_plan_id)
-- MST_Employee (emp_no)
-- MST_SkillHierarchy (related_skill_id)
-- MST_Certification (related_cert_id)
-- TRN_TrainingHistory (related_training_id)
-- MST_UserAuth (created_by, updated_by)
+### 2.3 関連API
+API-013
 
-### 参照元テーブル
-- HIS_GoalProgressHistory (progress_id)
+### 2.4 関連バッチ
+BATCH-008
 
-## データ仕様
+## 3. テーブル構造
 
-### goal_type（目標種別）
-- 短期: 短期目標（1年以内）
-- 中期: 中期目標（1-3年）
-- 長期: 長期目標（3年以上）
+### 3.1 カラム定義
 
-### achievement_status（達成状況）
-- 未着手: まだ取り組みを開始していない
-- 進行中: 現在取り組み中
-- 達成済: 目標を達成済み
-- 中止: 目標を中止・変更
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 8 | employee_id | 社員ID | VARCHAR | 50 | ○ | - | ○ | - | 目標を設定した社員のID |
+| 9 | goal_title | 目標タイトル | VARCHAR | 200 | ○ | - | - | - | 目標の簡潔なタイトル |
+| 10 | goal_category | 目標カテゴリ | ENUM | None | ○ | - | - | - | 目標のカテゴリ（BUSINESS:業務、SKILL:スキル、CAREER:キャリア） |
+| 11 | target_date | 目標期限 | DATE | None | ○ | - | - | - | 目標達成の期限日 |
+| 12 | progress_rate | 進捗率 | DECIMAL | 5,2 | ○ | - | - | 0.0 | 目標の進捗率（0.00-100.00%） |
 
-### progress_rate（進捗率）
-- 0-100の整数値
-- パーセンテージで表現
 
-## 運用仕様
+### 3.2 インデックス定義
 
-### データ保持期間
-- 5年間（キャリア開発履歴として保持）
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | id | 主キー |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
+| idx_employee | INDEX | employee_id | 社員別検索用 |
 
-### バックアップ
-- 日次バックアップ対象
-- 月次アーカイブ対象
 
-### メンテナンス
-- 定期的な進捗状況の確認
-- 古い進捗データのアーカイブ
+### 3.3 制約定義
 
-## パフォーマンス
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_trn_goalprogress | PRIMARY KEY | id | 主キー制約 |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
-### 想定レコード数
-- 初期: 500件
-- 1年後: 5,000件
-- 3年後: 20,000件
 
-### アクセスパターン
-- 社員別進捗参照: 高頻度
-- 期間別進捗集計: 中頻度
-- 目標達成分析: 低頻度
+## 4. リレーション
 
-### インデックス設計
-- PRIMARY KEY: progress_id
-- INDEX: tenant_id, career_plan_id, emp_no, goal_type, check_date
-- INDEX: achievement_status, manager_confirmed
-- INDEX: related_skill_id, related_cert_id, related_training_id
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
-## セキュリティ
 
-### アクセス制御
-- 参照: 本人、上長、人事担当者、システム管理者
-- 更新: 本人、人事担当者、システム管理者
-- 削除: システム管理者のみ
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| - | - | - | 必要に応じて追加 |
 
-### 機密情報
-- 個人の目標進捗情報の適切な管理
-- 評価コメントの機密性確保
+## 5. データ仕様
 
-## 移行仕様
+### 5.1 データ例
+```sql
+-- サンプルデータ
+INSERT INTO TRN_GoalProgress (
+    id, tenant_id, employee_id, goal_title, goal_category, target_date, progress_rate, created_by, updated_by
+) VALUES (
+    'sample_001', 'tenant_001', 'EMP000001', 'Java技術習得', 'SKILL', '2025-12-31', '50.0', 'user_admin', 'user_admin'
+);
+```
 
-### 初期データ
-- 既存システムからの進捗データ移行
-- キャリアプランとの整合性確保
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
-### データ移行
-- 関連スキル・資格・研修との紐付け
-- 進捗履歴の継承
+## 6. 運用仕様
 
-## 特記事項
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-### 制約事項
-- 進捗率は0〜100の範囲内
-- 目標種別は定義された値のみ
-- 達成状況は定義された値のみ
-- 上長確認後は基本的に変更不可
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-### 拡張予定
-- 進捗自動更新機能
-- 目標達成予測機能
-- 進捗アラート機能
+### 6.3 アーカイブ
+- アーカイブ条件：作成から3年経過
+- アーカイブ先：アーカイブDB
 
-### 関連システム
-- キャリア管理システム
-- 人事評価システム
-- スキル管理システム
-- 研修管理システム
-- 通知システム
+## 7. パフォーマンス
+
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | id, tenant_id | 基本検索 |
+| INSERT | 中 | - | 新規登録 |
+| UPDATE | 中 | id | 更新処理 |
+| DELETE | 低 | id | 削除処理 |
+
+### 7.2 パフォーマンス要件
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
+
+## 8. セキュリティ
+
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| user | ○ | × | × | × | 一般ユーザー（参照のみ） |
+
+### 8.2 データ保護
+- 個人情報：なし
+- 機密情報：低レベル
+- 暗号化：不要
+
+## 9. 移行仕様
+
+### 9.1 データ移行
+- 移行元：既存システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
+
+### 9.2 DDL
+```sql
+-- 目標進捗テーブル作成DDL
+CREATE TABLE TRN_GoalProgress (
+    id VARCHAR(50) NOT NULL COMMENT 'ID',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    employee_id VARCHAR(50) COMMENT '社員ID',
+    goal_title VARCHAR(200) COMMENT '目標タイトル',
+    goal_category ENUM COMMENT '目標カテゴリ',
+    target_date DATE COMMENT '目標期限',
+    progress_rate DECIMAL(5,2) DEFAULT 0.0 COMMENT '進捗率',
+    PRIMARY KEY (id),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_active (is_active),
+    INDEX idx_created_at (created_at),
+    INDEX idx_employee (employee_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='目標進捗';
+
+```
+
+## 10. 特記事項
+
+1. **設計方針**
+   - トランザクション系として設計
+   - マルチテナント対応
+   - 監査証跡の保持
+
+2. **運用上の注意点**
+   - 定期的なデータクリーンアップが必要
+   - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
+
+3. **今後の拡張予定**
+   - 必要に応じて機能拡張を検討
+
+4. **関連画面**
+   - 関連画面情報
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査
+
+
+## 11. 業務ルール
+
+- 進捗率は0-100%の範囲で設定
+- 目標期限は設定日より未来の日付
