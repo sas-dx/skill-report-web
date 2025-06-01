@@ -8,7 +8,11 @@
 | **テーブル名** | SYS_TenantUsage |
 | **論理名** | テナント使用量 |
 | **カテゴリ** | システム系 |
+| **機能カテゴリ** | マルチテナント管理 |
 | **優先度** | 高 |
+| **個人情報含有** | なし |
+| **機密情報レベル** | 中 |
+| **暗号化要否** | 不要 |
 | **ステータス** | 運用中 |
 | **作成日** | 2025-06-01 |
 | **最終更新日** | 2025-06-01 |
@@ -42,16 +46,13 @@ BATCH-018-01
 | インデックス名 | 種別 | カラム | 説明 |
 |----------------|------|--------|------|
 | PRIMARY | PRIMARY KEY | id | 主キー |
-| idx_tenant | INDEX | tenant_id | テナント検索用 |
 | idx_created_at | INDEX | created_at | 作成日時検索用 |
-| idx_active | INDEX | is_active | 有効フラグ検索用 |
 
 ### 3.3 制約定義
 
 | 制約名 | 制約種別 | カラム | 制約内容 |
 |--------|----------|--------|----------|
 | pk_sys_tenantusage | PRIMARY KEY | id | 主キー制約 |
-| fk_tenant | FOREIGN KEY | tenant_id | MST_Tenant.tenant_id |
 | fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
 | fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
@@ -60,7 +61,6 @@ BATCH-018-01
 ### 4.1 親テーブル
 | テーブル名 | 関連カラム | カーディナリティ | 説明 |
 |------------|------------|------------------|------|
-| MST_Tenant | tenant_id | 1:N | テナント情報 |
 | MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
 
 ### 4.2 子テーブル
@@ -74,19 +74,19 @@ BATCH-018-01
 ```sql
 -- サンプルデータ
 INSERT INTO SYS_TenantUsage (
-    id, tenant_id, created_by, updated_by
+    id, created_by, updated_by
 ) VALUES (
-    'sample_001', 'TENANT_001', 'user_admin', 'user_admin'
+    'sample_001', 'user_admin', 'user_admin'
 );
 ```
 
 ### 5.2 データ量見積もり
 | 項目 | 値 | 備考 |
 |------|----|----- |
-| 初期データ件数 | 10件 | 初期設定データ |
-| 月間増加件数 | 100件 | 想定値 |
-| 年間増加件数 | 1,200件 | 想定値 |
-| 5年後想定件数 | 6,010件 | 想定値 |
+| 初期データ件数 | 100件 | 初期設定データ |
+| 月間増加件数 | 3000件 | 想定値 |
+| 年間増加件数 | 36000件 | 想定値 |
+| 5年後想定件数 | 181,000件 | 想定値 |
 
 ## 6. 運用仕様
 
@@ -99,7 +99,7 @@ INSERT INTO SYS_TenantUsage (
 - パーティション条件：-
 
 ### 6.3 アーカイブ
-- アーカイブ条件：無効化から3年経過
+- アーカイブ条件：作成から2年経過
 - アーカイブ先：アーカイブDB
 
 ## 7. パフォーマンス
@@ -113,10 +113,10 @@ INSERT INTO SYS_TenantUsage (
 | DELETE | 低 | id | 削除処理 |
 
 ### 7.2 パフォーマンス要件
-- SELECT：10ms以内
-- INSERT：50ms以内
+- SELECT：20ms以内
+- INSERT：30ms以内
 - UPDATE：50ms以内
-- DELETE：100ms以内
+- DELETE：50ms以内
 
 ## 8. セキュリティ
 
@@ -128,8 +128,8 @@ INSERT INTO SYS_TenantUsage (
 | user | ○ | × | × | × | 一般ユーザー（参照のみ） |
 
 ### 8.2 データ保護
-- 個人情報：含まない
-- 機密情報：含まない
+- 個人情報：なし
+- 機密情報：中レベル
 - 暗号化：不要
 
 ## 9. 移行仕様
@@ -153,7 +153,6 @@ CREATE TABLE SYS_TenantUsage (
     INDEX idx_tenant (tenant_id),
     INDEX idx_created_at (created_at),
     INDEX idx_active (is_active),
-    CONSTRAINT fk_sys_tenantusage_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT fk_sys_tenantusage_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT fk_sys_tenantusage_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='テナント使用量';
@@ -169,9 +168,14 @@ CREATE TABLE SYS_TenantUsage (
 2. **運用上の注意点**
    - 定期的なデータクリーンアップが必要
    - パフォーマンス監視を実施
+   - データ量見積もりの定期見直し
 
 3. **今後の拡張予定**
    - 必要に応じて機能拡張を検討
 
 4. **関連画面**
    - SCR-TENANT-ADMIN
+
+5. **データ量・パフォーマンス監視**
+   - データ量が想定の150%を超えた場合はアラート
+   - 応答時間が設定値の120%を超えた場合は調査
