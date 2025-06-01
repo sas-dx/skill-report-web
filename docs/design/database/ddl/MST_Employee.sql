@@ -1,5 +1,5 @@
 -- MST_Employee (社員基本情報) DDL
--- 生成日時: 2025-06-01 15:57:34
+-- 生成日時: 2025-06-01 16:12:37
 
 CREATE TABLE MST_Employee (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

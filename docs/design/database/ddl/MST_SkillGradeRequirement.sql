@@ -1,5 +1,5 @@
 -- MST_SkillGradeRequirement (スキルグレード要件) DDL
--- 生成日時: 2025-06-01 15:57:34
+-- 生成日時: 2025-06-01 16:12:38
 
 CREATE TABLE MST_SkillGradeRequirement (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

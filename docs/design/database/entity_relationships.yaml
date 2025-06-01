@@ -1,0 +1,622 @@
+# エンティティ関連定義
+# 生成日時: 2025-06-01
+# 用途: テーブル定義書の関連ERD自動生成
+
+metadata:
+  version: "1.0.0"
+  created_date: "2025-06-01"
+  description: "マルチテナント対応スキル管理システムのエンティティ関連定義"
+  total_tables: 48
+
+# エンティティ定義
+entities:
+  # マルチテナント基盤
+  MST_Tenant:
+    logical_name: "テナント管理"
+    category: "マスタ系"
+    primary_key: "tenant_id"
+    key_columns:
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_name"
+        logical: "テナント名"
+        type: "VARCHAR(100)"
+      - name: "status"
+        logical: "ステータス"
+        type: "ENUM"
+
+  MST_TenantSettings:
+    logical_name: "テナント設定"
+    category: "マスタ系"
+    primary_key: "setting_id"
+    key_columns:
+      - name: "setting_id"
+        logical: "設定ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "setting_key"
+        logical: "設定キー"
+        type: "VARCHAR(100)"
+
+  # 認証・認可
+  MST_UserAuth:
+    logical_name: "ユーザー認証情報"
+    category: "マスタ系"
+    primary_key: "user_id"
+    key_columns:
+      - name: "user_id"
+        logical: "ユーザーID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "username"
+        logical: "ユーザー名"
+        type: "VARCHAR(100)"
+      - name: "email"
+        logical: "メールアドレス"
+        type: "VARCHAR(255)"
+
+  MST_Role:
+    logical_name: "ロール情報"
+    category: "マスタ系"
+    primary_key: "role_id"
+    key_columns:
+      - name: "role_id"
+        logical: "ロールID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "role_name"
+        logical: "ロール名"
+        type: "VARCHAR(100)"
+
+  MST_Permission:
+    logical_name: "権限情報"
+    category: "マスタ系"
+    primary_key: "permission_id"
+    key_columns:
+      - name: "permission_id"
+        logical: "権限ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "permission_name"
+        logical: "権限名"
+        type: "VARCHAR(100)"
+
+  MST_UserRole:
+    logical_name: "ユーザーロール関連"
+    category: "マスタ系"
+    primary_key: "user_role_id"
+    key_columns:
+      - name: "user_role_id"
+        logical: "ユーザーロールID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "user_id"
+        logical: "ユーザーID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "role_id"
+        logical: "ロールID"
+        type: "VARCHAR(50)"
+        is_fk: true
+
+  # 組織・プロフィール
+  MST_Employee:
+    logical_name: "社員基本情報"
+    category: "マスタ系"
+    primary_key: "employee_id"
+    key_columns:
+      - name: "employee_id"
+        logical: "社員ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "user_id"
+        logical: "ユーザーID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "employee_code"
+        logical: "社員番号"
+        type: "VARCHAR(30)"
+      - name: "full_name"
+        logical: "氏名"
+        type: "VARCHAR(100)"
+      - name: "department_id"
+        logical: "部署ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "position_id"
+        logical: "役職ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "job_type_id"
+        logical: "職種ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "manager_id"
+        logical: "上司ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+
+  MST_Department:
+    logical_name: "部署マスタ"
+    category: "マスタ系"
+    primary_key: "department_id"
+    key_columns:
+      - name: "department_id"
+        logical: "部署ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "department_code"
+        logical: "部署コード"
+        type: "VARCHAR(20)"
+      - name: "department_name"
+        logical: "部署名"
+        type: "VARCHAR(100)"
+      - name: "parent_department_id"
+        logical: "親部署ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+
+  MST_Position:
+    logical_name: "役職マスタ"
+    category: "マスタ系"
+    primary_key: "position_id"
+    key_columns:
+      - name: "position_id"
+        logical: "役職ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "position_code"
+        logical: "役職コード"
+        type: "VARCHAR(20)"
+      - name: "position_name"
+        logical: "役職名"
+        type: "VARCHAR(100)"
+
+  MST_JobType:
+    logical_name: "職種マスタ"
+    category: "マスタ系"
+    primary_key: "job_type_id"
+    key_columns:
+      - name: "job_type_id"
+        logical: "職種ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "job_type_code"
+        logical: "職種コード"
+        type: "VARCHAR(20)"
+      - name: "job_type_name"
+        logical: "職種名"
+        type: "VARCHAR(100)"
+
+  # スキル管理
+  MST_SkillCategory:
+    logical_name: "スキルカテゴリマスタ"
+    category: "マスタ系"
+    primary_key: "id"
+    key_columns:
+      - name: "id"
+        logical: "ID"
+        type: "BIGINT"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "category_code"
+        logical: "カテゴリコード"
+        type: "VARCHAR(20)"
+      - name: "category_name"
+        logical: "カテゴリ名"
+        type: "VARCHAR(100)"
+      - name: "parent_category_id"
+        logical: "親カテゴリID"
+        type: "BIGINT"
+        is_fk: true
+
+  MST_SkillHierarchy:
+    logical_name: "スキル階層マスタ"
+    category: "マスタ系"
+    primary_key: "skill_id"
+    key_columns:
+      - name: "skill_id"
+        logical: "スキルID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "skill_code"
+        logical: "スキルコード"
+        type: "VARCHAR(20)"
+      - name: "skill_name"
+        logical: "スキル名"
+        type: "VARCHAR(100)"
+      - name: "parent_skill_id"
+        logical: "親スキルID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "category_id"
+        logical: "カテゴリID"
+        type: "BIGINT"
+        is_fk: true
+
+  MST_SkillItem:
+    logical_name: "スキル項目マスタ"
+    category: "マスタ系"
+    primary_key: "skill_item_id"
+    key_columns:
+      - name: "skill_item_id"
+        logical: "スキル項目ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "skill_id"
+        logical: "スキルID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "item_code"
+        logical: "項目コード"
+        type: "VARCHAR(20)"
+      - name: "item_name"
+        logical: "項目名"
+        type: "VARCHAR(100)"
+
+  MST_SkillGrade:
+    logical_name: "スキルグレードマスタ"
+    category: "マスタ系"
+    primary_key: "grade_id"
+    key_columns:
+      - name: "grade_id"
+        logical: "グレードID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "grade_code"
+        logical: "グレードコード"
+        type: "VARCHAR(20)"
+      - name: "grade_name"
+        logical: "グレード名"
+        type: "VARCHAR(100)"
+
+  TRN_SkillRecord:
+    logical_name: "スキル情報"
+    category: "トランザクション系"
+    primary_key: "record_id"
+    key_columns:
+      - name: "record_id"
+        logical: "記録ID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "employee_id"
+        logical: "社員ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "skill_id"
+        logical: "スキルID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "skill_level"
+        logical: "スキルレベル"
+        type: "INT"
+
+  TRN_EmployeeSkillGrade:
+    logical_name: "社員スキルグレード"
+    category: "トランザクション系"
+    primary_key: "emp_skill_grade_id"
+    key_columns:
+      - name: "emp_skill_grade_id"
+        logical: "社員スキルグレードID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "employee_id"
+        logical: "社員ID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "skill_id"
+        logical: "スキルID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "grade_id"
+        logical: "グレードID"
+        type: "VARCHAR(50)"
+        is_fk: true
+
+  # 履歴系
+  HIS_AuditLog:
+    logical_name: "監査ログ"
+    category: "履歴系"
+    primary_key: "log_id"
+    key_columns:
+      - name: "log_id"
+        logical: "ログID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "user_id"
+        logical: "ユーザーID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "action_type"
+        logical: "アクション種別"
+        type: "VARCHAR(50)"
+
+  # システム系
+  SYS_TokenStore:
+    logical_name: "トークン管理"
+    category: "システム系"
+    primary_key: "token_id"
+    key_columns:
+      - name: "token_id"
+        logical: "トークンID"
+        type: "VARCHAR(50)"
+        is_pk: true
+      - name: "tenant_id"
+        logical: "テナントID"
+        type: "VARCHAR(50)"
+        is_fk: true
+      - name: "user_id"
+        logical: "ユーザーID"
+        type: "VARCHAR(50)"
+        is_fk: true
+
+# 関連定義
+relationships:
+  # テナント関連
+  - source: "MST_TenantSettings"
+    target: "MST_Tenant"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "tenant_id"
+    description: "テナント設定はテナントに属する"
+
+  # 認証・認可関連
+  - source: "MST_UserAuth"
+    target: "MST_Tenant"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "tenant_id"
+    description: "ユーザーはテナントに属する"
+
+  - source: "MST_Role"
+    target: "MST_Tenant"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "tenant_id"
+    description: "ロールはテナントに属する"
+
+  - source: "MST_Permission"
+    target: "MST_Tenant"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "tenant_id"
+    description: "権限はテナントに属する"
+
+  - source: "MST_UserRole"
+    target: "MST_UserAuth"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "user_id"
+    description: "ユーザーロールはユーザーに属する"
+
+  - source: "MST_UserRole"
+    target: "MST_Role"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "role_id"
+    description: "ユーザーロールはロールに属する"
+
+  # 組織・プロフィール関連
+  - source: "MST_Employee"
+    target: "MST_UserAuth"
+    type: "one_to_one"
+    cardinality: "||--||"
+    foreign_key: "user_id"
+    description: "社員はユーザー認証情報と紐づく"
+
+  - source: "MST_Employee"
+    target: "MST_Department"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "department_id"
+    description: "社員は部署に所属"
+
+  - source: "MST_Employee"
+    target: "MST_Position"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "position_id"
+    description: "社員は役職を持つ"
+
+  - source: "MST_Employee"
+    target: "MST_JobType"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "job_type_id"
+    description: "社員は職種に分類される"
+
+  - source: "MST_Employee"
+    target: "MST_Employee"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "manager_id"
+    description: "社員は上司を持つ（自己参照）"
+
+  - source: "MST_Department"
+    target: "MST_Department"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "parent_department_id"
+    description: "部署は親部署を持つ（自己参照）"
+
+  # スキル管理関連
+  - source: "MST_SkillCategory"
+    target: "MST_SkillCategory"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "parent_category_id"
+    description: "スキルカテゴリは親カテゴリを持つ（自己参照）"
+
+  - source: "MST_SkillHierarchy"
+    target: "MST_SkillCategory"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "category_id"
+    description: "スキルはカテゴリに分類される"
+
+  - source: "MST_SkillHierarchy"
+    target: "MST_SkillHierarchy"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "parent_skill_id"
+    description: "スキルは親スキルを持つ（自己参照）"
+
+  - source: "MST_SkillItem"
+    target: "MST_SkillHierarchy"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "skill_id"
+    description: "スキル項目はスキルに属する"
+
+  - source: "TRN_SkillRecord"
+    target: "MST_Employee"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "employee_id"
+    description: "スキル記録は社員に属する"
+
+  - source: "TRN_SkillRecord"
+    target: "MST_SkillHierarchy"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "skill_id"
+    description: "スキル記録はスキルに関連する"
+
+  - source: "TRN_EmployeeSkillGrade"
+    target: "MST_Employee"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "employee_id"
+    description: "社員スキルグレードは社員に属する"
+
+  - source: "TRN_EmployeeSkillGrade"
+    target: "MST_SkillHierarchy"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "skill_id"
+    description: "社員スキルグレードはスキルに関連する"
+
+  - source: "TRN_EmployeeSkillGrade"
+    target: "MST_SkillGrade"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "grade_id"
+    description: "社員スキルグレードはグレードに関連する"
+
+  # 履歴系関連
+  - source: "HIS_AuditLog"
+    target: "MST_UserAuth"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "user_id"
+    description: "監査ログはユーザーに関連する"
+
+  # システム系関連
+  - source: "SYS_TokenStore"
+    target: "MST_UserAuth"
+    type: "many_to_one"
+    cardinality: "}o--||"
+    foreign_key: "user_id"
+    description: "トークンはユーザーに属する"
+
+# 関連エンティティ抽出設定
+related_entity_config:
+  # 各テーブルの関連エンティティ抽出ルール
+  default_depth: 2  # デフォルトの関連深度
+  max_entities: 8   # 1つのERDに含める最大エンティティ数
+  
+  # テーブル別カスタム設定
+  custom_settings:
+    MST_Employee:
+      depth: 2
+      max_entities: 10
+      priority_relations:
+        - "MST_UserAuth"
+        - "MST_Department"
+        - "MST_Position"
+        - "MST_JobType"
+        - "TRN_SkillRecord"
+        - "TRN_EmployeeSkillGrade"
+    
+    TRN_SkillRecord:
+      depth: 2
+      max_entities: 8
+      priority_relations:
+        - "MST_Employee"
+        - "MST_SkillHierarchy"
+        - "MST_SkillCategory"
+        - "TRN_EmployeeSkillGrade"
+    
+    MST_SkillHierarchy:
+      depth: 2
+      max_entities: 8
+      priority_relations:
+        - "MST_SkillCategory"
+        - "MST_SkillItem"
+        - "TRN_SkillRecord"
+        - "TRN_EmployeeSkillGrade"

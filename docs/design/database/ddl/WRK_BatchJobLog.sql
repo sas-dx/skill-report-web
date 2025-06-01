@@ -1,5 +1,5 @@
 -- WRK_BatchJobLog (一括登録ジョブログ) DDL
--- 生成日時: 2025-06-01 15:57:34
+-- 生成日時: 2025-06-01 16:12:38
 
 CREATE TABLE WRK_BatchJobLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

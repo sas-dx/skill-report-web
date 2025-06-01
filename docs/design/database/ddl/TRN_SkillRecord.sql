@@ -1,5 +1,5 @@
 -- TRN_SkillRecord (スキル情報) DDL
--- 生成日時: 2025-06-01 15:57:34
+-- 生成日時: 2025-06-01 16:12:38
 
 CREATE TABLE TRN_SkillRecord (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

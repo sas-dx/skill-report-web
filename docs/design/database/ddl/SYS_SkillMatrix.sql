@@ -1,5 +1,5 @@
 -- SYS_SkillMatrix (スキルマップ) DDL
--- 生成日時: 2025-06-01 15:57:34
+-- 生成日時: 2025-06-01 16:12:38
 
 CREATE TABLE SYS_SkillMatrix (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

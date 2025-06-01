@@ -1,5 +1,5 @@
 -- TRN_EmployeeSkillGrade (社員スキルグレード) DDL
--- 生成日時: 2025-06-01 15:57:34
+-- 生成日時: 2025-06-01 16:12:38
 
 CREATE TABLE TRN_EmployeeSkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
