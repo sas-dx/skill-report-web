@@ -3,6 +3,13 @@ table_name: "MST_Department"
 logical_name: "部署マスタ"
 category: "マスタ系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - 部署マスタテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   MST_Department（部署マスタ）は、組織の部署・組織単位の階層構造と基本情報を管理するマスタテーブルです。

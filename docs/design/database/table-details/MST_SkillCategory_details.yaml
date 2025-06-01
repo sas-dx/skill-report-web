@@ -3,6 +3,13 @@ table_name: "MST_SkillCategory"
 logical_name: "スキルカテゴリマスタ"
 category: "マスタ系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - スキルカテゴリマスタテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   MST_SkillCategory（スキルカテゴリマスタ）は、スキルの分類・カテゴリを管理するマスタテーブルです。

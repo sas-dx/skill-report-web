@@ -3,6 +3,13 @@ table_name: "MST_SkillItem"
 logical_name: "スキル項目マスタ"
 category: "マスタ系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - スキル項目マスタテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。

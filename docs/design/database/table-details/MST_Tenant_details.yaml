@@ -1,0 +1,818 @@
+# MST_Tenant テーブル詳細定義
+table_name: "MST_Tenant"
+logical_name: "テナント（組織）"
+category: "マスタ系"
+
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - テナント（組織）マスタの詳細定義"
+
+# テーブル概要・目的
+overview: |
+  MST_Tenant（テナント）は、マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブルです。
+  
+  主な目的：
+  - マルチテナント環境での組織分離
+  - 組織固有の設定・ポリシー管理
+  - データアクセス制御の基盤
+  - 組織階層・関連の管理
+  - 課金・契約管理の基盤
+  
+  このテーブルにより、複数の組織が同一システムを安全に利用でき、
+  組織ごとの独立性とカスタマイズを実現できます。
+
+# 業務固有カラム定義
+business_columns:
+  - name: tenant_id
+    logical: テナントID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: true
+    encrypted: false
+    description: テナントを一意に識別するID
+    
+  - name: tenant_code
+    logical: テナントコード
+    type: VARCHAR
+    length: 20
+    null: false
+    unique: true
+    encrypted: false
+    description: テナントの識別コード（URL等で使用）
+    
+  - name: tenant_name
+    logical: テナント名
+    type: VARCHAR
+    length: 200
+    null: false
+    unique: false
+    encrypted: false
+    description: テナント（組織・会社）の正式名称
+    
+  - name: tenant_name_en
+    logical: テナント名（英語）
+    type: VARCHAR
+    length: 200
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントの英語名称
+    
+  - name: tenant_short_name
+    logical: テナント略称
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントの略称・短縮名
+    
+  - name: tenant_type
+    logical: テナント種別
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
+    enum_values: ['ENTERPRISE', 'DEPARTMENT', 'SUBSIDIARY', 'PARTNER', 'TRIAL']
+    
+  - name: parent_tenant_id
+    logical: 親テナントID
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 親テナントのID（階層構造の場合）
+    
+  - name: tenant_level
+    logical: テナントレベル
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: テナント階層のレベル（1が最上位）
+    default: 1
+    
+  - name: domain_name
+    logical: ドメイン名
+    type: VARCHAR
+    length: 100
+    null: true
+    unique: true
+    encrypted: false
+    description: テナント専用ドメイン名
+    
+  - name: subdomain
+    logical: サブドメイン
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: true
+    encrypted: false
+    description: サブドメイン名（xxx.system.com）
+    
+  - name: logo_url
+    logical: ロゴURL
+    type: VARCHAR
+    length: 500
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントロゴ画像のURL
+    
+  - name: primary_color
+    logical: プライマリカラー
+    type: VARCHAR
+    length: 7
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントのプライマリカラー（#RRGGBB）
+    
+  - name: secondary_color
+    logical: セカンダリカラー
+    type: VARCHAR
+    length: 7
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントのセカンダリカラー（#RRGGBB）
+    
+  - name: timezone
+    logical: タイムゾーン
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントのデフォルトタイムゾーン
+    default: 'Asia/Tokyo'
+    
+  - name: locale
+    logical: ロケール
+    type: VARCHAR
+    length: 10
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントのデフォルトロケール
+    default: 'ja_JP'
+    
+  - name: currency_code
+    logical: 通貨コード
+    type: VARCHAR
+    length: 3
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントで使用する通貨コード（ISO 4217）
+    default: 'JPY'
+    
+  - name: date_format
+    logical: 日付フォーマット
+    type: VARCHAR
+    length: 20
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントで使用する日付フォーマット
+    default: 'YYYY-MM-DD'
+    
+  - name: time_format
+    logical: 時刻フォーマット
+    type: VARCHAR
+    length: 20
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントで使用する時刻フォーマット
+    default: 'HH:mm:ss'
+    
+  - name: admin_email
+    logical: 管理者メール
+    type: VARCHAR
+    length: 255
+    null: false
+    unique: false
+    encrypted: false
+    description: テナント管理者のメールアドレス
+    
+  - name: contact_email
+    logical: 連絡先メール
+    type: VARCHAR
+    length: 255
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントの一般連絡先メールアドレス
+    
+  - name: phone_number
+    logical: 電話番号
+    type: VARCHAR
+    length: 20
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントの電話番号
+    
+  - name: address
+    logical: 住所
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントの住所
+    
+  - name: postal_code
+    logical: 郵便番号
+    type: VARCHAR
+    length: 10
+    null: true
+    unique: false
+    encrypted: false
+    description: 郵便番号
+    
+  - name: country_code
+    logical: 国コード
+    type: VARCHAR
+    length: 2
+    null: false
+    unique: false
+    encrypted: false
+    description: 国コード（ISO 3166-1 alpha-2）
+    default: 'JP'
+    
+  - name: subscription_plan
+    logical: サブスクリプションプラン
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
+    enum_values: ['FREE', 'BASIC', 'STANDARD', 'PREMIUM', 'ENTERPRISE']
+    default: 'BASIC'
+    
+  - name: max_users
+    logical: 最大ユーザー数
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 契約上の最大ユーザー数
+    default: 100
+    
+  - name: max_storage_gb
+    logical: 最大ストレージ容量
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 契約上の最大ストレージ容量（GB）
+    default: 10
+    
+  - name: features_enabled
+    logical: 有効機能
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 有効化されている機能一覧（JSON形式）
+    
+  - name: custom_settings
+    logical: カスタム設定
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナント固有のカスタム設定（JSON形式）
+    
+  - name: security_policy
+    logical: セキュリティポリシー
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントのセキュリティポリシー設定（JSON形式）
+    
+  - name: data_retention_days
+    logical: データ保持期間
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: データの保持期間（日数）
+    default: 2555
+    
+  - name: backup_enabled
+    logical: バックアップ有効
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 自動バックアップが有効かどうか
+    default: true
+    
+  - name: backup_frequency
+    logical: バックアップ頻度
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: バックアップの実行頻度（DAILY:日次、WEEKLY:週次、MONTHLY:月次）
+    enum_values: ['DAILY', 'WEEKLY', 'MONTHLY']
+    default: 'DAILY'
+    
+  - name: contract_start_date
+    logical: 契約開始日
+    type: DATE
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: テナント契約の開始日
+    
+  - name: contract_end_date
+    logical: 契約終了日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナント契約の終了日
+    
+  - name: trial_end_date
+    logical: 試用期間終了日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 試用期間の終了日
+    
+  - name: billing_cycle
+    logical: 請求サイクル
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 請求の周期（MONTHLY:月次、QUARTERLY:四半期、ANNUAL:年次）
+    enum_values: ['MONTHLY', 'QUARTERLY', 'ANNUAL']
+    default: 'MONTHLY'
+    
+  - name: monthly_fee
+    logical: 月額料金
+    type: DECIMAL
+    length: "10,2"
+    null: true
+    unique: false
+    encrypted: false
+    description: 月額利用料金
+    
+  - name: setup_fee
+    logical: 初期費用
+    type: DECIMAL
+    length: "10,2"
+    null: true
+    unique: false
+    encrypted: false
+    description: 初期セットアップ費用
+    
+  - name: status
+    logical: ステータス
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
+    enum_values: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRIAL', 'EXPIRED']
+    default: 'TRIAL'
+    
+  - name: activation_date
+    logical: 有効化日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントが有効化された日
+    
+  - name: suspension_date
+    logical: 停止日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントが停止された日
+    
+  - name: suspension_reason
+    logical: 停止理由
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナント停止の理由
+    
+  - name: last_login_date
+    logical: 最終ログイン日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナント内での最終ログイン日
+    
+  - name: current_users_count
+    logical: 現在ユーザー数
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 現在のアクティブユーザー数
+    default: 0
+    
+  - name: storage_used_gb
+    logical: 使用ストレージ容量
+    type: DECIMAL
+    length: "10,3"
+    null: false
+    unique: false
+    encrypted: false
+    description: 現在使用中のストレージ容量（GB）
+    default: 0.000
+    
+  - name: api_rate_limit
+    logical: API制限数
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 1時間あたりのAPI呼び出し制限数
+    default: 1000
+    
+  - name: sso_enabled
+    logical: SSO有効
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: シングルサインオンが有効かどうか
+    default: false
+    
+  - name: sso_provider
+    logical: SSOプロバイダー
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: SSOプロバイダー名（SAML、OAuth等）
+    
+  - name: sso_config
+    logical: SSO設定
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: SSO設定情報（JSON形式）
+    
+  - name: webhook_url
+    logical: Webhook URL
+    type: VARCHAR
+    length: 500
+    null: true
+    unique: false
+    encrypted: false
+    description: イベント通知用のWebhook URL
+    
+  - name: webhook_secret
+    logical: Webhook秘密鍵
+    type: VARCHAR
+    length: 100
+    null: true
+    unique: false
+    encrypted: true
+    description: Webhook認証用の秘密鍵
+    
+  - name: created_by
+    logical: 作成者
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントを作成したユーザーID
+    
+  - name: notes
+    logical: 備考
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: テナントに関する備考・メモ
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_tenant_id
+    columns: [tenant_id]
+    unique: true
+    description: テナントID検索用（一意）
+    
+  - name: idx_tenant_code
+    columns: [tenant_code]
+    unique: true
+    description: テナントコード検索用（一意）
+    
+  - name: idx_domain_name
+    columns: [domain_name]
+    unique: true
+    description: ドメイン名検索用（一意）
+    
+  - name: idx_subdomain
+    columns: [subdomain]
+    unique: true
+    description: サブドメイン検索用（一意）
+    
+  - name: idx_tenant_type
+    columns: [tenant_type]
+    unique: false
+    description: テナント種別検索用
+    
+  - name: idx_parent_tenant_id
+    columns: [parent_tenant_id]
+    unique: false
+    description: 親テナント検索用
+    
+  - name: idx_subscription_plan
+    columns: [subscription_plan]
+    unique: false
+    description: サブスクリプションプラン検索用
+    
+  - name: idx_status
+    columns: [status]
+    unique: false
+    description: ステータス検索用
+    
+  - name: idx_contract_period
+    columns: [contract_start_date, contract_end_date]
+    unique: false
+    description: 契約期間検索用
+    
+  - name: idx_admin_email
+    columns: [admin_email]
+    unique: false
+    description: 管理者メール検索用
+
+# 業務固有制約
+business_constraints:
+  - name: uk_tenant_id
+    type: UNIQUE
+    columns: [tenant_id]
+    description: テナントID一意制約
+    
+  - name: uk_tenant_code
+    type: UNIQUE
+    columns: [tenant_code]
+    description: テナントコード一意制約
+    
+  - name: uk_domain_name
+    type: UNIQUE
+    columns: [domain_name]
+    description: ドメイン名一意制約
+    
+  - name: uk_subdomain
+    type: UNIQUE
+    columns: [subdomain]
+    description: サブドメイン一意制約
+    
+  - name: chk_tenant_type
+    type: CHECK
+    condition: "tenant_type IN ('ENTERPRISE', 'DEPARTMENT', 'SUBSIDIARY', 'PARTNER', 'TRIAL')"
+    description: テナント種別値チェック制約
+    
+  - name: chk_subscription_plan
+    type: CHECK
+    condition: "subscription_plan IN ('FREE', 'BASIC', 'STANDARD', 'PREMIUM', 'ENTERPRISE')"
+    description: サブスクリプションプラン値チェック制約
+    
+  - name: chk_backup_frequency
+    type: CHECK
+    condition: "backup_frequency IN ('DAILY', 'WEEKLY', 'MONTHLY')"
+    description: バックアップ頻度値チェック制約
+    
+  - name: chk_billing_cycle
+    type: CHECK
+    condition: "billing_cycle IN ('MONTHLY', 'QUARTERLY', 'ANNUAL')"
+    description: 請求サイクル値チェック制約
+    
+  - name: chk_status
+    type: CHECK
+    condition: "status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRIAL', 'EXPIRED')"
+    description: ステータス値チェック制約
+    
+  - name: chk_tenant_level_positive
+    type: CHECK
+    condition: "tenant_level > 0"
+    description: テナントレベル正数チェック制約
+    
+  - name: chk_max_users_positive
+    type: CHECK
+    condition: "max_users > 0"
+    description: 最大ユーザー数正数チェック制約
+    
+  - name: chk_max_storage_positive
+    type: CHECK
+    condition: "max_storage_gb > 0"
+    description: 最大ストレージ容量正数チェック制約
+    
+  - name: chk_data_retention_positive
+    type: CHECK
+    condition: "data_retention_days > 0"
+    description: データ保持期間正数チェック制約
+    
+  - name: chk_contract_period
+    type: CHECK
+    condition: "contract_end_date IS NULL OR contract_start_date <= contract_end_date"
+    description: 契約期間整合性チェック制約
+    
+  - name: chk_current_users_range
+    type: CHECK
+    condition: "current_users_count >= 0 AND current_users_count <= max_users"
+    description: 現在ユーザー数範囲チェック制約
+    
+  - name: chk_storage_used_positive
+    type: CHECK
+    condition: "storage_used_gb >= 0"
+    description: 使用ストレージ容量非負数チェック制約
+    
+  - name: chk_api_rate_limit_positive
+    type: CHECK
+    condition: "api_rate_limit > 0"
+    description: API制限数正数チェック制約
+
+# 外部キー関係
+foreign_keys:
+  - name: fk_tenant_parent
+    column: parent_tenant_id
+    reference_table: MST_Tenant
+    reference_column: tenant_id
+    on_update: CASCADE
+    on_delete: SET NULL
+    description: 親テナントへの外部キー（自己参照）
+
+# サンプルデータ
+sample_data:
+  - tenant_id: "TENANT_001"
+    tenant_code: "acme-corp"
+    tenant_name: "株式会社ACME"
+    tenant_name_en: "ACME Corporation"
+    tenant_short_name: "ACME"
+    tenant_type: "ENTERPRISE"
+    parent_tenant_id: null
+    tenant_level: 1
+    domain_name: "acme-corp.com"
+    subdomain: "acme"
+    logo_url: "https://cdn.example.com/logos/acme-corp.png"
+    primary_color: "#0066CC"
+    secondary_color: "#FF6600"
+    timezone: "Asia/Tokyo"
+    locale: "ja_JP"
+    currency_code: "JPY"
+    date_format: "YYYY-MM-DD"
+    time_format: "HH:mm:ss"
+    admin_email: "admin@acme-corp.com"
+    contact_email: "contact@acme-corp.com"
+    phone_number: "03-1234-5678"
+    address: "東京都千代田区丸の内1-1-1"
+    postal_code: "100-0005"
+    country_code: "JP"
+    subscription_plan: "ENTERPRISE"
+    max_users: 1000
+    max_storage_gb: 1000
+    features_enabled: '["advanced_analytics", "custom_reports", "api_access", "sso", "audit_logs"]'
+    custom_settings: '{"theme": "corporate", "dashboard_layout": "advanced", "notification_preferences": {"email": true, "slack": true}}'
+    security_policy: '{"password_policy": {"min_length": 8, "require_special_chars": true}, "session_timeout": 480, "ip_whitelist": ["192.168.1.0/24"]}'
+    data_retention_days: 2555
+    backup_enabled: true
+    backup_frequency: "DAILY"
+    contract_start_date: "2024-01-01"
+    contract_end_date: "2024-12-31"
+    trial_end_date: null
+    billing_cycle: "ANNUAL"
+    monthly_fee: 50000.00
+    setup_fee: 100000.00
+    status: "ACTIVE"
+    activation_date: "2024-01-01"
+    suspension_date: null
+    suspension_reason: null
+    last_login_date: "2024-06-01"
+    current_users_count: 250
+    storage_used_gb: 125.500
+    api_rate_limit: 10000
+    sso_enabled: true
+    sso_provider: "SAML"
+    sso_config: '{"entity_id": "acme-corp", "sso_url": "https://sso.acme-corp.com/saml", "certificate": "..."}'
+    webhook_url: "https://api.acme-corp.com/webhooks/skill-system"
+    webhook_secret: "webhook_secret_key_123"
+    created_by: "SYSTEM"
+    notes: "大手企業向けエンタープライズプラン"
+    
+  - tenant_id: "TENANT_002"
+    tenant_code: "beta-tech"
+    tenant_name: "ベータテクノロジー株式会社"
+    tenant_name_en: "Beta Technology Inc."
+    tenant_short_name: "BetaTech"
+    tenant_type: "ENTERPRISE"
+    parent_tenant_id: null
+    tenant_level: 1
+    domain_name: null
+    subdomain: "beta-tech"
+    logo_url: "https://cdn.example.com/logos/beta-tech.png"
+    primary_color: "#28A745"
+    secondary_color: "#6C757D"
+    timezone: "Asia/Tokyo"
+    locale: "ja_JP"
+    currency_code: "JPY"
+    date_format: "YYYY/MM/DD"
+    time_format: "HH:mm"
+    admin_email: "admin@beta-tech.co.jp"
+    contact_email: "info@beta-tech.co.jp"
+    phone_number: "06-9876-5432"
+    address: "大阪府大阪市北区梅田2-2-2"
+    postal_code: "530-0001"
+    country_code: "JP"
+    subscription_plan: "STANDARD"
+    max_users: 200
+    max_storage_gb: 100
+    features_enabled: '["basic_analytics", "standard_reports", "api_access"]'
+    custom_settings: '{"theme": "modern", "dashboard_layout": "standard"}'
+    security_policy: '{"password_policy": {"min_length": 6, "require_special_chars": false}, "session_timeout": 240}'
+    data_retention_days: 1825
+    backup_enabled: true
+    backup_frequency: "WEEKLY"
+    contract_start_date: "2024-03-01"
+    contract_end_date: "2025-02-28"
+    trial_end_date: null
+    billing_cycle: "MONTHLY"
+    monthly_fee: 15000.00
+    setup_fee: 30000.00
+    status: "ACTIVE"
+    activation_date: "2024-03-01"
+    suspension_date: null
+    suspension_reason: null
+    last_login_date: "2024-05-30"
+    current_users_count: 85
+    storage_used_gb: 23.750
+    api_rate_limit: 2000
+    sso_enabled: false
+    sso_provider: null
+    sso_config: null
+    webhook_url: null
+    webhook_secret: null
+    created_by: "SYSTEM"
+    notes: "中堅企業向けスタンダードプラン"
+
+# 特記事項
+notes:
+  - "マルチテナント環境でのデータ分離の基盤テーブル"
+  - "階層構造により親子関係のある組織に対応"
+  - "カスタム設定により組織固有の要件に対応"
+  - "セキュリティポリシーで組織ごとのセキュリティ要件を管理"
+  - "使用量監視により契約制限の遵守を確保"
+  - "SSO連携により既存認証システムとの統合が可能"
+
+# 業務ルール
+business_rules:
+  - "テナントID、テナントコード、ドメイン名、サブドメインは一意である必要がある"
+  - "テナントレベルは正数である必要がある"
+  - "現在ユーザー数は最大ユーザー数以下である必要がある"
+  - "契約開始日は契約終了日以前である必要がある"
+  - "使用ストレージ容量は最大ストレージ容量以下である必要がある"
+  - "親テナントのレベルは子テナントより小さい必要がある"
+  - "試用期間中のテナントは機能制限がある"
+  - "停止中のテナントはログイン不可"

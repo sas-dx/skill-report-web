@@ -3,6 +3,13 @@ table_name: "MST_UserAuth"
 logical_name: "ユーザー認証情報"
 category: "マスタ系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - ユーザ認証マスタテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   MST_UserAuth（ユーザー認証情報）は、システムにアクセスする全ユーザーの認証・認可情報を管理するマスタテーブルです。

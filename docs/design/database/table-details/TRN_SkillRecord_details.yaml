@@ -3,6 +3,13 @@ table_name: "TRN_SkillRecord"
 logical_name: "スキル情報"
 category: "トランザクション系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - スキル記録トランザクションテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   TRN_SkillRecord（スキル情報）は、組織内の全社員が保有するスキル・技術・資格等の詳細情報を管理するトランザクションテーブルです。

@@ -1,0 +1,421 @@
+# TRN_ProjectRecord テーブル詳細定義
+table_name: "TRN_ProjectRecord"
+logical_name: "案件実績"
+category: "トランザクション系"
+
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - 案件実績テーブルの詳細定義"
+
+# テーブル概要・目的
+overview: |
+  TRN_ProjectRecord（案件実績）は、社員が参加したプロジェクト・案件の実績情報を管理するトランザクションテーブルです。
+  
+  主な目的：
+  - プロジェクト参加履歴の記録・管理
+  - 担当役割・責任範囲の記録
+  - 使用技術・スキルの実績記録
+  - 成果・評価の記録
+  - キャリア形成・スキル証明の基盤
+  
+  このテーブルにより、社員の実務経験を体系的に記録し、
+  スキル評価やキャリア開発の判断材料として活用できます。
+
+# 業務固有カラム定義
+business_columns:
+  - name: project_record_id
+    logical: 案件実績ID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: true
+    encrypted: false
+    description: 案件実績を一意に識別するID
+    
+  - name: employee_id
+    logical: 社員ID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: 参加した社員のID（MST_Employeeへの外部キー）
+    
+  - name: project_name
+    logical: プロジェクト名
+    type: VARCHAR
+    length: 200
+    null: false
+    unique: false
+    encrypted: false
+    description: プロジェクト・案件の名称
+    
+  - name: project_code
+    logical: プロジェクトコード
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 社内プロジェクト管理コード
+    
+  - name: client_name
+    logical: 顧客名
+    type: VARCHAR
+    length: 100
+    null: true
+    unique: false
+    encrypted: true
+    description: 顧客・クライアント名（機密情報のため暗号化）
+    
+  - name: project_type
+    logical: プロジェクト種別
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: プロジェクトの種別（DEVELOPMENT:開発、MAINTENANCE:保守、CONSULTING:コンサル、RESEARCH:研究、OTHER:その他）
+    enum_values: ['DEVELOPMENT', 'MAINTENANCE', 'CONSULTING', 'RESEARCH', 'OTHER']
+    
+  - name: project_scale
+    logical: プロジェクト規模
+    type: ENUM
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトの規模（SMALL:小規模、MEDIUM:中規模、LARGE:大規模、ENTERPRISE:エンタープライズ）
+    enum_values: ['SMALL', 'MEDIUM', 'LARGE', 'ENTERPRISE']
+    
+  - name: start_date
+    logical: 開始日
+    type: DATE
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: プロジェクト参加開始日
+    
+  - name: end_date
+    logical: 終了日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクト参加終了日（進行中の場合はNULL）
+    
+  - name: participation_rate
+    logical: 参画率
+    type: DECIMAL
+    length: "5,2"
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトへの参画率（%）
+    
+  - name: role_title
+    logical: 担当役職
+    type: VARCHAR
+    length: 100
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクト内での役職・ポジション
+    
+  - name: responsibilities
+    logical: 担当業務
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 具体的な担当業務・責任範囲
+    
+  - name: technologies_used
+    logical: 使用技術
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトで使用した技術・ツール（JSON形式）
+    
+  - name: skills_applied
+    logical: 適用スキル
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトで活用したスキル（JSON形式）
+    
+  - name: achievements
+    logical: 成果・実績
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトでの具体的な成果・実績
+    
+  - name: challenges_faced
+    logical: 課題・困難
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 直面した課題や困難とその対応
+    
+  - name: lessons_learned
+    logical: 学んだこと
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトから学んだ知識・経験
+    
+  - name: team_size
+    logical: チーム規模
+    type: INTEGER
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトチームの人数
+    
+  - name: budget_range
+    logical: 予算規模
+    type: ENUM
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトの予算規模（UNDER_1M:100万円未満、UNDER_10M:1000万円未満、UNDER_100M:1億円未満、OVER_100M:1億円以上）
+    enum_values: ['UNDER_1M', 'UNDER_10M', 'UNDER_100M', 'OVER_100M']
+    
+  - name: project_status
+    logical: プロジェクト状況
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: プロジェクトの状況（ONGOING:進行中、COMPLETED:完了、SUSPENDED:中断、CANCELLED:中止）
+    enum_values: ['ONGOING', 'COMPLETED', 'SUSPENDED', 'CANCELLED']
+    default: 'ONGOING'
+    
+  - name: evaluation_score
+    logical: 評価点数
+    type: DECIMAL
+    length: "3,1"
+    null: true
+    unique: false
+    encrypted: false
+    description: プロジェクトでの評価点数（1.0-5.0）
+    
+  - name: evaluation_comment
+    logical: 評価コメント
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 上司・PMからの評価コメント
+    
+  - name: is_confidential
+    logical: 機密フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 機密プロジェクトかどうか
+    default: false
+    
+  - name: is_public_reference
+    logical: 公開参照可能フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 社外への参照情報として公開可能か
+    default: false
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_project_record_id
+    columns: [project_record_id]
+    unique: true
+    description: 案件実績ID検索用（一意）
+    
+  - name: idx_employee_id
+    columns: [employee_id]
+    unique: false
+    description: 社員ID検索用
+    
+  - name: idx_project_name
+    columns: [project_name]
+    unique: false
+    description: プロジェクト名検索用
+    
+  - name: idx_project_code
+    columns: [project_code]
+    unique: false
+    description: プロジェクトコード検索用
+    
+  - name: idx_project_type
+    columns: [project_type]
+    unique: false
+    description: プロジェクト種別検索用
+    
+  - name: idx_date_range
+    columns: [start_date, end_date]
+    unique: false
+    description: 期間検索用
+    
+  - name: idx_project_status
+    columns: [project_status]
+    unique: false
+    description: プロジェクト状況検索用
+    
+  - name: idx_employee_period
+    columns: [employee_id, start_date, end_date]
+    unique: false
+    description: 社員別期間検索用
+
+# 業務固有制約
+business_constraints:
+  - name: uk_project_record_id
+    type: UNIQUE
+    columns: [project_record_id]
+    description: 案件実績ID一意制約
+    
+  - name: chk_project_type
+    type: CHECK
+    condition: "project_type IN ('DEVELOPMENT', 'MAINTENANCE', 'CONSULTING', 'RESEARCH', 'OTHER')"
+    description: プロジェクト種別値チェック制約
+    
+  - name: chk_project_scale
+    type: CHECK
+    condition: "project_scale IN ('SMALL', 'MEDIUM', 'LARGE', 'ENTERPRISE')"
+    description: プロジェクト規模値チェック制約
+    
+  - name: chk_budget_range
+    type: CHECK
+    condition: "budget_range IN ('UNDER_1M', 'UNDER_10M', 'UNDER_100M', 'OVER_100M')"
+    description: 予算規模値チェック制約
+    
+  - name: chk_project_status
+    type: CHECK
+    condition: "project_status IN ('ONGOING', 'COMPLETED', 'SUSPENDED', 'CANCELLED')"
+    description: プロジェクト状況値チェック制約
+    
+  - name: chk_date_range
+    type: CHECK
+    condition: "end_date IS NULL OR start_date <= end_date"
+    description: 開始日・終了日の整合性チェック制約
+    
+  - name: chk_participation_rate
+    type: CHECK
+    condition: "participation_rate IS NULL OR (participation_rate >= 0 AND participation_rate <= 100)"
+    description: 参画率範囲チェック制約
+    
+  - name: chk_evaluation_score
+    type: CHECK
+    condition: "evaluation_score IS NULL OR (evaluation_score >= 1.0 AND evaluation_score <= 5.0)"
+    description: 評価点数範囲チェック制約
+    
+  - name: chk_team_size
+    type: CHECK
+    condition: "team_size IS NULL OR team_size > 0"
+    description: チーム規模正数チェック制約
+
+# 外部キー関係
+foreign_keys:
+  - name: fk_project_record_employee
+    column: employee_id
+    reference_table: MST_Employee
+    reference_column: id
+    on_update: CASCADE
+    on_delete: RESTRICT
+    description: 社員への外部キー
+
+# サンプルデータ
+sample_data:
+  - project_record_id: "PRJ_REC_001"
+    employee_id: "EMP000001"
+    project_name: "顧客管理システム刷新プロジェクト"
+    project_code: "CRM2024_001"
+    client_name: "株式会社サンプル"
+    project_type: "DEVELOPMENT"
+    project_scale: "LARGE"
+    start_date: "2024-01-15"
+    end_date: "2024-12-31"
+    participation_rate: 80.0
+    role_title: "テックリード"
+    responsibilities: "システム設計、開発チームリード、技術選定"
+    technologies_used: '["Java", "Spring Boot", "PostgreSQL", "React", "Docker"]'
+    skills_applied: '["システム設計", "チームマネジメント", "技術選定"]'
+    achievements: "予定より2週間早期リリース、性能要件120%達成"
+    challenges_faced: "レガシーシステムとの連携、短納期対応"
+    lessons_learned: "マイクロサービス設計の重要性、チーム間コミュニケーション"
+    team_size: 8
+    budget_range: "UNDER_100M"
+    project_status: "COMPLETED"
+    evaluation_score: 4.5
+    evaluation_comment: "技術リーダーシップを発揮し、プロジェクトを成功に導いた"
+    is_confidential: false
+    is_public_reference: true
+    
+  - project_record_id: "PRJ_REC_002"
+    employee_id: "EMP000002"
+    project_name: "AI画像解析システム開発"
+    project_code: "AI2024_002"
+    client_name: "機密プロジェクト"
+    project_type: "RESEARCH"
+    project_scale: "MEDIUM"
+    start_date: "2024-03-01"
+    end_date: null
+    participation_rate: 100.0
+    role_title: "AIエンジニア"
+    responsibilities: "機械学習モデル開発、データ前処理、精度改善"
+    technologies_used: '["Python", "TensorFlow", "OpenCV", "AWS SageMaker"]'
+    skills_applied: '["機械学習", "画像処理", "データ分析"]'
+    achievements: "認識精度95%達成、処理速度30%向上"
+    challenges_faced: "学習データ不足、モデル精度向上"
+    lessons_learned: "データ品質の重要性、MLOpsの必要性"
+    team_size: 4
+    budget_range: "UNDER_10M"
+    project_status: "ONGOING"
+    evaluation_score: null
+    evaluation_comment: null
+    is_confidential: true
+    is_public_reference: false
+
+# 特記事項
+notes:
+  - "顧客名は機密情報のため暗号化必須"
+  - "使用技術・適用スキルはJSON形式で柔軟に管理"
+  - "進行中プロジェクトは end_date = NULL で管理"
+  - "機密プロジェクトは is_confidential = true で管理"
+  - "評価は完了後に記録（進行中は NULL）"
+  - "参画率は工数ベースでの参加割合"
+
+# 業務ルール
+business_rules:
+  - "案件実績IDは一意である必要がある"
+  - "開始日は終了日以前である必要がある"
+  - "進行中プロジェクトは終了日をNULLに設定"
+  - "参画率は0-100%の範囲で設定"
+  - "評価点数は1.0-5.0の範囲で設定"
+  - "機密プロジェクトは公開参照不可"
+  - "使用技術・スキルはスキルマスタとの整合性を保つ"
+  - "チーム規模は1人以上で設定"

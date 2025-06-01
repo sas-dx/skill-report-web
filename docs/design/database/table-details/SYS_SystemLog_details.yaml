@@ -3,6 +3,13 @@ table_name: "SYS_SystemLog"
 logical_name: "システムログ"
 category: "システム系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - システムログテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   SYS_SystemLog（システムログ）は、アプリケーション全体で発生するあらゆるシステムイベントを記録・管理するログテーブルです。

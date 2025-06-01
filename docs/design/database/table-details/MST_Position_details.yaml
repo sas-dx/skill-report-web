@@ -3,6 +3,13 @@ table_name: "MST_Position"
 logical_name: "役職マスタ"
 category: "マスタ系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - 役職マスタテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   MST_Position（役職マスタ）は、組織内の役職・職位の階層構造と基本情報を管理するマスタテーブルです。

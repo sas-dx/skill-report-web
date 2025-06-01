@@ -1,0 +1,262 @@
+# [テーブル名] テーブル詳細定義
+# このファイルは新しいテーブル詳細定義を作成する際のテンプレートです
+# 使用時は以下の手順で進めてください：
+# 1. ファイル名を「[テーブル名]_details.yaml」に変更
+# 2. [テンプレート項目]を実際の値に置き換え
+# 3. 不要なセクションやコメントを削除
+# 4. 業務要件に応じてカラムやインデックスを追加
+
+table_name: "[テーブル名]"  # 例: "MST_Employee"
+logical_name: "[論理名]"    # 例: "社員マスタ"
+category: "[カテゴリ]"      # "マスタ系" または "トランザクション系"
+
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "[作成日]"        # 例: "2025-06-01"
+    author: "[作成者]"      # 例: "開発チーム"
+    changes: "[変更内容]"   # 例: "初版作成 - [テーブル名]の詳細定義"
+
+# テーブル概要・目的
+overview: |
+  [テーブルの概要説明]
+  
+  主な目的：
+  - [目的1]
+  - [目的2]
+  - [目的3]
+  
+  [このテーブルの役割や重要性について説明]
+
+# 業務固有カラム定義
+business_columns:
+  # 主キー例
+  - name: "[主キーカラム名]"
+    logical: "[主キー論理名]"
+    type: VARCHAR           # VARCHAR, INTEGER, DECIMAL, DATE, TIMESTAMP, TEXT, BOOLEAN, ENUM
+    length: 50              # VARCHAR, DECIMAL の場合は必須。INTEGER, DATE等は null
+    null: false             # true または false
+    unique: true            # true または false
+    encrypted: false        # true または false（機密情報の場合）
+    description: "[カラムの説明]"
+    # オプション項目（必要に応じて追加）
+    # default: "[デフォルト値]"
+    # validation: "[バリデーションルール]"  # 例: "^[A-Z0-9_]+$"
+    # enum_values: ['値1', '値2', '値3']    # ENUM型の場合
+    
+  # 通常カラム例
+  - name: "[カラム名]"
+    logical: "[論理名]"
+    type: VARCHAR
+    length: 100
+    null: false
+    unique: false
+    encrypted: false
+    description: "[カラムの説明]"
+    
+  # ENUM型カラム例
+  - name: "[ステータスカラム名]"
+    logical: "[ステータス論理名]"
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: "[ステータスの説明]（値1:説明1、値2:説明2、値3:説明3）"
+    enum_values: ['値1', '値2', '値3']
+    default: '値1'
+    
+  # 数値型カラム例
+  - name: "[数値カラム名]"
+    logical: "[数値論理名]"
+    type: INTEGER           # または DECIMAL
+    length: null            # DECIMALの場合は "10,2" 形式
+    null: false
+    unique: false
+    encrypted: false
+    description: "[数値の説明]"
+    default: 0
+    
+  # 日付型カラム例
+  - name: "[日付カラム名]"
+    logical: "[日付論理名]"
+    type: DATE              # または TIMESTAMP
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: "[日付の説明]"
+    
+  # テキスト型カラム例
+  - name: "[テキストカラム名]"
+    logical: "[テキスト論理名]"
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: "[テキストの説明]（JSON形式等の場合は明記）"
+    
+  # 論理削除フラグ例（必要に応じて）
+  - name: is_active
+    logical: 有効フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: レコードが有効かどうか
+    default: true
+
+# 業務固有インデックス
+business_indexes:
+  # 主キーインデックス例
+  - name: idx_[テーブル名]_[主キーカラム名]
+    columns: [[主キーカラム名]]
+    unique: true
+    description: "[主キー]検索用（一意）"
+    
+  # 単一カラムインデックス例
+  - name: idx_[テーブル名]_[カラム名]
+    columns: [[カラム名]]
+    unique: false
+    description: "[カラム名]検索用"
+    
+  # 複合インデックス例
+  - name: idx_[テーブル名]_[カラム1]_[カラム2]
+    columns: [[カラム1], [カラム2]]
+    unique: false
+    description: "[カラム1]と[カラム2]の複合検索用"
+    
+  # 一意インデックス例
+  - name: idx_[テーブル名]_[ユニークカラム名]
+    columns: [[ユニークカラム名]]
+    unique: true
+    description: "[ユニークカラム名]検索用（一意）"
+
+# 業務固有制約
+business_constraints:
+  # 一意制約例
+  - name: uk_[テーブル名]_[カラム名]
+    type: UNIQUE
+    columns: [[カラム名]]
+    description: "[カラム名]一意制約"
+    
+  # チェック制約例（ENUM値）
+  - name: chk_[テーブル名]_[カラム名]
+    type: CHECK
+    condition: "[カラム名] IN ('値1', '値2', '値3')"
+    description: "[カラム名]値チェック制約"
+    
+  # チェック制約例（数値範囲）
+  - name: chk_[テーブル名]_[数値カラム名]_positive
+    type: CHECK
+    condition: "[数値カラム名] > 0"
+    description: "[数値カラム名]正数チェック制約"
+    
+  # チェック制約例（日付範囲）
+  - name: chk_[テーブル名]_date_range
+    type: CHECK
+    condition: "[終了日] IS NULL OR [開始日] <= [終了日]"
+    description: "日付範囲整合性チェック制約"
+
+# 外部キー関係
+foreign_keys:
+  # 外部キー例
+  - name: fk_[テーブル名]_[参照テーブル名]
+    column: [外部キーカラム名]
+    reference_table: [参照テーブル名]
+    reference_column: [参照カラム名]
+    on_update: CASCADE      # CASCADE, RESTRICT, SET NULL, NO ACTION
+    on_delete: RESTRICT     # CASCADE, RESTRICT, SET NULL, NO ACTION
+    description: "[参照テーブル名]への外部キー"
+    
+  # 自己参照外部キー例（階層構造等）
+  # - name: fk_[テーブル名]_parent
+  #   column: parent_[主キーカラム名]
+  #   reference_table: [テーブル名]
+  #   reference_column: [主キーカラム名]
+  #   on_update: CASCADE
+  #   on_delete: SET NULL
+  #   description: "親レコードへの外部キー（自己参照）"
+
+# サンプルデータ
+sample_data:
+  # サンプルレコード1
+  - [主キーカラム名]: "[サンプル値1]"
+    [カラム名]: "[サンプル値]"
+    [ステータスカラム名]: "値1"
+    [数値カラム名]: 100
+    [日付カラム名]: "2024-01-01"
+    [テキストカラム名]: "[サンプルテキスト]"
+    is_active: true
+    
+  # サンプルレコード2
+  - [主キーカラム名]: "[サンプル値2]"
+    [カラム名]: "[サンプル値2]"
+    [ステータスカラム名]: "値2"
+    [数値カラム名]: 200
+    [日付カラム名]: "2024-02-01"
+    [テキストカラム名]: "[サンプルテキスト2]"
+    is_active: true
+
+# 特記事項
+notes:
+  - "[特記事項1]"
+  - "[特記事項2]"
+  - "[特記事項3]"
+  - "論理削除は is_active フラグで管理"  # 論理削除を使用する場合
+  - "[外部システムとの連携について]"      # 外部連携がある場合
+  - "[パフォーマンス考慮事項]"            # パフォーマンス要件がある場合
+
+# 業務ルール
+business_rules:
+  - "[ルール1]"
+  - "[ルール2]"
+  - "[ルール3]"
+  - "[データ整合性に関するルール]"
+  - "[業務制約に関するルール]"
+  - "[運用に関するルール]"
+
+# ===== テンプレート使用時の注意事項 =====
+# 
+# 1. カラム定義について：
+#    - name: 物理カラム名（英数字・アンダースコア）
+#    - logical: 日本語の論理名
+#    - type: データ型は大文字で統一
+#    - length: VARCHAR, DECIMALのみ指定。DECIMALは "全体桁数,小数桁数"
+#    - null: true/false で指定
+#    - unique: true/false で指定
+#    - encrypted: 機密情報の場合のみ true
+#    - description: 具体的で分かりやすい説明
+#
+# 2. ENUM型について：
+#    - enum_values: 配列形式で値を列挙
+#    - description: 各値の意味を説明
+#    - default: デフォルト値を指定
+#
+# 3. インデックスについ：
+#    - 検索頻度の高いカラムに設定
+#    - 複合インデックスは使用頻度を考慮
+#    - 一意制約が必要な場合は unique: true
+#
+# 4. 制約について：
+#    - 一意制約: UNIQUE型で columns 指定
+#    - チェック制約: CHECK型で condition 指定
+#    - 制約名は分かりやすい命名
+#
+# 5. 外部キーについて：
+#    - 参照整合性が必要な場合のみ設定
+#    - on_update, on_delete は業務要件に応じて選択
+#    - 循環参照に注意
+#
+# 6. サンプルデータについて：
+#    - 実際の業務で使用されそうなデータ
+#    - 各データ型の例を含める
+#    - 制約に違反しないデータ
+#
+# 7. 命名規則：
+#    - テーブル名: MST_*, TRN_* プレフィックス
+#    - カラム名: snake_case
+#    - インデックス名: idx_[テーブル名]_[カラム名]
+#    - 制約名: uk_*, chk_*, fk_* プレフィックス
