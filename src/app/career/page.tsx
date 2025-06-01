@@ -6,6 +6,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { RadarChart } from '@/components/ui/RadarChart';
 
 interface ActionPlan {
   id: string;
@@ -82,7 +83,7 @@ export default function CareerPage() {
       {/* ヘッダー */}
       <DashboardHeader 
         onMenuClick={handleMenuClick}
-        title="キャリアプラン管理"
+        title="年間スキル報告書システム"
       />
 
       {/* メインレイアウト */}
@@ -149,18 +150,22 @@ export default function CareerPage() {
             {/* ② スキルギャップ分析セクション */}
             <div className="bg-white shadow rounded-lg p-6 mb-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">スキルギャップ分析</h2>
-              <div className="bg-gray-100 rounded-lg p-8 text-center">
-                <div className="text-gray-500 mb-4">
-                  <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <p className="text-gray-600 text-lg font-medium">レーダーチャート表示領域</p>
-                <p className="text-gray-500 text-sm mt-2">(現在スキル vs 目標スキル)</p>
-                <Button variant="secondary" className="mt-4">
-                  スキル目標設定
-                </Button>
+              <div className="bg-gray-50 rounded-lg p-6 mb-4">
+                <RadarChart 
+                  data={[
+                    { label: 'JavaScript', current: 3, target: 4 },
+                    { label: 'React', current: 2, target: 4 },
+                    { label: 'Node.js', current: 2, target: 3 },
+                    { label: 'TypeScript', current: 1, target: 3 },
+                    { label: 'AWS', current: 1, target: 4 },
+                    { label: 'Docker', current: 2, target: 3 }
+                  ]}
+                  size={280}
+                />
               </div>
+              <Button variant="secondary" className="w-full">
+                スキル目標設定
+              </Button>
             </div>
 
             {/* ③ アクションプランセクション */}
