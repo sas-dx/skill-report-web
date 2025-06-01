@@ -1,0 +1,87 @@
+# TRN_GoalProgress テーブル詳細定義
+table_name: "TRN_GoalProgress"
+logical_name: "目標進捗"
+category: "トランザクション系"
+
+# テーブル概要・目的
+overview: |
+  TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状況を管理するトランザクションテーブルです。
+  
+  主な目的：
+  - 個人目標の設定・管理（業務目標、スキル向上目標等）
+  - 目標達成度の定期的な進捗管理
+  - 上司・部下間での目標共有・フィードバック
+  - 人事評価・査定の基礎データ
+  - 組織目標と個人目標の連携管理
+  
+  このテーブルは、人事評価制度、目標管理制度（MBO）、人材育成など、
+  組織の成果管理と人材開発の基盤となる重要なデータを提供します。
+
+# 業務固有カラム定義
+business_columns:
+  - name: employee_id
+    logical: 社員ID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: 目標を設定した社員のID
+    
+  - name: goal_title
+    logical: 目標タイトル
+    type: VARCHAR
+    length: 200
+    null: false
+    unique: false
+    encrypted: false
+    description: 目標の簡潔なタイトル
+    
+  - name: goal_category
+    logical: 目標カテゴリ
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 目標のカテゴリ（BUSINESS:業務、SKILL:スキル、CAREER:キャリア）
+    enum_values: ["BUSINESS", "SKILL", "CAREER"]
+    
+  - name: target_date
+    logical: 目標期限
+    type: DATE
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 目標達成の期限日
+    
+  - name: progress_rate
+    logical: 進捗率
+    type: DECIMAL
+    length: "5,2"
+    null: false
+    unique: false
+    encrypted: false
+    description: 目標の進捗率（0.00-100.00%）
+    default: 0.00
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_employee
+    columns: [employee_id]
+    unique: false
+    description: 社員別検索用
+
+# サンプルデータ
+sample_data:
+  - employee_id: "EMP000001"
+    goal_title: "Java技術習得"
+    goal_category: "SKILL"
+    target_date: "2025-12-31"
+    progress_rate: 50.00
+
+# 業務ルール
+business_rules:
+  - "進捗率は0-100%の範囲で設定"
+  - "目標期限は設定日より未来の日付"

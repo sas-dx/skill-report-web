@@ -20,7 +20,24 @@
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-SCR-SKILL-M
+MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。
+
+主な目的：
+- スキル項目の体系的管理（技術スキル、ビジネススキル、資格等）
+- スキル評価基準の標準化（レベル定義、評価指標等）
+- スキルカテゴリ・分類の階層管理
+- 人材育成計画・研修プログラムの基盤
+- プロジェクトアサインメント・スキルマッチングの基礎
+- 組織スキル分析・可視化の基盤
+- 外部資格・認定との連携管理
+
+このテーブルは、人材のスキル管理、キャリア開発、組織能力分析など、
+戦略的人材マネジメントの基盤となる重要なマスタデータです。
+
+
+### 2.2 特記事項
+- スキル項目は階層構造で管理
+- 評価基準は標準化されたレベル定義を使用
 
 ### 2.3 関連API
 API-038
@@ -41,6 +58,12 @@ BATCH-034
 | 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
 | 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 8 | skill_code | スキルコード | VARCHAR | 20 | ○ | - | - | - | スキル項目を一意に識別するコード（例：SKILL001） |
+| 9 | skill_name | スキル名 | VARCHAR | 100 | ○ | - | - | - | スキル項目の正式名称 |
+| 10 | skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ | - | ○ | - | スキルカテゴリのID |
+| 11 | skill_type | スキル種別 | ENUM | None | ○ | - | - | - | スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格） |
+| 12 | difficulty_level | 習得難易度 | INT | None | ○ | - | - | - | スキル習得の難易度（1-5段階） |
+| 13 | importance_level | 重要度 | INT | None | ○ | - | - | - | 組織における重要度（1-5段階） |
 
 
 ### 3.2 インデックス定義
@@ -51,6 +74,8 @@ BATCH-034
 | idx_tenant | INDEX | tenant_id | テナント検索用 |
 | idx_active | INDEX | is_active | 有効フラグ検索用 |
 | idx_created_at | INDEX | created_at | 作成日時検索用 |
+| idx_skill_code | UNIQUE INDEX | skill_code | スキルコード検索用 |
+| idx_skill_category | INDEX | skill_category_id | スキルカテゴリ別検索用 |
 
 
 ### 3.3 制約定義
@@ -60,6 +85,7 @@ BATCH-034
 | pk_mst_skillitem | PRIMARY KEY | id | 主キー制約 |
 | fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
 | fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
+| uk_skill_code | UNIQUE | skill_code | ['skill_code'] |
 
 
 ## 4. リレーション
@@ -81,9 +107,9 @@ BATCH-034
 ```sql
 -- サンプルデータ
 INSERT INTO MST_SkillItem (
-    id, tenant_id, created_by, updated_by
+    id, tenant_id, skill_code, skill_name, skill_category_id, skill_type, difficulty_level, importance_level, created_by, updated_by
 ) VALUES (
-    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+    'sample_001', 'tenant_001', 'SKILL001', 'Java', 'CAT001', 'TECHNICAL', '3', '4', 'user_admin', 'user_admin'
 );
 ```
 
@@ -157,10 +183,18 @@ CREATE TABLE MST_SkillItem (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    skill_code VARCHAR(20) COMMENT 'スキルコード',
+    skill_name VARCHAR(100) COMMENT 'スキル名',
+    skill_category_id VARCHAR(50) COMMENT 'スキルカテゴリID',
+    skill_type ENUM COMMENT 'スキル種別',
+    difficulty_level INT COMMENT '習得難易度',
+    importance_level INT COMMENT '重要度',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    UNIQUE INDEX idx_skill_code (skill_code),
+    INDEX idx_skill_category (skill_category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキル項目マスタ';
 
 ```
@@ -186,3 +220,9 @@ CREATE TABLE MST_SkillItem (
 5. **データ量・パフォーマンス監視**
    - データ量が想定の150%を超えた場合はアラート
    - 応答時間が設定値の120%を超えた場合は調査
+
+
+## 11. 業務ルール
+
+- スキルコードは自動採番（SKILL + 3桁連番）
+- 重要度・難易度は1-5の5段階評価

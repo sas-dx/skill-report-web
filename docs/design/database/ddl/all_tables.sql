@@ -1,5 +1,5 @@
 -- 全テーブル作成DDL
--- 生成日時: 2025-06-01 11:54:08
+-- 生成日時: 2025-06-01 12:21:32
 
 -- --------テーブル作成DDL
 CREATE TABLE ------------ (
@@ -25,10 +25,37 @@ CREATE TABLE MST_UserAuth (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    user_id VARCHAR(50) COMMENT 'ユーザーID',
+    login_id VARCHAR(100) COMMENT 'ログインID',
+    password_hash VARCHAR(255) COMMENT 'パスワードハッシュ',
+    password_salt VARCHAR(100) COMMENT 'パスワードソルト',
+    employee_id VARCHAR(50) COMMENT '社員ID',
+    account_status ENUM DEFAULT ACTIVE COMMENT 'アカウント状態',
+    last_login_at TIMESTAMP COMMENT '最終ログイン日時',
+    last_login_ip VARCHAR(45) COMMENT '最終ログインIP',
+    failed_login_count INT DEFAULT 0 COMMENT 'ログイン失敗回数',
+    last_failed_login_at TIMESTAMP COMMENT '最終ログイン失敗日時',
+    password_changed_at TIMESTAMP COMMENT 'パスワード変更日時',
+    password_expires_at TIMESTAMP COMMENT 'パスワード有効期限',
+    mfa_enabled BOOLEAN DEFAULT False COMMENT '多要素認証有効',
+    mfa_secret VARCHAR(255) COMMENT '多要素認証シークレット',
+    recovery_token VARCHAR(255) COMMENT '復旧トークン',
+    recovery_token_expires_at TIMESTAMP COMMENT '復旧トークン有効期限',
+    session_timeout INT COMMENT 'セッションタイムアウト',
+    external_auth_provider VARCHAR(50) COMMENT '外部認証プロバイダ',
+    external_auth_id VARCHAR(255) COMMENT '外部認証ID',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    UNIQUE INDEX idx_user_id (user_id),
+    UNIQUE INDEX idx_login_id (login_id),
+    UNIQUE INDEX idx_employee_id (employee_id),
+    INDEX idx_account_status (account_status),
+    INDEX idx_last_login (last_login_at),
+    INDEX idx_password_expires (password_expires_at),
+    INDEX idx_external_auth (external_auth_provider, external_auth_id),
+    CONSTRAINT fk_userauth_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ユーザー認証情報';
 
 -- ロール情報テーブル作成DDL
@@ -124,10 +151,39 @@ CREATE TABLE MST_Department (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    department_code VARCHAR(20) COMMENT '部署コード',
+    department_name VARCHAR(100) COMMENT '部署名',
+    department_name_short VARCHAR(50) COMMENT '部署名略称',
+    parent_department_id VARCHAR(50) COMMENT '親部署ID',
+    department_level INT COMMENT '部署レベル',
+    department_type ENUM COMMENT '部署種別',
+    manager_id VARCHAR(50) COMMENT '部署長ID',
+    deputy_manager_id VARCHAR(50) COMMENT '副部署長ID',
+    cost_center_code VARCHAR(20) COMMENT 'コストセンターコード',
+    budget_amount DECIMAL(15,2) COMMENT '予算額',
+    location VARCHAR(200) COMMENT '所在地',
+    phone_number VARCHAR(20) COMMENT '代表電話番号',
+    email_address VARCHAR(255) COMMENT '代表メールアドレス',
+    establishment_date DATE COMMENT '設立日',
+    abolition_date DATE COMMENT '廃止日',
+    department_status ENUM DEFAULT ACTIVE COMMENT '部署状態',
+    sort_order INT COMMENT '表示順序',
+    description TEXT COMMENT '部署説明',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    UNIQUE INDEX idx_department_code (department_code),
+    INDEX idx_parent_department (parent_department_id),
+    INDEX idx_department_level (department_level),
+    INDEX idx_department_type (department_type),
+    INDEX idx_manager (manager_id),
+    INDEX idx_status (department_status),
+    INDEX idx_cost_center (cost_center_code),
+    INDEX idx_sort_order (sort_order),
+    CONSTRAINT fk_department_parent FOREIGN KEY (parent_department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE SET NULL,
+    CONSTRAINT fk_department_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL,
+    CONSTRAINT fk_department_deputy FOREIGN KEY (deputy_manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='部署マスタ';
 
 -- 役職マスタテーブル作成DDL
@@ -139,10 +195,37 @@ CREATE TABLE MST_Position (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    position_code VARCHAR(20) COMMENT '役職コード',
+    position_name VARCHAR(100) COMMENT '役職名',
+    position_name_short VARCHAR(50) COMMENT '役職名略称',
+    position_level INT COMMENT '役職レベル',
+    position_rank INT COMMENT '役職ランク',
+    position_category ENUM COMMENT '役職カテゴリ',
+    authority_level INT COMMENT '権限レベル',
+    approval_limit DECIMAL(15,2) COMMENT '承認限度額',
+    salary_grade VARCHAR(10) COMMENT '給与等級',
+    allowance_amount DECIMAL(10,2) COMMENT '役職手当額',
+    is_management BOOLEAN DEFAULT False COMMENT '管理職フラグ',
+    is_executive BOOLEAN DEFAULT False COMMENT '役員フラグ',
+    requires_approval BOOLEAN DEFAULT False COMMENT '承認権限フラグ',
+    can_hire BOOLEAN DEFAULT False COMMENT '採用権限フラグ',
+    can_evaluate BOOLEAN DEFAULT False COMMENT '評価権限フラグ',
+    position_status ENUM DEFAULT ACTIVE COMMENT '役職状態',
+    sort_order INT COMMENT '表示順序',
+    description TEXT COMMENT '役職説明',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    UNIQUE INDEX idx_position_code (position_code),
+    INDEX idx_position_level (position_level),
+    INDEX idx_position_rank (position_rank),
+    INDEX idx_position_category (position_category),
+    INDEX idx_authority_level (authority_level),
+    INDEX idx_salary_grade (salary_grade),
+    INDEX idx_status (position_status),
+    INDEX idx_management_flags (is_management, is_executive),
+    INDEX idx_sort_order (sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='役職マスタ';
 
 -- スキル階層マスタテーブル作成DDL
@@ -439,10 +522,18 @@ CREATE TABLE MST_SkillItem (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    skill_code VARCHAR(20) COMMENT 'スキルコード',
+    skill_name VARCHAR(100) COMMENT 'スキル名',
+    skill_category_id VARCHAR(50) COMMENT 'スキルカテゴリID',
+    skill_type ENUM COMMENT 'スキル種別',
+    difficulty_level INT COMMENT '習得難易度',
+    importance_level INT COMMENT '重要度',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    UNIQUE INDEX idx_skill_code (skill_code),
+    INDEX idx_skill_category (skill_category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキル項目マスタ';
 
 -- 研修プログラムテーブル作成DDL
@@ -514,10 +605,16 @@ CREATE TABLE TRN_GoalProgress (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    employee_id VARCHAR(50) COMMENT '社員ID',
+    goal_title VARCHAR(200) COMMENT '目標タイトル',
+    goal_category ENUM COMMENT '目標カテゴリ',
+    target_date DATE COMMENT '目標期限',
+    progress_rate DECIMAL(5,2) DEFAULT 0.0 COMMENT '進捗率',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_employee (employee_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='目標進捗';
 
 -- 案件実績テーブル作成DDL

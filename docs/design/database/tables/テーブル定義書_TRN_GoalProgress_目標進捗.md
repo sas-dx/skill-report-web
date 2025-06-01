@@ -20,7 +20,18 @@
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-SCR-CAR-EVAL
+TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状況を管理するトランザクションテーブルです。
+
+主な目的：
+- 個人目標の設定・管理（業務目標、スキル向上目標等）
+- 目標達成度の定期的な進捗管理
+- 上司・部下間での目標共有・フィードバック
+- 人事評価・査定の基礎データ
+- 組織目標と個人目標の連携管理
+
+このテーブルは、人事評価制度、目標管理制度（MBO）、人材育成など、
+組織の成果管理と人材開発の基盤となる重要なデータを提供します。
+
 
 ### 2.3 関連API
 API-013
@@ -41,6 +52,11 @@ BATCH-008
 | 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
 | 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 8 | employee_id | 社員ID | VARCHAR | 50 | ○ | - | ○ | - | 目標を設定した社員のID |
+| 9 | goal_title | 目標タイトル | VARCHAR | 200 | ○ | - | - | - | 目標の簡潔なタイトル |
+| 10 | goal_category | 目標カテゴリ | ENUM | None | ○ | - | - | - | 目標のカテゴリ（BUSINESS:業務、SKILL:スキル、CAREER:キャリア） |
+| 11 | target_date | 目標期限 | DATE | None | ○ | - | - | - | 目標達成の期限日 |
+| 12 | progress_rate | 進捗率 | DECIMAL | 5,2 | ○ | - | - | 0.0 | 目標の進捗率（0.00-100.00%） |
 
 
 ### 3.2 インデックス定義
@@ -51,6 +67,7 @@ BATCH-008
 | idx_tenant | INDEX | tenant_id | テナント検索用 |
 | idx_active | INDEX | is_active | 有効フラグ検索用 |
 | idx_created_at | INDEX | created_at | 作成日時検索用 |
+| idx_employee | INDEX | employee_id | 社員別検索用 |
 
 
 ### 3.3 制約定義
@@ -81,9 +98,9 @@ BATCH-008
 ```sql
 -- サンプルデータ
 INSERT INTO TRN_GoalProgress (
-    id, tenant_id, created_by, updated_by
+    id, tenant_id, employee_id, goal_title, goal_category, target_date, progress_rate, created_by, updated_by
 ) VALUES (
-    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
+    'sample_001', 'tenant_001', 'EMP000001', 'Java技術習得', 'SKILL', '2025-12-31', '50.0', 'user_admin', 'user_admin'
 );
 ```
 
@@ -157,10 +174,16 @@ CREATE TABLE TRN_GoalProgress (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
     created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    employee_id VARCHAR(50) COMMENT '社員ID',
+    goal_title VARCHAR(200) COMMENT '目標タイトル',
+    goal_category ENUM COMMENT '目標カテゴリ',
+    target_date DATE COMMENT '目標期限',
+    progress_rate DECIMAL(5,2) DEFAULT 0.0 COMMENT '進捗率',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_employee (employee_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='目標進捗';
 
 ```
@@ -186,3 +209,9 @@ CREATE TABLE TRN_GoalProgress (
 5. **データ量・パフォーマンス監視**
    - データ量が想定の150%を超えた場合はアラート
    - 応答時間が設定値の120%を超えた場合は調査
+
+
+## 11. 業務ルール
+
+- 進捗率は0-100%の範囲で設定
+- 目標期限は設定日より未来の日付
