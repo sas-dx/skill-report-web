@@ -354,6 +354,20 @@ async function main() {
     },
   })
 
+  // 管理者の認証情報を作成
+  const adminPasswordHash = await bcrypt.hash('admin123', 10)
+  await prisma.userAuth.upsert({
+    where: { userId: adminUser.id },
+    update: {},
+    create: {
+      userId: adminUser.id,
+      passwordHash: adminPasswordHash,
+      lastLoginAt: null,
+      loginFailureCount: 0,
+      isLocked: false,
+    },
+  })
+
   // 8. 管理者の権限設定
   console.log('🔑 管理者権限を設定中...')
   await prisma.userRole.upsert({
@@ -370,7 +384,54 @@ async function main() {
     },
   })
 
-  // 9. ロール権限の設定
+  // 9. テストユーザーの作成
+  console.log('🧪 テストユーザーを作成中...')
+  
+  const testUser = await prisma.user.upsert({
+    where: { empNo: 'TEST001' },
+    update: {},
+    create: {
+      empNo: 'TEST001',
+      email: 'test@skill-report.local',
+      name: 'テスト太郎',
+      nameKana: 'テストタロウ',
+      deptId: departments[0].id,
+      positionId: positions[3].id,
+      joinDate: new Date('2025-04-01'),
+      isActive: true,
+    },
+  })
+
+  // テストユーザーの認証情報を作成
+  const testPasswordHash = await bcrypt.hash('test123', 10)
+  await prisma.userAuth.upsert({
+    where: { userId: testUser.id },
+    update: {},
+    create: {
+      userId: testUser.id,
+      passwordHash: testPasswordHash,
+      lastLoginAt: null,
+      loginFailureCount: 0,
+      isLocked: false,
+    },
+  })
+
+  // 10. テストユーザーの権限設定
+  await prisma.userRole.upsert({
+    where: {
+      userId_roleId: {
+        userId: testUser.id,
+        roleId: roles[2].id,
+      },
+    },
+    update: {},
+    create: {
+      userId: testUser.id,
+      roleId: roles[2].id,
+    },
+  })
+
+  // 11. ロール権限の設定
   await Promise.all([
     // システム管理者権限
     prisma.rolePermission.upsert({
@@ -414,39 +475,6 @@ async function main() {
       },
     }),
   ])
-
-  // 10. テストユーザーの作成
-  console.log('🧪 テストユーザーを作成中...')
-  
-  const testUser = await prisma.user.upsert({
-    where: { empNo: 'TEST001' },
-    update: {},
-    create: {
-      empNo: 'TEST001',
-      email: 'test@skill-report.local',
-      name: 'テスト太郎',
-      nameKana: 'テストタロウ',
-      deptId: departments[0].id,
-      positionId: positions[3].id,
-      joinDate: new Date('2025-04-01'),
-      isActive: true,
-    },
-  })
-
-  // 11. テストユーザーの権限設定
-  await prisma.userRole.upsert({
-    where: {
-      userId_roleId: {
-        userId: testUser.id,
-        roleId: roles[2].id,
-      },
-    },
-    update: {},
-    create: {
-      userId: testUser.id,
-      roleId: roles[2].id,
-    },
-  })
 
   // 12. テストユーザーのサンプルスキルデータ
   console.log('📊 サンプルスキルデータを投入中...')
@@ -496,8 +524,12 @@ async function main() {
   console.log(`   - ユーザー: 2件（管理者・テストユーザー）`)
   console.log('')
   console.log('🔐 ログイン情報:')
-  console.log('   管理者: admin@skill-report.local')
-  console.log('   テストユーザー: test@skill-report.local')
+  console.log('   管理者:')
+  console.log('     ユーザーID: admin@skill-report.local')
+  console.log('     パスワード: admin123')
+  console.log('   テストユーザー:')
+  console.log('     ユーザーID: test@skill-report.local')
+  console.log('     パスワード: test123')
 }
 
 main()
@@ -507,5 +539,5 @@ main()
   .catch(async (e) => {
     console.error('❌ 初期データ投入中にエラーが発生しました:', e)
     await prisma.$disconnect()
-    process.exit(1)
+    throw e
   })
