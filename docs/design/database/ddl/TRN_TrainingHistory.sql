@@ -1,5 +1,5 @@
 -- TRN_TrainingHistory (研修参加履歴) DDL
--- 生成日時: 2025-06-01 19:42:43
+-- 生成日時: 2025-06-01 20:40:26
 
 CREATE TABLE TRN_TrainingHistory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

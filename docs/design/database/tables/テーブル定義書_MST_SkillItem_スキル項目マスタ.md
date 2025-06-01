@@ -1,29 +1,15 @@
-# テーブル定義書: MST_SkillItem (スキル項目マスタ)
+# テーブル定義書: MST_SkillItem
 
-## 📋 基本情報
+## 基本情報
 
-| 項目 | 内容 |
-|------|------|
+| 項目 | 値 |
+|------|-----|
 | テーブル名 | MST_SkillItem |
 | 論理名 | スキル項目マスタ |
 | カテゴリ | マスタ系 |
-| 作成日 | 2025-06-01 |
+| 生成日時 | 2025-06-01 20:40:25 |
 
-> **注意**: 本テーブル定義書は自動生成されます。手動編集は行わないでください。
-> 詳細定義の変更は `table-details/MST_SkillItem_details.yaml` で行ってください。
-
-
-## 📝 改版履歴
-
-> **注意**: 改版履歴の詳細は以下のYAMLファイルで管理されています：
-> `table-details/TABLE_NAME_details.yaml`
-
-| バージョン | 更新日 | 更新者 | 主な変更内容 |
-|------------|--------|--------|-------------|
-| 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - スキル項目マスタテーブルの詳細定義 |
-
-
-## 📝 テーブル概要
+## 概要
 
 MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。
 
@@ -40,58 +26,55 @@ MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象�
 戦略的人材マネジメントの基盤となる重要なマスタデータです。
 
 
-## 🗂️ カラム定義
+## カラム定義
 
-| カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト | 説明 |
-|----------|--------|----------|------|------|----|----|------------|------|
-| id | ID | VARCHAR | 50 | × | ● |  |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × |  |  |  | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  |  |  | マルチテナント識別子 |
-| skill_code | スキルコード | VARCHAR | 20 | ○ |  |  |  | スキル項目を一意に識別するコード（例：SKILL001） |
-| skill_name | スキル名 | VARCHAR | 100 | ○ |  |  |  | スキル項目の正式名称 |
-| skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  |  |  | スキルカテゴリのID |
-| skill_type | スキル種別 | ENUM |  | ○ |  |  |  | スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格） |
-| difficulty_level | 習得難易度 | INT |  | ○ |  |  |  | スキル習得の難易度（1-5段階） |
-| importance_level | 重要度 | INT |  | ○ |  |  |  | 組織における重要度（1-5段階） |
-| created_at | 作成日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  |  |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  |  |  | レコード更新者のユーザーID |
+| カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
+|----------|--------|----------|------|------|------------|------|
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
+| skill_code | スキルコード | VARCHAR | 20 | ○ |  | スキル項目を一意に識別するコード（例：SKILL001） |
+| skill_name | スキル名 | VARCHAR | 100 | ○ |  | スキル項目の正式名称 |
+| skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリのID |
+| skill_type | スキル種別 | ENUM |  | ○ |  | スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格） |
+| difficulty_level | 習得難易度 | INT |  | ○ |  | スキル習得の難易度（1-5段階） |
+| importance_level | 重要度 | INT |  | ○ |  | 組織における重要度（1-5段階） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
+| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
 
-## 🔍 インデックス定義
+## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
 | idx_skill_code | skill_code | ○ | スキルコード検索用 |
 | idx_skill_category | skill_category_id | × | スキルカテゴリ別検索用 |
 
-## 🔒 制約定義
+## 制約
 
-| 制約名 | 制約タイプ | 対象カラム | 条件 | 説明 |
-|--------|------------|------------|------|------|
-| uk_skill_code | UNIQUE | skill_code |  | スキルコード一意制約 |
+| 制約名 | 種別 | 条件 | 説明 |
+|--------|------|------|------|
+| uk_skill_code | UNIQUE |  | スキルコード一意制約 |
 
-## 📊 サンプルデータ
+## サンプルデータ
 
-```json
-[
-  {
-    "skill_code": "SKILL001",
-    "skill_name": "Java",
-    "skill_category_id": "CAT001",
-    "skill_type": "TECHNICAL",
-    "difficulty_level": 3,
-    "importance_level": 4
-  }
-]
-```
+| skill_code | skill_name | skill_category_id | skill_type | difficulty_level | importance_level |
+|------|------|------|------|------|------|
+| SKILL001 | Java | CAT001 | TECHNICAL | 3 | 4 |
 
-## 📌 特記事項
+## 特記事項
 
 - スキル項目は階層構造で管理
 - 評価基準は標準化されたレベル定義を使用
 
-## 📋 業務ルール
+## 業務ルール
 
 - スキルコードは自動採番（SKILL + 3桁連番）
 - 重要度・難易度は1-5の5段階評価
+
+## 改版履歴
+
+| バージョン | 更新日 | 更新者 | 変更内容 |
+|------------|--------|--------|----------|
+| 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - スキル項目マスタテーブルの詳細定義 |

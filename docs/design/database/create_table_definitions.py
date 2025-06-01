@@ -285,6 +285,131 @@ class TableDefinitionGenerator:
             self.logger.error(f"{details_file} の読み込みに失敗: {e}")
             return None, False
     
+    def generate_table_definition(self, table_name: str, table_info: Dict[str, Any]) -> Tuple[str, bool]:
+        """テーブル定義書（Markdown）を生成（YAMLファイル存在フラグも返す）"""
+        details, has_yaml = self.load_table_details(table_name)
+        
+        # ヘッダー部分
+        md_content = f"# テーブル定義書: {table_name}\n\n"
+        md_content += f"## 基本情報\n\n"
+        md_content += f"| 項目 | 値 |\n"
+        md_content += f"|------|-----|\n"
+        md_content += f"| テーブル名 | {table_name} |\n"
+        md_content += f"| 論理名 | {table_info['logical_name']} |\n"
+        md_content += f"| カテゴリ | {table_info['category']} |\n"
+        md_content += f"| 生成日時 | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |\n\n"
+        
+        if details and 'overview' in details:
+            md_content += f"## 概要\n\n{details['overview']}\n\n"
+        
+        # カラム定義
+        md_content += f"## カラム定義\n\n"
+        md_content += f"| カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |\n"
+        md_content += f"|----------|--------|----------|------|------|------------|------|\n"
+        
+        # 基本カラム
+        for col in self.common_columns['base_columns']:
+            null_str = "○" if col.get('null', True) else "×"
+            default_str = str(col.get('default', '')) if col.get('default') is not None else ''
+            length_str = str(col.get('length', '')) if col.get('length') else ''
+            md_content += f"| {col['name']} | {col['logical']} | {col['type']} | {length_str} | {null_str} | {default_str} | {col['description']} |\n"
+        
+        # テナントカラム
+        if not table_name.startswith('SYS_'):
+            for col in self.common_columns['tenant_columns']:
+                null_str = "○" if col.get('null', True) else "×"
+                default_str = str(col.get('default', '')) if col.get('default') is not None else ''
+                length_str = str(col.get('length', '')) if col.get('length') else ''
+                md_content += f"| {col['name']} | {col['logical']} | {col['type']} | {length_str} | {null_str} | {default_str} | {col['description']} |\n"
+        
+        # 業務固有カラム
+        if details and 'business_columns' in details:
+            for col in details['business_columns']:
+                null_str = "○" if col.get('null', True) else "×"
+                default_str = str(col.get('default', '')) if col.get('default') is not None else ''
+                length_str = str(col.get('length', '')) if col.get('length') else ''
+                md_content += f"| {col['name']} | {col['logical']} | {col['type']} | {length_str} | {null_str} | {default_str} | {col['description']} |\n"
+        
+        # 監査カラム
+        for col in self.common_columns['audit_columns']:
+            null_str = "○" if col.get('null', True) else "×"
+            default_str = str(col.get('default', '')) if col.get('default') is not None else ''
+            length_str = str(col.get('length', '')) if col.get('length') else ''
+            md_content += f"| {col['name']} | {col['logical']} | {col['type']} | {length_str} | {null_str} | {default_str} | {col['description']} |\n"
+        
+        # インデックス情報
+        if details and 'business_indexes' in details:
+            md_content += f"\n## インデックス\n\n"
+            md_content += f"| インデックス名 | カラム | ユニーク | 説明 |\n"
+            md_content += f"|----------------|--------|----------|------|\n"
+            for idx in details['business_indexes']:
+                unique_str = "○" if idx.get('unique', False) else "×"
+                columns_str = ", ".join(idx['columns'])
+                description = idx.get('description', '')
+                md_content += f"| {idx['name']} | {columns_str} | {unique_str} | {description} |\n"
+        
+        # 外部キー情報
+        if details and 'foreign_keys' in details:
+            md_content += f"\n## 外部キー\n\n"
+            md_content += f"| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |\n"
+            md_content += f"|--------|--------|--------------|------------|--------|--------|------|\n"
+            for fk in details['foreign_keys']:
+                description = fk.get('description', '')
+                md_content += f"| {fk['name']} | {fk['column']} | {fk['reference_table']} | {fk['reference_column']} | {fk['on_update']} | {fk['on_delete']} | {description} |\n"
+        
+        # 制約情報
+        if details and 'business_constraints' in details:
+            md_content += f"\n## 制約\n\n"
+            md_content += f"| 制約名 | 種別 | 条件 | 説明 |\n"
+            md_content += f"|--------|------|------|------|\n"
+            for constraint in details['business_constraints']:
+                condition = constraint.get('condition', '')
+                description = constraint.get('description', '')
+                md_content += f"| {constraint['name']} | {constraint['type']} | {condition} | {description} |\n"
+        
+        # サンプルデータ
+        if details and 'sample_data' in details and details['sample_data']:
+            md_content += f"\n## サンプルデータ\n\n"
+            if len(details['sample_data']) > 0:
+                # 最初のサンプルデータからカラム名を取得
+                sample = details['sample_data'][0]
+                headers = list(sample.keys())
+                
+                # ヘッダー行
+                md_content += "| " + " | ".join(headers) + " |\n"
+                md_content += "|" + "------|" * len(headers) + "\n"
+                
+                # データ行（最大3件まで表示）
+                for i, data in enumerate(details['sample_data'][:3]):
+                    values = [str(data.get(header, '')) for header in headers]
+                    md_content += "| " + " | ".join(values) + " |\n"
+        
+        # 特記事項
+        if details and 'notes' in details:
+            md_content += f"\n## 特記事項\n\n"
+            for note in details['notes']:
+                md_content += f"- {note}\n"
+        
+        # 業務ルール
+        if details and 'business_rules' in details:
+            md_content += f"\n## 業務ルール\n\n"
+            for rule in details['business_rules']:
+                md_content += f"- {rule}\n"
+        
+        # 改版履歴
+        if details and 'revision_history' in details:
+            md_content += f"\n## 改版履歴\n\n"
+            md_content += f"| バージョン | 更新日 | 更新者 | 変更内容 |\n"
+            md_content += f"|------------|--------|--------|----------|\n"
+            for revision in details['revision_history']:
+                md_content += f"| {revision['version']} | {revision['date']} | {revision['author']} | {revision['changes']} |\n"
+        
+        if not has_yaml:
+            md_content += f"\n## 注意\n\n"
+            md_content += f"このテーブル定義書は詳細YAMLファイルが存在しないため、基本定義のみで生成されています。\n"
+        
+        return md_content, has_yaml
+
     def generate_ddl(self, table_name: str, table_info: Dict[str, Any]) -> Tuple[str, bool]:
         """DDLを生成（YAMLファイル存在フラグも返す）"""
         details, has_yaml = self.load_table_details(table_name)
@@ -417,8 +542,19 @@ class TableDefinitionGenerator:
             self.logger.info(f"処理中: {table_name} ({table_info['logical_name']})")
             
             try:
+                # テーブル定義書生成
+                md_content, has_yaml = self.generate_table_definition(table_name, table_info)
+                md_file = tables_output / f"テーブル定義書_{table_name}_{table_info['logical_name']}.md"
+                
+                if not dry_run:
+                    with open(md_file, 'w', encoding='utf-8') as f:
+                        f.write(md_content)
+                    self.logger.success(f"  ✓ {md_file}")
+                else:
+                    self.logger.info(f"  [DRY] {md_file}")
+                
                 # DDL生成
-                ddl_content, has_yaml = self.generate_ddl(table_name, table_info)
+                ddl_content, _ = self.generate_ddl(table_name, table_info)
                 ddl_file = ddl_output / f"{table_name}.sql"
                 
                 if not dry_run:
@@ -470,6 +606,7 @@ class TableDefinitionGenerator:
         self._print_summary()
         
         self.logger.success(f"処理が完了しました！")
+        self.logger.info(f"📁 テーブル定義書出力先: {tables_output}")
         self.logger.info(f"📁 DDL出力先: {ddl_output}")
     
     def _print_summary(self):
