@@ -360,7 +360,7 @@ class TableDefinitionGeneratorV5:
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-{table_info['description']}
+{table_details.get('overview', table_info['description']) if table_details else table_info['description']}
 """
 
         # 詳細定義がある場合は追加情報を含める
