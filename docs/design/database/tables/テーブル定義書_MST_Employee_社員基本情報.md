@@ -40,29 +40,29 @@ MST_Employee（社員基本情報）は、組織に所属する全社員の基�
 
 ## 🗂️ カラム定義
 
-| カラム名 | 論理名 | データ型 | NULL | デフォルト | 説明 |
-|----------|--------|----------|------|------------|------|
-| id | ID | VARCHAR(50) | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN | × |  | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR(50) | × |  | マルチテナント識別子 |
-| employee_code | 社員番号 | VARCHAR(20) | ○ |  | 社員を一意に識別する番号（例：EMP000001） |
-| full_name | 氏名 | VARCHAR(100) | ○ |  | 社員の氏名（個人情報のため暗号化対象） |
-| full_name_kana | 氏名カナ | VARCHAR(100) | ○ |  | 社員の氏名カナ（個人情報のため暗号化対象） |
-| email | メールアドレス | VARCHAR(255) | ○ |  | 社員のメールアドレス（ログイン認証に使用） |
-| phone | 電話番号 | VARCHAR(20) | ○ |  | 社員の電話番号（個人情報のため暗号化対象） |
-| hire_date | 入社日 | DATE | ○ |  | 社員の入社日 |
-| birth_date | 生年月日 | DATE | ○ |  | 社員の生年月日（個人情報のため暗号化対象） |
-| gender | 性別 | ENUM | ○ |  | 性別（M:男性、F:女性、O:その他） |
-| department_id | 部署ID | VARCHAR(50) | ○ |  | 所属部署のID（MST_Departmentへの外部キー） |
-| position_id | 役職ID | VARCHAR(50) | ○ |  | 役職のID（MST_Positionへの外部キー） |
-| job_type_id | 職種ID | VARCHAR(50) | ○ |  | 職種のID（MST_JobTypeへの外部キー） |
-| employment_status | 雇用形態 | ENUM | ○ | FULL_TIME | 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員） |
-| manager_id | 上司ID | VARCHAR(50) | ○ |  | 直属の上司のID（MST_Employeeへの自己参照外部キー） |
-| employee_status | 在籍状況 | ENUM | ○ | ACTIVE | 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職） |
-| created_at | 作成日時 | TIMESTAMP | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR(50) | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR(50) | × |  | レコード更新者のユーザーID |
+| カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト | 説明 |
+|----------|--------|----------|------|------|----|----|------------|------|
+| id | ID | VARCHAR | 50 | × | ● |  |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × |  |  |  | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  |  |  | マルチテナント識別子 |
+| employee_code | 社員番号 | VARCHAR | 20 | ○ |  |  |  | 社員を一意に識別する番号（例：EMP000001） |
+| full_name | 氏名 | VARCHAR | 100 | ○ |  |  |  | 社員の氏名（個人情報のため暗号化対象） |
+| full_name_kana | 氏名カナ | VARCHAR | 100 | ○ |  |  |  | 社員の氏名カナ（個人情報のため暗号化対象） |
+| email | メールアドレス | VARCHAR | 255 | ○ |  |  |  | 社員のメールアドレス（ログイン認証に使用） |
+| phone | 電話番号 | VARCHAR | 20 | ○ |  |  |  | 社員の電話番号（個人情報のため暗号化対象） |
+| hire_date | 入社日 | DATE |  | ○ |  |  |  | 社員の入社日 |
+| birth_date | 生年月日 | DATE |  | ○ |  |  |  | 社員の生年月日（個人情報のため暗号化対象） |
+| gender | 性別 | ENUM |  | ○ |  |  |  | 性別（M:男性、F:女性、O:その他） |
+| department_id | 部署ID | VARCHAR | 50 | ○ |  | ● |  | 所属部署のID（MST_Departmentへの外部キー） |
+| position_id | 役職ID | VARCHAR | 50 | ○ |  | ● |  | 役職のID（MST_Positionへの外部キー） |
+| job_type_id | 職種ID | VARCHAR | 50 | ○ |  | ● |  | 職種のID（MST_JobTypeへの外部キー） |
+| employment_status | 雇用形態 | ENUM |  | ○ |  |  | FULL_TIME | 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員） |
+| manager_id | 上司ID | VARCHAR | 50 | ○ |  | ● |  | 直属の上司のID（MST_Employeeへの自己参照外部キー） |
+| employee_status | 在籍状況 | ENUM |  | ○ |  |  | ACTIVE | 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職） |
+| created_at | 作成日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| created_by | 作成者 | VARCHAR | 50 | × |  |  |  | レコード作成者のユーザーID |
+| updated_by | 更新者 | VARCHAR | 50 | × |  |  |  | レコード更新者のユーザーID |
 
 ## 🔍 インデックス定義
 

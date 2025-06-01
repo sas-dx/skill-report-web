@@ -1,27 +1,29 @@
 -- 全テーブル統合DDL
--- 生成日時: 2025-06-01 12:50:47
+-- 生成日時: 2025-06-01 13:03:58
 
--- MST_Role (ロール情報) DDL
--- 生成日時: 2025-06-01 12:50:47
+-- MST_Department (部署マスタ) DDL
+-- 生成日時: 2025-06-01 13:03:58
 
-CREATE TABLE MST_Role (
+CREATE TABLE MST_Department (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
-    is_deleted BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
-    role_code VARCHAR(20),
-    role_name VARCHAR(100),
-    role_name_short VARCHAR(50),
-    role_category ENUM,
-    role_level INT,
-    parent_role_id VARCHAR(50),
-    is_system_role BOOLEAN DEFAULT False,
-    is_tenant_specific BOOLEAN DEFAULT False,
-    max_users INT,
-    role_priority INT DEFAULT 999,
-    auto_assign_conditions JSON,
-    role_status ENUM DEFAULT 'ACTIVE',
-    effective_from DATE,
-    effective_to DATE,
+    department_code VARCHAR(20),
+    department_name VARCHAR(100),
+    department_name_short VARCHAR(50),
+    parent_department_id VARCHAR(50),
+    department_level INT,
+    department_type ENUM,
+    manager_id VARCHAR(50),
+    deputy_manager_id VARCHAR(50),
+    cost_center_code VARCHAR(20),
+    budget_amount DECIMAL(15,2),
+    location VARCHAR(200),
+    phone_number VARCHAR(20),
+    email_address VARCHAR(255),
+    establishment_date DATE,
+    abolition_date DATE,
+    department_status ENUM DEFAULT 'ACTIVE',
     sort_order INT,
     description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -30,44 +32,44 @@ CREATE TABLE MST_Role (
     updated_by VARCHAR(50) NOT NULL
 );
 
-CREATE UNIQUE INDEX idx_role_code ON MST_Role (role_code);
-CREATE INDEX idx_role_category ON MST_Role (role_category);
-CREATE INDEX idx_role_level ON MST_Role (role_level);
-CREATE INDEX idx_parent_role ON MST_Role (parent_role_id);
-CREATE INDEX idx_system_role ON MST_Role (is_system_role);
-CREATE INDEX idx_tenant_specific ON MST_Role (is_tenant_specific);
-CREATE INDEX idx_role_status ON MST_Role (role_status);
-CREATE INDEX idx_effective_period ON MST_Role (effective_from, effective_to);
-CREATE INDEX idx_sort_order ON MST_Role (sort_order);
+CREATE UNIQUE INDEX idx_department_code ON MST_Department (department_code);
+CREATE INDEX idx_parent_department ON MST_Department (parent_department_id);
+CREATE INDEX idx_department_level ON MST_Department (department_level);
+CREATE INDEX idx_department_type ON MST_Department (department_type);
+CREATE INDEX idx_manager ON MST_Department (manager_id);
+CREATE INDEX idx_status ON MST_Department (department_status);
+CREATE INDEX idx_cost_center ON MST_Department (cost_center_code);
+CREATE INDEX idx_sort_order ON MST_Department (sort_order);
 
 -- 外部キー制約
-ALTER TABLE MST_Role ADD CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent FOREIGN KEY (parent_department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy FOREIGN KEY (deputy_manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- MST_Permission (権限情報) DDL
--- 生成日時: 2025-06-01 12:50:47
+-- MST_Position (役職マスタ) DDL
+-- 生成日時: 2025-06-01 13:03:58
 
-CREATE TABLE MST_Permission (
+CREATE TABLE MST_Position (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
-    is_deleted BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
-    permission_code VARCHAR(50),
-    permission_name VARCHAR(100),
-    permission_name_short VARCHAR(50),
-    permission_category ENUM,
-    resource_type VARCHAR(50),
-    action_type ENUM,
-    scope_level ENUM,
-    parent_permission_id VARCHAR(50),
-    is_system_permission BOOLEAN DEFAULT False,
-    requires_conditions BOOLEAN DEFAULT False,
-    condition_expression TEXT,
-    risk_level INT DEFAULT 1,
+    position_code VARCHAR(20),
+    position_name VARCHAR(100),
+    position_name_short VARCHAR(50),
+    position_level INT,
+    position_rank INT,
+    position_category ENUM,
+    authority_level INT,
+    approval_limit DECIMAL(15,2),
+    salary_grade VARCHAR(10),
+    allowance_amount DECIMAL(10,2),
+    is_management BOOLEAN DEFAULT False,
+    is_executive BOOLEAN DEFAULT False,
     requires_approval BOOLEAN DEFAULT False,
-    audit_required BOOLEAN DEFAULT False,
-    permission_status ENUM DEFAULT 'ACTIVE',
-    effective_from DATE,
-    effective_to DATE,
+    can_hire BOOLEAN DEFAULT False,
+    can_evaluate BOOLEAN DEFAULT False,
+    position_status ENUM DEFAULT 'ACTIVE',
     sort_order INT,
     description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,15 +78,12 @@ CREATE TABLE MST_Permission (
     updated_by VARCHAR(50) NOT NULL
 );
 
-CREATE UNIQUE INDEX idx_permission_code ON MST_Permission (permission_code);
-CREATE INDEX idx_permission_category ON MST_Permission (permission_category);
-CREATE INDEX idx_resource_action ON MST_Permission (resource_type, action_type);
-CREATE INDEX idx_scope_level ON MST_Permission (scope_level);
-CREATE INDEX idx_parent_permission ON MST_Permission (parent_permission_id);
-CREATE INDEX idx_system_permission ON MST_Permission (is_system_permission);
-CREATE INDEX idx_risk_level ON MST_Permission (risk_level);
-CREATE INDEX idx_permission_status ON MST_Permission (permission_status);
-CREATE INDEX idx_effective_period ON MST_Permission (effective_from, effective_to);
-
--- 外部キー制約
-ALTER TABLE MST_Permission ADD CONSTRAINT fk_permission_parent FOREIGN KEY (parent_permission_id) REFERENCES MST_Permission(id) ON UPDATE CASCADE ON DELETE SET NULL;
+CREATE UNIQUE INDEX idx_position_code ON MST_Position (position_code);
+CREATE INDEX idx_position_level ON MST_Position (position_level);
+CREATE INDEX idx_position_rank ON MST_Position (position_rank);
+CREATE INDEX idx_position_category ON MST_Position (position_category);
+CREATE INDEX idx_authority_level ON MST_Position (authority_level);
+CREATE INDEX idx_salary_grade ON MST_Position (salary_grade);
+CREATE INDEX idx_status ON MST_Position (position_status);
+CREATE INDEX idx_management_flags ON MST_Position (is_management, is_executive);
+CREATE INDEX idx_sort_order ON MST_Position (sort_order);

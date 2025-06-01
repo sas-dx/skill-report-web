@@ -1,9 +1,9 @@
 -- MST_Employee (社員基本情報) DDL
--- 生成日時: 2025-06-01 12:50:34
+-- 生成日時: 2025-06-01 13:03:42
 
 CREATE TABLE MST_Employee (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
-    is_deleted BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
     employee_code VARCHAR(20),
     full_name VARCHAR(100),

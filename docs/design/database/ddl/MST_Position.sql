@@ -1,41 +1,40 @@
--- 役職マスタテーブル作成DDL
+-- MST_Position (役職マスタ) DDL
+-- 生成日時: 2025-06-01 13:03:58
+
 CREATE TABLE MST_Position (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    position_code VARCHAR(20) COMMENT '役職コード',
-    position_name VARCHAR(100) COMMENT '役職名',
-    position_name_short VARCHAR(50) COMMENT '役職名略称',
-    position_level INT COMMENT '役職レベル',
-    position_rank INT COMMENT '役職ランク',
-    position_category ENUM COMMENT '役職カテゴリ',
-    authority_level INT COMMENT '権限レベル',
-    approval_limit DECIMAL(15,2) COMMENT '承認限度額',
-    salary_grade VARCHAR(10) COMMENT '給与等級',
-    allowance_amount DECIMAL(10,2) COMMENT '役職手当額',
-    is_management BOOLEAN DEFAULT False COMMENT '管理職フラグ',
-    is_executive BOOLEAN DEFAULT False COMMENT '役員フラグ',
-    requires_approval BOOLEAN DEFAULT False COMMENT '承認権限フラグ',
-    can_hire BOOLEAN DEFAULT False COMMENT '採用権限フラグ',
-    can_evaluate BOOLEAN DEFAULT False COMMENT '評価権限フラグ',
-    position_status ENUM DEFAULT ACTIVE COMMENT '役職状態',
-    sort_order INT COMMENT '表示順序',
-    description TEXT COMMENT '役職説明',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    UNIQUE INDEX idx_position_code (position_code),
-    INDEX idx_position_level (position_level),
-    INDEX idx_position_rank (position_rank),
-    INDEX idx_position_category (position_category),
-    INDEX idx_authority_level (authority_level),
-    INDEX idx_salary_grade (salary_grade),
-    INDEX idx_status (position_status),
-    INDEX idx_management_flags (is_management, is_executive),
-    INDEX idx_sort_order (sort_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='役職マスタ';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
+    tenant_id VARCHAR(50) NOT NULL,
+    position_code VARCHAR(20),
+    position_name VARCHAR(100),
+    position_name_short VARCHAR(50),
+    position_level INT,
+    position_rank INT,
+    position_category ENUM,
+    authority_level INT,
+    approval_limit DECIMAL(15,2),
+    salary_grade VARCHAR(10),
+    allowance_amount DECIMAL(10,2),
+    is_management BOOLEAN DEFAULT False,
+    is_executive BOOLEAN DEFAULT False,
+    requires_approval BOOLEAN DEFAULT False,
+    can_hire BOOLEAN DEFAULT False,
+    can_evaluate BOOLEAN DEFAULT False,
+    position_status ENUM DEFAULT 'ACTIVE',
+    sort_order INT,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_position_code ON MST_Position (position_code);
+CREATE INDEX idx_position_level ON MST_Position (position_level);
+CREATE INDEX idx_position_rank ON MST_Position (position_rank);
+CREATE INDEX idx_position_category ON MST_Position (position_category);
+CREATE INDEX idx_authority_level ON MST_Position (authority_level);
+CREATE INDEX idx_salary_grade ON MST_Position (salary_grade);
+CREATE INDEX idx_status ON MST_Position (position_status);
+CREATE INDEX idx_management_flags ON MST_Position (is_management, is_executive);
+CREATE INDEX idx_sort_order ON MST_Position (sort_order);
