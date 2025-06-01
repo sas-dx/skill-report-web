@@ -1,14 +1,14 @@
-# テーブル定義書：TRN_TrainingHistory（研修履歴）
+# テーブル定義書：TRN_SkillRecord（スキル情報）
 
 ## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| **テーブルID** | TBL-017 |
-| **テーブル名** | TRN_TrainingHistory |
-| **論理名** | 研修履歴 |
+| **テーブルID** | TBL-010 |
+| **テーブル名** | TRN_SkillRecord |
+| **論理名** | スキル情報 |
 | **カテゴリ** | トランザクション系 |
-| **優先度** | 中 |
+| **優先度** | 最高 |
 | **ステータス** | 運用中 |
 | **作成日** | 2025-06-01 |
 | **最終更新日** | 2025-06-01 |
@@ -16,13 +16,13 @@
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-TRN_TrainingHistory（研修履歴）は、業務トランザクションデータを管理するテーブルです。日々の業務処理で発生するデータを格納します。
+TRN_SkillRecord（スキル情報）は、業務トランザクションデータを管理するテーブルです。日々の業務処理で発生するデータを格納します。
 
 ### 2.2 関連API
-API-016
+API-008
 
 ### 2.3 関連バッチ
-BATCH-011
+BATCH-006
 
 ## 3. テーブル構造
 
@@ -51,7 +51,7 @@ BATCH-011
 
 | 制約名 | 制約種別 | カラム | 制約内容 |
 |--------|----------|--------|----------|
-| pk_trn_traininghistory | PRIMARY KEY | id | 主キー制約 |
+| pk_trn_skillrecord | PRIMARY KEY | id | 主キー制約 |
 | fk_tenant | FOREIGN KEY | tenant_id | MST_Tenant.tenant_id |
 | fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
 | fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
@@ -74,7 +74,7 @@ BATCH-011
 ### 5.1 データ例
 ```sql
 -- サンプルデータ
-INSERT INTO TRN_TrainingHistory (
+INSERT INTO TRN_SkillRecord (
     id, tenant_id, created_by, updated_by
 ) VALUES (
     'sample_001', 'TENANT_001', 'user_admin', 'user_admin'
@@ -142,7 +142,7 @@ INSERT INTO TRN_TrainingHistory (
 
 ### 9.2 DDL
 ```sql
-CREATE TABLE TRN_TrainingHistory (
+CREATE TABLE TRN_SkillRecord (
     id VARCHAR(50) NOT NULL COMMENT 'ID',
     tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
     is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
@@ -154,10 +154,10 @@ CREATE TABLE TRN_TrainingHistory (
     INDEX idx_tenant (tenant_id),
     INDEX idx_created_at (created_at),
     INDEX idx_active (is_active),
-    CONSTRAINT fk_trn_traininghistory_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_trn_traininghistory_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT fk_trn_traininghistory_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='研修履歴';
+    CONSTRAINT fk_trn_skillrecord_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_trn_skillrecord_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_trn_skillrecord_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキル情報';
 ```
 
 ## 10. 特記事項
@@ -175,4 +175,4 @@ CREATE TABLE TRN_TrainingHistory (
    - 必要に応じて機能拡張を検討
 
 4. **関連画面**
-   - SCR-TRAIN
+   - SCR-SKILL

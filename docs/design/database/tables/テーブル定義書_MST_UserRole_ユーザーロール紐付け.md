@@ -1,4 +1,4 @@
-# テーブル定義書：MST_UserRole（ユーザーロール関連）
+# テーブル定義書：MST_UserRole（ユーザーロール紐付け）
 
 ## 1. 基本情報
 
@@ -6,7 +6,7 @@
 |------|------|
 | **テーブルID** | TBL-004 |
 | **テーブル名** | MST_UserRole |
-| **論理名** | ユーザーロール関連 |
+| **論理名** | ユーザーロール紐付け |
 | **カテゴリ** | マスタ系 |
 | **優先度** | 高 |
 | **ステータス** | 運用中 |
@@ -16,7 +16,7 @@
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-MST_UserRole（ユーザーロール関連）は、マスタデータを管理するテーブルです。システムの基本設定や参照データを格納し、他のテーブルから参照されます。
+MST_UserRole（ユーザーロール紐付け）は、マスタデータを管理するテーブルです。システムの基本設定や参照データを格納し、他のテーブルから参照されます。
 
 ### 2.2 関連API
 API-004
@@ -158,7 +158,7 @@ CREATE TABLE MST_UserRole (
     CONSTRAINT fk_mst_userrole_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT fk_mst_userrole_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT fk_mst_userrole_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ユーザーロール関連';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ユーザーロール紐付け';
 ```
 
 ## 10. 特記事項
