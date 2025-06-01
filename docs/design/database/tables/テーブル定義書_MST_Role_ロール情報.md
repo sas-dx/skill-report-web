@@ -43,31 +43,31 @@ MST_Role（ロール情報）は、システム内のロール（役割）を管
 
 ## 🗂️ カラム定義
 
-| カラム名 | 論理名 | データ型 | NULL | デフォルト | 説明 |
-|----------|--------|----------|------|------------|------|
-| id | ID | VARCHAR(50) | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN | × |  | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR(50) | × |  | マルチテナント識別子 |
-| role_code | ロールコード | VARCHAR(20) | ○ |  | ロールを一意に識別するコード（例：ROLE001） |
-| role_name | ロール名 | VARCHAR(100) | ○ |  | ロールの正式名称 |
-| role_name_short | ロール名略称 | VARCHAR(50) | ○ |  | ロールの略称・短縮名 |
-| role_category | ロールカテゴリ | ENUM | ○ |  | ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム） |
-| role_level | ロールレベル | INT | ○ |  | ロールの階層レベル（1:最上位、数値が大きいほど下位） |
-| parent_role_id | 親ロールID | VARCHAR(50) | ○ |  | 上位ロールのID（MST_Roleへの自己参照外部キー） |
-| is_system_role | システムロールフラグ | BOOLEAN | ○ |  | システム標準ロールかどうか（削除・変更不可） |
-| is_tenant_specific | テナント固有フラグ | BOOLEAN | ○ |  | テナント固有のロールかどうか |
-| max_users | 最大ユーザー数 | INT | ○ |  | このロールに割り当て可能な最大ユーザー数 |
-| role_priority | ロール優先度 | INT | ○ | 999 | 複数ロール保持時の優先度（数値が小さいほど高優先） |
-| auto_assign_conditions | 自動割り当て条件 | JSON | ○ |  | 自動ロール割り当ての条件（JSON形式） |
-| role_status | ロール状態 | ENUM | ○ | ACTIVE | ロールの状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨） |
-| effective_from | 有効開始日 | DATE | ○ |  | ロールの有効開始日 |
-| effective_to | 有効終了日 | DATE | ○ |  | ロールの有効終了日 |
-| sort_order | 表示順序 | INT | ○ |  | 画面表示時の順序 |
-| description | ロール説明 | TEXT | ○ |  | ロールの詳細説明・用途 |
-| created_at | 作成日時 | TIMESTAMP | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR(50) | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR(50) | × |  | レコード更新者のユーザーID |
+| カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト | 説明 |
+|----------|--------|----------|------|------|----|----|------------|------|
+| id | ID | VARCHAR | 50 | × | ● |  |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × |  |  |  | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  |  |  | マルチテナント識別子 |
+| role_code | ロールコード | VARCHAR | 20 | ○ |  |  |  | ロールを一意に識別するコード（例：ROLE001） |
+| role_name | ロール名 | VARCHAR | 100 | ○ |  |  |  | ロールの正式名称 |
+| role_name_short | ロール名略称 | VARCHAR | 50 | ○ |  |  |  | ロールの略称・短縮名 |
+| role_category | ロールカテゴリ | ENUM |  | ○ |  |  |  | ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム） |
+| role_level | ロールレベル | INT |  | ○ |  |  |  | ロールの階層レベル（1:最上位、数値が大きいほど下位） |
+| parent_role_id | 親ロールID | VARCHAR | 50 | ○ |  | ● |  | 上位ロールのID（MST_Roleへの自己参照外部キー） |
+| is_system_role | システムロールフラグ | BOOLEAN |  | ○ |  |  |  | システム標準ロールかどうか（削除・変更不可） |
+| is_tenant_specific | テナント固有フラグ | BOOLEAN |  | ○ |  |  |  | テナント固有のロールかどうか |
+| max_users | 最大ユーザー数 | INT |  | ○ |  |  |  | このロールに割り当て可能な最大ユーザー数 |
+| role_priority | ロール優先度 | INT |  | ○ |  |  | 999 | 複数ロール保持時の優先度（数値が小さいほど高優先） |
+| auto_assign_conditions | 自動割り当て条件 | JSON |  | ○ |  |  |  | 自動ロール割り当ての条件（JSON形式） |
+| role_status | ロール状態 | ENUM |  | ○ |  |  | ACTIVE | ロールの状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨） |
+| effective_from | 有効開始日 | DATE |  | ○ |  |  |  | ロールの有効開始日 |
+| effective_to | 有効終了日 | DATE |  | ○ |  |  |  | ロールの有効終了日 |
+| sort_order | 表示順序 | INT |  | ○ |  |  |  | 画面表示時の順序 |
+| description | ロール説明 | TEXT |  | ○ |  |  |  | ロールの詳細説明・用途 |
+| created_at | 作成日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| created_by | 作成者 | VARCHAR | 50 | × |  |  |  | レコード作成者のユーザーID |
+| updated_by | 更新者 | VARCHAR | 50 | × |  |  |  | レコード更新者のユーザーID |
 
 ## 🔍 インデックス定義
 

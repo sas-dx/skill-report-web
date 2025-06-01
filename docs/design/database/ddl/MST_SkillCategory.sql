@@ -1,46 +1,47 @@
--- スキルカテゴリマスタテーブル作成DDL
+-- MST_SkillCategory (スキルカテゴリマスタ) DDL
+-- 生成日時: 2025-06-01 13:28:12
+
 CREATE TABLE MST_SkillCategory (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    category_code VARCHAR(20) COMMENT 'カテゴリコード',
-    category_name VARCHAR(100) COMMENT 'カテゴリ名',
-    category_name_short VARCHAR(50) COMMENT 'カテゴリ名略称',
-    category_name_en VARCHAR(100) COMMENT 'カテゴリ名英語',
-    category_type ENUM COMMENT 'カテゴリ種別',
-    parent_category_id VARCHAR(50) COMMENT '親カテゴリID',
-    category_level INT DEFAULT 1 COMMENT 'カテゴリレベル',
-    category_path VARCHAR(500) COMMENT 'カテゴリパス',
-    is_system_category BOOLEAN DEFAULT False COMMENT 'システムカテゴリフラグ',
-    is_leaf_category BOOLEAN DEFAULT True COMMENT '末端カテゴリフラグ',
-    skill_count INT DEFAULT 0 COMMENT 'スキル数',
-    evaluation_method ENUM COMMENT '評価方法',
-    max_level INT COMMENT '最大レベル',
-    icon_url VARCHAR(255) COMMENT 'アイコンURL',
-    color_code VARCHAR(7) COMMENT 'カラーコード',
-    display_order INT DEFAULT 999 COMMENT '表示順序',
-    is_popular BOOLEAN DEFAULT False COMMENT '人気カテゴリフラグ',
-    category_status ENUM DEFAULT ACTIVE COMMENT 'カテゴリ状態',
-    effective_from DATE COMMENT '有効開始日',
-    effective_to DATE COMMENT '有効終了日',
-    description TEXT COMMENT 'カテゴリ説明',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    UNIQUE INDEX idx_category_code (category_code),
-    INDEX idx_category_type (category_type),
-    INDEX idx_parent_category (parent_category_id),
-    INDEX idx_category_level (category_level),
-    INDEX idx_category_path (category_path),
-    INDEX idx_system_category (is_system_category),
-    INDEX idx_leaf_category (is_leaf_category),
-    INDEX idx_category_status (category_status),
-    INDEX idx_display_order (parent_category_id, display_order),
-    INDEX idx_popular_category (is_popular),
-    CONSTRAINT fk_skillcategory_parent FOREIGN KEY (parent_category_id) REFERENCES MST_SkillCategory(id) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキルカテゴリマスタ';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
+    tenant_id VARCHAR(50) NOT NULL,
+    category_code VARCHAR(20),
+    category_name VARCHAR(100),
+    category_name_short VARCHAR(50),
+    category_name_en VARCHAR(100),
+    category_type ENUM,
+    parent_category_id VARCHAR(50),
+    category_level INT DEFAULT 1,
+    category_path VARCHAR(500),
+    is_system_category BOOLEAN DEFAULT False,
+    is_leaf_category BOOLEAN DEFAULT True,
+    skill_count INT DEFAULT 0,
+    evaluation_method ENUM,
+    max_level INT,
+    icon_url VARCHAR(255),
+    color_code VARCHAR(7),
+    display_order INT DEFAULT 999,
+    is_popular BOOLEAN DEFAULT False,
+    category_status ENUM DEFAULT 'ACTIVE',
+    effective_from DATE,
+    effective_to DATE,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_category_code ON MST_SkillCategory (category_code);
+CREATE INDEX idx_category_type ON MST_SkillCategory (category_type);
+CREATE INDEX idx_parent_category ON MST_SkillCategory (parent_category_id);
+CREATE INDEX idx_category_level ON MST_SkillCategory (category_level);
+CREATE INDEX idx_category_path ON MST_SkillCategory (category_path);
+CREATE INDEX idx_system_category ON MST_SkillCategory (is_system_category);
+CREATE INDEX idx_leaf_category ON MST_SkillCategory (is_leaf_category);
+CREATE INDEX idx_category_status ON MST_SkillCategory (category_status);
+CREATE INDEX idx_display_order ON MST_SkillCategory (parent_category_id, display_order);
+CREATE INDEX idx_popular_category ON MST_SkillCategory (is_popular);
+
+-- 外部キー制約
+ALTER TABLE MST_SkillCategory ADD CONSTRAINT fk_skillcategory_parent FOREIGN KEY (parent_category_id) REFERENCES MST_SkillCategory(id) ON UPDATE CASCADE ON DELETE SET NULL;

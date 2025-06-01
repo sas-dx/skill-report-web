@@ -1,49 +1,50 @@
--- ユーザーロール紐付けテーブル作成DDL
+-- MST_UserRole (ユーザーロール紐付け) DDL
+-- 生成日時: 2025-06-01 13:28:12
+
 CREATE TABLE MST_UserRole (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    user_id VARCHAR(50) COMMENT 'ユーザーID',
-    role_id VARCHAR(50) COMMENT 'ロールID',
-    assignment_type ENUM DEFAULT DIRECT COMMENT '割り当て種別',
-    assigned_by VARCHAR(50) COMMENT '割り当て者ID',
-    assignment_reason TEXT COMMENT '割り当て理由',
-    effective_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '有効開始日時',
-    effective_to TIMESTAMP COMMENT '有効終了日時',
-    is_primary_role BOOLEAN DEFAULT False COMMENT '主ロールフラグ',
-    priority_order INT DEFAULT 999 COMMENT '優先順序',
-    conditions JSON COMMENT '適用条件',
-    delegation_source_user_id VARCHAR(50) COMMENT '委譲元ユーザーID',
-    delegation_expires_at TIMESTAMP COMMENT '委譲期限',
-    auto_assigned BOOLEAN DEFAULT False COMMENT '自動割り当てフラグ',
-    requires_approval BOOLEAN DEFAULT False COMMENT '承認要求フラグ',
-    approval_status ENUM COMMENT '承認状態',
-    approved_by VARCHAR(50) COMMENT '承認者ID',
-    approved_at TIMESTAMP COMMENT '承認日時',
-    assignment_status ENUM DEFAULT ACTIVE COMMENT '割り当て状態',
-    last_used_at TIMESTAMP COMMENT '最終使用日時',
-    usage_count INT DEFAULT 0 COMMENT '使用回数',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    UNIQUE INDEX idx_user_role (user_id, role_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_role_id (role_id),
-    INDEX idx_assignment_type (assignment_type),
-    INDEX idx_assigned_by (assigned_by),
-    INDEX idx_effective_period (effective_from, effective_to),
-    INDEX idx_primary_role (user_id, is_primary_role),
-    INDEX idx_assignment_status (assignment_status),
-    INDEX idx_approval_status (approval_status),
-    INDEX idx_delegation_source (delegation_source_user_id),
-    CONSTRAINT fk_userrole_user FOREIGN KEY (user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_userrole_role FOREIGN KEY (role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_userrole_assigned_by FOREIGN KEY (assigned_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL,
-    CONSTRAINT fk_userrole_delegation_source FOREIGN KEY (delegation_source_user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL,
-    CONSTRAINT fk_userrole_approved_by FOREIGN KEY (approved_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ユーザーロール紐付け';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
+    tenant_id VARCHAR(50) NOT NULL,
+    user_id VARCHAR(50),
+    role_id VARCHAR(50),
+    assignment_type ENUM DEFAULT 'DIRECT',
+    assigned_by VARCHAR(50),
+    assignment_reason TEXT,
+    effective_from TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP',
+    effective_to TIMESTAMP,
+    is_primary_role BOOLEAN DEFAULT False,
+    priority_order INT DEFAULT 999,
+    conditions JSON,
+    delegation_source_user_id VARCHAR(50),
+    delegation_expires_at TIMESTAMP,
+    auto_assigned BOOLEAN DEFAULT False,
+    requires_approval BOOLEAN DEFAULT False,
+    approval_status ENUM,
+    approved_by VARCHAR(50),
+    approved_at TIMESTAMP,
+    assignment_status ENUM DEFAULT 'ACTIVE',
+    last_used_at TIMESTAMP,
+    usage_count INT DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_user_role ON MST_UserRole (user_id, role_id);
+CREATE INDEX idx_user_id ON MST_UserRole (user_id);
+CREATE INDEX idx_role_id ON MST_UserRole (role_id);
+CREATE INDEX idx_assignment_type ON MST_UserRole (assignment_type);
+CREATE INDEX idx_assigned_by ON MST_UserRole (assigned_by);
+CREATE INDEX idx_effective_period ON MST_UserRole (effective_from, effective_to);
+CREATE INDEX idx_primary_role ON MST_UserRole (user_id, is_primary_role);
+CREATE INDEX idx_assignment_status ON MST_UserRole (assignment_status);
+CREATE INDEX idx_approval_status ON MST_UserRole (approval_status);
+CREATE INDEX idx_delegation_source ON MST_UserRole (delegation_source_user_id);
+
+-- 外部キー制約
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_user FOREIGN KEY (user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_role FOREIGN KEY (role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_assigned_by FOREIGN KEY (assigned_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_delegation_source FOREIGN KEY (delegation_source_user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_approved_by FOREIGN KEY (approved_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;

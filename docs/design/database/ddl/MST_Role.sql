@@ -1,9 +1,9 @@
 -- MST_Role (ロール情報) DDL
--- 生成日時: 2025-06-01 12:50:47
+-- 生成日時: 2025-06-01 13:28:12
 
 CREATE TABLE MST_Role (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
-    is_deleted BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
     role_code VARCHAR(20),
     role_name VARCHAR(100),

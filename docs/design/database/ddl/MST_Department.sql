@@ -1,5 +1,5 @@
 -- MST_Department (部署マスタ) DDL
--- 生成日時: 2025-06-01 13:03:58
+-- 生成日時: 2025-06-01 13:28:12
 
 CREATE TABLE MST_Department (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

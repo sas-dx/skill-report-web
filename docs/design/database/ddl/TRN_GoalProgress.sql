@@ -1,20 +1,19 @@
--- 目標進捗テーブル作成DDL
+-- TRN_GoalProgress (目標進捗) DDL
+-- 生成日時: 2025-06-01 13:28:12
+
 CREATE TABLE TRN_GoalProgress (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    employee_id VARCHAR(50) COMMENT '社員ID',
-    goal_title VARCHAR(200) COMMENT '目標タイトル',
-    goal_category ENUM COMMENT '目標カテゴリ',
-    target_date DATE COMMENT '目標期限',
-    progress_rate DECIMAL(5,2) DEFAULT 0.0 COMMENT '進捗率',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    INDEX idx_employee (employee_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='目標進捗';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL DEFAULT False,
+    tenant_id VARCHAR(50) NOT NULL,
+    employee_id VARCHAR(50),
+    goal_title VARCHAR(200),
+    goal_category ENUM,
+    target_date DATE,
+    progress_rate DECIMAL(5,2) DEFAULT 0.0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE INDEX idx_employee ON TRN_GoalProgress (employee_id);

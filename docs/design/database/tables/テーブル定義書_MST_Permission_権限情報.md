@@ -33,34 +33,34 @@ MST_Permission（権限情報）は、システム内の権限（許可）を管
 
 ## 🗂️ カラム定義
 
-| カラム名 | 論理名 | データ型 | NULL | デフォルト | 説明 |
-|----------|--------|----------|------|------------|------|
-| id | ID | VARCHAR(50) | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN | × |  | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR(50) | × |  | マルチテナント識別子 |
-| permission_code | 権限コード | VARCHAR(50) | ○ |  | 権限を一意に識別するコード（例：PERM_USER_READ） |
-| permission_name | 権限名 | VARCHAR(100) | ○ |  | 権限の正式名称 |
-| permission_name_short | 権限名略称 | VARCHAR(50) | ○ |  | 権限の略称・短縮名 |
-| permission_category | 権限カテゴリ | ENUM | ○ |  | 権限のカテゴリ（SYSTEM:システム、SCREEN:画面、API:API、DATA:データ、FUNCTION:機能） |
-| resource_type | リソース種別 | VARCHAR(50) | ○ |  | 権限対象のリソース種別（USER、SKILL、REPORT等） |
-| action_type | アクション種別 | ENUM | ○ |  | 許可するアクション（CREATE:作成、READ:参照、UPDATE:更新、DELETE:削除、EXECUTE:実行） |
-| scope_level | スコープレベル | ENUM | ○ |  | 権限のスコープ（GLOBAL:全体、TENANT:テナント、DEPARTMENT:部署、SELF:自分のみ） |
-| parent_permission_id | 親権限ID | VARCHAR(50) | ○ |  | 上位権限のID（MST_Permissionへの自己参照外部キー） |
-| is_system_permission | システム権限フラグ | BOOLEAN | ○ |  | システム標準権限かどうか（削除・変更不可） |
-| requires_conditions | 条件要求フラグ | BOOLEAN | ○ |  | 権限行使に条件が必要かどうか |
-| condition_expression | 条件式 | TEXT | ○ |  | 権限行使の条件式（SQL WHERE句形式等） |
-| risk_level | リスクレベル | INT | ○ | 1 | 権限のリスクレベル（1:低、2:中、3:高、4:最高） |
-| requires_approval | 承認要求フラグ | BOOLEAN | ○ |  | 権限行使に承認が必要かどうか |
-| audit_required | 監査要求フラグ | BOOLEAN | ○ |  | 権限行使時の監査ログ記録が必要かどうか |
-| permission_status | 権限状態 | ENUM | ○ | ACTIVE | 権限の状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨） |
-| effective_from | 有効開始日 | DATE | ○ |  | 権限の有効開始日 |
-| effective_to | 有効終了日 | DATE | ○ |  | 権限の有効終了日 |
-| sort_order | 表示順序 | INT | ○ |  | 画面表示時の順序 |
-| description | 権限説明 | TEXT | ○ |  | 権限の詳細説明・用途 |
-| created_at | 作成日時 | TIMESTAMP | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR(50) | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR(50) | × |  | レコード更新者のユーザーID |
+| カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト | 説明 |
+|----------|--------|----------|------|------|----|----|------------|------|
+| id | ID | VARCHAR | 50 | × | ● |  |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × |  |  |  | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  |  |  | マルチテナント識別子 |
+| permission_code | 権限コード | VARCHAR | 50 | ○ |  |  |  | 権限を一意に識別するコード（例：PERM_USER_READ） |
+| permission_name | 権限名 | VARCHAR | 100 | ○ |  |  |  | 権限の正式名称 |
+| permission_name_short | 権限名略称 | VARCHAR | 50 | ○ |  |  |  | 権限の略称・短縮名 |
+| permission_category | 権限カテゴリ | ENUM |  | ○ |  |  |  | 権限のカテゴリ（SYSTEM:システム、SCREEN:画面、API:API、DATA:データ、FUNCTION:機能） |
+| resource_type | リソース種別 | VARCHAR | 50 | ○ |  |  |  | 権限対象のリソース種別（USER、SKILL、REPORT等） |
+| action_type | アクション種別 | ENUM |  | ○ |  |  |  | 許可するアクション（CREATE:作成、READ:参照、UPDATE:更新、DELETE:削除、EXECUTE:実行） |
+| scope_level | スコープレベル | ENUM |  | ○ |  |  |  | 権限のスコープ（GLOBAL:全体、TENANT:テナント、DEPARTMENT:部署、SELF:自分のみ） |
+| parent_permission_id | 親権限ID | VARCHAR | 50 | ○ |  | ● |  | 上位権限のID（MST_Permissionへの自己参照外部キー） |
+| is_system_permission | システム権限フラグ | BOOLEAN |  | ○ |  |  |  | システム標準権限かどうか（削除・変更不可） |
+| requires_conditions | 条件要求フラグ | BOOLEAN |  | ○ |  |  |  | 権限行使に条件が必要かどうか |
+| condition_expression | 条件式 | TEXT |  | ○ |  |  |  | 権限行使の条件式（SQL WHERE句形式等） |
+| risk_level | リスクレベル | INT |  | ○ |  |  | 1 | 権限のリスクレベル（1:低、2:中、3:高、4:最高） |
+| requires_approval | 承認要求フラグ | BOOLEAN |  | ○ |  |  |  | 権限行使に承認が必要かどうか |
+| audit_required | 監査要求フラグ | BOOLEAN |  | ○ |  |  |  | 権限行使時の監査ログ記録が必要かどうか |
+| permission_status | 権限状態 | ENUM |  | ○ |  |  | ACTIVE | 権限の状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨） |
+| effective_from | 有効開始日 | DATE |  | ○ |  |  |  | 権限の有効開始日 |
+| effective_to | 有効終了日 | DATE |  | ○ |  |  |  | 権限の有効終了日 |
+| sort_order | 表示順序 | INT |  | ○ |  |  |  | 画面表示時の順序 |
+| description | 権限説明 | TEXT |  | ○ |  |  |  | 権限の詳細説明・用途 |
+| created_at | 作成日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × |  |  | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| created_by | 作成者 | VARCHAR | 50 | × |  |  |  | レコード作成者のユーザーID |
+| updated_by | 更新者 | VARCHAR | 50 | × |  |  |  | レコード更新者のユーザーID |
 
 ## 🔍 インデックス定義
 
