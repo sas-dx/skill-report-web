@@ -54,6 +54,62 @@ export interface UpdateHistory {
   changes: string;
 }
 
+// CAR.1-PLAN.1: キャリア目標関連のデータ型
+export interface CareerGoal {
+  id: string;
+  emp_no: string;
+  goal_type: 'short' | 'medium' | 'long'; // 短期・中期・長期
+  title: string;
+  description: string;
+  target_date: string;
+  status: 'planning' | 'in_progress' | 'completed' | 'postponed';
+  progress: number; // 0-100%
+  skills_required: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CareerPlan {
+  id: string;
+  emp_no: string;
+  vision: string;
+  current_position: string;
+  target_position: string;
+  target_year: number;
+  goals: CareerGoal[];
+  updated_at: string;
+}
+
+// WPM.1-DET.1: 作業実績関連のデータ型
+export interface WorkProject {
+  id: string;
+  project_name: string;
+  client_name?: string;
+  start_date: string;
+  end_date?: string;
+  status: 'planning' | 'active' | 'completed' | 'suspended';
+  role: string;
+  team_size: number;
+  technologies: string[];
+  description: string;
+}
+
+export interface WorkRecord {
+  id: string;
+  emp_no: string;
+  project: WorkProject;
+  period_start: string;
+  period_end?: string;
+  responsibilities: string[];
+  achievements: string[];
+  skills_used: string[];
+  skills_acquired: string[];
+  challenges: string;
+  lessons_learned: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // プロフィールモックデータ
 export const mockProfileData: ProfileData = {
   emp_no: "EMP001",
@@ -446,4 +502,189 @@ export const skillLevelDescriptions = {
   2: "基礎知識あり・簡単な作業可能",
   3: "実務経験あり・一人で作業可能",
   4: "専門知識あり・他者への指導可能"
+};
+
+// キャリアプランモックデータ
+export const mockCareerPlan: CareerPlan = {
+  id: "career_001",
+  emp_no: "EMP001",
+  vision: "フルスタックエンジニアとして、技術とビジネスの両面で価値を提供できる人材になる",
+  current_position: "主任",
+  target_position: "シニアエンジニア・テックリード",
+  target_year: 2027,
+  goals: [],
+  updated_at: "2025-05-20T10:30:00Z"
+};
+
+// キャリア目標モックデータ
+export const mockCareerGoals: CareerGoal[] = [
+  {
+    id: "goal_001",
+    emp_no: "EMP001",
+    goal_type: "short",
+    title: "React/Next.jsの習得",
+    description: "モダンなフロントエンド開発技術を習得し、フルスタック開発能力を向上させる",
+    target_date: "2025-12-31",
+    status: "in_progress",
+    progress: 65,
+    skills_required: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    created_at: "2025-01-15T09:00:00Z",
+    updated_at: "2025-05-20T14:30:00Z"
+  },
+  {
+    id: "goal_002",
+    emp_no: "EMP001",
+    goal_type: "medium",
+    title: "プロジェクトリーダー経験",
+    description: "5名以上のチームでプロジェクトリーダーとして案件を成功に導く",
+    target_date: "2026-06-30",
+    status: "planning",
+    progress: 15,
+    skills_required: ["プロジェクト管理", "チームマネジメント", "コミュニケーション"],
+    created_at: "2025-02-01T10:00:00Z",
+    updated_at: "2025-05-15T16:45:00Z"
+  },
+  {
+    id: "goal_003",
+    emp_no: "EMP001",
+    goal_type: "long",
+    title: "技術アーキテクト認定取得",
+    description: "システムアーキテクチャ設計能力を証明する資格を取得し、技術的リーダーシップを発揮する",
+    target_date: "2027-12-31",
+    status: "planning",
+    progress: 5,
+    skills_required: ["システム設計", "アーキテクチャパターン", "技術選定"],
+    created_at: "2025-03-01T11:00:00Z",
+    updated_at: "2025-04-20T13:20:00Z"
+  }
+];
+
+// 作業実績モックデータ
+export const mockWorkRecords: WorkRecord[] = [
+  {
+    id: "work_001",
+    emp_no: "EMP001",
+    project: {
+      id: "proj_001",
+      project_name: "ECサイトリニューアルプロジェクト",
+      client_name: "株式会社サンプル商事",
+      start_date: "2024-04-01",
+      end_date: "2025-03-31",
+      status: "active",
+      role: "フロントエンドエンジニア",
+      team_size: 8,
+      technologies: ["React", "TypeScript", "Next.js", "Tailwind CSS", "PostgreSQL"],
+      description: "既存ECサイトのモダン化とユーザビリティ向上を目的としたリニューアルプロジェクト"
+    },
+    period_start: "2024-04-01",
+    period_end: "2025-03-31",
+    responsibilities: [
+      "商品一覧・詳細画面のフロントエンド開発",
+      "ショッピングカート機能の実装",
+      "レスポンシブデザインの対応",
+      "パフォーマンス最適化"
+    ],
+    achievements: [
+      "ページ読み込み速度を40%改善",
+      "モバイル対応によりコンバージョン率15%向上",
+      "コンポーネントの再利用性を高め開発効率20%向上"
+    ],
+    skills_used: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Git"],
+    skills_acquired: ["Next.js App Router", "Tailwind CSS", "パフォーマンス最適化"],
+    challenges: "大規模なレガシーコードからの移行で、既存機能との互換性を保ちながらモダン化を進める必要があった",
+    lessons_learned: "段階的な移行戦略の重要性と、チーム内でのコードレビュー文化の価値を実感した",
+    created_at: "2024-04-01T09:00:00Z",
+    updated_at: "2025-05-20T15:30:00Z"
+  },
+  {
+    id: "work_002",
+    emp_no: "EMP001",
+    project: {
+      id: "proj_002",
+      project_name: "社内業務システム開発",
+      start_date: "2023-10-01",
+      end_date: "2024-03-31",
+      status: "completed",
+      role: "フルスタックエンジニア",
+      team_size: 5,
+      technologies: ["Java", "Spring Boot", "React", "MySQL", "Docker"],
+      description: "人事・経理業務の効率化を目的とした社内システムの新規開発"
+    },
+    period_start: "2023-10-01",
+    period_end: "2024-03-31",
+    responsibilities: [
+      "要件定義・基本設計への参画",
+      "バックエンドAPI開発（Spring Boot）",
+      "フロントエンド開発（React）",
+      "データベース設計・実装"
+    ],
+    achievements: [
+      "予定より1ヶ月早期にリリース完了",
+      "業務処理時間を60%短縮",
+      "ユーザー満足度調査で4.5/5.0の高評価"
+    ],
+    skills_used: ["Java", "Spring Boot", "React", "MySQL", "Docker", "Git"],
+    skills_acquired: ["Spring Security", "JPA", "Docker Compose"],
+    challenges: "複雑な業務ルールをシステムに落とし込む際の要件整理と、ユーザーとの認識合わせが困難だった",
+    lessons_learned: "ユーザーとの密なコミュニケーションと、プロトタイプを使った早期検証の重要性を学んだ",
+    created_at: "2023-10-01T09:00:00Z",
+    updated_at: "2024-04-15T10:20:00Z"
+  },
+  {
+    id: "work_003",
+    emp_no: "EMP001",
+    project: {
+      id: "proj_003",
+      project_name: "APIマイクロサービス化プロジェクト",
+      start_date: "2023-01-01",
+      end_date: "2023-09-30",
+      status: "completed",
+      role: "バックエンドエンジニア",
+      team_size: 6,
+      technologies: ["Java", "Spring Boot", "Docker", "Kubernetes", "PostgreSQL"],
+      description: "モノリシックなシステムをマイクロサービスアーキテクチャに移行"
+    },
+    period_start: "2023-01-01",
+    period_end: "2023-09-30",
+    responsibilities: [
+      "既存システムの分析・分割設計",
+      "マイクロサービスのAPI設計・開発",
+      "Docker化・Kubernetes環境構築",
+      "データ移行・整合性確保"
+    ],
+    achievements: [
+      "システムの可用性を99.9%に向上",
+      "デプロイ頻度を週1回から日次に改善",
+      "新機能開発速度を50%向上"
+    ],
+    skills_used: ["Java", "Spring Boot", "Docker", "Kubernetes", "PostgreSQL"],
+    skills_acquired: ["マイクロサービス設計", "Kubernetes", "CI/CD"],
+    challenges: "サービス間の依存関係の整理と、データ整合性を保ちながらの段階的移行が複雑だった",
+    lessons_learned: "アーキテクチャ設計の重要性と、段階的な移行戦略の必要性を深く理解した",
+    created_at: "2023-01-01T09:00:00Z",
+    updated_at: "2023-10-15T14:45:00Z"
+  }
+];
+
+// 目標タイプのラベル
+export const goalTypeLabels = {
+  short: "短期目標（1年以内）",
+  medium: "中期目標（1-3年）",
+  long: "長期目標（3年以上）"
+};
+
+// 目標ステータスのラベル
+export const goalStatusLabels = {
+  planning: "計画中",
+  in_progress: "進行中",
+  completed: "完了",
+  postponed: "延期"
+};
+
+// プロジェクトステータスのラベル
+export const projectStatusLabels = {
+  planning: "計画中",
+  active: "進行中",
+  completed: "完了",
+  suspended: "中断"
 };
