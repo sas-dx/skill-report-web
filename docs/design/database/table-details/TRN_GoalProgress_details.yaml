@@ -3,6 +3,13 @@ table_name: "TRN_GoalProgress"
 logical_name: "目標進捗"
 category: "トランザクション系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - 目標進捗トランザクションテーブルの詳細定義"
+
 # テーブル概要・目的
 overview: |
   TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状況を管理するトランザクションテーブルです。
