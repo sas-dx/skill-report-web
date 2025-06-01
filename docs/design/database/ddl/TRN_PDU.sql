@@ -1,5 +1,5 @@
 -- TRN_PDU (継続教育ポイント) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_PDU (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

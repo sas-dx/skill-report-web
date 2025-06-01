@@ -1,8 +1,8 @@
 -- 全テーブル統合DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 -- MST_UserAuth (ユーザー認証情報) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:42
 
 CREATE TABLE MST_UserAuth (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -46,7 +46,7 @@ ALTER TABLE MST_UserAuth ADD CONSTRAINT fk_userauth_employee FOREIGN KEY (employ
 
 
 -- MST_Role (ロール情報) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:42
 
 CREATE TABLE MST_Role (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -89,7 +89,7 @@ ALTER TABLE MST_Role ADD CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) 
 
 
 -- MST_Permission (権限情報) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:42
 
 CREATE TABLE MST_Permission (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -135,7 +135,7 @@ ALTER TABLE MST_Permission ADD CONSTRAINT fk_permission_parent FOREIGN KEY (pare
 
 
 -- MST_UserRole (ユーザーロール紐付け) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:42
 
 CREATE TABLE MST_UserRole (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -187,7 +187,7 @@ ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_approved_by FOREIGN KEY (app
 
 
 -- MST_Employee (社員基本情報) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_Employee (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -228,7 +228,7 @@ ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager FOREIGN KEY (manager
 
 
 -- MST_Department (部署マスタ) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_Department (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -274,7 +274,7 @@ ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy FOREIGN KEY (depu
 
 
 -- MST_Position (役職マスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_Position (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -316,7 +316,7 @@ CREATE INDEX idx_sort_order ON MST_Position (sort_order);
 
 
 -- MST_SkillHierarchy (スキル階層マスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_SkillHierarchy (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -350,7 +350,7 @@ ALTER TABLE MST_SkillHierarchy ADD CONSTRAINT fk_hierarchy_parent FOREIGN KEY (p
 
 
 -- MST_Certification (資格情報) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_Certification (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -392,37 +392,121 @@ ALTER TABLE MST_Certification ADD CONSTRAINT fk_certification_skill_category FOR
 
 
 -- MST_CareerPlan (目標・キャリアプラン) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_CareerPlan (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    career_plan_id VARCHAR(50),
+    employee_id VARCHAR(50),
+    plan_name VARCHAR(200),
+    plan_description TEXT,
+    plan_type ENUM,
+    target_position_id VARCHAR(50),
+    target_job_type_id VARCHAR(50),
+    target_department_id VARCHAR(50),
+    current_level ENUM,
+    target_level ENUM,
+    plan_start_date DATE,
+    plan_end_date DATE,
+    milestone_1_date DATE,
+    milestone_1_description VARCHAR(500),
+    milestone_2_date DATE,
+    milestone_2_description VARCHAR(500),
+    milestone_3_date DATE,
+    milestone_3_description VARCHAR(500),
+    required_skills TEXT,
+    required_certifications TEXT,
+    required_experiences TEXT,
+    development_actions TEXT,
+    training_plan TEXT,
+    mentor_id VARCHAR(50),
+    supervisor_id VARCHAR(50),
+    plan_status ENUM DEFAULT 'DRAFT',
+    progress_percentage DECIMAL(5,2) DEFAULT 0.0,
+    last_review_date DATE,
+    next_review_date DATE,
+    review_frequency ENUM DEFAULT 'QUARTERLY',
+    success_criteria TEXT,
+    risk_factors TEXT,
+    support_resources TEXT,
+    budget_allocated DECIMAL(10,2),
+    budget_used DECIMAL(10,2) DEFAULT 0.0,
+    priority_level ENUM DEFAULT 'NORMAL',
+    visibility_level ENUM DEFAULT 'MANAGER',
+    template_id VARCHAR(50),
+    custom_fields TEXT,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_career_plan_id ON MST_CareerPlan (career_plan_id);
+CREATE INDEX idx_employee_id ON MST_CareerPlan (employee_id);
+CREATE INDEX idx_plan_type ON MST_CareerPlan (plan_type);
+CREATE INDEX idx_target_position ON MST_CareerPlan (target_position_id);
+CREATE INDEX idx_target_job_type ON MST_CareerPlan (target_job_type_id);
+CREATE INDEX idx_plan_status ON MST_CareerPlan (plan_status);
+CREATE INDEX idx_plan_period ON MST_CareerPlan (plan_start_date, plan_end_date);
+CREATE INDEX idx_review_date ON MST_CareerPlan (next_review_date);
+CREATE INDEX idx_mentor_id ON MST_CareerPlan (mentor_id);
+CREATE INDEX idx_supervisor_id ON MST_CareerPlan (supervisor_id);
+CREATE INDEX idx_priority_level ON MST_CareerPlan (priority_level);
+
+-- 外部キー制約
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_position FOREIGN KEY (target_position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_job_type FOREIGN KEY (target_job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_department FOREIGN KEY (target_department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor FOREIGN KEY (mentor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_supervisor FOREIGN KEY (supervisor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_ReportTemplate (帳票テンプレート) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_ReportTemplate (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    template_key VARCHAR(100),
+    template_name VARCHAR(200),
+    report_category ENUM,
+    output_format ENUM,
+    language_code VARCHAR(10) DEFAULT 'ja',
+    template_content TEXT,
+    style_sheet TEXT,
+    parameters_schema TEXT,
+    data_source_config TEXT,
+    page_settings TEXT,
+    header_template TEXT,
+    footer_template TEXT,
+    is_default BOOLEAN DEFAULT False,
+    is_active BOOLEAN DEFAULT True,
+    version VARCHAR(20) DEFAULT '1.0.0',
+    preview_image_url VARCHAR(500),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_report_template_tenant_key ON MST_ReportTemplate (tenant_id, template_key, language_code);
+CREATE INDEX idx_report_template_category ON MST_ReportTemplate (report_category);
+CREATE INDEX idx_report_template_format ON MST_ReportTemplate (output_format);
+CREATE INDEX idx_report_template_language ON MST_ReportTemplate (language_code);
+CREATE INDEX idx_report_template_default ON MST_ReportTemplate (is_default, is_active);
+
+-- 外部キー制約
 
 
 -- MST_SystemConfig (システム設定) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_SystemConfig (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -464,67 +548,203 @@ CREATE INDEX idx_sort_order ON MST_SystemConfig (sort_order);
 
 
 -- MST_Tenant (テナント管理) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_Tenant (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    tenant_id VARCHAR(50),
+    tenant_code VARCHAR(20),
+    tenant_name VARCHAR(200),
+    tenant_name_en VARCHAR(200),
+    tenant_short_name VARCHAR(50),
+    tenant_type ENUM,
+    parent_tenant_id VARCHAR(50),
+    tenant_level INTEGER DEFAULT 1,
+    domain_name VARCHAR(100),
+    subdomain VARCHAR(50),
+    logo_url VARCHAR(500),
+    primary_color VARCHAR(7),
+    secondary_color VARCHAR(7),
+    timezone VARCHAR(50) DEFAULT 'Asia/Tokyo',
+    locale VARCHAR(10) DEFAULT 'ja_JP',
+    currency_code VARCHAR(3) DEFAULT 'JPY',
+    date_format VARCHAR(20) DEFAULT 'YYYY-MM-DD',
+    time_format VARCHAR(20) DEFAULT 'HH:mm:ss',
+    admin_email VARCHAR(255),
+    contact_email VARCHAR(255),
+    phone_number VARCHAR(20),
+    address TEXT,
+    postal_code VARCHAR(10),
+    country_code VARCHAR(2) DEFAULT 'JP',
+    subscription_plan ENUM DEFAULT 'BASIC',
+    max_users INTEGER DEFAULT 100,
+    max_storage_gb INTEGER DEFAULT 10,
+    features_enabled TEXT,
+    custom_settings TEXT,
+    security_policy TEXT,
+    data_retention_days INTEGER DEFAULT 2555,
+    backup_enabled BOOLEAN DEFAULT True,
+    backup_frequency ENUM DEFAULT 'DAILY',
+    contract_start_date DATE,
+    contract_end_date DATE,
+    trial_end_date DATE,
+    billing_cycle ENUM DEFAULT 'MONTHLY',
+    monthly_fee DECIMAL(10,2),
+    setup_fee DECIMAL(10,2),
+    status ENUM DEFAULT 'TRIAL',
+    activation_date DATE,
+    suspension_date DATE,
+    suspension_reason TEXT,
+    last_login_date DATE,
+    current_users_count INTEGER DEFAULT 0,
+    storage_used_gb DECIMAL(10,3) DEFAULT 0.0,
+    api_rate_limit INTEGER DEFAULT 1000,
+    sso_enabled BOOLEAN DEFAULT False,
+    sso_provider VARCHAR(50),
+    sso_config TEXT,
+    webhook_url VARCHAR(500),
+    webhook_secret VARCHAR(100),
+    created_by VARCHAR(50),
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_tenant_id ON MST_Tenant (tenant_id);
+CREATE UNIQUE INDEX idx_tenant_code ON MST_Tenant (tenant_code);
+CREATE UNIQUE INDEX idx_domain_name ON MST_Tenant (domain_name);
+CREATE UNIQUE INDEX idx_subdomain ON MST_Tenant (subdomain);
+CREATE INDEX idx_tenant_type ON MST_Tenant (tenant_type);
+CREATE INDEX idx_parent_tenant_id ON MST_Tenant (parent_tenant_id);
+CREATE INDEX idx_subscription_plan ON MST_Tenant (subscription_plan);
+CREATE INDEX idx_status ON MST_Tenant (status);
+CREATE INDEX idx_contract_period ON MST_Tenant (contract_start_date, contract_end_date);
+CREATE INDEX idx_admin_email ON MST_Tenant (admin_email);
+
+-- 外部キー制約
+ALTER TABLE MST_Tenant ADD CONSTRAINT fk_tenant_parent FOREIGN KEY (parent_tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_TenantSettings (テナント設定) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_TenantSettings (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    setting_category ENUM,
+    setting_key VARCHAR(100),
+    setting_name VARCHAR(200),
+    setting_description TEXT,
+    data_type ENUM,
+    setting_value TEXT,
+    default_value TEXT,
+    validation_rules TEXT,
+    is_required BOOLEAN DEFAULT False,
+    is_encrypted BOOLEAN DEFAULT False,
+    is_system_managed BOOLEAN DEFAULT False,
+    is_user_configurable BOOLEAN DEFAULT True,
+    display_order INTEGER DEFAULT 0,
+    effective_from TIMESTAMP,
+    effective_until TIMESTAMP,
+    last_modified_by VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_tenant_settings_tenant_key ON MST_TenantSettings (tenant_id, setting_key);
+CREATE INDEX idx_tenant_settings_category ON MST_TenantSettings (setting_category);
+CREATE INDEX idx_tenant_settings_configurable ON MST_TenantSettings (is_user_configurable);
+CREATE INDEX idx_tenant_settings_system_managed ON MST_TenantSettings (is_system_managed);
+CREATE INDEX idx_tenant_settings_display_order ON MST_TenantSettings (tenant_id, setting_category, display_order);
+CREATE INDEX idx_tenant_settings_effective ON MST_TenantSettings (effective_from, effective_until);
+
+-- 外部キー制約
+ALTER TABLE MST_TenantSettings ADD CONSTRAINT fk_tenant_settings_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 -- MST_NotificationSettings (通知設定) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_NotificationSettings (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    setting_key VARCHAR(100),
+    setting_name VARCHAR(200),
+    notification_type ENUM,
+    target_audience ENUM,
+    trigger_event VARCHAR(100),
+    frequency_type ENUM DEFAULT 'IMMEDIATE',
+    frequency_value INTEGER,
+    template_id VARCHAR(50),
+    channel_config TEXT,
+    is_enabled BOOLEAN DEFAULT True,
+    priority_level ENUM DEFAULT 'MEDIUM',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_notification_settings_tenant_key ON MST_NotificationSettings (tenant_id, setting_key);
+CREATE INDEX idx_notification_settings_type ON MST_NotificationSettings (notification_type);
+CREATE INDEX idx_notification_settings_event ON MST_NotificationSettings (trigger_event);
+CREATE INDEX idx_notification_settings_enabled ON MST_NotificationSettings (is_enabled);
+CREATE INDEX idx_notification_settings_template ON MST_NotificationSettings (template_id);
+
+-- 外部キー制約
+ALTER TABLE MST_NotificationSettings ADD CONSTRAINT fk_notification_settings_template FOREIGN KEY (template_id) REFERENCES MST_NotificationTemplate(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_NotificationTemplate (通知テンプレート) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_NotificationTemplate (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    template_key VARCHAR(100),
+    template_name VARCHAR(200),
+    notification_type ENUM,
+    language_code VARCHAR(10) DEFAULT 'ja',
+    subject_template VARCHAR(500),
+    body_template TEXT,
+    format_type ENUM DEFAULT 'PLAIN',
+    parameters TEXT,
+    sample_data TEXT,
+    is_default BOOLEAN DEFAULT False,
+    is_active BOOLEAN DEFAULT True,
+    version VARCHAR(20) DEFAULT '1.0.0',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_notification_template_tenant_key_type ON MST_NotificationTemplate (tenant_id, template_key, notification_type, language_code);
+CREATE INDEX idx_notification_template_type ON MST_NotificationTemplate (notification_type);
+CREATE INDEX idx_notification_template_language ON MST_NotificationTemplate (language_code);
+CREATE INDEX idx_notification_template_default ON MST_NotificationTemplate (is_default, is_active);
+CREATE INDEX idx_notification_template_key ON MST_NotificationTemplate (template_key);
+
+-- 外部キー制約
 
 
 -- MST_SkillCategory (スキルカテゴリマスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_SkillCategory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -573,7 +793,7 @@ ALTER TABLE MST_SkillCategory ADD CONSTRAINT fk_skillcategory_parent FOREIGN KEY
 
 
 -- MST_JobType (職種マスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_JobType (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -614,7 +834,7 @@ CREATE INDEX idx_sort_order ON MST_JobType (sort_order);
 
 
 -- MST_SkillGrade (スキルグレードマスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_SkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -655,112 +875,375 @@ CREATE INDEX idx_sort_order ON MST_SkillGrade (sort_order);
 
 
 -- MST_CertificationRequirement (資格要件マスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_CertificationRequirement (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    requirement_id VARCHAR(50),
+    requirement_name VARCHAR(200),
+    requirement_description TEXT,
+    requirement_type ENUM,
+    target_job_type_id VARCHAR(50),
+    target_position_id VARCHAR(50),
+    target_skill_grade_id VARCHAR(50),
+    target_department_id VARCHAR(50),
+    certification_id VARCHAR(50),
+    requirement_level ENUM,
+    priority_order INTEGER DEFAULT 1,
+    alternative_certifications TEXT,
+    minimum_experience_years INTEGER,
+    minimum_skill_level ENUM,
+    grace_period_months INTEGER,
+    renewal_required BOOLEAN DEFAULT False,
+    renewal_interval_months INTEGER,
+    exemption_conditions TEXT,
+    assessment_criteria TEXT,
+    business_justification TEXT,
+    compliance_requirement BOOLEAN DEFAULT False,
+    client_requirement BOOLEAN DEFAULT False,
+    internal_policy BOOLEAN DEFAULT False,
+    effective_start_date DATE,
+    effective_end_date DATE,
+    notification_timing INTEGER,
+    escalation_timing INTEGER,
+    cost_support_available BOOLEAN DEFAULT False,
+    cost_support_amount DECIMAL(10,2),
+    cost_support_conditions TEXT,
+    training_support_available BOOLEAN DEFAULT False,
+    recommended_training_programs TEXT,
+    study_time_allocation DECIMAL(5,2),
+    success_rate DECIMAL(5,2),
+    average_study_hours DECIMAL(6,2),
+    difficulty_rating ENUM,
+    active_flag BOOLEAN DEFAULT True,
+    created_by VARCHAR(50),
+    approved_by VARCHAR(50),
+    approval_date DATE,
+    review_date DATE,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_requirement_id ON MST_CertificationRequirement (requirement_id);
+CREATE INDEX idx_requirement_type ON MST_CertificationRequirement (requirement_type);
+CREATE INDEX idx_target_job_type ON MST_CertificationRequirement (target_job_type_id);
+CREATE INDEX idx_target_position ON MST_CertificationRequirement (target_position_id);
+CREATE INDEX idx_target_skill_grade ON MST_CertificationRequirement (target_skill_grade_id);
+CREATE INDEX idx_certification_id ON MST_CertificationRequirement (certification_id);
+CREATE INDEX idx_requirement_level ON MST_CertificationRequirement (requirement_level);
+CREATE INDEX idx_active_flag ON MST_CertificationRequirement (active_flag);
+CREATE INDEX idx_effective_period ON MST_CertificationRequirement (effective_start_date, effective_end_date);
+CREATE INDEX idx_compliance_requirement ON MST_CertificationRequirement (compliance_requirement);
+CREATE INDEX idx_priority_order ON MST_CertificationRequirement (priority_order);
+
+-- 外部キー制約
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_job_type FOREIGN KEY (target_job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_position FOREIGN KEY (target_position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_skill_grade FOREIGN KEY (target_skill_grade_id) REFERENCES MST_SkillGrade(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_department FOREIGN KEY (target_department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_certification FOREIGN KEY (certification_id) REFERENCES MST_Certification(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_created_by FOREIGN KEY (created_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_approved_by FOREIGN KEY (approved_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_EmployeeJobType (社員職種関連) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_EmployeeJobType (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    employee_job_type_id VARCHAR(50),
+    employee_id VARCHAR(50),
+    job_type_id VARCHAR(50),
+    assignment_type ENUM,
+    assignment_ratio DECIMAL(5,2) DEFAULT 100.0,
+    effective_start_date DATE,
+    effective_end_date DATE,
+    assignment_reason ENUM,
+    assignment_status ENUM DEFAULT 'ACTIVE',
+    proficiency_level ENUM DEFAULT 'NOVICE',
+    target_proficiency_level ENUM,
+    target_achievement_date DATE,
+    certification_requirements TEXT,
+    skill_requirements TEXT,
+    experience_requirements TEXT,
+    development_plan TEXT,
+    training_plan TEXT,
+    mentor_id VARCHAR(50),
+    supervisor_id VARCHAR(50),
+    performance_rating ENUM,
+    last_evaluation_date DATE,
+    next_evaluation_date DATE,
+    evaluation_frequency ENUM DEFAULT 'QUARTERLY',
+    career_path TEXT,
+    strengths TEXT,
+    improvement_areas TEXT,
+    achievements TEXT,
+    goals TEXT,
+    workload_percentage DECIMAL(5,2) DEFAULT 100.0,
+    billable_flag BOOLEAN DEFAULT True,
+    cost_center VARCHAR(20),
+    budget_allocation DECIMAL(10,2),
+    hourly_rate DECIMAL(8,2),
+    overtime_eligible BOOLEAN DEFAULT True,
+    remote_work_eligible BOOLEAN DEFAULT False,
+    travel_required BOOLEAN DEFAULT False,
+    security_clearance_required BOOLEAN DEFAULT False,
+    created_by VARCHAR(50),
+    approved_by VARCHAR(50),
+    approval_date DATE,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_employee_job_type_id ON MST_EmployeeJobType (employee_job_type_id);
+CREATE INDEX idx_employee_id ON MST_EmployeeJobType (employee_id);
+CREATE INDEX idx_job_type_id ON MST_EmployeeJobType (job_type_id);
+CREATE INDEX idx_employee_job_type ON MST_EmployeeJobType (employee_id, job_type_id);
+CREATE INDEX idx_assignment_type ON MST_EmployeeJobType (assignment_type);
+CREATE INDEX idx_assignment_status ON MST_EmployeeJobType (assignment_status);
+CREATE INDEX idx_proficiency_level ON MST_EmployeeJobType (proficiency_level);
+CREATE INDEX idx_effective_period ON MST_EmployeeJobType (effective_start_date, effective_end_date);
+CREATE INDEX idx_mentor_id ON MST_EmployeeJobType (mentor_id);
+CREATE INDEX idx_supervisor_id ON MST_EmployeeJobType (supervisor_id);
+CREATE INDEX idx_performance_rating ON MST_EmployeeJobType (performance_rating);
+
+-- 外部キー制約
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_mentor FOREIGN KEY (mentor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_supervisor FOREIGN KEY (supervisor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_created_by FOREIGN KEY (created_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_approved_by FOREIGN KEY (approved_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_JobTypeSkillGrade (職種スキルグレード関連) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_JobTypeSkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    job_type_id VARCHAR(50),
+    skill_grade_id VARCHAR(50),
+    grade_requirement_type ENUM DEFAULT 'STANDARD',
+    required_experience_years DECIMAL(4,1),
+    promotion_criteria TEXT,
+    salary_range_min DECIMAL(10,0),
+    salary_range_max DECIMAL(10,0),
+    performance_expectations TEXT,
+    leadership_requirements TEXT,
+    technical_depth INTEGER,
+    business_impact INTEGER,
+    team_size_expectation INTEGER,
+    certification_requirements TEXT,
+    grade_status ENUM DEFAULT 'ACTIVE',
+    effective_date DATE,
+    expiry_date DATE,
+    next_grade_path TEXT,
+    evaluation_frequency ENUM DEFAULT 'ANNUAL',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_MST_JobTypeSkillGrade_job_type_id ON MST_JobTypeSkillGrade (job_type_id);
+CREATE INDEX idx_MST_JobTypeSkillGrade_skill_grade_id ON MST_JobTypeSkillGrade (skill_grade_id);
+CREATE UNIQUE INDEX idx_MST_JobTypeSkillGrade_job_grade ON MST_JobTypeSkillGrade (job_type_id, skill_grade_id);
+CREATE INDEX idx_MST_JobTypeSkillGrade_requirement_type ON MST_JobTypeSkillGrade (grade_requirement_type);
+CREATE INDEX idx_MST_JobTypeSkillGrade_experience_years ON MST_JobTypeSkillGrade (required_experience_years);
+CREATE INDEX idx_MST_JobTypeSkillGrade_status ON MST_JobTypeSkillGrade (grade_status);
+CREATE INDEX idx_MST_JobTypeSkillGrade_effective_date ON MST_JobTypeSkillGrade (effective_date);
+CREATE INDEX idx_MST_JobTypeSkillGrade_technical_depth ON MST_JobTypeSkillGrade (technical_depth);
+
+-- 外部キー制約
+ALTER TABLE MST_JobTypeSkillGrade ADD CONSTRAINT fk_MST_JobTypeSkillGrade_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_JobTypeSkillGrade ADD CONSTRAINT fk_MST_JobTypeSkillGrade_skill_grade FOREIGN KEY (skill_grade_id) REFERENCES MST_SkillGrade(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 -- MST_SkillGradeRequirement (スキルグレード要件) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_SkillGradeRequirement (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    skill_grade_id VARCHAR(50),
+    requirement_category ENUM,
+    requirement_name VARCHAR(200),
+    requirement_description TEXT,
+    evaluation_criteria TEXT,
+    proficiency_level INTEGER,
+    weight_percentage DECIMAL(5,2),
+    minimum_score DECIMAL(5,2),
+    evidence_requirements TEXT,
+    learning_resources TEXT,
+    prerequisite_requirements TEXT,
+    assessment_method ENUM,
+    assessment_frequency ENUM DEFAULT 'ANNUAL',
+    validity_period INTEGER,
+    certification_mapping TEXT,
+    requirement_status ENUM DEFAULT 'ACTIVE',
+    effective_date DATE,
+    expiry_date DATE,
+    revision_notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_MST_SkillGradeRequirement_skill_grade_id ON MST_SkillGradeRequirement (skill_grade_id);
+CREATE INDEX idx_MST_SkillGradeRequirement_category ON MST_SkillGradeRequirement (requirement_category);
+CREATE INDEX idx_MST_SkillGradeRequirement_grade_category ON MST_SkillGradeRequirement (skill_grade_id, requirement_category);
+CREATE INDEX idx_MST_SkillGradeRequirement_proficiency_level ON MST_SkillGradeRequirement (proficiency_level);
+CREATE INDEX idx_MST_SkillGradeRequirement_assessment_method ON MST_SkillGradeRequirement (assessment_method);
+CREATE INDEX idx_MST_SkillGradeRequirement_status ON MST_SkillGradeRequirement (requirement_status);
+CREATE INDEX idx_MST_SkillGradeRequirement_effective_date ON MST_SkillGradeRequirement (effective_date);
+CREATE INDEX idx_MST_SkillGradeRequirement_weight ON MST_SkillGradeRequirement (weight_percentage);
+
+-- 外部キー制約
+ALTER TABLE MST_SkillGradeRequirement ADD CONSTRAINT fk_MST_SkillGradeRequirement_skill_grade FOREIGN KEY (skill_grade_id) REFERENCES MST_SkillGrade(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 -- MST_JobTypeSkill (職種スキル関連) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_JobTypeSkill (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    job_type_id VARCHAR(50),
+    skill_item_id VARCHAR(50),
+    required_level INTEGER,
+    skill_priority ENUM DEFAULT 'MEDIUM',
+    skill_category ENUM,
+    experience_years DECIMAL(4,1),
+    certification_required BOOLEAN DEFAULT False,
+    skill_weight DECIMAL(5,2),
+    evaluation_criteria TEXT,
+    learning_path TEXT,
+    skill_status ENUM DEFAULT 'ACTIVE',
+    effective_date DATE,
+    expiry_date DATE,
+    alternative_skills TEXT,
+    prerequisite_skills TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_MST_JobTypeSkill_job_type_id ON MST_JobTypeSkill (job_type_id);
+CREATE INDEX idx_MST_JobTypeSkill_skill_item_id ON MST_JobTypeSkill (skill_item_id);
+CREATE UNIQUE INDEX idx_MST_JobTypeSkill_job_skill ON MST_JobTypeSkill (job_type_id, skill_item_id);
+CREATE INDEX idx_MST_JobTypeSkill_required_level ON MST_JobTypeSkill (required_level);
+CREATE INDEX idx_MST_JobTypeSkill_priority ON MST_JobTypeSkill (skill_priority);
+CREATE INDEX idx_MST_JobTypeSkill_category ON MST_JobTypeSkill (skill_category);
+CREATE INDEX idx_MST_JobTypeSkill_status ON MST_JobTypeSkill (skill_status);
+CREATE INDEX idx_MST_JobTypeSkill_effective_date ON MST_JobTypeSkill (effective_date);
+
+-- 外部キー制約
+ALTER TABLE MST_JobTypeSkill ADD CONSTRAINT fk_MST_JobTypeSkill_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_JobTypeSkill ADD CONSTRAINT fk_MST_JobTypeSkill_skill_item FOREIGN KEY (skill_item_id) REFERENCES MST_SkillItem(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 -- MST_EmployeeDepartment (社員部署関連) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_EmployeeDepartment (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    employee_id VARCHAR(50),
+    department_id VARCHAR(50),
+    assignment_type ENUM DEFAULT 'PRIMARY',
+    start_date DATE,
+    end_date DATE,
+    assignment_ratio DECIMAL(5,2),
+    role_in_department VARCHAR(100),
+    reporting_manager_id VARCHAR(50),
+    assignment_reason VARCHAR(500),
+    assignment_status ENUM DEFAULT 'ACTIVE',
+    approval_status ENUM DEFAULT 'PENDING',
+    approved_by VARCHAR(50),
+    approved_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_MST_EmployeeDepartment_employee_id ON MST_EmployeeDepartment (employee_id);
+CREATE INDEX idx_MST_EmployeeDepartment_department_id ON MST_EmployeeDepartment (department_id);
+CREATE INDEX idx_MST_EmployeeDepartment_employee_department ON MST_EmployeeDepartment (employee_id, department_id);
+CREATE INDEX idx_MST_EmployeeDepartment_assignment_type ON MST_EmployeeDepartment (assignment_type);
+CREATE INDEX idx_MST_EmployeeDepartment_start_date ON MST_EmployeeDepartment (start_date);
+CREATE INDEX idx_MST_EmployeeDepartment_end_date ON MST_EmployeeDepartment (end_date);
+CREATE INDEX idx_MST_EmployeeDepartment_status ON MST_EmployeeDepartment (assignment_status);
+
+-- 外部キー制約
+ALTER TABLE MST_EmployeeDepartment ADD CONSTRAINT fk_MST_EmployeeDepartment_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeeDepartment ADD CONSTRAINT fk_MST_EmployeeDepartment_department FOREIGN KEY (department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeeDepartment ADD CONSTRAINT fk_MST_EmployeeDepartment_reporting_manager FOREIGN KEY (reporting_manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_EmployeeDepartment ADD CONSTRAINT fk_MST_EmployeeDepartment_approved_by FOREIGN KEY (approved_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_EmployeePosition (社員役職関連) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_EmployeePosition (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    employee_id VARCHAR(50),
+    position_id VARCHAR(50),
+    appointment_type ENUM DEFAULT 'PRIMARY',
+    start_date DATE,
+    end_date DATE,
+    appointment_reason VARCHAR(500),
+    responsibility_scope VARCHAR(500),
+    authority_level INTEGER,
+    salary_grade VARCHAR(20),
+    appointment_status ENUM DEFAULT 'ACTIVE',
+    approval_status ENUM DEFAULT 'PENDING',
+    approved_by VARCHAR(50),
+    approved_at TIMESTAMP,
+    performance_target TEXT,
+    delegation_authority TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_MST_EmployeePosition_employee_id ON MST_EmployeePosition (employee_id);
+CREATE INDEX idx_MST_EmployeePosition_position_id ON MST_EmployeePosition (position_id);
+CREATE INDEX idx_MST_EmployeePosition_employee_position ON MST_EmployeePosition (employee_id, position_id);
+CREATE INDEX idx_MST_EmployeePosition_appointment_type ON MST_EmployeePosition (appointment_type);
+CREATE INDEX idx_MST_EmployeePosition_start_date ON MST_EmployeePosition (start_date);
+CREATE INDEX idx_MST_EmployeePosition_end_date ON MST_EmployeePosition (end_date);
+CREATE INDEX idx_MST_EmployeePosition_status ON MST_EmployeePosition (appointment_status);
+CREATE INDEX idx_MST_EmployeePosition_authority_level ON MST_EmployeePosition (authority_level);
+
+-- 外部キー制約
+ALTER TABLE MST_EmployeePosition ADD CONSTRAINT fk_MST_EmployeePosition_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeePosition ADD CONSTRAINT fk_MST_EmployeePosition_position FOREIGN KEY (position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeePosition ADD CONSTRAINT fk_MST_EmployeePosition_approved_by FOREIGN KEY (approved_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- MST_SkillItem (スキル項目マスタ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_SkillItem (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -783,22 +1266,80 @@ CREATE INDEX idx_skill_category ON MST_SkillItem (skill_category_id);
 
 
 -- MST_TrainingProgram (研修プログラム) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE MST_TrainingProgram (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    training_program_id VARCHAR(50),
+    program_code VARCHAR(20),
+    program_name VARCHAR(200),
+    program_name_en VARCHAR(200),
+    program_description TEXT,
+    program_category ENUM,
+    program_type ENUM,
+    target_audience ENUM,
+    difficulty_level ENUM,
+    duration_hours DECIMAL(5,2),
+    duration_days INTEGER,
+    max_participants INTEGER,
+    min_participants INTEGER,
+    prerequisites TEXT,
+    learning_objectives TEXT,
+    curriculum_outline TEXT,
+    curriculum_details TEXT,
+    materials_required TEXT,
+    equipment_required TEXT,
+    instructor_requirements TEXT,
+    assessment_method ENUM,
+    passing_score DECIMAL(5,2),
+    certification_provided BOOLEAN DEFAULT False,
+    pdu_credits DECIMAL(5,2),
+    related_skills TEXT,
+    related_certifications TEXT,
+    cost_per_participant DECIMAL(10,2),
+    external_provider VARCHAR(200),
+    external_url VARCHAR(500),
+    venue_type ENUM,
+    venue_requirements TEXT,
+    language ENUM DEFAULT 'JA',
+    repeat_interval INTEGER,
+    mandatory_flag BOOLEAN DEFAULT False,
+    active_flag BOOLEAN DEFAULT True,
+    effective_start_date DATE,
+    effective_end_date DATE,
+    created_by VARCHAR(50),
+    approved_by VARCHAR(50),
+    approval_date DATE,
+    version_number VARCHAR(10) DEFAULT '1.0',
+    revision_notes TEXT,
+    tags TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_training_program_id ON MST_TrainingProgram (training_program_id);
+CREATE UNIQUE INDEX idx_program_code ON MST_TrainingProgram (program_code);
+CREATE INDEX idx_program_category ON MST_TrainingProgram (program_category);
+CREATE INDEX idx_program_type ON MST_TrainingProgram (program_type);
+CREATE INDEX idx_target_audience ON MST_TrainingProgram (target_audience);
+CREATE INDEX idx_difficulty_level ON MST_TrainingProgram (difficulty_level);
+CREATE INDEX idx_active_flag ON MST_TrainingProgram (active_flag);
+CREATE INDEX idx_mandatory_flag ON MST_TrainingProgram (mandatory_flag);
+CREATE INDEX idx_effective_period ON MST_TrainingProgram (effective_start_date, effective_end_date);
+CREATE INDEX idx_external_provider ON MST_TrainingProgram (external_provider);
+CREATE INDEX idx_language ON MST_TrainingProgram (language);
+
+-- 外部キー制約
+ALTER TABLE MST_TrainingProgram ADD CONSTRAINT fk_training_program_created_by FOREIGN KEY (created_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_TrainingProgram ADD CONSTRAINT fk_training_program_approved_by FOREIGN KEY (approved_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- TRN_SkillRecord (スキル情報) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_SkillRecord (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -845,28 +1386,68 @@ ALTER TABLE TRN_SkillRecord ADD CONSTRAINT fk_skill_assessor FOREIGN KEY (assess
 
 
 -- TRN_GoalProgress (目標進捗) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_GoalProgress (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    goal_id VARCHAR(50),
     employee_id VARCHAR(50),
     goal_title VARCHAR(200),
+    goal_description TEXT,
     goal_category ENUM,
+    goal_type ENUM,
+    priority_level ENUM DEFAULT 'MEDIUM',
+    target_value DECIMAL(15,2),
+    current_value DECIMAL(15,2),
+    unit VARCHAR(50),
+    start_date DATE,
     target_date DATE,
     progress_rate DECIMAL(5,2) DEFAULT 0.0,
+    achievement_status ENUM DEFAULT 'NOT_STARTED',
+    supervisor_id VARCHAR(50),
+    approval_status ENUM DEFAULT 'DRAFT',
+    approved_at TIMESTAMP,
+    approved_by VARCHAR(50),
+    completion_date DATE,
+    achievement_rate DECIMAL(5,2),
+    self_evaluation INTEGER,
+    supervisor_evaluation INTEGER,
+    evaluation_comments TEXT,
+    related_career_plan_id VARCHAR(50),
+    related_skill_items TEXT,
+    milestones TEXT,
+    obstacles TEXT,
+    support_needed TEXT,
+    last_updated_at TIMESTAMP,
+    next_review_date DATE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
-CREATE INDEX idx_employee ON TRN_GoalProgress (employee_id);
+CREATE UNIQUE INDEX idx_TRN_GoalProgress_goal_id ON TRN_GoalProgress (goal_id);
+CREATE INDEX idx_TRN_GoalProgress_employee_id ON TRN_GoalProgress (employee_id);
+CREATE INDEX idx_TRN_GoalProgress_supervisor_id ON TRN_GoalProgress (supervisor_id);
+CREATE INDEX idx_TRN_GoalProgress_category ON TRN_GoalProgress (goal_category);
+CREATE INDEX idx_TRN_GoalProgress_status ON TRN_GoalProgress (achievement_status);
+CREATE INDEX idx_TRN_GoalProgress_approval_status ON TRN_GoalProgress (approval_status);
+CREATE INDEX idx_TRN_GoalProgress_target_date ON TRN_GoalProgress (target_date);
+CREATE INDEX idx_TRN_GoalProgress_priority ON TRN_GoalProgress (priority_level);
+CREATE INDEX idx_TRN_GoalProgress_employee_period ON TRN_GoalProgress (employee_id, start_date, target_date);
+CREATE INDEX idx_TRN_GoalProgress_next_review ON TRN_GoalProgress (next_review_date);
+
+-- 外部キー制約
+ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_supervisor FOREIGN KEY (supervisor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_approved_by FOREIGN KEY (approved_by) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_career_plan FOREIGN KEY (related_career_plan_id) REFERENCES MST_CareerPlan(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- TRN_ProjectRecord (案件実績) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_ProjectRecord (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -916,7 +1497,7 @@ ALTER TABLE TRN_ProjectRecord ADD CONSTRAINT fk_project_record_employee FOREIGN 
 
 
 -- TRN_TrainingHistory (研修参加履歴) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_TrainingHistory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -976,7 +1557,7 @@ ALTER TABLE TRN_TrainingHistory ADD CONSTRAINT fk_training_history_approver FORE
 
 
 -- TRN_PDU (継続教育ポイント) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_PDU (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1041,7 +1622,7 @@ ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_project FOREIGN KEY (related_project_i
 
 
 -- TRN_SkillEvidence (スキル証跡) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:43
 
 CREATE TABLE TRN_SkillEvidence (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1109,7 +1690,7 @@ ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_certification FOREIGN K
 
 
 -- TRN_Notification (通知履歴) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE TRN_Notification (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1174,59 +1755,47 @@ ALTER TABLE TRN_Notification ADD CONSTRAINT fk_notification_recipient FOREIGN KE
 ALTER TABLE TRN_Notification ADD CONSTRAINT fk_notification_sender FOREIGN KEY (sender_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- TRN_EmployeeSkillGrade (社員スキルグレード) DDL
--- 生成日時: 2025-06-01 16:12:38
-
-CREATE TABLE TRN_EmployeeSkillGrade (
-    id VARCHAR(50) NOT NULL PRIMARY KEY,
-    is_deleted BOOLEAN NOT NULL DEFAULT False,
-    tenant_id VARCHAR(50) NOT NULL,
-    employee_id VARCHAR(50),
-    job_type_id VARCHAR(50),
-    skill_grade VARCHAR(10),
-    skill_level INT,
-    effective_date DATE,
-    expiry_date DATE,
-    evaluation_date DATE,
-    evaluator_id VARCHAR(50),
-    evaluation_comment TEXT,
-    certification_flag BOOLEAN DEFAULT False,
-    next_evaluation_date DATE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by VARCHAR(50) NOT NULL,
-    updated_by VARCHAR(50) NOT NULL
-);
-
-CREATE INDEX idx_employee_job_effective ON TRN_EmployeeSkillGrade (employee_id, job_type_id, effective_date);
-CREATE INDEX idx_employee_current ON TRN_EmployeeSkillGrade (employee_id, expiry_date);
-CREATE INDEX idx_job_type_grade ON TRN_EmployeeSkillGrade (job_type_id, skill_grade);
-CREATE INDEX idx_evaluation_date ON TRN_EmployeeSkillGrade (evaluation_date);
-CREATE INDEX idx_next_evaluation ON TRN_EmployeeSkillGrade (next_evaluation_date);
-CREATE INDEX idx_certification ON TRN_EmployeeSkillGrade (certification_flag);
-
--- 外部キー制約
-ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
-ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_evaluator FOREIGN KEY (evaluator_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
-
-
 -- SYS_SkillIndex (スキル検索インデックス) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_SkillIndex (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    skill_id VARCHAR(50),
+    index_type ENUM,
+    search_term VARCHAR(200),
+    normalized_term VARCHAR(200),
+    relevance_score DECIMAL(5,3) DEFAULT 1.0,
+    frequency_weight DECIMAL(5,3) DEFAULT 1.0,
+    position_weight DECIMAL(5,3) DEFAULT 1.0,
+    language_code VARCHAR(10) DEFAULT 'ja',
+    source_field ENUM,
+    is_active BOOLEAN DEFAULT True,
+    search_count INTEGER DEFAULT 0,
+    last_searched_at TIMESTAMP,
+    index_updated_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_skill_index_skill ON SYS_SkillIndex (skill_id);
+CREATE INDEX idx_skill_index_search_term ON SYS_SkillIndex (normalized_term, language_code);
+CREATE INDEX idx_skill_index_type ON SYS_SkillIndex (index_type);
+CREATE INDEX idx_skill_index_tenant_term ON SYS_SkillIndex (tenant_id, normalized_term);
+CREATE INDEX idx_skill_index_relevance ON SYS_SkillIndex (relevance_score);
+CREATE INDEX idx_skill_index_active ON SYS_SkillIndex (is_active);
+CREATE INDEX idx_skill_index_search_stats ON SYS_SkillIndex (search_count, last_searched_at);
+
+-- 外部キー制約
+ALTER TABLE SYS_SkillIndex ADD CONSTRAINT fk_skill_index_skill FOREIGN KEY (skill_id) REFERENCES MST_Skill(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 -- SYS_SkillMatrix (スキルマップ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_SkillMatrix (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1240,7 +1809,7 @@ CREATE TABLE SYS_SkillMatrix (
 
 
 -- SYS_BackupHistory (バックアップ履歴) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_BackupHistory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1254,7 +1823,7 @@ CREATE TABLE SYS_BackupHistory (
 
 
 -- SYS_SystemLog (システムログ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_SystemLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1301,21 +1870,46 @@ ALTER TABLE SYS_SystemLog ADD CONSTRAINT fk_log_user FOREIGN KEY (user_id) REFER
 
 
 -- SYS_TokenStore (トークン管理) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_TokenStore (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    user_id VARCHAR(50),
+    token_type ENUM,
+    token_value TEXT,
+    token_hash VARCHAR(255),
+    expires_at TIMESTAMP,
+    issued_at TIMESTAMP,
+    last_used_at TIMESTAMP,
+    client_ip VARCHAR(45),
+    user_agent TEXT,
+    device_fingerprint VARCHAR(255),
+    scope TEXT,
+    is_revoked BOOLEAN DEFAULT False,
+    revoked_at TIMESTAMP,
+    revoked_reason ENUM,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_token_store_hash ON SYS_TokenStore (token_hash);
+CREATE INDEX idx_token_store_user_type ON SYS_TokenStore (user_id, token_type);
+CREATE INDEX idx_token_store_expires ON SYS_TokenStore (expires_at, is_revoked);
+CREATE INDEX idx_token_store_tenant_user ON SYS_TokenStore (tenant_id, user_id);
+CREATE INDEX idx_token_store_issued ON SYS_TokenStore (issued_at);
+CREATE INDEX idx_token_store_last_used ON SYS_TokenStore (last_used_at);
+
+-- 外部キー制約
+ALTER TABLE SYS_TokenStore ADD CONSTRAINT fk_token_store_user FOREIGN KEY (user_id) REFERENCES MST_UserAuth(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 -- SYS_MasterData (マスタデータ全般) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_MasterData (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1329,7 +1923,7 @@ CREATE TABLE SYS_MasterData (
 
 
 -- SYS_TenantUsage (テナント使用量) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_TenantUsage (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
@@ -1343,66 +1937,191 @@ CREATE TABLE SYS_TenantUsage (
 
 
 -- SYS_IntegrationConfig (外部連携設定) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE SYS_IntegrationConfig (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    integration_key VARCHAR(100),
+    integration_name VARCHAR(200),
+    integration_type ENUM,
+    endpoint_url VARCHAR(500),
+    auth_type ENUM,
+    auth_config TEXT,
+    connection_config TEXT,
+    request_headers TEXT,
+    timeout_seconds INTEGER DEFAULT 30,
+    retry_count INTEGER DEFAULT 3,
+    retry_interval INTEGER DEFAULT 5,
+    rate_limit_per_minute INTEGER,
+    is_enabled BOOLEAN DEFAULT True,
+    health_check_url VARCHAR(500),
+    last_health_check TIMESTAMP,
+    health_status ENUM,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_integration_config_tenant_key ON SYS_IntegrationConfig (tenant_id, integration_key);
+CREATE INDEX idx_integration_config_type ON SYS_IntegrationConfig (integration_type);
+CREATE INDEX idx_integration_config_enabled ON SYS_IntegrationConfig (is_enabled);
+CREATE INDEX idx_integration_config_health ON SYS_IntegrationConfig (health_status, last_health_check);
+CREATE INDEX idx_integration_config_auth_type ON SYS_IntegrationConfig (auth_type);
+
+-- 外部キー制約
 
 
 -- HIS_AuditLog (監査ログ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE HIS_AuditLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    user_id VARCHAR(50),
+    session_id VARCHAR(100),
+    action_type ENUM,
+    target_table VARCHAR(100),
+    target_id VARCHAR(50),
+    old_values TEXT,
+    new_values TEXT,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(500),
+    result_status ENUM DEFAULT 'SUCCESS',
+    error_message TEXT,
+    execution_time_ms INTEGER,
+    is_deleted BOOLEAN DEFAULT False,
+    tenant_id VARCHAR(50),
+    created_at TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP',
+    updated_at TIMESTAMP DEFAULT 'CURRENT_TIMESTAMP',
+    created_by VARCHAR(50),
+    updated_by VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE UNIQUE INDEX idx_his_auditlog_id ON HIS_AuditLog (id);
+CREATE INDEX idx_his_auditlog_user_id ON HIS_AuditLog (user_id);
+CREATE INDEX idx_his_auditlog_tenant_id ON HIS_AuditLog (tenant_id);
+CREATE INDEX idx_his_auditlog_action_type ON HIS_AuditLog (action_type);
+CREATE INDEX idx_his_auditlog_target_table ON HIS_AuditLog (target_table);
+CREATE INDEX idx_his_auditlog_created_at ON HIS_AuditLog (created_at);
+CREATE INDEX idx_his_auditlog_user_created ON HIS_AuditLog (user_id, created_at);
+CREATE INDEX idx_his_auditlog_tenant_created ON HIS_AuditLog (tenant_id, created_at);
+
+-- 外部キー制約
+ALTER TABLE HIS_AuditLog ADD CONSTRAINT fk_his_auditlog_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE HIS_AuditLog ADD CONSTRAINT fk_his_auditlog_user FOREIGN KEY (user_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 -- HIS_NotificationLog (通知送信履歴) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE HIS_NotificationLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    notification_id VARCHAR(50),
+    setting_id VARCHAR(50),
+    template_id VARCHAR(50),
+    notification_type ENUM,
+    recipient_type ENUM,
+    recipient_address VARCHAR(500),
+    subject VARCHAR(500),
+    message_body TEXT,
+    message_format ENUM,
+    send_status ENUM,
+    send_attempts INTEGER DEFAULT 0,
+    max_retry_count INTEGER DEFAULT 3,
+    scheduled_at TIMESTAMP,
+    sent_at TIMESTAMP,
+    delivered_at TIMESTAMP,
+    opened_at TIMESTAMP,
+    response_code VARCHAR(20),
+    response_message TEXT,
+    error_details TEXT,
+    integration_config_id VARCHAR(50),
+    priority_level ENUM DEFAULT 'MEDIUM',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_notification_log_notification ON HIS_NotificationLog (notification_id);
+CREATE INDEX idx_notification_log_tenant_status ON HIS_NotificationLog (tenant_id, send_status);
+CREATE INDEX idx_notification_log_type ON HIS_NotificationLog (notification_type);
+CREATE INDEX idx_notification_log_scheduled ON HIS_NotificationLog (scheduled_at);
+CREATE INDEX idx_notification_log_sent ON HIS_NotificationLog (sent_at);
+CREATE INDEX idx_notification_log_status_attempts ON HIS_NotificationLog (send_status, send_attempts);
+CREATE INDEX idx_notification_log_priority ON HIS_NotificationLog (priority_level, scheduled_at);
+
+-- 外部キー制約
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_notification FOREIGN KEY (notification_id) REFERENCES TRN_Notification(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_setting FOREIGN KEY (setting_id) REFERENCES MST_NotificationSettings(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_template FOREIGN KEY (template_id) REFERENCES MST_NotificationTemplate(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_integration FOREIGN KEY (integration_config_id) REFERENCES SYS_IntegrationConfig(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 -- HIS_TenantBilling (テナント課金履歴) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE HIS_TenantBilling (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
+    id VARCHAR(50),
+    tenant_id VARCHAR(50),
+    billing_period_start DATE,
+    billing_period_end DATE,
+    billing_type ENUM,
+    plan_id VARCHAR(50),
+    plan_name VARCHAR(200),
+    base_amount DECIMAL(12,2) DEFAULT 0.0,
+    usage_amount DECIMAL(12,2) DEFAULT 0.0,
+    additional_amount DECIMAL(12,2) DEFAULT 0.0,
+    discount_amount DECIMAL(12,2) DEFAULT 0.0,
+    subtotal_amount DECIMAL(12,2),
+    tax_rate DECIMAL(5,3),
+    tax_amount DECIMAL(12,2),
+    total_amount DECIMAL(12,2),
+    currency_code VARCHAR(3) DEFAULT 'JPY',
+    usage_details TEXT,
+    billing_status ENUM DEFAULT 'CALCULATED',
+    invoice_number VARCHAR(50),
+    invoice_date DATE,
+    due_date DATE,
+    paid_date DATE,
+    payment_method ENUM,
+    notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX idx_tenant_billing_tenant_period ON HIS_TenantBilling (tenant_id, billing_period_start, billing_period_end);
+CREATE INDEX idx_tenant_billing_status ON HIS_TenantBilling (billing_status);
+CREATE UNIQUE INDEX idx_tenant_billing_invoice ON HIS_TenantBilling (invoice_number);
+CREATE INDEX idx_tenant_billing_dates ON HIS_TenantBilling (invoice_date, due_date, paid_date);
+CREATE INDEX idx_tenant_billing_type ON HIS_TenantBilling (billing_type);
+CREATE INDEX idx_tenant_billing_amount ON HIS_TenantBilling (total_amount);
+
+-- 外部キー制約
+ALTER TABLE HIS_TenantBilling ADD CONSTRAINT fk_tenant_billing_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 -- WRK_BatchJobLog (一括登録ジョブログ) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE WRK_BatchJobLog (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

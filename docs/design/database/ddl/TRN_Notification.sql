@@ -1,5 +1,5 @@
 -- TRN_Notification (通知履歴) DDL
--- 生成日時: 2025-06-01 16:12:38
+-- 生成日時: 2025-06-01 19:42:44
 
 CREATE TABLE TRN_Notification (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

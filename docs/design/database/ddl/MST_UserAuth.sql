@@ -1,5 +1,5 @@
 -- MST_UserAuth (ユーザー認証情報) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:42
 
 CREATE TABLE MST_UserAuth (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

@@ -1,5 +1,5 @@
 -- MST_Role (ロール情報) DDL
--- 生成日時: 2025-06-01 16:12:37
+-- 生成日時: 2025-06-01 19:42:42
 
 CREATE TABLE MST_Role (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
