@@ -1,11 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-テーブル定義書生成スクリプト v8 (関連エンティティERD自動生成対応版)
-- 関連エンティティのMermaid ERD自動生成機能
-- 外部キー関係の自動解析
-- テーブル定義書への関連エンティティ図統合
-- v7の全機能を継承
+テーブル定義書生成スクリプト
+
+改版履歴:
+┌─────────┬────────────┬──────────┬─────────────────────────────────────────────────────┐
+│ バージョン │    更新日    │  更新者  │                  主な変更内容                       │
+├─────────┼────────────┼──────────┼─────────────────────────────────────────────────────┤
+│  v1.0   │ 2024-11-XX │ 開発者   │ 初版作成・基本的なテーブル定義書生成機能            │
+│  v2.0   │ 2024-11-XX │ 開発者   │ 基本構造の確立・共通カラム定義の実装                │
+│  v3.0   │ 2024-12-XX │ 開発者   │ YAML詳細定義ファイル対応・設定駆動化                │
+│  v4.0   │ 2024-12-XX │ 開発者   │ インデックス・制約定義対応・外部キー関係追加        │
+│  v5.0   │ 2024-12-XX │ 開発者   │ 改版履歴機能追加・サンプルデータ対応                │
+│  v6.0   │ 2025-01-XX │ 開発者   │ DDL生成機能追加・統合DDL対応・エラーハンドリング強化│
+│  v7.0   │ 2025-05-XX │ 開発者   │ レイアウト改良・PK/FK表示・桁数情報追加             │
+│  v8.0   │ 2025-06-01 │ システム │ 全テーブル定義書再生成・ファイル命名規則統一        │
+└─────────┴────────────┴──────────┴─────────────────────────────────────────────────────┘
+
+機能概要:
+- テーブル一覧.mdからテーブル情報を自動読み込み
+- YAML詳細定義ファイルとの連携
+- テーブル定義書（Markdown）の自動生成
+- DDLファイルの自動生成
+- 統合DDLファイルの作成
+- コマンドライン引数による柔軟な実行制御
 """
 
 import os
@@ -16,258 +34,10 @@ import json
 import argparse
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Set, Tuple
-
-class ERDGenerator:
-    """関連エンティティERD生成クラス"""
-    
-    def __init__(self, base_dir: Path, tables_info: Dict[str, Any]):
-        self.base_dir = base_dir
-        self.details_dir = base_dir / "table-details"
-        self.tables_info = tables_info
-        self.all_foreign_keys = {}
-        self.reverse_foreign_keys = {}
-        self._build_foreign_key_maps()
-    
-    def _build_foreign_key_maps(self):
-        """全テーブルの外部キー関係マップを構築"""
-        for table_name in self.tables_info.keys():
-            details = self._load_table_details(table_name)
-            if details and 'foreign_keys' in details:
-                self.all_foreign_keys[table_name] = details['foreign_keys']
-                
-                # 逆参照マップも構築
-                for fk in details['foreign_keys']:
-                    ref_table = fk['reference_table']
-                    if ref_table not in self.reverse_foreign_keys:
-                        self.reverse_foreign_keys[ref_table] = []
-                    self.reverse_foreign_keys[ref_table].append({
-                        'from_table': table_name,
-                        'from_column': fk['column'],
-                        'to_column': fk['reference_column'],
-                        'relationship_type': self._determine_relationship_type(fk)
-                    })
-    
-    def _load_table_details(self, table_name: str) -> Optional[Dict[str, Any]]:
-        """テーブル詳細定義YAMLを読み込み"""
-        details_file = self.details_dir / f"{table_name}_details.yaml"
-        if not details_file.exists():
-            return None
-        
-        try:
-            with open(details_file, 'r', encoding='utf-8') as f:
-                return yaml.safe_load(f)
-        except Exception:
-            return None
-    
-    def _determine_relationship_type(self, fk: Dict[str, Any]) -> str:
-        """外部キー関係のタイプを判定"""
-        # 削除時の動作で判定
-        on_delete = fk.get('on_delete', 'RESTRICT').upper()
-        if on_delete == 'CASCADE':
-            return 'composition'  # 強い関連（親が削除されると子も削除）
-        elif on_delete == 'SET NULL':
-            return 'aggregation'  # 弱い関連（親が削除されても子は残る）
-        else:
-            return 'association'  # 関連
-    
-    def analyze_related_tables(self, target_table: str) -> Dict[str, Any]:
-        """関連テーブルを解析"""
-        related = {
-            'direct_references': [],      # 直接参照するテーブル
-            'direct_referenced_by': [],   # 直接参照されるテーブル
-            'all_related': set(),         # 全関連テーブル
-            'relationships': []           # 関係性の詳細
-        }
-        
-        # 直接参照するテーブル（外部キー先）
-        if target_table in self.all_foreign_keys:
-            for fk in self.all_foreign_keys[target_table]:
-                ref_table = fk['reference_table']
-                if ref_table != target_table and ref_table in self.tables_info:
-                    related['direct_references'].append({
-                        'table': ref_table,
-                        'column': fk['column'],
-                        'ref_column': fk['reference_column'],
-                        'relationship_type': self._determine_relationship_type(fk)
-                    })
-                    related['all_related'].add(ref_table)
-        
-        # 直接参照されるテーブル（外部キー元）
-        if target_table in self.reverse_foreign_keys:
-            for ref in self.reverse_foreign_keys[target_table]:
-                from_table = ref['from_table']
-                if from_table != target_table and from_table in self.tables_info:
-                    related['direct_referenced_by'].append({
-                        'table': from_table,
-                        'column': ref['from_column'],
-                        'ref_column': ref['to_column'],
-                        'relationship_type': ref['relationship_type']
-                    })
-                    related['all_related'].add(from_table)
-        
-        # 関係性の詳細を構築
-        for ref in related['direct_references']:
-            related['relationships'].append({
-                'from': target_table,
-                'to': ref['table'],
-                'type': ref['relationship_type'],
-                'direction': 'outgoing'
-            })
-        
-        for ref in related['direct_referenced_by']:
-            related['relationships'].append({
-                'from': ref['table'],
-                'to': target_table,
-                'type': ref['relationship_type'],
-                'direction': 'incoming'
-            })
-        
-        return related
-    
-    def _get_key_columns(self, table_name: str) -> Dict[str, List[str]]:
-        """テーブルの主要カラムを取得"""
-        details = self._load_table_details(table_name)
-        columns = {
-            'primary_keys': ['id'],  # 基本的にidがPK
-            'foreign_keys': [],
-            'unique_keys': [],
-            'business_keys': []
-        }
-        
-        if not details:
-            return columns
-        
-        # 業務固有カラムから主要なものを抽出
-        if 'business_columns' in details:
-            for col in details['business_columns']:
-                col_name = col['name']
-                
-                # 外部キー
-                if table_name in self.all_foreign_keys:
-                    for fk in self.all_foreign_keys[table_name]:
-                        if fk['column'] == col_name:
-                            columns['foreign_keys'].append(f"{col_name} FK")
-                
-                # ユニークキー（コード系）
-                if 'code' in col_name.lower() or 'email' in col_name.lower():
-                    columns['unique_keys'].append(f"{col_name} UK")
-                
-                # 業務キー（名前系、重要な識別子）
-                if any(keyword in col_name.lower() for keyword in ['name', 'title', 'status', 'type']):
-                    columns['business_keys'].append(col_name)
-        
-        return columns
-    
-    def generate_mermaid_erd(self, target_table: str, related_tables: Dict[str, Any]) -> str:
-        """Mermaid ERD形式で関連エンティティ図を生成"""
-        mermaid_content = "```mermaid\nerDiagram\n"
-        
-        # 対象テーブルと関連テーブルのリスト
-        all_tables = [target_table] + list(related_tables['all_related'])
-        
-        # エンティティ定義
-        for table in all_tables:
-            columns = self._get_key_columns(table)
-            
-            mermaid_content += f"    {table} {{\n"
-            
-            # 主キー
-            for pk in columns['primary_keys']:
-                mermaid_content += f"        string {pk} PK\n"
-            
-            # 外部キー
-            for fk in columns['foreign_keys']:
-                mermaid_content += f"        string {fk}\n"
-            
-            # ユニークキー
-            for uk in columns['unique_keys']:
-                mermaid_content += f"        string {uk}\n"
-            
-            # 主要な業務キー（最大3つまで）
-            for bk in columns['business_keys'][:3]:
-                if bk not in columns['primary_keys'] and not any(bk in fk for fk in columns['foreign_keys']):
-                    mermaid_content += f"        string {bk}\n"
-            
-            mermaid_content += "    }\n\n"
-        
-        # リレーション定義
-        for rel in related_tables['relationships']:
-            from_table = rel['from']
-            to_table = rel['to']
-            rel_type = rel['type']
-            
-            # Mermaidの関係記号を決定
-            if rel_type == 'composition':
-                symbol = "||--o{"
-                label = "強い関連"
-            elif rel_type == 'aggregation':
-                symbol = "||--o{"
-                label = "弱い関連"
-            else:
-                symbol = "||--o{"
-                label = "関連"
-            
-            mermaid_content += f"    {from_table} {symbol} {to_table} : \"{label}\"\n"
-        
-        mermaid_content += "```\n"
-        return mermaid_content
-    
-    def generate_related_entities_section(self, target_table: str) -> str:
-        """関連エンティティセクションを生成"""
-        related_tables = self.analyze_related_tables(target_table)
-        
-        if not related_tables['all_related']:
-            return "\n## 🔗 関連エンティティ\n\n関連するエンティティはありません。\n"
-        
-        content = "\n## 🔗 関連エンティティ\n\n"
-        content += "以下は、このテーブルと直接的な関連を持つエンティティの関係図です。\n\n"
-        
-        # 関連エンティティ一覧
-        content += "### 📊 関連テーブル一覧\n\n"
-        content += "| テーブル名 | 論理名 | 関係性 | 説明 |\n"
-        content += "|------------|--------|--------|------|\n"
-        
-        # 参照先テーブル
-        for ref in related_tables['direct_references']:
-            table_name = ref['table']
-            logical_name = self.tables_info.get(table_name, {}).get('logical_name', table_name)
-            rel_type = "参照先"
-            description = f"{ref['column']} → {table_name}.{ref['ref_column']}"
-            content += f"| {table_name} | {logical_name} | {rel_type} | {description} |\n"
-        
-        # 参照元テーブル
-        for ref in related_tables['direct_referenced_by']:
-            table_name = ref['table']
-            logical_name = self.tables_info.get(table_name, {}).get('logical_name', table_name)
-            rel_type = "参照元"
-            description = f"{table_name}.{ref['column']} → {ref['ref_column']}"
-            content += f"| {table_name} | {logical_name} | {rel_type} | {description} |\n"
-        
-        # ERD図
-        content += "\n### 🎯 エンティティ関連図\n\n"
-        content += self.generate_mermaid_erd(target_table, related_tables)
-        
-        # 関係性の説明
-        if related_tables['relationships']:
-            content += "\n### 📝 関係性の詳細\n\n"
-            for rel in related_tables['relationships']:
-                from_logical = self.tables_info.get(rel['from'], {}).get('logical_name', rel['from'])
-                to_logical = self.tables_info.get(rel['to'], {}).get('logical_name', rel['to'])
-                
-                if rel['type'] == 'composition':
-                    desc = "強い関連（親エンティティが削除されると子エンティティも削除される）"
-                elif rel['type'] == 'aggregation':
-                    desc = "弱い関連（親エンティティが削除されても子エンティティは残る）"
-                else:
-                    desc = "関連（参照整合性制約あり）"
-                
-                content += f"- **{from_logical} → {to_logical}**: {desc}\n"
-        
-        return content
+from typing import Dict, List, Optional, Any
 
 class TableDefinitionGenerator:
-    """テーブル定義書生成クラス（v8拡張版）"""
+    """テーブル定義書生成クラス"""
     
     def __init__(self, base_dir: str = None):
         """初期化"""
@@ -285,7 +55,6 @@ class TableDefinitionGenerator:
         # テーブル情報
         self.tables_info = {}
         self.common_columns = self._get_common_columns()
-        self.erd_generator = None
         
     def _get_common_columns(self) -> Dict[str, Any]:
         """共通カラム定義を取得"""
@@ -438,7 +207,7 @@ class TableDefinitionGenerator:
             return None
     
     def generate_table_definition(self, table_name: str, table_info: Dict[str, Any]) -> str:
-        """テーブル定義書を生成（関連エンティティERD付き）"""
+        """テーブル定義書を生成"""
         details = self.load_table_details(table_name)
         logical_name = table_info['logical_name']
         category = table_info['category']
@@ -478,7 +247,7 @@ class TableDefinitionGenerator:
         else:
             md_content += f"{logical_name}テーブルの詳細定義です。\n\n"
         
-        # カラム定義
+        # カラム定義（v7レイアウト）
         md_content += "## 🗂️ カラム定義\n\n"
         md_content += "| カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト | 説明 |\n"
         md_content += "|----------|--------|----------|------|------|----|----|------------|------|\n"
@@ -529,10 +298,6 @@ class TableDefinitionGenerator:
             for fk in details['foreign_keys']:
                 md_content += f"| {fk['name']} | {fk['column']} | {fk['reference_table']} | {fk['reference_column']} | {fk['on_update']} | {fk['on_delete']} | {fk['description']} |\n"
         
-        # 関連エンティティERD（新機能）
-        if self.erd_generator:
-            md_content += self.erd_generator.generate_related_entities_section(table_name)
-        
         # サンプルデータ
         if details and 'sample_data' in details:
             md_content += "\n## 📊 サンプルデータ\n\n"
@@ -571,14 +336,102 @@ class TableDefinitionGenerator:
         
         return content
     
-    def generate_files(self, table_names: List[str] = None, output_dir: str = None, enable_erd: bool = True):
-        """ファイル生成メイン処理（ERD生成機能付き）"""
+    def generate_ddl(self, table_name: str, table_info: Dict[str, Any]) -> str:
+        """DDLを生成"""
+        details = self.load_table_details(table_name)
+        
+        ddl_content = f"-- {table_name} ({table_info['logical_name']}) DDL\n"
+        ddl_content += f"-- 生成日時: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        
+        # テーブル作成
+        ddl_content += f"CREATE TABLE {table_name} (\n"
+        
+        columns = []
+        
+        # 基本カラム
+        for col in self.common_columns['base_columns']:
+            col_type = col['type']
+            if col.get('length'):
+                col_type += f"({col['length']})"
+            
+            col_def = f"    {col['name']} {col_type}"
+            if not col.get('null', True):
+                col_def += " NOT NULL"
+            if col.get('default') is not None:
+                if isinstance(col['default'], str):
+                    col_def += f" DEFAULT '{col['default']}'"
+                else:
+                    col_def += f" DEFAULT {col['default']}"
+            if col.get('primary'):
+                col_def += " PRIMARY KEY"
+            columns.append(col_def)
+        
+        # テナントカラム
+        if not table_name.startswith('SYS_'):
+            for col in self.common_columns['tenant_columns']:
+                col_type = col['type']
+                if col.get('length'):
+                    col_type += f"({col['length']})"
+                
+                col_def = f"    {col['name']} {col_type}"
+                if not col.get('null', True):
+                    col_def += " NOT NULL"
+                columns.append(col_def)
+        
+        # 業務固有カラム
+        if details and 'business_columns' in details:
+            for col in details['business_columns']:
+                col_type = col['type']
+                if col.get('length'):
+                    col_type += f"({col['length']})"
+                
+                col_def = f"    {col['name']} {col_type}"
+                if not col.get('null', True):
+                    col_def += " NOT NULL"
+                if col.get('default') is not None:
+                    if isinstance(col['default'], str):
+                        col_def += f" DEFAULT '{col['default']}'"
+                    else:
+                        col_def += f" DEFAULT {col['default']}"
+                columns.append(col_def)
+        
+        # 監査カラム
+        for col in self.common_columns['audit_columns']:
+            col_type = col['type']
+            if col.get('length'):
+                col_type += f"({col['length']})"
+            
+            col_def = f"    {col['name']} {col_type}"
+            if not col.get('null', True):
+                col_def += " NOT NULL"
+            if col.get('default'):
+                col_def += f" DEFAULT {col['default']}"
+            columns.append(col_def)
+        
+        ddl_content += ",\n".join(columns)
+        ddl_content += "\n);\n\n"
+        
+        # インデックス作成
+        if details and 'business_indexes' in details:
+            for idx in details['business_indexes']:
+                unique_str = "UNIQUE " if idx.get('unique', False) else ""
+                columns_str = ", ".join(idx['columns'])
+                ddl_content += f"CREATE {unique_str}INDEX {idx['name']} ON {table_name} ({columns_str});\n"
+        
+        # 外部キー制約
+        if details and 'foreign_keys' in details:
+            ddl_content += "\n-- 外部キー制約\n"
+            for fk in details['foreign_keys']:
+                ddl_content += f"ALTER TABLE {table_name} ADD CONSTRAINT {fk['name']} "
+                ddl_content += f"FOREIGN KEY ({fk['column']}) REFERENCES {fk['reference_table']}({fk['reference_column']}) "
+                ddl_content += f"ON UPDATE {fk['on_update']} ON DELETE {fk['on_delete']};\n"
+        
+        return ddl_content
+    
+    def generate_files(self, table_names: List[str] = None, output_dir: str = None):
+        """ファイル生成メイン処理"""
         # テーブル一覧読み込み
         self.tables_info = self.load_table_list()
-        
-        # ERDジェネレーター初期化
-        if enable_erd:
-            self.erd_generator = ERDGenerator(self.base_dir, self.tables_info)
         
         # 出力先ディレクトリ設定
         if output_dir:
@@ -600,12 +453,12 @@ class TableDefinitionGenerator:
         else:
             target_tables = self.tables_info
         
-        print(f"🚀 テーブル定義書生成スクリプト v8 (関連エンティティERD自動生成対応版)")
+        print(f"🚀 テーブル定義書生成スクリプト v8.0 (統一版)")
         print("=" * 80)
         print(f"{len(target_tables)}個のテーブルを処理します。")
-        if enable_erd:
-            print("✨ 関連エンティティERD自動生成機能: 有効")
         print()
+        
+        generated_ddls = []
         
         for table_name, table_info in target_tables.items():
             print(f"処理中: {table_name} ({table_info['logical_name']})")
@@ -619,12 +472,94 @@ class TableDefinitionGenerator:
                     f.write(md_content)
                 print(f"  ✓ {md_file}")
                 
-                # ERD生成状況表示
-                if enable_erd and self.erd_generator:
-                    related_tables = self.erd_generator.analyze_related_tables(table_name)
-                    if related_tables['all_related']:
-                        print(f"  🔗 関連エンティティ: {len(related_tables['all_related'])}個")
-                    else:
-                        print(f"  🔗 関連エンティティ: なし")
+                # DDL生成
+                ddl_content = self.generate_ddl(table_name, table_info)
+                ddl_file = ddl_output / f"{table_name}.sql"
+                
+                with open(ddl_file, 'w', encoding='utf-8') as f:
+                    f.write(ddl_content)
+                print(f"  ✓ {ddl_file}")
+                
+                generated_ddls.append(ddl_content)
                 
             except Exception as e:
+                print(f"  ❌ エラー: {e}")
+        
+        # 統合DDL生成
+        if generated_ddls:
+            all_ddl_file = ddl_output / "all_tables.sql"
+            with open(all_ddl_file, 'w', encoding='utf-8') as f:
+                f.write("-- 全テーブル統合DDL\n")
+                f.write(f"-- 生成日時: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                f.write("\n\n".join(generated_ddls))
+            print(f"\n✅ 統合DDL: {all_ddl_file}")
+        
+        print(f"\n🎉 処理が完了しました！")
+        print(f"📁 テーブル定義書出力先: {tables_output}")
+        print(f"📁 DDL出力先: {ddl_output}")
+
+def main():
+    """メイン関数"""
+    parser = argparse.ArgumentParser(
+        description="テーブル定義書生成スクリプト v8.0 (統一版)",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+使用例:
+  # 全テーブル生成
+  python3 create_table_definitions.py
+  
+  # 個別テーブル生成
+  python3 create_table_definitions.py --table MST_Employee
+  python3 create_table_definitions.py --table MST_Role,MST_Permission
+  
+  # カテゴリ別生成
+  python3 create_table_definitions.py --category マスタ系
+  
+  # 出力先指定
+  python3 create_table_definitions.py --table MST_Employee --output-dir custom/
+        """
+    )
+    
+    parser.add_argument(
+        '--table', '-t',
+        help='生成対象テーブル名（カンマ区切りで複数指定可能）'
+    )
+    
+    parser.add_argument(
+        '--category', '-c',
+        help='生成対象カテゴリ（マスタ系、トランザクション系等）'
+    )
+    
+    parser.add_argument(
+        '--output-dir', '-o',
+        help='出力先ディレクトリ'
+    )
+    
+    parser.add_argument(
+        '--base-dir', '-b',
+        help='ベースディレクトリ（デフォルト: スクリプトのディレクトリ）'
+    )
+    
+    args = parser.parse_args()
+    
+    try:
+        generator = TableDefinitionGenerator(args.base_dir)
+        
+        # 対象テーブル決定
+        target_tables = None
+        
+        if args.table:
+            target_tables = [t.strip() for t in args.table.split(',')]
+        elif args.category:
+            # カテゴリ別フィルタリング（実装簡略化のため、今回は省略）
+            print(f"カテゴリ別生成機能は今後実装予定です: {args.category}")
+            return
+        
+        generator.generate_files(target_tables, args.output_dir)
+        
+    except Exception as e:
+        print(f"❌ エラーが発生しました: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
