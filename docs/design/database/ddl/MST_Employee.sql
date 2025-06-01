@@ -1,38 +1,39 @@
--- 社員基本情報テーブル作成DDL
+-- MST_Employee (社員基本情報) DDL
+-- 生成日時: 2025-06-01 12:50:34
+
 CREATE TABLE MST_Employee (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    employee_code VARCHAR(20) COMMENT '社員番号',
-    full_name VARCHAR(100) COMMENT '氏名',
-    full_name_kana VARCHAR(100) COMMENT '氏名カナ',
-    email VARCHAR(255) COMMENT 'メールアドレス',
-    phone VARCHAR(20) COMMENT '電話番号',
-    hire_date DATE COMMENT '入社日',
-    birth_date DATE COMMENT '生年月日',
-    gender ENUM COMMENT '性別',
-    department_id VARCHAR(50) COMMENT '部署ID',
-    position_id VARCHAR(50) COMMENT '役職ID',
-    job_type_id VARCHAR(50) COMMENT '職種ID',
-    employment_status ENUM DEFAULT FULL_TIME COMMENT '雇用形態',
-    manager_id VARCHAR(50) COMMENT '上司ID',
-    employee_status ENUM DEFAULT ACTIVE COMMENT '在籍状況',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    UNIQUE INDEX idx_employee_code (employee_code),
-    UNIQUE INDEX idx_email (email),
-    INDEX idx_department (department_id),
-    INDEX idx_manager (manager_id),
-    INDEX idx_status (employee_status),
-    INDEX idx_hire_date (hire_date),
-    CONSTRAINT fk_employee_department FOREIGN KEY (department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT fk_employee_position FOREIGN KEY (position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE SET NULL,
-    CONSTRAINT fk_employee_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE SET NULL,
-    CONSTRAINT fk_employee_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社員基本情報';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL,
+    tenant_id VARCHAR(50) NOT NULL,
+    employee_code VARCHAR(20),
+    full_name VARCHAR(100),
+    full_name_kana VARCHAR(100),
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    hire_date DATE,
+    birth_date DATE,
+    gender ENUM,
+    department_id VARCHAR(50),
+    position_id VARCHAR(50),
+    job_type_id VARCHAR(50),
+    employment_status ENUM DEFAULT 'FULL_TIME',
+    manager_id VARCHAR(50),
+    employee_status ENUM DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_employee_code ON MST_Employee (employee_code);
+CREATE UNIQUE INDEX idx_email ON MST_Employee (email);
+CREATE INDEX idx_department ON MST_Employee (department_id);
+CREATE INDEX idx_manager ON MST_Employee (manager_id);
+CREATE INDEX idx_status ON MST_Employee (employee_status);
+CREATE INDEX idx_hire_date ON MST_Employee (hire_date);
+
+-- 外部キー制約
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_department FOREIGN KEY (department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_position FOREIGN KEY (position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;

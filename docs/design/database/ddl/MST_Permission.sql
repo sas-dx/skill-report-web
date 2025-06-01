@@ -1,43 +1,44 @@
--- 権限情報テーブル作成DDL
+-- MST_Permission (権限情報) DDL
+-- 生成日時: 2025-06-01 12:50:47
+
 CREATE TABLE MST_Permission (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    permission_code VARCHAR(50) COMMENT '権限コード',
-    permission_name VARCHAR(100) COMMENT '権限名',
-    permission_name_short VARCHAR(50) COMMENT '権限名略称',
-    permission_category ENUM COMMENT '権限カテゴリ',
-    resource_type VARCHAR(50) COMMENT 'リソース種別',
-    action_type ENUM COMMENT 'アクション種別',
-    scope_level ENUM COMMENT 'スコープレベル',
-    parent_permission_id VARCHAR(50) COMMENT '親権限ID',
-    is_system_permission BOOLEAN DEFAULT False COMMENT 'システム権限フラグ',
-    requires_conditions BOOLEAN DEFAULT False COMMENT '条件要求フラグ',
-    condition_expression TEXT COMMENT '条件式',
-    risk_level INT DEFAULT 1 COMMENT 'リスクレベル',
-    requires_approval BOOLEAN DEFAULT False COMMENT '承認要求フラグ',
-    audit_required BOOLEAN DEFAULT False COMMENT '監査要求フラグ',
-    permission_status ENUM DEFAULT ACTIVE COMMENT '権限状態',
-    effective_from DATE COMMENT '有効開始日',
-    effective_to DATE COMMENT '有効終了日',
-    sort_order INT COMMENT '表示順序',
-    description TEXT COMMENT '権限説明',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    UNIQUE INDEX idx_permission_code (permission_code),
-    INDEX idx_permission_category (permission_category),
-    INDEX idx_resource_action (resource_type, action_type),
-    INDEX idx_scope_level (scope_level),
-    INDEX idx_parent_permission (parent_permission_id),
-    INDEX idx_system_permission (is_system_permission),
-    INDEX idx_risk_level (risk_level),
-    INDEX idx_permission_status (permission_status),
-    INDEX idx_effective_period (effective_from, effective_to),
-    CONSTRAINT fk_permission_parent FOREIGN KEY (parent_permission_id) REFERENCES MST_Permission(id) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='権限情報';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL,
+    tenant_id VARCHAR(50) NOT NULL,
+    permission_code VARCHAR(50),
+    permission_name VARCHAR(100),
+    permission_name_short VARCHAR(50),
+    permission_category ENUM,
+    resource_type VARCHAR(50),
+    action_type ENUM,
+    scope_level ENUM,
+    parent_permission_id VARCHAR(50),
+    is_system_permission BOOLEAN DEFAULT False,
+    requires_conditions BOOLEAN DEFAULT False,
+    condition_expression TEXT,
+    risk_level INT DEFAULT 1,
+    requires_approval BOOLEAN DEFAULT False,
+    audit_required BOOLEAN DEFAULT False,
+    permission_status ENUM DEFAULT 'ACTIVE',
+    effective_from DATE,
+    effective_to DATE,
+    sort_order INT,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_permission_code ON MST_Permission (permission_code);
+CREATE INDEX idx_permission_category ON MST_Permission (permission_category);
+CREATE INDEX idx_resource_action ON MST_Permission (resource_type, action_type);
+CREATE INDEX idx_scope_level ON MST_Permission (scope_level);
+CREATE INDEX idx_parent_permission ON MST_Permission (parent_permission_id);
+CREATE INDEX idx_system_permission ON MST_Permission (is_system_permission);
+CREATE INDEX idx_risk_level ON MST_Permission (risk_level);
+CREATE INDEX idx_permission_status ON MST_Permission (permission_status);
+CREATE INDEX idx_effective_period ON MST_Permission (effective_from, effective_to);
+
+-- 外部キー制約
+ALTER TABLE MST_Permission ADD CONSTRAINT fk_permission_parent FOREIGN KEY (parent_permission_id) REFERENCES MST_Permission(id) ON UPDATE CASCADE ON DELETE SET NULL;

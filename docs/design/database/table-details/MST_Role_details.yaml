@@ -3,6 +3,18 @@ table_name: "MST_Role"
 logical_name: "ロール情報"
 category: "マスタ系"
 
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - ロール情報テーブルの詳細定義"
+    
+  - version: "1.1.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "改版履歴管理機能追加、ロール階層・権限継承機能強化"
+
 # テーブル概要・目的
 overview: |
   MST_Role（ロール情報）は、システム内のロール（役割）を管理するマスタテーブルです。

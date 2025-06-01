@@ -1,40 +1,41 @@
--- ロール情報テーブル作成DDL
+-- MST_Role (ロール情報) DDL
+-- 生成日時: 2025-06-01 12:50:47
+
 CREATE TABLE MST_Role (
-    id VARCHAR(50) NOT NULL COMMENT 'ID',
-    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
-    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
-    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
-    role_code VARCHAR(20) COMMENT 'ロールコード',
-    role_name VARCHAR(100) COMMENT 'ロール名',
-    role_name_short VARCHAR(50) COMMENT 'ロール名略称',
-    role_category ENUM COMMENT 'ロールカテゴリ',
-    role_level INT COMMENT 'ロールレベル',
-    parent_role_id VARCHAR(50) COMMENT '親ロールID',
-    is_system_role BOOLEAN DEFAULT False COMMENT 'システムロールフラグ',
-    is_tenant_specific BOOLEAN DEFAULT False COMMENT 'テナント固有フラグ',
-    max_users INT COMMENT '最大ユーザー数',
-    role_priority INT DEFAULT 999 COMMENT 'ロール優先度',
-    auto_assign_conditions JSON COMMENT '自動割り当て条件',
-    role_status ENUM DEFAULT ACTIVE COMMENT 'ロール状態',
-    effective_from DATE COMMENT '有効開始日',
-    effective_to DATE COMMENT '有効終了日',
-    sort_order INT COMMENT '表示順序',
-    description TEXT COMMENT 'ロール説明',
-    PRIMARY KEY (id),
-    INDEX idx_tenant (tenant_id),
-    INDEX idx_active (is_active),
-    INDEX idx_created_at (created_at),
-    UNIQUE INDEX idx_role_code (role_code),
-    INDEX idx_role_category (role_category),
-    INDEX idx_role_level (role_level),
-    INDEX idx_parent_role (parent_role_id),
-    INDEX idx_system_role (is_system_role),
-    INDEX idx_tenant_specific (is_tenant_specific),
-    INDEX idx_role_status (role_status),
-    INDEX idx_effective_period (effective_from, effective_to),
-    INDEX idx_sort_order (sort_order),
-    CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ロール情報';
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    is_deleted BOOLEAN NOT NULL,
+    tenant_id VARCHAR(50) NOT NULL,
+    role_code VARCHAR(20),
+    role_name VARCHAR(100),
+    role_name_short VARCHAR(50),
+    role_category ENUM,
+    role_level INT,
+    parent_role_id VARCHAR(50),
+    is_system_role BOOLEAN DEFAULT False,
+    is_tenant_specific BOOLEAN DEFAULT False,
+    max_users INT,
+    role_priority INT DEFAULT 999,
+    auto_assign_conditions JSON,
+    role_status ENUM DEFAULT 'ACTIVE',
+    effective_from DATE,
+    effective_to DATE,
+    sort_order INT,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by VARCHAR(50) NOT NULL,
+    updated_by VARCHAR(50) NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_role_code ON MST_Role (role_code);
+CREATE INDEX idx_role_category ON MST_Role (role_category);
+CREATE INDEX idx_role_level ON MST_Role (role_level);
+CREATE INDEX idx_parent_role ON MST_Role (parent_role_id);
+CREATE INDEX idx_system_role ON MST_Role (is_system_role);
+CREATE INDEX idx_tenant_specific ON MST_Role (is_tenant_specific);
+CREATE INDEX idx_role_status ON MST_Role (role_status);
+CREATE INDEX idx_effective_period ON MST_Role (effective_from, effective_to);
+CREATE INDEX idx_sort_order ON MST_Role (sort_order);
+
+-- 外部キー制約
+ALTER TABLE MST_Role ADD CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE SET NULL;
