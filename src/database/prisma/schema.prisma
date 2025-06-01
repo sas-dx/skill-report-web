@@ -25,6 +25,7 @@ model User {
   // リレーション
   department  Department? @relation(fields: [deptId], references: [id])
   position    Position?   @relation(fields: [positionId], references: [id])
+  userAuth    UserAuth?
   userRoles   UserRole[]
   skills      UserSkill[]
   careerPlans CareerPlan[]
@@ -32,6 +33,25 @@ model User {
   trainings   UserTraining[]
 
   @@map("users")
+}
+
+// 要求仕様ID: ACC.1-AUTH.1 - ユーザー認証情報
+model UserAuth {
+  id                 String    @id @default(cuid())
+  userId             String    @unique @map("user_id")
+  passwordHash       String    @map("password_hash")
+  lastLoginAt        DateTime? @map("last_login_at")
+  loginFailureCount  Int       @default(0) @map("login_failure_count")
+  isLocked           Boolean   @default(false) @map("is_locked")
+  lockedAt           DateTime? @map("locked_at")
+  passwordChangedAt  DateTime? @map("password_changed_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  // リレーション
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_auth")
 }
 
 // 要求仕様ID: ACC.1-ROLE.1 - ロール管理
