@@ -1,7 +1,38 @@
 # 要求仕様ID: PLT.1-DB.1 - PostgreSQL データベース設定
+# 要求仕様ID: PLT.1-DOCKER.1 - 開発環境Docker化
 
 
 services:
+  # Next.js アプリケーション（開発環境）
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: skill-report-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # ソースコードをバインドマウント（ホットリロード対応）
+      - .:/app
+      # node_modules を名前付きボリュームで分離（パフォーマンス向上）
+      - node_modules:/app/node_modules
+      # .next キャッシュを名前付きボリュームで分離
+      - nextjs_cache:/app/.next
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://skill_user:skill_password@postgres:5432/skill_report_db
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=development-secret-key
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - skill-report-network
+    # 開発時のホットリロード用設定
+    stdin_open: true
+    tty: true
+
   postgres:
     image: postgres:15-alpine
     container_name: skill-report-postgres
@@ -47,6 +78,10 @@ volumes:
   postgres_data:
     driver: local
   pgadmin_data:
+    driver: local
+  node_modules:
+    driver: local
+  nextjs_cache:
     driver: local
 
 networks:

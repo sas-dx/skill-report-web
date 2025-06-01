@@ -870,35 +870,132 @@ Cline Rulesは、システムレベルのガイダンスをClineに提供する�
 
 ## 開発・利用方法
 
+### 前提条件
+- Node.js 18以上
+- Docker & Docker Compose
+- PostgreSQL 15以上
+
+### セットアップ手順
+
 ```bash
-# 技術スタック確定次第記載
+# リポジトリのクローン
+git clone <repository-url>
+cd skill-report-web
+
+# 依存関係のインストール
+npm install
+
+# 環境変数の設定
+cp .env.example .env
+# .envファイルを編集して適切な値を設定
+
+# データベースの初期化
+npm run db:setup
+
+# 開発サーバーの起動
+npm run dev
+```
+
+### Docker環境での開発
+
+```bash
+# Docker環境の起動
+docker-compose up -d
+
+# 開発用コンテナでの作業
+./scripts/docker-dev.sh  # Linux/Mac
+./scripts/docker-dev.bat # Windows
 ```
 
 ### 環境変数
 
-| 変数名       | 用途           | 例 |
-| --------- | ------------ | - |
-| TEST\_ENV | 環境変数確定次第内容記載 |   |
+`.env.example` をコピーして `.env` を作成し、以下の環境変数を設定してください。
 
-`.env.example` をコピーして `.env` を作成してください。
+#### データベース設定
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| DATABASE_URL | PostgreSQL接続URL | postgresql://username:password@localhost:5432/skill_report_db |
 
-## 使用技術（検討中）
+#### Next.js設定
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| NEXTAUTH_URL | NextAuth.js認証URL | http://localhost:3000 |
+| NEXTAUTH_SECRET | NextAuth.jsシークレットキー | your-nextauth-secret-key-here |
+| NODE_ENV | 実行環境 | development |
+| PORT | アプリケーションポート | 3000 |
 
-現在、技術スタックおよび開発環境は **検討中 (TBD)** です。確定次第このセクションを更新します。
+#### セキュリティ設定
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| JWT_SECRET | JWT署名用シークレットキー | your-jwt-secret-key-here |
+| ENCRYPTION_KEY | データ暗号化キー（32文字） | your-32-character-encryption-key |
+| BCRYPT_ROUNDS | パスワードハッシュ化ラウンド数 | 12 |
+| SESSION_TIMEOUT | セッションタイムアウト（秒） | 3600 |
+
+#### メール設定（通知機能用）
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| SMTP_HOST | SMTPサーバーホスト | smtp.example.com |
+| SMTP_PORT | SMTPポート | 587 |
+| SMTP_USER | SMTP認証ユーザー | your-email@example.com |
+| SMTP_PASS | SMTP認証パスワード | your-email-password |
+| SMTP_FROM | 送信者メールアドレス | noreply@example.com |
+
+#### 外部システム連携
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| HR_SYSTEM_API_URL | 人事システムAPI URL | https://hr-api.example.com |
+| HR_SYSTEM_API_KEY | 人事システムAPIキー | your-hr-api-key |
+| SSO_PROVIDER_URL | SSO プロバイダーURL | https://sso.example.com |
+| SSO_CLIENT_ID | SSO クライアントID | your-sso-client-id |
+| SSO_CLIENT_SECRET | SSO クライアントシークレット | your-sso-client-secret |
+
+#### ファイルアップロード設定
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| UPLOAD_MAX_SIZE | アップロード最大サイズ（バイト） | 10485760 |
+| UPLOAD_ALLOWED_TYPES | 許可ファイルタイプ | image/jpeg,image/png,application/pdf |
+
+#### ログ・監視設定
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| LOG_LEVEL | ログレベル | info |
+| LOG_FILE_PATH | ログファイルパス | ./logs |
+
+#### バックアップ設定
+| 変数名 | 用途 | 例 |
+|--------|------|----|
+| BACKUP_SCHEDULE | バックアップスケジュール（cron形式） | 0 2 * * * |
+| BACKUP_RETENTION_DAYS | バックアップ保持日数 | 30 |
+
+
+## 使用技術
+
+### 技術スタック（Next.js 14 + TypeScript）
+- **フロントエンド**: Next.js 14, React 18, TypeScript, Tailwind CSS
+- **バックエンド**: Next.js API Routes, Node.js
+- **データベース**: PostgreSQL 15, Prisma ORM
+- **認証**: NextAuth.js
+- **開発環境**: Docker, Docker Compose
+- **デプロイ**: Vercel（予定）
 
 ## ディレクトリ構成
 
 ```
 skill-report-web/
 ├── .clinerules/                  # Cline開発ルール（コーディング規約やテスト規約、gitルール等を記載）
-│   ├── 01-project-context.md    # プロジェクト基本方針、AI駆動開発の方針
-│   ├── 02-coding-standards.md   # 技術スタック非依存のコーディング規約
+│   ├── .clinerules               # Clineルール設定ファイル
+│   ├── 00-core-rules.md          # 統合開発ルール（プロジェクト固有ルール）
+│   ├── 01-project-context.md     # プロジェクト基本方針、AI駆動開発の方針
+│   ├── 02-coding-standards.md    # 技術スタック非依存のコーディング規約
 │   ├── 03-frontend-guidelines.md # フロントエンド設計原則、コンポーネント設計
-│   ├── 04-backend-guidelines.md # バックエンド設計原則、API設計
+│   ├── 04-backend-guidelines.md  # バックエンド設計原則、API設計
 │   ├── 05-requirements-analysis.md # 要件分析・設計ガイドライン
 │   ├── 06-development-workflow.md # 開発ワークフロー・プロセス管理
-│   ├── 07-testing-strategy.md   # テスト戦略・品質保証
-│   └── 08-ai-driven-development.md # AI駆動開発ガイドライン
+│   ├── 07-testing-strategy.md    # テスト戦略・品質保証
+│   ├── 08-ai-driven-development.md # AI駆動開発ガイドライン
+│   ├── 09-project-specific-rules.md # プロジェクト固有ルール（アーカイブ）
+│   └── .archived/                # アーカイブされたルールファイル
 ├── memory-bank/                  # Clineメモリバンク（要件定義や設計、技術スタック等を記載）
 │   ├── projectbrief.md          # プロジェクトの基本情報、目的、背景、スコープ
 │   ├── productContext.md        # 解決する課題、ユーザー体験、業務フロー
@@ -913,30 +1010,70 @@ skill-report-web/
 │   ├── requirements/             # 要件定義関連
 │   │   ├── プロジェクト基本情報_改訂版.md
 │   │   ├── 技術スタック選定.md
-│   │   └── 要件定義.md
+│   │   ├── 要件定義.md
+│   │   ├── 環境構築.md
+│   │   └── UI_UX共通仕様書.md
 │   ├── design/                   # 設計書関連
+│   │   ├── architecture/         # アーキテクチャ設計
+│   │   │   ├── マルチテナントアーキテクチャ設計書.md
+│   │   │   └── 技術スタック設計書.md
 │   │   ├── screens/              # 画面設計
 │   │   │   ├── 画面一覧.md
 │   │   │   └── specs/            # 画面設計書（15画面）
 │   │   ├── api/                  # API設計
 │   │   │   ├── API一覧.md
-│   │   │   └── specs/            # API仕様書（34API）
+│   │   │   └── specs/            # API仕様書（84API）
 │   │   ├── database/             # データベース設計
 │   │   │   ├── エンティティ関連図.md
 │   │   │   ├── テーブル一覧.md
-│   │   │   └── tables/           # テーブル定義書（25テーブル）
+│   │   │   └── tables/           # テーブル定義書（8テーブル）
 │   │   ├── batch/                # バッチ設計
 │   │   │   ├── バッチ一覧.md
-│   │   │   └── specs/            # バッチ仕様書（17バッチ）
+│   │   │   └── specs/            # バッチ仕様書（67バッチ）
+│   │   ├── components/           # コンポーネント設計
+│   │   │   ├── 共通部品定義書.md
+│   │   │   ├── frontend/         # フロントエンドコンポーネント
+│   │   │   ├── backend/          # バックエンドコンポーネント
+│   │   │   └── shared/           # 共通コンポーネント
 │   │   └── interfaces/           # インターフェース設計
 │   │       ├── インターフェース一覧.md
 │   │       └── specs/            # インターフェース仕様書
+│   ├── implementation/           # 実装関連
+│   │   └── 実装計画書.md
 │   └── testing/                  # テスト関連
 │       ├── テスト計画書.md
-│       ├── ユニットテスト実装ガイド.md
-│       ├── 機能テスト実行計画書.md
-│       └── E2Eテスト実行手順書.md
-├── src/                          # ソースコード（開発開始後に作成予定）
+│       ├── テスト設計書.md
+│       ├── ユニットテスト実装ガイド_統合版.md
+│       ├── 統合テスト実装ガイド.md
+│       ├── E2Eテスト実装ガイド.md
+│       ├── パフォーマンステスト実装ガイド.md
+│       └── 機能テスト実行計画書.md
+├── src/                          # ソースコード
+│   ├── app/                      # Next.js App Router
+│   │   ├── globals.css           # グローバルスタイル
+│   │   ├── layout.tsx            # ルートレイアウト
+│   │   └── page.tsx              # ホームページ
+│   ├── backend/                  # バックエンドロジック
+│   ├── database/                 # データベース関連
+│   │   └── prisma/               # Prisma設定
+│   │       ├── schema.prisma     # Prismaスキーマ
+│   │       └── seed.ts           # シードデータ
+│   ├── frontend/                 # フロントエンドコンポーネント
+│   ├── scripts/                  # スクリプト
+│   │   └── db/                   # データベーススクリプト
+│   │       └── init-db.sql       # DB初期化スクリプト
+│   └── shared/                   # 共通ユーティリティ
+├── scripts/                      # 開発・運用スクリプト
+│   ├── docker-dev.sh             # Docker開発環境起動（Linux/Mac）
+│   └── docker-dev.bat            # Docker開発環境起動（Windows）
+├── .env.example                  # 環境変数テンプレート
+├── .env                          # 環境変数（ローカル）
+├── docker-compose.yml            # Docker Compose設定
+├── Dockerfile.dev                # 開発用Dockerfile
+├── next.config.js                # Next.js設定
+├── tailwind.config.js            # Tailwind CSS設定
+├── tsconfig.json                 # TypeScript設定
+├── package.json                  # Node.js依存関係
 ├── .gitignore                    # Git除外設定
 └── README.md                     # このファイル
 ```

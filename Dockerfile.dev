@@ -1,0 +1,33 @@
+# 要求仕様ID: PLT.1-DOCKER.1 - 開発環境Docker化
+
+# Node.js 18 LTS Alpine版をベースイメージとして使用
+FROM node:18-alpine AS base
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# システムの依存関係をインストール
+RUN apk add --no-cache \
+    libc6-compat \
+    openssl \
+    git
+
+# package.json と package-lock.json をコピー
+COPY package*.json ./
+
+# 依存関係をインストール（開発用依存関係も含む）
+RUN npm ci
+
+# Prismaクライアントを生成
+COPY src/database/prisma ./src/database/prisma
+RUN npx prisma generate --schema=src/database/prisma/schema.prisma
+
+# アプリケーションのソースコードをコピー
+# （実際の開発時はボリュームマウントで上書きされる）
+COPY . .
+
+# Next.jsの開発サーバー用ポートを公開
+EXPOSE 3000
+
+# 開発サーバーを起動
+CMD ["npm", "run", "dev"]
