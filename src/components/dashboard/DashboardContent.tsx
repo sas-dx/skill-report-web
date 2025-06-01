@@ -16,7 +16,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       {/* ウェルカムセクション */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">
-          おかえりなさい、{userName}さん
+          おかえりなさい、山田 太郎さん
         </h1>
         <p className="text-blue-100">
           今日も一日お疲れさまです。スキルアップの進捗を確認しましょう。

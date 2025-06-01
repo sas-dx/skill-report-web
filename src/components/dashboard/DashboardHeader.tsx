@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { NotificationIcon } from '../ui/NotificationIcon';
 import { UserDropdown } from '../ui/UserDropdown';
 
@@ -14,9 +15,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onMenuClick, 
   title = 'ダッシュボード' 
 }) => {
+  const router = useRouter();
+
   const handleLogout = () => {
-    // TODO: ログアウト処理を実装
+    // ログアウト処理
+    // TODO: 実際のログアウトAPI呼び出しを実装
     console.log('ログアウト処理');
+    
+    // ルートページ（トップページ）に遷移
+    router.push('/');
   };
 
   return (
