@@ -20,12 +20,12 @@
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-WRK_BatchJobLog（一括登録ジョブログ）は、一時的な作業データを管理するテーブルです。バッチ処理や一括処理の際に使用されます。
+SCR-WORK-BULK
 
-### 2.2 関連API
+### 2.3 関連API
 API-015
 
-### 2.3 関連バッチ
+### 2.4 関連バッチ
 BATCH-010
 
 ## 3. テーブル構造
@@ -36,10 +36,11 @@ BATCH-010
 |----|----------|--------|----------|------|------|----|----|--------------|------|
 | 1 | id | ID | VARCHAR | 50 | × | ○ | - | - | 主キー |
 | 2 | tenant_id | テナントID | VARCHAR | 50 | × | - | ○ | - | テナントID |
-| 3 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
-| 4 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| 5 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
-| 6 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
+| 3 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | レコードが有効かどうか |
+| 4 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 5 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 6 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 7 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
 
 ### 3.2 インデックス定義
@@ -47,8 +48,10 @@ BATCH-010
 | インデックス名 | 種別 | カラム | 説明 |
 |----------------|------|--------|------|
 | PRIMARY | PRIMARY KEY | id | 主キー |
-| idx_created_at | INDEX | created_at | 作成日時検索用 |
 | idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_created_at | INDEX | created_at | 作成日時検索用 |
+
 
 ### 3.3 制約定義
 
@@ -58,12 +61,14 @@ BATCH-010
 | fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
 | fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
 
+
 ## 4. リレーション
 
 ### 4.1 親テーブル
 | テーブル名 | 関連カラム | カーディナリティ | 説明 |
 |------------|------------|------------------|------|
 | MST_UserAuth | created_by, updated_by | 1:N | ユーザー情報 |
+
 
 ### 4.2 子テーブル
 | テーブル名 | 関連カラム | カーディナリティ | 説明 |
@@ -76,19 +81,19 @@ BATCH-010
 ```sql
 -- サンプルデータ
 INSERT INTO WRK_BatchJobLog (
-    id, created_by, updated_by
+    id, tenant_id, created_by, updated_by
 ) VALUES (
-    'sample_001', 'user_admin', 'user_admin'
+    'sample_001', 'tenant_001', 'user_admin', 'user_admin'
 );
 ```
 
 ### 5.2 データ量見積もり
 | 項目 | 値 | 備考 |
 |------|----|----- |
-| 初期データ件数 | 100件 | 初期設定データ |
-| 月間増加件数 | 500件 | 想定値 |
-| 年間増加件数 | 6000件 | 想定値 |
-| 5年後想定件数 | 31,000件 | 想定値 |
+| 初期データ件数 | 500件 | 初期設定データ |
+| 月間増加件数 | 100件 | 想定値 |
+| 年間増加件数 | 1,200件 | 想定値 |
+| 5年後想定件数 | 6,500件 | 想定値 |
 
 ## 6. 運用仕様
 
@@ -101,7 +106,7 @@ INSERT INTO WRK_BatchJobLog (
 - パーティション条件：-
 
 ### 6.3 アーカイブ
-- アーカイブ条件：作成から3ヶ月経過
+- アーカイブ条件：作成から3年経過
 - アーカイブ先：アーカイブDB
 
 ## 7. パフォーマンス
@@ -115,10 +120,10 @@ INSERT INTO WRK_BatchJobLog (
 | DELETE | 低 | id | 削除処理 |
 
 ### 7.2 パフォーマンス要件
-- SELECT：50ms以内
-- INSERT：100ms以内
-- UPDATE：100ms以内
-- DELETE：50ms以内
+- SELECT：15ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：100ms以内
 
 ## 8. セキュリティ
 
@@ -143,6 +148,7 @@ INSERT INTO WRK_BatchJobLog (
 
 ### 9.2 DDL
 ```sql
+-- 一括登録ジョブログテーブル作成DDL
 CREATE TABLE WRK_BatchJobLog (
     id VARCHAR(50) NOT NULL COMMENT 'ID',
     tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID',
@@ -153,11 +159,10 @@ CREATE TABLE WRK_BatchJobLog (
     updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
     PRIMARY KEY (id),
     INDEX idx_tenant (tenant_id),
-    INDEX idx_created_at (created_at),
     INDEX idx_active (is_active),
-    CONSTRAINT fk_wrk_batchjoblog_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT fk_wrk_batchjoblog_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT
+    INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='一括登録ジョブログ';
+
 ```
 
 ## 10. 特記事項
@@ -176,7 +181,7 @@ CREATE TABLE WRK_BatchJobLog (
    - 必要に応じて機能拡張を検討
 
 4. **関連画面**
-   - SCR-WORK-BULK
+   - 関連画面情報
 
 5. **データ量・パフォーマンス監視**
    - データ量が想定の150%を超えた場合はアラート

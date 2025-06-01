@@ -1,0 +1,281 @@
+# MST_Employee テーブル詳細定義
+table_name: "MST_Employee"
+logical_name: "社員基本情報"
+category: "マスタ系"
+
+# 業務固有カラム定義
+business_columns:
+  - name: employee_code
+    logical: 社員番号
+    type: VARCHAR
+    length: 20
+    null: false
+    unique: true
+    encrypted: false
+    description: 社員を一意に識別する番号（例：EMP000001）
+    validation: "^EMP[0-9]{6}$"
+    
+  - name: full_name
+    logical: 氏名
+    type: VARCHAR
+    length: 100
+    null: false
+    unique: false
+    encrypted: true
+    description: 社員の氏名（個人情報のため暗号化対象）
+    
+  - name: full_name_kana
+    logical: 氏名カナ
+    type: VARCHAR
+    length: 100
+    null: false
+    unique: false
+    encrypted: true
+    description: 社員の氏名カナ（個人情報のため暗号化対象）
+    
+  - name: email
+    logical: メールアドレス
+    type: VARCHAR
+    length: 255
+    null: false
+    unique: true
+    encrypted: false
+    description: 社員のメールアドレス（ログイン認証に使用）
+    validation: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    
+  - name: phone
+    logical: 電話番号
+    type: VARCHAR
+    length: 20
+    null: true
+    unique: false
+    encrypted: true
+    description: 社員の電話番号（個人情報のため暗号化対象）
+    
+  - name: hire_date
+    logical: 入社日
+    type: DATE
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 社員の入社日
+    
+  - name: birth_date
+    logical: 生年月日
+    type: DATE
+    length: null
+    null: true
+    unique: false
+    encrypted: true
+    description: 社員の生年月日（個人情報のため暗号化対象）
+    
+  - name: gender
+    logical: 性別
+    type: ENUM
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 性別（M:男性、F:女性、O:その他）
+    enum_values: ['M', 'F', 'O']
+    
+  - name: department_id
+    logical: 部署ID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: 所属部署のID（MST_Departmentへの外部キー）
+    
+  - name: position_id
+    logical: 役職ID
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 役職のID（MST_Positionへの外部キー）
+    
+  - name: job_type_id
+    logical: 職種ID
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 職種のID（MST_JobTypeへの外部キー）
+    
+  - name: employment_status
+    logical: 雇用形態
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）
+    enum_values: ['FULL_TIME', 'PART_TIME', 'CONTRACT']
+    default: 'FULL_TIME'
+    
+  - name: manager_id
+    logical: 上司ID
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 直属の上司のID（MST_Employeeへの自己参照外部キー）
+    
+  - name: employee_status
+    logical: 在籍状況
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職）
+    enum_values: ['ACTIVE', 'RETIRED', 'SUSPENDED']
+    default: 'ACTIVE'
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_employee_code
+    columns: [employee_code]
+    unique: true
+    description: 社員番号検索用（一意）
+    
+  - name: idx_email
+    columns: [email]
+    unique: true
+    description: メールアドレス検索用（一意）
+    
+  - name: idx_department
+    columns: [department_id]
+    unique: false
+    description: 部署別検索用
+    
+  - name: idx_manager
+    columns: [manager_id]
+    unique: false
+    description: 上司別検索用
+    
+  - name: idx_status
+    columns: [employee_status]
+    unique: false
+    description: 在籍状況別検索用
+    
+  - name: idx_hire_date
+    columns: [hire_date]
+    unique: false
+    description: 入社日検索用
+
+# 業務固有制約
+business_constraints:
+  - name: uk_employee_code
+    type: UNIQUE
+    columns: [employee_code]
+    description: 社員番号一意制約
+    
+  - name: uk_email
+    type: UNIQUE
+    columns: [email]
+    description: メールアドレス一意制約
+    
+  - name: chk_gender
+    type: CHECK
+    condition: "gender IN ('M', 'F', 'O')"
+    description: 性別値チェック制約
+    
+  - name: chk_employment_status
+    type: CHECK
+    condition: "employment_status IN ('FULL_TIME', 'PART_TIME', 'CONTRACT')"
+    description: 雇用形態値チェック制約
+    
+  - name: chk_employee_status
+    type: CHECK
+    condition: "employee_status IN ('ACTIVE', 'RETIRED', 'SUSPENDED')"
+    description: 在籍状況値チェック制約
+
+# 外部キー関係
+foreign_keys:
+  - name: fk_employee_department
+    column: department_id
+    reference_table: MST_Department
+    reference_column: id
+    on_update: CASCADE
+    on_delete: RESTRICT
+    description: 部署への外部キー
+    
+  - name: fk_employee_position
+    column: position_id
+    reference_table: MST_Position
+    reference_column: id
+    on_update: CASCADE
+    on_delete: SET NULL
+    description: 役職への外部キー
+    
+  - name: fk_employee_job_type
+    column: job_type_id
+    reference_table: MST_JobType
+    reference_column: id
+    on_update: CASCADE
+    on_delete: SET NULL
+    description: 職種への外部キー
+    
+  - name: fk_employee_manager
+    column: manager_id
+    reference_table: MST_Employee
+    reference_column: id
+    on_update: CASCADE
+    on_delete: SET NULL
+    description: 上司への自己参照外部キー
+
+# サンプルデータ
+sample_data:
+  - employee_code: "EMP000001"
+    full_name: "山田太郎"
+    full_name_kana: "ヤマダタロウ"
+    email: "yamada.taro@company.com"
+    phone: "090-1234-5678"
+    hire_date: "2020-04-01"
+    birth_date: "1990-01-15"
+    gender: "M"
+    department_id: "DEPT001"
+    position_id: "POS001"
+    job_type_id: "JOB001"
+    employment_status: "FULL_TIME"
+    manager_id: null
+    employee_status: "ACTIVE"
+    
+  - employee_code: "EMP000002"
+    full_name: "佐藤花子"
+    full_name_kana: "サトウハナコ"
+    email: "sato.hanako@company.com"
+    phone: "090-2345-6789"
+    hire_date: "2021-04-01"
+    birth_date: "1992-03-20"
+    gender: "F"
+    department_id: "DEPT002"
+    position_id: "POS002"
+    job_type_id: "JOB002"
+    employment_status: "FULL_TIME"
+    manager_id: "EMP000001"
+    employee_status: "ACTIVE"
+
+# 特記事項
+notes:
+  - "個人情報保護法に基づき氏名・氏名カナ・電話番号・生年月日は暗号化必須"
+  - "社員番号は人事システムとの連携キーとして使用"
+  - "メールアドレスは認証システムのユーザーIDとして使用"
+  - "上司IDは組織階層の管理に使用（自己参照）"
+  - "在籍状況により論理削除を実現（物理削除は行わない）"
+  - "部署・役職・職種の変更履歴は別途履歴テーブルで管理"
+
+# 業務ルール
+business_rules:
+  - "社員番号は入社時に自動採番（EMP + 6桁連番）"
+  - "メールアドレスは会社ドメイン必須"
+  - "退職時は employee_status を RETIRED に変更"
+  - "休職時は employee_status を SUSPENDED に変更"
+  - "上司は同一部署または上位部署の社員のみ設定可能"
