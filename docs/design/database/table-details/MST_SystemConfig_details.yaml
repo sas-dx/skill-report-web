@@ -1,0 +1,360 @@
+# MST_SystemConfig テーブル詳細定義
+table_name: "MST_SystemConfig"
+logical_name: "システム設定"
+category: "マスタ系"
+
+# 改版履歴
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - システム設定マスタテーブルの詳細定義"
+
+# テーブル概要・目的
+overview: |
+  MST_SystemConfig（システム設定）は、システム全体の設定値・パラメータを管理するマスタテーブルです。
+  
+  主な目的：
+  - システム運用パラメータの一元管理
+  - 機能ON/OFF設定の管理
+  - 業務ルール・閾値の設定管理
+  - 外部連携設定の管理
+  - セキュリティ設定の管理
+  
+  このテーブルにより、システムの動作を柔軟に制御し、
+  運用環境に応じた設定変更を効率的に行うことができます。
+
+# 業務固有カラム定義
+business_columns:
+  - name: config_key
+    logical: 設定キー
+    type: VARCHAR
+    length: 100
+    null: false
+    unique: true
+    encrypted: false
+    description: 設定項目を一意に識別するキー（例：MAX_LOGIN_ATTEMPTS、SESSION_TIMEOUT）
+    validation: "^[A-Z0-9_]+$"
+    
+  - name: config_name
+    logical: 設定名
+    type: VARCHAR
+    length: 200
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定項目の表示名・説明
+    
+  - name: config_value
+    logical: 設定値
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定の値（文字列、数値、JSON等）
+    
+  - name: config_type
+    logical: 設定タイプ
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定値のデータタイプ（STRING:文字列、INTEGER:整数、DECIMAL:小数、BOOLEAN:真偽値、JSON:JSON、ENCRYPTED:暗号化）
+    enum_values: ['STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON', 'ENCRYPTED']
+    
+  - name: config_category
+    logical: 設定カテゴリ
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定の分類（SECURITY:セキュリティ、SYSTEM:システム、BUSINESS:業務、UI:ユーザーインターフェース、INTEGRATION:連携）
+    enum_values: ['SECURITY', 'SYSTEM', 'BUSINESS', 'UI', 'INTEGRATION']
+    
+  - name: default_value
+    logical: デフォルト値
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定のデフォルト値
+    
+  - name: validation_rule
+    logical: 検証ルール
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定値の検証ルール（正規表現、範囲等）
+    
+  - name: description
+    logical: 説明
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定項目の詳細説明・用途
+    
+  - name: is_encrypted
+    logical: 暗号化フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定値が暗号化されているかどうか
+    default: false
+    
+  - name: is_system_only
+    logical: システム専用フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: システム内部でのみ使用される設定かどうか
+    default: false
+    
+  - name: is_user_configurable
+    logical: ユーザー設定可能フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 管理者がUI経由で変更可能かどうか
+    default: true
+    
+  - name: requires_restart
+    logical: 再起動要否
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定変更時にシステム再起動が必要かどうか
+    default: false
+    
+  - name: environment
+    logical: 環境
+    type: ENUM
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定が適用される環境（DEV:開発、TEST:テスト、PROD:本番、ALL:全環境）
+    enum_values: ['DEV', 'TEST', 'PROD', 'ALL']
+    default: 'ALL'
+    
+  - name: tenant_specific
+    logical: テナント固有フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントごとに異なる値を持つ設定かどうか
+    default: false
+    
+  - name: last_modified_by
+    logical: 最終更新者
+    type: VARCHAR
+    length: 50
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定を最後に更新したユーザーID
+    
+  - name: last_modified_reason
+    logical: 更新理由
+    type: TEXT
+    length: null
+    null: true
+    unique: false
+    encrypted: false
+    description: 設定変更の理由・目的
+    
+  - name: sort_order
+    logical: 表示順序
+    type: INTEGER
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定一覧での表示順序
+    default: 0
+    
+  - name: is_active
+    logical: 有効フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 設定が有効かどうか
+    default: true
+
+# 業務固有インデックス
+business_indexes:
+  - name: idx_config_key
+    columns: [config_key]
+    unique: true
+    description: 設定キー検索用（一意）
+    
+  - name: idx_config_category
+    columns: [config_category]
+    unique: false
+    description: 設定カテゴリ検索用
+    
+  - name: idx_config_type
+    columns: [config_type]
+    unique: false
+    description: 設定タイプ検索用
+    
+  - name: idx_user_configurable
+    columns: [is_user_configurable, is_active]
+    unique: false
+    description: ユーザー設定可能項目検索用
+    
+  - name: idx_environment
+    columns: [environment, is_active]
+    unique: false
+    description: 環境別設定検索用
+    
+  - name: idx_tenant_specific
+    columns: [tenant_specific, is_active]
+    unique: false
+    description: テナント固有設定検索用
+    
+  - name: idx_sort_order
+    columns: [sort_order]
+    unique: false
+    description: 表示順序検索用
+
+# 業務固有制約
+business_constraints:
+  - name: uk_config_key
+    type: UNIQUE
+    columns: [config_key]
+    description: 設定キー一意制約
+    
+  - name: chk_config_type
+    type: CHECK
+    condition: "config_type IN ('STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON', 'ENCRYPTED')"
+    description: 設定タイプ値チェック制約
+    
+  - name: chk_config_category
+    type: CHECK
+    condition: "config_category IN ('SECURITY', 'SYSTEM', 'BUSINESS', 'UI', 'INTEGRATION')"
+    description: 設定カテゴリ値チェック制約
+    
+  - name: chk_environment
+    type: CHECK
+    condition: "environment IN ('DEV', 'TEST', 'PROD', 'ALL')"
+    description: 環境値チェック制約
+
+# 外部キー関係
+foreign_keys: []
+
+# サンプルデータ
+sample_data:
+  - config_key: "MAX_LOGIN_ATTEMPTS"
+    config_name: "最大ログイン試行回数"
+    config_value: "5"
+    config_type: "INTEGER"
+    config_category: "SECURITY"
+    default_value: "3"
+    validation_rule: "^[1-9][0-9]*$"
+    description: "アカウントロックまでの最大ログイン失敗回数"
+    is_encrypted: false
+    is_system_only: false
+    is_user_configurable: true
+    requires_restart: false
+    environment: "ALL"
+    tenant_specific: true
+    last_modified_by: "admin"
+    last_modified_reason: "セキュリティ強化のため"
+    sort_order: 1
+    is_active: true
+    
+  - config_key: "SESSION_TIMEOUT_MINUTES"
+    config_name: "セッションタイムアウト時間（分）"
+    config_value: "30"
+    config_type: "INTEGER"
+    config_category: "SECURITY"
+    default_value: "60"
+    validation_rule: "^[1-9][0-9]*$"
+    description: "ユーザーセッションの自動タイムアウト時間"
+    is_encrypted: false
+    is_system_only: false
+    is_user_configurable: true
+    requires_restart: false
+    environment: "ALL"
+    tenant_specific: true
+    last_modified_by: "admin"
+    last_modified_reason: "セキュリティポリシー変更"
+    sort_order: 2
+    is_active: true
+    
+  - config_key: "SKILL_EVALUATION_PERIOD_MONTHS"
+    config_name: "スキル評価期間（月）"
+    config_value: "6"
+    config_type: "INTEGER"
+    config_category: "BUSINESS"
+    default_value: "12"
+    validation_rule: "^[1-9][0-9]*$"
+    description: "スキル評価の実施間隔"
+    is_encrypted: false
+    is_system_only: false
+    is_user_configurable: true
+    requires_restart: false
+    environment: "ALL"
+    tenant_specific: true
+    last_modified_by: "hr_admin"
+    last_modified_reason: "評価頻度の見直し"
+    sort_order: 10
+    is_active: true
+    
+  - config_key: "EMAIL_SMTP_PASSWORD"
+    config_name: "SMTP認証パスワード"
+    config_value: "encrypted_password_value"
+    config_type: "ENCRYPTED"
+    config_category: "INTEGRATION"
+    default_value: null
+    validation_rule: null
+    description: "メール送信用SMTP認証パスワード"
+    is_encrypted: true
+    is_system_only: true
+    is_user_configurable: false
+    requires_restart: true
+    environment: "PROD"
+    tenant_specific: false
+    last_modified_by: "system"
+    last_modified_reason: "初期設定"
+    sort_order: 100
+    is_active: true
+
+# 特記事項
+notes:
+  - "設定キーは英大文字・数字・アンダースコアのみ使用可能"
+  - "暗号化設定は config_type = 'ENCRYPTED' かつ is_encrypted = true で管理"
+  - "テナント固有設定は別途テナント設定テーブルとの連携が必要"
+  - "システム専用設定は管理画面に表示しない"
+  - "再起動要否フラグは運用時の注意喚起に使用"
+  - "論理削除は is_active フラグで管理"
+
+# 業務ルール
+business_rules:
+  - "設定キーは一意である必要がある"
+  - "暗号化設定は config_type = 'ENCRYPTED' に設定"
+  - "システム専用設定は is_user_configurable = false に設定"
+  - "検証ルールは設定値の妥当性チェックに使用"
+  - "環境固有設定は適切な environment 値を設定"
+  - "テナント固有設定は tenant_specific = true に設定"
+  - "設定変更時は last_modified_by と last_modified_reason を必須記録"
