@@ -14,6 +14,11 @@ revision_history:
     date: "2025-06-01"
     author: "開発チーム"
     changes: "改版履歴管理機能追加、個人情報暗号化対応強化"
+    
+  - version: "1.2.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "社員番号桁数拡張（20→30桁）、現行システム移行対応、スキルグレード管理の別テーブル化対応"
 
 # テーブル概要・目的
 overview: |
@@ -33,12 +38,12 @@ business_columns:
   - name: employee_code
     logical: 社員番号
     type: VARCHAR
-    length: 20
+    length: 30
     null: false
     unique: true
     encrypted: false
-    description: 社員を一意に識別する番号（例：EMP000001）
-    validation: "^EMP[0-9]{6}$"
+    description: 社員を一意に識別する番号（例：EMP000001、現行システムからの移行番号も対応）
+    validation: "^[A-Z0-9]{1,30}$"
     
   - name: full_name
     logical: 氏名
@@ -296,11 +301,15 @@ notes:
   - "上司IDは組織階層の管理に使用（自己参照）"
   - "在籍状況により論理削除を実現（物理削除は行わない）"
   - "部署・役職・職種の変更履歴は別途履歴テーブルで管理"
+  - "社員番号は30桁まで対応、現行システムからの移行番号も格納可能"
+  - "スキルグレード情報は別テーブル（TRN_EmployeeSkillGrade）で管理"
 
 # 業務ルール
 business_rules:
-  - "社員番号は入社時に自動採番（EMP + 6桁連番）"
+  - "社員番号は入社時に自動採番（EMP + 6桁連番）または現行システムからの移行番号を使用"
+  - "現行システム移行時は既存の社員番号体系をそのまま使用可能"
   - "メールアドレスは会社ドメイン必須"
   - "退職時は employee_status を RETIRED に変更"
   - "休職時は employee_status を SUSPENDED に変更"
   - "上司は同一部署または上位部署の社員のみ設定可能"
+  - "スキルグレードは職種ごとに TRN_EmployeeSkillGrade テーブルで管理"

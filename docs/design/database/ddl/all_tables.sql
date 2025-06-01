@@ -1,89 +1,79 @@
 -- 全テーブル統合DDL
--- 生成日時: 2025-06-01 13:03:58
+-- 生成日時: 2025-06-01 13:11:39
 
--- MST_Department (部署マスタ) DDL
--- 生成日時: 2025-06-01 13:03:58
+-- MST_Employee (社員基本情報) DDL
+-- 生成日時: 2025-06-01 13:11:39
 
-CREATE TABLE MST_Department (
+CREATE TABLE MST_Employee (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
-    department_code VARCHAR(20),
-    department_name VARCHAR(100),
-    department_name_short VARCHAR(50),
-    parent_department_id VARCHAR(50),
-    department_level INT,
-    department_type ENUM,
+    employee_code VARCHAR(30),
+    full_name VARCHAR(100),
+    full_name_kana VARCHAR(100),
+    email VARCHAR(255),
+    phone VARCHAR(20),
+    hire_date DATE,
+    birth_date DATE,
+    gender ENUM,
+    department_id VARCHAR(50),
+    position_id VARCHAR(50),
+    job_type_id VARCHAR(50),
+    employment_status ENUM DEFAULT 'FULL_TIME',
     manager_id VARCHAR(50),
-    deputy_manager_id VARCHAR(50),
-    cost_center_code VARCHAR(20),
-    budget_amount DECIMAL(15,2),
-    location VARCHAR(200),
-    phone_number VARCHAR(20),
-    email_address VARCHAR(255),
-    establishment_date DATE,
-    abolition_date DATE,
-    department_status ENUM DEFAULT 'ACTIVE',
-    sort_order INT,
-    description TEXT,
+    employee_status ENUM DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
-CREATE UNIQUE INDEX idx_department_code ON MST_Department (department_code);
-CREATE INDEX idx_parent_department ON MST_Department (parent_department_id);
-CREATE INDEX idx_department_level ON MST_Department (department_level);
-CREATE INDEX idx_department_type ON MST_Department (department_type);
-CREATE INDEX idx_manager ON MST_Department (manager_id);
-CREATE INDEX idx_status ON MST_Department (department_status);
-CREATE INDEX idx_cost_center ON MST_Department (cost_center_code);
-CREATE INDEX idx_sort_order ON MST_Department (sort_order);
+CREATE UNIQUE INDEX idx_employee_code ON MST_Employee (employee_code);
+CREATE UNIQUE INDEX idx_email ON MST_Employee (email);
+CREATE INDEX idx_department ON MST_Employee (department_id);
+CREATE INDEX idx_manager ON MST_Employee (manager_id);
+CREATE INDEX idx_status ON MST_Employee (employee_status);
+CREATE INDEX idx_hire_date ON MST_Employee (hire_date);
 
 -- 外部キー制約
-ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent FOREIGN KEY (parent_department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE MST_Department ADD CONSTRAINT fk_department_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy FOREIGN KEY (deputy_manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_department FOREIGN KEY (department_id) REFERENCES MST_Department(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_position FOREIGN KEY (position_id) REFERENCES MST_Position(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager FOREIGN KEY (manager_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- MST_Position (役職マスタ) DDL
--- 生成日時: 2025-06-01 13:03:58
+-- TRN_EmployeeSkillGrade (社員スキルグレード) DDL
+-- 生成日時: 2025-06-01 13:11:39
 
-CREATE TABLE MST_Position (
+CREATE TABLE TRN_EmployeeSkillGrade (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
     is_deleted BOOLEAN NOT NULL DEFAULT False,
     tenant_id VARCHAR(50) NOT NULL,
-    position_code VARCHAR(20),
-    position_name VARCHAR(100),
-    position_name_short VARCHAR(50),
-    position_level INT,
-    position_rank INT,
-    position_category ENUM,
-    authority_level INT,
-    approval_limit DECIMAL(15,2),
-    salary_grade VARCHAR(10),
-    allowance_amount DECIMAL(10,2),
-    is_management BOOLEAN DEFAULT False,
-    is_executive BOOLEAN DEFAULT False,
-    requires_approval BOOLEAN DEFAULT False,
-    can_hire BOOLEAN DEFAULT False,
-    can_evaluate BOOLEAN DEFAULT False,
-    position_status ENUM DEFAULT 'ACTIVE',
-    sort_order INT,
-    description TEXT,
+    employee_id VARCHAR(50),
+    job_type_id VARCHAR(50),
+    skill_grade VARCHAR(10),
+    skill_level INT,
+    effective_date DATE,
+    expiry_date DATE,
+    evaluation_date DATE,
+    evaluator_id VARCHAR(50),
+    evaluation_comment TEXT,
+    certification_flag BOOLEAN DEFAULT False,
+    next_evaluation_date DATE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_by VARCHAR(50) NOT NULL,
     updated_by VARCHAR(50) NOT NULL
 );
 
-CREATE UNIQUE INDEX idx_position_code ON MST_Position (position_code);
-CREATE INDEX idx_position_level ON MST_Position (position_level);
-CREATE INDEX idx_position_rank ON MST_Position (position_rank);
-CREATE INDEX idx_position_category ON MST_Position (position_category);
-CREATE INDEX idx_authority_level ON MST_Position (authority_level);
-CREATE INDEX idx_salary_grade ON MST_Position (salary_grade);
-CREATE INDEX idx_status ON MST_Position (position_status);
-CREATE INDEX idx_management_flags ON MST_Position (is_management, is_executive);
-CREATE INDEX idx_sort_order ON MST_Position (sort_order);
+CREATE INDEX idx_employee_job_effective ON TRN_EmployeeSkillGrade (employee_id, job_type_id, effective_date);
+CREATE INDEX idx_employee_current ON TRN_EmployeeSkillGrade (employee_id, expiry_date);
+CREATE INDEX idx_job_type_grade ON TRN_EmployeeSkillGrade (job_type_id, skill_grade);
+CREATE INDEX idx_evaluation_date ON TRN_EmployeeSkillGrade (evaluation_date);
+CREATE INDEX idx_next_evaluation ON TRN_EmployeeSkillGrade (next_evaluation_date);
+CREATE INDEX idx_certification ON TRN_EmployeeSkillGrade (certification_flag);
+
+-- 外部キー制約
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_job_type FOREIGN KEY (job_type_id) REFERENCES MST_JobType(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_evaluator FOREIGN KEY (evaluator_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
