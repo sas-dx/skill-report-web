@@ -1,13 +1,15 @@
 // PLT.1-WEB.1: ダッシュボード画面
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
+import { Sidebar } from '@/components/dashboard/Sidebar';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // TODO: 実際の認証状態とユーザー情報を取得
   const userName = 'テストユーザー';
@@ -18,15 +20,38 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  const handleMenuClick = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleSidebarClose = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* ヘッダー - 最上部に固定 */}
       <DashboardHeader 
-        userName={userName}
-        onLogout={handleLogout}
+        onMenuClick={handleMenuClick}
+        title="ダッシュボード"
       />
-      <DashboardContent 
-        userName={userName}
-      />
+
+      {/* メインレイアウト - ヘッダーの下 */}
+      <div className="flex pt-16">
+        {/* サイドバー */}
+        <Sidebar 
+          isOpen={isSidebarOpen}
+          onClose={handleSidebarClose}
+        />
+
+        {/* メインコンテンツエリア */}
+        <div className="flex-1 lg:ml-64">
+          {/* コンテンツ */}
+          <DashboardContent 
+            userName={userName}
+          />
+        </div>
+      </div>
     </div>
   );
 }
