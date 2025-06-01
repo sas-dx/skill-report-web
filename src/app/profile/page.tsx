@@ -1,336 +1,331 @@
-// PRO.1-BASE.1: プロフィール管理画面
+// PRO.1-BASE.1: プロフィール画面
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { mockProfileData, mockUpdateHistory, type ProfileData, type UpdateHistory } from '@/lib/mockData';
+import { Spinner } from '@/components/ui/Spinner';
 
-const ProfilePage: React.FC = () => {
-  const [profileData, setProfileData] = useState<ProfileData>(mockProfileData);
-  const [updateHistory] = useState<UpdateHistory[]>(mockUpdateHistory);
+interface UserProfile {
+  emp_no: string;
+  name: string;
+  email: string;
+  department: string;
+  position: string;
+  hire_date: string;
+  phone?: string;
+  emergency_contact?: string;
+  skills_summary?: string;
+}
+
+export default function ProfilePage() {
+  const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState<ProfileData>(mockProfileData);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
+
+  const handleMenuClick = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleSidebarClose = () => {
+    setIsSidebarOpen(false);
+  };
+
+  // モックデータの読み込み
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        // TODO: 実際のAPI呼び出しに置き換える
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 模擬的な読み込み時間
+        
+        const mockProfile: UserProfile = {
+          emp_no: 'EMP001',
+          name: '山田 太郎',
+          email: 'yamada.taro@company.com',
+          department: '開発部',
+          position: 'シニアエンジニア',
+          hire_date: '2020-04-01',
+          phone: '090-1234-5678',
+          emergency_contact: '090-8765-4321',
+          skills_summary: 'JavaScript, React, Node.js, AWS'
+        };
+        
+        setProfile(mockProfile);
+        setEditedProfile(mockProfile);
+      } catch (error) {
+        console.error('プロフィール読み込みエラー:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
-    setEditedData(profileData);
   };
 
   const handleCancel = () => {
+    setEditedProfile(profile);
     setIsEditing(false);
-    setEditedData(profileData);
   };
 
-  const handleSave = () => {
-    // 実際のAPIコールはここで実行
-    setProfileData(editedData);
-    setIsEditing(false);
-    // 成功メッセージ表示（実装時）
-    alert('プロフィール情報を保存しました');
+  const handleSave = async () => {
+    if (!editedProfile) return;
+    
+    setIsSaving(true);
+    try {
+      // TODO: 実際のAPI呼び出しに置き換える
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 模擬的な保存時間
+      
+      setProfile(editedProfile);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('プロフィール保存エラー:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleInputChange = (field: keyof ProfileData, value: string) => {
-    setEditedData(prev => ({
-      ...prev,
+  const handleInputChange = (field: keyof UserProfile, value: string) => {
+    if (!editedProfile) return;
+    
+    setEditedProfile({
+      ...editedProfile,
       [field]: value
-    }));
+    });
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ja-JP');
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ヘッダー */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <h1 className="text-2xl font-bold text-gray-900">プロフィール管理</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              個人情報・所属情報の確認・編集を行います
-            </p>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader 
+          onMenuClick={handleMenuClick}
+          title="プロフィール"
+        />
+        <div className="flex pt-16">
+          <Sidebar 
+            isOpen={isSidebarOpen}
+            onClose={handleSidebarClose}
+          />
+          <div className="flex-1 lg:ml-64 flex items-center justify-center">
+            <Spinner size="lg" />
           </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* メインコンテンツ */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* 基本情報セクション */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-gray-900">基本情報</h2>
-                  {!isEditing && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleEdit}
-                      className="flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader 
+          onMenuClick={handleMenuClick}
+          title="プロフィール"
+        />
+        <div className="flex pt-16">
+          <Sidebar 
+            isOpen={isSidebarOpen}
+            onClose={handleSidebarClose}
+          />
+          <div className="flex-1 lg:ml-64 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">プロフィールが見つかりません</h2>
+              <p className="text-gray-600">プロフィール情報の読み込みに失敗しました。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* ヘッダー - 最上部に固定 */}
+      <DashboardHeader 
+        onMenuClick={handleMenuClick}
+        title="プロフィール"
+      />
+
+      {/* メインレイアウト - ヘッダーの下 */}
+      <div className="flex pt-16">
+        {/* サイドバー */}
+        <Sidebar 
+          isOpen={isSidebarOpen}
+          onClose={handleSidebarClose}
+        />
+
+        {/* メインコンテンツエリア */}
+        <div className="flex-1 lg:ml-64">
+          <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            {/* ページヘッダー */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">プロフィール</h1>
+                  <p className="text-gray-600 mt-1">個人情報とスキル概要を管理します</p>
+                </div>
+                <div className="flex space-x-3">
+                  {!isEditing ? (
+                    <Button onClick={handleEdit} variant="primary">
                       編集
                     </Button>
+                  ) : (
+                    <>
+                      <Button onClick={handleCancel} variant="secondary">
+                        キャンセル
+                      </Button>
+                      <Button 
+                        onClick={handleSave} 
+                        variant="primary"
+                        disabled={isSaving}
+                      >
+                        {isSaving ? '保存中...' : '保存'}
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* プロフィール情報 */}
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900">基本情報</h2>
+              </div>
+              
               <div className="px-6 py-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 社員番号 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       社員番号
                     </label>
                     <Input
-                      value={isEditing ? editedData.emp_no : profileData.emp_no}
-                      onChange={(e) => handleInputChange('emp_no', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
+                      value={profile.emp_no}
+                      disabled={true}
+                      className="bg-gray-50"
                     />
                   </div>
+
+                  {/* 氏名 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      氏名（漢字） <span className="text-red-500">*</span>
+                      氏名 <span className="text-red-500">*</span>
                     </label>
                     <Input
-                      value={isEditing ? editedData.name_kanji : profileData.name_kanji}
-                      onChange={(e) => handleInputChange('name_kanji', e.target.value)}
+                      value={isEditing ? editedProfile?.name || '' : profile.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
                       disabled={!isEditing}
-                      className="w-full"
-                      required
+                      className={!isEditing ? 'bg-gray-50' : ''}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      氏名（カナ） <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      value={isEditing ? editedData.name_kana : profileData.name_kana}
-                      onChange={(e) => handleInputChange('name_kana', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      氏名（英字）
-                    </label>
-                    <Input
-                      value={isEditing ? editedData.name_english : profileData.name_english}
-                      onChange={(e) => handleInputChange('name_english', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
-                    />
-                  </div>
+
+                  {/* メールアドレス */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       メールアドレス <span className="text-red-500">*</span>
                     </label>
                     <Input
                       type="email"
-                      value={isEditing ? editedData.email : profileData.email}
+                      value={isEditing ? editedProfile?.email || '' : profile.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       disabled={!isEditing}
-                      className="w-full"
-                      required
+                      className={!isEditing ? 'bg-gray-50' : ''}
                     />
                   </div>
+
+                  {/* 部署 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      生年月日
+                      部署
                     </label>
                     <Input
-                      type="date"
-                      value={isEditing ? editedData.birth_date : profileData.birth_date}
-                      onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                      value={isEditing ? editedProfile?.department || '' : profile.department}
+                      onChange={(e) => handleInputChange('department', e.target.value)}
                       disabled={!isEditing}
-                      className="w-full"
+                      className={!isEditing ? 'bg-gray-50' : ''}
                     />
                   </div>
+
+                  {/* 役職 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      役職
+                    </label>
+                    <Input
+                      value={isEditing ? editedProfile?.position || '' : profile.position}
+                      onChange={(e) => handleInputChange('position', e.target.value)}
+                      disabled={!isEditing}
+                      className={!isEditing ? 'bg-gray-50' : ''}
+                    />
+                  </div>
+
+                  {/* 入社日 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       入社日
                     </label>
                     <Input
                       type="date"
-                      value={isEditing ? editedData.join_date : profileData.join_date}
-                      onChange={(e) => handleInputChange('join_date', e.target.value)}
+                      value={isEditing ? editedProfile?.hire_date || '' : profile.hire_date}
+                      onChange={(e) => handleInputChange('hire_date', e.target.value)}
                       disabled={!isEditing}
-                      className="w-full"
+                      className={!isEditing ? 'bg-gray-50' : ''}
                     />
                   </div>
+
+                  {/* 電話番号 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       電話番号
                     </label>
                     <Input
-                      type="tel"
-                      value={isEditing ? editedData.phone : profileData.phone}
+                      value={isEditing ? editedProfile?.phone || '' : profile.phone || ''}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       disabled={!isEditing}
-                      className="w-full"
+                      className={!isEditing ? 'bg-gray-50' : ''}
                     />
                   </div>
-                </div>
-              </div>
-            </div>
 
-            {/* 所属情報セクション */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">所属情報</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      部署名
-                    </label>
-                    <Input
-                      value={isEditing ? editedData.dept_name : profileData.dept_name}
-                      onChange={(e) => handleInputChange('dept_name', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      役職
-                    </label>
-                    <Input
-                      value={isEditing ? editedData.position_name : profileData.position_name}
-                      onChange={(e) => handleInputChange('position_name', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      上司名
-                    </label>
-                    <Input
-                      value={isEditing ? editedData.manager_name : profileData.manager_name}
-                      onChange={(e) => handleInputChange('manager_name', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 連絡先情報セクション */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">連絡先情報</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="grid grid-cols-1 gap-6">
+                  {/* 緊急連絡先 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       緊急連絡先
                     </label>
                     <Input
-                      type="tel"
-                      value={isEditing ? editedData.emergency_contact : profileData.emergency_contact}
+                      value={isEditing ? editedProfile?.emergency_contact || '' : profile.emergency_contact || ''}
                       onChange={(e) => handleInputChange('emergency_contact', e.target.value)}
                       disabled={!isEditing}
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      住所
-                    </label>
-                    <Input
-                      value={isEditing ? editedData.address : profileData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      disabled={!isEditing}
-                      className="w-full"
+                      className={!isEditing ? 'bg-gray-50' : ''}
                     />
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* 操作ボタン */}
-            {isEditing && (
-              <div className="bg-white shadow rounded-lg">
-                <div className="px-6 py-4">
-                  <div className="flex justify-end space-x-3">
-                    <Button
-                      variant="outline"
-                      onClick={handleCancel}
-                    >
-                      キャンセル
-                    </Button>
-                    <Button
-                      onClick={handleSave}
-                    >
-                      保存
-                    </Button>
-                  </div>
+                {/* スキル概要 */}
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    スキル概要
+                  </label>
+                  <textarea
+                    value={isEditing ? editedProfile?.skills_summary || '' : profile.skills_summary || ''}
+                    onChange={(e) => handleInputChange('skills_summary', e.target.value)}
+                    disabled={!isEditing}
+                    rows={4}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                      !isEditing ? 'bg-gray-50' : ''
+                    }`}
+                    placeholder="保有スキルや専門分野を入力してください"
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* サイドバー */}
-          <div className="space-y-6">
-            {/* 更新履歴 */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">更新履歴</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="space-y-4">
-                  {updateHistory.map((history) => (
-                    <div key={history.id} className="border-l-4 border-blue-400 pl-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-900">
-                          {history.section}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {formatDate(history.updated_at)}
-                        </p>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {history.changes}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        更新者: {history.updated_by}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 最終更新情報 */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">最終更新情報</h2>
-              </div>
-              <div className="px-6 py-4">
-                <dl className="space-y-2">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">更新日時</dt>
-                    <dd className="text-sm text-gray-900">
-                      {formatDate(profileData.updated_at)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">更新者</dt>
-                    <dd className="text-sm text-gray-900">
-                      {profileData.updated_by}
-                    </dd>
-                  </div>
-                </dl>
               </div>
             </div>
           </div>
@@ -338,6 +333,4 @@ const ProfilePage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default ProfilePage;
+}

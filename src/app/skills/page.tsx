@@ -1,412 +1,516 @@
 // SKL.1-HIER.1: スキル管理画面
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { 
-  mockSkillCategories, 
-  mockCertifications,
-  skillLevelLabels,
-  skillLevelDescriptions,
-  type SkillCategory, 
-  type SkillItem,
-  type CertificationData 
-} from '@/lib/mockData';
+import { Spinner } from '@/components/ui/Spinner';
 
-const SkillsPage: React.FC = () => {
-  const [skillCategories, setSkillCategories] = useState<SkillCategory[]>(mockSkillCategories);
-  const [certifications, setCertifications] = useState<CertificationData[]>(mockCertifications);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
+interface Skill {
+  id: string;
+  category: string;
+  subcategory: string;
+  name: string;
+  level: number;
+  experience_years?: number;
+  last_used?: string;
+  certification?: string;
+  notes?: string;
+}
+
+interface SkillCategory {
+  id: string;
+  name: string;
+  subcategories: SkillSubcategory[];
+}
+
+interface SkillSubcategory {
+  id: string;
+  name: string;
+  skills: string[];
+}
+
+export default function SkillsPage() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [skillCategories, setSkillCategories] = useState<SkillCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [isEditing, setIsEditing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [newSkill, setNewSkill] = useState<Partial<Skill>>({
+    category: '',
+    subcategory: '',
+    name: '',
+    level: 1,
+    experience_years: 0,
+    last_used: '',
+    certification: '',
+    notes: ''
+  });
 
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
+  const handleMenuClick = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const toggleSkill = (skillId: string) => {
-    const newExpanded = new Set(expandedSkills);
-    if (newExpanded.has(skillId)) {
-      newExpanded.delete(skillId);
-    } else {
-      newExpanded.add(skillId);
-    }
-    setExpandedSkills(newExpanded);
+  const handleSidebarClose = () => {
+    setIsSidebarOpen(false);
   };
 
-  const updateSkillLevel = (skillId: string, level: number) => {
-    const updateSkillInCategory = (skills: SkillItem[]): SkillItem[] => {
-      return skills.map(skill => {
-        if (skill.id === skillId) {
-          return { ...skill, level };
-        }
-        if (skill.children) {
-          return { ...skill, children: updateSkillInCategory(skill.children) };
-        }
-        return skill;
-      });
+  // モックデータの初期化
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const mockCategories: SkillCategory[] = [
+          {
+            id: '1',
+            name: 'プログラミング言語',
+            subcategories: [
+              { id: '1-1', name: 'フロントエンド', skills: ['JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular'] },
+              { id: '1-2', name: 'バックエンド', skills: ['Node.js', 'Python', 'Java', 'C#', 'Go'] },
+              { id: '1-3', name: 'モバイル', skills: ['React Native', 'Flutter', 'Swift', 'Kotlin'] }
+            ]
+          },
+          {
+            id: '2',
+            name: 'インフラ・クラウド',
+            subcategories: [
+              { id: '2-1', name: 'クラウドサービス', skills: ['AWS', 'Azure', 'GCP', 'Vercel', 'Netlify'] },
+              { id: '2-2', name: 'コンテナ', skills: ['Docker', 'Kubernetes', 'Docker Compose'] },
+              { id: '2-3', name: 'CI/CD', skills: ['GitHub Actions', 'Jenkins', 'GitLab CI'] }
+            ]
+          },
+          {
+            id: '3',
+            name: 'データベース',
+            subcategories: [
+              { id: '3-1', name: 'リレーショナル', skills: ['PostgreSQL', 'MySQL', 'SQL Server'] },
+              { id: '3-2', name: 'NoSQL', skills: ['MongoDB', 'Redis', 'DynamoDB'] }
+            ]
+          }
+        ];
+
+        const mockSkills: Skill[] = [
+          {
+            id: '1',
+            category: 'プログラミング言語',
+            subcategory: 'フロントエンド',
+            name: 'JavaScript',
+            level: 4,
+            experience_years: 5,
+            last_used: '2025-05-30',
+            certification: '',
+            notes: 'ES6+の機能を活用した開発経験豊富'
+          },
+          {
+            id: '2',
+            category: 'プログラミング言語',
+            subcategory: 'フロントエンド',
+            name: 'React',
+            level: 4,
+            experience_years: 3,
+            last_used: '2025-05-30',
+            certification: '',
+            notes: 'Hooks、Context API、Next.jsでの開発経験あり'
+          },
+          {
+            id: '3',
+            category: 'インフラ・クラウド',
+            subcategory: 'クラウドサービス',
+            name: 'AWS',
+            level: 3,
+            experience_years: 2,
+            last_used: '2025-05-15',
+            certification: 'AWS Solutions Architect Associate',
+            notes: 'EC2、S3、RDS、Lambda等の基本サービス利用経験'
+          }
+        ];
+
+        setSkillCategories(mockCategories);
+        setSkills(mockSkills);
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setSkillCategories(categories =>
-      categories.map(category => ({
-        ...category,
-        skills: updateSkillInCategory(category.skills)
-      }))
-    );
+    loadData();
+  }, []);
+
+  const getLevelText = (level: number) => {
+    const levels = ['', '×', '△', '○', '◎'];
+    return levels[level] || '';
   };
 
-  const getSkillLevelColor = (level: number) => {
-    switch (level) {
-      case 0: return 'bg-gray-100 text-gray-600';
-      case 1: return 'bg-red-100 text-red-800';
-      case 2: return 'bg-yellow-100 text-yellow-800';
-      case 3: return 'bg-blue-100 text-blue-800';
-      case 4: return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-600';
+  const getLevelColor = (level: number) => {
+    const colors = ['', 'text-red-500', 'text-yellow-500', 'text-blue-500', 'text-green-500'];
+    return colors[level] || '';
+  };
+
+  const filteredSkills = skills.filter(skill => {
+    const matchesSearch = skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         skill.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         skill.subcategory.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === '' || skill.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const handleAddSkill = () => {
+    if (!newSkill.name || !newSkill.category || !newSkill.subcategory) {
+      alert('必須項目を入力してください');
+      return;
     }
+
+    const skill: Skill = {
+      id: Date.now().toString(),
+      category: newSkill.category!,
+      subcategory: newSkill.subcategory!,
+      name: newSkill.name!,
+      level: newSkill.level || 1,
+      experience_years: newSkill.experience_years || 0,
+      last_used: newSkill.last_used || '',
+      certification: newSkill.certification || '',
+      notes: newSkill.notes || ''
+    };
+
+    setSkills([...skills, skill]);
+    setNewSkill({
+      category: '',
+      subcategory: '',
+      name: '',
+      level: 1,
+      experience_years: 0,
+      last_used: '',
+      certification: '',
+      notes: ''
+    });
+    setActiveTab('list');
   };
 
-  const renderSkillItem = (skill: SkillItem, depth: number = 0) => {
-    const hasChildren = skill.children && skill.children.length > 0;
-    const isExpanded = expandedSkills.has(skill.id);
-    const paddingLeft = `${depth * 1.5 + 1}rem`;
-
+  if (isLoading) {
     return (
-      <div key={skill.id} className="border-b border-gray-100 last:border-b-0">
-        <div 
-          className="flex items-center justify-between py-3 hover:bg-gray-50"
-          style={{ paddingLeft }}
-        >
-          <div className="flex items-center flex-1">
-            {hasChildren && (
-              <button
-                onClick={() => toggleSkill(skill.id)}
-                className="mr-2 p-1 hover:bg-gray-200 rounded"
-              >
-                <svg 
-                  className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            )}
-            <div className="flex-1">
-              <div className="flex items-center">
-                <span className="font-medium text-gray-900">{skill.name}</span>
-                {skill.subcategory && (
-                  <span className="ml-2 text-xs text-gray-500">
-                    ({skill.subcategory})
-                  </span>
-                )}
-              </div>
-              {skill.acquired_date && (
-                <div className="text-xs text-gray-500 mt-1">
-                  習得日: {new Date(skill.acquired_date).toLocaleDateString('ja-JP')}
-                </div>
-              )}
-              {skill.remarks && (
-                <div className="text-xs text-gray-600 mt-1">
-                  {skill.remarks}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {skill.level === 0 ? (
-              <span className={`px-3 py-1 text-sm font-medium rounded-full ${getSkillLevelColor(skill.level)}`}>
-                未評価
-              </span>
-            ) : (
-              <span className={`px-3 py-2 text-lg font-bold rounded-full ${getSkillLevelColor(skill.level)}`}>
-                {skillLevelLabels[skill.level as keyof typeof skillLevelLabels]}
-              </span>
-            )}
-            {isEditing && (
-              <select
-                value={skill.level}
-                onChange={(e) => updateSkillLevel(skill.id, parseInt(e.target.value))}
-                className="text-xs border border-gray-300 rounded px-2 py-1"
-              >
-                {Object.entries(skillLevelLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label} - {skillLevelDescriptions[parseInt(value) as keyof typeof skillLevelDescriptions]}
-                  </option>
-                ))}
-              </select>
-            )}
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader 
+          onMenuClick={handleMenuClick}
+          title="スキル管理"
+        />
+        <div className="flex pt-16">
+          <Sidebar 
+            isOpen={isSidebarOpen}
+            onClose={handleSidebarClose}
+          />
+          <div className="flex-1 lg:ml-64 flex items-center justify-center">
+            <Spinner size="lg" />
           </div>
         </div>
-        
-        {hasChildren && isExpanded && (
-          <div>
-            {skill.children!.map(childSkill => renderSkillItem(childSkill, depth + 1))}
-          </div>
-        )}
       </div>
     );
-  };
-
-  const filteredCategories = skillCategories.filter(category => {
-    if (selectedCategory !== 'all' && category.id !== selectedCategory) {
-      return false;
-    }
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return category.name.toLowerCase().includes(searchLower) ||
-             category.skills.some(skill => 
-               skill.name.toLowerCase().includes(searchLower) ||
-               (skill.children && skill.children.some(child => 
-                 child.name.toLowerCase().includes(searchLower)
-               ))
-             );
-    }
-    return true;
-  });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <div className="flex items-center justify-between">
+      <DashboardHeader 
+        onMenuClick={handleMenuClick}
+        title="スキル管理"
+      />
+
+      {/* メインレイアウト */}
+      <div className="flex pt-16">
+        {/* サイドバー */}
+        <Sidebar 
+          isOpen={isSidebarOpen}
+          onClose={handleSidebarClose}
+        />
+
+        {/* メインコンテンツエリア */}
+        <div className="flex-1 lg:ml-64">
+          <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            {/* ページヘッダー */}
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold text-gray-900">スキル管理</h1>
+              <p className="text-gray-600 mt-1">保有スキルの登録・管理を行います</p>
+            </div>
+
+            {/* タブナビゲーション */}
+            <div className="mb-6">
+              <div className="border-b border-gray-200">
+                <nav className="-mb-px flex space-x-8">
+                  <button
+                    onClick={() => setActiveTab('list')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === 'list'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    スキル一覧
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('add')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === 'add'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    スキル追加
+                  </button>
+                </nav>
+              </div>
+            </div>
+
+            {/* スキル一覧タブ */}
+            {activeTab === 'list' && (
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">スキル管理</h1>
-                <p className="mt-1 text-sm text-gray-600">
-                  技術・開発・業務・管理・生産スキルの管理を行います
-                </p>
-              </div>
-              <Button
-                onClick={() => setIsEditing(!isEditing)}
-                variant={isEditing ? "outline" : "primary"}
-              >
-                {isEditing ? 'キャンセル' : '編集モード'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* メインコンテンツ */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* 検索・フィルター */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    スキル検索
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="スキル名で検索..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    カテゴリフィルター
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  >
-                    <option value="all">すべてのカテゴリ</option>
-                    {skillCategories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* スキル一覧 */}
-            <div className="space-y-4">
-              {filteredCategories.map(category => (
-                <div key={category.id} className="bg-white shadow rounded-lg">
-                  <div 
-                    className="px-6 py-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50"
-                    onClick={() => toggleCategory(category.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-medium text-gray-900 flex items-center">
-                        <svg 
-                          className={`w-5 h-5 mr-2 transition-transform ${
-                            expandedCategories.has(category.id) ? 'rotate-90' : ''
-                          }`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        {category.name}
-                      </h2>
-                      <span className="text-sm text-gray-500">
-                        {category.skills.length} 項目
-                      </span>
+                {/* 検索・フィルター */}
+                <div className="mb-6 bg-white p-4 rounded-lg shadow">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        キーワード検索
+                      </label>
+                      <Input
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="スキル名、カテゴリで検索"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        カテゴリフィルター
+                      </label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">すべてのカテゴリ</option>
+                        {skillCategories.map(category => (
+                          <option key={category.id} value={category.name}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                  
-                  {expandedCategories.has(category.id) && (
-                    <div className="px-6 py-4">
-                      {category.skills.map(skill => renderSkillItem(skill))}
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
 
-            {isEditing && (
+                {/* スキル一覧 */}
+                <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          スキル名
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          カテゴリ
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          レベル
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          経験年数
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          最終使用
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          操作
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredSkills.map((skill) => (
+                        <tr key={skill.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{skill.name}</div>
+                            <div className="text-sm text-gray-500">{skill.subcategory}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {skill.category}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`text-lg font-bold ${getLevelColor(skill.level)}`}>
+                              {getLevelText(skill.level)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {skill.experience_years}年
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {skill.last_used}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button className="text-blue-600 hover:text-blue-900 mr-3">
+                              編集
+                            </button>
+                            <button className="text-red-600 hover:text-red-900">
+                              削除
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* スキル追加タブ */}
+            {activeTab === 'add' && (
               <div className="bg-white shadow rounded-lg p-6">
-                <div className="flex justify-end space-x-3">
+                <h2 className="text-lg font-medium text-gray-900 mb-6">新しいスキルを追加</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* カテゴリ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      カテゴリ <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newSkill.category}
+                      onChange={(e) => setNewSkill({...newSkill, category: e.target.value, subcategory: ''})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">カテゴリを選択</option>
+                      {skillCategories.map(category => (
+                        <option key={category.id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* サブカテゴリ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      サブカテゴリ <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newSkill.subcategory}
+                      onChange={(e) => setNewSkill({...newSkill, subcategory: e.target.value})}
+                      disabled={!newSkill.category}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50"
+                    >
+                      <option value="">サブカテゴリを選択</option>
+                      {skillCategories
+                        .find(cat => cat.name === newSkill.category)
+                        ?.subcategories.map(sub => (
+                          <option key={sub.id} value={sub.name}>
+                            {sub.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  {/* スキル名 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      スキル名 <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={newSkill.name}
+                      onChange={(e) => setNewSkill({...newSkill, name: e.target.value})}
+                      placeholder="例: JavaScript"
+                    />
+                  </div>
+
+                  {/* レベル */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      レベル <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={newSkill.level}
+                      onChange={(e) => setNewSkill({...newSkill, level: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value={1}>× - 未経験</option>
+                      <option value={2}>△ - 基礎レベル</option>
+                      <option value={3}>○ - 実務レベル</option>
+                      <option value={4}>◎ - エキスパート</option>
+                    </select>
+                  </div>
+
+                  {/* 経験年数 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      経験年数
+                    </label>
+                    <Input
+                      type="number"
+                      value={newSkill.experience_years}
+                      onChange={(e) => setNewSkill({...newSkill, experience_years: parseInt(e.target.value) || 0})}
+                      min="0"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  {/* 最終使用日 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      最終使用日
+                    </label>
+                    <Input
+                      type="date"
+                      value={newSkill.last_used}
+                      onChange={(e) => setNewSkill({...newSkill, last_used: e.target.value})}
+                    />
+                  </div>
+
+                  {/* 資格・認定 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      関連資格・認定
+                    </label>
+                    <Input
+                      value={newSkill.certification}
+                      onChange={(e) => setNewSkill({...newSkill, certification: e.target.value})}
+                      placeholder="例: AWS Solutions Architect Associate"
+                    />
+                  </div>
+
+                  {/* 備考 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      備考・詳細
+                    </label>
+                    <textarea
+                      value={newSkill.notes}
+                      onChange={(e) => setNewSkill({...newSkill, notes: e.target.value})}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="スキルの詳細や特記事項を入力"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-3">
                   <Button
-                    variant="outline"
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => setActiveTab('list')}
+                    variant="secondary"
                   >
                     キャンセル
                   </Button>
                   <Button
-                    onClick={() => {
-                      setIsEditing(false);
-                      alert('スキル情報を保存しました');
-                    }}
+                    onClick={handleAddSkill}
+                    variant="primary"
                   >
-                    保存
+                    スキルを追加
                   </Button>
                 </div>
               </div>
             )}
-          </div>
-
-          {/* サイドバー */}
-          <div className="space-y-6">
-            {/* スキルレベル説明 */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">評価基準</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="space-y-3">
-                  {Object.entries(skillLevelLabels).map(([level, label]) => (
-                    <div key={level} className="flex items-center">
-                      {parseInt(level) === 0 ? (
-                        <span className={`px-2 py-1 text-xs font-medium rounded mr-3 ${getSkillLevelColor(parseInt(level))}`}>
-                          {label}
-                        </span>
-                      ) : (
-                        <span className={`w-5 h-5 text-xs font-medium rounded-full mr-2 flex items-center justify-center ${getSkillLevelColor(parseInt(level))}`}>
-                          {label}
-                        </span>
-                      )}
-                      <span className="text-xs text-gray-600">
-                        {skillLevelDescriptions[parseInt(level) as keyof typeof skillLevelDescriptions]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 資格情報 */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">保有資格</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="space-y-4">
-                  {certifications.map(cert => (
-                    <div key={cert.id} className="border-l-4 border-green-400 pl-4">
-                      <h3 className="text-sm font-medium text-gray-900">
-                        {cert.cert_name}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        取得日: {new Date(cert.acquired_date).toLocaleDateString('ja-JP')}
-                      </p>
-                      {cert.expire_date && (
-                        <p className="text-xs text-gray-500">
-                          有効期限: {new Date(cert.expire_date).toLocaleDateString('ja-JP')}
-                        </p>
-                      )}
-                      {cert.score && (
-                        <p className="text-xs text-gray-600">
-                          スコア: {cert.score}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-500">
-                        発行者: {cert.issuer}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* スキル統計 */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">スキル統計</h2>
-              </div>
-              <div className="px-6 py-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">総スキル数</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {skillCategories.reduce((total, category) => 
-                        total + category.skills.reduce((catTotal, skill) => 
-                          catTotal + 1 + (skill.children?.length || 0), 0
-                        ), 0
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">評価済みスキル</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {skillCategories.reduce((total, category) => 
-                        total + category.skills.reduce((catTotal, skill) => {
-                          let count = skill.level > 0 ? 1 : 0;
-                          if (skill.children) {
-                            count += skill.children.filter(child => child.level > 0).length;
-                          }
-                          return catTotal + count;
-                        }, 0
-                      ), 0
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">保有資格数</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {certifications.length}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default SkillsPage;
+}
