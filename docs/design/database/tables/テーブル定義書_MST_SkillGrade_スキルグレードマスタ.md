@@ -1,174 +1,326 @@
 # テーブル定義書：MST_SkillGrade（スキルグレードマスタ）
 
-## 基本情報
+## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| テーブル名 | MST_SkillGrade |
-| 論理名 | スキルグレードマスタ |
-| 用途 | 職種内での習熟度レベルを管理 |
-| カテゴリ | マスタ系 |
-| 重要度 | 高 |
+| **テーブルID** | TBL-036 |
+| **テーブル名** | MST_SkillGrade |
+| **論理名** | スキルグレードマスタ |
+| **カテゴリ** | マスタ系 |
+| **優先度** | 高 |
+| **ステータス** | 運用中 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
-## テーブル概要
+## 2. テーブル概要
 
-職種内での習熟度レベル（初級、中級、上級、エキスパート等）を管理するマスタテーブル。
-スキルグレード別の要件定義、昇格基準、評価基準の設定に使用される。
+### 2.1 概要・目的
+スキルグレードマスタテーブル（MST_SkillGrade）は、スキル評価の段階的なレベルを管理します。各グレードには明確な評価基準と要件が定義され、統一的なスキル評価体系を提供します。職種やテナントに応じたカスタマイズも可能です。
 
-## カラム定義
+### 2.2 関連API
+- [API-032](../../api/specs/API仕様書_API-032_スキルグレード管理API.md) - スキルグレード管理API
 
-| # | カラム名 | データ型 | NULL | デフォルト | 主キー | 外部キー | インデックス | 説明 |
-|---|----------|----------|------|------------|--------|----------|--------------|------|
-| 1 | tenant_id | VARCHAR(50) | NOT NULL | - | ○ | MST_Tenant.tenant_id | ○ | テナントID |
-| 2 | skill_grade_id | VARCHAR(20) | NOT NULL | - | ○ | - | ○ | スキルグレードID |
-| 3 | skill_grade_name | VARCHAR(100) | NOT NULL | - | - | - | ○ | スキルグレード名 |
-| 4 | skill_grade_code | VARCHAR(10) | NOT NULL | - | - | - | ○ | スキルグレードコード |
-| 5 | grade_level | INT | NOT NULL | - | - | - | ○ | グレードレベル（数値） |
-| 6 | description | TEXT | NULL | - | - | - | - | グレード説明 |
-| 7 | requirements | JSON | NULL | - | - | - | - | 昇格要件 |
-| 8 | evaluation_criteria | JSON | NULL | - | - | - | - | 評価基準 |
-| 9 | expected_skills | JSON | NULL | - | - | - | - | 期待スキル一覧 |
-| 10 | min_experience_years | INT | NULL | 0 | - | - | - | 最低経験年数 |
-| 11 | max_experience_years | INT | NULL | - | - | - | - | 最大経験年数 |
-| 12 | promotion_criteria | JSON | NULL | - | - | - | - | 昇格基準 |
-| 13 | salary_coefficient | DECIMAL(5,2) | NULL | 1.00 | - | - | - | 給与係数 |
-| 14 | is_entry_level | BOOLEAN | NOT NULL | FALSE | - | - | ○ | エントリーレベルフラグ |
-| 15 | is_active | BOOLEAN | NOT NULL | TRUE | - | - | ○ | 有効フラグ |
-| 16 | display_order | INT | NOT NULL | 0 | - | - | ○ | 表示順序 |
-| 17 | created_at | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | - | - | ○ | 作成日時 |
-| 18 | created_by | VARCHAR(50) | NOT NULL | - | - | MST_UserAuth.user_id | - | 作成者 |
-| 19 | updated_at | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | - | - | ○ | 更新日時 |
-| 20 | updated_by | VARCHAR(50) | NOT NULL | - | - | MST_UserAuth.user_id | - | 更新者 |
-| 21 | version | INT | NOT NULL | 1 | - | - | - | バージョン（楽観的排他制御） |
+### 2.3 関連バッチ
+- [BATCH-022](../../batch/specs/バッチ定義書_BATCH-022_スキルグレード同期バッチ.md) - スキルグレード同期バッチ
 
-## インデックス定義
+## 3. テーブル構造
 
-| インデックス名 | 種別 | 対象カラム | 説明 |
-|---------------|------|------------|------|
-| PK_MST_SkillGrade | PRIMARY | tenant_id, skill_grade_id | 主キー |
-| UK_MST_SkillGrade_Code | UNIQUE | tenant_id, skill_grade_code | スキルグレードコード一意制約 |
-| UK_MST_SkillGrade_Name | UNIQUE | tenant_id, skill_grade_name | スキルグレード名一意制約 |
-| UK_MST_SkillGrade_Level | UNIQUE | tenant_id, grade_level | グレードレベル一意制約 |
-| IX_MST_SkillGrade_Level | INDEX | tenant_id, grade_level | グレードレベル検索用 |
-| IX_MST_SkillGrade_Entry | INDEX | tenant_id, is_entry_level | エントリーレベル検索用 |
-| IX_MST_SkillGrade_Active | INDEX | tenant_id, is_active | 有効グレード検索用 |
-| IX_MST_SkillGrade_Order | INDEX | tenant_id, display_order | 表示順序用 |
-| IX_MST_SkillGrade_Created | INDEX | created_at | 作成日時検索用 |
-| IX_MST_SkillGrade_Updated | INDEX | updated_at | 更新日時検索用 |
+### 3.1 カラム定義
 
-## 制約定義
+| No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
+|----|----------|--------|----------|------|------|----|----|--------------|------|
+| 1 | grade_id | グレードID | VARCHAR | 20 | × | ○ | - | - | スキルグレードを一意に識別するID |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | ○ | - | ○ | NULL | テナント固有グレードの場合のテナントID |
+| 3 | grade_code | グレードコード | VARCHAR | 20 | × | - | - | - | スキルグレードのコード |
+| 4 | grade_name | グレード名 | VARCHAR | 100 | × | - | - | - | スキルグレードの名称 |
+| 5 | grade_name_en | グレード名（英語） | VARCHAR | 100 | ○ | - | - | NULL | グレード名の英語表記 |
+| 6 | grade_level | グレードレベル | INTEGER | - | × | - | - | 1 | グレードの数値レベル（1-10） |
+| 7 | grade_type | グレード種別 | VARCHAR | 20 | × | - | - | 'STANDARD' | グレードの種別（STANDARD/TECHNICAL/BUSINESS等） |
+| 8 | description | 説明 | TEXT | - | ○ | - | - | NULL | グレードの詳細説明 |
+| 9 | evaluation_criteria | 評価基準 | TEXT | - | × | - | - | - | グレード判定の具体的基準 |
+| 10 | required_skills | 必要スキル | TEXT | - | ○ | - | - | NULL | グレード達成に必要なスキル |
+| 11 | required_experience | 必要経験 | TEXT | - | ○ | - | - | NULL | グレード達成に必要な経験 |
+| 12 | required_certifications | 必要資格 | TEXT | - | ○ | - | - | NULL | グレード達成に必要な資格 |
+| 13 | min_experience_years | 最小経験年数 | INTEGER | - | ○ | - | - | NULL | グレード達成に必要な最小経験年数 |
+| 14 | min_project_count | 最小プロジェクト数 | INTEGER | - | ○ | - | - | NULL | グレード達成に必要な最小プロジェクト数 |
+| 15 | assessment_method | 評価方法 | VARCHAR | 50 | × | - | - | 'SELF_ASSESSMENT' | 評価方法（SELF_ASSESSMENT/PEER_REVIEW/MANAGER_REVIEW等） |
+| 16 | color_code | カラーコード | VARCHAR | 7 | ○ | - | - | NULL | グレードの表示色（#RRGGBB形式） |
+| 17 | icon_url | アイコンURL | VARCHAR | 500 | ○ | - | - | NULL | グレードのアイコン画像URL |
+| 18 | badge_url | バッジURL | VARCHAR | 500 | ○ | - | - | NULL | グレードバッジ画像URL |
+| 19 | sort_order | 表示順序 | INTEGER | - | × | - | - | 0 | グレード一覧での表示順序 |
+| 20 | is_system_grade | システムグレードフラグ | BOOLEAN | - | × | - | - | FALSE | システム標準グレードかどうか |
+| 21 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | グレードが有効かどうか |
+| 22 | effective_date | 有効開始日 | DATE | - | × | - | - | - | グレードの有効開始日 |
+| 23 | expiry_date | 有効終了日 | DATE | - | ○ | - | - | NULL | グレードの有効終了日 |
+| 24 | created_at | 作成日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP | レコード作成日時 |
+| 25 | updated_at | 更新日時 | TIMESTAMP | - | × | - | - | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
+| 26 | created_by | 作成者ID | VARCHAR | 50 | × | - | ○ | - | レコード作成者のユーザーID |
+| 27 | updated_by | 更新者ID | VARCHAR | 50 | × | - | ○ | - | レコード更新者のユーザーID |
 
-| 制約名 | 種別 | 対象カラム | 条件 | 説明 |
-|--------|------|------------|------|------|
-| FK_MST_SkillGrade_Tenant | FOREIGN KEY | tenant_id | MST_Tenant.tenant_id | テナント参照制約 |
-| FK_MST_SkillGrade_CreatedBy | FOREIGN KEY | created_by | MST_UserAuth.user_id | 作成者参照制約 |
-| FK_MST_SkillGrade_UpdatedBy | FOREIGN KEY | updated_by | MST_UserAuth.user_id | 更新者参照制約 |
-| CK_MST_SkillGrade_Level | CHECK | grade_level | grade_level >= 1 AND grade_level <= 10 | グレードレベル範囲チェック |
-| CK_MST_SkillGrade_Experience | CHECK | min_experience_years, max_experience_years | min_experience_years <= max_experience_years | 経験年数範囲チェック |
-| CK_MST_SkillGrade_Coefficient | CHECK | salary_coefficient | salary_coefficient >= 0.5 AND salary_coefficient <= 5.0 | 給与係数範囲チェック |
-| CK_MST_SkillGrade_Order | CHECK | display_order | display_order >= 0 | 表示順序正数チェック |
+### 3.2 インデックス定義
 
-## サンプルデータ
+| インデックス名 | 種別 | カラム | 説明 |
+|----------------|------|--------|------|
+| PRIMARY | PRIMARY KEY | grade_id | 主キー |
+| idx_grade_code | UNIQUE | grade_code | グレードコードの一意性を保証 |
+| idx_tenant_grade | INDEX | tenant_id, grade_code | テナント内グレードコード検索用 |
+| idx_tenant | INDEX | tenant_id | テナント検索用 |
+| idx_grade_level | INDEX | grade_level | グレードレベル検索用 |
+| idx_grade_type | INDEX | grade_type | グレード種別検索用 |
+| idx_system | INDEX | is_system_grade | システムグレード検索用 |
+| idx_active | INDEX | is_active | 有効フラグ検索用 |
+| idx_effective | INDEX | effective_date, expiry_date | 有効期間検索用 |
+| idx_assessment | INDEX | assessment_method | 評価方法検索用 |
 
+### 3.3 制約定義
+
+| 制約名 | 制約種別 | カラム | 制約内容 |
+|--------|----------|--------|----------|
+| pk_skill_grade | PRIMARY KEY | grade_id | 主キー制約 |
+| uq_grade_code | UNIQUE | grade_code | グレードコードの一意性を保証 |
+| fk_tenant | FOREIGN KEY | tenant_id | MST_Tenant.tenant_id |
+| fk_created_by | FOREIGN KEY | created_by | MST_UserAuth.user_id |
+| fk_updated_by | FOREIGN KEY | updated_by | MST_UserAuth.user_id |
+| chk_grade_level | CHECK | grade_level | grade_level >= 1 AND grade_level <= 10 |
+| chk_grade_type | CHECK | grade_type | grade_type IN ('STANDARD', 'TECHNICAL', 'BUSINESS', 'LEADERSHIP', 'SPECIALIST') |
+| chk_assessment_method | CHECK | assessment_method | assessment_method IN ('SELF_ASSESSMENT', 'PEER_REVIEW', 'MANAGER_REVIEW', 'EXPERT_REVIEW', 'CERTIFICATION') |
+| chk_color_code | CHECK | color_code | color_code IS NULL OR color_code REGEXP '^#[0-9A-Fa-f]{6}$' |
+| chk_min_experience_years | CHECK | min_experience_years | min_experience_years IS NULL OR min_experience_years >= 0 |
+| chk_min_project_count | CHECK | min_project_count | min_project_count IS NULL OR min_project_count >= 0 |
+| chk_expiry_date | CHECK | expiry_date | expiry_date IS NULL OR expiry_date >= effective_date |
+
+## 4. リレーション
+
+### 4.1 親テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| MST_Tenant | tenant_id | 1:N | テナント情報 |
+| MST_UserAuth | created_by, updated_by | 1:N | 作成者・更新者 |
+
+### 4.2 子テーブル
+| テーブル名 | 関連カラム | カーディナリティ | 説明 |
+|------------|------------|------------------|------|
+| TRN_SkillRecord | grade_id | 1:N | スキル評価記録 |
+| MST_SkillGradeRequirement | grade_id | 1:N | スキルグレード要件 |
+| MST_JobTypeSkillGrade | grade_id | 1:N | 職種スキルグレード関連 |
+
+## 5. データ仕様
+
+### 5.1 データ例
 ```sql
-INSERT INTO MST_SkillGrade VALUES
-('tenant001', 'SG001', '初級', 'JUNIOR', 1, '基本的なスキルを習得したレベル', 
- '{"experience": "0-2年", "skills": ["基本知識"], "certifications": []}', 
- '{"technical": 40, "communication": 30, "management": 10}', 
- '["基本的なプログラミング", "基本的なコミュニケーション"]', 0, 2, 
- '{"performance": "基本業務を遂行", "evaluation": "指導の下で業務実行"}', 1.00, TRUE, TRUE, 1, 
- NOW(), 'admin', NOW(), 'admin', 1),
-('tenant001', 'SG002', '中級', 'MIDDLE', 2, '一人前のスキルを持つレベル', 
- '{"experience": "2-5年", "skills": ["応用知識"], "certifications": ["基本情報技術者"]}', 
- '{"technical": 60, "communication": 40, "management": 20}', 
- '["応用プログラミング", "チームワーク", "問題解決"]', 2, 5, 
- '{"performance": "独立して業務遂行", "evaluation": "自律的な業務実行"}', 1.20, FALSE, TRUE, 2, 
- NOW(), 'admin', NOW(), 'admin', 1),
-('tenant001', 'SG003', '上級', 'SENIOR', 3, '高度なスキルを持つレベル', 
- '{"experience": "5-10年", "skills": ["専門知識"], "certifications": ["応用情報技術者"]}', 
- '{"technical": 80, "communication": 60, "management": 40}', 
- '["アーキテクチャ設計", "リーダーシップ", "メンタリング"]', 5, 10, 
- '{"performance": "高度な業務遂行", "evaluation": "他者への指導・支援"}', 1.50, FALSE, TRUE, 3, 
- NOW(), 'admin', NOW(), 'admin', 1),
-('tenant001', 'SG004', 'エキスパート', 'EXPERT', 4, '専門分野のエキスパートレベル', 
- '{"experience": "10年以上", "skills": ["エキスパート知識"], "certifications": ["高度情報技術者"]}', 
- '{"technical": 90, "communication": 80, "management": 60}', 
- '["技術戦略立案", "組織運営", "イノベーション創出"]', 10, 20, 
- '{"performance": "戦略的業務遂行", "evaluation": "組織全体への貢献"}', 2.00, FALSE, TRUE, 4, 
- NOW(), 'admin', NOW(), 'admin', 1);
+-- システム標準グレード（初級）
+INSERT INTO MST_SkillGrade (
+    grade_id, grade_code, grade_name, grade_name_en, grade_level,
+    grade_type, description, evaluation_criteria, required_experience,
+    min_experience_years, assessment_method, color_code,
+    is_system_grade, effective_date, created_by, updated_by
+) VALUES (
+    'GRADE_001', 'BEGINNER', '初級', 'Beginner', 1,
+    'STANDARD', '基本的なスキルレベル',
+    '基本的な知識を有し、指導の下で業務を遂行できる',
+    '基本的な業務経験、研修受講',
+    0, 'SELF_ASSESSMENT', '#4CAF50',
+    TRUE, '2025-04-01', 'system', 'system'
+);
+
+-- システム標準グレード（中級）
+INSERT INTO MST_SkillGrade (
+    grade_id, grade_code, grade_name, grade_name_en, grade_level,
+    grade_type, description, evaluation_criteria, required_experience,
+    min_experience_years, min_project_count, assessment_method, color_code,
+    is_system_grade, effective_date, created_by, updated_by
+) VALUES (
+    'GRADE_002', 'INTERMEDIATE', '中級', 'Intermediate', 3,
+    'STANDARD', '実務レベルのスキル',
+    '独立して業務を遂行でき、他者への指導も可能',
+    '実務経験、プロジェクト参加実績',
+    2, 3, 'MANAGER_REVIEW', '#FF9800',
+    TRUE, '2025-04-01', 'system', 'system'
+);
+
+-- 技術専門グレード
+INSERT INTO MST_SkillGrade (
+    grade_id, grade_code, grade_name, grade_name_en, grade_level,
+    grade_type, description, evaluation_criteria, required_certifications,
+    min_experience_years, assessment_method, color_code,
+    is_system_grade, effective_date, created_by, updated_by
+) VALUES (
+    'GRADE_003', 'TECH_EXPERT', '技術エキスパート', 'Technical Expert', 7,
+    'TECHNICAL', '技術分野の専門家レベル',
+    '高度な技術知識を有し、技術的な課題解決をリードできる',
+    '関連技術資格、専門認定',
+    5, 'EXPERT_REVIEW', '#2196F3',
+    TRUE, '2025-04-01', 'system', 'system'
+);
+
+-- テナント固有グレード
+INSERT INTO MST_SkillGrade (
+    grade_id, tenant_id, grade_code, grade_name, grade_level,
+    grade_type, description, evaluation_criteria,
+    is_system_grade, effective_date, created_by, updated_by
+) VALUES (
+    'GRADE_T001', 'TENANT_001', 'CUSTOM_SENIOR', 'カスタムシニア', 5,
+    'BUSINESS', 'テナント固有のシニアレベル',
+    '社内基準に基づくシニアレベルの評価',
+    FALSE, '2025-04-01', 'admin_001', 'admin_001'
+);
 ```
 
-## 業務ルール
+### 5.2 データ量見積もり
+| 項目 | 値 | 備考 |
+|------|----|----- |
+| 初期データ件数 | 50件 | システム標準グレード |
+| 年間増加件数 | 10件 | カスタムグレード追加 |
+| 5年後想定件数 | 100件 | 想定値 |
 
-### 基本ルール
-1. **テナント分離**: 全ての操作はテナント単位で実行される
-2. **グレードコード一意性**: 同一テナント内でスキルグレードコードは一意である
-3. **グレード名一意性**: 同一テナント内でスキルグレード名は一意である
-4. **グレードレベル一意性**: 同一テナント内でグレードレベルは一意である
-5. **有効性管理**: 無効化されたスキルグレードは新規割り当て不可
+## 6. 運用仕様
 
-### データ整合性
-1. **グレードレベル範囲**: 1-10の範囲内で設定
-2. **経験年数範囲**: 最低経験年数 ≤ 最大経験年数
-3. **給与係数範囲**: 0.5-5.0の範囲内で設定
-4. **表示順序**: 0以上の整数値
-5. **JSON形式**: requirements、evaluation_criteria、expected_skills、promotion_criteriaは有効なJSON形式
+### 6.1 バックアップ
+- 日次バックアップ：毎日2:00実行
+- 週次バックアップ：毎週日曜日3:00実行
 
-### 運用ルール
-1. **論理削除**: 物理削除は行わず、is_activeフラグで管理
-2. **履歴管理**: 更新時は監査ログに記録
-3. **バージョン管理**: 楽観的排他制御でデータ整合性を保証
-4. **エントリーレベル**: テナント内で1つのエントリーレベルグレードを設定
+### 6.2 パーティション
+- パーティション種別：なし
+- パーティション条件：-
 
-## 関連テーブル
+### 6.3 アーカイブ
+- アーカイブ条件：廃止から3年経過
+- アーカイブ先：アーカイブDB
 
-### 参照元テーブル
-- MST_JobTypeSkillGrade（職種スキルグレード関連）
-- MST_SkillGradeRequirement（スキルグレード要件）
-- MST_CertificationRequirement（資格要件マスタ）
-- TRN_SkillRecord（スキル評価記録）
+## 7. パフォーマンス
 
-### 参照先テーブル
-- MST_Tenant（テナント管理）
-- MST_UserAuth（ユーザー認証情報）
+### 7.1 想定アクセスパターン
+| 操作 | 頻度 | 条件 | 備考 |
+|------|------|------|------|
+| SELECT | 高 | is_active, grade_type | 有効グレード取得 |
+| SELECT | 高 | grade_level | グレードレベル検索 |
+| SELECT | 中 | tenant_id | テナント固有グレード取得 |
+| SELECT | 中 | assessment_method | 評価方法別検索 |
+| UPDATE | 低 | grade_id | グレード情報更新 |
+| INSERT | 低 | - | 新規グレード作成 |
 
-## パフォーマンス考慮事項
+### 7.2 パフォーマンス要件
+- SELECT：10ms以内
+- INSERT：50ms以内
+- UPDATE：50ms以内
+- DELETE：50ms以内
 
-### 推奨事項
-1. **インデックス活用**: グレードレベル、エントリーレベル、有効フラグでの検索が多いため適切なインデックスを設定
-2. **JSON検索**: requirements等のJSON検索時はMySQLのJSON関数を活用
-3. **キャッシュ戦略**: スキルグレードマスタは更新頻度が低いためアプリケーションレベルでキャッシュ推奨
+## 8. セキュリティ
 
-### 注意事項
-1. **JSON型制限**: MySQLバージョンによるJSON型サポート確認が必要
-2. **文字エンコーディング**: UTF-8対応で多言語グレード名に対応
-3. **インデックスサイズ**: 大量テナント環境では複合インデックスサイズに注意
+### 8.1 アクセス制御
+| ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
+|--------|--------|--------|--------|--------|------|
+| system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
+| skill_admin | ○ | ○ | ○ | × | スキル管理者 |
+| manager | ○ | × | × | × | 管理職 |
+| employee | ○ | × | × | × | 一般社員 |
+| readonly | ○ | × | × | × | 参照専用 |
 
-## セキュリティ考慮事項
+### 8.2 データ保護
+- 個人情報：含まない
+- 機密情報：含む（評価体系）
+- 暗号化：不要
 
-### アクセス制御
-1. **テナント分離**: 必ずテナントIDでの絞り込みを実装
-2. **権限チェック**: スキルグレード管理権限を持つユーザーのみ更新可能
-3. **監査ログ**: 全ての変更操作を監査ログに記録
+## 9. 移行仕様
 
-### データ保護
-1. **機密情報**: 給与係数等の機密情報は適切な権限管理
-2. **暗号化**: 必要に応じてアプリケーションレベルでの暗号化
-3. **バックアップ**: 定期的なバックアップとリストア手順の確立
+### 9.1 データ移行
+- 移行元：既存スキル管理システム
+- 移行方法：CSVインポート
+- 移行タイミング：システム移行時
 
-## 運用上の注意
+### 9.2 DDL
+```sql
+CREATE TABLE MST_SkillGrade (
+    grade_id VARCHAR(20) NOT NULL COMMENT 'グレードID',
+    tenant_id VARCHAR(50) NULL COMMENT 'テナントID',
+    grade_code VARCHAR(20) NOT NULL COMMENT 'グレードコード',
+    grade_name VARCHAR(100) NOT NULL COMMENT 'グレード名',
+    grade_name_en VARCHAR(100) NULL COMMENT 'グレード名（英語）',
+    grade_level INTEGER NOT NULL DEFAULT 1 COMMENT 'グレードレベル',
+    grade_type VARCHAR(20) NOT NULL DEFAULT 'STANDARD' COMMENT 'グレード種別',
+    description TEXT NULL COMMENT '説明',
+    evaluation_criteria TEXT NOT NULL COMMENT '評価基準',
+    required_skills TEXT NULL COMMENT '必要スキル',
+    required_experience TEXT NULL COMMENT '必要経験',
+    required_certifications TEXT NULL COMMENT '必要資格',
+    min_experience_years INTEGER NULL COMMENT '最小経験年数',
+    min_project_count INTEGER NULL COMMENT '最小プロジェクト数',
+    assessment_method VARCHAR(50) NOT NULL DEFAULT 'SELF_ASSESSMENT' COMMENT '評価方法',
+    color_code VARCHAR(7) NULL COMMENT 'カラーコード',
+    icon_url VARCHAR(500) NULL COMMENT 'アイコンURL',
+    badge_url VARCHAR(500) NULL COMMENT 'バッジURL',
+    sort_order INTEGER NOT NULL DEFAULT 0 COMMENT '表示順序',
+    is_system_grade BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'システムグレードフラグ',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    effective_date DATE NOT NULL COMMENT '有効開始日',
+    expiry_date DATE NULL COMMENT '有効終了日',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
+    PRIMARY KEY (grade_id),
+    UNIQUE KEY idx_grade_code (grade_code),
+    INDEX idx_tenant_grade (tenant_id, grade_code),
+    INDEX idx_tenant (tenant_id),
+    INDEX idx_grade_level (grade_level),
+    INDEX idx_grade_type (grade_type),
+    INDEX idx_system (is_system_grade),
+    INDEX idx_active (is_active),
+    INDEX idx_effective (effective_date, expiry_date),
+    INDEX idx_assessment (assessment_method),
+    CONSTRAINT fk_skill_grade_tenant FOREIGN KEY (tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_skill_grade_created_by FOREIGN KEY (created_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_skill_grade_updated_by FOREIGN KEY (updated_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT chk_skill_grade_level CHECK (grade_level >= 1 AND grade_level <= 10),
+    CONSTRAINT chk_skill_grade_type CHECK (grade_type IN ('STANDARD', 'TECHNICAL', 'BUSINESS', 'LEADERSHIP', 'SPECIALIST')),
+    CONSTRAINT chk_skill_grade_assessment CHECK (assessment_method IN ('SELF_ASSESSMENT', 'PEER_REVIEW', 'MANAGER_REVIEW', 'EXPERT_REVIEW', 'CERTIFICATION')),
+    CONSTRAINT chk_skill_grade_color_code CHECK (color_code IS NULL OR color_code REGEXP '^#[0-9A-Fa-f]{6}$'),
+    CONSTRAINT chk_skill_grade_min_experience CHECK (min_experience_years IS NULL OR min_experience_years >= 0),
+    CONSTRAINT chk_skill_grade_min_project CHECK (min_project_count IS NULL OR min_project_count >= 0),
+    CONSTRAINT chk_skill_grade_expiry_date CHECK (expiry_date IS NULL OR expiry_date >= effective_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキルグレードマスタ';
+```
 
-### メンテナンス
-1. **定期見直し**: スキルグレード体系の変更に応じた定期的な見直し
-2. **データクリーンアップ**: 無効スキルグレードの定期的なアーカイブ
-3. **パフォーマンス監視**: JSON検索のパフォーマンス監視
+## 10. 特記事項
 
-### 障害対応
-1. **整合性チェック**: 関連テーブルとの整合性定期チェック
-2. **復旧手順**: データ破損時の復旧手順書整備
-3. **ロールバック**: 更新失敗時のロールバック手順確立
+1. **10段階グレードレベル**
+   - 1-10の数値レベルで細かな段階評価を実現
+   - 柔軟なグレード体系の構築が可能
 
-### 昇格管理
-1. **昇格基準**: 明確な昇格基準の設定と運用
-2. **評価プロセス**: 定期的な評価プロセスの実施
-3. **フィードバック**: 昇格要件に対する進捗フィードバック
+2. **多様なグレード種別**
+   - STANDARD（標準）、TECHNICAL（技術）、BUSINESS（ビジネス）、LEADERSHIP（リーダーシップ）、SPECIALIST（専門）
+   - 分野別の専門的なグレード体系を支援
+
+3. **多様な評価方法**
+   - 自己評価、ピアレビュー、上司評価、専門家評価、資格認定
+   - 評価の客観性と信頼性を確保
+
+4. **視覚的なグレード表現**
+   - カラーコード、アイコン、バッジによる視覚的表現
+   - モチベーション向上とわかりやすい表示
+
+5. **定量的な要件定義**
+   - 最小経験年数、最小プロジェクト数による明確な基準
+   - 客観的なグレード判定を支援
+
+6. **マルチテナント対応**
+   - システム標準グレードとテナント固有グレードの混在管理
+   - tenant_idがNULLの場合はシステム標準グレード
+
+7. **論理削除による履歴管理**
+   - グレード廃止時は論理削除（is_active=FALSE）を使用
+   - 有効期間によりグレード変更履歴を管理
+
+8. **システム標準グレードの保護**
+   - システム標準グレード（is_system_grade=TRUE）は削除不可
+   - テナント管理者による誤削除を防止
+
+---
+
+**改訂履歴**
+
+| バージョン | 日付 | 変更者 | 変更内容 |
+|------------|------|--------|----------|
+| 1.0 | 2025-06-01 | システムアーキテクト | 新フォーマットで初版作成 |

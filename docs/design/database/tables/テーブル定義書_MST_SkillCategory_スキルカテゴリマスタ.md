@@ -1,29 +1,28 @@
-# テーブル定義書：スキルカテゴリマスタ (MST_SkillCategory)
+# テーブル定義書：MST_SkillCategory（スキルカテゴリマスタ）
 
 ## 1. 基本情報
 
 | 項目 | 内容 |
 |------|------|
-| **テーブルID** | TBL-009 |
+| **テーブルID** | TBL-034 |
 | **テーブル名** | MST_SkillCategory |
 | **論理名** | スキルカテゴリマスタ |
 | **カテゴリ** | マスタ系 |
-| **優先度** | 最高 |
+| **優先度** | 高 |
 | **ステータス** | 運用中 |
-| **作成日** | 2025-05-29 |
-| **最終更新日** | 2025-05-31 |
+| **作成日** | 2025-06-01 |
+| **最終更新日** | 2025-06-01 |
 
 ## 2. テーブル概要
 
 ### 2.1 概要・目的
-スキルカテゴリマスタテーブル（MST_SkillCategory）は、スキル管理システムの中核となるスキルの分類体系を管理します。3階層構造（大分類/中分類/小分類）によりスキルを体系的に分類し、スキル評価とレポート集計の基盤となります。
+スキルカテゴリマスタテーブル（MST_SkillCategory）は、スキル管理システムの中核となるスキルの分類体系を管理します。3階層構造（大分類/中分類/小分類）によりスキルを体系的に分類し、スキル評価とレポート集計の基盤となります。マルチテナント対応により、テナント固有のカテゴリ体系も管理可能です。
 
 ### 2.2 関連API
-- [API-007](../api/specs/API仕様書_API-007.md) - スキル管理API
-- [API-008](../api/specs/API仕様書_API-008.md) - スキルカテゴリ管理API
+- [API-030](../../api/specs/API仕様書_API-030_スキルカテゴリ管理API.md) - スキルカテゴリ管理API
 
 ### 2.3 関連バッチ
-- [BATCH-008](../batch/specs/バッチ定義書_BATCH-008.md) - スキルマスタ同期バッチ
+- [BATCH-020](../../batch/specs/バッチ定義書_BATCH-020_スキルマスタ同期バッチ.md) - スキルマスタ同期バッチ
 
 ## 3. テーブル構造
 
@@ -32,20 +31,20 @@
 | No | カラム名 | 論理名 | データ型 | 桁数 | NULL | PK | FK | デフォルト値 | 説明 |
 |----|----------|--------|----------|------|------|----|----|--------------|------|
 | 1 | category_id | カテゴリID | VARCHAR | 20 | × | ○ | - | - | スキルカテゴリを一意に識別するID |
-| 2 | category_code | カテゴリコード | VARCHAR | 20 | × | - | - | - | スキルカテゴリのコード |
-| 3 | category_name | カテゴリ名 | VARCHAR | 100 | × | - | - | - | スキルカテゴリの名称 |
-| 4 | category_name_en | カテゴリ名（英語） | VARCHAR | 100 | ○ | - | - | NULL | カテゴリ名の英語表記 |
-| 5 | parent_category_id | 親カテゴリID | VARCHAR | 20 | ○ | - | ○ | NULL | 上位カテゴリのID |
-| 6 | category_level | カテゴリレベル | INTEGER | - | × | - | - | 1 | 階層レベル（1:大分類、2:中分類、3:小分類） |
-| 7 | category_path | カテゴリパス | VARCHAR | 500 | × | - | - | - | 階層構造を表すパス（/大分類/中分類/小分類） |
-| 8 | icon_url | アイコンURL | VARCHAR | 500 | ○ | - | - | NULL | カテゴリのアイコン画像URL |
-| 9 | color_code | カラーコード | VARCHAR | 7 | ○ | - | - | NULL | カテゴリの表示色（#RRGGBB形式） |
-| 10 | description | 説明 | TEXT | - | ○ | - | - | NULL | カテゴリの詳細説明 |
-| 11 | evaluation_criteria | 評価基準 | TEXT | - | ○ | - | - | NULL | スキル評価の基準・指針 |
-| 12 | required_evidence | 必要な証跡 | TEXT | - | ○ | - | - | NULL | スキル証明に必要な証跡・資料 |
-| 13 | sort_order | 表示順序 | INTEGER | - | × | - | - | 0 | 同階層内での表示順序 |
-| 14 | is_system_category | システムカテゴリフラグ | BOOLEAN | - | × | - | - | FALSE | システム標準カテゴリかどうか |
-| 15 | tenant_id | テナントID | VARCHAR | 50 | ○ | - | ○ | NULL | テナント固有カテゴリの場合のテナントID |
+| 2 | tenant_id | テナントID | VARCHAR | 50 | ○ | - | ○ | NULL | テナント固有カテゴリの場合のテナントID |
+| 3 | category_code | カテゴリコード | VARCHAR | 20 | × | - | - | - | スキルカテゴリのコード |
+| 4 | category_name | カテゴリ名 | VARCHAR | 100 | × | - | - | - | スキルカテゴリの名称 |
+| 5 | category_name_en | カテゴリ名（英語） | VARCHAR | 100 | ○ | - | - | NULL | カテゴリ名の英語表記 |
+| 6 | parent_category_id | 親カテゴリID | VARCHAR | 20 | ○ | - | ○ | NULL | 上位カテゴリのID（自己参照） |
+| 7 | category_level | カテゴリレベル | INTEGER | - | × | - | - | 1 | 階層レベル（1:大分類、2:中分類、3:小分類） |
+| 8 | category_path | カテゴリパス | VARCHAR | 500 | × | - | - | - | 階層構造を表すパス（/大分類/中分類/小分類） |
+| 9 | icon_url | アイコンURL | VARCHAR | 500 | ○ | - | - | NULL | カテゴリのアイコン画像URL |
+| 10 | color_code | カラーコード | VARCHAR | 7 | ○ | - | - | NULL | カテゴリの表示色（#RRGGBB形式） |
+| 11 | description | 説明 | TEXT | - | ○ | - | - | NULL | カテゴリの詳細説明 |
+| 12 | evaluation_criteria | 評価基準 | TEXT | - | ○ | - | - | NULL | スキル評価の基準・指針 |
+| 13 | required_evidence | 必要な証跡 | TEXT | - | ○ | - | - | NULL | スキル証明に必要な証跡・資料 |
+| 14 | sort_order | 表示順序 | INTEGER | - | × | - | - | 0 | 同階層内での表示順序 |
+| 15 | is_system_category | システムカテゴリフラグ | BOOLEAN | - | × | - | - | FALSE | システム標準カテゴリかどうか |
 | 16 | is_active | 有効フラグ | BOOLEAN | - | × | - | - | TRUE | カテゴリが有効かどうか |
 | 17 | effective_date | 有効開始日 | DATE | - | × | - | - | - | カテゴリの有効開始日 |
 | 18 | expiry_date | 有効終了日 | DATE | - | ○ | - | - | NULL | カテゴリの有効終了日 |
@@ -60,6 +59,7 @@
 |----------------|------|--------|------|
 | PRIMARY | PRIMARY KEY | category_id | 主キー |
 | idx_category_code | UNIQUE | category_code | カテゴリコードの一意性を保証 |
+| idx_tenant_category | INDEX | tenant_id, category_code | テナント内カテゴリコード検索用 |
 | idx_parent | INDEX | parent_category_id | 親カテゴリ検索用 |
 | idx_tenant | INDEX | tenant_id | テナント検索用 |
 | idx_level | INDEX | category_level | カテゴリレベル検索用 |
@@ -101,45 +101,40 @@
 
 ### 5.1 データ例
 ```sql
--- 大分類
+-- システム標準大分類
 INSERT INTO MST_SkillCategory (
-    category_id, category_code, category_name,
-    category_level, category_path, color_code,
-    description, is_system_category, effective_date,
-    created_by, updated_by
+    category_id, category_code, category_name, category_name_en,
+    category_level, category_path, color_code, description,
+    is_system_category, effective_date, created_by, updated_by
 ) VALUES (
-    'CAT_001',
-    'TECH',
-    '技術スキル',
-    1,
-    '/技術スキル',
-    '#2196F3',
+    'CAT_001', 'TECH', '技術スキル', 'Technical Skills',
+    1, '/技術スキル', '#2196F3',
     'プログラミング、インフラ、データベース等の技術的なスキル',
-    TRUE,
-    '2023-04-01',
-    'system',
-    'system'
+    TRUE, '2025-04-01', 'system', 'system'
 );
 
--- 中分類
+-- システム標準中分類
 INSERT INTO MST_SkillCategory (
-    category_id, category_code, category_name,
-    parent_category_id, category_level, category_path,
-    color_code, description, is_system_category,
-    effective_date, created_by, updated_by
+    category_id, category_code, category_name, category_name_en,
+    parent_category_id, category_level, category_path, color_code,
+    description, is_system_category, effective_date, created_by, updated_by
 ) VALUES (
-    'CAT_002',
-    'PROG',
-    'プログラミング',
-    'CAT_001',
-    2,
-    '/技術スキル/プログラミング',
-    '#4CAF50',
+    'CAT_002', 'PROG', 'プログラミング', 'Programming',
+    'CAT_001', 2, '/技術スキル/プログラミング', '#4CAF50',
     'プログラミング言語・フレームワークに関するスキル',
-    TRUE,
-    '2023-04-01',
-    'system',
-    'system'
+    TRUE, '2025-04-01', 'system', 'system'
+);
+
+-- テナント固有カテゴリ
+INSERT INTO MST_SkillCategory (
+    category_id, tenant_id, category_code, category_name,
+    parent_category_id, category_level, category_path, color_code,
+    description, is_system_category, effective_date, created_by, updated_by
+) VALUES (
+    'CAT_T001', 'TENANT_001', 'CUSTOM_TECH', 'カスタム技術',
+    'CAT_001', 2, '/技術スキル/カスタム技術', '#FF9800',
+    'テナント固有の技術スキル分類',
+    FALSE, '2025-04-01', 'admin_001', 'admin_001'
 );
 ```
 
@@ -188,6 +183,7 @@ INSERT INTO MST_SkillCategory (
 | ロール | SELECT | INSERT | UPDATE | DELETE | 備考 |
 |--------|--------|--------|--------|--------|------|
 | system_admin | ○ | ○ | ○ | ○ | システム管理者 |
+| tenant_admin | ○ | ○ | ○ | × | テナント管理者（自テナントのみ） |
 | skill_admin | ○ | ○ | ○ | × | スキル管理者 |
 | manager | ○ | ○ | ○ | × | 管理職（テナント内のみ） |
 | employee | ○ | × | × | × | 一般社員 |
@@ -208,30 +204,31 @@ INSERT INTO MST_SkillCategory (
 ### 9.2 DDL
 ```sql
 CREATE TABLE MST_SkillCategory (
-    category_id VARCHAR(20) NOT NULL,
-    category_code VARCHAR(20) NOT NULL,
-    category_name VARCHAR(100) NOT NULL,
-    category_name_en VARCHAR(100) NULL,
-    parent_category_id VARCHAR(20) NULL,
-    category_level INTEGER NOT NULL DEFAULT 1,
-    category_path VARCHAR(500) NOT NULL,
-    icon_url VARCHAR(500) NULL,
-    color_code VARCHAR(7) NULL,
-    description TEXT NULL,
-    evaluation_criteria TEXT NULL,
-    required_evidence TEXT NULL,
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    is_system_category BOOLEAN NOT NULL DEFAULT FALSE,
-    tenant_id VARCHAR(50) NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    effective_date DATE NOT NULL,
-    expiry_date DATE NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by VARCHAR(50) NOT NULL,
-    updated_by VARCHAR(50) NOT NULL,
+    category_id VARCHAR(20) NOT NULL COMMENT 'カテゴリID',
+    tenant_id VARCHAR(50) NULL COMMENT 'テナントID',
+    category_code VARCHAR(20) NOT NULL COMMENT 'カテゴリコード',
+    category_name VARCHAR(100) NOT NULL COMMENT 'カテゴリ名',
+    category_name_en VARCHAR(100) NULL COMMENT 'カテゴリ名（英語）',
+    parent_category_id VARCHAR(20) NULL COMMENT '親カテゴリID',
+    category_level INTEGER NOT NULL DEFAULT 1 COMMENT 'カテゴリレベル',
+    category_path VARCHAR(500) NOT NULL COMMENT 'カテゴリパス',
+    icon_url VARCHAR(500) NULL COMMENT 'アイコンURL',
+    color_code VARCHAR(7) NULL COMMENT 'カラーコード',
+    description TEXT NULL COMMENT '説明',
+    evaluation_criteria TEXT NULL COMMENT '評価基準',
+    required_evidence TEXT NULL COMMENT '必要な証跡',
+    sort_order INTEGER NOT NULL DEFAULT 0 COMMENT '表示順序',
+    is_system_category BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'システムカテゴリフラグ',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+    effective_date DATE NOT NULL COMMENT '有効開始日',
+    expiry_date DATE NULL COMMENT '有効終了日',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT '作成者ID',
+    updated_by VARCHAR(50) NOT NULL COMMENT '更新者ID',
     PRIMARY KEY (category_id),
     UNIQUE KEY idx_category_code (category_code),
+    INDEX idx_tenant_category (tenant_id, category_code),
     INDEX idx_parent (parent_category_id),
     INDEX idx_tenant (tenant_id),
     INDEX idx_level (category_level),
@@ -246,20 +243,42 @@ CREATE TABLE MST_SkillCategory (
     CONSTRAINT chk_skill_category_level CHECK (category_level >= 1 AND category_level <= 3),
     CONSTRAINT chk_skill_category_color_code CHECK (color_code IS NULL OR color_code REGEXP '^#[0-9A-Fa-f]{6}$'),
     CONSTRAINT chk_skill_category_expiry_date CHECK (expiry_date IS NULL OR expiry_date >= effective_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='スキルカテゴリマスタ';
 ```
 
 ## 10. 特記事項
 
-1. 3階層構造（大分類/中分類/小分類）によるスキル分類体系
-2. システム標準カテゴリとテナント固有カテゴリの混在管理
-3. カテゴリパスにより階層構造の可視化が可能
-4. アイコンとカラーコードによる視覚的な分類表現
-5. 評価基準と必要証跡により統一的なスキル評価を支援
-6. カテゴリ廃止時は論理削除（is_active=FALSE）を使用
-7. 有効期間によりカテゴリ変更履歴を管理
-8. 同階層内での表示順序はsort_orderで制御
-9. システム標準カテゴリは削除不可
+1. **3階層構造によるスキル分類体系**
+   - 大分類（Level 1）、中分類（Level 2）、小分類（Level 3）の3階層構造
+   - category_pathにより階層構造の可視化が可能
+
+2. **マルチテナント対応**
+   - システム標準カテゴリとテナント固有カテゴリの混在管理
+   - tenant_idがNULLの場合はシステム標準カテゴリ
+
+3. **視覚的な分類表現**
+   - アイコンとカラーコードによる視覚的な分類表現
+   - UIでの分かりやすい表示を支援
+
+4. **統一的なスキル評価支援**
+   - 評価基準と必要証跡により統一的なスキル評価を支援
+   - カテゴリごとの評価指針を明確化
+
+5. **論理削除による履歴管理**
+   - カテゴリ廃止時は論理削除（is_active=FALSE）を使用
+   - 有効期間によりカテゴリ変更履歴を管理
+
+6. **表示順序制御**
+   - 同階層内での表示順序はsort_orderで制御
+   - UI表示時の並び順を管理
+
+7. **システム標準カテゴリの保護**
+   - システム標準カテゴリ（is_system_category=TRUE）は削除不可
+   - テナント管理者による誤削除を防止
+
+8. **自己参照による階層構造**
+   - parent_category_idによる自己参照で階層構造を実現
+   - 柔軟な階層構造の管理が可能
 
 ---
 
@@ -267,5 +286,4 @@ CREATE TABLE MST_SkillCategory (
 
 | バージョン | 日付 | 変更者 | 変更内容 |
 |------------|------|--------|----------|
-| 1.0 | 2025-05-29 | システムアーキテクト | 初版作成 |
-| 1.1 | 2025-05-31 | システムアーキテクト | 新フォーマットに変更、詳細情報追加 |
+| 1.0 | 2025-06-01 | システムアーキテクト | 新フォーマットで初版作成 |
