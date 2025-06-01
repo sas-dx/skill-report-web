@@ -1,5 +1,5 @@
 -- TRN_ProjectRecord (案件実績) DDL
--- 生成日時: 2025-06-01 14:31:00
+-- 生成日時: 2025-06-01 15:57:34
 
 CREATE TABLE TRN_ProjectRecord (
     id VARCHAR(50) NOT NULL PRIMARY KEY,

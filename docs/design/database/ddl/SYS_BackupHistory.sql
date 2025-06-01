@@ -1,5 +1,5 @@
 -- SYS_BackupHistory (バックアップ履歴) DDL
--- 生成日時: 2025-06-01 14:31:00
+-- 生成日時: 2025-06-01 15:57:34
 
 CREATE TABLE SYS_BackupHistory (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
