@@ -5,59 +5,126 @@ screen_info:
   function: ユーザー認証・ログイン
   users: 全ユーザー
   priority: 高
-overview: ログイン画面の詳細仕様です。
+screen_overview:
+  purpose: ログイン画面の目的を記載してください
+  main_functions:
+  - 主要機能1の説明
+  - 主要機能2の説明
+  - 主要機能3の説明
+screen_layout:
+  layout_type: single_column
+  description: レイアウトの説明を記載
+  sections:
+  - section_name: ヘッダー部
+    description: タイトルとナビゲーション
+  - section_name: メイン部
+    description: 主要コンテンツエリア
+  - section_name: フッター部
+    description: フッター情報
 screen_items:
-- id: example_field
-  name: 例：入力フィールド
-  type: text
+- item_id: username
+  item_name: ユーザー名
+  api_parameter: username
+  data_type: string
+  io_type: input
   required: true
-  max_length: 100
-  description: 例：ユーザー名入力フィールド
-  validation:
-  - required
-  - max_length:100
-- id: example_button
-  name: 例：実行ボタン
-  type: button
-  action: submit
-  description: 例：フォーム送信ボタン
+  remarks: ログイン用ユーザー名
+- item_id: password
+  item_name: パスワード
+  api_parameter: password
+  data_type: string
+  io_type: input
+  required: true
+  remarks: ログイン用パスワード（マスク表示）
+- item_id: login_button
+  item_name: ログインボタン
+  api_parameter: ''
+  data_type: button
+  io_type: action
+  required: false
+  remarks: ログイン実行ボタン
+operation_flow:
+- step: 1
+  operation: 画面表示
+  description: ログイン画面が表示される
+- step: 2
+  operation: ユーザー名入力
+  description: ユーザー名を入力フィールドに入力
+- step: 3
+  operation: パスワード入力
+  description: パスワードを入力フィールドに入力
+- step: 4
+  operation: ログインボタン押下
+  description: ログインボタンを押下して認証実行
+- step: 5
+  operation: 画面遷移
+  description: 認証成功時はホーム画面へ遷移
 events:
-- trigger: on_load
-  description: 画面読み込み時の処理
-  actions:
-  - initialize_form
-  - load_data
-- trigger: on_submit
-  description: フォーム送信時の処理
-  actions:
-  - validate_input
-  - save_data
-  - show_result
+- event_id: EVT_001
+  trigger_action: on_load
+  event_detail: 画面読み込み時の初期化処理
+  related_api: ''
+  message_display: ''
+- event_id: EVT_002
+  trigger_action: on_login_click
+  event_detail: ログインボタン押下時の認証処理
+  related_api: API_AUTH_001 - ユーザー認証API
+  message_display: 認証中...
 validations:
-- field: example_field
-  rules:
-  - required
-  - max_length:100
-  error_message: 必須項目です。100文字以内で入力してください。
+  input_validation:
+  - field: username
+    rules:
+    - required
+    - min_length:3
+    - max_length:50
+    error_message: ユーザー名は3文字以上50文字以内で入力してください。
+  - field: password
+    rules:
+    - required
+    - min_length:8
+    error_message: パスワードは8文字以上で入力してください。
 error_handling:
-- error_type: validation_error
-  message: 入力内容に誤りがあります。
-  action: show_error_message
-- error_type: system_error
-  message: システムエラーが発生しました。
-  action: show_error_page
+  error_messages:
+  - error_code: ERR_001
+    error_type: validation_error
+    message: 入力内容に誤りがあります。
+    action: show_field_error
+  - error_code: ERR_002
+    error_type: authentication_error
+    message: ユーザー名またはパスワードが正しくありません。
+    action: show_error_message
+  - error_code: ERR_003
+    error_type: system_error
+    message: システムエラーが発生しました。しばらく時間をおいて再度お試しください。
+    action: show_error_page
 security:
-  authentication: true
+  authentication:
+    method: form_based
+    session_management: true
+    password_encryption: true
   authorization:
-  - user
-  - admin
-  csrf_protection: true
-  input_sanitization: true
+    roles:
+    - user
+    - admin
+    access_control: role_based
+  data_protection:
+    csrf_protection: true
+    input_sanitization: true
+    sql_injection_prevention: true
+    xss_prevention: true
+performance:
+  load_time_target: 2s
+  optimization:
+  - image_compression
+  - css_minification
+  - js_minification
+  caching: browser_cache
 accessibility:
   keyboard_navigation: true
   screen_reader_support: true
   color_contrast: AA
   font_size_adjustable: true
+  aria_labels: true
 responsive_design:
   mobile_support: true
   tablet_support: true
@@ -66,18 +133,33 @@ responsive_design:
   - 320px
   - 768px
   - 1024px
-performance:
-  load_time_target: 2s
-  optimization:
-  - image_compression
-  - css_minification
-  - js_minification
+  layout_adaptation: fluid
+related_apis:
+- api_id: API_AUTH_001
+  api_name: ユーザー認証API
+  method: POST
+  endpoint: /api/auth/login
+  description: ユーザー認証を行うAPI
+related_screens:
+- screen_id: SCR_CMN_Home
+  screen_name: ホーム画面
+  relation_type: transition_to
+  condition: 認証成功時
+- screen_id: SCR_AUT_PasswordReset
+  screen_name: パスワードリセット画面
+  relation_type: link_to
+  condition: パスワードを忘れた場合
 business_rules:
 - ログイン画面に関する業務ルールを記載
-- 例：ユーザーは自分の情報のみ編集可能
+- 例：ログイン試行回数は5回まで
+- 例：パスワードは定期的な変更が必要
 notes:
 - 実装時の注意事項を記載
-- 例：IE11サポートが必要
+- 例：セッション管理の実装が必要
+- 例：ブルートフォース攻撃対策が必要
+remarks:
+- その他の重要な情報を記載
+- 例：多要素認証の将来対応予定
 revision_history:
 - version: '1.0'
   date: '2025-06-02'
