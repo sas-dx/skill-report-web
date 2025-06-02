@@ -1,167 +1,346 @@
 screen_info:
   screen_id: SCR_AUT_Login
   screen_name: ログイン画面
-  category: 認証
+  category: AUT（認証・認可）
   function: ユーザー認証・ログイン
-  users: 全ユーザー
-  priority: 高
+  users: 全ユーザー（社員・上司・人事・管理者）
+  priority: 最高
+  created_date: 2025-05-28
+  updated_date: 2025-06-01
+
 screen_overview:
-  purpose: ログイン画面の目的を記載してください
+  purpose: システム利用者が安全かつ簡便にログイン認証を行う画面。ID/パスワード認証およびSSO（シングルサインオン）に対応。セキュアな認証基盤を提供し、業務システムの起点となる。
   main_functions:
-  - 主要機能1の説明
-  - 主要機能2の説明
-  - 主要機能3の説明
+    - ID/パスワード認証（ユーザーID（社員番号またはメール）とパスワードによる認証、パスワード表示/非表示の切り替え機能、入力値のバリデーション）
+    - SSO認証（シングルサインオンによる認証、SAML/OIDC対応、IdP（Identity Provider）との連携）
+    - セキュリティ機能（アカウントロック機能、ログイン失敗回数の制限、認証履歴の記録）
+    - パスワードリセット（パスワード忘れ時のリセット機能、セキュアなリセットプロセス）
+
 screen_layout:
-  layout_type: single_column
-  description: レイアウトの説明を記載
+  layout_type: centered_form
+  description: 中央配置のログインフォーム。会社ロゴとシステム名をヘッダーに配置し、ユーザーID・パスワード入力欄、各種ボタン、エラーメッセージ表示エリアを縦に配置。フッターにコピーライトを表示。
   sections:
-  - section_name: ヘッダー部
-    description: タイトルとナビゲーション
-  - section_name: メイン部
-    description: 主要コンテンツエリア
-  - section_name: フッター部
-    description: フッター情報
+    - section_name: ヘッダー部
+      description: 会社ロゴと「年間スキル報告書システム ログイン」タイトル
+    - section_name: 認証フォーム部
+      description: ユーザーID・パスワード入力欄、パスワード表示チェックボックス
+    - section_name: アクション部
+      description: ログインボタン、SSOログインボタン、パスワードリセットリンク
+    - section_name: メッセージ部
+      description: エラー時メッセージ表示エリア
+    - section_name: フッター部
+      description: コピーライト表示
+
 screen_items:
-- item_id: username
-  item_name: ユーザー名
-  api_parameter: username
-  data_type: string
-  io_type: input
-  required: true
-  remarks: ログイン用ユーザー名
-- item_id: password
-  item_name: パスワード
-  api_parameter: password
-  data_type: string
-  io_type: input
-  required: true
-  remarks: ログイン用パスワード（マスク表示）
-- item_id: login_button
-  item_name: ログインボタン
-  api_parameter: ''
-  data_type: button
-  io_type: action
-  required: false
-  remarks: ログイン実行ボタン
+  - item_id: user_id
+    item_name: ユーザーID
+    api_parameter: user_id
+    data_type: text
+    io_type: input
+    required: true
+    max_length: 50
+    remarks: 社員番号またはメール。英数字・記号対応
+  - item_id: password
+    item_name: パスワード
+    api_parameter: password
+    data_type: password
+    io_type: input
+    required: true
+    min_length: 8
+    remarks: 8文字以上、英数字・記号組み合わせ
+  - item_id: show_password
+    item_name: パスワードを表示
+    api_parameter: ""
+    data_type: checkbox
+    io_type: input
+    required: false
+    remarks: 入力時マスク/表示切替
+  - item_id: login_button
+    item_name: ログインボタン
+    api_parameter: ""
+    data_type: button
+    io_type: action
+    required: false
+    remarks: 必須項目入力後のみ活性
+  - item_id: sso_login_button
+    item_name: SSOでログイン
+    api_parameter: ""
+    data_type: button
+    io_type: action
+    required: false
+    remarks: SSO連携設定時のみ表示
+  - item_id: password_reset_link
+    item_name: パスワードを忘れた方はこちら
+    api_parameter: ""
+    data_type: link
+    io_type: action
+    required: false
+    remarks: パスワードリセット画面へ遷移
+  - item_id: error_message
+    item_name: エラーメッセージ
+    api_parameter: ""
+    data_type: label
+    io_type: output
+    required: false
+    remarks: 入力エラー・認証失敗時に表示
+
 operation_flow:
-- step: 1
-  operation: 画面表示
-  description: ログイン画面が表示される
-- step: 2
-  operation: ユーザー名入力
-  description: ユーザー名を入力フィールドに入力
-- step: 3
-  operation: パスワード入力
-  description: パスワードを入力フィールドに入力
-- step: 4
-  operation: ログインボタン押下
-  description: ログインボタンを押下して認証実行
-- step: 5
-  operation: 画面遷移
-  description: 認証成功時はホーム画面へ遷移
+  - step: 1
+    operation: ログイン画面表示
+    description: ログイン画面が表示される。SSO設定に応じてSSOボタンの表示/非表示を制御
+  - step: 2
+    operation: ユーザーID・パスワード入力
+    description: ユーザーIDとパスワードを入力フィールドに入力
+  - step: 3
+    operation: ログインボタン押下
+    description: ログインボタンを押下して認証実行
+  - step: 4
+    operation: 入力値バリデーション
+    description: 必須項目チェック、文字数制限、形式チェックを実行
+  - step: 5
+    operation: API認証呼び出し
+    description: ユーザー認証APIを呼び出して認証処理を実行
+  - step: 6
+    operation: 認証結果判定
+    description: 認証成功時はセッション発行、失敗時は失敗回数チェック
+  - step: 7
+    operation: 画面遷移
+    description: 認証成功時はテナント選択画面へ遷移、失敗時はエラーメッセージ表示
+
 events:
-- event_id: EVT_001
-  trigger_action: on_load
-  event_detail: 画面読み込み時の初期化処理
-  related_api: ''
-  message_display: ''
-- event_id: EVT_002
-  trigger_action: on_login_click
-  event_detail: ログインボタン押下時の認証処理
-  related_api: API_AUTH_001 - ユーザー認証API
-  message_display: 認証中...
+  - event_id: E01
+    trigger_action: ログインボタン押下
+    event_detail: 入力値バリデーション→API-001呼出→認証成功時はSCR_TEN_Selectへ遷移
+    related_api: API-001:ユーザー認証API
+    message_display: エラー時：エラーメッセージ表示
+  - event_id: E02
+    trigger_action: SSOでログインボタン押下
+    event_detail: API-002呼出（IdPリダイレクト）→認証成功時はSCR_TEN_Selectへ遷移
+    related_api: API-002:SSO認証API
+    message_display: エラー時：エラーメッセージ表示
+  - event_id: E03
+    trigger_action: パスワード表示チェック
+    event_detail: パスワード入力欄の表示/非表示切替
+    related_api: ""
+    message_display: ""
+  - event_id: E04
+    trigger_action: パスワードを忘れた方はこちら
+    event_detail: パスワードリセット画面へ遷移
+    related_api: ""
+    message_display: ""
+  - event_id: E05
+    trigger_action: Enterキー押下
+    event_detail: ログインボタン押下と同等処理
+    related_api: API-001
+    message_display: ""
+  - event_id: E06
+    trigger_action: 入力エラー
+    event_detail: 必須項目未入力・形式不正・認証失敗
+    related_api: API-001/002
+    message_display: エラーメッセージ表示
+  - event_id: E07
+    trigger_action: ログイン成功
+    event_detail: セッション発行・ユーザー権限取得・SCR_TEN_Selectへ遷移
+    related_api: API-001/002
+    message_display: ""
+  - event_id: E08
+    trigger_action: ログイン失敗
+    event_detail: エラーメッセージ表示・パスワード再入力促す
+    related_api: API-001/002
+    message_display: ユーザーIDまたはパスワードが違います
+  - event_id: E09
+    trigger_action: アカウントロック
+    event_detail: ログイン失敗回数上限超過
+    related_api: API-001/002
+    message_display: アカウントがロックされました
+
 validations:
   input_validation:
-  - field: username
-    rules:
-    - required
-    - min_length:3
-    - max_length:50
-    error_message: ユーザー名は3文字以上50文字以内で入力してください。
-  - field: password
-    rules:
-    - required
-    - min_length:8
-    error_message: パスワードは8文字以上で入力してください。
+    - field: user_id
+      rules:
+        - required
+        - max_length:50
+        - alphanumeric_symbols
+      error_message: ユーザーIDは必須です。50文字以内の英数字・記号で入力してください。
+    - field: password
+      rules:
+        - required
+        - min_length:8
+        - alphanumeric_symbols_combination
+      error_message: パスワードは必須です。8文字以上の英数字・記号の組み合わせで入力してください。
+  business_rules:
+    - rule: ログイン失敗回数上限チェック
+      description: ログイン失敗回数が5回を超えた場合、アカウントをロック
+    - rule: アカウントロック状態確認
+      description: ログイン時にアカウントロック状態をチェック
+    - rule: パスワード有効期限確認
+      description: パスワードの有効期限をチェック
+    - rule: SQLインジェクション対策
+      description: 特殊文字の入力値検証を実施
+
 error_handling:
   error_messages:
-  - error_code: ERR_001
-    error_type: validation_error
-    message: 入力内容に誤りがあります。
-    action: show_field_error
-  - error_code: ERR_002
-    error_type: authentication_error
-    message: ユーザー名またはパスワードが正しくありません。
-    action: show_error_message
-  - error_code: ERR_003
-    error_type: system_error
-    message: システムエラーが発生しました。しばらく時間をおいて再度お試しください。
-    action: show_error_page
+    - error_code: MSG01
+      error_type: authentication_error
+      message: ユーザーIDまたはパスワードが違います
+      action: show_error_message
+      timing: 認証失敗時
+    - error_code: MSG02
+      error_type: validation_error
+      message: 必須項目が入力されていません
+      action: show_field_error
+      timing: 入力バリデーション時
+    - error_code: MSG03
+      error_type: account_lock_error
+      message: アカウントがロックされました。管理者に連絡してください
+      action: show_error_message
+      timing: ログイン失敗上限時
+    - error_code: MSG04
+      error_type: system_error
+      message: システム障害が発生しました。再度お試しください
+      action: show_error_page
+      timing: システム例外時
+
 security:
   authentication:
-    method: form_based
+    method: form_based_and_sso
     session_management: true
     password_encryption: true
+    hash_algorithm: bcrypt
+    tls_required: true
   authorization:
     roles:
-    - user
-    - admin
+      - employee
+      - supervisor
+      - hr
+      - admin
     access_control: role_based
   data_protection:
     csrf_protection: true
     input_sanitization: true
     sql_injection_prevention: true
     xss_prevention: true
+    password_mask: true
+    paste_disabled: true
+    login_history_logging: true
+    intrusion_detection: true
+
 performance:
-  load_time_target: 2s
+  load_time_target: 1s
+  login_processing_target: 2s
+  sso_processing_target: 3s
   optimization:
-  - image_compression
-  - css_minification
-  - js_minification
+    - image_compression
+    - css_minification
+    - js_minification
   caching: browser_cache
+
 accessibility:
   keyboard_navigation: true
   screen_reader_support: true
   color_contrast: AA
   font_size_adjustable: true
   aria_labels: true
+  focus_indication: true
+  tab_order: logical
+  enter_key_support: true
+
 responsive_design:
   mobile_support: true
   tablet_support: true
   desktop_support: true
   breakpoints:
-  - 320px
-  - 768px
-  - 1024px
-  layout_adaptation: fluid
+    - 767px
+    - 768px
+    - 1024px
+    - 1200px
+  layout_adaptation:
+    desktop: centered_800px
+    tablet: centered_responsive
+    mobile: full_width_touch_friendly
+
 related_apis:
-- api_id: API_AUTH_001
-  api_name: ユーザー認証API
-  method: POST
-  endpoint: /api/auth/login
-  description: ユーザー認証を行うAPI
+  - api_id: API-001
+    api_name: ユーザー認証API
+    method: POST
+    endpoint: /api/auth/login
+    description: ユーザー認証を行うAPI
+  - api_id: API-002
+    api_name: SSO認証API
+    method: GET
+    endpoint: /api/auth/sso
+    description: SSO認証を行うAPI
+  - api_id: API-003
+    api_name: ログアウトAPI
+    method: POST
+    endpoint: /api/auth/logout
+    description: ログアウト処理を行うAPI
+  - api_id: API-004
+    api_name: パスワードリセットAPI
+    method: POST
+    endpoint: /api/auth/password-reset
+    description: パスワードリセット処理を行うAPI
+
 related_screens:
-- screen_id: SCR_CMN_Home
-  screen_name: ホーム画面
-  relation_type: transition_to
-  condition: 認証成功時
-- screen_id: SCR_AUT_PasswordReset
-  screen_name: パスワードリセット画面
-  relation_type: link_to
-  condition: パスワードを忘れた場合
+  - screen_id: SCR_TEN_Select
+    screen_name: テナント選択画面
+    relation_type: transition_to
+    condition: 認証成功時
+  - screen_id: SCR_CMN_Home
+    screen_name: ホームダッシュボード画面
+    relation_type: transition_to
+    condition: テナント選択後
+  - screen_id: SCR_AUT_PasswordReset
+    screen_name: パスワードリセット画面
+    relation_type: link_to
+    condition: パスワードを忘れた場合
+
 business_rules:
-- ログイン画面に関する業務ルールを記載
-- 例：ログイン試行回数は5回まで
-- 例：パスワードは定期的な変更が必要
+  - マルチテナント環境の認証起点となる重要な画面
+  - セキュリティを最優先とした設計
+  - ユーザビリティとセキュリティのバランスを重視
+  - ログイン試行回数は5回まで
+  - アカウントロック時は管理者による解除が必要
+  - 全認証トランザクションを記録
+  - ログイン成功/失敗の履歴管理
+  - セキュリティ監査への対応
+
+special_requirements:
+  sso_configuration:
+    - SSO未設定時は「SSOでログイン」ボタンを非表示
+    - SAML/OIDC/代理認証等の方式に対応
+    - IdP設定はシステム管理者が行う
+  mfa_support:
+    - 将来的な拡張として設計上考慮
+    - SMS認証、アプリ認証等の追加予定
+  audit_trail:
+    - 全認証トランザクションを記録
+    - ログイン成功/失敗の履歴管理
+    - セキュリティ監査への対応
+
 notes:
-- 実装時の注意事項を記載
-- 例：セッション管理の実装が必要
-- 例：ブルートフォース攻撃対策が必要
+  - 実装時の注意事項：セッション管理の実装が必要
+  - 実装時の注意事項：ブルートフォース攻撃対策が必要
+  - 実装時の注意事項：CSRF対策の実装が必要
+  - 実装時の注意事項：TLS通信の必須化
+  - 実装時の注意事項：パスワードのハッシュ化保存
+
 remarks:
-- その他の重要な情報を記載
-- 例：多要素認証の将来対応予定
+  - 将来的な認証方式拡張に対応可能な設計
+  - 多要素認証の将来対応予定
+  - マルチテナント環境対応
+  - セキュリティ監査要件への対応
+
 revision_history:
-- version: '1.0'
-  date: '2025-06-02'
-  author: システム
-  changes: 初版作成
+  - version: "1.0"
+    date: "2025-05-28"
+    author: システム
+    changes: 初版作成
+  - version: "1.1"
+    date: "2025-06-01"
+    author: システム
+    changes: 詳細仕様追加・セキュリティ要件強化
+  - version: "2.0"
+    date: "2025-06-03"
+    author: システム
+    changes: 画面定義書の詳細内容を反映した完全版YAML作成
