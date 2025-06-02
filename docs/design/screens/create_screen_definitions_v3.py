@@ -322,6 +322,14 @@ class ScreenDefinitionGenerator:
                     rules = ', '.join(validation.get('rules', [])) if validation.get('rules') else ''
                     md_content += f"| {validation['field']} | {rules} | {validation.get('error_message', '')} |\n"
                 md_content += "\n"
+            
+            if details['validations'].get('business_rules'):
+                md_content += f"### ビジネスルール検証\n\n"
+                md_content += f"| ルール | 説明 |\n"
+                md_content += f"|--------|------|\n"
+                for rule in details['validations']['business_rules']:
+                    md_content += f"| {rule['rule']} | {rule['description']} |\n"
+                md_content += "\n"
         
         # エラーハンドリング
         if details and 'error_handling' in details:
@@ -367,6 +375,10 @@ class ScreenDefinitionGenerator:
             md_content += f"| 項目 | 値 |\n"
             md_content += f"|------|----|\n"
             md_content += f"| 読み込み時間目標 | {performance.get('load_time_target', 'N/A')} |\n"
+            if performance.get('login_processing_target'):
+                md_content += f"| ログイン処理時間目標 | {performance['login_processing_target']} |\n"
+            if performance.get('sso_processing_target'):
+                md_content += f"| SSO処理時間目標 | {performance['sso_processing_target']} |\n"
             if performance.get('optimization'):
                 optimizations = ', '.join(performance['optimization']) if isinstance(performance['optimization'], list) else str(performance['optimization'])
                 md_content += f"| 最適化手法 | {optimizations} |\n"
@@ -418,6 +430,36 @@ class ScreenDefinitionGenerator:
             for screen in details['related_screens']:
                 md_content += f"| {screen['screen_id']} | {screen['screen_name']} | {screen['relation_type']} | {screen.get('condition', '')} |\n"
             md_content += "\n"
+        
+        # ビジネスルール
+        if details and 'business_rules' in details:
+            md_content += f"## ビジネスルール\n\n"
+            for rule in details['business_rules']:
+                md_content += f"- {rule}\n"
+            md_content += "\n"
+        
+        # 特別要件
+        if details and 'special_requirements' in details:
+            special_req = details['special_requirements']
+            md_content += f"## 特別要件\n\n"
+            
+            if special_req.get('sso_configuration'):
+                md_content += f"### SSO設定\n\n"
+                for config in special_req['sso_configuration']:
+                    md_content += f"- {config}\n"
+                md_content += "\n"
+            
+            if special_req.get('mfa_support'):
+                md_content += f"### 多要素認証（MFA）\n\n"
+                for mfa in special_req['mfa_support']:
+                    md_content += f"- {mfa}\n"
+                md_content += "\n"
+            
+            if special_req.get('audit_trail'):
+                md_content += f"### 監査証跡\n\n"
+                for audit in special_req['audit_trail']:
+                    md_content += f"- {audit}\n"
+                md_content += "\n"
         
         # 特記事項
         if details and 'notes' in details:
