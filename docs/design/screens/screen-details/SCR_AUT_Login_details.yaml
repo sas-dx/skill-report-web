@@ -1,0 +1,85 @@
+screen_info:
+  screen_id: SCR_AUT_Login
+  screen_name: ログイン画面
+  category: 認証
+  function: ユーザー認証・ログイン
+  users: 全ユーザー
+  priority: 高
+overview: ログイン画面の詳細仕様です。
+screen_items:
+- id: example_field
+  name: 例：入力フィールド
+  type: text
+  required: true
+  max_length: 100
+  description: 例：ユーザー名入力フィールド
+  validation:
+  - required
+  - max_length:100
+- id: example_button
+  name: 例：実行ボタン
+  type: button
+  action: submit
+  description: 例：フォーム送信ボタン
+events:
+- trigger: on_load
+  description: 画面読み込み時の処理
+  actions:
+  - initialize_form
+  - load_data
+- trigger: on_submit
+  description: フォーム送信時の処理
+  actions:
+  - validate_input
+  - save_data
+  - show_result
+validations:
+- field: example_field
+  rules:
+  - required
+  - max_length:100
+  error_message: 必須項目です。100文字以内で入力してください。
+error_handling:
+- error_type: validation_error
+  message: 入力内容に誤りがあります。
+  action: show_error_message
+- error_type: system_error
+  message: システムエラーが発生しました。
+  action: show_error_page
+security:
+  authentication: true
+  authorization:
+  - user
+  - admin
+  csrf_protection: true
+  input_sanitization: true
+accessibility:
+  keyboard_navigation: true
+  screen_reader_support: true
+  color_contrast: AA
+  font_size_adjustable: true
+responsive_design:
+  mobile_support: true
+  tablet_support: true
+  desktop_support: true
+  breakpoints:
+  - 320px
+  - 768px
+  - 1024px
+performance:
+  load_time_target: 2s
+  optimization:
+  - image_compression
+  - css_minification
+  - js_minification
+business_rules:
+- ログイン画面に関する業務ルールを記載
+- 例：ユーザーは自分の情報のみ編集可能
+notes:
+- 実装時の注意事項を記載
+- 例：IE11サポートが必要
+revision_history:
+- version: '1.0'
+  date: '2025-06-02'
+  author: システム
+  changes: 初版作成
