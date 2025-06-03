@@ -76,7 +76,7 @@ class SqlUtils:
         Returns:
             str: カラム定義文
         """
-        col_type = column.type.upper()
+        col_type = column.data_type.upper()
         
         # 長さ指定
         if column.length and col_type in ['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC']:

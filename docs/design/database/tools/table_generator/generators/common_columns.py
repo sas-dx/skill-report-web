@@ -30,7 +30,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='id',
                 logical='ID',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=50,
                 null=False,
                 primary=True,
@@ -44,7 +44,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='is_deleted',
                 logical='削除フラグ',
-                type='BOOLEAN',
+                data_type='BOOLEAN',
                 null=False,
                 default=False,
                 description='論理削除フラグ',
@@ -66,7 +66,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='created_at',
                 logical='作成日時',
-                type='TIMESTAMP',
+                data_type='TIMESTAMP',
                 null=False,
                 default='CURRENT_TIMESTAMP',
                 description='レコード作成日時',
@@ -80,7 +80,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='updated_at',
                 logical='更新日時',
-                type='TIMESTAMP',
+                data_type='TIMESTAMP',
                 null=False,
                 default='CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
                 description='レコード更新日時',
@@ -94,7 +94,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='created_by',
                 logical='作成者',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=50,
                 null=False,
                 description='レコード作成者のユーザーID',
@@ -107,7 +107,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='updated_by',
                 logical='更新者',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=50,
                 null=False,
                 description='レコード更新者のユーザーID',
@@ -130,7 +130,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='tenant_id',
                 logical='テナントID',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=50,
                 null=False,
                 description='マルチテナント識別子',
@@ -153,7 +153,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='version',
                 logical='バージョン',
-                type='INTEGER',
+                data_type='INTEGER',
                 null=False,
                 default=1,
                 description='楽観的排他制御用バージョン番号',
@@ -177,7 +177,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='sort_order',
                 logical='ソート順',
-                type='INTEGER',
+                data_type='INTEGER',
                 null=True,
                 description='表示順序',
                 data_generation={
@@ -199,7 +199,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='status',
                 logical='ステータス',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=20,
                 null=False,
                 default='ACTIVE',
@@ -213,7 +213,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='is_active',
                 logical='有効フラグ',
-                type='BOOLEAN',
+                data_type='BOOLEAN',
                 null=False,
                 default=True,
                 description='有効/無効フラグ',
@@ -236,7 +236,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='approval_status',
                 logical='承認ステータス',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=20,
                 null=False,
                 default='PENDING',
@@ -250,7 +250,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='approved_by',
                 logical='承認者',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=50,
                 null=True,
                 description='承認者のユーザーID',
@@ -264,7 +264,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='approved_at',
                 logical='承認日時',
-                type='TIMESTAMP',
+                data_type='TIMESTAMP',
                 null=True,
                 description='承認日時',
                 data_generation={
@@ -288,7 +288,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='start_date',
                 logical='開始日',
-                type='DATE',
+                data_type='DATE',
                 null=True,
                 description='有効開始日',
                 data_generation={
@@ -301,7 +301,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='end_date',
                 logical='終了日',
-                type='DATE',
+                data_type='DATE',
                 null=True,
                 description='有効終了日',
                 data_generation={
@@ -375,7 +375,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='skill_level',
                 logical='スキルレベル',
-                type='INTEGER',
+                data_type='INTEGER',
                 null=False,
                 description='スキルレベル（1:初級、2:中級、3:上級、4:エキスパート）',
                 data_generation={
@@ -387,7 +387,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='evaluation_date',
                 logical='評価日',
-                type='DATE',
+                data_type='DATE',
                 null=True,
                 description='スキル評価実施日',
                 data_generation={
@@ -400,7 +400,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='evaluator_id',
                 logical='評価者ID',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=50,
                 null=True,
                 description='評価者のユーザーID',
@@ -423,7 +423,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='project_code',
                 logical='プロジェクトコード',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=20,
                 null=False,
                 unique=True,
@@ -438,7 +438,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='priority',
                 logical='優先度',
-                type='INTEGER',
+                data_type='INTEGER',
                 null=False,
                 default=3,
                 description='優先度（1:最高、2:高、3:中、4:低、5:最低）',
@@ -451,7 +451,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='progress_rate',
                 logical='進捗率',
-                type='DECIMAL',
+                data_type='DECIMAL',
                 length=5,  # DECIMAL(5,2) for 0.00-100.00
                 null=False,
                 default=0.00,
@@ -476,7 +476,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='code',
                 logical='コード',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=20,
                 null=False,
                 unique=True,
@@ -491,7 +491,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='name',
                 logical='名称',
-                type='VARCHAR',
+                data_type='VARCHAR',
                 length=100,
                 null=False,
                 description='マスタ名称',
@@ -503,7 +503,7 @@ class CommonColumns:
             ColumnDefinition(
                 name='description',
                 logical='説明',
-                type='TEXT',
+                data_type='TEXT',
                 null=True,
                 description='マスタ説明',
                 data_generation={

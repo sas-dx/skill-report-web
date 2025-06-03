@@ -140,7 +140,7 @@ class YamlLoader:
                 column = ColumnDefinition(
                     name=col_data['name'],
                     logical=col_data['logical'],
-                    type=col_data['type'],
+                    data_type=col_data['type'],
                     length=col_data.get('length'),
                     null=col_data.get('null', True),
                     default=col_data.get('default'),

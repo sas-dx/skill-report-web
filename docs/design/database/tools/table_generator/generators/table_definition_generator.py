@@ -66,7 +66,12 @@ class TableDefinitionGenerator:
         Returns:
             ProcessingResult: 処理結果
         """
-        result = ProcessingResult()
+        result = ProcessingResult(
+            table_name="",
+            logical_name="",
+            success=True,
+            has_yaml=False
+        )
         
         try:
             self.logger.header("🚀 テーブル定義書生成を開始します")
@@ -162,11 +167,16 @@ class TableDefinitionGenerator:
         Returns:
             ProcessingResult: 処理結果
         """
-        result = ProcessingResult()
+        result = ProcessingResult(
+            table_name=table_name,
+            logical_name=table_info.get('logical_name', ''),
+            success=True,
+            has_yaml=False
+        )
         
         try:
             # YAML定義ファイルを読み込み
-            yaml_file = self.config.get_details_dir() / f"{table_name}.yaml"
+            yaml_file = self.config.get_details_dir() / f"{table_name}_details.yaml"
             if not yaml_file.exists():
                 result.success = False
                 result.error_message = f"YAML定義ファイルが見つかりません: {yaml_file}"
@@ -398,7 +408,7 @@ class TableDefinitionGenerator:
         """
         try:
             # YAML定義ファイルを読み込み
-            yaml_file = self.config.get_details_dir() / f"{table_name}.yaml"
+            yaml_file = self.config.get_details_dir() / f"{table_name}_details.yaml"
             if not yaml_file.exists():
                 self.logger.error(f"YAML定義ファイルが見つかりません: {yaml_file}")
                 return []

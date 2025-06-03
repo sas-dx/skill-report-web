@@ -27,6 +27,8 @@ class ProcessingResult:
         error_message (Optional[str]): エラーメッセージ
         warning_message (Optional[str]): 警告メッセージ
         generated_files (List[str]): 生成されたファイルのリスト
+        processed_files (List[str]): 処理されたファイルのリスト
+        errors (List[str]): エラーリスト
         data_count (Optional[int]): 生成されたデータ件数
     """
     table_name: str
@@ -36,12 +38,18 @@ class ProcessingResult:
     error_message: Optional[str] = None
     warning_message: Optional[str] = None
     generated_files: List[str] = None
+    processed_files: List[str] = None
+    errors: List[str] = None
     data_count: Optional[int] = None
     
     def __post_init__(self):
         """初期化後処理"""
         if self.generated_files is None:
             self.generated_files = []
+        if self.processed_files is None:
+            self.processed_files = []
+        if self.errors is None:
+            self.errors = []
 
 
 @dataclass
@@ -64,7 +72,7 @@ class ColumnDefinition:
     """
     name: str
     logical: str
-    type: str
+    data_type: str
     length: Optional[int] = None
     null: bool = True
     default: Optional[Any] = None
@@ -155,6 +163,7 @@ class TableDefinition:
     logical_name: str
     category: str = ""
     overview: str = ""
+    description: str = ""
     business_columns: List[ColumnDefinition] = None
     business_indexes: List[IndexDefinition] = None
     foreign_keys: List[ForeignKeyDefinition] = None
