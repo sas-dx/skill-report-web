@@ -159,9 +159,9 @@ class DDLGenerator:
         """
         # 制約の種類に応じてDDLを生成
         if constraint.type.upper() == 'CHECK':
-            return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} CHECK ({constraint.definition});"
+            return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} CHECK ({constraint.condition});"
         elif constraint.type.upper() == 'UNIQUE':
-            columns = ', '.join(constraint.columns) if hasattr(constraint, 'columns') else constraint.definition
+            columns = ', '.join(constraint.columns) if hasattr(constraint, 'columns') else constraint.condition
             return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({columns});"
         else:
             return f"-- 未対応の制約タイプ: {constraint.type}"
