@@ -23,6 +23,7 @@ from table_generator.utils.file_utils import FileUtils
 from table_generator.utils.sql_utils import SqlUtils
 from table_generator.generators.common_columns import CommonColumns
 from table_generator.generators.ddl_generator import DDLGenerator
+from table_generator.generators.insert_generator import InsertGenerator
 from table_generator.data.faker_utils import FakerUtils
 
 
@@ -46,6 +47,7 @@ class TableDefinitionGenerator:
         self.file_utils = FileUtils(logger=self.logger)
         self.sql_utils = SqlUtils(logger=self.logger)
         self.ddl_generator = DDLGenerator(logger=self.logger)
+        self.insert_generator = InsertGenerator(logger=self.logger)
         self.faker_utils = FakerUtils(logger=self.logger)
         
         # 必要なディレクトリを作成
@@ -204,13 +206,17 @@ class TableDefinitionGenerator:
             # DDLを生成
             ddl_content = self.ddl_generator.generate_table_ddl(table_def)
             
+            # INSERT文を生成
+            insert_content = self.insert_generator.generate_insert_sql(table_def)
+            
             if not dry_run:
                 # ファイルを出力
-                self._write_output_files(table_name, table_def, markdown_content, ddl_content, output_dir, result)
+                self._write_output_files(table_name, table_def, markdown_content, ddl_content, insert_content, output_dir, result)
             else:
                 self.logger.info(f"🔍 [DRY RUN] {table_name} の出力をスキップしました")
                 result.generated_files.append(f"[DRY RUN] {table_name}.md")
                 result.generated_files.append(f"[DRY RUN] {table_name}.sql")
+                result.generated_files.append(f"[DRY RUN] {table_name}_sample_data.sql")
             
             result.success = True
             
@@ -393,7 +399,7 @@ class TableDefinitionGenerator:
         return "\n".join(lines)
     
     def _write_output_files(self, table_name: str, table_def: TableDefinition, 
-                           markdown_content: str, ddl_content: str, 
+                           markdown_content: str, ddl_content: str, insert_content: str,
                            output_dir: Optional[str], result: ProcessingResult):
         """出力ファイルを書き込み
         
@@ -409,12 +415,14 @@ class TableDefinitionGenerator:
             if output_dir:
                 tables_dir = Path(output_dir) / "tables"
                 ddl_dir = Path(output_dir) / "ddl"
+                data_dir = Path(output_dir) / "data"
             else:
                 tables_dir = self.config.get_tables_dir()
                 ddl_dir = self.config.get_ddl_dir()
+                data_dir = self.config.get_base_dir() / "data"
             
             # ディレクトリを作成
-            self.file_utils.ensure_directories([tables_dir, ddl_dir])
+            self.file_utils.ensure_directories([tables_dir, ddl_dir, data_dir])
             
             # Markdownファイルを出力（要求されている形式のファイル名）
             logical_name = getattr(table_def, 'logical_name', table_name)
@@ -428,6 +436,12 @@ class TableDefinitionGenerator:
             if self.file_utils.write_file(sql_file, ddl_content):
                 result.generated_files.append(str(sql_file))
                 self.logger.info(f"🗃️ DDLファイルを出力: {sql_file}")
+            
+            # INSERT文ファイルを出力
+            insert_file = data_dir / f"{table_name}_sample_data.sql"
+            if self.file_utils.write_file(insert_file, insert_content):
+                result.generated_files.append(str(insert_file))
+                self.logger.info(f"📊 INSERT文ファイルを出力: {insert_file}")
                 
         except Exception as e:
             raise Exception(f"ファイル出力でエラー: {str(e)}")
