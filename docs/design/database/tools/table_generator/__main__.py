@@ -16,7 +16,7 @@ from pathlib import Path
 # パッケージのパスを追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from table_generator.core.logger import Logger
+from table_generator.core.logger import EnhancedLogger
 from table_generator.generators.table_definition_generator import TableDefinitionGenerator
 
 
@@ -82,7 +82,7 @@ def main():
         base_dir = args.base_dir or str(Path(__file__).parent.parent.parent)
         
         # ログ設定
-        logger = Logger(enable_color=not args.no_color, verbose=args.verbose)
+        logger = EnhancedLogger(enable_color=not args.no_color)
         
         # ジェネレーター初期化
         generator = TableDefinitionGenerator(

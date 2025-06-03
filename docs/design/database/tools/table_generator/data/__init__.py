@@ -14,7 +14,6 @@
 """
 
 from .yaml_data_loader import YamlDataLoader
-from .data_factory import YamlDrivenDataFactory
 from .faker_utils import FakerUtils
 
-__all__ = ['YamlDataLoader', 'YamlDrivenDataFactory', 'FakerUtils']
+__all__ = ['YamlDataLoader', 'FakerUtils']

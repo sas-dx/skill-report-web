@@ -14,9 +14,8 @@
 対応要求仕様ID: PLT.2-DB.1, PLT.2-TOOL.1
 """
 
-from .table_definition import TableDefinitionGenerator
+from .table_definition_generator import TableDefinitionGenerator
 from .ddl_generator import DDLGenerator
-from .data_generator import DataGenerator
 from .common_columns import CommonColumns
 
-__all__ = ['TableDefinitionGenerator', 'DDLGenerator', 'DataGenerator', 'CommonColumns']
+__all__ = ['TableDefinitionGenerator', 'DDLGenerator', 'CommonColumns']
