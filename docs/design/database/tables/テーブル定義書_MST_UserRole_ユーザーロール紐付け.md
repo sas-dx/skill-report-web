@@ -7,7 +7,7 @@
 | テーブル名 | MST_UserRole |
 | 論理名 | ユーザーロール紐付け |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ MST_UserRole（ユーザーロール紐付け）は、ユーザーとロール�
 システムセキュリティの実装において中核的な役割を果たします。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | user_id | ユーザーID | VARCHAR | 50 | ○ |  | ユーザーのID（MST_UserAuthへの外部キー） |
 | role_id | ロールID | VARCHAR | 50 | ○ |  | ロールのID（MST_Roleへの外部キー） |
 | assignment_type | 割り当て種別 | ENUM |  | ○ | DIRECT | ロール割り当ての種別（DIRECT:直接、INHERITED:継承、DELEGATED:委譲、TEMPORARY:一時的） |
@@ -53,10 +51,9 @@ MST_UserRole（ユーザーロール紐付け）は、ユーザーとロール�
 | assignment_status | 割り当て状態 | ENUM |  | ○ | ACTIVE | 割り当ての状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、EXPIRED:期限切れ） |
 | last_used_at | 最終使用日時 | TIMESTAMP |  | ○ |  | このロールが最後に使用された日時 |
 | usage_count | 使用回数 | INT |  | ○ | 0 | このロールが使用された回数 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

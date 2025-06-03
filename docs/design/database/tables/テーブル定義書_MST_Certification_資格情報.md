@@ -7,7 +7,7 @@
 | テーブル名 | MST_Certification |
 | 論理名 | 資格情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 キャリア開発や人材配置の判断材料として活用できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | certification_code | 資格コード | VARCHAR | 50 | ○ |  | 資格を一意に識別するコード（例：CERT_AWS_SAA、CERT_PMP） |
 | certification_name | 資格名 | VARCHAR | 200 | ○ |  | 正式な資格名称 |
 | certification_name_en | 資格名（英語） | VARCHAR | 200 | ○ |  | 英語での資格名称 |
@@ -49,10 +47,8 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 | skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | 関連するスキルカテゴリのID |
 | is_recommended | 推奨資格フラグ | BOOLEAN |  | ○ | False | 会社として取得を推奨する資格かどうか |
 | is_active | 有効フラグ | BOOLEAN |  | ○ | True | 資格が有効かどうか |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 

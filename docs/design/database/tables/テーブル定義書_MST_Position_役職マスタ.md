@@ -7,7 +7,7 @@
 | テーブル名 | MST_Position |
 | 論理名 | 役職マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ MST_Position（役職マスタ）は、組織内の役職・職位の階層構�
 企業の階層的組織運営の基盤となる重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | position_code | 役職コード | VARCHAR | 20 | ○ |  | 役職を一意に識別するコード（例：POS001） |
 | position_name | 役職名 | VARCHAR | 100 | ○ |  | 役職の正式名称 |
 | position_name_short | 役職名略称 | VARCHAR | 50 | ○ |  | 役職の略称・短縮名 |
@@ -51,10 +49,8 @@ MST_Position（役職マスタ）は、組織内の役職・職位の階層構�
 | position_status | 役職状態 | ENUM |  | ○ | ACTIVE | 役職の状態（ACTIVE:有効、INACTIVE:無効、ABOLISHED:廃止） |
 | sort_order | 表示順序 | INT |  | ○ |  | 組織図等での表示順序 |
 | description | 役職説明 | TEXT |  | ○ |  | 役職の責任・権限・業務内容の説明 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 

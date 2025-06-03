@@ -7,7 +7,7 @@
 | テーブル名 | MST_EmployeeJobType |
 | 論理名 | 社員職種関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_EmployeeJobType（社員職種関連）は、社員と職種の関連付け�
 適切な人材配置とキャリア開発を支援できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | employee_job_type_id | 社員職種関連ID | VARCHAR | 50 | ○ |  | 社員職種関連を一意に識別するID |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 対象社員のID（MST_Employeeへの外部キー） |
 | job_type_id | 職種ID | VARCHAR | 50 | ○ |  | 職種のID（MST_JobTypeへの外部キー） |
@@ -72,10 +70,9 @@ MST_EmployeeJobType（社員職種関連）は、社員と職種の関連付け�
 | approved_by | 承認者 | VARCHAR | 50 | ○ |  | 関連付けを承認した責任者ID |
 | approval_date | 承認日 | DATE |  | ○ |  | 関連付けが承認された日付 |
 | notes | 備考 | TEXT |  | ○ |  | その他の備考・特記事項 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

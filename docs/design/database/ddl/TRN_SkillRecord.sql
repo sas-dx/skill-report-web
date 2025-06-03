@@ -1,32 +1,40 @@
--- TRN_SkillRecord (スキル情報) DDL
--- 生成日時: 2025-06-01 20:40:26
+-- ============================================
+-- テーブル: TRN_SkillRecord
+-- 論理名: スキル情報
+-- 説明: 
+-- 作成日: 2025-06-04 06:57:02
+-- ============================================
+
+DROP TABLE IF EXISTS TRN_SkillRecord;
 
 CREATE TABLE TRN_SkillRecord (
-    id VARCHAR(50) NOT NULL PRIMARY KEY,
-    is_deleted BOOLEAN NOT NULL DEFAULT False,
-    tenant_id VARCHAR(50) NOT NULL,
-    employee_id VARCHAR(50),
-    skill_item_id VARCHAR(50),
-    skill_level INT,
-    self_assessment INT,
-    manager_assessment INT,
-    evidence_description TEXT,
-    acquisition_date DATE,
-    last_used_date DATE,
-    expiry_date DATE,
-    certification_id VARCHAR(50),
-    skill_category_id VARCHAR(50),
-    assessment_date DATE,
-    assessor_id VARCHAR(50),
-    skill_status ENUM DEFAULT 'ACTIVE',
-    learning_hours INT,
-    project_experience_count INT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by VARCHAR(50) NOT NULL,
-    updated_by VARCHAR(50) NOT NULL
-);
+    employee_id VARCHAR(50) COMMENT 'スキルを保有する社員のID（MST_Employeeへの外部キー）',
+    skill_item_id VARCHAR(50) COMMENT 'スキル項目のID（MST_SkillItemへの外部キー）',
+    skill_level INT COMMENT 'スキルレベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター）',
+    self_assessment INT COMMENT '自己評価（1-5段階）',
+    manager_assessment INT COMMENT '上司による評価（1-5段階）',
+    evidence_description TEXT COMMENT 'スキル習得の証跡や根拠の説明',
+    acquisition_date DATE COMMENT 'スキルを習得した日付',
+    last_used_date DATE COMMENT 'スキルを最後に使用した日付',
+    expiry_date DATE COMMENT 'スキルの有効期限（資格等の場合）',
+    certification_id VARCHAR(50) COMMENT '関連する資格のID（MST_Certificationへの外部キー）',
+    skill_category_id VARCHAR(50) COMMENT 'スキルカテゴリのID（MST_SkillCategoryへの外部キー）',
+    assessment_date DATE COMMENT '最後に評価を行った日付',
+    assessor_id VARCHAR(50) COMMENT '評価を行った人のID（MST_Employeeへの外部キー）',
+    skill_status ENUM DEFAULT 'ACTIVE' COMMENT 'スキルの状況（ACTIVE:有効、EXPIRED:期限切れ、SUSPENDED:一時停止）',
+    learning_hours INT COMMENT 'スキル習得にかけた学習時間（時間）',
+    project_experience_count INT COMMENT 'このスキルを使用したプロジェクトの回数',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'マルチテナント識別子',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' COMMENT 'レコード更新日時',
+    created_by VARCHAR(50) NOT NULL COMMENT 'レコード作成者のユーザーID',
+    updated_by VARCHAR(50) NOT NULL COMMENT 'レコード更新者のユーザーID',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- インデックス作成
 CREATE UNIQUE INDEX idx_employee_skill ON TRN_SkillRecord (employee_id, skill_item_id);
 CREATE INDEX idx_employee ON TRN_SkillRecord (employee_id);
 CREATE INDEX idx_skill_item ON TRN_SkillRecord (skill_item_id);
@@ -43,3 +51,12 @@ ALTER TABLE TRN_SkillRecord ADD CONSTRAINT fk_skill_item FOREIGN KEY (skill_item
 ALTER TABLE TRN_SkillRecord ADD CONSTRAINT fk_skill_certification FOREIGN KEY (certification_id) REFERENCES MST_Certification(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE TRN_SkillRecord ADD CONSTRAINT fk_skill_category FOREIGN KEY (skill_category_id) REFERENCES MST_SkillCategory(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE TRN_SkillRecord ADD CONSTRAINT fk_skill_assessor FOREIGN KEY (assessor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+-- その他の制約
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT uk_employee_skill UNIQUE ();
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT chk_skill_level CHECK (skill_level BETWEEN 1 AND 5);
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT chk_self_assessment CHECK (self_assessment IS NULL OR self_assessment BETWEEN 1 AND 5);
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT chk_manager_assessment CHECK (manager_assessment IS NULL OR manager_assessment BETWEEN 1 AND 5);
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT chk_skill_status CHECK (skill_status IN ('ACTIVE', 'EXPIRED', 'SUSPENDED'));
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT chk_learning_hours CHECK (learning_hours IS NULL OR learning_hours >= 0);
+ALTER TABLE TRN_SkillRecord ADD CONSTRAINT chk_project_count CHECK (project_experience_count IS NULL OR project_experience_count >= 0);

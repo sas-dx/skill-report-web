@@ -7,7 +7,7 @@
 | テーブル名 | MST_UserAuth |
 | 論理名 | ユーザー認証情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ MST_UserAuth（ユーザー認証情報）は、システムにアクセスす�
 個人情報保護、コンプライアンス対応において重要な役割を果たします。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | user_id | ユーザーID | VARCHAR | 50 | ○ |  | ユーザーを一意に識別するID（例：USER000001） |
 | login_id | ログインID | VARCHAR | 100 | ○ |  | ログイン時に使用するID（通常はメールアドレス） |
 | password_hash | パスワードハッシュ | VARCHAR | 255 | ○ |  | ハッシュ化されたパスワード（bcrypt等） |
@@ -52,10 +50,9 @@ MST_UserAuth（ユーザー認証情報）は、システムにアクセスす�
 | session_timeout | セッションタイムアウト | INT |  | ○ |  | セッションタイムアウト時間（分） |
 | external_auth_provider | 外部認証プロバイダ | VARCHAR | 50 | ○ |  | 外部認証プロバイダ（LDAP、SAML、OAuth等） |
 | external_auth_id | 外部認証ID | VARCHAR | 255 | ○ |  | 外部認証システムでのユーザーID |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

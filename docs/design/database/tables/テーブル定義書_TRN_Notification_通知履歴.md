@@ -7,7 +7,7 @@
 | テーブル名 | TRN_Notification |
 | 論理名 | 通知履歴 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ TRN_Notification（通知履歴）は、システムから送信された各種�
 重要な情報の確実な配信と適切なコミュニケーションを支援できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | notification_id | 通知ID | VARCHAR | 50 | ○ |  | 通知を一意に識別するID |
 | recipient_id | 受信者ID | VARCHAR | 50 | ○ |  | 通知受信者の社員ID（MST_Employeeへの外部キー） |
 | sender_id | 送信者ID | VARCHAR | 50 | ○ |  | 通知送信者の社員ID（システム送信の場合はNULL） |
@@ -65,6 +63,9 @@ TRN_Notification（通知履歴）は、システムから送信された各種�
 | device_type | デバイス種別 | ENUM |  | ○ |  | 既読時のデバイス種別（PC:PC、MOBILE:モバイル、TABLET:タブレット） |
 | is_bulk_notification | 一括通知フラグ | BOOLEAN |  | ○ | False | 一括送信された通知かどうか |
 | personalization_data | パーソナライゼーションデータ | TEXT |  | ○ |  | 個人向けカスタマイズデータ（JSON形式） |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |

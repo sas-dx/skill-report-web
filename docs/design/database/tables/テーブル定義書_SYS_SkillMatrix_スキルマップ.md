@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SkillMatrix |
 | 論理名 | スキルマップ |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -22,12 +22,11 @@
 社員のスキル可視化やスキル分析の基盤データを提供します。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 評価対象の社員ID（MST_Employeeへの外部キー） |
 | skill_id | スキルID | VARCHAR | 50 | ○ |  | スキル項目ID（MST_Skillへの外部キー） |
 | skill_level | スキルレベル | INTEGER |  | ○ | 1 | スキル評価レベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター） |
@@ -39,10 +38,8 @@
 | notes | 備考 | TEXT |  | ○ |  | スキル評価に関する詳細な備考やコメント |
 | next_target_level | 次回目標レベル | INTEGER |  | ○ |  | 次回評価での目標レベル（1-5） |
 | target_date | 目標達成日 | DATE |  | ○ |  | 目標レベル達成予定日 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

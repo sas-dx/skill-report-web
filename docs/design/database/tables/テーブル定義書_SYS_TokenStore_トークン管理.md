@@ -7,7 +7,7 @@
 | テーブル名 | SYS_TokenStore |
 | 論理名 | トークン管理 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,12 +23,11 @@ SYS_TokenStore（トークン管理）は、認証・認可システムで使用
 このテーブルは、認証・認可システムの基盤となる重要なシステムデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
 | user_id | ユーザーID | VARCHAR | 50 | ○ |  | トークンの所有者ユーザーID（MST_UserAuthへの参照） |
@@ -45,10 +44,7 @@ SYS_TokenStore（トークン管理）は、認証・認可システムで使用
 | is_revoked | 無効化フラグ | BOOLEAN |  | ○ | False | トークンが無効化されているかどうか |
 | revoked_at | 無効化日時 | TIMESTAMP |  | ○ |  | トークンが無効化された日時 |
 | revoked_reason | 無効化理由 | ENUM |  | ○ |  | 無効化の理由（LOGOUT:ログアウト、EXPIRED:期限切れ、SECURITY:セキュリティ、ADMIN:管理者操作） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

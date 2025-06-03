@@ -7,7 +7,7 @@
 | テーブル名 | MST_JobType |
 | 論理名 | 職種マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基
 職種別スキル要件の管理を効率的に行うことができます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | job_type_code | 職種コード | VARCHAR | 20 | ○ |  | 職種を一意に識別するコード（例：SE、PM、QA、BA） |
 | job_type_name | 職種名 | VARCHAR | 100 | ○ |  | 職種の正式名称 |
 | job_type_name_en | 職種名（英語） | VARCHAR | 100 | ○ |  | 英語での職種名称 |
@@ -48,10 +46,8 @@ MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基
 | travel_frequency | 出張頻度 | ENUM |  | ○ |  | 出張の頻度（NONE:なし、LOW:低、MEDIUM:中、HIGH:高） |
 | sort_order | 表示順序 | INTEGER |  | ○ | 0 | 職種一覧での表示順序 |
 | is_active | 有効フラグ | BOOLEAN |  | ○ | True | 職種が有効かどうか |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 
@@ -64,11 +60,6 @@ MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基
 | idx_category_level | job_category, job_level | × | カテゴリ・レベル複合検索用 |
 | idx_remote_eligible | remote_work_eligible, is_active | × | リモートワーク可能職種検索用 |
 | idx_sort_order | sort_order | × | 表示順序検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
 
 ## 制約
 

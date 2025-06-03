@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SkillIndex |
 | 論理名 | スキル検索インデックス |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,12 +23,11 @@ SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能
 このテーブルは、スキル管理機能において高速で精度の高い検索を実現する重要なシステムデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
 | skill_id | スキルID | VARCHAR | 50 | ○ |  | インデックス対象のスキルID（MST_Skillへの参照） |
@@ -44,10 +43,7 @@ SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能
 | search_count | 検索回数 | INTEGER |  | ○ | 0 | この語句での検索実行回数 |
 | last_searched_at | 最終検索日時 | TIMESTAMP |  | ○ |  | この語句で最後に検索された日時 |
 | index_updated_at | インデックス更新日時 | TIMESTAMP |  | ○ |  | インデックスが最後に更新された日時 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

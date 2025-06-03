@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillCategory |
 | 論理名 | スキルカテゴリマスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ MST_SkillCategory（スキルカテゴリマスタ）は、スキルの分類・
 効率的なスキル管理と戦略的人材育成を支援します。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | category_code | カテゴリコード | VARCHAR | 20 | ○ |  | スキルカテゴリを一意に識別するコード（例：CAT001） |
 | category_name | カテゴリ名 | VARCHAR | 100 | ○ |  | スキルカテゴリの正式名称 |
 | category_name_short | カテゴリ名略称 | VARCHAR | 50 | ○ |  | スキルカテゴリの略称・短縮名 |
@@ -54,10 +52,8 @@ MST_SkillCategory（スキルカテゴリマスタ）は、スキルの分類・
 | effective_from | 有効開始日 | DATE |  | ○ |  | カテゴリの有効開始日 |
 | effective_to | 有効終了日 | DATE |  | ○ |  | カテゴリの有効終了日 |
 | description | カテゴリ説明 | TEXT |  | ○ |  | カテゴリの詳細説明・用途 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 

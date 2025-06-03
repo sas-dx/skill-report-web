@@ -7,7 +7,7 @@
 | テーブル名 | MST_EmployeePosition |
 | 論理名 | 社員役職関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -25,13 +25,11 @@ MST_EmployeePosition（社員役職関連）は、社員と役職の関連付け
 人事評価や昇進管理の履歴を正確に追跡できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 社員のID（MST_Employeeへの外部キー） |
 | position_id | 役職ID | VARCHAR | 50 | ○ |  | 役職のID（MST_Positionへの外部キー） |
 | appointment_type | 任命区分 | ENUM |  | ○ | PRIMARY | 任命区分（PRIMARY:主役職、ACTING:代理、CONCURRENT:兼任） |
@@ -47,10 +45,9 @@ MST_EmployeePosition（社員役職関連）は、社員と役職の関連付け
 | approved_at | 承認日時 | TIMESTAMP |  | ○ |  | 任命が承認された日時 |
 | performance_target | 成果目標 | TEXT |  | ○ |  | 当該役職での成果目標・KPI |
 | delegation_authority | 委譲権限 | TEXT |  | ○ |  | 委譲された権限の詳細（JSON形式） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

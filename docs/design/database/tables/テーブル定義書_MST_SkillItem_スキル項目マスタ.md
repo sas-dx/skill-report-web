@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillItem |
 | 論理名 | スキル項目マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,23 +26,20 @@ MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象�
 戦略的人材マネジメントの基盤となる重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | skill_code | スキルコード | VARCHAR | 20 | ○ |  | スキル項目を一意に識別するコード（例：SKILL001） |
 | skill_name | スキル名 | VARCHAR | 100 | ○ |  | スキル項目の正式名称 |
 | skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリのID |
 | skill_type | スキル種別 | ENUM |  | ○ |  | スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格） |
 | difficulty_level | 習得難易度 | INT |  | ○ |  | スキル習得の難易度（1-5段階） |
 | importance_level | 重要度 | INT |  | ○ |  | 組織における重要度（1-5段階） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

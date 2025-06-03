@@ -7,7 +7,7 @@
 | テーブル名 | MST_CareerPlan |
 | 論理名 | 目標・キャリアプラン |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_CareerPlan（目標・キャリアプラン）は、社員の中長期的な
 効果的なキャリア開発と人材育成を実現できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | career_plan_id | キャリアプランID | VARCHAR | 50 | ○ |  | キャリアプランを一意に識別するID |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 対象社員のID（MST_Employeeへの外部キー） |
 | plan_name | プラン名 | VARCHAR | 200 | ○ |  | キャリアプランの名称 |
@@ -71,10 +69,9 @@ MST_CareerPlan（目標・キャリアプラン）は、社員の中長期的な
 | template_id | テンプレートID | VARCHAR | 50 | ○ |  | 使用したプランテンプレートのID |
 | custom_fields | カスタムフィールド | TEXT |  | ○ |  | 組織固有の追加項目（JSON形式） |
 | notes | 備考 | TEXT |  | ○ |  | その他の備考・メモ |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

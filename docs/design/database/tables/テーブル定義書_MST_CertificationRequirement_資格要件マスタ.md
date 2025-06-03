@@ -7,7 +7,7 @@
 | テーブル名 | MST_CertificationRequirement |
 | 論理名 | 資格要件マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_CertificationRequirement（資格要件マスタ）は、職種・役職・�
 適切な人材配置と計画的な人材育成を実現できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | requirement_id | 要件ID | VARCHAR | 50 | ○ |  | 資格要件を一意に識別するID |
 | requirement_name | 要件名 | VARCHAR | 200 | ○ |  | 資格要件の名称 |
 | requirement_description | 要件説明 | TEXT |  | ○ |  | 資格要件の詳細説明 |
@@ -73,10 +71,9 @@ MST_CertificationRequirement（資格要件マスタ）は、職種・役職・�
 | approval_date | 承認日 | DATE |  | ○ |  | 要件が承認された日付 |
 | review_date | 見直し日 | DATE |  | ○ |  | 次回要件見直し予定日 |
 | notes | 備考 | TEXT |  | ○ |  | その他の備考・補足情報 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

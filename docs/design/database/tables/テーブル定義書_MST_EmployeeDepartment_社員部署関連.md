@@ -7,7 +7,7 @@
 | テーブル名 | MST_EmployeeDepartment |
 | 論理名 | 社員部署関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -25,13 +25,11 @@ MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付�
 人事異動や組織変更の履歴を正確に追跡できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 社員のID（MST_Employeeへの外部キー） |
 | department_id | 部署ID | VARCHAR | 50 | ○ |  | 部署のID（MST_Departmentへの外部キー） |
 | assignment_type | 配属区分 | ENUM |  | ○ | PRIMARY | 配属区分（PRIMARY:主配属、SECONDARY:兼務、TEMPORARY:一時配属） |
@@ -45,10 +43,9 @@ MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付�
 | approval_status | 承認状況 | ENUM |  | ○ | PENDING | 承認状況（APPROVED:承認済、PENDING:承認待ち、REJECTED:却下） |
 | approved_by | 承認者ID | VARCHAR | 50 | ○ |  | 配属を承認した管理者のID |
 | approved_at | 承認日時 | TIMESTAMP |  | ○ |  | 配属が承認された日時 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

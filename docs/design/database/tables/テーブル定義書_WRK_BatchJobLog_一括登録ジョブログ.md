@@ -7,7 +7,7 @@
 | テーブル名 | WRK_BatchJobLog |
 | 論理名 | 一括登録ジョブログ |
 | カテゴリ | ワーク系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@
 主に管理者画面での監視とAPI経由での状況確認に使用される。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | job_id | ジョブID | VARCHAR | 50 | ○ |  | 一括処理ジョブの一意識別子（UUID形式） |
 | job_name | ジョブ名 | VARCHAR | 200 | ○ |  | 実行されたジョブの名称（画面表示用） |
 | job_type | ジョブ種別 | ENUM |  | ○ | SKILL_IMPORT | ジョブの種別（SKILL_IMPORT:スキル情報一括登録、EMPLOYEE_IMPORT:社員情報一括登録、BULK_UPDATE:一括更新、BULK_DELETE:一括削除、DATA_EXPORT:データエクスポート） |
@@ -48,10 +46,8 @@
 | progress_percentage | 進捗率 | DECIMAL | 5,2 | ○ | 0.0 | ジョブの進捗率（0.00-100.00） |
 | execution_environment | 実行環境 | VARCHAR | 100 | ○ |  | ジョブが実行された環境情報（サーバー名、プロセスID等） |
 | job_parameters | ジョブパラメータ | TEXT |  | ○ |  | ジョブ実行時のパラメータ情報（JSON形式） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

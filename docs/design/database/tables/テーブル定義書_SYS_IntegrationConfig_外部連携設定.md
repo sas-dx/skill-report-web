@@ -7,7 +7,7 @@
 | テーブル名 | SYS_IntegrationConfig |
 | 論理名 | 外部連携設定 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,12 +23,11 @@ SYS_IntegrationConfig（外部連携設定）は、外部システムとの連�
 このテーブルは、通知・連携管理機能において外部システムとの安全で効率的な連携を実現する重要なシステムデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
 | integration_key | 連携キー | VARCHAR | 100 | ○ |  | 連携設定の識別キー（例：slack_webhook、teams_connector等） |
@@ -47,10 +46,7 @@ SYS_IntegrationConfig（外部連携設定）は、外部システムとの連�
 | health_check_url | ヘルスチェックURL | VARCHAR | 500 | ○ |  | 連携先の死活監視用URL |
 | last_health_check | 最終ヘルスチェック | TIMESTAMP |  | ○ |  | 最終ヘルスチェック実行日時 |
 | health_status | ヘルス状態 | ENUM |  | ○ |  | 連携先の状態（HEALTHY:正常、UNHEALTHY:異常、UNKNOWN:不明） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
@@ -61,11 +57,6 @@ SYS_IntegrationConfig（外部連携設定）は、外部システムとの連�
 | idx_integration_config_enabled | is_enabled | × | 有効設定検索用 |
 | idx_integration_config_health | health_status, last_health_check | × | ヘルス状態検索用 |
 | idx_integration_config_auth_type | auth_type | × | 認証タイプ別検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
 
 ## 制約
 
