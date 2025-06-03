@@ -206,7 +206,7 @@ class TableDefinitionGenerator:
             
             if not dry_run:
                 # ファイルを出力
-                self._write_output_files(table_name, markdown_content, ddl_content, output_dir, result)
+                self._write_output_files(table_name, table_def, markdown_content, ddl_content, output_dir, result)
             else:
                 self.logger.info(f"🔍 [DRY RUN] {table_name} の出力をスキップしました")
                 result.generated_files.append(f"[DRY RUN] {table_name}.md")
@@ -257,40 +257,48 @@ class TableDefinitionGenerator:
         lines = []
         
         # ヘッダー
-        lines.append(f"# {table_def.table_name}")
-        lines.append("")
-        lines.append(f"**{table_def.logical_name}**")
-        lines.append("")
-        lines.append(f"**概要**: {table_def.description}")
+        lines.append(f"# テーブル定義書: {table_def.table_name}")
         lines.append("")
         
-        # テーブル情報
-        lines.append("## テーブル情報")
+        # 基本情報
+        lines.append("## 基本情報")
         lines.append("")
         lines.append("| 項目 | 値 |")
         lines.append("|------|-----|")
         lines.append(f"| テーブル名 | {table_def.table_name} |")
         lines.append(f"| 論理名 | {table_def.logical_name} |")
-        lines.append(f"| 説明 | {table_def.description} |")
-        lines.append(f"| 作成日 | {datetime.now().strftime('%Y-%m-%d')} |")
+        lines.append(f"| カテゴリ | {getattr(table_def, 'category', 'マスタ系')} |")
+        lines.append(f"| 生成日時 | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |")
+        lines.append("")
+        
+        # 概要
+        lines.append("## 概要")
+        lines.append("")
+        if hasattr(table_def, 'overview') and table_def.overview:
+            lines.append(table_def.overview)
+        else:
+            lines.append(table_def.description)
+        lines.append("")
         lines.append("")
         
         # カラム定義
         lines.append("## カラム定義")
         lines.append("")
-        lines.append("| No | カラム名 | データ型 | NULL | デフォルト | 説明 |")
-        lines.append("|----|----------|----------|------|------------|------|")
+        lines.append("| カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |")
+        lines.append("|----------|--------|----------|------|------|------------|------|")
         
-        for i, col in enumerate(table_def.business_columns, 1):
+        for col in table_def.business_columns:
             null_str = "○" if col.null else "×"
             default_str = str(col.default) if col.default is not None else ""
-            lines.append(f"| {i} | {col.name} | {col.data_type} | {null_str} | {default_str} | {col.description} |")
+            length_str = str(col.length) if hasattr(col, 'length') and col.length else ""
+            logical_name = getattr(col, 'logical', col.name)
+            lines.append(f"| {col.name} | {logical_name} | {col.data_type} | {length_str} | {null_str} | {default_str} | {col.description} |")
         
         lines.append("")
         
-        # インデックス定義
+        # インデックス
         if table_def.business_indexes:
-            lines.append("## インデックス定義")
+            lines.append("## インデックス")
             lines.append("")
             lines.append("| インデックス名 | カラム | ユニーク | 説明 |")
             lines.append("|----------------|--------|----------|------|")
@@ -302,39 +310,91 @@ class TableDefinitionGenerator:
             
             lines.append("")
         
-        # 外部キー定義
+        # 外部キー
         if table_def.foreign_keys:
-            lines.append("## 外部キー定義")
+            lines.append("## 外部キー")
             lines.append("")
-            lines.append("| 制約名 | カラム | 参照テーブル | 参照カラム | 説明 |")
-            lines.append("|--------|--------|--------------|------------|------|")
+            lines.append("| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |")
+            lines.append("|--------|--------|--------------|------------|--------|--------|------|")
             
             for fk in table_def.foreign_keys:
-                lines.append(f"| {fk.name} | {fk.column} | {fk.reference_table} | {fk.reference_column} | {fk.description} |")
+                on_update = getattr(fk, 'on_update', 'CASCADE')
+                on_delete = getattr(fk, 'on_delete', 'RESTRICT')
+                lines.append(f"| {fk.name} | {fk.column} | {fk.reference_table} | {fk.reference_column} | {on_update} | {on_delete} | {fk.description} |")
             
             lines.append("")
         
-        # ビジネスルール
-        if table_def.business_rules:
-            lines.append("## ビジネスルール")
+        # 制約
+        if hasattr(table_def, 'business_constraints') and table_def.business_constraints:
+            lines.append("## 制約")
             lines.append("")
-            for i, rule in enumerate(table_def.business_rules, 1):
-                lines.append(f"{i}. {rule}")
+            lines.append("| 制約名 | 種別 | 条件 | 説明 |")
+            lines.append("|--------|------|------|------|")
+            
+            for constraint in table_def.business_constraints:
+                constraint_type = getattr(constraint, 'type', 'CHECK')
+                condition = getattr(constraint, 'condition', '')
+                lines.append(f"| {constraint.name} | {constraint_type} | {condition} | {constraint.description} |")
+            
             lines.append("")
         
-        # 備考
+        # サンプルデータ
+        if hasattr(table_def, 'sample_data') and table_def.sample_data:
+            lines.append("## サンプルデータ")
+            lines.append("")
+            
+            # サンプルデータのヘッダーを動的に生成
+            if table_def.sample_data:
+                sample_keys = list(table_def.sample_data[0].keys())
+                header = "| " + " | ".join(sample_keys) + " |"
+                separator = "|" + "------|" * len(sample_keys)
+                lines.append(header)
+                lines.append(separator)
+                
+                for sample in table_def.sample_data:
+                    row_values = [str(sample.get(key, '')) for key in sample_keys]
+                    row = "| " + " | ".join(row_values) + " |"
+                    lines.append(row)
+                
+                lines.append("")
+        
+        # 特記事項
         if table_def.notes:
-            lines.append("## 備考")
+            lines.append("## 特記事項")
             lines.append("")
             for note in table_def.notes:
                 lines.append(f"- {note}")
             lines.append("")
         
+        # 業務ルール
+        if table_def.business_rules:
+            lines.append("## 業務ルール")
+            lines.append("")
+            for rule in table_def.business_rules:
+                lines.append(f"- {rule}")
+            lines.append("")
+        
+        # 改版履歴
+        if hasattr(table_def, 'revision_history') and table_def.revision_history:
+            lines.append("## 改版履歴")
+            lines.append("")
+            lines.append("| バージョン | 更新日 | 更新者 | 変更内容 |")
+            lines.append("|------------|--------|--------|----------|")
+            
+            for revision in table_def.revision_history:
+                version = revision.get('version', '')
+                date = revision.get('date', '')
+                author = revision.get('author', '')
+                changes = revision.get('changes', '')
+                lines.append(f"| {version} | {date} | {author} | {changes} |")
+            
+            lines.append("")
+        
         return "\n".join(lines)
     
-    def _write_output_files(self, table_name: str, markdown_content: str, 
-                           ddl_content: str, output_dir: Optional[str], 
-                           result: ProcessingResult):
+    def _write_output_files(self, table_name: str, table_def: TableDefinition, 
+                           markdown_content: str, ddl_content: str, 
+                           output_dir: Optional[str], result: ProcessingResult):
         """出力ファイルを書き込み
         
         Args:
@@ -356,8 +416,9 @@ class TableDefinitionGenerator:
             # ディレクトリを作成
             self.file_utils.ensure_directories([tables_dir, ddl_dir])
             
-            # Markdownファイルを出力
-            md_file = tables_dir / f"{table_name}.md"
+            # Markdownファイルを出力（要求されている形式のファイル名）
+            logical_name = getattr(table_def, 'logical_name', table_name)
+            md_file = tables_dir / f"テーブル定義書_{table_name}_{logical_name}.md"
             if self.file_utils.write_file(md_file, markdown_content):
                 result.generated_files.append(str(md_file))
                 self.logger.info(f"📄 Markdown定義書を出力: {md_file}")
