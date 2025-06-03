@@ -4,28 +4,7 @@
 
 ## ツール構成
 
-### 1. create_table_definitions.py
-**単体完結版テーブル定義書生成スクリプト（v12.0）**
-
-- **機能**: YAMLファイルからMarkdown形式のテーブル定義書とDDLを生成
-- **特徴**: 
-  - カラー出力対応
-  - 詳細診断機能
-  - エラーハンドリング強化
-  - 単体ファイルで完結
-- **使用方法**:
-  ```bash
-  cd /home/kurosawa/skill-report-web/docs/design/database/tools
-  python3 create_table_definitions.py
-  
-  # 個別テーブル生成
-  python3 create_table_definitions.py --table MST_Employee
-  
-  # ドライラン
-  python3 create_table_definitions.py --dry-run
-  ```
-
-### 2. table_generator/
+### table_generator/
 **モジュール化されたテーブル定義書作成パッケージ**
 
 - **機能**: 拡張性を重視したパッケージ構造
@@ -50,19 +29,42 @@
       └── yaml_loader.py   # YAML読み込み
   ```
 
-## 推奨使用方法
+## 使用方法
 
-### 日常的な使用
-**create_table_definitions.py** を使用することを推奨します。
-- 即座に利用可能
-- 豊富な機能（カラー出力、診断機能）
-- コマンドライン引数対応
+### 基本的な使用
+```bash
+cd /home/kurosawa/skill-report-web/docs/design/database/tools
+python3 -m table_generator
+```
+
+### オプション付き実行
+```bash
+# 個別テーブル生成
+python3 -m table_generator --table MST_Employee
+
+# 複数テーブル生成
+python3 -m table_generator --table MST_Role,MST_Permission
+
+# ドライラン
+python3 -m table_generator --dry-run
+
+# 詳細ログ
+python3 -m table_generator --verbose
+
+# カラー出力無効
+python3 -m table_generator --no-color
+```
 
 ### 開発・カスタマイズ
-**table_generator/** パッケージを使用してください。
-- 他のスクリプトから再利用
-- 機能拡張・カスタマイズ
-- モジュール単位での利用
+**table_generator/** パッケージを直接利用：
+```python
+from table_generator.generators.table_definition_generator import TableDefinitionGenerator
+from table_generator.core.logger import Logger
+
+logger = Logger()
+generator = TableDefinitionGenerator(logger=logger)
+generator.generate_files()
+```
 
 ## 関連ファイル
 
@@ -74,5 +76,6 @@
 
 ## 更新履歴
 
+- 2025-06-04: 冗長ファイル削除・table_generatorパッケージに統一
+- 2025-06-04: __main__.py追加・モジュール実行対応
 - 2025-06-04: ツール統合・重複解消
-- 2025-06-01: create_table_definitions.py v12.0 完全統合版
