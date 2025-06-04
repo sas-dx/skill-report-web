@@ -3,3 +3,12 @@
 # Login directory exclusion
 src/app/login/
 src/app/login/**
+
+# Archived rules (読込不要)
+.clinerules/.archived/
+.clinerules/.archived/**
+
+# Memory bank (読込不要)  
+memory-bank/
+memory-bank/**
+
