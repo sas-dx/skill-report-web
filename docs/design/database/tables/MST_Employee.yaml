@@ -1,0 +1,121 @@
+# 従業員マスタテーブル定義
+table_name: MST_Employee
+logical_name: 従業員マスタ
+description: システムを利用する従業員の基本情報を管理するマスタテーブル
+schema: public
+
+columns:
+  - name: employee_id
+    logical_name: 従業員ID
+    type: VARCHAR(20)
+    nullable: false
+    primary_key: true
+    description: 従業員を一意に識別するID
+    example: "EMP001"
+
+  - name: employee_code
+    logical_name: 従業員コード
+    type: VARCHAR(10)
+    nullable: false
+    unique: true
+    description: 従業員の社内コード
+    example: "E001"
+
+  - name: first_name
+    logical_name: 名
+    type: VARCHAR(50)
+    nullable: false
+    description: 従業員の名前（名）
+    example: "太郎"
+
+  - name: last_name
+    logical_name: 姓
+    type: VARCHAR(50)
+    nullable: false
+    description: 従業員の名前（姓）
+    example: "田中"
+
+  - name: email
+    logical_name: メールアドレス
+    type: VARCHAR(255)
+    nullable: false
+    unique: true
+    description: 従業員のメールアドレス
+    example: "tanaka.taro@company.com"
+
+  - name: department_id
+    logical_name: 部署ID
+    type: VARCHAR(20)
+    nullable: true
+    description: 所属部署のID
+    example: "DEPT001"
+
+  - name: position
+    logical_name: 役職
+    type: VARCHAR(100)
+    nullable: true
+    description: 従業員の役職
+    example: "主任"
+
+  - name: hire_date
+    logical_name: 入社日
+    type: DATE
+    nullable: false
+    description: 従業員の入社日
+    example: "2023-04-01"
+
+  - name: status
+    logical_name: ステータス
+    type: VARCHAR(20)
+    nullable: false
+    default: "'ACTIVE'"
+    description: 従業員のステータス（ACTIVE/INACTIVE/RETIRED）
+    example: "ACTIVE"
+
+indexes:
+  - name: idx_employee_code
+    columns: [employee_code]
+    unique: true
+    description: 従業員コードのユニークインデックス
+
+  - name: idx_employee_email
+    columns: [email]
+    unique: true
+    description: メールアドレスのユニークインデックス
+
+  - name: idx_employee_department
+    columns: [department_id]
+    description: 部署IDのインデックス
+
+  - name: idx_employee_status
+    columns: [status]
+    description: ステータスのインデックス
+
+constraints:
+  - name: chk_employee_status
+    type: CHECK
+    condition: "status IN ('ACTIVE', 'INACTIVE', 'RETIRED')"
+    description: ステータスの値制約
+
+foreign_keys:
+  - name: fk_employee_department
+    columns: [department_id]
+    references:
+      table: MST_Department
+      columns: [department_id]
+    on_delete: SET NULL
+    on_update: CASCADE
+    description: 部署マスタへの外部キー
+
+# 共通カラムの設定
+common_columns:
+  audit: true
+  tenant: false
+  soft_delete: true
+
+# テーブル設定
+settings:
+  engine: InnoDB
+  charset: utf8mb4
+  collation: utf8mb4_unicode_ci
+  comment: "従業員マスタテーブル"

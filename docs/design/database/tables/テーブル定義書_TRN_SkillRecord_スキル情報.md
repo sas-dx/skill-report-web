@@ -7,7 +7,7 @@
 | テーブル名 | TRN_SkillRecord |
 | 論理名 | スキル情報 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ TRN_SkillRecord（スキル情報）は、組織内の全社員が保有する�
 戦略的人材マネジメントの基盤となる重要なデータを提供します。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | スキルを保有する社員のID（MST_Employeeへの外部キー） |
 | skill_item_id | スキル項目ID | VARCHAR | 50 | ○ |  | スキル項目のID（MST_SkillItemへの外部キー） |
 | skill_level | スキルレベル | INT |  | ○ |  | スキルレベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター） |
@@ -49,6 +47,9 @@ TRN_SkillRecord（スキル情報）は、組織内の全社員が保有する�
 | skill_status | スキル状況 | ENUM |  | ○ | ACTIVE | スキルの状況（ACTIVE:有効、EXPIRED:期限切れ、SUSPENDED:一時停止） |
 | learning_hours | 学習時間 | INT |  | ○ |  | スキル習得にかけた学習時間（時間） |
 | project_experience_count | プロジェクト経験回数 | INT |  | ○ |  | このスキルを使用したプロジェクトの回数 |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |

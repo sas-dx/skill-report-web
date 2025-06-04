@@ -7,7 +7,7 @@
 | テーブル名 | HIS_NotificationLog |
 | 論理名 | 通知送信履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,13 +23,11 @@ HIS_NotificationLog（通知送信履歴）は、システムから送信され�
 このテーブルは、通知・連携管理機能において送信状況の把握と品質向上を支える重要な履歴データです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
 | notification_id | 通知ID | VARCHAR | 50 | ○ |  | 送信された通知のID（TRN_Notificationへの参照） |
@@ -53,10 +51,7 @@ HIS_NotificationLog（通知送信履歴）は、システムから送信され�
 | error_details | エラー詳細 | TEXT |  | ○ |  | 送信失敗時のエラー詳細情報（JSON形式） |
 | integration_config_id | 連携設定ID | VARCHAR | 50 | ○ |  | 使用された外部連携設定のID（SYS_IntegrationConfigへの参照） |
 | priority_level | 優先度レベル | ENUM |  | ○ | MEDIUM | 通知の優先度（HIGH:高、MEDIUM:中、LOW:低） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

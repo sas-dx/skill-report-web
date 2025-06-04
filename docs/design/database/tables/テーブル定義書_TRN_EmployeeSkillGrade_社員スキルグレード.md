@@ -7,7 +7,7 @@
 | テーブル名 | TRN_EmployeeSkillGrade |
 | 論理名 | 社員スキルグレード |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:54:47 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ TRN_EmployeeSkillGrade（社員スキルグレード）は、社員が職種ご�
 このテーブルは、人事評価、キャリア開発、組織分析など、スキル管理の中核となる重要なデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 対象社員のID（MST_Employeeへの外部キー） |
 | job_type_id | 職種ID | VARCHAR | 50 | ○ |  | 対象職種のID（MST_JobTypeへの外部キー） |
 | skill_grade | スキルグレード | VARCHAR | 10 | ○ |  | スキルグレード値（例：S, A, B, C, D または 1, 2, 3, 4, 5） |
@@ -42,6 +40,9 @@ TRN_EmployeeSkillGrade（社員スキルグレード）は、社員が職種ご�
 | evaluation_comment | 評価コメント | TEXT |  | ○ |  | 評価に関するコメント・備考 |
 | certification_flag | 認定フラグ | BOOLEAN |  | ○ | False | 公式認定されたスキルグレードかどうか |
 | next_evaluation_date | 次回評価予定日 | DATE |  | ○ |  | 次回スキル評価の予定日 |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |

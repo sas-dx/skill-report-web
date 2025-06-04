@@ -7,7 +7,7 @@
 | テーブル名 | MST_SystemConfig |
 | 論理名 | システム設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_SystemConfig（システム設定）は、システム全体の設定値・�
 運用環境に応じた設定変更を効率的に行うことができます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | config_key | 設定キー | VARCHAR | 100 | ○ |  | 設定項目を一意に識別するキー（例：MAX_LOGIN_ATTEMPTS、SESSION_TIMEOUT） |
 | config_name | 設定名 | VARCHAR | 200 | ○ |  | 設定項目の表示名・説明 |
 | config_value | 設定値 | TEXT |  | ○ |  | 設定の値（文字列、数値、JSON等） |
@@ -49,10 +47,8 @@ MST_SystemConfig（システム設定）は、システム全体の設定値・�
 | last_modified_reason | 更新理由 | TEXT |  | ○ |  | 設定変更の理由・目的 |
 | sort_order | 表示順序 | INTEGER |  | ○ | 0 | 設定一覧での表示順序 |
 | is_active | 有効フラグ | BOOLEAN |  | ○ | True | 設定が有効かどうか |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 
@@ -65,11 +61,6 @@ MST_SystemConfig（システム設定）は、システム全体の設定値・�
 | idx_environment | environment, is_active | × | 環境別設定検索用 |
 | idx_tenant_specific | tenant_specific, is_active | × | テナント固有設定検索用 |
 | idx_sort_order | sort_order | × | 表示順序検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
 
 ## 制約
 
@@ -87,6 +78,7 @@ MST_SystemConfig（システム設定）は、システム全体の設定値・�
 | MAX_LOGIN_ATTEMPTS | 最大ログイン試行回数 | 5 | INTEGER | SECURITY | 3 | ^[1-9][0-9]*$ | アカウントロックまでの最大ログイン失敗回数 | False | False | True | False | ALL | True | admin | セキュリティ強化のため | 1 | True |
 | SESSION_TIMEOUT_MINUTES | セッションタイムアウト時間（分） | 30 | INTEGER | SECURITY | 60 | ^[1-9][0-9]*$ | ユーザーセッションの自動タイムアウト時間 | False | False | True | False | ALL | True | admin | セキュリティポリシー変更 | 2 | True |
 | SKILL_EVALUATION_PERIOD_MONTHS | スキル評価期間（月） | 6 | INTEGER | BUSINESS | 12 | ^[1-9][0-9]*$ | スキル評価の実施間隔 | False | False | True | False | ALL | True | hr_admin | 評価頻度の見直し | 10 | True |
+| EMAIL_SMTP_PASSWORD | SMTP認証パスワード | encrypted_password_value | ENCRYPTED | INTEGRATION | None | None | メール送信用SMTP認証パスワード | True | True | False | True | PROD | False | system | 初期設定 | 100 | True |
 
 ## 特記事項
 

@@ -7,7 +7,7 @@
 | テーブル名 | MST_TrainingProgram |
 | 論理名 | 研修プログラム |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_TrainingProgram（研修プログラム）は、組織で提供される研�
 組織全体のスキル向上と人材育成を促進できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | training_program_id | 研修プログラムID | VARCHAR | 50 | ○ |  | 研修プログラムを一意に識別するID |
 | program_code | プログラムコード | VARCHAR | 20 | ○ |  | 研修プログラムの識別コード |
 | program_name | プログラム名 | VARCHAR | 200 | ○ |  | 研修プログラムの名称 |
@@ -74,10 +72,9 @@ MST_TrainingProgram（研修プログラム）は、組織で提供される研�
 | version_number | バージョン番号 | VARCHAR | 10 | ○ | 1.0 | プログラムのバージョン番号 |
 | revision_notes | 改訂メモ | TEXT |  | ○ |  | バージョン改訂時のメモ・変更内容 |
 | tags | タグ | TEXT |  | ○ |  | 検索・分類用のタグ（JSON形式） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

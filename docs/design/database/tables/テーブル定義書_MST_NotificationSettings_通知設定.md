@@ -7,7 +7,7 @@
 | テーブル名 | MST_NotificationSettings |
 | 論理名 | 通知設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,13 +23,11 @@ MST_NotificationSettings（通知設定）は、システム全体の通知機�
 このテーブルは、通知・連携管理機能の基盤となる重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
 | setting_key | 設定キー | VARCHAR | 100 | ○ |  | 通知設定の識別キー（例：skill_update_notification、goal_reminder等） |
@@ -43,10 +41,9 @@ MST_NotificationSettings（通知設定）は、システム全体の通知機�
 | channel_config | チャネル設定 | TEXT |  | ○ |  | 通知チャネル固有の設定情報（JSON形式） |
 | is_enabled | 有効フラグ | BOOLEAN |  | ○ | True | 通知設定が有効かどうか |
 | priority_level | 優先度レベル | ENUM |  | ○ | MEDIUM | 通知の優先度（HIGH:高、MEDIUM:中、LOW:低） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

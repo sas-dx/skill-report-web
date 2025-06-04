@@ -7,7 +7,7 @@
 | テーブル名 | HIS_TenantBilling |
 | 論理名 | テナント課金履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,13 +23,11 @@ HIS_TenantBilling（テナント課金履歴）は、マルチテナントシス
 このテーブルは、マルチテナント管理機能において課金・請求業務を支える重要な履歴データです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | 課金対象のテナントID（MST_Tenantへの参照） |
 | billing_period_start | 課金期間開始日 | DATE |  | ○ |  | 課金期間の開始日 |
@@ -54,10 +52,7 @@ HIS_TenantBilling（テナント課金履歴）は、マルチテナントシス
 | paid_date | 支払日 | DATE |  | ○ |  | 実際の支払日 |
 | payment_method | 支払方法 | ENUM |  | ○ |  | 支払方法（CREDIT_CARD:クレジットカード、BANK_TRANSFER:銀行振込、AUTO_DEBIT:自動引落） |
 | notes | 備考 | TEXT |  | ○ |  | 課金に関する備考・特記事項 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

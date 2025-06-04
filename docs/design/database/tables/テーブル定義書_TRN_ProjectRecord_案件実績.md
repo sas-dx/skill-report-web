@@ -7,7 +7,7 @@
 | テーブル名 | TRN_ProjectRecord |
 | 論理名 | 案件実績 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ TRN_ProjectRecord（案件実績）は、社員が参加したプロジェクト
 スキル評価やキャリア開発の判断材料として活用できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | project_record_id | 案件実績ID | VARCHAR | 50 | ○ |  | 案件実績を一意に識別するID |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 参加した社員のID（MST_Employeeへの外部キー） |
 | project_name | プロジェクト名 | VARCHAR | 200 | ○ |  | プロジェクト・案件の名称 |
@@ -55,6 +53,9 @@ TRN_ProjectRecord（案件実績）は、社員が参加したプロジェクト
 | evaluation_comment | 評価コメント | TEXT |  | ○ |  | 上司・PMからの評価コメント |
 | is_confidential | 機密フラグ | BOOLEAN |  | ○ | False | 機密プロジェクトかどうか |
 | is_public_reference | 公開参照可能フラグ | BOOLEAN |  | ○ | False | 社外への参照情報として公開可能か |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |

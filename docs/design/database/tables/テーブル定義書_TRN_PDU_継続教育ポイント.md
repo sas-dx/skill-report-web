@@ -7,7 +7,7 @@
 | テーブル名 | TRN_PDU |
 | 論理名 | 継続教育ポイント |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ TRN_PDU（継続教育ポイント）は、社員が取得した継続教育ポ�
 資格維持や専門性向上の支援を効率的に行うことができます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | pdu_id | PDU ID | VARCHAR | 50 | ○ |  | PDU記録を一意に識別するID |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | PDUを取得した社員のID（MST_Employeeへの外部キー） |
 | certification_id | 資格ID | VARCHAR | 50 | ○ |  | 関連する資格のID（MST_Certificationへの外部キー） |
@@ -64,6 +62,9 @@ TRN_PDU（継続教育ポイント）は、社員が取得した継続教育ポ�
 | recurrence_pattern | 繰り返しパターン | VARCHAR | 50 | ○ |  | 定期活動の繰り返しパターン（WEEKLY、MONTHLY等） |
 | related_training_id | 関連研修ID | VARCHAR | 50 | ○ |  | 関連する研修履歴のID（TRN_TrainingHistoryへの外部キー） |
 | related_project_id | 関連案件ID | VARCHAR | 50 | ○ |  | 関連するプロジェクトのID（TRN_ProjectRecordへの外部キー） |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
