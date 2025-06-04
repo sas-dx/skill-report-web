@@ -3,6 +3,7 @@
 """
 from typing import Dict, List
 from ..core.models import ConsistencyReport, CheckResult, CheckSeverity
+from ..core.check_definitions import get_japanese_check_name
 
 
 class ConsoleReporter:
@@ -80,7 +81,9 @@ class ConsoleReporter:
         if check_stats:
             lines.append(f"\n🔍 チェック別統計:")
             for check_name, stats in check_stats.items():
-                lines.append(f"  {check_name}:")
+                # チェック名を日本語化
+                japanese_name = get_japanese_check_name(check_name)
+                lines.append(f"  {japanese_name}:")
                 for severity, count in stats.items():
                     if severity != 'total' and count > 0:
                         icon = self.icons.get(CheckSeverity(severity), '')

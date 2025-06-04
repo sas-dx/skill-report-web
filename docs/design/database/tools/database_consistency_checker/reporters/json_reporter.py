@@ -4,6 +4,7 @@
 import json
 from typing import Dict, Any
 from ..core.models import ConsistencyReport, CheckResult, CheckSeverity, FixSuggestion
+from ..core.check_definitions import get_japanese_check_name
 
 
 class JsonReporter:
@@ -51,6 +52,7 @@ class JsonReporter:
         """チェック結果を辞書形式に変換"""
         return {
             "check_name": result.check_name,
+            "check_name_japanese": get_japanese_check_name(result.check_name),
             "table_name": result.table_name,
             "severity": result.severity.value,
             "message": result.message,

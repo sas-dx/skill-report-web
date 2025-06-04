@@ -3,6 +3,7 @@
 """
 from typing import Dict, List
 from ..core.models import ConsistencyReport, CheckResult, CheckSeverity
+from ..core.check_definitions import get_japanese_check_name, get_all_check_definitions
 
 
 class MarkdownReporter:
@@ -37,6 +38,9 @@ class MarkdownReporter:
         lines.append(f"**対象テーブル数:** {report.total_tables}")
         lines.append(f"**総チェック数:** {report.total_checks}")
         lines.append("")
+        
+        # チェック内容の解説
+        lines.extend(self._generate_check_explanation_section())
         
         # サマリー
         lines.extend(self._generate_summary_section(report))
@@ -94,6 +98,30 @@ class MarkdownReporter:
         
         return lines
     
+    def _generate_check_explanation_section(self) -> List[str]:
+        """チェック内容の解説セクションを生成"""
+        lines = []
+        
+        lines.append("## 🔍 チェック内容について")
+        lines.append("")
+        lines.append("このレポートでは、データベース設計の整合性を以下の4つの観点からチェックしています。")
+        lines.append("")
+        
+        # 各チェックの詳細説明
+        check_definitions = get_all_check_definitions()
+        
+        for i, (check_key, definition) in enumerate(check_definitions.items(), 1):
+            lines.append(f"### {i}. {definition.japanese_name}")
+            lines.append("")
+            lines.append(f"**目的:** {definition.purpose}")
+            lines.append("")
+            lines.append(f"**チェック内容:** {definition.check_content}")
+            lines.append("")
+            lines.append(f"**検出する問題:** {definition.detected_issues}")
+            lines.append("")
+        
+        return lines
+    
     def _generate_check_statistics_section(self, report: ConsistencyReport) -> List[str]:
         """チェック別統計セクションを生成"""
         lines = []
@@ -118,7 +146,9 @@ class MarkdownReporter:
             info = stats.get('info', 0)
             total = stats.get('total', 0)
             
-            lines.append(f"| {check_name} | {success} | {warning} | {error} | {info} | {total} |")
+            # チェック名を日本語化
+            japanese_name = get_japanese_check_name(check_name)
+            lines.append(f"| {japanese_name} | {success} | {warning} | {error} | {info} | {total} |")
         
         lines.append("")
         
@@ -163,7 +193,8 @@ class MarkdownReporter:
             
             for result in results:
                 table_name = result.table_name or "-"
-                check_name = result.check_name
+                # チェック名を日本語化
+                check_name = get_japanese_check_name(result.check_name)
                 message = self._escape_markdown(result.message)
                 details = self._format_details(result.details)
                 
