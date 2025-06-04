@@ -8,5 +8,5 @@ src/app/login/**
 .clinerules/.archived/
 .clinerules/.archived/**
 
-
-
+# DDL template file exclusion
+docs/design/database/ddl/------------.sql
