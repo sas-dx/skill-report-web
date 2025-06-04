@@ -44,11 +44,41 @@ table_generator/
     └── yaml_loader.py       # YAML読み込み
 ```
 
+## 🛠️ 事前準備・インストール
+
+### Python環境要件
+- **Python 3.7以上**が必要です
+- **pip**が利用可能であることを確認してください
+
+### 環境確認
+```bash
+# Python環境確認
+python3 --version
+
+# pipの確認・更新
+pip3 --version
+pip3 install --upgrade pip
+```
+
+### 必要なPythonパッケージ
+```bash
+# 必要パッケージのインストール
+pip3 install PyYAML
+
+# インストール確認
+python3 -c "import yaml; print('PyYAML installed successfully')"
+```
+
+### 動作環境
+- **WSL:Ubuntu環境**での動作確認済み
+- **Git bash環境**でのコマンド実行推奨
+- **標準ライブラリ**：pathlib、datetime、typing（Python 3.7以降で利用可能）
+
 ## 🔧 使用方法
 
 ### 基本的な使用
 ```bash
-cd /home/kurosawa/skill-report-web/docs/design/database/tools
+cd ~/skill-report-web/docs/design/database/tools
 python3 -m table_generator
 ```
 
@@ -72,7 +102,7 @@ python3 -m table_generator --table MST_Role,MST_Permission
 python3 -m table_generator --output-dir custom/
 
 # ベースディレクトリ指定
-python3 -m table_generator --base-dir /path/to/database/
+python3 -m table_generator --base-dir ~/custom/database/
 
 # ドライラン（ファイルを実際には作成しない）
 python3 -m table_generator --dry-run
@@ -212,16 +242,37 @@ class CustomGenerator:
 
 ## 🚨 注意事項
 
-### 実行環境
-- Python 3.7以上
-- WSL:Ubuntu環境での動作確認済み
-- Git bash環境でのコマンド実行推奨
+### 実行前チェック
+```bash
+# 作業ディレクトリの確認
+pwd
+# ~/skill-report-web/docs/design/database/tools であることを確認
+
+# 必要ファイルの存在確認
+ls -la ../table-details/
+ls -la table_generator/
+```
 
 ### ファイル依存関係
-- YAMLファイルの形式は既存の`table-details/*.yaml`に準拠
-- 共通カラム定義は`common_columns.py`で管理
-- 出力先ディレクトリは自動作成されます
+- **YAMLファイル**：既存の`../table-details/*.yaml`形式に準拠
+- **共通カラム定義**：`table_generator/generators/common_columns.py`で管理
+- **出力先ディレクトリ**：自動作成されます（../tables/, ../ddl/, ../data/）
 
-### パフォーマンス
-- 大量テーブル処理時は`--verbose`オプションで進捗確認推奨
-- `--dry-run`オプションで事前確認を推奨
+### パフォーマンス・トラブルシューティング
+- **大量テーブル処理時**：`--verbose`オプションで進捗確認推奨
+- **事前確認**：`--dry-run`オプションで実行内容を確認
+- **エラー時**：`--verbose`オプションで詳細ログを確認
+- **権限エラー**：出力先ディレクトリの書き込み権限を確認
+
+### よくある問題と解決方法
+```bash
+# ModuleNotFoundError: No module named 'yaml'
+pip3 install PyYAML
+
+# Permission denied エラー
+chmod +x table_generator/__main__.py
+
+# パスが見つからないエラー
+cd ~/skill-report-web/docs/design/database/tools
+pwd  # 現在位置を確認
+```
