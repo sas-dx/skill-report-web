@@ -19,12 +19,12 @@
 ### 現在実装済み
 - ✅ テーブル存在整合性チェック
 - ✅ 孤立ファイル検出
+- ✅ カラム定義整合性チェック
+- ✅ 外部キー整合性チェック
 - ✅ コンソール/Markdown/JSON形式でのレポート出力
 - ✅ 詳細ログ機能
 
 ### 将来実装予定
-- 🔄 カラム定義整合性チェック
-- 🔄 外部キー整合性チェック
 - 🔄 データ型整合性チェック
 - 🔄 制約整合性チェック
 - 🔄 修正提案機能
@@ -73,8 +73,14 @@ python run_check.py --checks table_existence
 # 孤立ファイルチェックのみ
 python run_check.py --checks orphaned_files
 
+# カラム整合性チェックのみ
+python run_check.py --checks column_consistency
+
+# 外部キー整合性チェックのみ
+python run_check.py --checks foreign_key_consistency
+
 # 複数のチェックを指定
-python run_check.py --checks table_existence orphaned_files
+python run_check.py --checks table_existence column_consistency foreign_key_consistency
 ```
 
 ### 利用可能なオプション

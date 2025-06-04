@@ -8,6 +8,8 @@ from ..core.models import CheckResult, CheckConfig, ConsistencyReport, CheckSeve
 from ..core.config import Config
 from ..core.logger import ConsistencyLogger
 from .table_existence_checker import TableExistenceChecker
+from .column_consistency_checker import ColumnConsistencyChecker
+from .foreign_key_checker import ForeignKeyChecker
 
 
 class ConsistencyChecker:
@@ -27,6 +29,8 @@ class ConsistencyChecker:
         
         # 各チェッカーの初期化
         self.table_existence_checker = TableExistenceChecker(self.logger)
+        self.column_consistency_checker = ColumnConsistencyChecker(self.logger)
+        self.foreign_key_checker = ForeignKeyChecker(self.logger)
     
     def run_all_checks(self) -> ConsistencyReport:
         """
@@ -72,6 +76,16 @@ class ConsistencyChecker:
         orphan_results = self._create_orphan_results(orphaned_files)
         all_results.extend(orphan_results)
         
+        # 3. カラム整合性チェック
+        self.logger.section("3. カラム定義整合性チェック")
+        column_results = self._run_column_consistency_checks()
+        all_results.extend(column_results)
+        
+        # 4. 外部キー整合性チェック
+        self.logger.section("4. 外部キー整合性チェック")
+        fk_results = self._run_foreign_key_checks()
+        all_results.extend(fk_results)
+        
         # レポート作成
         report = self._create_report(all_results)
         
@@ -114,6 +128,14 @@ class ConsistencyChecker:
             )
             orphan_results = self._create_orphan_results(orphaned_files)
             all_results.extend(orphan_results)
+        
+        if "column_consistency" in check_names:
+            column_results = self._run_column_consistency_checks()
+            all_results.extend(column_results)
+        
+        if "foreign_key_consistency" in check_names:
+            fk_results = self._run_foreign_key_checks()
+            all_results.extend(fk_results)
         
         return self._create_report(all_results)
     
@@ -188,9 +210,9 @@ class ConsistencyChecker:
         return [
             "table_existence",
             "orphaned_files",
+            "column_consistency",
+            "foreign_key_consistency",
             # 将来的に追加予定
-            # "column_consistency",
-            # "foreign_key_consistency",
             # "data_type_consistency",
             # "constraint_consistency"
         ]
@@ -269,3 +291,87 @@ class ConsistencyChecker:
             フィルタされたチェック結果
         """
         return [r for r in results if r.table_name in table_names]
+    
+    def _run_column_consistency_checks(self) -> List[CheckResult]:
+        """カラム整合性チェックを実行"""
+        results = []
+        
+        # テーブル一覧から対象テーブルを取得
+        from ..parsers.table_list_parser import TableListParser
+        table_parser = TableListParser(self.logger)
+        tables = table_parser.parse_file(self.config.table_list_file)
+        
+        if not tables:
+            self.logger.warning("テーブル一覧の解析に失敗しました")
+            return results
+        
+        # 対象テーブルのフィルタリング
+        target_tables = self.check_config.target_tables
+        if target_tables:
+            tables = [t for t in tables if t.table_name in target_tables]
+        
+        # 各テーブルのカラム整合性をチェック
+        for table in tables:
+            ddl_path = self.config.ddl_dir / f"{table.table_name}.sql"
+            yaml_path = self.config.table_details_dir / f"{table.table_name}_details.yaml"
+            
+            if ddl_path.exists() and yaml_path.exists():
+                table_results = self.column_consistency_checker.check_table_column_consistency(
+                    ddl_path, yaml_path
+                )
+                results.extend(table_results)
+                
+                # 進捗表示
+                if table_results:
+                    error_count = sum(1 for r in table_results if r.severity == CheckSeverity.ERROR)
+                    warning_count = sum(1 for r in table_results if r.severity == CheckSeverity.WARNING)
+                    
+                    if error_count > 0:
+                        self.logger.error(f"  {table.table_name}: {error_count}個のエラー, {warning_count}個の警告")
+                    elif warning_count > 0:
+                        self.logger.warning(f"  {table.table_name}: {warning_count}個の警告")
+                    else:
+                        self.logger.success(f"  {table.table_name}: OK")
+                else:
+                    self.logger.success(f"  {table.table_name}: OK")
+            else:
+                if not ddl_path.exists():
+                    self.logger.warning(f"  {table.table_name}: DDLファイルが見つかりません")
+                if not yaml_path.exists():
+                    self.logger.warning(f"  {table.table_name}: YAML詳細ファイルが見つかりません")
+        
+        return results
+    
+    def _run_foreign_key_checks(self) -> List[CheckResult]:
+        """外部キー整合性チェックを実行"""
+        results = []
+        
+        # entity_relationships.yamlの存在確認
+        if not self.config.entity_relationships_file.exists():
+            self.logger.warning("entity_relationships.yamlが見つかりません")
+            return results
+        
+        # 外部キー整合性チェックを実行
+        fk_results = self.foreign_key_checker.check_foreign_key_consistency(
+            entity_yaml_path=self.config.entity_relationships_file,
+            ddl_dir=self.config.ddl_dir,
+            yaml_details_dir=self.config.table_details_dir
+        )
+        
+        results.extend(fk_results)
+        
+        # 結果のサマリー表示
+        if fk_results:
+            error_count = sum(1 for r in fk_results if r.severity == CheckSeverity.ERROR)
+            warning_count = sum(1 for r in fk_results if r.severity == CheckSeverity.WARNING)
+            
+            if error_count > 0:
+                self.logger.error(f"  外部キーチェック: {error_count}個のエラー, {warning_count}個の警告")
+            elif warning_count > 0:
+                self.logger.warning(f"  外部キーチェック: {warning_count}個の警告")
+            else:
+                self.logger.success("  外部キーチェック: OK")
+        else:
+            self.logger.success("  外部キーチェック: OK")
+        
+        return results
