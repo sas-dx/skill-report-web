@@ -8,7 +8,5 @@ src/app/login/**
 .clinerules/.archived/
 .clinerules/.archived/**
 
-# Memory bank (読込不要)  
-memory-bank/
-memory-bank/**
+
 
