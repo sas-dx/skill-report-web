@@ -1,0 +1,5 @@
+# Cline ignore patterns
+
+# Login directory exclusion
+src/app/login/
+src/app/login/**
