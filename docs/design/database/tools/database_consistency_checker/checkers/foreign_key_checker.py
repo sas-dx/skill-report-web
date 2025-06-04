@@ -46,7 +46,7 @@ class ForeignKeyChecker:
         entity_data = self.entity_parser.parse_file(entity_yaml_path)
         if not entity_data:
             results.append(CheckResult(
-                check_type="foreign_key_consistency",
+                check_name="foreign_key_consistency",
                 table_name="",
                 severity=CheckSeverity.ERROR,
                 message=f"entity_relationships.yamlの解析に失敗: {entity_yaml_path}",
@@ -79,7 +79,7 @@ class ForeignKeyChecker:
         
         if not ddl_path.exists():
             results.append(CheckResult(
-                check_type="foreign_key_consistency",
+                check_name="foreign_key_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"DDLファイルが見つかりません: {ddl_path}",
@@ -89,7 +89,7 @@ class ForeignKeyChecker:
         
         if not yaml_path.exists():
             results.append(CheckResult(
-                check_type="foreign_key_consistency",
+                check_name="foreign_key_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"YAML詳細ファイルが見つかりません: {yaml_path}",
@@ -247,7 +247,7 @@ class ForeignKeyChecker:
             # DDLに存在するかチェック
             if fk_key not in ddl_fk_map:
                 results.append(CheckResult(
-                    check_type="foreign_key_consistency",
+                    check_name="foreign_key_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"外部キー {list(source_cols)} -> {target_table}.{list(target_cols)} がDDLに存在しません",
@@ -262,7 +262,7 @@ class ForeignKeyChecker:
             # YAMLに存在するかチェック
             if fk_key not in yaml_fk_map:
                 results.append(CheckResult(
-                    check_type="foreign_key_consistency",
+                    check_name="foreign_key_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"外部キー {list(source_cols)} -> {target_table}.{list(target_cols)} がYAMLに存在しません",
@@ -279,7 +279,7 @@ class ForeignKeyChecker:
         for fk_key in ddl_only_keys:
             source_cols, target_table, target_cols = fk_key
             results.append(CheckResult(
-                check_type="foreign_key_consistency",
+                check_name="foreign_key_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"外部キー {list(source_cols)} -> {target_table}.{list(target_cols)} がDDLにのみ存在します",
@@ -297,7 +297,7 @@ class ForeignKeyChecker:
         for fk_key in yaml_only_keys:
             source_cols, target_table, target_cols = fk_key
             results.append(CheckResult(
-                check_type="foreign_key_consistency",
+                check_name="foreign_key_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"外部キー {list(source_cols)} -> {target_table}.{list(target_cols)} がYAMLにのみ存在します",
@@ -319,7 +319,7 @@ class ForeignKeyChecker:
             # ON UPDATE設定の比較
             if ddl_fk.get('on_update', 'RESTRICT') != yaml_fk.get('on_update', 'RESTRICT'):
                 results.append(CheckResult(
-                    check_type="foreign_key_consistency",
+                    check_name="foreign_key_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.WARNING,
                     message=f"外部キー {ddl_fk['name']} のON UPDATE設定が不一致",
@@ -334,7 +334,7 @@ class ForeignKeyChecker:
             # ON DELETE設定の比較
             if ddl_fk.get('on_delete', 'RESTRICT') != yaml_fk.get('on_delete', 'RESTRICT'):
                 results.append(CheckResult(
-                    check_type="foreign_key_consistency",
+                    check_name="foreign_key_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.WARNING,
                     message=f"外部キー {ddl_fk['name']} のON DELETE設定が不一致",
@@ -365,7 +365,7 @@ class ForeignKeyChecker:
             target_ddl_path = ddl_dir / f"{target_table}.sql"
             if not target_ddl_path.exists():
                 results.append(CheckResult(
-                    check_type="foreign_key_consistency",
+                    check_name="foreign_key_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"外部キー {fk['name']} の参照先テーブル {target_table} のDDLファイルが存在しません",
@@ -382,7 +382,7 @@ class ForeignKeyChecker:
             target_schema = self.column_parser.parse_ddl_file(target_ddl_path)
             if not target_schema:
                 results.append(CheckResult(
-                    check_type="foreign_key_consistency",
+                    check_name="foreign_key_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"外部キー {fk['name']} の参照先テーブル {target_table} のDDL解析に失敗",
@@ -398,7 +398,7 @@ class ForeignKeyChecker:
             for target_col in target_columns:
                 if target_col not in target_schema.columns:
                     results.append(CheckResult(
-                        check_type="foreign_key_consistency",
+                        check_name="foreign_key_consistency",
                         table_name=table_name,
                         severity=CheckSeverity.ERROR,
                         message=f"外部キー {fk['name']} の参照先カラム {target_table}.{target_col} が存在しません",

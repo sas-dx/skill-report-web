@@ -43,7 +43,7 @@ class ColumnConsistencyChecker:
         
         if not ddl_schema:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=ddl_path.stem,
                 severity=CheckSeverity.ERROR,
                 message=f"DDLファイルの解析に失敗しました: {ddl_path}",
@@ -53,7 +53,7 @@ class ColumnConsistencyChecker:
         
         if not yaml_schema:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=yaml_path.stem,
                 severity=CheckSeverity.ERROR,
                 message=f"YAMLファイルの解析に失敗しました: {yaml_path}",
@@ -92,7 +92,7 @@ class ColumnConsistencyChecker:
         ddl_only = ddl_columns - yaml_columns
         for column_name in ddl_only:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"カラム '{column_name}' がDDLにのみ存在します",
@@ -107,7 +107,7 @@ class ColumnConsistencyChecker:
         yaml_only = yaml_columns - ddl_columns
         for column_name in yaml_only:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message=f"カラム '{column_name}' がYAMLにのみ存在します（DDLに定義が必要）",
@@ -142,7 +142,7 @@ class ColumnConsistencyChecker:
         # データ型の比較
         if ddl_col.data_type.upper() != yaml_col.data_type.upper():
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message=f"カラム '{column_name}' のデータ型が不一致",
@@ -158,7 +158,7 @@ class ColumnConsistencyChecker:
         elif ddl_col.data_type.upper() == yaml_col.data_type.upper():
             if ddl_col.length != yaml_col.length:
                 results.append(CheckResult(
-                    check_type="column_consistency",
+                    check_name="column_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.WARNING,
                     message=f"カラム '{column_name}' の長さが不一致",
@@ -173,7 +173,7 @@ class ColumnConsistencyChecker:
         # NULL制約の比較
         if ddl_col.nullable != yaml_col.nullable:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message=f"カラム '{column_name}' のNULL制約が不一致",
@@ -190,7 +190,7 @@ class ColumnConsistencyChecker:
             # 両方ともNoneでない場合のみチェック
             if ddl_col.default_value is not None or yaml_col.default_value is not None:
                 results.append(CheckResult(
-                    check_type="column_consistency",
+                    check_name="column_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.WARNING,
                     message=f"カラム '{column_name}' のデフォルト値が不一致",
@@ -209,7 +209,7 @@ class ColumnConsistencyChecker:
             
             if ddl_enum_set != yaml_enum_set:
                 results.append(CheckResult(
-                    check_type="column_consistency",
+                    check_name="column_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"カラム '{column_name}' のENUM値が不一致",
@@ -243,7 +243,7 @@ class ColumnConsistencyChecker:
         ddl_only = ddl_index_names - yaml_index_names
         for index_name in ddl_only:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"インデックス '{index_name}' がDDLにのみ存在します",
@@ -258,7 +258,7 @@ class ColumnConsistencyChecker:
         yaml_only = yaml_index_names - ddl_index_names
         for index_name in yaml_only:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message=f"インデックス '{index_name}' がYAMLにのみ存在します（DDLに定義が必要）",
@@ -278,7 +278,7 @@ class ColumnConsistencyChecker:
             # カラム構成の比較
             if ddl_idx['columns'] != yaml_idx['columns']:
                 results.append(CheckResult(
-                    check_type="column_consistency",
+                    check_name="column_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"インデックス '{index_name}' のカラム構成が不一致",
@@ -293,7 +293,7 @@ class ColumnConsistencyChecker:
             # UNIQUE属性の比較
             if ddl_idx.get('unique', False) != yaml_idx.get('unique', False):
                 results.append(CheckResult(
-                    check_type="column_consistency",
+                    check_name="column_consistency",
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message=f"インデックス '{index_name}' のUNIQUE属性が不一致",
@@ -322,7 +322,7 @@ class ColumnConsistencyChecker:
         
         if ddl_pk != yaml_pk:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message="PRIMARY KEY制約が不一致",
@@ -342,7 +342,7 @@ class ColumnConsistencyChecker:
         
         for constraint in ddl_only_unique:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"UNIQUE制約 {list(constraint)} がDDLにのみ存在します",
@@ -354,7 +354,7 @@ class ColumnConsistencyChecker:
         
         for constraint in yaml_only_unique:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message=f"UNIQUE制約 {list(constraint)} がYAMLにのみ存在します（DDLに定義が必要）",
@@ -376,7 +376,7 @@ class ColumnConsistencyChecker:
         
         for check_name in ddl_only_checks:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.WARNING,
                 message=f"CHECK制約 '{check_name}' がDDLにのみ存在します",
@@ -389,7 +389,7 @@ class ColumnConsistencyChecker:
         
         for check_name in yaml_only_checks:
             results.append(CheckResult(
-                check_type="column_consistency",
+                check_name="column_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
                 message=f"CHECK制約 '{check_name}' がYAMLにのみ存在します（DDLに定義が必要）",

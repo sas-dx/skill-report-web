@@ -153,7 +153,7 @@ class ConsistencyLogger:
     def section(self, message: str):
         """セクションログ"""
         if self.enable_color:
-            section_color = self.COLORS['INFO'] + self.COLORS['BOLD']
+            section_color = self.COLORS[CheckSeverity.INFO] + self.COLORS['BOLD']
             reset = self.COLORS['RESET']
             print(f"\n{section_color}--- {message} ---{reset}")
         else:
