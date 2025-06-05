@@ -173,6 +173,7 @@ class TableExistenceChecker:
         }
         
         missing_sources = [source for source, exists in existence_pattern.items() if not exists]
+        present_sources = [source for source, exists in existence_pattern.items() if exists]
         
         if missing_sources:
             if len(missing_sources) == len(existence_pattern):
@@ -182,43 +183,33 @@ class TableExistenceChecker:
                     table_name=table_name,
                     severity=CheckSeverity.ERROR,
                     message="テーブルがどのソースにも存在しません",
-                    details=existence_pattern
+                    details={
+                        'existence_pattern': existence_pattern,
+                        'missing_sources': missing_sources,
+                        'present_sources': present_sources
+                    }
                 ))
-            elif 'table_list' in missing_sources:
-                # テーブル一覧に存在しない
+            else:
+                # 具体的な不整合メッセージを生成
+                detailed_message = self._generate_detailed_existence_message(
+                    table_name, existence_pattern, missing_sources, present_sources
+                )
+                
+                # 重要度を判定
+                severity = self._determine_existence_severity(missing_sources)
+                
                 results.append(CheckResult(
                     check_name="table_existence",
                     table_name=table_name,
-                    severity=CheckSeverity.ERROR,
-                    message="テーブル一覧.mdに定義されていません",
-                    details={'missing_sources': missing_sources}
-                ))
-            elif 'ddl' in missing_sources:
-                # DDLファイルが存在しない
-                results.append(CheckResult(
-                    check_name="table_existence",
-                    table_name=table_name,
-                    severity=CheckSeverity.ERROR,
-                    message="DDLファイルが存在しません",
-                    details={'missing_sources': missing_sources}
-                ))
-            elif 'details' in missing_sources:
-                # 詳細定義ファイルが存在しない
-                results.append(CheckResult(
-                    check_name="table_existence",
-                    table_name=table_name,
-                    severity=CheckSeverity.WARNING,
-                    message="テーブル詳細定義ファイルが存在しません",
-                    details={'missing_sources': missing_sources}
-                ))
-            elif 'entity' in missing_sources:
-                # エンティティ関連定義に存在しない
-                results.append(CheckResult(
-                    check_name="table_existence",
-                    table_name=table_name,
-                    severity=CheckSeverity.WARNING,
-                    message="エンティティ関連定義に存在しません",
-                    details={'missing_sources': missing_sources}
+                    severity=severity,
+                    message=detailed_message,
+                    details={
+                        'existence_pattern': existence_pattern,
+                        'missing_sources': missing_sources,
+                        'present_sources': present_sources,
+                        'expected_files': self._get_expected_files(table_name, missing_sources),
+                        'fix_suggestions': self._get_existence_fix_suggestions(table_name, missing_sources)
+                    }
                 ))
         else:
             # 全てのソースに存在する
@@ -227,10 +218,81 @@ class TableExistenceChecker:
                 table_name=table_name,
                 severity=CheckSeverity.SUCCESS,
                 message="全てのソースに存在します",
-                details=existence_pattern
+                details={
+                    'existence_pattern': existence_pattern,
+                    'all_sources_present': True
+                }
             ))
         
         return results
+    
+    def _generate_detailed_existence_message(
+        self,
+        table_name: str,
+        existence_pattern: Dict[str, bool],
+        missing_sources: List[str],
+        present_sources: List[str]
+    ) -> str:
+        """詳細な存在チェックメッセージを生成"""
+        source_names = {
+            'table_list': 'テーブル一覧.md',
+            'entity': 'entity_relationships.yaml',
+            'ddl': 'DDLファイル',
+            'details': 'テーブル詳細YAML'
+        }
+        
+        # 存在する場所と存在しない場所を明確に示す
+        present_list = [source_names[source] for source in present_sources]
+        missing_list = [source_names[source] for source in missing_sources]
+        
+        message_parts = []
+        
+        if present_list:
+            message_parts.append(f"存在: {', '.join(present_list)}")
+        
+        if missing_list:
+            message_parts.append(f"不足: {', '.join(missing_list)}")
+        
+        return f"テーブル定義の不整合 - {' | '.join(message_parts)}"
+    
+    def _determine_existence_severity(self, missing_sources: List[str]) -> CheckSeverity:
+        """存在チェックの重要度を判定"""
+        # テーブル一覧またはDDLファイルが不足している場合はエラー
+        if 'table_list' in missing_sources or 'ddl' in missing_sources:
+            return CheckSeverity.ERROR
+        
+        # その他の場合は警告
+        return CheckSeverity.WARNING
+    
+    def _get_expected_files(self, table_name: str, missing_sources: List[str]) -> Dict[str, str]:
+        """期待されるファイル名を取得"""
+        expected_files = {}
+        
+        if 'ddl' in missing_sources:
+            expected_files['ddl'] = f"{table_name}.sql"
+        
+        if 'details' in missing_sources:
+            expected_files['details'] = f"{table_name}_details.yaml"
+        
+        return expected_files
+    
+    def _get_existence_fix_suggestions(self, table_name: str, missing_sources: List[str]) -> List[str]:
+        """存在チェックの修正提案を生成"""
+        suggestions = []
+        
+        if 'table_list' in missing_sources:
+            suggestions.append(f"テーブル一覧.mdに'{table_name}'を追加してください")
+        
+        if 'ddl' in missing_sources:
+            suggestions.append(f"DDLファイル'{table_name}.sql'を作成してください")
+        
+        if 'details' in missing_sources:
+            suggestions.append(f"テーブル詳細YAML'{table_name}_details.yaml'を作成してください")
+        
+        if 'entity' in missing_sources:
+            suggestions.append(f"entity_relationships.yamlに'{table_name}'の関連定義を追加してください")
+        
+        return suggestions
     
     def get_orphaned_files(
         self,

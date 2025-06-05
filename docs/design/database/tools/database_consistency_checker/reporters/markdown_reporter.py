@@ -166,39 +166,66 @@ class MarkdownReporter:
             lines.append("")
             return lines
         
-        # 重要度別にグループ化
-        results_by_severity = {}
+        # チェック種別ごとにグループ化
+        results_by_check = {}
         for result in report.results:
-            severity = result.severity
-            if severity not in results_by_severity:
-                results_by_severity[severity] = []
-            results_by_severity[severity].append(result)
+            check_name = result.check_name
+            if check_name not in results_by_check:
+                results_by_check[check_name] = []
+            results_by_check[check_name].append(result)
         
-        # 重要度順に出力
-        severity_order = [CheckSeverity.ERROR, CheckSeverity.WARNING, CheckSeverity.INFO, CheckSeverity.SUCCESS]
+        # チェック種別順に出力
+        check_order = ['table_existence', 'orphaned_files', 'column_consistency', 'foreign_key_consistency']
         
-        for severity in severity_order:
-            if severity not in results_by_severity:
+        for check_name in check_order:
+            if check_name not in results_by_check:
                 continue
             
-            results = results_by_severity[severity]
-            icon = self.icons.get(severity, '')
+            results = results_by_check[check_name]
+            japanese_name = get_japanese_check_name(check_name)
             
-            lines.append(f"### {icon} {severity.value.upper()} ({len(results)}件)")
+            lines.append(f"### 🔍 {japanese_name} ({len(results)}件)")
             lines.append("")
             
-            # テーブル形式で出力
-            lines.append("| テーブル名 | チェック | メッセージ | 詳細 |")
-            lines.append("|------------|----------|------------|------|")
+            # 重要度別にソート
+            severity_order = {
+                CheckSeverity.ERROR: 0,
+                CheckSeverity.WARNING: 1,
+                CheckSeverity.INFO: 2,
+                CheckSeverity.SUCCESS: 3
+            }
             
-            for result in results:
-                table_name = result.table_name or "-"
-                # チェック名を日本語化
-                check_name = get_japanese_check_name(result.check_name)
-                message = self._escape_markdown(result.message)
-                details = self._format_details(result.details)
+            sorted_results = sorted(results, key=lambda r: (severity_order.get(r.severity, 4), r.table_name or ""))
+            
+            for i, result in enumerate(sorted_results, 1):
+                icon = self.icons.get(result.severity, '')
                 
-                lines.append(f"| {table_name} | {check_name} | {message} | {details} |")
+                lines.append(f"#### {i}. {icon} {result.message}")
+                lines.append("")
+                
+                # テーブル名
+                if result.table_name:
+                    lines.append(f"**テーブル:** {result.table_name}")
+                    lines.append("")
+                
+                # ファイル情報
+                if result.file_path:
+                    file_info = f"**ファイル:** `{result.file_path}`"
+                    if result.line_number:
+                        file_info += f" (行 {result.line_number})"
+                    lines.append(file_info)
+                    lines.append("")
+                
+                # 詳細情報
+                if result.details:
+                    lines.append("**詳細情報:**")
+                    lines.extend(self._format_detailed_info(result.details))
+                    lines.append("")
+                
+                # 区切り線（最後の項目以外）
+                if i < len(sorted_results):
+                    lines.append("---")
+                    lines.append("")
             
             lines.append("")
         
@@ -283,16 +310,129 @@ class MarkdownReporter:
         if not details:
             return "-"
         
-        # 簡潔な形式で詳細情報を表示
+        # テーブル存在チェックの詳細情報を特別処理
+        if 'existence_pattern' in details:
+            return self._format_existence_details(details)
+        
+        # その他の詳細情報
         formatted_items = []
         for key, value in details.items():
-            if isinstance(value, (list, dict)):
-                formatted_items.append(f"{key}: {len(value) if isinstance(value, list) else 'object'}")
+            if isinstance(value, list):
+                if value:  # リストが空でない場合
+                    formatted_items.append(f"{key}: {', '.join(map(str, value))}")
+                else:
+                    formatted_items.append(f"{key}: なし")
+            elif isinstance(value, dict):
+                formatted_items.append(f"{key}: {len(value)}項目")
             else:
                 formatted_items.append(f"{key}: {value}")
         
-        result = ", ".join(formatted_items)
+        result = " | ".join(formatted_items)
         return self._escape_markdown(result)
+    
+    def _format_existence_details(self, details: Dict) -> str:
+        """テーブル存在チェックの詳細情報をフォーマット"""
+        existence_pattern = details.get('existence_pattern', {})
+        expected_files = details.get('expected_files', {})
+        fix_suggestions = details.get('fix_suggestions', [])
+        
+        parts = []
+        
+        # 存在パターン
+        pattern_parts = []
+        source_names = {
+            'table_list': 'テーブル一覧',
+            'entity': 'エンティティ',
+            'ddl': 'DDL',
+            'details': '詳細YAML'
+        }
+        
+        for source, exists in existence_pattern.items():
+            status = "○" if exists else "×"
+            name = source_names.get(source, source)
+            pattern_parts.append(f"{name}:{status}")
+        
+        if pattern_parts:
+            parts.append(" ".join(pattern_parts))
+        
+        # 期待ファイル
+        if expected_files:
+            file_list = [f"{key}:{filename}" for key, filename in expected_files.items()]
+            parts.append(f"期待ファイル: {', '.join(file_list)}")
+        
+        result = " | ".join(parts)
+        return self._escape_markdown(result)
+    
+    def _format_detailed_info(self, details: Dict) -> List[str]:
+        """詳細情報を複数行でフォーマット"""
+        lines = []
+        
+        if not details:
+            lines.append("詳細情報はありません。")
+            return lines
+        
+        # テーブル存在チェックの詳細情報
+        if 'existence_pattern' in details:
+            lines.extend(self._format_existence_detailed_info(details))
+        else:
+            # その他の詳細情報
+            for key, value in details.items():
+                if isinstance(value, list):
+                    if value:
+                        lines.append(f"- **{key}:**")
+                        for item in value:
+                            lines.append(f"  - {item}")
+                    else:
+                        lines.append(f"- **{key}:** なし")
+                elif isinstance(value, dict):
+                    if value:
+                        lines.append(f"- **{key}:**")
+                        for sub_key, sub_value in value.items():
+                            lines.append(f"  - {sub_key}: {sub_value}")
+                    else:
+                        lines.append(f"- **{key}:** なし")
+                else:
+                    lines.append(f"- **{key}:** {value}")
+        
+        return lines
+    
+    def _format_existence_detailed_info(self, details: Dict) -> List[str]:
+        """テーブル存在チェックの詳細情報を複数行でフォーマット"""
+        lines = []
+        
+        existence_pattern = details.get('existence_pattern', {})
+        missing_sources = details.get('missing_sources', [])
+        present_sources = details.get('present_sources', [])
+        expected_files = details.get('expected_files', {})
+        fix_suggestions = details.get('fix_suggestions', [])
+        
+        source_names = {
+            'table_list': 'テーブル一覧.md',
+            'entity': 'entity_relationships.yaml',
+            'ddl': 'DDLファイル',
+            'details': 'テーブル詳細YAML'
+        }
+        
+        # 存在状況
+        lines.append("- **存在状況:**")
+        for source, exists in existence_pattern.items():
+            status = "✅ 存在" if exists else "❌ 不足"
+            name = source_names.get(source, source)
+            lines.append(f"  - {name}: {status}")
+        
+        # 期待ファイル
+        if expected_files:
+            lines.append("- **期待されるファイル:**")
+            for file_type, filename in expected_files.items():
+                lines.append(f"  - {filename}")
+        
+        # 修正提案
+        if fix_suggestions:
+            lines.append("- **修正提案:**")
+            for suggestion in fix_suggestions:
+                lines.append(f"  - {suggestion}")
+        
+        return lines
     
     def generate_toc(self, report: ConsistencyReport) -> str:
         """目次を生成"""
