@@ -11,6 +11,7 @@ from .table_existence_checker import TableExistenceChecker
 from .column_consistency_checker import ColumnConsistencyChecker
 from .foreign_key_checker import ForeignKeyChecker
 from .data_type_consistency_checker import DataTypeConsistencyChecker
+from .yaml_format_checker import YamlFormatChecker
 
 
 class ConsistencyChecker:
@@ -33,6 +34,7 @@ class ConsistencyChecker:
         self.column_consistency_checker = ColumnConsistencyChecker(self.logger)
         self.foreign_key_checker = ForeignKeyChecker(self.logger)
         self.data_type_checker = DataTypeConsistencyChecker(Path(config.base_dir))
+        self.yaml_format_checker = YamlFormatChecker(config.base_dir)
     
     def run_all_checks(self) -> ConsistencyReport:
         """
@@ -92,6 +94,10 @@ class ConsistencyChecker:
         data_type_results = self._run_data_type_checks()
         all_results.extend(data_type_results)
         
+        # 6. YAMLフォーマット整合性チェック
+        yaml_format_results = self._run_yaml_format_checks()
+        all_results.extend(yaml_format_results)
+        
         # レポート作成
         report = self._create_report(all_results)
         
@@ -146,6 +152,10 @@ class ConsistencyChecker:
         if "data_type_consistency" in check_names:
             data_type_results = self._run_data_type_checks()
             all_results.extend(data_type_results)
+        
+        if "yaml_format_consistency" in check_names:
+            yaml_format_results = self._run_yaml_format_checks()
+            all_results.extend(yaml_format_results)
         
         return self._create_report(all_results)
     
@@ -227,6 +237,67 @@ class ConsistencyChecker:
         
         return results
     
+    def _run_yaml_format_checks(self) -> List[CheckResult]:
+        """YAMLフォーマット整合性チェックを実行"""
+        results = []
+        
+        # テーブル一覧から対象テーブルを取得
+        from ..parsers.table_list_parser import TableListParser
+        table_parser = TableListParser(self.logger)
+        tables = table_parser.parse_file(self.config.table_list_file)
+        
+        if not tables:
+            self.logger.warning("テーブル一覧の解析に失敗しました")
+            return results
+        
+        # 対象テーブルのフィルタリング
+        target_tables = self.check_config.target_tables
+        if target_tables:
+            table_names = target_tables
+        else:
+            table_names = [t.table_name for t in tables]
+        
+        # YAMLフォーマット整合性チェックを実行
+        self.logger.section("6. YAMLフォーマット整合性チェック")
+        yaml_format_results = self.yaml_format_checker.check_yaml_format_consistency(table_names)
+        
+        # CheckResultに変換
+        for result in yaml_format_results:
+            # YamlFormatCheckerのCheckResultをConsistencyCheckerのCheckResultに変換
+            severity = CheckSeverity.SUCCESS
+            if result.status.name == 'ERROR':
+                severity = CheckSeverity.ERROR
+            elif result.status.name == 'WARNING':
+                severity = CheckSeverity.WARNING
+            elif result.status.name == 'INFO':
+                severity = CheckSeverity.INFO
+            
+            converted_result = CheckResult(
+                check_name="yaml_format_consistency",
+                table_name=result.table_name,
+                severity=severity,
+                message=result.message,
+                details={}
+            )
+            results.append(converted_result)
+        
+        # 結果のサマリー表示
+        if yaml_format_results:
+            error_count = sum(1 for r in yaml_format_results if r.status.name == 'ERROR')
+            warning_count = sum(1 for r in yaml_format_results if r.status.name == 'WARNING')
+            success_count = sum(1 for r in yaml_format_results if r.status.name == 'SUCCESS')
+            
+            if error_count > 0:
+                self.logger.error(f"  YAMLフォーマットチェック: {error_count}個のエラー, {warning_count}個の警告, {success_count}個の成功")
+            elif warning_count > 0:
+                self.logger.warning(f"  YAMLフォーマットチェック: {warning_count}個の警告, {success_count}個の成功")
+            else:
+                self.logger.success(f"  YAMLフォーマットチェック: {success_count}個の成功")
+        else:
+            self.logger.success("  YAMLフォーマットチェック: OK")
+        
+        return results
+    
     def _create_report(self, results: List[CheckResult]) -> ConsistencyReport:
         """整合性チェックレポートを作成"""
         # 統計情報の計算
@@ -271,6 +342,7 @@ class ConsistencyChecker:
             "column_consistency",
             "foreign_key_consistency",
             "data_type_consistency",
+            "yaml_format_consistency",
             # 将来的に追加予定
             # "constraint_consistency"
         ]
