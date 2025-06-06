@@ -4,13 +4,16 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export async function runSampleSeed() {
+  console.log('🌱 データベースの初期データ投入を開始します...')
   // HIS_AuditLog_sample_data.sql
+  console.log('📊 HIS_AuditLogデータを投入中...')
   await prisma.auditLog.createMany({
     data: [
     ],
   })
   
   // HIS_NotificationLog_sample_data.sql
+  console.log('📊 HIS_NotificationLogデータを投入中...')
   await prisma.notificationLog.createMany({
     data: [
       {
@@ -88,6 +91,7 @@ export async function runSampleSeed() {
   })
   
   // HIS_TenantBilling_sample_data.sql
+  console.log('📊 HIS_TenantBillingデータを投入中...')
   await prisma.tenantBilling.createMany({
     data: [
       {
@@ -148,6 +152,7 @@ export async function runSampleSeed() {
   })
   
   // MST_CareerPlan_sample_data.sql
+  console.log('📊 MST_CareerPlanデータを投入中...')
   await prisma.careerPlan.createMany({
     data: [
       {
@@ -244,6 +249,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Certification_sample_data.sql
+  console.log('📊 MST_Certificationデータを投入中...')
   await prisma.certification.createMany({
     data: [
       {
@@ -294,6 +300,7 @@ export async function runSampleSeed() {
   })
   
   // MST_CertificationRequirement_sample_data.sql
+  console.log('📊 MST_CertificationRequirementデータを投入中...')
   await prisma.certificationRequirement.createMany({
     data: [
       {
@@ -394,6 +401,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Department_sample_data.sql
+  console.log('📊 MST_Departmentデータを投入中...')
   await prisma.department.createMany({
     data: [
       {
@@ -444,6 +452,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Employee_sample_data.sql
+  console.log('📊 MST_Employeeデータを投入中...')
   await prisma.employee.createMany({
     data: [
       {
@@ -488,6 +497,7 @@ export async function runSampleSeed() {
   })
   
   // MST_EmployeeDepartment_sample_data.sql
+  console.log('📊 MST_EmployeeDepartmentデータを投入中...')
   await prisma.employeeDepartment.createMany({
     data: [
       {
@@ -548,6 +558,7 @@ export async function runSampleSeed() {
   })
   
   // MST_EmployeeJobType_sample_data.sql
+  console.log('📊 MST_EmployeeJobTypeデータを投入中...')
   await prisma.employeeJobType.createMany({
     data: [
       {
@@ -646,6 +657,7 @@ export async function runSampleSeed() {
   })
   
   // MST_EmployeePosition_sample_data.sql
+  console.log('📊 MST_EmployeePositionデータを投入中...')
   await prisma.employeePosition.createMany({
     data: [
       {
@@ -712,6 +724,7 @@ export async function runSampleSeed() {
   })
   
   // MST_JobType_sample_data.sql
+  console.log('📊 MST_JobTypeデータを投入中...')
   await prisma.jobType.createMany({
     data: [
       {
@@ -781,6 +794,7 @@ export async function runSampleSeed() {
   })
   
   // MST_JobTypeSkill_sample_data.sql
+  console.log('📊 MST_JobTypeSkillデータを投入中...')
   await prisma.jobTypeSkill.createMany({
     data: [
       {
@@ -847,6 +861,7 @@ export async function runSampleSeed() {
   })
   
   // MST_JobTypeSkillGrade_sample_data.sql
+  console.log('📊 MST_JobTypeSkillGradeデータを投入中...')
   await prisma.jobTypeSkillGrade.createMany({
     data: [
       {
@@ -922,6 +937,7 @@ export async function runSampleSeed() {
   })
   
   // MST_NotificationSettings_sample_data.sql
+  console.log('📊 MST_NotificationSettingsデータを投入中...')
   await prisma.notificationSettings.createMany({
     data: [
       {
@@ -964,6 +980,7 @@ export async function runSampleSeed() {
   })
   
   // MST_NotificationTemplate_sample_data.sql
+  console.log('📊 MST_NotificationTemplateデータを投入中...')
   await prisma.notificationTemplate.createMany({
     data: [
       {
@@ -1029,6 +1046,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Permission_sample_data.sql
+  console.log('📊 MST_Permissionデータを投入中...')
   await prisma.permission.createMany({
     data: [
       {
@@ -1104,6 +1122,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Position_sample_data.sql
+  console.log('📊 MST_Positionデータを投入中...')
   await prisma.position.createMany({
     data: [
       {
@@ -1176,12 +1195,14 @@ export async function runSampleSeed() {
   })
   
   // MST_ReportTemplate_sample_data.sql
+  console.log('📊 MST_ReportTemplateデータを投入中...')
   await prisma.reportTemplate.createMany({
     data: [
     ],
   })
   
   // MST_Role_sample_data.sql
+  console.log('📊 MST_Roleデータを投入中...')
   await prisma.role.createMany({
     data: [
       {
@@ -1248,6 +1269,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillCategory_sample_data.sql
+  console.log('📊 MST_SkillCategoryデータを投入中...')
   await prisma.skillCategory.createMany({
     data: [
       {
@@ -1329,6 +1351,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillGrade_sample_data.sql
+  console.log('📊 MST_SkillGradeデータを投入中...')
   await prisma.skillGrade.createMany({
     data: [
       {
@@ -1423,6 +1446,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillGradeRequirement_sample_data.sql
+  console.log('📊 MST_SkillGradeRequirementデータを投入中...')
   await prisma.skillGradeRequirement.createMany({
     data: [
       {
@@ -1501,6 +1525,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillHierarchy_sample_data.sql
+  console.log('📊 MST_SkillHierarchyデータを投入中...')
   await prisma.skillHierarchy.createMany({
     data: [
       {
@@ -1546,6 +1571,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillItem_sample_data.sql
+  console.log('📊 MST_SkillItemデータを投入中...')
   await prisma.skillItem.createMany({
     data: [
       {
@@ -1563,6 +1589,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SystemConfig_sample_data.sql
+  console.log('📊 MST_SystemConfigデータを投入中...')
   await prisma.systemConfig.createMany({
     data: [
       {
@@ -1657,6 +1684,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Tenant_sample_data.sql
+  console.log('📊 MST_Tenantデータを投入中...')
   await prisma.tenant.createMany({
     data: [
       {
@@ -1781,6 +1809,7 @@ export async function runSampleSeed() {
   })
   
   // MST_TenantSettings_sample_data.sql
+  console.log('📊 MST_TenantSettingsデータを投入中...')
   await prisma.tenantSettings.createMany({
     data: [
       {
@@ -1879,6 +1908,7 @@ export async function runSampleSeed() {
   })
   
   // MST_TrainingProgram_sample_data.sql
+  console.log('📊 MST_TrainingProgramデータを投入中...')
   await prisma.trainingProgram.createMany({
     data: [
       {
@@ -1981,6 +2011,7 @@ export async function runSampleSeed() {
   })
   
   // MST_UserAuth_sample_data.sql
+  console.log('📊 MST_UserAuthデータを投入中...')
   await prisma.userAuth.createMany({
     data: [
       {
@@ -2035,6 +2066,7 @@ export async function runSampleSeed() {
   })
   
   // MST_UserRole_sample_data.sql
+  console.log('📊 MST_UserRoleデータを投入中...')
   await prisma.userRole.createMany({
     data: [
       {
@@ -2091,6 +2123,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_BackupHistory_sample_data.sql
+  console.log('📊 SYS_BackupHistoryデータを投入中...')
   await prisma.backupHistory.createMany({
     data: [
       {
@@ -2143,6 +2176,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_IntegrationConfig_sample_data.sql
+  console.log('📊 SYS_IntegrationConfigデータを投入中...')
   await prisma.integrationConfig.createMany({
     data: [
       {
@@ -2212,6 +2246,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_MasterData_sample_data.sql
+  console.log('📊 SYS_MasterDataデータを投入中...')
   await prisma.masterData.createMany({
     data: [
       {
@@ -2298,6 +2333,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_SkillIndex_sample_data.sql
+  console.log('📊 SYS_SkillIndexデータを投入中...')
   await prisma.skillIndex.createMany({
     data: [
       {
@@ -2358,6 +2394,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_SkillMatrix_sample_data.sql
+  console.log('📊 SYS_SkillMatrixデータを投入中...')
   await prisma.skillMatrix.createMany({
     data: [
       {
@@ -2394,12 +2431,14 @@ export async function runSampleSeed() {
   })
   
   // SYS_SystemLog_sample_data.sql
+  console.log('📊 SYS_SystemLogデータを投入中...')
   await prisma.systemLog.createMany({
     data: [
     ],
   })
   
   // SYS_TenantUsage_sample_data.sql
+  console.log('📊 SYS_TenantUsageデータを投入中...')
   await prisma.tenantUsage.createMany({
     data: [
       {
@@ -2456,12 +2495,14 @@ export async function runSampleSeed() {
   })
   
   // SYS_TokenStore_sample_data.sql
+  console.log('📊 SYS_TokenStoreデータを投入中...')
   await prisma.tokenStore.createMany({
     data: [
     ],
   })
   
   // TRN_EmployeeSkillGrade_sample_data.sql
+  console.log('📊 TRN_EmployeeSkillGradeデータを投入中...')
   await prisma.employeeSkillGrade.createMany({
     data: [
       {
@@ -2528,6 +2569,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_GoalProgress_sample_data.sql
+  console.log('📊 TRN_GoalProgressデータを投入中...')
   await prisma.goalProgress.createMany({
     data: [
       {
@@ -2651,12 +2693,14 @@ export async function runSampleSeed() {
   })
   
   // TRN_Notification_sample_data.sql
+  console.log('📊 TRN_Notificationデータを投入中...')
   await prisma.notification.createMany({
     data: [
     ],
   })
   
   // TRN_PDU_sample_data.sql
+  console.log('📊 TRN_PDUデータを投入中...')
   await prisma.pDU.createMany({
     data: [
       {
@@ -2747,6 +2791,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_ProjectRecord_sample_data.sql
+  console.log('📊 TRN_ProjectRecordデータを投入中...')
   await prisma.projectRecord.createMany({
     data: [
       {
@@ -2819,6 +2864,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_SkillEvidence_sample_data.sql
+  console.log('📊 TRN_SkillEvidenceデータを投入中...')
   await prisma.skillEvidence.createMany({
     data: [
       {
@@ -2913,6 +2959,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_SkillRecord_sample_data.sql
+  console.log('📊 TRN_SkillRecordデータを投入中...')
   await prisma.skillRecord.createMany({
     data: [
       {
@@ -2969,6 +3016,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_TrainingHistory_sample_data.sql
+  console.log('📊 TRN_TrainingHistoryデータを投入中...')
   await prisma.trainingHistory.createMany({
     data: [
       {
@@ -3055,6 +3103,7 @@ export async function runSampleSeed() {
   })
   
   // WRK_BatchJobLog_sample_data.sql
+  console.log('📊 WRK_BatchJobLogデータを投入中...')
   await prisma.batchJobLog.createMany({
     data: [
       {
@@ -3123,6 +3172,7 @@ export async function runSampleSeed() {
     ],
   })
   
+  console.log('✅ 初期データ投入が完了しました！')
 }
 
 if (require.main === module) {

@@ -77,6 +77,7 @@ def generate_ts(table: str, columns: List[str], rows: List[List[Optional[str]]])
     """Prisma用のTypeScriptコードを生成"""
     lines: List[str] = []
     model_prop = to_prisma_property(table)
+    lines.append(f"console.log('📊 {table}データを投入中...')")
     lines.append(f"await prisma.{model_prop}.createMany({{")
     lines.append("  data: [")
     for row in rows:
@@ -106,8 +107,10 @@ def main(sql_dir: str, output_file: str) -> None:
         "const prisma = new PrismaClient()",
         "",
         "export async function runSampleSeed() {",
+        "  console.log('🌱 データベースの初期データ投入を開始します...')",
     ]
     footer = [
+        "  console.log('✅ 初期データ投入が完了しました！')",
         "}",
         "",
         "if (require.main === module) {",
