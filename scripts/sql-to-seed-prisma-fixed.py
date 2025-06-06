@@ -18,6 +18,18 @@ from pathlib import Path
 from typing import List, Tuple, Optional
 
 
+def to_model_name(name: str) -> str:
+    """Convert table name like 'MST_Tenant' to Prisma model name 'Tenant'."""
+    name = re.sub(r"^([A-Z]+_)", "", name)
+    return re.sub(r"(?:^|_)([A-Za-z])", lambda m: m.group(1).upper(), name)
+
+
+def to_prisma_property(name: str) -> str:
+    """Return Prisma client property name (camelCase)."""
+    model = to_model_name(name)
+    return model[:1].lower() + model[1:]
+
+
 def parse_sql_file(path: Path) -> Tuple[str, List[str], List[List[Optional[str]]]]:
     """INSERT文を含むSQLファイルを解析する"""
     content = path.read_text(encoding="utf-8")
@@ -63,7 +75,8 @@ def format_value(value: Optional[str]) -> str:
 def generate_ts(table: str, columns: List[str], rows: List[List[Optional[str]]]) -> str:
     """Prisma用のTypeScriptコードを生成"""
     lines: List[str] = []
-    lines.append(f"await prisma.{table.lower()}.createMany({{")
+    model_prop = to_prisma_property(table)
+    lines.append(f"await prisma.{model_prop}.createMany({{")
     lines.append("  data: [")
     for row in rows:
         lines.append("    {")
@@ -105,10 +118,10 @@ def main(sql_dir: str, output_file: str) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     with out_path.open("w", encoding="utf-8") as f:
-        f.write("\n".join(header))
+        f.write("\n".join(header) + "\n")
         for snippet in snippets:
             f.write("  " + snippet.replace("\n", "\n  ") + "\n")
-        f.write("\n".join(footer))
+        f.write("\n".join(footer) + "\n")
 
 
 if __name__ == "__main__":
@@ -116,3 +129,4 @@ if __name__ == "__main__":
         print("Usage: python sql-to-seed-prisma-fixed.py <sql_dir> <output_file>")
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])
+
