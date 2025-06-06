@@ -46,27 +46,10 @@ schema.push('');
   const columns = [];
   let primaryCols = [];
   const pkMatch = content.match(/PRIMARY KEY\s*\(([^)]+)\)/i);
-
-
-  for (const line of lines) {
-    const clean = line.replace(/,\s*$/, '').replace(/COMMENT\s+'.*'/i,'').trim();
-    if (/^(PRIMARY KEY|UNIQUE|KEY|CONSTRAINT)/i.test(clean)) continue;
-    const m = clean.match(/^`?([A-Za-z0-9_]+)`?\s+([A-Za-z]+(?:\([0-9,]+\))?)/);
-    if (!m) continue;
-    const name = m[1];
-    const type = mapType(m[2]);
-    const optional = !/NOT NULL/i.test(clean);
-    const isId = primaryCols.includes(name) || name === 'id';
-    let field = `  ${name} ${type}`;
-    if (optional && !isId) field += '?';
-    if (isId) field += ' @id';
-
-    columns.push(field);
   }
   const modelName = toModelName(tableName);
   schema.push(`model ${modelName} {`);
   schema.push(...columns);
-
   schema.push(`  @@map("${tableName}")`);
   schema.push('}');
   schema.push('');
