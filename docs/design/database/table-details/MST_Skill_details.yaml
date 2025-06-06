@@ -35,6 +35,15 @@ business_columns:
     encrypted: false
     description: スキルの一意識別子
     
+  - name: tenant_id
+    logical: テナントID
+    type: VARCHAR
+    length: 50
+    null: false
+    unique: false
+    encrypted: false
+    description: テナントID（マルチテナント対応）
+    
   - name: skill_name
     logical: スキル名
     type: VARCHAR
@@ -215,6 +224,36 @@ business_columns:
     unique: false
     encrypted: false
     description: スキルの有効終了日
+    
+  - name: created_at
+    logical: 作成日時
+    type: TIMESTAMP
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: レコード作成日時
+    default: CURRENT_TIMESTAMP
+    
+  - name: updated_at
+    logical: 更新日時
+    type: TIMESTAMP
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: レコード更新日時
+    default: CURRENT_TIMESTAMP
+    
+  - name: is_deleted
+    logical: 削除フラグ
+    type: BOOLEAN
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: 論理削除フラグ
+    default: false
 
 # 業務固有インデックス
 business_indexes:
@@ -297,6 +336,14 @@ business_constraints:
 
 # 外部キー関係
 foreign_keys:
+  - name: fk_MST_Skill_tenant
+    column: tenant_id
+    reference_table: MST_Tenant
+    reference_column: tenant_id
+    on_update: CASCADE
+    on_delete: RESTRICT
+    description: MST_Tenantへの外部キー
+    
   - name: fk_MST_Skill_category
     column: category_id
     reference_table: MST_SkillCategory
