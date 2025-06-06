@@ -10,9 +10,26 @@
 2. **entity_relationships.yaml** (手動作成)
 3. **エンティティ関連図.mdl** (手動作成)
 4. **テーブル定義詳細YAML** (手動作成)
-5. **テーブル定義書** (自動作成)
-6. **DDL** (自動作成)
-7. **INSERT文** (自動作成)
+5. **テーブル定義書** (自動作成) ⚠️ **手動編集禁止**
+6. **DDL** (自動作成) ⚠️ **手動編集禁止**
+7. **INSERT文** (自動作成) ⚠️ **手動編集禁止**
+
+## ⚠️ 重要な注意事項
+
+### 手動編集禁止ファイル
+
+以下のファイルは**自動生成されるため、手動での編集は絶対に禁止**です：
+
+- **テーブル定義書** (`tables/テーブル定義書_*.md`)
+- **DDLファイル** (`ddl/*.sql`)
+- **INSERT文** (`data/*_sample_data.sql`)
+
+これらのファイルを手動で編集した場合：
+- 🚨 次回の自動生成時に変更が上書きされます
+- 🚨 データベース設計の整合性が保てなくなります
+- 🚨 チーム開発での混乱を招きます
+
+**変更が必要な場合は、必ず手動作成ファイル（テーブル一覧.md、entity_relationships.yaml、テーブル定義詳細YAML）を修正してから自動生成を実行してください。**
 
 ## 機能
 
@@ -23,6 +40,11 @@
 - ✅ 外部キー整合性チェック
 - ✅ コンソール/Markdown/JSON形式でのレポート出力
 - ✅ 詳細ログ機能
+- ✅ **レポート出力管理機能** (v1.1.0で追加)
+  - タイムスタンプ付きファイル名でユニーク性担保
+  - 最新レポートへの自動リンク作成
+  - 古いレポートの自動クリーンアップ
+  - レポート統計情報の取得
 
 ### 将来実装予定
 - 🔄 データ型整合性チェック
@@ -83,6 +105,28 @@ python run_check.py --checks foreign_key_consistency
 python run_check.py --checks table_existence column_consistency foreign_key_consistency
 ```
 
+### レポート管理機能 (v1.1.0で追加)
+
+```bash
+# レポート出力ディレクトリを指定
+python run_check.py --output-format markdown --report-dir custom_reports
+
+# レポート保持期間を設定（デフォルト: 30日）
+python run_check.py --output-format markdown --keep-reports 7
+
+# 最大レポート数を設定（デフォルト: 100件）
+python run_check.py --output-format markdown --max-reports 50
+
+# カスタムプレフィックスを指定
+python run_check.py --output-format markdown --report-prefix "manual_check"
+
+# 自動クリーンアップを無効化
+python run_check.py --output-format markdown --no-cleanup
+
+# 詳細なレポート統計を表示
+python run_check.py --output-format markdown --verbose
+```
+
 ### 利用可能なオプション
 
 ```bash
@@ -114,9 +158,16 @@ docs/design/database/
 ├── data/
 │   ├── MST_Employee_sample_data.sql
 │   └── ...
-└── details/
-    ├── MST_Employee_details.yaml
-    └── ...
+├── details/
+│   ├── MST_Employee_details.yaml
+│   └── ...
+└── tools/database_consistency_checker/
+    └── reports/                    # レポート出力ディレクトリ (v1.1.0で追加)
+        ├── 20250606_200710_consistency_report.md  # タイムスタンプ付きレポート
+        ├── latest_consistency_report.md           # 最新レポートリンク
+        ├── daily/                                 # 日次レポート用
+        ├── manual/                                # 手動実行レポート用
+        └── archive/                               # アーカイブ用
 ```
 
 ## チェック項目
@@ -176,6 +227,29 @@ docs/design/database/
 ### JSON出力
 
 プログラムで処理しやすい構造化データが出力されます。
+
+### レポート管理機能の出力例 (v1.1.0で追加)
+
+```
+📄 レポートを出力しました: /path/to/reports/20250606_200710_consistency_report.md
+🔗 最新レポートリンク: /path/to/reports/latest_consistency_report.md
+📊 レポート統計: 総数15件, 総サイズ4.2MB
+```
+
+**詳細モード（--verbose）での出力例：**
+```
+📊 レポート統計詳細:
+   - 総レポート数: 15件
+   - 総サイズ: 4.2MB
+   - ディレクトリ別統計:
+     * main: 10件 (2.8MB)
+     * daily: 3件 (0.9MB)
+     * manual: 2件 (0.5MB)
+     * archive: 0件 (0.0MB)
+   - 最古のレポート: 2025-05-15 (22日前)
+   - 最新のレポート: 2025-06-06 (今日)
+⚠️ レポートクリーンアップ: 5件の古いレポートを削除しました
+```
 
 ## 設定
 
@@ -263,6 +337,16 @@ python -m pytest tests/integration/
 このツールは内部使用のために開発されました。
 
 ## 更新履歴
+
+### v1.1.0 (2025-06-06)
+- 🚀 **レポート出力管理機能を追加**
+- タイムスタンプ付きファイル名でユニーク性担保
+- 最新レポートへの自動リンク作成機能
+- 古いレポートの自動クリーンアップ機能
+- レポート統計情報の取得機能
+- 新しいコマンドライン引数の追加（--report-dir, --keep-reports等）
+- ReportManagerクラスによる統合レポート管理
+- reports/ディレクトリ構造の自動作成
 
 ### v1.0.0 (2025-06-04)
 - 初回リリース
