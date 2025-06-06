@@ -6,11 +6,6 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 DDL_DIR="$ROOT_DIR/docs/design/database/ddl"
 OUT_FILE="$ROOT_DIR/src/database/prisma/schema.prisma"
 
-if ! command -v node >/dev/null 2>&1; then
-  echo "node command not found" >&2
-  exit 1
-fi
-
 node "$SCRIPT_DIR/sql-to-prisma.js" "$DDL_DIR" "$OUT_FILE"
 
 echo "Generated Prisma schema at $OUT_FILE"
