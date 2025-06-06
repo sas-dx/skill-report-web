@@ -39,7 +39,7 @@ const processed = new Set();
 
 for (const file of fs.readdirSync(ddlDir)) {
   if (!file.endsWith('.sql')) continue;
-  if (file === 'all_tables.sql') continue;
+  if (file === 'all_tables.sql' || file.startsWith('------------')) continue;
   const content = fs.readFileSync(path.join(ddlDir, file), 'utf8');
   const tableMatch = content.match(/CREATE TABLE\s+(\w+)\s*\(([^;]*)\)/s);
   if (!tableMatch) continue;
@@ -51,7 +51,31 @@ for (const file of fs.readdirSync(ddlDir)) {
   const columns = [];
   let primaryCols = [];
   const pkMatch = content.match(/PRIMARY KEY\s*\(([^)]+)\)/i);
-  if (pkMatch) primaryCols = pkMatch[1].split(/\s*,\s*/);
+  if (pkMatch) primaryCols = pkMatch[1].split(/\s*,\s*/).map(c=>c.replace(/`/g,''));
+
+  const uniqueIndices = [];
+  const uniqRegexes = [
+    /CREATE UNIQUE INDEX\s+\w+\s+ON\s+\w+\s*\(([^)]+)\)/gi,
+    /ALTER TABLE\s+\w+\s+ADD CONSTRAINT\s+\w+\s+UNIQUE\s*\(([^)]+)\)/gi
+  ];
+  for (const re of uniqRegexes) {
+    let m;
+    while ((m = re.exec(content))) {
+      const cols = m[1].split(/\s*,\s*/).map(c=>c.replace(/`/g,''));
+      if (cols[0]) uniqueIndices.push(cols);
+    }
+  }
+
+  if (primaryCols.length === 0 && uniqueIndices.length) {
+    primaryCols = uniqueIndices.shift();
+  }
+
+  const uniqueSingles = [];
+  const uniqueMulti = [];
+  for (const u of uniqueIndices) {
+    if (u.length === 1) uniqueSingles.push(u[0]);
+    else uniqueMulti.push(u);
+  }
 
   for (const line of lines) {
     const clean = line.replace(/,\s*$/, '').replace(/COMMENT\s+'.*'/i,'').trim();
@@ -65,11 +89,18 @@ for (const file of fs.readdirSync(ddlDir)) {
     let field = `  ${name} ${type}`;
     if (optional && !isId) field += '?';
     if (isId) field += ' @id';
+    else if (uniqueSingles.includes(name)) field += ' @unique';
     columns.push(field);
   }
   const modelName = toModelName(tableName);
   schema.push(`model ${modelName} {`);
   schema.push(...columns);
+  if (primaryCols.length > 1) {
+    schema.push(`  @@id([${primaryCols.join(', ')}])`);
+  }
+  for (const u of uniqueMulti) {
+    schema.push(`  @@unique([${u.join(', ')}])`);
+  }
   schema.push(`  @@map("${tableName}")`);
   schema.push('}');
   schema.push('');
