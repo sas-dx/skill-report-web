@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import List, Dict, Optional, Set, Tuple
 from dataclasses import dataclass
 
-from ..core.models import CheckResult, CheckSeverity
-from ..core.logger import ConsistencyLogger
-from ..parsers.column_parser import ColumnParser, TableSchema
-from ..parsers.entity_yaml_parser import EntityYamlParser
+from core.models import CheckResult, CheckSeverity
+from core.logger import ConsistencyLogger
+from parsers.column_parser import ColumnParser, TableSchema
+from parsers.entity_yaml_parser import EntityYamlParser
 
 
 @dataclass

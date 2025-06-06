@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import List, Dict, Optional, Set, Tuple
 from dataclasses import dataclass
 
-from ..core.models import CheckResult, CheckSeverity
-from ..core.logger import ConsistencyLogger
-from ..parsers.column_parser import ColumnParser, TableSchema, ColumnDefinition
+from core.models import CheckResult, CheckSeverity
+from core.logger import ConsistencyLogger
+from parsers.column_parser import ColumnParser, TableSchema, ColumnDefinition
 
 
 @dataclass

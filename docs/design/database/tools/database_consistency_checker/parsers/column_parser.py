@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 
-from ..core.logger import ConsistencyLogger
+from core.logger import ConsistencyLogger
 
 
 @dataclass

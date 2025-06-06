@@ -5,7 +5,7 @@ YAMLフォーマット整合性チェッカー
 import os
 import yaml
 from typing import Dict, List, Any, Optional, Tuple
-from ..core.models import CheckResult, CheckStatus
+from core.models import CheckResult, CheckSeverity
 
 
 class YamlFormatChecker:
@@ -77,9 +77,9 @@ class YamlFormatChecker:
         
         if not os.path.exists(self.table_details_dir):
             return [CheckResult(
+                check_name="yaml_format_consistency",
                 table_name="SYSTEM",
-                check_type="yaml_format_consistency",
-                status=CheckStatus.ERROR,
+                severity=CheckSeverity.ERROR,
                 message=f"テーブル詳細ディレクトリが存在しません: {self.table_details_dir}"
             )]
         
@@ -89,8 +89,8 @@ class YamlFormatChecker:
         if not yaml_files:
             return [CheckResult(
                 table_name="SYSTEM",
-                check_type="yaml_format_consistency",
-                status=CheckStatus.WARNING,
+                check_name="yaml_format_consistency",
+                severity=CheckSeverity.WARNING,
                 message="テーブル詳細YAMLファイルが見つかりません"
             )]
         
@@ -127,8 +127,8 @@ class YamlFormatChecker:
             if not yaml_content:
                 return [CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message="YAMLファイルが空または読み込めません"
                 )]
             
@@ -139,8 +139,8 @@ class YamlFormatChecker:
             if not template_config:
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.WARNING,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.WARNING,
                     message=f"未知のテンプレートパターンです: {template_type}"
                 ))
                 return results
@@ -153,27 +153,27 @@ class YamlFormatChecker:
             results.extend(self._check_enum_values(table_name, yaml_content, template_config))
             
             # 成功メッセージ（エラーがない場合）
-            error_count = sum(1 for r in results if r.status == CheckStatus.ERROR)
+            error_count = sum(1 for r in results if r.severity == CheckSeverity.ERROR)
             if error_count == 0:
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.SUCCESS,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.SUCCESS,
                     message=f"{template_config['name']}準拠OK"
                 ))
                 
         except yaml.YAMLError as e:
             results.append(CheckResult(
                 table_name=table_name,
-                check_type="yaml_format_consistency",
-                status=CheckStatus.ERROR,
+                check_name="yaml_format_consistency",
+                severity=CheckSeverity.ERROR,
                 message=f"YAML解析エラー: {str(e)}"
             ))
         except Exception as e:
             results.append(CheckResult(
                 table_name=table_name,
-                check_type="yaml_format_consistency",
-                status=CheckStatus.ERROR,
+                check_name="yaml_format_consistency",
+                severity=CheckSeverity.ERROR,
                 message=f"ファイル読み込みエラー: {str(e)}"
             ))
         
@@ -216,15 +216,15 @@ class YamlFormatChecker:
             if section not in yaml_content:
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message=f"必須セクション '{section}' が存在しません"
                 ))
             elif yaml_content[section] is None or yaml_content[section] == '':
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.WARNING,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.WARNING,
                     message=f"必須セクション '{section}' が空です"
                 ))
         
@@ -250,8 +250,8 @@ class YamlFormatChecker:
             if section not in yaml_content:
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.WARNING,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.WARNING,
                     message=f"推奨セクション '{section}' が存在しません"
                 ))
         
@@ -305,8 +305,8 @@ class YamlFormatChecker:
         if not isinstance(columns, list):
             return [CheckResult(
                 table_name=table_name,
-                check_type="yaml_format_consistency",
-                status=CheckStatus.ERROR,
+                check_name="yaml_format_consistency",
+                severity=CheckSeverity.ERROR,
                 message="カラム定義は配列である必要があります"
             )]
         
@@ -314,8 +314,8 @@ class YamlFormatChecker:
             if not isinstance(column, dict):
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message=f"カラム定義[{i}]は辞書である必要があります"
                 ))
                 continue
@@ -326,8 +326,8 @@ class YamlFormatChecker:
                 if field not in column:
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.ERROR,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.ERROR,
                         message=f"カラム定義[{i}]: 必須フィールド '{field}' が存在しません"
                     ))
             
@@ -338,8 +338,8 @@ class YamlFormatChecker:
                     column_name = column.get('name', f'カラム[{i}]')
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.WARNING,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.WARNING,
                         message=f"カラム '{column_name}': 推奨フィールド '{field}' が存在しません"
                     ))
         
@@ -361,8 +361,8 @@ class YamlFormatChecker:
         if not isinstance(indexes, list):
             return [CheckResult(
                 table_name=table_name,
-                check_type="yaml_format_consistency",
-                status=CheckStatus.ERROR,
+                check_name="yaml_format_consistency",
+                severity=CheckSeverity.ERROR,
                 message="インデックス定義は配列である必要があります"
             )]
         
@@ -370,8 +370,8 @@ class YamlFormatChecker:
             if not isinstance(index, dict):
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message=f"インデックス定義[{i}]は辞書である必要があります"
                 ))
                 continue
@@ -382,8 +382,8 @@ class YamlFormatChecker:
                 if field not in index:
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.ERROR,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.ERROR,
                         message=f"インデックス定義[{i}]: 必須フィールド '{field}' が存在しません"
                     ))
             
@@ -391,8 +391,8 @@ class YamlFormatChecker:
             if 'columns' in index and not isinstance(index['columns'], list):
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message=f"インデックス定義[{i}]: 'columns'は配列である必要があります"
                 ))
         
@@ -414,8 +414,8 @@ class YamlFormatChecker:
         if not isinstance(constraints, list):
             return [CheckResult(
                 table_name=table_name,
-                check_type="yaml_format_consistency",
-                status=CheckStatus.ERROR,
+                check_name="yaml_format_consistency",
+                severity=CheckSeverity.ERROR,
                 message="制約定義は配列である必要があります"
             )]
         
@@ -423,8 +423,8 @@ class YamlFormatChecker:
             if not isinstance(constraint, dict):
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message=f"制約定義[{i}]は辞書である必要があります"
                 ))
                 continue
@@ -435,8 +435,8 @@ class YamlFormatChecker:
                 if field not in constraint:
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.ERROR,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.ERROR,
                         message=f"制約定義[{i}]: 必須フィールド '{field}' が存在しません"
                     ))
         
@@ -479,8 +479,8 @@ class YamlFormatChecker:
                 if base_type not in self.VALID_DATA_TYPES:
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.ERROR,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.ERROR,
                         message=f"カラム '{column_name}': 無効なデータ型 '{data_type}'"
                     ))
         
@@ -522,22 +522,22 @@ class YamlFormatChecker:
                 if not enum_values:
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.ERROR,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.ERROR,
                         message=f"カラム '{column_name}': ENUM型には 'enum_values' が必要です"
                     ))
                 elif not isinstance(enum_values, list):
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.ERROR,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.ERROR,
                         message=f"カラム '{column_name}': 'enum_values' は配列である必要があります"
                     ))
                 elif len(enum_values) == 0:
                     results.append(CheckResult(
                         table_name=table_name,
-                        check_type="yaml_format_consistency",
-                        status=CheckStatus.WARNING,
+                        check_name="yaml_format_consistency",
+                        severity=CheckSeverity.WARNING,
                         message=f"カラム '{column_name}': 'enum_values' が空です"
                     ))
         
@@ -547,8 +547,8 @@ class YamlFormatChecker:
             if category not in self.VALID_CATEGORIES:
                 results.append(CheckResult(
                     table_name=table_name,
-                    check_type="yaml_format_consistency",
-                    status=CheckStatus.ERROR,
+                    check_name="yaml_format_consistency",
+                    severity=CheckSeverity.ERROR,
                     message=f"無効なカテゴリ値: '{category}'. 有効な値: {', '.join(self.VALID_CATEGORIES)}"
                 ))
         

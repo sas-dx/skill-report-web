@@ -3,11 +3,11 @@
 """
 from pathlib import Path
 from typing import List, Dict, Set, Optional
-from ..core.models import CheckResult, CheckSeverity, TableListEntry
-from ..core.logger import ConsistencyLogger
-from ..parsers.table_list_parser import TableListParser
-from ..parsers.entity_yaml_parser import EntityYamlParser
-from ..parsers.ddl_parser import DDLParser
+from core.models import CheckResult, CheckSeverity, TableListEntry
+from core.logger import ConsistencyLogger
+from parsers.table_list_parser import TableListParser
+from parsers.entity_yaml_parser import EntityYamlParser
+from parsers.ddl_parser import DDLParser
 
 
 class TableExistenceChecker:

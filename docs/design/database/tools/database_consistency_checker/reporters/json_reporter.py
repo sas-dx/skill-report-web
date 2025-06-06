@@ -3,8 +3,8 @@
 """
 import json
 from typing import Dict, Any
-from ..core.models import ConsistencyReport, CheckResult, CheckSeverity, FixSuggestion
-from ..core.check_definitions import get_japanese_check_name
+from core.models import ConsistencyReport, CheckResult, CheckSeverity, FixSuggestion
+from core.check_definitions import get_japanese_check_name
 
 
 class JsonReporter:

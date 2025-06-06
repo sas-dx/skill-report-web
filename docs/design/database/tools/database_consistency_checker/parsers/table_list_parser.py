@@ -4,8 +4,8 @@
 import re
 from pathlib import Path
 from typing import List, Optional
-from ..core.models import TableListEntry
-from ..core.logger import ConsistencyLogger
+from core.models import TableListEntry
+from core.logger import ConsistencyLogger
 
 
 class TableListParser:

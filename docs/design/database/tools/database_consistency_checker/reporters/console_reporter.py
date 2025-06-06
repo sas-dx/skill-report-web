@@ -2,8 +2,8 @@
 データベース整合性チェックツール - コンソールレポーター
 """
 from typing import Dict, List
-from ..core.models import ConsistencyReport, CheckResult, CheckSeverity
-from ..core.check_definitions import get_japanese_check_name
+from core.models import ConsistencyReport, CheckResult, CheckSeverity
+from core.check_definitions import get_japanese_check_name
 
 
 class ConsoleReporter:

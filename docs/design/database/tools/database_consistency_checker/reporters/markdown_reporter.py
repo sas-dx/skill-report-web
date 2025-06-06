@@ -2,8 +2,8 @@
 データベース整合性チェックツール - Markdownレポーター
 """
 from typing import Dict, List
-from ..core.models import ConsistencyReport, CheckResult, CheckSeverity
-from ..core.check_definitions import get_japanese_check_name, get_all_check_definitions
+from core.models import ConsistencyReport, CheckResult, CheckSeverity
+from core.check_definitions import get_japanese_check_name, get_all_check_definitions
 
 
 class MarkdownReporter:

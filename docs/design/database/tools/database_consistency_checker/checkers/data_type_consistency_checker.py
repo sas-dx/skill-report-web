@@ -5,12 +5,12 @@ import logging
 from typing import List, Dict, Optional, Any
 from pathlib import Path
 
-from ..core.models import (
+from core.models import (
     CheckResult, CheckSeverity, ColumnDefinition, 
     DDLTable, TableDefinition
 )
-from ..parsers.ddl_parser import EnhancedDDLParser
-from ..parsers.yaml_parser import EnhancedYAMLParser
+from parsers.ddl_parser import EnhancedDDLParser
+from parsers.yaml_parser import EnhancedYAMLParser
 
 
 class DataTypeConsistencyChecker:

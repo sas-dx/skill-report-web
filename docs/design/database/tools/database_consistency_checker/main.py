@@ -6,13 +6,17 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from .core.config import Config, create_check_config
-from .core.logger import ConsistencyLogger
-from .checkers.consistency_checker import ConsistencyChecker
-from .reporters.console_reporter import ConsoleReporter
-from .reporters.markdown_reporter import MarkdownReporter
-from .reporters.json_reporter import JsonReporter
-from .utils.report_manager import ReportManager
+# 現在のディレクトリをPythonパスに追加
+current_dir = Path(__file__).parent
+sys.path.insert(0, str(current_dir))
+
+from core.config import Config, create_check_config
+from core.logger import ConsistencyLogger
+from checkers.consistency_checker import ConsistencyChecker
+from reporters.console_reporter import ConsoleReporter
+from reporters.markdown_reporter import MarkdownReporter
+from reporters.json_reporter import JsonReporter
+from utils.report_manager import ReportManager
 
 
 def create_argument_parser() -> argparse.ArgumentParser:

@@ -4,14 +4,14 @@
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
-from ..core.models import CheckResult, CheckConfig, ConsistencyReport, CheckSeverity
-from ..core.config import Config
-from ..core.logger import ConsistencyLogger
-from .table_existence_checker import TableExistenceChecker
-from .column_consistency_checker import ColumnConsistencyChecker
-from .foreign_key_checker import ForeignKeyChecker
-from .data_type_consistency_checker import DataTypeConsistencyChecker
-from .yaml_format_checker import YamlFormatChecker
+from core.models import CheckResult, CheckConfig, ConsistencyReport, CheckSeverity
+from core.config import Config
+from core.logger import ConsistencyLogger
+from checkers.table_existence_checker import TableExistenceChecker
+from checkers.column_consistency_checker import ColumnConsistencyChecker
+from checkers.foreign_key_checker import ForeignKeyChecker
+from checkers.data_type_consistency_checker import DataTypeConsistencyChecker
+from checkers.yaml_format_checker import YamlFormatChecker
 
 
 class ConsistencyChecker:
@@ -194,7 +194,7 @@ class ConsistencyChecker:
         results = []
         
         # テーブル一覧から対象テーブルを取得
-        from ..parsers.table_list_parser import TableListParser
+        from parsers.table_list_parser import TableListParser
         table_parser = TableListParser(self.logger)
         tables = table_parser.parse_file(self.config.table_list_file)
         
@@ -242,7 +242,7 @@ class ConsistencyChecker:
         results = []
         
         # テーブル一覧から対象テーブルを取得
-        from ..parsers.table_list_parser import TableListParser
+        from parsers.table_list_parser import TableListParser
         table_parser = TableListParser(self.logger)
         tables = table_parser.parse_file(self.config.table_list_file)
         
@@ -427,7 +427,7 @@ class ConsistencyChecker:
         results = []
         
         # テーブル一覧から対象テーブルを取得
-        from ..parsers.table_list_parser import TableListParser
+        from parsers.table_list_parser import TableListParser
         table_parser = TableListParser(self.logger)
         tables = table_parser.parse_file(self.config.table_list_file)
         
