@@ -6,6 +6,8 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 DDL_DIR="$ROOT_DIR/docs/design/database/ddl"
 OUT_FILE="$ROOT_DIR/src/database/prisma/schema.prisma"
 
+mkdir -p "$(dirname "$OUT_FILE")"
+
 node "$SCRIPT_DIR/sql-to-prisma.js" "$DDL_DIR" "$OUT_FILE"
 
 echo "Generated Prisma schema at $OUT_FILE"
