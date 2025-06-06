@@ -49,12 +49,16 @@
   - 最新レポートへの自動リンク作成
   - 古いレポートの自動クリーンアップ
   - レポート統計情報の取得
+- ✅ **YAMLフォーマット整合性チェック** (v1.3.0で追加)
+  - テーブル定義詳細YAMLファイルの標準テンプレート準拠確認
+  - 必須フィールドの存在チェック
+  - データ型・制約の妥当性検証
+  - YAMLフォーマット・構造の検証
 
 ### 将来実装予定
 
 #### Phase 1（短期：1-2ヶ月）🔥 最高優先度
 - 🔄 **制約整合性チェック** - CHECK制約、UNIQUE制約、PRIMARY KEY制約、インデックス制約の詳細整合性確認
-- 🔄 **YAMLフォーマット整合性チェック** - テーブル定義詳細YAMLファイルの標準テンプレート準拠確認
 - 🔄 **修正提案機能** - 検出された問題に対する具体的な修正方法の提案と自動修正コマンド生成
 
 #### Phase 2（中期：3-4ヶ月）⚡ 高優先度
@@ -117,8 +121,11 @@ python run_check.py --checks foreign_key_consistency
 # データ型整合性チェックのみ
 python run_check.py --checks data_type_consistency
 
+# YAMLフォーマット整合性チェックのみ
+python run_check.py --checks yaml_format_consistency
+
 # 複数のチェックを指定
-python run_check.py --checks table_existence column_consistency foreign_key_consistency data_type_consistency
+python run_check.py --checks table_existence column_consistency foreign_key_consistency data_type_consistency yaml_format_consistency
 ```
 
 ### レポート管理機能 (v1.1.0で追加)
@@ -378,6 +385,16 @@ python -m pytest tests/integration/
 このツールは内部使用のために開発されました。
 
 ## 更新履歴
+
+### v1.3.0 (2025-06-06)
+- 🚀 **YAMLフォーマット整合性チェック機能を追加**
+- テーブル定義詳細YAMLファイルの標準テンプレート準拠確認
+- 必須フィールドの存在チェック（table_name, description, columns等）
+- データ型・制約の妥当性検証
+- YAMLフォーマット・構造の検証
+- YamlFormatCheckerクラスの実装
+- `--checks yaml_format_consistency`オプションの追加
+- 将来実装予定をPhase別に再整理（短期・中期・長期）
 
 ### v1.2.0 (2025-06-06)
 - 🚀 **データ型整合性チェック機能を追加**
