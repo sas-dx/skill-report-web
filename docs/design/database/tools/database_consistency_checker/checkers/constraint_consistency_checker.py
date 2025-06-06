@@ -349,14 +349,34 @@ class ConstraintConsistencyChecker:
         # DDLからインデックスを抽出
         ddl_indexes = {}
         for index in getattr(ddl_schema, 'indexes', []):
-            key = (tuple(sorted(index.columns)), index.unique)
-            ddl_indexes[key] = index
+            # indexが辞書の場合とオブジェクトの場合を処理
+            if isinstance(index, dict):
+                columns = index.get('columns', [])
+                unique = index.get('unique', False)
+                name = index.get('name', '')
+            else:
+                columns = getattr(index, 'columns', [])
+                unique = getattr(index, 'unique', False)
+                name = getattr(index, 'name', '')
+            
+            key = (tuple(sorted(columns)), unique)
+            ddl_indexes[key] = {'name': name, 'columns': columns, 'unique': unique}
         
         # YAMLからインデックスを抽出
         yaml_indexes = {}
         for index in getattr(yaml_schema, 'indexes', []):
-            key = (tuple(sorted(index.columns)), index.unique)
-            yaml_indexes[key] = index
+            # indexが辞書の場合とオブジェクトの場合を処理
+            if isinstance(index, dict):
+                columns = index.get('columns', [])
+                unique = index.get('unique', False)
+                name = index.get('name', '')
+            else:
+                columns = getattr(index, 'columns', [])
+                unique = getattr(index, 'unique', False)
+                name = getattr(index, 'name', '')
+            
+            key = (tuple(sorted(columns)), unique)
+            yaml_indexes[key] = {'name': name, 'columns': columns, 'unique': unique}
         
         # インデックスの一致チェック
         ddl_keys = set(ddl_indexes.keys())
@@ -373,10 +393,10 @@ class ConstraintConsistencyChecker:
                 check_name="constraint_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
-                message=f"インデックスがDDLに不足: {index.name} ({', '.join(columns)})",
+                message=f"インデックスがDDLに不足: {index['name']} ({', '.join(columns)})",
                 details={
                     "issue_type": "missing_index_in_ddl",
-                    "index_name": index.name,
+                    "index_name": index['name'],
                     "index_columns": list(columns),
                     "unique": unique
                 }
@@ -389,10 +409,10 @@ class ConstraintConsistencyChecker:
                 check_name="constraint_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.ERROR,
-                message=f"インデックスがYAMLに不足: {index.name} ({', '.join(columns)})",
+                message=f"インデックスがYAMLに不足: {index['name']} ({', '.join(columns)})",
                 details={
                     "issue_type": "missing_index_in_yaml",
-                    "index_name": index.name,
+                    "index_name": index['name'],
                     "index_columns": list(columns),
                     "unique": unique
                 }
@@ -406,10 +426,10 @@ class ConstraintConsistencyChecker:
                 check_name="constraint_consistency",
                 table_name=table_name,
                 severity=CheckSeverity.SUCCESS,
-                message=f"インデックス整合性OK: {ddl_index.name} ({', '.join(columns)})",
+                message=f"インデックス整合性OK: {ddl_index['name']} ({', '.join(columns)})",
                 details={
                     "issue_type": "index_consistent",
-                    "index_name": ddl_index.name,
+                    "index_name": ddl_index['name'],
                     "index_columns": list(columns),
                     "unique": unique
                 }

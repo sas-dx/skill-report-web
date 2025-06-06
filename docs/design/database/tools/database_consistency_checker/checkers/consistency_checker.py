@@ -211,6 +211,7 @@ class ConsistencyChecker:
         
         # 修正提案コンテキストの作成
         context = FixContext(
+            base_dir=self.config.base_dir,
             ddl_dir=self.config.ddl_dir,
             yaml_details_dir=self.config.table_details_dir,
             table_list_file=self.config.table_list_file,
@@ -361,27 +362,40 @@ class ConsistencyChecker:
         for result in yaml_format_results:
             # YamlFormatCheckerのCheckResultをConsistencyCheckerのCheckResultに変換
             severity = CheckSeverity.SUCCESS
-            if result.status.name == 'ERROR':
-                severity = CheckSeverity.ERROR
-            elif result.status.name == 'WARNING':
-                severity = CheckSeverity.WARNING
-            elif result.status.name == 'INFO':
-                severity = CheckSeverity.INFO
+            if hasattr(result, 'status'):
+                if result.status.name == 'ERROR':
+                    severity = CheckSeverity.ERROR
+                elif result.status.name == 'WARNING':
+                    severity = CheckSeverity.WARNING
+                elif result.status.name == 'INFO':
+                    severity = CheckSeverity.INFO
+            elif hasattr(result, 'severity'):
+                # 既にCheckResultの場合はそのまま使用
+                severity = result.severity
             
             converted_result = CheckResult(
                 check_name="yaml_format_consistency",
-                table_name=result.table_name,
+                table_name=getattr(result, 'table_name', ''),
                 severity=severity,
-                message=result.message,
-                details={}
+                message=getattr(result, 'message', ''),
+                details=getattr(result, 'details', {})
             )
             results.append(converted_result)
         
         # 結果のサマリー表示
         if yaml_format_results:
-            error_count = sum(1 for r in yaml_format_results if r.status.name == 'ERROR')
-            warning_count = sum(1 for r in yaml_format_results if r.status.name == 'WARNING')
-            success_count = sum(1 for r in yaml_format_results if r.status.name == 'SUCCESS')
+            error_count = sum(1 for r in yaml_format_results if getattr(r, 'status', getattr(r, 'severity', None)) and (
+                (hasattr(r, 'status') and r.status.name == 'ERROR') or 
+                (hasattr(r, 'severity') and r.severity == CheckSeverity.ERROR)
+            ))
+            warning_count = sum(1 for r in yaml_format_results if getattr(r, 'status', getattr(r, 'severity', None)) and (
+                (hasattr(r, 'status') and r.status.name == 'WARNING') or 
+                (hasattr(r, 'severity') and r.severity == CheckSeverity.WARNING)
+            ))
+            success_count = sum(1 for r in yaml_format_results if getattr(r, 'status', getattr(r, 'severity', None)) and (
+                (hasattr(r, 'status') and r.status.name == 'SUCCESS') or 
+                (hasattr(r, 'severity') and r.severity == CheckSeverity.SUCCESS)
+            ))
             
             if error_count > 0:
                 self.logger.error(f"  YAMLフォーマットチェック: {error_count}個のエラー, {warning_count}個の警告, {success_count}個の成功")
