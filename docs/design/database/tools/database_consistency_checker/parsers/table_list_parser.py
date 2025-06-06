@@ -1,9 +1,9 @@
 """
-データベース整合性チェックツール - テーブル一覧.md解析
+テーブル一覧解析機能
 """
 import re
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Optional
 from ..core.models import TableListEntry
 from ..core.logger import ConsistencyLogger
 
@@ -22,31 +22,31 @@ class TableListParser:
     
     def parse_file(self, file_path: Path) -> List[TableListEntry]:
         """
-        テーブル一覧.mdファイルを解析
+        テーブル一覧ファイルを解析
         
         Args:
-            file_path: ファイルパス
+            file_path: テーブル一覧ファイルのパス
             
         Returns:
             テーブル一覧エントリのリスト
         """
         if not file_path.exists():
-            self.logger.error(f"テーブル一覧ファイルが見つかりません: {file_path}")
+            self.logger.warning(f"テーブル一覧ファイルが見つかりません: {file_path}")
             return []
         
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            return self._parse_markdown_table(content)
+            return self._parse_content(content)
             
         except Exception as e:
-            self.logger.error(f"テーブル一覧ファイルの読み込みエラー: {e}")
+            self.logger.error(f"テーブル一覧ファイル解析エラー: {file_path} - {e}")
             return []
     
-    def _parse_markdown_table(self, content: str) -> List[TableListEntry]:
+    def _parse_content(self, content: str) -> List[TableListEntry]:
         """
-        Markdownテーブルを解析
+        テーブル一覧の内容を解析
         
         Args:
             content: ファイル内容
@@ -56,35 +56,34 @@ class TableListParser:
         """
         entries = []
         
-        # テーブル行を抽出（|で始まり|で終わる行）
-        table_lines = []
+        # マークダウンテーブルの行を抽出
+        lines = content.split('\n')
         in_table = False
+        header_found = False
         
-        for line in content.split('\n'):
+        for line in lines:
             line = line.strip()
-            if line.startswith('|') and line.endswith('|'):
-                if 'テーブルID' in line or 'table_id' in line.lower():
-                    in_table = True
-                    continue  # ヘッダー行をスキップ
-                elif line.startswith('|---') or line.startswith('|--'):
-                    continue  # 区切り行をスキップ
-                elif in_table:
-                    table_lines.append(line)
-            elif in_table and line == '':
-                # 空行でテーブル終了
-                break
-        
-        # 各行を解析
-        for line_num, line in enumerate(table_lines, 1):
-            try:
+            
+            # テーブルの開始を検出
+            if '|' in line and ('テーブル名' in line or 'Table' in line):
+                in_table = True
+                header_found = True
+                continue
+            
+            # ヘッダー区切り行をスキップ
+            if in_table and header_found and re.match(r'^\|[\s\-\|]+\|$', line):
+                continue
+            
+            # テーブル行を解析
+            if in_table and line.startswith('|') and line.endswith('|'):
                 entry = self._parse_table_row(line)
                 if entry:
                     entries.append(entry)
-            except Exception as e:
-                self.logger.warning(f"テーブル一覧の行解析エラー (行{line_num}): {e}")
-                continue
+            elif in_table and not line:
+                # 空行でテーブル終了
+                in_table = False
+                header_found = False
         
-        self.logger.info(f"テーブル一覧から {len(entries)} 件のテーブルを解析しました")
         return entries
     
     def _parse_table_row(self, line: str) -> Optional[TableListEntry]:
@@ -97,110 +96,123 @@ class TableListParser:
         Returns:
             テーブル一覧エントリ
         """
-        # |で分割してセルを取得
-        cells = [cell.strip() for cell in line.split('|')[1:-1]]  # 最初と最後の空要素を除去
-        
-        if len(cells) < 4:
+        try:
+            # パイプで分割
+            parts = [part.strip() for part in line.split('|')]
+            
+            # 最初と最後の空要素を除去
+            if parts and not parts[0]:
+                parts = parts[1:]
+            if parts and not parts[-1]:
+                parts = parts[:-1]
+            
+            if len(parts) < 2:
+                return None
+            
+            table_name = parts[0].strip()
+            description = parts[1].strip() if len(parts) > 1 else ""
+            
+            # テーブル名が空の場合はスキップ
+            if not table_name or table_name in ['テーブル名', 'Table Name', 'Table']:
+                return None
+            
+            return TableListEntry(
+                table_name=table_name,
+                description=description
+            )
+            
+        except Exception as e:
+            self.logger.warning(f"テーブル行解析エラー: {line} - {e}")
             return None
-        
-        # 基本情報の抽出
-        table_id = cells[0] if len(cells) > 0 else ""
-        category = cells[1] if len(cells) > 1 else ""
-        table_name = cells[2] if len(cells) > 2 else ""
-        logical_name = cells[3] if len(cells) > 3 else ""
-        
-        # 優先度の抽出（7番目のカラム）
-        priority = cells[7] if len(cells) > 7 else "中"
-        
-        # 個人情報含有の判定（16番目のカラム）
-        personal_info = False
-        if len(cells) > 15:
-            personal_info_text = cells[15].lower()
-            personal_info = personal_info_text in ['あり', 'true', 'yes', '○']
-        
-        # 暗号化要否の判定（18番目のカラム）
-        encryption_required = False
-        if len(cells) > 17:
-            encryption_text = cells[17].lower()
-            encryption_required = encryption_text in ['要', 'required', 'true', 'yes', '○']
-        
-        return TableListEntry(
-            table_id=table_id,
-            category=category,
-            table_name=table_name,
-            logical_name=logical_name,
-            priority=priority,
-            personal_info=personal_info,
-            encryption_required=encryption_required
-        )
     
     def get_table_names(self, entries: List[TableListEntry]) -> List[str]:
         """
         テーブル名のリストを取得
         
         Args:
-            entries: テーブル一覧エントリ
+            entries: テーブル一覧エントリのリスト
             
         Returns:
             テーブル名のリスト
         """
         return [entry.table_name for entry in entries if entry.table_name]
     
-    def get_tables_by_category(self, entries: List[TableListEntry]) -> Dict[str, List[str]]:
+    def find_table_by_name(self, entries: List[TableListEntry], table_name: str) -> Optional[TableListEntry]:
         """
-        カテゴリ別のテーブル名を取得
+        テーブル名でエントリを検索
         
         Args:
-            entries: テーブル一覧エントリ
+            entries: テーブル一覧エントリのリスト
+            table_name: 検索するテーブル名
             
         Returns:
-            カテゴリ別テーブル名辞書
+            見つかったテーブル一覧エントリ
         """
-        category_tables = {}
+        for entry in entries:
+            if entry.table_name == table_name:
+                return entry
+        return None
+    
+    def validate_table_names(self, entries: List[TableListEntry]) -> List[str]:
+        """
+        テーブル名の妥当性をチェック
+        
+        Args:
+            entries: テーブル一覧エントリのリスト
+            
+        Returns:
+            無効なテーブル名のリスト
+        """
+        invalid_names = []
         
         for entry in entries:
-            if entry.category not in category_tables:
-                category_tables[entry.category] = []
-            category_tables[entry.category].append(entry.table_name)
+            table_name = entry.table_name
+            
+            # テーブル名の命名規則チェック
+            if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', table_name):
+                invalid_names.append(table_name)
         
-        return category_tables
+        return invalid_names
     
-    def get_high_priority_tables(self, entries: List[TableListEntry]) -> List[str]:
+    def get_statistics(self, entries: List[TableListEntry]) -> dict:
         """
-        高優先度テーブルを取得
+        統計情報を取得
         
         Args:
-            entries: テーブル一覧エントリ
+            entries: テーブル一覧エントリのリスト
             
         Returns:
-            高優先度テーブル名のリスト
+            統計情報
         """
-        high_priority = ['最高', '高', 'high', 'critical']
-        return [
-            entry.table_name for entry in entries 
-            if entry.priority.lower() in [p.lower() for p in high_priority]
-        ]
+        return {
+            'total_tables': len(entries),
+            'tables_with_description': sum(1 for e in entries if e.description),
+            'tables_without_description': sum(1 for e in entries if not e.description),
+            'table_name_prefixes': self._analyze_prefixes(entries)
+        }
     
-    def get_personal_info_tables(self, entries: List[TableListEntry]) -> List[str]:
+    def _analyze_prefixes(self, entries: List[TableListEntry]) -> dict:
         """
-        個人情報含有テーブルを取得
+        テーブル名のプレフィックスを分析
         
         Args:
-            entries: テーブル一覧エントリ
+            entries: テーブル一覧エントリのリスト
             
         Returns:
-            個人情報含有テーブル名のリスト
+            プレフィックス統計
         """
-        return [entry.table_name for entry in entries if entry.personal_info]
-    
-    def get_encryption_required_tables(self, entries: List[TableListEntry]) -> List[str]:
-        """
-        暗号化要求テーブルを取得
+        prefixes = {}
         
-        Args:
-            entries: テーブル一覧エントリ
+        for entry in entries:
+            table_name = entry.table_name
             
-        Returns:
-            暗号化要求テーブル名のリスト
-        """
-        return [entry.table_name for entry in entries if entry.encryption_required]
+            # アンダースコアで分割してプレフィックスを抽出
+            parts = table_name.split('_')
+            if len(parts) > 1:
+                prefix = parts[0]
+                if prefix in prefixes:
+                    prefixes[prefix] += 1
+                else:
+                    prefixes[prefix] = 1
+        
+        return prefixes

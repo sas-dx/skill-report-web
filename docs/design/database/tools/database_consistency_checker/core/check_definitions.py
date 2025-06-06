@@ -42,6 +42,13 @@ CHECK_DEFINITIONS: Dict[str, CheckDefinition] = {
         purpose="エンティティ関連図とDDL間での外部キー定義の整合性確認",
         check_content="外部キー名、参照先テーブル・カラム、ON DELETE/UPDATE設定の一致確認",
         detected_issues="参照先不整合、制約設定の相違、定義漏れ"
+    ),
+    "data_type_consistency": CheckDefinition(
+        japanese_name="データ型整合性",
+        description="DDLとYAMLファイル間でのデータ型定義の詳細整合性確認",
+        purpose="DDLとYAMLファイル間でのデータ型定義の詳細整合性確認",
+        check_content="データ型の詳細比較、長さ・精度・スケールの一致確認、ENUM値の整合性確認",
+        detected_issues="データ型不一致、長さ・精度の相違、ENUM値の不整合"
     )
 }
 

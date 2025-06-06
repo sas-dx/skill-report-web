@@ -10,6 +10,7 @@ from ..core.logger import ConsistencyLogger
 from .table_existence_checker import TableExistenceChecker
 from .column_consistency_checker import ColumnConsistencyChecker
 from .foreign_key_checker import ForeignKeyChecker
+from .data_type_consistency_checker import DataTypeConsistencyChecker
 
 
 class ConsistencyChecker:
@@ -31,6 +32,7 @@ class ConsistencyChecker:
         self.table_existence_checker = TableExistenceChecker(self.logger)
         self.column_consistency_checker = ColumnConsistencyChecker(self.logger)
         self.foreign_key_checker = ForeignKeyChecker(self.logger)
+        self.data_type_checker = DataTypeConsistencyChecker(Path(config.base_dir))
     
     def run_all_checks(self) -> ConsistencyReport:
         """
@@ -86,6 +88,10 @@ class ConsistencyChecker:
         fk_results = self._run_foreign_key_checks()
         all_results.extend(fk_results)
         
+        # 5. データ型整合性チェック
+        data_type_results = self._run_data_type_checks()
+        all_results.extend(data_type_results)
+        
         # レポート作成
         report = self._create_report(all_results)
         
@@ -137,6 +143,10 @@ class ConsistencyChecker:
             fk_results = self._run_foreign_key_checks()
             all_results.extend(fk_results)
         
+        if "data_type_consistency" in check_names:
+            data_type_results = self._run_data_type_checks()
+            all_results.extend(data_type_results)
+        
         return self._create_report(all_results)
     
     def _create_orphan_results(self, orphaned_files: Dict[str, List[str]]) -> List[CheckResult]:
@@ -166,6 +176,54 @@ class ConsistencyChecker:
                 message="孤立ファイルは見つかりませんでした",
                 details={}
             ))
+        
+        return results
+    
+    def _run_data_type_checks(self) -> List[CheckResult]:
+        """データ型整合性チェックを実行"""
+        results = []
+        
+        # テーブル一覧から対象テーブルを取得
+        from ..parsers.table_list_parser import TableListParser
+        table_parser = TableListParser(self.logger)
+        tables = table_parser.parse_file(self.config.table_list_file)
+        
+        if not tables:
+            self.logger.warning("テーブル一覧の解析に失敗しました")
+            return results
+        
+        # 対象テーブルのフィルタリング
+        target_tables = self.check_config.target_tables
+        if target_tables:
+            table_names = target_tables
+        else:
+            table_names = [t.table_name for t in tables]
+        
+        # データ型整合性チェックを実行
+        self.logger.section("5. データ型整合性チェック")
+        data_type_results = self.data_type_checker.check_all_tables(table_names)
+        results.extend(data_type_results)
+        
+        # 結果のサマリー表示
+        if data_type_results:
+            error_count = sum(1 for r in data_type_results if r.severity == CheckSeverity.ERROR)
+            warning_count = sum(1 for r in data_type_results if r.severity == CheckSeverity.WARNING)
+            success_count = sum(1 for r in data_type_results if r.severity == CheckSeverity.SUCCESS)
+            
+            if error_count > 0:
+                self.logger.error(f"  データ型チェック: {error_count}個のエラー, {warning_count}個の警告, {success_count}個の成功")
+            elif warning_count > 0:
+                self.logger.warning(f"  データ型チェック: {warning_count}個の警告, {success_count}個の成功")
+            else:
+                self.logger.success(f"  データ型チェック: {success_count}個の成功")
+            
+            # 統計情報の表示
+            if self.check_config.verbose:
+                stats = self.data_type_checker.get_summary_statistics(data_type_results)
+                self.logger.info(f"    チェック対象テーブル数: {stats['tables_checked']}")
+                self.logger.info(f"    チェック対象カラム数: {stats['columns_checked']}")
+        else:
+            self.logger.success("  データ型チェック: OK")
         
         return results
     
@@ -212,8 +270,8 @@ class ConsistencyChecker:
             "orphaned_files",
             "column_consistency",
             "foreign_key_consistency",
+            "data_type_consistency",
             # 将来的に追加予定
-            # "data_type_consistency",
             # "constraint_consistency"
         ]
     

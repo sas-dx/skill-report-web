@@ -175,7 +175,7 @@ class MarkdownReporter:
             results_by_check[check_name].append(result)
         
         # チェック種別順に出力
-        check_order = ['table_existence', 'orphaned_files', 'column_consistency', 'foreign_key_consistency']
+        check_order = ['table_existence', 'orphaned_files', 'column_consistency', 'foreign_key_consistency', 'data_type_consistency']
         
         for check_name in check_order:
             if check_name not in results_by_check:

@@ -123,6 +123,13 @@ class FixSuggestion:
 
 
 @dataclass
+class TableListEntry:
+    """テーブル一覧エントリ"""
+    table_name: str
+    description: str = ""
+
+
+@dataclass
 class ConsistencyReport:
     """整合性チェックレポート"""
     check_date: str
@@ -131,18 +138,6 @@ class ConsistencyReport:
     results: List[CheckResult] = field(default_factory=list)
     fix_suggestions: List[FixSuggestion] = field(default_factory=list)
     summary: Dict[str, int] = field(default_factory=dict)
-
-
-@dataclass
-class TableListEntry:
-    """テーブル一覧エントリ"""
-    table_id: str
-    category: str
-    table_name: str
-    logical_name: str
-    priority: str
-    personal_info: bool = False
-    encryption_required: bool = False
 
 
 @dataclass
