@@ -10,3 +10,27 @@ src/app/login/**
 
 # DDL template file exclusion
 docs/design/database/ddl/------------.sql
+
+# レポートファイルの除外
+**/reports/
+**/reports/**
+
+# 大容量ドキュメント・ツールファイルの除外
+docs/design/database/tools/
+docs/design/database/tools/**
+docs/design/database/table-details/
+docs/design/database/table-details/**
+
+# テストファイルの除外
+**/test_*.py
+**/test_*.md
+
+# 自動生成ファイルの除外
+src/database/prisma/migrations/
+src/database/prisma/migrations/**
+
+# Node.js関連の除外強化
+node_modules/
+node_modules/**
+.next/
+.next/**
