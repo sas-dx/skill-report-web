@@ -7,7 +7,7 @@
 | テーブル名 | MST_JobTypeSkillGrade |
 | 論理名 | 職種スキルグレード関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -25,13 +25,11 @@ MST_JobTypeSkillGrade（職種スキルグレード関連）は、職種とス�
 人材育成や昇進管理の判断基準として活用できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | job_type_id | 職種ID | VARCHAR | 50 | ○ |  | 職種のID（MST_JobTypeへの外部キー） |
 | skill_grade_id | スキルグレードID | VARCHAR | 50 | ○ |  | スキルグレードのID（MST_SkillGradeへの外部キー） |
 | grade_requirement_type | グレード要件区分 | ENUM |  | ○ | STANDARD | グレード要件区分（MINIMUM:最低要件、STANDARD:標準要件、ADVANCED:上級要件） |
@@ -50,10 +48,9 @@ MST_JobTypeSkillGrade（職種スキルグレード関連）は、職種とス�
 | expiry_date | 有効終了日 | DATE |  | ○ |  | グレード要件の有効終了日（NULL:無期限） |
 | next_grade_path | 次グレードパス | TEXT |  | ○ |  | 次のグレードへの昇進パス（JSON形式） |
 | evaluation_frequency | 評価頻度 | ENUM |  | ○ | ANNUAL | 評価頻度（ANNUAL:年次、SEMI_ANNUAL:半年、QUARTERLY:四半期） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

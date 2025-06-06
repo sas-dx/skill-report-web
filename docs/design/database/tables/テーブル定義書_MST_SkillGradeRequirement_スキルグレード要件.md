@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillGradeRequirement |
 | 論理名 | スキルグレード要件 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -25,13 +25,11 @@ MST_SkillGradeRequirement（スキルグレード要件）は、スキルグレ�
 公正で透明性の高い人材評価・育成システムを構築できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | skill_grade_id | スキルグレードID | VARCHAR | 50 | ○ |  | スキルグレードのID（MST_SkillGradeへの外部キー） |
 | requirement_category | 要件カテゴリ | ENUM |  | ○ |  | 要件カテゴリ（TECHNICAL:技術、BUSINESS:業務、LEADERSHIP:リーダーシップ、COMMUNICATION:コミュニケーション） |
 | requirement_name | 要件名 | VARCHAR | 200 | ○ |  | 要件の名称 |
@@ -51,10 +49,9 @@ MST_SkillGradeRequirement（スキルグレード要件）は、スキルグレ�
 | effective_date | 有効開始日 | DATE |  | ○ |  | 要件の有効開始日 |
 | expiry_date | 有効終了日 | DATE |  | ○ |  | 要件の有効終了日（NULL:無期限） |
 | revision_notes | 改版備考 | TEXT |  | ○ |  | 要件変更時の備考・理由 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

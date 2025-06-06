@@ -7,7 +7,7 @@
 | テーブル名 | MST_ReportTemplate |
 | 論理名 | 帳票テンプレート |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,13 +23,11 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 このテーブルは、帳票・レポート機能において一貫性のある帳票出力を実現する重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
 | template_key | テンプレートキー | VARCHAR | 100 | ○ |  | テンプレートの識別キー（例：skill_report、goal_summary等） |
@@ -48,10 +46,9 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 | is_active | 有効フラグ | BOOLEAN |  | ○ | True | テンプレートが有効かどうか |
 | version | バージョン | VARCHAR | 20 | ○ | 1.0.0 | テンプレートのバージョン番号 |
 | preview_image_url | プレビュー画像URL | VARCHAR | 500 | ○ |  | テンプレートのプレビュー画像URL |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 
@@ -62,11 +59,6 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 | idx_report_template_format | output_format | × | 出力形式別検索用 |
 | idx_report_template_language | language_code | × | 言語別検索用 |
 | idx_report_template_default | is_default, is_active | × | デフォルト・有効テンプレート検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
 
 ## 制約
 

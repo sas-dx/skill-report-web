@@ -594,7 +594,7 @@ ABC/ABM分析の結果、帳票業務のWeb化・AI自動化は
 - [SAS2030経営計画書_DX推進詳細版_v3.0](https://sasbusiness.sharepoint.com/:p:/r/sites/msteams_81e110_093265/Shared%20Documents/%E3%83%9E%E3%83%8D%E3%82%B8%E3%83%A1%E3%83%B3%E3%83%88T/SAS2030%E8%A8%88%E7%94%BB%E7%AD%96%E5%AE%9A/02.%E3%83%AD%E3%83%BC%E3%83%AA%E3%83%B3%E3%82%B0/%E7%AC%AC3.0%E7%89%88/SAS2030%E7%B5%8C%E5%96%B6%E8%A8%88%E7%94%BB%E6%9B%B8_DX%E6%8E%A8%E9%80%B2%E8%A9%B3%E7%B4%B0%E7%89%88_v3.0.pptx?d=we84411bdba944deea167b87ec976cc6b&csf=1&web=1&e=SP3bK9)
 - [DX推進全体定例_20250520](https://sasbusiness.sharepoint.com/:p:/r/sites/msteams_81e110_093265/Shared%20Documents/%E3%83%9E%E3%83%8D%E3%82%B8%E3%83%A1%E3%83%B3%E3%83%88T/DX%E6%96%B9%E9%87%9D/2025%E5%B9%B4%E5%BA%A6/DX%E6%8E%A8%E9%80%B2%E5%85%A8%E4%BD%93%E5%AE%9A%E4%BE%8B_20250520.pptx?d=wf9b6ebf9dba34b57b4989f7a6a8ff5c1&csf=1&web=1&e=K6n760)
 - [【AI推進】2025年度キックオフ](https://sasbusiness.sharepoint.com/:p:/r/sites/msteams_81e110_093265/Shared%20Documents/General/99_%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96/43_AI%E6%8E%A8%E9%80%B2TF/2025%E5%B9%B4%E5%BA%A6/%E3%80%90AI%E6%8E%A8%E9%80%B2%E3%80%912025%E5%B9%B4%E5%BA%A6%E3%82%AD%E3%83%83%E3%82%AF%E3%82%AA%E3%83%95.pptx?d=wae26d43d5b6f48f5a1cc4f1ff9ad3783&csf=1&web=1&e=uWD4kn)
-- [WBSと工数管理](https://sasbusiness.sharepoint.com/:f:/r/sites/msteams_81e110_093265/Shared%20Documents/General/43_AI%E6%8E%A8%E9%80%B2TF/2025%E5%B9%B4%E5%BA%A6/AI%E9%A7%86%E5%8B%95%E9%96%8B%E7%99%BA/%E5%B9%B4%E9%96%93%E3%82%B9%E3%82%AD%E3%83%AB%E5%A0%B1%E5%91%8A%E6%9B%B8WEB%E5%8C%96PJT?csf=1&web=1&e=ZQJDLB)
+- [WBSと工数管理](https://sasbusiness.sharepoint.com/sites/msteams_81e110_093265/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F81e110%5F093265%2FShared%20Documents%2FGeneral%2F2025%2F05%5FAI%2FAI%E9%A7%86%E5%8B%95%E9%96%8B%E7%99%BA%2F%E5%B9%B4%E9%96%93%E3%82%B9%E3%82%AD%E3%83%AB%E5%A0%B1%E5%91%8A%E6%9B%B8WEB%E5%8C%96PJT%2F%E4%BD%9C%E6%A5%AD%E9%80%B2%E6%8D%97%E7%AE%A1%E7%90%86&viewid=df0f7196%2Dd944%2D4129%2Db386%2D2f4e01c0fa9f&csf=1&web=1&e=rAJSZi&CID=12975339%2Dc9d8%2D477e%2Dbd72%2Dc34680a50882&FolderCTID=0x0120008282AA4DD9180248B012611FC6C36411)
 
 #### プロジェクト管理文書
 - **memory-bank/**：AI駆動開発における文脈・設計・進捗情報の管理
@@ -625,7 +625,7 @@ ABC/ABM分析の結果、帳票業務のWeb化・AI自動化は
 2. **レビュー方法**: GitHub Pull Request + 毎週火曜日ステークホルダーミーティング
 3. **バックログ管理**: Backlogでタスク管理を実施（画面ベースでチケット管理）
 4. **変更管理**: ユーザーストーリー単位で Issue を起票し、必要に応じて仕様を更新
-5. **WBSと工数管理**: [SharePointリンク](https://sasbusiness.sharepoint.com/:f:/r/sites/msteams_81e110_093265/Shared%20Documents/General/43_AI%E6%8E%A8%E9%80%B2TF/2025%E5%B9%B4%E5%BA%A6/AI%E9%A7%86%E5%8B%95%E9%96%8B%E7%99%BA/%E5%B9%B4%E9%96%93%E3%82%B9%E3%82%AD%E3%83%AB%E5%A0%B1%E5%91%8A%E6%9B%B8WEB%E5%8C%96PJT?csf=1&web=1&e=ZQJDLB)で管理（各メンバーは週次で工数実績を記録）
+5. **WBSと工数管理**: [SharePointリンク](https://sasbusiness.sharepoint.com/sites/msteams_81e110_093265/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fmsteams%5F81e110%5F093265%2FShared%20Documents%2FGeneral%2F2025%2F05%5FAI%2FAI%E9%A7%86%E5%8B%95%E9%96%8B%E7%99%BA%2F%E5%B9%B4%E9%96%93%E3%82%B9%E3%82%AD%E3%83%AB%E5%A0%B1%E5%91%8A%E6%9B%B8WEB%E5%8C%96PJT%2F%E4%BD%9C%E6%A5%AD%E9%80%B2%E6%8D%97%E7%AE%A1%E7%90%86&viewid=df0f7196%2Dd944%2D4129%2Db386%2D2f4e01c0fa9f&csf=1&web=1&e=rAJSZi&CID=12975339%2Dc9d8%2D477e%2Dbd72%2Dc34680a50882&FolderCTID=0x0120008282AA4DD9180248B012611FC6C36411)で管理（各メンバーは週次で工数実績を記録）
 
 ---
 # memory-bank
@@ -1077,6 +1077,17 @@ skill-report-web/
 ├── .gitignore                    # Git除外設定
 └── README.md                     # このファイル
 ```
+
+
+## Prismaスキーマの生成
+
+`docs/design/database/ddl` 以下の SQL ファイルから Prisma スキーマを生成するには次のスクリプトを実行します。
+
+```bash
+bash scripts/ddl-to-prisma.sh
+```
+
+生成結果は `src/database/prisma/schema.prisma` に出力されます。
 
 ## 連絡先・メンバー
 

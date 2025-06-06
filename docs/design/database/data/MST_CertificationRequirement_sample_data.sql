@@ -1,0 +1,45 @@
+-- MST_CertificationRequirement (資格要件マスタ) サンプルデータ
+-- 生成日時: 2025-06-04 06:57:02
+
+INSERT INTO MST_CertificationRequirement (
+    requirement_id, requirement_name, requirement_description, requirement_type,
+    target_job_type_id, target_position_id, target_skill_grade_id, target_department_id,
+    certification_id, requirement_level, priority_order, alternative_certifications,
+    minimum_experience_years, minimum_skill_level, grace_period_months, renewal_required,
+    renewal_interval_months, exemption_conditions, assessment_criteria, business_justification,
+    compliance_requirement, client_requirement, internal_policy, effective_start_date,
+    effective_end_date, notification_timing, escalation_timing, cost_support_available,
+    cost_support_amount, cost_support_conditions, training_support_available, recommended_training_programs,
+    study_time_allocation, success_rate, average_study_hours, difficulty_rating,
+    active_flag, created_by, approved_by, approval_date,
+    review_date, notes, code, name,
+    description
+) VALUES
+    ('REQ_001', 'システムエンジニア必須資格要件', 'システムエンジニア職種における基本的な資格要件', 'JOB_TYPE',
+     'JOB_001', NULL, NULL, NULL,
+     'CERT_IPA_001', 'MANDATORY', 1, '["基本情報技術者試験", "応用情報技術者試験"]',
+     2, 'INTERMEDIATE', 12, FALSE,
+     NULL, '同等の実務経験5年以上、または関連する上位資格保有', '資格証明書の提出、実務経験の確認', '技術的基礎知識の担保、顧客への信頼性向上',
+     FALSE, TRUE, TRUE, '2024-04-01',
+     NULL, 90, 30, TRUE,
+     50000.0, '初回受験のみ、合格時に全額支給', TRUE, '["TRN_PROG_003", "TRN_PROG_004"]',
+     2.0, 75.5, 150.0, 'MEDIUM',
+     TRUE, 'EMP000010', 'EMP000005', '2024-03-15',
+     '2025-03-31', '新入社員は入社3年以内に取得必須', NULL, NULL,
+     NULL),
+    ('REQ_002', 'プロジェクトマネージャー昇進要件', 'プロジェクトマネージャー役職への昇進に必要な資格要件', 'PROMOTION',
+     NULL, 'POS_004', NULL, NULL,
+     'CERT_PMP_001', 'MANDATORY', 1, '["プロジェクトマネージャ試験", "P2M資格"]',
+     5, 'ADVANCED', 18, TRUE,
+     36, '大規模プロジェクト成功実績3件以上', '資格証明書、プロジェクト実績評価、360度評価', 'プロジェクト管理能力の客観的証明、国際標準への準拠',
+     FALSE, TRUE, TRUE, '2024-01-01',
+     NULL, 180, 60, TRUE,
+     100000.0, '受験料・研修費用全額支給、PDU維持費用も支援', TRUE, '["TRN_PROG_001", "TRN_PROG_005"]',
+     4.0, 65.0, 300.0, 'HARD',
+     TRUE, 'EMP000015', 'EMP000008', '2023-12-01',
+     '2024-12-31', 'PMO部門配属者は優先的に取得支援', NULL, NULL,
+     NULL)
+;
+
+-- 実行確認用クエリ
+-- SELECT * FROM MST_CertificationRequirement ORDER BY created_at DESC;

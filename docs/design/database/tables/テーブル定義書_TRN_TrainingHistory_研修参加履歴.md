@@ -7,7 +7,7 @@
 | テーブル名 | TRN_TrainingHistory |
 | 論理名 | 研修参加履歴 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ TRN_TrainingHistory（研修参加履歴）は、社員が参加した研修・�
 スキル開発やキャリア形成の支援を効率的に行うことができます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | training_history_id | 研修履歴ID | VARCHAR | 50 | ○ |  | 研修参加履歴を一意に識別するID |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 参加した社員のID（MST_Employeeへの外部キー） |
 | training_program_id | 研修プログラムID | VARCHAR | 50 | ○ |  | 研修プログラムのID（MST_TrainingProgramへの外部キー） |
@@ -62,6 +60,9 @@ TRN_TrainingHistory（研修参加履歴）は、社員が参加した研修・�
 | follow_up_date | フォローアップ予定日 | DATE |  | ○ |  | フォローアップの予定日 |
 | manager_approval | 上司承認 | BOOLEAN |  | ○ | False | 上司による参加承認があったかどうか |
 | approved_by | 承認者 | VARCHAR | 50 | ○ |  | 研修参加を承認した上司のID |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |

@@ -7,7 +7,7 @@
 | テーブル名 | HIS_AuditLog |
 | 論理名 | 監査ログ |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,13 +23,11 @@
 90日間のログ保持期間を設けています。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
 | user_id | ユーザーID | VARCHAR | 50 | ○ |  | 操作を実行したユーザーのID |
 | session_id | セッションID | VARCHAR | 100 | ○ |  | 操作時のセッション識別子 |
@@ -49,10 +47,6 @@
 | updated_at | 更新日時 | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | ○ |  | レコード作成者のユーザーID |
 | updated_by | 更新者 | VARCHAR | 50 | ○ |  | レコード更新者のユーザーID |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
 
 ## インデックス
 

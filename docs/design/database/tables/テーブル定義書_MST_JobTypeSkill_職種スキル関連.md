@@ -7,7 +7,7 @@
 | テーブル名 | MST_JobTypeSkill |
 | 論理名 | 職種スキル関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -25,13 +25,11 @@ MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関�
 人材育成や配置転換の判断基準として活用できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | job_type_id | 職種ID | VARCHAR | 50 | ○ |  | 職種のID（MST_JobTypeへの外部キー） |
 | skill_item_id | スキル項目ID | VARCHAR | 50 | ○ |  | スキル項目のID（MST_SkillItemへの外部キー） |
 | required_level | 必要レベル | INTEGER |  | ○ |  | 当該職種で必要なスキルレベル（1-5、5が最高レベル） |
@@ -47,10 +45,9 @@ MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関�
 | expiry_date | 有効終了日 | DATE |  | ○ |  | スキル要件の有効終了日（NULL:無期限） |
 | alternative_skills | 代替スキル | TEXT |  | ○ |  | 代替可能なスキルのリスト（JSON形式） |
 | prerequisite_skills | 前提スキル | TEXT |  | ○ |  | 前提となるスキルのリスト（JSON形式） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SystemLog |
 | 論理名 | システムログ |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -25,12 +25,11 @@ SYS_SystemLog（システムログ）は、アプリケーション全体で発�
 大量データの効率的な管理のため、月次パーティション分割と自動アーカイブ機能を実装しています。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | log_level | ログレベル | ENUM |  | ○ |  | ログレベル（ERROR:エラー、WARN:警告、INFO:情報、DEBUG:デバッグ） |
 | log_category | ログカテゴリ | VARCHAR | 50 | ○ |  | ログのカテゴリ（AUTH:認証、API:API、BATCH:バッチ、SYSTEM:システム） |
 | message | ログメッセージ | TEXT |  | ○ |  | ログメッセージの内容 |
@@ -50,10 +49,8 @@ SYS_SystemLog（システムログ）は、アプリケーション全体で発�
 | component_name | コンポーネント名 | VARCHAR | 100 | ○ |  | ログを出力したコンポーネント名 |
 | thread_name | スレッド名 | VARCHAR | 100 | ○ |  | ログを出力したスレッド名 |
 | server_name | サーバー名 | VARCHAR | 100 | ○ |  | ログを出力したサーバー名 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 

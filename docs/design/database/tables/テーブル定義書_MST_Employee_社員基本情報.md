@@ -7,7 +7,7 @@
 | テーブル名 | MST_Employee |
 | 論理名 | 社員基本情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,13 +23,11 @@ MST_Employee（社員基本情報）は、組織に所属する全社員の基�
 このテーブルは、スキル管理、目標管理、評価管理など、システム全体の基盤となる重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | employee_code | 社員番号 | VARCHAR | 30 | ○ |  | 社員を一意に識別する番号（例：EMP000001、現行システムからの移行番号も対応） |
 | full_name | 氏名 | VARCHAR | 100 | ○ |  | 社員の氏名（個人情報のため暗号化対象） |
 | full_name_kana | 氏名カナ | VARCHAR | 100 | ○ |  | 社員の氏名カナ（個人情報のため暗号化対象） |
@@ -44,10 +42,9 @@ MST_Employee（社員基本情報）は、組織に所属する全社員の基�
 | employment_status | 雇用形態 | ENUM |  | ○ | FULL_TIME | 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員） |
 | manager_id | 上司ID | VARCHAR | 50 | ○ |  | 直属の上司のID（MST_Employeeへの自己参照外部キー） |
 | employee_status | 在籍状況 | ENUM |  | ○ | ACTIVE | 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
 
 ## インデックス
 

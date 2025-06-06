@@ -7,7 +7,7 @@
 | テーブル名 | MST_Permission |
 | 論理名 | 権限情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ MST_Permission（権限情報）は、システム内の権限（許可）を管
 適切なアクセス制御を実現する重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | permission_code | 権限コード | VARCHAR | 50 | ○ |  | 権限を一意に識別するコード（例：PERM_USER_READ） |
 | permission_name | 権限名 | VARCHAR | 100 | ○ |  | 権限の正式名称 |
 | permission_name_short | 権限名略称 | VARCHAR | 50 | ○ |  | 権限の略称・短縮名 |
@@ -52,10 +50,8 @@ MST_Permission（権限情報）は、システム内の権限（許可）を管
 | effective_to | 有効終了日 | DATE |  | ○ |  | 権限の有効終了日 |
 | sort_order | 表示順序 | INT |  | ○ |  | 画面表示時の順序 |
 | description | 権限説明 | TEXT |  | ○ |  | 権限の詳細説明・用途 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 

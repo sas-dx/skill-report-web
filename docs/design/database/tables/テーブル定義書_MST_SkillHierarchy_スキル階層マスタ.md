@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillHierarchy |
 | 論理名 | スキル階層マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ MST_SkillHierarchy（スキル階層マスタ）は、スキル項目間の階�
 社員のスキル管理を効率的に行うことができます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | skill_id | スキルID | VARCHAR | 50 | ○ |  | スキル項目のID（MST_SkillItemへの外部キー） |
 | parent_skill_id | 親スキルID | VARCHAR | 50 | ○ |  | 親スキルのID（MST_SkillHierarchyへの自己参照外部キー、NULLの場合はルートスキル） |
 | hierarchy_level | 階層レベル | INTEGER |  | ○ |  | 階層の深さ（1:大分類、2:中分類、3:小分類、最大5階層まで） |
@@ -40,10 +38,8 @@ MST_SkillHierarchy（スキル階層マスタ）は、スキル項目間の階�
 | skill_category | スキルカテゴリ | ENUM |  | ○ |  | スキルの大分類（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格、SOFT:ソフトスキル） |
 | description | 説明 | TEXT |  | ○ |  | スキル階層の詳細説明 |
 | is_active | 有効フラグ | BOOLEAN |  | ○ | True | 階層が有効かどうか |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 

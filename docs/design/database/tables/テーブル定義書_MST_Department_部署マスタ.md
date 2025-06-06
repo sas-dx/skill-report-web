@@ -7,7 +7,7 @@
 | テーブル名 | MST_Department |
 | 論理名 | 部署マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-01 20:40:25 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -26,13 +26,11 @@ MST_Department（部署マスタ）は、組織の部署・組織単位の階層
 組織運営の様々な業務プロセスの基盤となる重要なマスタデータです。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | department_code | 部署コード | VARCHAR | 20 | ○ |  | 部署を一意に識別するコード（例：DEPT001） |
 | department_name | 部署名 | VARCHAR | 100 | ○ |  | 部署の正式名称 |
 | department_name_short | 部署名略称 | VARCHAR | 50 | ○ |  | 部署の略称・短縮名 |
@@ -51,10 +49,8 @@ MST_Department（部署マスタ）は、組織の部署・組織単位の階層
 | department_status | 部署状態 | ENUM |  | ○ | ACTIVE | 部署の状態（ACTIVE:有効、INACTIVE:無効、MERGED:統合、ABOLISHED:廃止） |
 | sort_order | 表示順序 | INT |  | ○ |  | 組織図等での表示順序 |
 | description | 部署説明 | TEXT |  | ○ |  | 部署の役割・業務内容の説明 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| code | コード | VARCHAR | 20 | × |  | マスタコード |
+| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
 
 ## インデックス
 

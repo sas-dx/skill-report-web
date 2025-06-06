@@ -7,7 +7,7 @@
 | テーブル名 | SYS_BackupHistory |
 | 論理名 | バックアップ履歴 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -23,12 +23,11 @@
 障害時の迅速な復旧とデータ整合性の確保に貢献します。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | backup_id | バックアップID | VARCHAR | 50 | ○ |  | バックアップの一意識別子 |
 | backup_type | バックアップ種別 | ENUM |  | ○ | FULL | バックアップの種別（FULL:フルバックアップ、INCREMENTAL:増分バックアップ、DIFFERENTIAL:差分バックアップ） |
 | backup_scope | バックアップ範囲 | ENUM |  | ○ | DATABASE | バックアップ対象範囲（DATABASE:データベース全体、TABLE:特定テーブル、SCHEMA:特定スキーマ） |
@@ -48,10 +47,8 @@
 | error_message | エラーメッセージ | TEXT |  | ○ |  | バックアップ失敗時のエラーメッセージ |
 | recovery_tested | 復旧テスト済み | BOOLEAN |  | ○ | False | このバックアップからの復旧テストが実施済みかどうか |
 | recovery_test_date | 復旧テスト日 | DATE |  | ○ |  | 復旧テストを実施した日付 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
@@ -62,11 +59,6 @@
 | idx_SYS_BackupHistory_status | backup_status | × | バックアップ状況検索用 |
 | idx_SYS_BackupHistory_type_scope | backup_type, backup_scope | × | バックアップ種別と範囲の複合検索用 |
 | idx_SYS_BackupHistory_expiry_date | expiry_date | × | 有効期限検索用（期限切れバックアップの削除処理用） |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
 
 ## 制約
 

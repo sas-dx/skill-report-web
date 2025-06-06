@@ -1,0 +1,1395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model EmployeeSkillGrade {
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  employee_id String?
+  job_type_id String?
+  skill_grade String?
+  skill_level Int?
+  effective_date DateTime?
+  expiry_date DateTime?
+  evaluation_date DateTime?
+  evaluator_id String?
+  evaluation_comment String?
+  certification_flag Boolean?
+  next_evaluation_date DateTime?
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_EmployeeSkillGrade")
+}
+
+model AuditLog {
+  id String @id
+  user_id String?
+  session_id String?
+  action_type String?
+  target_table String?
+  target_id String?
+  old_values String?
+  new_values String?
+  ip_address String?
+  user_agent String?
+  result_status String?
+  error_message String?
+  execution_time_ms Int?
+  is_deleted Boolean?
+  tenant_id String?
+  created_at DateTime?
+  updated_at DateTime?
+  created_by String?
+  updated_by String?
+  @@map("HIS_AuditLog")
+}
+
+model NotificationLog {
+  id String @id
+  tenant_id String?
+  notification_id String?
+  setting_id String?
+  template_id String?
+  notification_type String?
+  recipient_type String?
+  recipient_address String?
+  subject String?
+  message_body String?
+  message_format String?
+  send_status String?
+  send_attempts Int?
+  max_retry_count Int?
+  scheduled_at DateTime?
+  sent_at DateTime?
+  delivered_at DateTime?
+  opened_at DateTime?
+  response_code String?
+  response_message String?
+  error_details String?
+  integration_config_id String?
+  priority_level String?
+  is_deleted Boolean
+  @@map("HIS_NotificationLog")
+}
+
+model TenantBilling {
+  id String @id
+  tenant_id String?
+  billing_period_start DateTime?
+  billing_period_end DateTime?
+  billing_type String?
+  plan_id String?
+  plan_name String?
+  base_amount Decimal?
+  usage_amount Decimal?
+  additional_amount Decimal?
+  discount_amount Decimal?
+  subtotal_amount Decimal?
+  tax_rate Decimal?
+  tax_amount Decimal?
+  total_amount Decimal?
+  currency_code String?
+  usage_details String?
+  billing_status String?
+  invoice_number String?
+  invoice_date DateTime?
+  due_date DateTime?
+  paid_date DateTime?
+  payment_method String?
+  notes String?
+  is_deleted Boolean
+  @@map("HIS_TenantBilling")
+}
+
+model CareerPlan {
+  career_plan_id String?
+  employee_id String?
+  plan_name String?
+  plan_description String?
+  plan_type String?
+  target_position_id String?
+  target_job_type_id String?
+  target_department_id String?
+  current_level String?
+  target_level String?
+  plan_start_date DateTime?
+  plan_end_date DateTime?
+  milestone_1_date DateTime?
+  milestone_1_description String?
+  milestone_2_date DateTime?
+  milestone_2_description String?
+  milestone_3_date DateTime?
+  milestone_3_description String?
+  required_skills String?
+  required_certifications String?
+  required_experiences String?
+  development_actions String?
+  training_plan String?
+  mentor_id String?
+  supervisor_id String?
+  plan_status String?
+  progress_percentage Decimal?
+  last_review_date DateTime?
+  next_review_date DateTime?
+  review_frequency String?
+  success_criteria String?
+  risk_factors String?
+  support_resources String?
+  budget_allocated Decimal?
+  budget_used Decimal?
+  priority_level String?
+  visibility_level String?
+  template_id String?
+  custom_fields String?
+  notes String?
+  code String
+  name String
+  description String?
+  @@map("MST_CareerPlan")
+}
+
+model Certification {
+  certification_code String?
+  certification_name String?
+  certification_name_en String?
+  issuer String?
+  issuer_country String?
+  certification_category String?
+  certification_level String?
+  validity_period_months Int?
+  renewal_required Boolean?
+  renewal_requirements String?
+  exam_fee Decimal?
+  exam_language String?
+  exam_format String?
+  official_url String?
+  description String?
+  skill_category_id String?
+  is_recommended Boolean?
+  is_active Boolean?
+  code String
+  name String
+  @@map("MST_Certification")
+}
+
+model CertificationRequirement {
+  requirement_id String?
+  requirement_name String?
+  requirement_description String?
+  requirement_type String?
+  target_job_type_id String?
+  target_position_id String?
+  target_skill_grade_id String?
+  target_department_id String?
+  certification_id String?
+  requirement_level String?
+  priority_order Int?
+  alternative_certifications String?
+  minimum_experience_years Int?
+  minimum_skill_level String?
+  grace_period_months Int?
+  renewal_required Boolean?
+  renewal_interval_months Int?
+  exemption_conditions String?
+  assessment_criteria String?
+  business_justification String?
+  compliance_requirement Boolean?
+  client_requirement Boolean?
+  internal_policy Boolean?
+  effective_start_date DateTime?
+  effective_end_date DateTime?
+  notification_timing Int?
+  escalation_timing Int?
+  cost_support_available Boolean?
+  cost_support_amount Decimal?
+  cost_support_conditions String?
+  training_support_available Boolean?
+  recommended_training_programs String?
+  study_time_allocation Decimal?
+  success_rate Decimal?
+  average_study_hours Decimal?
+  difficulty_rating String?
+  active_flag Boolean?
+  created_by String?
+  approved_by String?
+  approval_date DateTime?
+  review_date DateTime?
+  notes String?
+  code String
+  name String
+  description String?
+  @@map("MST_CertificationRequirement")
+}
+
+model Department {
+  department_code String?
+  department_name String?
+  department_name_short String?
+  parent_department_id String?
+  department_level Int?
+  department_type String?
+  manager_id String?
+  deputy_manager_id String?
+  cost_center_code String?
+  budget_amount Decimal?
+  location String?
+  phone_number String?
+  email_address String?
+  establishment_date DateTime?
+  abolition_date DateTime?
+  department_status String?
+  sort_order Int?
+  description String?
+  code String
+  name String
+  @@map("MST_Department")
+}
+
+model Employee {
+  employee_code String?
+  full_name String?
+  full_name_kana String?
+  email String?
+  phone String?
+  hire_date DateTime?
+  birth_date DateTime?
+  gender String?
+  department_id String?
+  position_id String?
+  job_type_id String?
+  employment_status String?
+  manager_id String?
+  employee_status String?
+  code String
+  name String
+  description String?
+  @@map("MST_Employee")
+}
+
+model EmployeeDepartment {
+  employee_id String?
+  department_id String?
+  assignment_type String?
+  start_date DateTime?
+  end_date DateTime?
+  assignment_ratio Decimal?
+  role_in_department String?
+  reporting_manager_id String?
+  assignment_reason String?
+  assignment_status String?
+  approval_status String?
+  approved_by String?
+  approved_at DateTime?
+  code String
+  name String
+  description String?
+  @@map("MST_EmployeeDepartment")
+}
+
+model EmployeeJobType {
+  employee_job_type_id String?
+  employee_id String?
+  job_type_id String?
+  assignment_type String?
+  assignment_ratio Decimal?
+  effective_start_date DateTime?
+  effective_end_date DateTime?
+  assignment_reason String?
+  assignment_status String?
+  proficiency_level String?
+  target_proficiency_level String?
+  target_achievement_date DateTime?
+  certification_requirements String?
+  skill_requirements String?
+  experience_requirements String?
+  development_plan String?
+  training_plan String?
+  mentor_id String?
+  supervisor_id String?
+  performance_rating String?
+  last_evaluation_date DateTime?
+  next_evaluation_date DateTime?
+  evaluation_frequency String?
+  career_path String?
+  strengths String?
+  improvement_areas String?
+  achievements String?
+  goals String?
+  workload_percentage Decimal?
+  billable_flag Boolean?
+  cost_center String?
+  budget_allocation Decimal?
+  hourly_rate Decimal?
+  overtime_eligible Boolean?
+  remote_work_eligible Boolean?
+  travel_required Boolean?
+  security_clearance_required Boolean?
+  created_by String?
+  approved_by String?
+  approval_date DateTime?
+  notes String?
+  code String
+  name String
+  description String?
+  @@map("MST_EmployeeJobType")
+}
+
+model EmployeePosition {
+  employee_id String?
+  position_id String?
+  appointment_type String?
+  start_date DateTime?
+  end_date DateTime?
+  appointment_reason String?
+  responsibility_scope String?
+  authority_level Int?
+  salary_grade String?
+  appointment_status String?
+  approval_status String?
+  approved_by String?
+  approved_at DateTime?
+  performance_target String?
+  delegation_authority String?
+  code String
+  name String
+  description String?
+  @@map("MST_EmployeePosition")
+}
+
+model JobType {
+  job_type_code String?
+  job_type_name String?
+  job_type_name_en String?
+  job_category String?
+  job_level String?
+  description String?
+  required_experience_years Int?
+  salary_grade_min Int?
+  salary_grade_max Int?
+  career_path String?
+  required_certifications String?
+  required_skills String?
+  department_affinity String?
+  remote_work_eligible Boolean?
+  travel_frequency String?
+  sort_order Int?
+  is_active Boolean?
+  code String
+  name String
+  @@map("MST_JobType")
+}
+
+model JobTypeSkill {
+  job_type_id String?
+  skill_item_id String?
+  required_level Int?
+  skill_priority String?
+  skill_category String?
+  experience_years Decimal?
+  certification_required Boolean?
+  skill_weight Decimal?
+  evaluation_criteria String?
+  learning_path String?
+  skill_status String?
+  effective_date DateTime?
+  expiry_date DateTime?
+  alternative_skills String?
+  prerequisite_skills String?
+  code String
+  name String
+  description String?
+  @@map("MST_JobTypeSkill")
+}
+
+model JobTypeSkillGrade {
+  job_type_id String?
+  skill_grade_id String?
+  grade_requirement_type String?
+  required_experience_years Decimal?
+  promotion_criteria String?
+  salary_range_min Decimal?
+  salary_range_max Decimal?
+  performance_expectations String?
+  leadership_requirements String?
+  technical_depth Int?
+  business_impact Int?
+  team_size_expectation Int?
+  certification_requirements String?
+  grade_status String?
+  effective_date DateTime?
+  expiry_date DateTime?
+  next_grade_path String?
+  evaluation_frequency String?
+  code String
+  name String
+  description String?
+  @@map("MST_JobTypeSkillGrade")
+}
+
+model NotificationSettings {
+  id String @id
+  tenant_id String?
+  setting_key String?
+  setting_name String?
+  notification_type String?
+  target_audience String?
+  trigger_event String?
+  frequency_type String?
+  frequency_value Int?
+  template_id String?
+  channel_config String?
+  is_enabled Boolean?
+  priority_level String?
+  code String
+  name String
+  description String?
+  @@map("MST_NotificationSettings")
+}
+
+model NotificationTemplate {
+  id String @id
+  tenant_id String?
+  template_key String?
+  template_name String?
+  notification_type String?
+  language_code String?
+  subject_template String?
+  body_template String?
+  format_type String?
+  parameters String?
+  sample_data String?
+  is_default Boolean?
+  is_active Boolean?
+  version String?
+  code String
+  name String
+  description String?
+  @@map("MST_NotificationTemplate")
+}
+
+model Permission {
+  permission_code String?
+  permission_name String?
+  permission_name_short String?
+  permission_category String?
+  resource_type String?
+  action_type String?
+  scope_level String?
+  parent_permission_id String?
+  is_system_permission Boolean?
+  requires_conditions Boolean?
+  condition_expression String?
+  risk_level Int?
+  requires_approval Boolean?
+  audit_required Boolean?
+  permission_status String?
+  effective_from DateTime?
+  effective_to DateTime?
+  sort_order Int?
+  description String?
+  code String
+  name String
+  @@map("MST_Permission")
+}
+
+model Position {
+  position_code String?
+  position_name String?
+  position_name_short String?
+  position_level Int?
+  position_rank Int?
+  position_category String?
+  authority_level Int?
+  approval_limit Decimal?
+  salary_grade String?
+  allowance_amount Decimal?
+  is_management Boolean?
+  is_executive Boolean?
+  requires_approval Boolean?
+  can_hire Boolean?
+  can_evaluate Boolean?
+  position_status String?
+  sort_order Int?
+  description String?
+  code String
+  name String
+  @@map("MST_Position")
+}
+
+model ReportTemplate {
+  id String @id
+  tenant_id String?
+  template_key String?
+  template_name String?
+  report_category String?
+  output_format String?
+  language_code String?
+  template_content String?
+  style_sheet String?
+  parameters_schema String?
+  data_source_config String?
+  page_settings String?
+  header_template String?
+  footer_template String?
+  is_default Boolean?
+  is_active Boolean?
+  version String?
+  preview_image_url String?
+  code String
+  name String
+  description String?
+  @@map("MST_ReportTemplate")
+}
+
+model Role {
+  role_code String?
+  role_name String?
+  role_name_short String?
+  role_category String?
+  role_level Int?
+  parent_role_id String?
+  is_system_role Boolean?
+  is_tenant_specific Boolean?
+  max_users Int?
+  role_priority Int?
+  auto_assign_conditions String?
+  role_status String?
+  effective_from DateTime?
+  effective_to DateTime?
+  sort_order Int?
+  description String?
+  code String
+  name String
+  @@map("MST_Role")
+}
+
+model SkillCategory {
+  category_code String?
+  category_name String?
+  category_name_short String?
+  category_name_en String?
+  category_type String?
+  parent_category_id String?
+  category_level Int?
+  category_path String?
+  is_system_category Boolean?
+  is_leaf_category Boolean?
+  skill_count Int?
+  evaluation_method String?
+  max_level Int?
+  icon_url String?
+  color_code String?
+  display_order Int?
+  is_popular Boolean?
+  category_status String?
+  effective_from DateTime?
+  effective_to DateTime?
+  description String?
+  code String
+  name String
+  @@map("MST_SkillCategory")
+}
+
+model SkillGrade {
+  grade_code String?
+  grade_name String?
+  grade_name_short String?
+  grade_level Int?
+  description String?
+  evaluation_criteria String?
+  required_experience_months Int?
+  skill_indicators String?
+  competency_requirements String?
+  certification_requirements String?
+  project_complexity String?
+  mentoring_capability Boolean?
+  leadership_level String?
+  salary_impact_factor Decimal?
+  promotion_eligibility Boolean?
+  color_code String?
+  sort_order Int?
+  is_active Boolean?
+  code String
+  name String
+  @@map("MST_SkillGrade")
+}
+
+model SkillGradeRequirement {
+  skill_grade_id String?
+  requirement_category String?
+  requirement_name String?
+  requirement_description String?
+  evaluation_criteria String?
+  proficiency_level Int?
+  weight_percentage Decimal?
+  minimum_score Decimal?
+  evidence_requirements String?
+  learning_resources String?
+  prerequisite_requirements String?
+  assessment_method String?
+  assessment_frequency String?
+  validity_period Int?
+  certification_mapping String?
+  requirement_status String?
+  effective_date DateTime?
+  expiry_date DateTime?
+  revision_notes String?
+  code String
+  name String
+  description String?
+  @@map("MST_SkillGradeRequirement")
+}
+
+model SkillHierarchy {
+  skill_id String?
+  parent_skill_id String?
+  hierarchy_level Int?
+  skill_path String?
+  sort_order Int?
+  is_leaf Boolean?
+  skill_category String?
+  description String?
+  is_active Boolean?
+  code String
+  name String
+  @@map("MST_SkillHierarchy")
+}
+
+model SkillItem {
+  skill_code String?
+  skill_name String?
+  skill_category_id String?
+  skill_type String?
+  difficulty_level Int?
+  importance_level Int?
+  code String
+  name String
+  description String?
+  @@map("MST_SkillItem")
+}
+
+model SystemConfig {
+  config_key String?
+  config_name String?
+  config_value String?
+  config_type String?
+  config_category String?
+  default_value String?
+  validation_rule String?
+  description String?
+  is_encrypted Boolean?
+  is_system_only Boolean?
+  is_user_configurable Boolean?
+  requires_restart Boolean?
+  environment String?
+  tenant_specific Boolean?
+  last_modified_by String?
+  last_modified_reason String?
+  sort_order Int?
+  is_active Boolean?
+  code String
+  name String
+  @@map("MST_SystemConfig")
+}
+
+model Tenant {
+  tenant_id String?
+  tenant_code String?
+  tenant_name String?
+  tenant_name_en String?
+  tenant_short_name String?
+  tenant_type String?
+  parent_tenant_id String?
+  tenant_level Int?
+  domain_name String?
+  subdomain String?
+  logo_url String?
+  primary_color String?
+  secondary_color String?
+  timezone String?
+  locale String?
+  currency_code String?
+  date_format String?
+  time_format String?
+  admin_email String?
+  contact_email String?
+  phone_number String?
+  address String?
+  postal_code String?
+  country_code String?
+  subscription_plan String?
+  max_users Int?
+  max_storage_gb Int?
+  features_enabled String?
+  custom_settings String?
+  security_policy String?
+  data_retention_days Int?
+  backup_enabled Boolean?
+  backup_frequency String?
+  contract_start_date DateTime?
+  contract_end_date DateTime?
+  trial_end_date DateTime?
+  billing_cycle String?
+  monthly_fee Decimal?
+  setup_fee Decimal?
+  status String?
+  activation_date DateTime?
+  suspension_date DateTime?
+  suspension_reason String?
+  last_login_date DateTime?
+  current_users_count Int?
+  storage_used_gb Decimal?
+  api_rate_limit Int?
+  sso_enabled Boolean?
+  sso_provider String?
+  sso_config String?
+  webhook_url String?
+  webhook_secret String?
+  created_by String?
+  notes String?
+  code String
+  name String
+  description String?
+  @@map("MST_Tenant")
+}
+
+model TenantSettings {
+  id String @id
+  tenant_id String?
+  setting_category String?
+  setting_key String?
+  setting_name String?
+  setting_description String?
+  data_type String?
+  setting_value String?
+  default_value String?
+  validation_rules String?
+  is_required Boolean?
+  is_encrypted Boolean?
+  is_system_managed Boolean?
+  is_user_configurable Boolean?
+  display_order Int?
+  effective_from DateTime?
+  effective_until DateTime?
+  last_modified_by String?
+  code String
+  name String
+  description String?
+  @@map("MST_TenantSettings")
+}
+
+model TrainingProgram {
+  training_program_id String?
+  program_code String?
+  program_name String?
+  program_name_en String?
+  program_description String?
+  program_category String?
+  program_type String?
+  target_audience String?
+  difficulty_level String?
+  duration_hours Decimal?
+  duration_days Int?
+  max_participants Int?
+  min_participants Int?
+  prerequisites String?
+  learning_objectives String?
+  curriculum_outline String?
+  curriculum_details String?
+  materials_required String?
+  equipment_required String?
+  instructor_requirements String?
+  assessment_method String?
+  passing_score Decimal?
+  certification_provided Boolean?
+  pdu_credits Decimal?
+  related_skills String?
+  related_certifications String?
+  cost_per_participant Decimal?
+  external_provider String?
+  external_url String?
+  venue_type String?
+  venue_requirements String?
+  language String?
+  repeat_interval Int?
+  mandatory_flag Boolean?
+  active_flag Boolean?
+  effective_start_date DateTime?
+  effective_end_date DateTime?
+  created_by String?
+  approved_by String?
+  approval_date DateTime?
+  version_number String?
+  revision_notes String?
+  tags String?
+  code String
+  name String
+  description String?
+  @@map("MST_TrainingProgram")
+}
+
+model UserAuth {
+  user_id String?
+  login_id String?
+  password_hash String?
+  password_salt String?
+  employee_id String?
+  account_status String?
+  last_login_at DateTime?
+  last_login_ip String?
+  failed_login_count Int?
+  last_failed_login_at DateTime?
+  password_changed_at DateTime?
+  password_expires_at DateTime?
+  mfa_enabled Boolean?
+  mfa_secret String?
+  recovery_token String?
+  recovery_token_expires_at DateTime?
+  session_timeout Int?
+  external_auth_provider String?
+  external_auth_id String?
+  code String
+  name String
+  description String?
+  @@map("MST_UserAuth")
+}
+
+model UserRole {
+  user_id String?
+  role_id String?
+  assignment_type String?
+  assigned_by String?
+  assignment_reason String?
+  effective_from DateTime?
+  effective_to DateTime?
+  is_primary_role Boolean?
+  priority_order Int?
+  conditions String?
+  delegation_source_user_id String?
+  delegation_expires_at DateTime?
+  auto_assigned Boolean?
+  requires_approval Boolean?
+  approval_status String?
+  approved_by String?
+  approved_at DateTime?
+  assignment_status String?
+  last_used_at DateTime?
+  usage_count Int?
+  code String
+  name String
+  description String?
+  @@map("MST_UserRole")
+}
+
+model BackupHistory {
+  backup_id String?
+  backup_type String?
+  backup_scope String?
+  target_objects String?
+  backup_start_time DateTime?
+  backup_end_time DateTime?
+  backup_status String?
+  backup_file_path String?
+  backup_file_size BigInt?
+  compression_type String?
+  encryption_enabled Boolean?
+  checksum String?
+  retention_period_days Int?
+  expiry_date DateTime?
+  backup_trigger String?
+  executed_by String?
+  error_message String?
+  recovery_tested Boolean?
+  recovery_test_date DateTime?
+  id String @id
+  is_deleted Boolean
+  @@map("SYS_BackupHistory")
+}
+
+model IntegrationConfig {
+  id String @id
+  tenant_id String?
+  integration_key String?
+  integration_name String?
+  integration_type String?
+  endpoint_url String?
+  auth_type String?
+  auth_config String?
+  connection_config String?
+  request_headers String?
+  timeout_seconds Int?
+  retry_count Int?
+  retry_interval Int?
+  rate_limit_per_minute Int?
+  is_enabled Boolean?
+  health_check_url String?
+  last_health_check DateTime?
+  health_status String?
+  is_deleted Boolean
+  @@map("SYS_IntegrationConfig")
+}
+
+model MasterData {
+  master_key String?
+  master_category String?
+  master_name String?
+  master_value String?
+  data_type String?
+  default_value String?
+  validation_rule String?
+  is_system_managed Boolean?
+  is_editable Boolean?
+  display_order Int?
+  description String?
+  effective_from DateTime?
+  effective_to DateTime?
+  last_modified_by String?
+  last_modified_at DateTime?
+  version Int?
+  id String @id
+  is_deleted Boolean
+  @@map("SYS_MasterData")
+}
+
+model SkillIndex {
+  id String @id
+  tenant_id String?
+  skill_id String?
+  index_type String?
+  search_term String?
+  normalized_term String?
+  relevance_score Decimal?
+  frequency_weight Decimal?
+  position_weight Decimal?
+  language_code String?
+  source_field String?
+  is_active Boolean?
+  search_count Int?
+  last_searched_at DateTime?
+  index_updated_at DateTime?
+  is_deleted Boolean
+  @@map("SYS_SkillIndex")
+}
+
+model SkillMatrix {
+  employee_id String?
+  skill_id String?
+  skill_level Int?
+  self_assessment Int?
+  manager_assessment Int?
+  peer_assessment Int?
+  assessment_date DateTime?
+  evidence_url String?
+  notes String?
+  next_target_level Int?
+  target_date DateTime?
+  id String @id
+  is_deleted Boolean
+  @@map("SYS_SkillMatrix")
+}
+
+model SystemLog {
+  log_level String?
+  log_category String?
+  message String?
+  user_id String?
+  session_id String?
+  ip_address String?
+  user_agent String?
+  request_url String?
+  request_method String?
+  response_status Int?
+  response_time Int?
+  error_code String?
+  stack_trace String?
+  request_body String?
+  response_body String?
+  correlation_id String?
+  component_name String?
+  thread_name String?
+  server_name String?
+  id String @id
+  is_deleted Boolean
+  @@map("SYS_SystemLog")
+}
+
+model TenantUsage {
+  usage_date DateTime?
+  tenant_id String?
+  active_users Int?
+  total_logins Int?
+  api_requests BigInt?
+  data_storage_mb Decimal?
+  file_storage_mb Decimal?
+  backup_storage_mb Decimal?
+  cpu_usage_minutes Decimal?
+  memory_usage_mb_hours Decimal?
+  network_transfer_mb Decimal?
+  report_generations Int?
+  skill_assessments Int?
+  notification_sent Int?
+  peak_concurrent_users Int?
+  peak_time DateTime?
+  error_count Int?
+  response_time_avg_ms Decimal?
+  uptime_percentage Decimal?
+  billing_amount Decimal?
+  collection_timestamp DateTime?
+  id String @id
+  is_deleted Boolean
+  @@map("SYS_TenantUsage")
+}
+
+model TokenStore {
+  id String @id
+  tenant_id String?
+  user_id String?
+  token_type String?
+  token_value String?
+  token_hash String?
+  expires_at DateTime?
+  issued_at DateTime?
+  last_used_at DateTime?
+  client_ip String?
+  user_agent String?
+  device_fingerprint String?
+  scope String?
+  is_revoked Boolean?
+  revoked_at DateTime?
+  revoked_reason String?
+  is_deleted Boolean
+  @@map("SYS_TokenStore")
+}
+
+model EmployeeSkillGrade {
+  employee_id String?
+  job_type_id String?
+  skill_grade String?
+  skill_level Int?
+  effective_date DateTime?
+  expiry_date DateTime?
+  evaluation_date DateTime?
+  evaluator_id String?
+  evaluation_comment String?
+  certification_flag Boolean?
+  next_evaluation_date DateTime?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_EmployeeSkillGrade")
+}
+
+model GoalProgress {
+  goal_id String?
+  employee_id String?
+  goal_title String?
+  goal_description String?
+  goal_category String?
+  goal_type String?
+  priority_level String?
+  target_value Decimal?
+  current_value Decimal?
+  unit String?
+  start_date DateTime?
+  target_date DateTime?
+  progress_rate Decimal?
+  achievement_status String?
+  supervisor_id String?
+  approval_status String?
+  approved_at DateTime?
+  approved_by String?
+  completion_date DateTime?
+  achievement_rate Decimal?
+  self_evaluation Int?
+  supervisor_evaluation Int?
+  evaluation_comments String?
+  related_career_plan_id String?
+  related_skill_items String?
+  milestones String?
+  obstacles String?
+  support_needed String?
+  last_updated_at DateTime?
+  next_review_date DateTime?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_GoalProgress")
+}
+
+model Notification {
+  notification_id String?
+  recipient_id String?
+  sender_id String?
+  notification_type String?
+  notification_category String?
+  priority_level String?
+  title String?
+  message String?
+  message_format String?
+  action_url String?
+  action_label String?
+  delivery_method String?
+  delivery_status String?
+  sent_at DateTime?
+  delivered_at DateTime?
+  read_status String?
+  read_at DateTime?
+  archived_at DateTime?
+  expiry_date DateTime?
+  retry_count Int?
+  max_retry_count Int?
+  last_retry_at DateTime?
+  error_message String?
+  external_message_id String?
+  template_id String?
+  template_variables String?
+  related_entity_type String?
+  related_entity_id String?
+  batch_id String?
+  user_agent String?
+  ip_address String?
+  device_type String?
+  is_bulk_notification Boolean?
+  personalization_data String?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_Notification")
+}
+
+model PDU {
+  pdu_id String?
+  employee_id String?
+  certification_id String?
+  activity_type String?
+  activity_name String?
+  activity_description String?
+  provider_name String?
+  activity_date DateTime?
+  start_time DateTime?
+  end_time DateTime?
+  duration_hours Decimal?
+  pdu_points Decimal?
+  pdu_category String?
+  pdu_subcategory String?
+  location String?
+  cost Decimal?
+  cost_covered_by String?
+  evidence_type String?
+  evidence_file_path String?
+  certificate_number String?
+  instructor_name String?
+  learning_objectives String?
+  learning_outcomes String?
+  skills_developed String?
+  approval_status String?
+  approved_by String?
+  approval_date DateTime?
+  approval_comment String?
+  expiry_date DateTime?
+  is_recurring Boolean?
+  recurrence_pattern String?
+  related_training_id String?
+  related_project_id String?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_PDU")
+}
+
+model ProjectRecord {
+  project_record_id String?
+  employee_id String?
+  project_name String?
+  project_code String?
+  client_name String?
+  project_type String?
+  project_scale String?
+  start_date DateTime?
+  end_date DateTime?
+  participation_rate Decimal?
+  role_title String?
+  responsibilities String?
+  technologies_used String?
+  skills_applied String?
+  achievements String?
+  challenges_faced String?
+  lessons_learned String?
+  team_size Int?
+  budget_range String?
+  project_status String?
+  evaluation_score Decimal?
+  evaluation_comment String?
+  is_confidential Boolean?
+  is_public_reference Boolean?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_ProjectRecord")
+}
+
+model SkillEvidence {
+  evidence_id String?
+  employee_id String?
+  skill_id String?
+  evidence_type String?
+  evidence_title String?
+  evidence_description String?
+  skill_level_demonstrated String?
+  evidence_date DateTime?
+  validity_start_date DateTime?
+  validity_end_date DateTime?
+  file_path String?
+  file_type String?
+  file_size_kb Int?
+  external_url String?
+  issuer_name String?
+  issuer_type String?
+  certificate_number String?
+  verification_method String?
+  verification_status String?
+  verified_by String?
+  verification_date DateTime?
+  verification_comment String?
+  related_project_id String?
+  related_training_id String?
+  related_certification_id String?
+  impact_score Decimal?
+  complexity_level String?
+  team_size Int?
+  role_in_activity String?
+  technologies_used String?
+  achievements String?
+  lessons_learned String?
+  is_public Boolean?
+  is_portfolio_item Boolean?
+  tags String?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_SkillEvidence")
+}
+
+model SkillRecord {
+  employee_id String?
+  skill_item_id String?
+  skill_level Int?
+  self_assessment Int?
+  manager_assessment Int?
+  evidence_description String?
+  acquisition_date DateTime?
+  last_used_date DateTime?
+  expiry_date DateTime?
+  certification_id String?
+  skill_category_id String?
+  assessment_date DateTime?
+  assessor_id String?
+  skill_status String?
+  learning_hours Int?
+  project_experience_count Int?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_SkillRecord")
+}
+
+model TrainingHistory {
+  training_history_id String?
+  employee_id String?
+  training_program_id String?
+  training_name String?
+  training_type String?
+  training_category String?
+  provider_name String?
+  instructor_name String?
+  start_date DateTime?
+  end_date DateTime?
+  duration_hours Decimal?
+  location String?
+  cost Decimal?
+  cost_covered_by String?
+  attendance_status String?
+  completion_rate Decimal?
+  test_score Decimal?
+  grade String?
+  certificate_obtained Boolean?
+  certificate_number String?
+  pdu_earned Decimal?
+  skills_acquired String?
+  learning_objectives String?
+  learning_outcomes String?
+  feedback String?
+  satisfaction_score Decimal?
+  recommendation_score Decimal?
+  follow_up_required Boolean?
+  follow_up_date DateTime?
+  manager_approval Boolean?
+  approved_by String?
+  id String @id
+  is_deleted Boolean
+  tenant_id String
+  created_at DateTime
+  updated_at DateTime
+  created_by String
+  updated_by String
+  @@map("TRN_TrainingHistory")
+}
+
+model BatchJobLog {
+  job_id String?
+  job_name String?
+  job_type String?
+  status String?
+  start_time DateTime?
+  end_time DateTime?
+  total_records Int?
+  processed_records Int?
+  success_records Int?
+  error_records Int?
+  error_details String?
+  input_file_path String?
+  output_file_path String?
+  executed_by String?
+  progress_percentage Decimal?
+  execution_environment String?
+  job_parameters String?
+  id String @id
+  is_deleted Boolean
+  @@map("WRK_BatchJobLog")
+}

@@ -7,7 +7,7 @@
 | テーブル名 | TRN_GoalProgress |
 | 論理名 | 目標進捗 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -27,13 +27,11 @@ TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状�
 組織の成果管理と人材開発の基盤となる重要なデータを提供します。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | goal_id | 目標ID | VARCHAR | 50 | ○ |  | 目標を一意に識別するID（例：GOAL000001） |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 目標を設定した社員のID（MST_Employeeへの外部キー） |
 | goal_title | 目標タイトル | VARCHAR | 200 | ○ |  | 目標の簡潔なタイトル |
@@ -64,6 +62,9 @@ TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状�
 | support_needed | 必要サポート | TEXT |  | ○ |  | 目標達成に必要なサポート・リソース |
 | last_updated_at | 最終更新日時 | TIMESTAMP |  | ○ |  | 進捗が最後に更新された日時 |
 | next_review_date | 次回レビュー日 | DATE |  | ○ |  | 次回の進捗レビュー予定日 |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |

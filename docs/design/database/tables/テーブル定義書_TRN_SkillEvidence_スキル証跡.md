@@ -7,7 +7,7 @@
 | テーブル名 | TRN_SkillEvidence |
 | 論理名 | スキル証跡 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-01 20:40:26 |
+| 生成日時 | 2025-06-04 06:57:02 |
 
 ## 概要
 
@@ -24,13 +24,11 @@ TRN_SkillEvidence（スキル証跡）は、社員のスキル習得・向上を
 適切な人材配置や能力開発の判断を支援できます。
 
 
+
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | evidence_id | 証跡ID | VARCHAR | 50 | ○ |  | スキル証跡を一意に識別するID |
 | employee_id | 社員ID | VARCHAR | 50 | ○ |  | 証跡の対象社員ID（MST_Employeeへの外部キー） |
 | skill_id | スキルID | VARCHAR | 50 | ○ |  | 証明対象のスキルID（MST_SkillItemへの外部キー） |
@@ -66,6 +64,9 @@ TRN_SkillEvidence（スキル証跡）は、社員のスキル習得・向上を
 | is_public | 公開フラグ | BOOLEAN |  | ○ | False | 証跡を社外に公開可能かどうか |
 | is_portfolio_item | ポートフォリオ項目フラグ | BOOLEAN |  | ○ | False | ポートフォリオに含める項目かどうか |
 | tags | タグ | TEXT |  | ○ |  | 検索・分類用のタグ（JSON形式） |
+| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
 | created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
