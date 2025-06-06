@@ -179,3 +179,8 @@ class CheckConfig:
     base_dir: str = ""
     output_format: str = "console"  # console, markdown, json
     output_file: Optional[str] = None
+    report_dir: str = "reports"
+    keep_reports: int = 30
+    max_reports: int = 100
+    report_prefix: Optional[str] = None
+    auto_cleanup: bool = True

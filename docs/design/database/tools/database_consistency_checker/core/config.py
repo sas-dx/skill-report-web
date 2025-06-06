@@ -138,7 +138,12 @@ def create_check_config(
     target_tables: Optional[List[str]] = None,
     base_dir: str = "",
     output_format: str = "console",
-    output_file: Optional[str] = None
+    output_file: Optional[str] = None,
+    report_dir: str = "reports",
+    keep_reports: int = 30,
+    max_reports: int = 100,
+    report_prefix: Optional[str] = None,
+    auto_cleanup: bool = True
 ) -> CheckConfig:
     """
     チェック設定を作成
@@ -153,6 +158,11 @@ def create_check_config(
         base_dir: ベースディレクトリ
         output_format: 出力形式
         output_file: 出力ファイル
+        report_dir: レポートディレクトリ
+        keep_reports: レポート保持日数
+        max_reports: 最大レポート数
+        report_prefix: レポートファイルプレフィックス
+        auto_cleanup: 自動クリーンアップ
         
     Returns:
         CheckConfig
@@ -166,5 +176,10 @@ def create_check_config(
         target_tables=target_tables or [],
         base_dir=base_dir,
         output_format=output_format,
-        output_file=output_file
+        output_file=output_file,
+        report_dir=report_dir,
+        keep_reports=keep_reports,
+        max_reports=max_reports,
+        report_prefix=report_prefix,
+        auto_cleanup=auto_cleanup
     )

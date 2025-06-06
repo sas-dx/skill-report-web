@@ -12,6 +12,7 @@ from .checkers.consistency_checker import ConsistencyChecker
 from .reporters.console_reporter import ConsoleReporter
 from .reporters.markdown_reporter import MarkdownReporter
 from .reporters.json_reporter import JsonReporter
+from .utils.report_manager import ReportManager
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -108,6 +109,40 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="詳細ログを出力"
     )
     
+    # レポート管理オプション
+    parser.add_argument(
+        "--report-dir",
+        type=str,
+        default="reports",
+        help="レポート出力ディレクトリ（デフォルト: reports）"
+    )
+    
+    parser.add_argument(
+        "--keep-reports",
+        type=int,
+        default=30,
+        help="レポート保持日数（デフォルト: 30日）"
+    )
+    
+    parser.add_argument(
+        "--max-reports",
+        type=int,
+        default=100,
+        help="最大レポート数（デフォルト: 100件）"
+    )
+    
+    parser.add_argument(
+        "--report-prefix",
+        type=str,
+        help="レポートファイルのカスタムプレフィックス"
+    )
+    
+    parser.add_argument(
+        "--no-cleanup",
+        action="store_true",
+        help="古いレポートの自動クリーンアップを無効化"
+    )
+    
     # その他
     parser.add_argument(
         "--list-checks",
@@ -141,7 +176,12 @@ def main():
             target_tables=args.tables,
             base_dir=args.base_dir,
             output_format=args.output_format,
-            output_file=args.output_file
+            output_file=args.output_file,
+            report_dir=args.report_dir,
+            keep_reports=args.keep_reports,
+            max_reports=args.max_reports,
+            report_prefix=args.report_prefix,
+            auto_cleanup=not args.no_cleanup
         )
     except Exception as e:
         print(f"❌ 設定初期化エラー: {e}", file=sys.stderr)
@@ -197,6 +237,7 @@ def main():
 
 def output_report(report, check_config):
     """レポートを出力"""
+    # レポーター初期化
     if check_config.output_format == "console":
         reporter = ConsoleReporter()
     elif check_config.output_format == "markdown":
@@ -209,8 +250,9 @@ def output_report(report, check_config):
     # レポート生成
     output_content = reporter.generate_report(report)
     
-    # 出力
+    # レポート管理機能を使用
     if check_config.output_file:
+        # 従来の方式（ユーザー指定ファイル）
         output_path = Path(check_config.output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -219,9 +261,60 @@ def output_report(report, check_config):
         
         print(f"📄 レポートを出力しました: {output_path}")
     else:
-        # 標準出力（コンソール形式の場合は既に出力済み）
+        # 新しいレポート管理機能を使用
         if check_config.output_format != "console":
-            print(output_content)
+            # レポートマネージャー初期化
+            report_manager = ReportManager(
+                base_dir=check_config.base_dir,
+                report_dir=check_config.report_dir
+            )
+            
+            # レポートファイルパス取得
+            report_path = report_manager.get_report_path(
+                report_type="consistency_report",
+                extension=_get_file_extension(check_config.output_format),
+                custom_prefix=check_config.report_prefix
+            )
+            
+            # レポート出力
+            with open(report_path, 'w', encoding='utf-8') as f:
+                f.write(output_content)
+            
+            # 最新レポートリンク作成
+            link_name = f"latest_consistency_report.{_get_file_extension(check_config.output_format)}"
+            report_manager.create_latest_link(report_path, link_name)
+            
+            # 古いレポートのクリーンアップ
+            if check_config.auto_cleanup:
+                try:
+                    report_manager.cleanup_old_reports(
+                        keep_days=check_config.keep_reports,
+                        max_reports=check_config.max_reports
+                    )
+                except Exception as e:
+                    if check_config.verbose:
+                        print(f"⚠️ レポートクリーンアップエラー: {e}")
+            
+            print(f"📄 レポートを出力しました: {report_path}")
+            print(f"🔗 最新レポートリンク: {report_manager.report_dir / link_name}")
+            
+            # レポート統計表示（詳細モード時）
+            if check_config.verbose:
+                stats = report_manager.get_report_statistics()
+                print(f"📊 レポート統計: 総数{stats['total_reports']}件, 総サイズ{stats['total_size_mb']}MB")
+        else:
+            # コンソール出力（既に出力済み）
+            pass
+
+
+def _get_file_extension(output_format: str) -> str:
+    """出力形式からファイル拡張子を取得"""
+    extension_map = {
+        "markdown": "md",
+        "json": "json",
+        "console": "txt"
+    }
+    return extension_map.get(output_format, "txt")
 
 
 if __name__ == "__main__":
