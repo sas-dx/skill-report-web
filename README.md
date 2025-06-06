@@ -1089,6 +1089,40 @@ bash scripts/ddl-to-prisma.sh
 
 生成結果は `src/database/prisma/schema.prisma` に出力されます。
 
+## データベース整合性チェック
+
+データベース設計ドキュメント間の整合性をチェックするツールを提供しています。
+
+### 基本的な使用方法
+
+```bash
+# プロジェクトルートから実行
+cd docs/design/database/tools/database_consistency_checker
+
+# 全チェック実行
+python run_check.py
+
+# 特定のテーブルのみチェック
+python run_check.py --tables MST_Employee MST_Department
+
+# 詳細ログ付きでチェック
+python run_check.py --verbose
+```
+
+### 主要なチェック機能
+
+- **テーブル存在整合性チェック**: 全ソース間でのテーブル定義一致確認
+- **データ型整合性チェック**: DDLとYAML間のデータ型完全一致・互換性チェック
+- **外部キー整合性チェック**: 参照関係の妥当性チェック
+- **孤立ファイル検出**: 未使用・重複ファイルの特定
+
+### 詳細な使用方法
+
+詳細な使用方法、設定オプション、トラブルシューティングについては、以下のドキュメントを参照してください：
+
+- **[データベース整合性チェックツール README](docs/design/database/tools/database_consistency_checker/README.md)**
+- **[データベース設計ガイドライン](.clinerules/08-database-design-guidelines.md)**
+
 ## 連絡先・メンバー
 
 | 役割 | 名前 / GitHub | 連絡先 |
