@@ -18,7 +18,7 @@ class Config:
             base_dir: ベースディレクトリ（デフォルトは現在のディレクトリの親）
         """
         if not base_dir:
-            # tools/database_consistency_checker から ../../ に移動
+            # tools/database_consistency_checker から ../../../ に移動してdatabaseディレクトリへ
             current_dir = Path(__file__).parent.parent.parent.parent
             self.base_dir = current_dir.resolve()
         else:
