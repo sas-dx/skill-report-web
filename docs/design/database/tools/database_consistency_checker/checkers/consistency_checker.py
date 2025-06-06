@@ -12,6 +12,10 @@ from checkers.column_consistency_checker import ColumnConsistencyChecker
 from checkers.foreign_key_checker import ForeignKeyChecker
 from checkers.data_type_consistency_checker import DataTypeConsistencyChecker
 from checkers.yaml_format_checker import YamlFormatChecker
+from checkers.constraint_consistency_checker import ConstraintConsistencyChecker
+from fixers.fix_suggestion_generator import FixSuggestionGenerator, FixContext
+from fixers.table_list_fixer import TableListFixer
+from fixers.foreign_key_fixer import ForeignKeyFixer
 
 
 class ConsistencyChecker:
@@ -35,6 +39,12 @@ class ConsistencyChecker:
         self.foreign_key_checker = ForeignKeyChecker(self.logger)
         self.data_type_checker = DataTypeConsistencyChecker(Path(config.base_dir))
         self.yaml_format_checker = YamlFormatChecker(config.base_dir)
+        self.constraint_checker = ConstraintConsistencyChecker(self.logger)
+        
+        # 修正提案機能の初期化
+        self.fix_generator = FixSuggestionGenerator(self.logger)
+        self.table_list_fixer = TableListFixer(self.logger)
+        self.foreign_key_fixer = ForeignKeyFixer(self.logger)
     
     def run_all_checks(self) -> ConsistencyReport:
         """
@@ -157,6 +167,10 @@ class ConsistencyChecker:
             yaml_format_results = self._run_yaml_format_checks()
             all_results.extend(yaml_format_results)
         
+        if "constraint_consistency" in check_names:
+            constraint_results = self._run_constraint_checks()
+            all_results.extend(constraint_results)
+        
         return self._create_report(all_results)
     
     def _create_orphan_results(self, orphaned_files: Dict[str, List[str]]) -> List[CheckResult]:
@@ -188,6 +202,88 @@ class ConsistencyChecker:
             ))
         
         return results
+    
+    def _generate_fix_suggestions(self, results: List[CheckResult]) -> List:
+        """チェック結果から修正提案を生成"""
+        from core.models import FixSuggestion
+        
+        all_suggestions = []
+        
+        # 修正提案コンテキストの作成
+        context = FixContext(
+            ddl_dir=self.config.ddl_dir,
+            yaml_details_dir=self.config.table_details_dir,
+            table_list_file=self.config.table_list_file,
+            entity_relationships_file=self.config.entity_relationships_file
+        )
+        
+        # エラーと警告のみを対象とする
+        error_warning_results = [
+            r for r in results 
+            if r.severity in [CheckSeverity.ERROR, CheckSeverity.WARNING]
+        ]
+        
+        if not error_warning_results:
+            return all_suggestions
+        
+        # 1. テーブル一覧関連の修正提案
+        table_list_suggestions = self.table_list_fixer.generate_table_list_fixes(
+            error_warning_results, 
+            self.config.table_list_file,
+            self.config.ddl_dir,
+            self.config.table_details_dir
+        )
+        all_suggestions.extend(table_list_suggestions)
+        
+        # 2. 外部キー関連の修正提案
+        fk_suggestions = self.foreign_key_fixer.generate_foreign_key_fixes(
+            error_warning_results,
+            self.config.ddl_dir,
+            self.config.table_details_dir
+        )
+        all_suggestions.extend(fk_suggestions)
+        
+        # 3. 一般的な修正提案
+        general_suggestions = self.fix_generator.generate_fix_suggestions(
+            error_warning_results, 
+            context
+        )
+        all_suggestions.extend(general_suggestions)
+        
+        # 修正提案の重複除去と優先度順ソート
+        unique_suggestions = self._deduplicate_suggestions(all_suggestions)
+        sorted_suggestions = self._sort_suggestions_by_priority(unique_suggestions)
+        
+        return sorted_suggestions
+    
+    def _deduplicate_suggestions(self, suggestions: List) -> List:
+        """修正提案の重複を除去"""
+        seen = set()
+        unique_suggestions = []
+        
+        for suggestion in suggestions:
+            # テーブル名と説明をキーとして重複チェック
+            key = (suggestion.table_name, suggestion.description)
+            if key not in seen:
+                seen.add(key)
+                unique_suggestions.append(suggestion)
+        
+        return unique_suggestions
+    
+    def _sort_suggestions_by_priority(self, suggestions: List) -> List:
+        """修正提案を優先度順にソート"""
+        def get_priority(suggestion):
+            # クリティカルな修正を最優先
+            if suggestion.critical:
+                return 0
+            # バックアップが必要な修正を次に
+            elif suggestion.backup_required:
+                return 1
+            # その他
+            else:
+                return 2
+        
+        return sorted(suggestions, key=get_priority)
     
     def _run_data_type_checks(self) -> List[CheckResult]:
         """データ型整合性チェックを実行"""
@@ -298,6 +394,59 @@ class ConsistencyChecker:
         
         return results
     
+    def _run_constraint_checks(self) -> List[CheckResult]:
+        """制約整合性チェックを実行"""
+        results = []
+        
+        # テーブル一覧から対象テーブルを取得
+        from parsers.table_list_parser import TableListParser
+        table_parser = TableListParser(self.logger)
+        tables = table_parser.parse_file(self.config.table_list_file)
+        
+        if not tables:
+            self.logger.warning("テーブル一覧の解析に失敗しました")
+            return results
+        
+        # 対象テーブルのフィルタリング
+        target_tables = self.check_config.target_tables
+        if target_tables:
+            table_names = target_tables
+        else:
+            table_names = [t.table_name for t in tables]
+        
+        # 制約整合性チェックを実行
+        constraint_results = self.constraint_checker.check_constraint_consistency(
+            ddl_dir=self.config.ddl_dir,
+            yaml_details_dir=self.config.table_details_dir,
+            table_names=table_names
+        )
+        results.extend(constraint_results)
+        
+        # 結果のサマリー表示
+        if constraint_results:
+            error_count = sum(1 for r in constraint_results if r.severity == CheckSeverity.ERROR)
+            warning_count = sum(1 for r in constraint_results if r.severity == CheckSeverity.WARNING)
+            success_count = sum(1 for r in constraint_results if r.severity == CheckSeverity.SUCCESS)
+            
+            if error_count > 0:
+                self.logger.error(f"  制約チェック: {error_count}個のエラー, {warning_count}個の警告, {success_count}個の成功")
+            elif warning_count > 0:
+                self.logger.warning(f"  制約チェック: {warning_count}個の警告, {success_count}個の成功")
+            else:
+                self.logger.success(f"  制約チェック: {success_count}個の成功")
+            
+            # 統計情報の表示
+            if self.check_config.verbose:
+                stats = self.constraint_checker.get_constraint_statistics(constraint_results)
+                for constraint_type, type_stats in stats.items():
+                    total = sum(type_stats.values())
+                    if total > 0:
+                        self.logger.info(f"    {constraint_type}: {total}件")
+        else:
+            self.logger.success("  制約チェック: OK")
+        
+        return results
+    
     def _create_report(self, results: List[CheckResult]) -> ConsistencyReport:
         """整合性チェックレポートを作成"""
         # 統計情報の計算
@@ -314,12 +463,15 @@ class ConsistencyChecker:
             if result.table_name:
                 unique_tables.add(result.table_name)
         
+        # 修正提案の生成
+        fix_suggestions = self._generate_fix_suggestions(results)
+        
         return ConsistencyReport(
             check_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             total_tables=len(unique_tables),
             total_checks=len(results),
             results=results,
-            fix_suggestions=[],  # 修正提案は後で実装
+            fix_suggestions=fix_suggestions,
             summary=summary
         )
     
@@ -343,8 +495,7 @@ class ConsistencyChecker:
             "foreign_key_consistency",
             "data_type_consistency",
             "yaml_format_consistency",
-            # 将来的に追加予定
-            # "constraint_consistency"
+            "constraint_consistency"
         ]
     
     def validate_check_names(self, check_names: List[str]) -> List[str]:
