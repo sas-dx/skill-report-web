@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-テーブル生成ツール - Faker活用ユーティリティ
+テーブル生成ツール - 基本データ生成ユーティリティ
 
-Fakerライブラリを活用したテストデータ生成機能を提供します。
-※ Fakerが利用できない場合は、基本的なダミーデータを生成します。
+YAML定義されたサンプルデータを基本とし、
+必要に応じて基本的なダミーデータを生成する機能を提供します。
 
 対応要求仕様ID: PLT.2-DB.1, PLT.2-TOOL.1
 """
@@ -12,13 +12,6 @@ Fakerライブラリを活用したテストデータ生成機能を提供しま
 import random
 import datetime
 from typing import Any, List, Dict, Optional
-
-try:
-    from faker import Faker
-    from faker.providers import BaseProvider
-    FAKER_AVAILABLE = True
-except ImportError:
-    FAKER_AVAILABLE = False
 
 from ..core.logger import EnhancedLogger
 
@@ -106,36 +99,29 @@ class JapaneseSkillProvider:
         return f"SKL{random.randint(100, 999)}"
 
 
-class FakerUtils:
-    """Faker活用ユーティリティクラス
+class BasicDataUtils:
+    """基本データ生成ユーティリティクラス
     
-    Fakerライブラリを使用したテストデータ生成機能を提供します。
-    Fakerが利用できない場合は、基本的なダミーデータを生成します。
+    YAML定義されたサンプルデータを基本とし、
+    必要に応じて基本的なダミーデータを生成します。
+    外部ライブラリに依存しない軽量な実装です。
     """
     
-    def __init__(self, locale: str = 'ja_JP', seed: Optional[int] = None, logger: EnhancedLogger = None):
+    def __init__(self, seed: Optional[int] = None, logger: EnhancedLogger = None):
         """初期化
         
         Args:
-            locale (str): ロケール設定
             seed (Optional[int]): 乱数シード
             logger (EnhancedLogger, optional): ログ出力インスタンス
         """
         self.logger = logger or EnhancedLogger()
         self.provider = JapaneseSkillProvider()
         
-        if FAKER_AVAILABLE:
-            self.fake = Faker(locale)
-            self.logger.info("Fakerライブラリを使用します")
-        else:
-            self.fake = None
-            self.logger.warning("Fakerライブラリが利用できません。基本的なダミーデータを生成します")
+        self.logger.info("基本データ生成ユーティリティを初期化しました（外部依存なし）")
         
         # シード設定
         if seed is not None:
             random.seed(seed)
-            if FAKER_AVAILABLE and self.fake:
-                Faker.seed(seed)
     
     def generate_by_type(self, data_type: str, **kwargs) -> Any:
         """データタイプに応じてデータを生成
@@ -148,55 +134,13 @@ class FakerUtils:
             Any: 生成されたデータ
         """
         try:
-            if FAKER_AVAILABLE and self.fake:
-                return self._generate_with_faker(data_type, **kwargs)
-            else:
-                return self._generate_without_faker(data_type, **kwargs)
+            return self._generate_basic_data(data_type, **kwargs)
                 
         except Exception as e:
             self.logger.error(f"データ生成エラー ({data_type}): {e}")
             return self._fallback_data(data_type)
     
-    def _generate_with_faker(self, data_type: str, **kwargs) -> Any:
-        """Fakerを使用してデータを生成"""
-        if data_type == 'name':
-            return self.fake.name()
-        elif data_type == 'email':
-            return self.fake.email()
-        elif data_type == 'phone':
-            return self.fake.phone_number()
-        elif data_type == 'address':
-            return self.fake.address()
-        elif data_type == 'company':
-            return self.fake.company()
-        elif data_type == 'text':
-            max_chars = kwargs.get('max_nb_chars', 100)
-            return self.fake.text(max_nb_chars=max_chars)
-        elif data_type == 'word':
-            return self.fake.word()
-        elif data_type == 'sentence':
-            return self.fake.sentence()
-        elif data_type == 'date':
-            start = kwargs.get('start_date', '-1y')
-            end = kwargs.get('end_date', 'today')
-            return self.fake.date_between(start_date=start, end_date=end)
-        elif data_type == 'datetime':
-            start = kwargs.get('start_date', '-1y')
-            end = kwargs.get('end_date', 'now')
-            return self.fake.date_time_between(start_date=start, end_date=end)
-        elif data_type == 'integer':
-            min_val = kwargs.get('min_value', 1)
-            max_val = kwargs.get('max_value', 100)
-            return self.fake.random_int(min_val, max_val)
-        elif data_type == 'boolean':
-            chance = kwargs.get('chance_of_getting_true', 50)
-            return self.fake.boolean(chance_of_getting_true=chance)
-        elif data_type == 'uuid':
-            return self.fake.uuid4()
-        else:
-            return self._generate_custom_data(data_type, **kwargs)
-    
-    def _generate_without_faker(self, data_type: str, **kwargs) -> Any:
+    def _generate_basic_data(self, data_type: str, **kwargs) -> Any:
         """Faker非依存でデータを生成"""
         if data_type == 'name':
             return self.provider.japanese_name()
@@ -260,8 +204,7 @@ class FakerUtils:
             seed (int): 乱数シード
         """
         random.seed(seed)
-        if FAKER_AVAILABLE and self.fake:
-            Faker.seed(seed)
+        self.logger.info(f"乱数シードを設定しました: {seed}")
     
     def get_locale_info(self) -> Dict[str, Any]:
         """ロケール情報を取得
@@ -269,15 +212,13 @@ class FakerUtils:
         Returns:
             Dict[str, Any]: ロケール情報
         """
-        if FAKER_AVAILABLE and self.fake:
-            return {
-                'locale': self.fake.locales,
-                'providers': [provider.__name__ for provider in self.fake.providers],
-                'faker_available': True
-            }
-        else:
-            return {
-                'locale': 'ja_JP (fallback)',
-                'providers': ['JapaneseSkillProvider'],
-                'faker_available': False
-            }
+        return {
+            'locale': 'ja_JP (基本実装)',
+            'providers': ['JapaneseSkillProvider'],
+            'external_dependencies': False,
+            'description': 'YAML駆動のテストデータ生成（外部依存なし）'
+        }
+
+
+# 後方互換性のためのエイリアス
+FakerUtils = BasicDataUtils

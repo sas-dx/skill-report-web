@@ -22,7 +22,7 @@ from .generators.table_definition_generator import TableDefinitionGenerator
 from .generators.ddl_generator import DDLGenerator
 from .generators.common_columns import CommonColumns
 from .data.yaml_data_loader import YamlDataLoader
-from .data.faker_utils import FakerUtils
+from .data.faker_utils import BasicDataUtils, FakerUtils
 from .utils.yaml_loader import YamlLoader
 from .utils.file_utils import FileUtils
 from .utils.sql_utils import SqlUtils
@@ -40,6 +40,7 @@ __all__ = [
     'DDLGenerator',
     'CommonColumns',
     'YamlDataLoader',
+    'BasicDataUtils',
     'FakerUtils',
     'YamlLoader',
     'FileUtils',
