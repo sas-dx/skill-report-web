@@ -3,6 +3,7 @@ const path = require('path');
 
 const ddlDir = process.argv[2];
 const outputFile = process.argv[3];
+const provider = process.env.DB_PROVIDER || 'postgresql';
 if (!ddlDir || !outputFile) {
   console.error('Usage: node sql-to-prisma.js <ddl_dir> <output_file>');
   process.exit(1);
@@ -29,17 +30,22 @@ schema.push('  provider = "prisma-client-js"');
 schema.push('}');
 schema.push('');
 schema.push('datasource db {');
-schema.push('  provider = "mysql"');
+schema.push(`  provider = "${provider}"`);
 schema.push('  url      = env("DATABASE_URL")');
 schema.push('}');
 schema.push('');
 
+const processed = new Set();
+
 for (const file of fs.readdirSync(ddlDir)) {
   if (!file.endsWith('.sql')) continue;
+  if (file === 'all_tables.sql') continue;
   const content = fs.readFileSync(path.join(ddlDir, file), 'utf8');
   const tableMatch = content.match(/CREATE TABLE\s+(\w+)\s*\(([^;]*)\)/s);
   if (!tableMatch) continue;
   const tableName = tableMatch[1];
+  if (processed.has(tableName)) continue;
+  processed.add(tableName);
   const block = tableMatch[2];
   const lines = block.split(/\n/).map(l=>l.trim()).filter(l=>l && !l.startsWith('--'));
   const columns = [];
