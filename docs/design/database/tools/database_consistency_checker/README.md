@@ -38,6 +38,10 @@
 - ✅ 孤立ファイル検出
 - ✅ カラム定義整合性チェック
 - ✅ 外部キー整合性チェック
+- ✅ **データ型整合性チェック** (v1.2.0で追加)
+  - DDLとYAML間のデータ型完全一致・互換性チェック
+  - カラム定義の詳細比較（長さ制約、NULL制約、デフォルト値、ENUM値）
+  - データ型互換性マッピングによる柔軟なチェック
 - ✅ コンソール/Markdown/JSON形式でのレポート出力
 - ✅ 詳細ログ機能
 - ✅ **レポート出力管理機能** (v1.1.0で追加)
@@ -47,7 +51,6 @@
   - レポート統計情報の取得
 
 ### 将来実装予定
-- 🔄 データ型整合性チェック
 - 🔄 制約整合性チェック
 - 🔄 修正提案機能
 
@@ -101,8 +104,11 @@ python run_check.py --checks column_consistency
 # 外部キー整合性チェックのみ
 python run_check.py --checks foreign_key_consistency
 
+# データ型整合性チェックのみ
+python run_check.py --checks data_type_consistency
+
 # 複数のチェックを指定
-python run_check.py --checks table_existence column_consistency foreign_key_consistency
+python run_check.py --checks table_existence column_consistency foreign_key_consistency data_type_consistency
 ```
 
 ### レポート管理機能 (v1.1.0で追加)
@@ -195,6 +201,31 @@ docs/design/database/
 
 - 孤立DDLファイル
 - 孤立詳細定義ファイル
+
+### 3. データ型整合性チェック (v1.2.0で追加)
+
+DDLファイルとYAML詳細定義間のデータ型整合性をチェックします：
+
+**チェック項目：**
+- データ型の完全一致・互換性チェック
+- 長さ制約の比較（VARCHAR(50) vs VARCHAR(100)等）
+- NULL制約の整合性（NOT NULL vs NULL許可）
+- デフォルト値の比較
+- ENUM値の整合性
+
+**エラー例：**
+- ❌ カラム 'name' のデータ型が一致しません: DDL(VARCHAR(100)) ≠ YAML(VARCHAR(50))
+- ❌ カラム 'status' のENUM値が一致しません
+- ❌ カラム 'age' の長さ制約が一致しません
+
+**警告例：**
+- ⚠️ カラム 'description' のデータ型が互換性のある型で異なります: DDL(TEXT) vs YAML(VARCHAR)
+- ⚠️ カラム 'is_active' のNULL制約が一致しません
+- ⚠️ カラム 'created_at' のデフォルト値が一致しません
+
+**成功例：**
+- ✅ カラム 'id' のデータ型整合性OK: VARCHAR(50)
+- ✅ MST_Employee: データ型整合性チェック完了 (12カラム確認済み)
 
 ## 出力例
 
@@ -337,6 +368,15 @@ python -m pytest tests/integration/
 このツールは内部使用のために開発されました。
 
 ## 更新履歴
+
+### v1.2.0 (2025-06-06)
+- 🚀 **データ型整合性チェック機能を追加**
+- DDLとYAML間のデータ型完全一致・互換性チェック
+- カラム定義の詳細比較（長さ制約、NULL制約、デフォルト値、ENUM値）
+- データ型互換性マッピングによる柔軟なチェック
+- DataTypeConsistencyCheckerクラスの実装
+- `--checks data_type_consistency`オプションの追加
+- 包括的なエラー・警告・成功メッセージの提供
 
 ### v1.1.0 (2025-06-06)
 - 🚀 **レポート出力管理機能を追加**
