@@ -7,7 +7,8 @@
     Prisma Clientで利用できる`seed.ts`コードを生成する。
 
 使用方法:
-    python3 scripts/sql-to-seed-prisma-fixed.py <sql_dir> <output_file>
+    python3 scripts/sql-to-seed-prisma-fixed.py <sql_dir> [output_file]
+    output_file を省略した場合、"src/database/prisma/seed.ts" に生成します。
 
 このスクリプトはテーブル名・カラム名をそのままsnake_caseで出力する。
 """
@@ -125,8 +126,9 @@ def main(sql_dir: str, output_file: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python sql-to-seed-prisma-fixed.py <sql_dir> <output_file>")
+    if len(sys.argv) not in (2, 3):
+        print("Usage: python sql-to-seed-prisma-fixed.py <sql_dir> [output_file]")
         sys.exit(1)
-    main(sys.argv[1], sys.argv[2])
-
+    sql_dir = sys.argv[1]
+    out_file = sys.argv[2] if len(sys.argv) == 3 else "src/database/prisma/seed.ts"
+    main(sql_dir, out_file)
