@@ -1078,6 +1078,17 @@ skill-report-web/
 └── README.md                     # このファイル
 ```
 
+
+## Prismaスキーマの生成
+
+`docs/design/database/ddl` 以下の SQL ファイルから Prisma スキーマを生成するには次のスクリプトを実行します。
+
+```bash
+bash scripts/ddl-to-prisma.sh
+```
+
+生成結果は `src/database/prisma/schema.prisma` に出力されます。
+
 ## 連絡先・メンバー
 
 | 役割 | 名前 / GitHub | 連絡先 |

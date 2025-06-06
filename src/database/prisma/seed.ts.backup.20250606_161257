@@ -1,6 +1,6 @@
 // 要求仕様ID: PLT.1-DB.1 - データベース初期データ投入
 // 設計書: docs/design/database/data/ 配下のサンプルデータSQLファイル群
-// 自動生成日時: 2025-06-06 15:58:16
+// 自動生成日時: 2025-06-06 16:11:49
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -710,6 +710,8 @@ async function main() {
           skill_status: 'ACTIVE',
           learning_hours: 120,
           project_experience_count: 3,
+          name: ''EMP000001'-'SKILL001'',
+          code: 'EMP000001',
         },
       }),
       prisma.skillRecord.upsert({
@@ -732,6 +734,8 @@ async function main() {
           skill_status: 'ACTIVE',
           learning_hours: 80,
           project_experience_count: 2,
+          name: ''EMP000001'-'SKILL002'',
+          code: 'EMP000001',
         },
       }),
     ])

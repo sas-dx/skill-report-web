@@ -1,6 +1,5 @@
 // 要求仕様ID: PLT.1-DB.1 - データベース初期データ投入
 // 設計書: docs/design/database/data/ 配下のサンプルデータSQLファイル群
-// 自動生成日時: 2025-06-06 15:58:16
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -9,121 +8,61 @@ async function main() {
   console.log('🌱 データベースの初期データ投入を開始します...')
 
   try {
-    // MST_Tenantデータ
-    console.log('📊 MST_Tenantデータを投入中...')
-    const tenantData = await Promise.all([
+    // 1. テナントマスターデータ
+    console.log('🏢 テナントマスターデータを投入中...')
+    const tenants = await Promise.all([
       prisma.tenant.upsert({
-        where: { tenant_id: 'TENANT_001' },
+        where: { tenant_id: 'TENANT001' },
         update: {},
         create: {
-          tenant_id: 'TENANT_001',
+          tenant_id: 'TENANT001',
           tenant_code: 'acme-corp',
           tenant_name: '株式会社ACME',
           tenant_name_en: 'ACME Corporation',
           tenant_short_name: 'ACME',
           tenant_type: 'ENTERPRISE',
-          tenant_level: 1,
           domain_name: 'acme-corp.com',
           subdomain: 'acme',
-          logo_url: 'https://cdn.example.com/logos/acme-corp.png',
-          primary_color: '#0066CC',
-          secondary_color: '#FF6600',
           timezone: 'Asia/Tokyo',
           locale: 'ja_JP',
           currency_code: 'JPY',
-          date_format: 'YYYY-MM-DD',
-          time_format: 'HH:mm:ss',
-          admin_email: 'admin@acme-corp.com',
-          contact_email: 'contact@acme-corp.com',
-          phone_number: '03-1234-5678',
-          address: '東京都千代田区丸の内1-1-1',
-          postal_code: '100-0005',
-          country_code: 'JP',
-          subscription_plan: 'ENTERPRISE',
+          status: 'ACTIVE',
           max_users: 1000,
           max_storage_gb: 1000,
-          features_enabled: '["advanced_analytics", "custom_reports", "api_access", "sso", "audit_logs"]',
-          custom_settings: '{"theme": "corporate", "dashboard_layout": "advanced", "notification_preferences": {"email": true, "slack": true}}',
-          security_policy: '{"password_policy": {"min_length": 8, "require_special_chars": true}, "session_timeout": 480, "ip_whitelist": ["192.168.1.0/24"]}',
-          data_retention_days: 2555,
-          backup_enabled: true,
-          backup_frequency: 'DAILY',
-          contract_start_date: '2024-01-01',
-          contract_end_date: '2024-12-31',
-          billing_cycle: 'ANNUAL',
+          subscription_plan: 'ENTERPRISE',
           monthly_fee: 50000.0,
-          setup_fee: 100000.0,
-          status: 'ACTIVE',
-          activation_date: '2024-01-01',
-          last_login_date: '2024-06-01',
-          current_users_count: 250,
-          storage_used_gb: 125.5,
-          api_rate_limit: 10000,
-          sso_enabled: true,
-          sso_provider: 'SAML',
-          sso_config: '{"entity_id": "acme-corp", "sso_url": "https://sso.acme-corp.com/saml", "certificate": "..."}',
-          webhook_url: 'https://api.acme-corp.com/webhooks/skill-system',
-          webhook_secret: 'webhook_secret_key_123',
-          created_by: 'SYSTEM',
-          notes: '大手企業向けエンタープライズプラン',
+          code: 'TENANT001',
+          name: '株式会社ACME',
         },
       }),
       prisma.tenant.upsert({
-        where: { tenant_id: 'TENANT_002' },
+        where: { tenant_id: 'TENANT002' },
         update: {},
         create: {
-          tenant_id: 'TENANT_002',
+          tenant_id: 'TENANT002',
           tenant_code: 'beta-tech',
           tenant_name: 'ベータテクノロジー株式会社',
           tenant_name_en: 'Beta Technology Inc.',
           tenant_short_name: 'BetaTech',
           tenant_type: 'ENTERPRISE',
-          tenant_level: 1,
           subdomain: 'beta-tech',
-          logo_url: 'https://cdn.example.com/logos/beta-tech.png',
-          primary_color: '#28A745',
-          secondary_color: '#6C757D',
           timezone: 'Asia/Tokyo',
           locale: 'ja_JP',
           currency_code: 'JPY',
-          date_format: 'YYYY/MM/DD',
-          time_format: 'HH:mm',
-          admin_email: 'admin@beta-tech.co.jp',
-          contact_email: 'info@beta-tech.co.jp',
-          phone_number: '06-9876-5432',
-          address: '大阪府大阪市北区梅田2-2-2',
-          postal_code: '530-0001',
-          country_code: 'JP',
-          subscription_plan: 'STANDARD',
+          status: 'ACTIVE',
           max_users: 200,
           max_storage_gb: 100,
-          features_enabled: '["basic_analytics", "standard_reports", "api_access"]',
-          custom_settings: '{"theme": "modern", "dashboard_layout": "standard"}',
-          security_policy: '{"password_policy": {"min_length": 6, "require_special_chars": false}, "session_timeout": 240}',
-          data_retention_days: 1825,
-          backup_enabled: true,
-          backup_frequency: 'WEEKLY',
-          contract_start_date: '2024-03-01',
-          contract_end_date: '2025-02-28',
-          billing_cycle: 'MONTHLY',
+          subscription_plan: 'STANDARD',
           monthly_fee: 15000.0,
-          setup_fee: 30000.0,
-          status: 'ACTIVE',
-          activation_date: '2024-03-01',
-          last_login_date: '2024-05-30',
-          current_users_count: 85,
-          storage_used_gb: 23.75,
-          api_rate_limit: 2000,
-          sso_enabled: false,
-          created_by: 'SYSTEM',
-          notes: '中堅企業向けスタンダードプラン',
+          code: 'TENANT002',
+          name: 'ベータテクノロジー株式会社',
         },
       }),
     ])
 
-    // MST_Departmentデータ
-    console.log('📊 MST_Departmentデータを投入中...')
-    const departmentData = await Promise.all([
+    // 2. 部署マスターデータ
+    console.log('📁 部署マスターデータを投入中...')
+    const departments = await Promise.all([
       prisma.department.upsert({
         where: { department_code: 'DEPT001' },
         update: {},
@@ -133,15 +72,10 @@ async function main() {
           department_name_short: '経営企画',
           department_level: 1,
           department_type: 'HEADQUARTERS',
-          manager_id: 'EMP000001',
-          cost_center_code: 'CC001',
-          budget_amount: 50000000.0,
-          location: '本社ビル 10F',
-          phone_number: '03-1234-5678',
-          email_address: 'planning@company.com',
-          establishment_date: '2020-04-01',
-          department_status: 'ACTIVE',
           sort_order: 1,
+          department_status: 'ACTIVE',
+          code: 'DEPT001',
+          name: '経営企画本部',
           description: '会社全体の経営戦略立案・推進を担当',
         },
       }),
@@ -155,24 +89,18 @@ async function main() {
           parent_department_id: 'DEPT001',
           department_level: 2,
           department_type: 'DEPARTMENT',
-          manager_id: 'EMP000002',
-          deputy_manager_id: 'EMP000003',
-          cost_center_code: 'CC002',
-          budget_amount: 120000000.0,
-          location: '本社ビル 8F',
-          phone_number: '03-1234-5679',
-          email_address: 'dev@company.com',
-          establishment_date: '2020-04-01',
-          department_status: 'ACTIVE',
           sort_order: 2,
+          department_status: 'ACTIVE',
+          code: 'DEPT002',
+          name: 'システム開発部',
           description: '社内システムの開発・保守・運用を担当',
         },
       }),
     ])
 
-    // MST_Positionデータ
-    console.log('📊 MST_Positionデータを投入中...')
-    const positionData = await Promise.all([
+    // 3. 役職マスターデータ
+    console.log('👔 役職マスターデータを投入中...')
+    const positions = await Promise.all([
       prisma.position.upsert({
         where: { position_code: 'POS001' },
         update: {},
@@ -184,16 +112,12 @@ async function main() {
           position_rank: 1,
           position_category: 'EXECUTIVE',
           authority_level: 10,
-          approval_limit: 999999999.99,
-          salary_grade: 'E1',
-          allowance_amount: 500000.0,
           is_management: true,
           is_executive: true,
-          requires_approval: true,
-          can_hire: true,
-          can_evaluate: true,
           position_status: 'ACTIVE',
           sort_order: 1,
+          code: 'POS001',
+          name: '代表取締役社長',
           description: '会社の最高責任者として経営全般を統括',
         },
       }),
@@ -202,23 +126,19 @@ async function main() {
         update: {},
         create: {
           position_code: 'POS002',
-          position_name: '取締役',
-          position_name_short: '取締役',
-          position_level: 2,
+          position_name: '部長',
+          position_name_short: '部長',
+          position_level: 3,
           position_rank: 1,
-          position_category: 'EXECUTIVE',
-          authority_level: 9,
-          approval_limit: 100000000.0,
-          salary_grade: 'E2',
-          allowance_amount: 300000.0,
+          position_category: 'MANAGER',
+          authority_level: 7,
           is_management: true,
-          is_executive: true,
-          requires_approval: true,
-          can_hire: true,
-          can_evaluate: true,
+          is_executive: false,
           position_status: 'ACTIVE',
-          sort_order: 2,
-          description: '取締役会メンバーとして経営方針決定に参画',
+          sort_order: 3,
+          code: 'POS002',
+          name: '部長',
+          description: '部門の責任者として業務全般を管理',
         },
       }),
       prisma.position.upsert({
@@ -226,30 +146,44 @@ async function main() {
         update: {},
         create: {
           position_code: 'POS003',
-          position_name: '部長',
-          position_name_short: '部長',
-          position_level: 3,
-          position_rank: 1,
+          position_name: '課長',
+          position_name_short: '課長',
+          position_level: 4,
+          position_rank: 2,
           position_category: 'MANAGER',
-          authority_level: 7,
-          approval_limit: 10000000.0,
-          salary_grade: 'M1',
-          allowance_amount: 100000.0,
+          authority_level: 5,
           is_management: true,
           is_executive: false,
-          requires_approval: true,
-          can_hire: true,
-          can_evaluate: true,
           position_status: 'ACTIVE',
-          sort_order: 3,
-          description: '部門の責任者として業務全般を管理',
+          sort_order: 4,
+          code: 'POS003',
+          name: '課長',
+        },
+      }),
+      prisma.position.upsert({
+        where: { position_code: 'POS004' },
+        update: {},
+        create: {
+          position_code: 'POS004',
+          position_name: '一般',
+          position_name_short: '一般',
+          position_level: 5,
+          position_rank: 3,
+          position_category: 'STAFF',
+          authority_level: 1,
+          is_management: false,
+          is_executive: false,
+          position_status: 'ACTIVE',
+          sort_order: 5,
+          code: 'POS004',
+          name: '一般',
         },
       }),
     ])
 
-    // MST_JobTypeデータ
-    console.log('📊 MST_JobTypeデータを投入中...')
-    const jobTypeData = await Promise.all([
+    // 4. 職種マスターデータ
+    console.log('💼 職種マスターデータを投入中...')
+    const jobTypes = await Promise.all([
       prisma.jobType.upsert({
         where: { job_type_code: 'SE' },
         update: {},
@@ -259,18 +193,12 @@ async function main() {
           job_type_name_en: 'Systems Engineer',
           job_category: 'ENGINEERING',
           job_level: 'SENIOR',
-          description: 'システムの設計・開発・テストを担当するエンジニア',
           required_experience_years: 3,
-          salary_grade_min: 3,
-          salary_grade_max: 6,
-          career_path: 'SE → シニアSE → テックリード → エンジニアリングマネージャー',
-          required_certifications: '["基本情報技術者", "応用情報技術者"]',
-          required_skills: '["Java", "SQL", "システム設計", "要件定義"]',
-          department_affinity: '["開発部", "システム部"]',
-          remote_work_eligible: true,
-          travel_frequency: 'LOW',
           sort_order: 1,
           is_active: true,
+          code: 'SE',
+          name: 'システムエンジニア',
+          description: 'システムの設計・開発・テストを担当するエンジニア',
         },
       }),
       prisma.jobType.upsert({
@@ -282,48 +210,19 @@ async function main() {
           job_type_name_en: 'Project Manager',
           job_category: 'MANAGEMENT',
           job_level: 'MANAGER',
-          description: 'プロジェクトの計画・実行・管理を統括する責任者',
           required_experience_years: 5,
-          salary_grade_min: 5,
-          salary_grade_max: 8,
-          career_path: 'SE → リーダー → PM → 部門マネージャー',
-          required_certifications: '["PMP", "プロジェクトマネージャ試験"]',
-          required_skills: '["プロジェクト管理", "リーダーシップ", "コミュニケーション", "リスク管理"]',
-          department_affinity: '["開発部", "PMO"]',
-          remote_work_eligible: true,
-          travel_frequency: 'MEDIUM',
           sort_order: 2,
           is_active: true,
-        },
-      }),
-      prisma.jobType.upsert({
-        where: { job_type_code: 'QA' },
-        update: {},
-        create: {
-          job_type_code: 'QA',
-          job_type_name: '品質保証エンジニア',
-          job_type_name_en: 'Quality Assurance Engineer',
-          job_category: 'ENGINEERING',
-          job_level: 'SENIOR',
-          description: 'ソフトウェアの品質保証・テスト設計・実行を担当',
-          required_experience_years: 2,
-          salary_grade_min: 3,
-          salary_grade_max: 6,
-          career_path: 'QA → シニアQA → QAリード → QAマネージャー',
-          required_certifications: '["JSTQB", "ソフトウェア品質技術者資格"]',
-          required_skills: '["テスト設計", "自動化テスト", "品質管理", "バグ分析"]',
-          department_affinity: '["品質保証部", "開発部"]',
-          remote_work_eligible: true,
-          travel_frequency: 'NONE',
-          sort_order: 3,
-          is_active: true,
+          code: 'PM',
+          name: 'プロジェクトマネージャー',
+          description: 'プロジェクトの計画・実行・管理を統括する責任者',
         },
       }),
     ])
 
-    // MST_Roleデータ
-    console.log('📊 MST_Roleデータを投入中...')
-    const roleData = await Promise.all([
+    // 5. ロールマスターデータ
+    console.log('🔐 ロールマスターデータを投入中...')
+    const roles = await Promise.all([
       prisma.role.upsert({
         where: { role_code: 'ROLE001' },
         update: {},
@@ -335,11 +234,10 @@ async function main() {
           role_level: 1,
           is_system_role: true,
           is_tenant_specific: false,
-          max_users: 5,
-          role_priority: 1,
           role_status: 'ACTIVE',
-          effective_from: '2025-01-01',
           sort_order: 1,
+          code: 'ROLE001',
+          name: 'システム管理者',
           description: 'システム全体の管理権限を持つ最上位ロール',
         },
       }),
@@ -354,11 +252,10 @@ async function main() {
           role_level: 2,
           is_system_role: true,
           is_tenant_specific: true,
-          max_users: 10,
-          role_priority: 2,
           role_status: 'ACTIVE',
-          effective_from: '2025-01-01',
           sort_order: 2,
+          code: 'ROLE002',
+          name: 'テナント管理者',
           description: 'テナント内の管理権限を持つロール',
         },
       }),
@@ -373,19 +270,18 @@ async function main() {
           role_level: 3,
           is_system_role: true,
           is_tenant_specific: false,
-          role_priority: 10,
-          auto_assign_conditions: '{"default": true}',
           role_status: 'ACTIVE',
-          effective_from: '2025-01-01',
           sort_order: 10,
+          code: 'ROLE003',
+          name: '一般ユーザー',
           description: '基本的な業務機能を利用できるロール',
         },
       }),
     ])
 
-    // MST_Permissionデータ
-    console.log('📊 MST_Permissionデータを投入中...')
-    const permissionData = await Promise.all([
+    // 6. 権限マスターデータ
+    console.log('🔑 権限マスターデータを投入中...')
+    const permissions = await Promise.all([
       prisma.permission.upsert({
         where: { permission_code: 'PERM_USER_READ' },
         update: {},
@@ -403,8 +299,9 @@ async function main() {
           requires_approval: false,
           audit_required: true,
           permission_status: 'ACTIVE',
-          effective_from: '2025-01-01',
           sort_order: 1,
+          code: 'PERM_USER_READ',
+          name: 'ユーザー情報参照',
           description: 'ユーザー情報の参照権限',
         },
       }),
@@ -426,8 +323,9 @@ async function main() {
           requires_approval: false,
           audit_required: true,
           permission_status: 'ACTIVE',
-          effective_from: '2025-01-01',
           sort_order: 2,
+          code: 'PERM_USER_UPDATE',
+          name: 'ユーザー情報更新',
           description: 'ユーザー情報の更新権限（同一部署のみ）',
         },
       }),
@@ -448,16 +346,17 @@ async function main() {
           requires_approval: true,
           audit_required: true,
           permission_status: 'ACTIVE',
-          effective_from: '2025-01-01',
           sort_order: 100,
+          code: 'PERM_SYSTEM_ADMIN',
+          name: 'システム管理',
           description: 'システム全体の管理権限',
         },
       }),
     ])
 
-    // MST_SkillCategoryデータ
-    console.log('📊 MST_SkillCategoryデータを投入中...')
-    const skillCategoryData = await Promise.all([
+    // 7. スキルカテゴリマスターデータ
+    console.log('🎯 スキルカテゴリマスターデータを投入中...')
+    const skillCategories = await Promise.all([
       prisma.skillCategory.upsert({
         where: { category_code: 'CAT001' },
         update: {},
@@ -474,12 +373,12 @@ async function main() {
           skill_count: 25,
           evaluation_method: 'LEVEL',
           max_level: 5,
-          icon_url: '/icons/programming.svg',
           color_code: '#007ACC',
           display_order: 1,
           is_popular: true,
           category_status: 'ACTIVE',
-          effective_from: '2025-01-01',
+          code: 'CAT001',
+          name: 'プログラミング言語',
           description: '各種プログラミング言語のスキル',
         },
       }),
@@ -500,12 +399,12 @@ async function main() {
           skill_count: 8,
           evaluation_method: 'LEVEL',
           max_level: 5,
-          icon_url: '/icons/java.svg',
           color_code: '#ED8B00',
           display_order: 1,
           is_popular: true,
           category_status: 'ACTIVE',
-          effective_from: '2025-01-01',
+          code: 'CAT002',
+          name: 'Java',
           description: 'Java言語に関するスキル',
         },
       }),
@@ -525,37 +424,100 @@ async function main() {
           skill_count: 12,
           evaluation_method: 'LEVEL',
           max_level: 4,
-          icon_url: '/icons/communication.svg',
           color_code: '#28A745',
           display_order: 10,
           is_popular: true,
           category_status: 'ACTIVE',
-          effective_from: '2025-01-01',
+          code: 'CAT003',
+          name: 'コミュニケーション',
           description: 'コミュニケーション能力に関するスキル',
         },
       }),
     ])
 
-    // MST_SkillItemデータ
-    console.log('📊 MST_SkillItemデータを投入中...')
-    const skillItemData = await Promise.all([
+    // 8. スキルマスターデータ
+    console.log('⚡ スキルマスターデータを投入中...')
+    const skills = await Promise.all([
       prisma.skillItem.upsert({
         where: { skill_code: 'SKILL001' },
         update: {},
         create: {
           skill_code: 'SKILL001',
           skill_name: 'Java',
-          skill_category_id: 'CAT001',
+          skill_category_id: skillCategories[1].category_code,
           skill_type: 'TECHNICAL',
           difficulty_level: 3,
           importance_level: 4,
+          code: 'SKILL001',
+          name: 'Java',
+          description: 'Java言語でのプログラミングスキル',
+        },
+      }),
+      prisma.skillItem.upsert({
+        where: { skill_code: 'SKILL002' },
+        update: {},
+        create: {
+          skill_code: 'SKILL002',
+          skill_name: 'React.js',
+          skill_category_id: skillCategories[0].category_code,
+          skill_type: 'TECHNICAL',
+          difficulty_level: 3,
+          importance_level: 5,
+          code: 'SKILL002',
+          name: 'React.js',
+          description: 'Reactライブラリを使用したフロントエンド開発',
+        },
+      }),
+      prisma.skillItem.upsert({
+        where: { skill_code: 'SKILL003' },
+        update: {},
+        create: {
+          skill_code: 'SKILL003',
+          skill_name: 'Next.js',
+          skill_category_id: skillCategories[0].category_code,
+          skill_type: 'TECHNICAL',
+          difficulty_level: 4,
+          importance_level: 5,
+          code: 'SKILL003',
+          name: 'Next.js',
+          description: 'Next.jsフレームワークを使用したフルスタック開発',
+        },
+      }),
+      prisma.skillItem.upsert({
+        where: { skill_code: 'SKILL004' },
+        update: {},
+        create: {
+          skill_code: 'SKILL004',
+          skill_name: 'TypeScript',
+          skill_category_id: skillCategories[0].category_code,
+          skill_type: 'TECHNICAL',
+          difficulty_level: 3,
+          importance_level: 4,
+          code: 'SKILL004',
+          name: 'TypeScript',
+          description: 'TypeScriptを使用した型安全な開発',
+        },
+      }),
+      prisma.skillItem.upsert({
+        where: { skill_code: 'SKILL005' },
+        update: {},
+        create: {
+          skill_code: 'SKILL005',
+          skill_name: 'コミュニケーション',
+          skill_category_id: skillCategories[2].category_code,
+          skill_type: 'SOFT',
+          difficulty_level: 2,
+          importance_level: 5,
+          code: 'SKILL005',
+          name: 'コミュニケーション',
+          description: 'チーム内外でのコミュニケーション能力',
         },
       }),
     ])
 
-    // MST_Employeeデータ
-    console.log('📊 MST_Employeeデータを投入中...')
-    const employeeData = await Promise.all([
+    // 9. 従業員マスターデータ
+    console.log('👤 従業員マスターデータを投入中...')
+    const employees = await Promise.all([
       prisma.employee.upsert({
         where: { employee_code: 'EMP000001' },
         update: {},
@@ -565,14 +527,16 @@ async function main() {
           full_name_kana: 'ヤマダタロウ',
           email: 'yamada.taro@company.com',
           phone: '090-1234-5678',
-          hire_date: '2020-04-01',
-          birth_date: '1990-01-15',
+          hire_date: new Date('2020-04-01'),
+          birth_date: new Date('1990-01-15'),
           gender: 'M',
-          department_id: 'DEPT001',
-          position_id: 'POS001',
-          job_type_id: 'JOB001',
+          department_id: departments[1].department_code,
+          position_id: positions[1].position_code,
+          job_type_id: jobTypes[0].job_type_code,
           employment_status: 'FULL_TIME',
           employee_status: 'ACTIVE',
+          code: 'EMP000001',
+          name: '山田太郎',
         },
       }),
       prisma.employee.upsert({
@@ -584,161 +548,250 @@ async function main() {
           full_name_kana: 'サトウハナコ',
           email: 'sato.hanako@company.com',
           phone: '090-2345-6789',
-          hire_date: '2021-04-01',
-          birth_date: '1992-03-20',
+          hire_date: new Date('2021-04-01'),
+          birth_date: new Date('1992-03-20'),
           gender: 'F',
-          department_id: 'DEPT002',
-          position_id: 'POS002',
-          job_type_id: 'JOB002',
+          department_id: departments[1].department_code,
+          position_id: positions[3].position_code,
+          job_type_id: jobTypes[1].job_type_code,
           employment_status: 'FULL_TIME',
           manager_id: 'EMP000001',
           employee_status: 'ACTIVE',
+          code: 'EMP000002',
+          name: '佐藤花子',
+        },
+      }),
+      // 管理者ユーザー
+      prisma.employee.upsert({
+        where: { employee_code: 'ADMIN001' },
+        update: {},
+        create: {
+          employee_code: 'ADMIN001',
+          full_name: 'システム管理者',
+          full_name_kana: 'システムカンリシャ',
+          email: 'admin@skill-report.local',
+          hire_date: new Date('2025-01-01'),
+          department_id: departments[0].department_code,
+          position_id: positions[0].position_code,
+          employment_status: 'FULL_TIME',
+          employee_status: 'ACTIVE',
+          code: 'ADMIN001',
+          name: 'システム管理者',
         },
       }),
     ])
 
-    // MST_UserAuthデータ
-    console.log('📊 MST_UserAuthデータを投入中...')
-    const userAuthData = await Promise.all([
+    // 10. 認証情報の作成
+    console.log('🔐 認証情報を作成中...')
+    const userAuths = await Promise.all([
       prisma.userAuth.upsert({
-        where: { user_id: 'USER000001' },
+        where: { user_id: 'EMP000001' },
         update: {},
         create: {
-          user_id: 'USER000001',
+          user_id: 'EMP000001',
           login_id: 'yamada.taro@company.com',
           password_hash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5uIoS',
           password_salt: 'randomsalt123',
           employee_id: 'EMP000001',
           account_status: 'ACTIVE',
-          last_login_at: '2025-06-01 09:00:00',
-          last_login_ip: '192.168.1.100',
           failed_login_count: 0,
-          password_changed_at: '2025-01-01 00:00:00',
-          password_expires_at: '2025-12-31 23:59:59',
           mfa_enabled: true,
           mfa_secret: 'JBSWY3DPEHPK3PXP',
           session_timeout: 480,
+          code: 'AUTH001',
+          name: '山田太郎認証',
         },
       }),
       prisma.userAuth.upsert({
-        where: { user_id: 'USER000002' },
+        where: { user_id: 'EMP000002' },
         update: {},
         create: {
-          user_id: 'USER000002',
+          user_id: 'EMP000002',
           login_id: 'sato.hanako@company.com',
           password_hash: '$2b$12$XQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5uIoX',
           password_salt: 'randomsalt456',
           employee_id: 'EMP000002',
           account_status: 'ACTIVE',
-          last_login_at: '2025-05-31 17:30:00',
-          last_login_ip: '192.168.1.101',
           failed_login_count: 0,
-          password_changed_at: '2025-02-01 00:00:00',
-          password_expires_at: '2026-01-31 23:59:59',
           mfa_enabled: false,
           session_timeout: 240,
+          code: 'AUTH002',
+          name: '佐藤花子認証',
+        },
+      }),
+      prisma.userAuth.upsert({
+        where: { user_id: 'ADMIN001' },
+        update: {},
+        create: {
+          user_id: 'ADMIN001',
+          login_id: 'admin@skill-report.local',
+          password_hash: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+          employee_id: 'ADMIN001',
+          account_status: 'ACTIVE',
+          failed_login_count: 0,
+          mfa_enabled: false,
+          code: 'AUTH_ADMIN',
+          name: 'システム管理者認証',
         },
       }),
     ])
 
-    // MST_UserRoleデータ
-    console.log('📊 MST_UserRoleデータを投入中...')
-    const userRoleData = await Promise.all([
+    // 11. ユーザーロール紐付け
+    console.log('🔗 ユーザーロール紐付けを作成中...')
+    const userRoles = await Promise.all([
       prisma.userRole.upsert({
-        where: { user_id_role_id: { user_id: 'USER000001', role_id: 'ROLE003' } },
+        where: {
+          user_id_role_id: {
+            user_id: 'EMP000001',
+            role_id: roles[2].role_code,
+          },
+        },
         update: {},
         create: {
-          user_id: 'USER000001',
-          role_id: 'ROLE003',
+          user_id: 'EMP000001',
+          role_id: roles[2].role_code,
           assignment_type: 'DIRECT',
-          assigned_by: 'USER000000',
+          assigned_by: 'ADMIN001',
           assignment_reason: '新規ユーザー登録時の標準ロール割り当て',
-          effective_from: '2025-01-01 00:00:00',
           is_primary_role: true,
           priority_order: 1,
           auto_assigned: true,
           requires_approval: false,
           assignment_status: 'ACTIVE',
-          last_used_at: '2025-06-01 09:00:00',
           usage_count: 150,
+          code: 'UR001',
+          name: '山田太郎-一般ユーザー',
         },
       }),
       prisma.userRole.upsert({
-        where: { user_id_role_id: { user_id: 'USER000002', role_id: 'ROLE002' } },
+        where: {
+          user_id_role_id: {
+            user_id: 'EMP000002',
+            role_id: roles[1].role_code,
+          },
+        },
         update: {},
         create: {
-          user_id: 'USER000002',
-          role_id: 'ROLE002',
+          user_id: 'EMP000002',
+          role_id: roles[1].role_code,
           assignment_type: 'DIRECT',
-          assigned_by: 'USER000001',
+          assigned_by: 'ADMIN001',
           assignment_reason: 'テナント管理者権限付与',
-          effective_from: '2025-02-01 00:00:00',
           is_primary_role: true,
           priority_order: 1,
-          conditions: '{"tenant_id": "TENANT001"}',
           auto_assigned: false,
           requires_approval: true,
           approval_status: 'APPROVED',
-          approved_by: 'USER000001',
-          approved_at: '2025-01-31 15:30:00',
+          approved_by: 'ADMIN001',
           assignment_status: 'ACTIVE',
-          last_used_at: '2025-06-01 10:30:00',
           usage_count: 75,
+          code: 'UR002',
+          name: '佐藤花子-テナント管理者',
+        },
+      }),
+      prisma.userRole.upsert({
+        where: {
+          user_id_role_id: {
+            user_id: 'ADMIN001',
+            role_id: roles[0].role_code,
+          },
+        },
+        update: {},
+        create: {
+          user_id: 'ADMIN001',
+          role_id: roles[0].role_code,
+          assignment_type: 'DIRECT',
+          assigned_by: 'SYSTEM',
+          assignment_reason: 'システム管理者権限',
+          is_primary_role: true,
+          priority_order: 1,
+          auto_assigned: true,
+          requires_approval: false,
+          assignment_status: 'ACTIVE',
+          usage_count: 500,
+          code: 'UR_ADMIN',
+          name: 'システム管理者-システム管理者',
         },
       }),
     ])
 
-    // TRN_SkillRecordデータ
-    console.log('📊 TRN_SkillRecordデータを投入中...')
-    const skillRecordData = await Promise.all([
+   
+    console.log('📊 スキル記録データを投入中...')
+    const skillRecords = await Promise.all([
       prisma.skillRecord.upsert({
-        where: { employee_id_skill_item_id: { employee_id: 'EMP000001', skill_item_id: 'SKILL001' } },
+        where: {
+          employee_id_skill_item_id: {
+            employee_id: 'EMP000001',
+            skill_item_id: skills[0].skill_code,
+          },
+        },
         update: {},
         create: {
           employee_id: 'EMP000001',
-          skill_item_id: 'SKILL001',
+          skill_item_id: skills[0].skill_code,
           skill_level: 4,
           self_assessment: 4,
           manager_assessment: 3,
           evidence_description: 'Javaを使用したWebアプリケーション開発プロジェクトを3件担当',
-          acquisition_date: '2020-06-01',
-          last_used_date: '2025-05-30',
-          certification_id: 'CERT001',
-          skill_category_id: 'CAT001',
-          assessment_date: '2025-04-01',
-          assessor_id: 'EMP000010',
+          acquisition_date: new Date('2020-06-01'),
+          last_used_date: new Date('2025-05-30'),
+          skill_category_id: skillCategories[1].category_code,
+          assessment_date: new Date('2025-04-01'),
+          assessor_id: 'EMP000001',
           skill_status: 'ACTIVE',
           learning_hours: 120,
           project_experience_count: 3,
         },
       }),
       prisma.skillRecord.upsert({
-        where: { employee_id_skill_item_id: { employee_id: 'EMP000001', skill_item_id: 'SKILL002' } },
+        where: {
+          employee_id_skill_item_id: {
+            employee_id: 'EMP000001',
+            skill_item_id: skills[1].skill_code,
+          },
+        },
         update: {},
         create: {
           employee_id: 'EMP000001',
-          skill_item_id: 'SKILL002',
+          skill_item_id: skills[1].skill_code,
           skill_level: 3,
           self_assessment: 3,
           manager_assessment: 3,
           evidence_description: 'AWS環境でのインフラ構築・運用経験',
-          acquisition_date: '2021-03-15',
-          last_used_date: '2025-05-25',
-          expiry_date: '2026-03-15',
-          certification_id: 'CERT002',
-          skill_category_id: 'CAT002',
-          assessment_date: '2025-04-01',
-          assessor_id: 'EMP000010',
+          acquisition_date: new Date('2021-03-15'),
+          last_used_date: new Date('2025-05-25'),
+          expiry_date: new Date('2026-03-15'),
+          skill_category_id: skillCategories[0].category_code,
+          assessment_date: new Date('2025-04-01'),
+          assessor_id: 'EMP000001',
           skill_status: 'ACTIVE',
           learning_hours: 80,
           project_experience_count: 2,
+          id: 'SR002',
+          is_deleted: false,
+          tenant_id: 'TENANT001',
+          created_at: new Date(),
+          updated_at: new Date(),
+          created_by: 'EMP000001',
+          updated_by: 'EMP000001',
         },
       }),
     ])
 
-
     console.log('✅ データベースの初期データ投入が完了しました！')
-    console.log('📋 投入されたデータの詳細はログを確認してください')
+    console.log('📋 投入されたデータ:')
+    console.log(`   - テナント: ${tenants.length}件`)
+    console.log(`   - 部署: ${departments.length}件`)
+    console.log(`   - 役職: ${positions.length}件`)
+    console.log(`   - 職種: ${jobTypes.length}件`)
+    console.log(`   - ロール: ${roles.length}件`)
+    console.log(`   - 権限: ${permissions.length}件`)
+    console.log(`   - スキルカテゴリ: ${skillCategories.length}件`)
+    console.log(`   - スキル: ${skills.length}件`)
+    console.log(`   - 従業員: ${employees.length}件`)
+    console.log(`   - 認証情報: ${userAuths.length}件`)
+    console.log(`   - ユーザーロール: ${userRoles.length}件`)
+    console.log(`   - スキル記録: ${skillRecords.length}件`)
     console.log('')
     console.log('🔐 ログイン情報:')
     console.log('   管理者:')
