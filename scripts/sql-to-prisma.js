@@ -3,6 +3,7 @@ const path = require('path');
 
 const ddlDir = process.argv[2];
 const outputFile = process.argv[3];
+
 if (!ddlDir || !outputFile) {
   console.error('Usage: node sql-to-prisma.js <ddl_dir> <output_file>');
   process.exit(1);
@@ -29,23 +30,23 @@ schema.push('  provider = "prisma-client-js"');
 schema.push('}');
 schema.push('');
 schema.push('datasource db {');
-schema.push('  provider = "mysql"');
+
 schema.push('  url      = env("DATABASE_URL")');
 schema.push('}');
 schema.push('');
 
-for (const file of fs.readdirSync(ddlDir)) {
-  if (!file.endsWith('.sql')) continue;
+
   const content = fs.readFileSync(path.join(ddlDir, file), 'utf8');
   const tableMatch = content.match(/CREATE TABLE\s+(\w+)\s*\(([^;]*)\)/s);
   if (!tableMatch) continue;
   const tableName = tableMatch[1];
+
   const block = tableMatch[2];
   const lines = block.split(/\n/).map(l=>l.trim()).filter(l=>l && !l.startsWith('--'));
   const columns = [];
   let primaryCols = [];
   const pkMatch = content.match(/PRIMARY KEY\s*\(([^)]+)\)/i);
-  if (pkMatch) primaryCols = pkMatch[1].split(/\s*,\s*/);
+
 
   for (const line of lines) {
     const clean = line.replace(/,\s*$/, '').replace(/COMMENT\s+'.*'/i,'').trim();
@@ -59,11 +60,13 @@ for (const file of fs.readdirSync(ddlDir)) {
     let field = `  ${name} ${type}`;
     if (optional && !isId) field += '?';
     if (isId) field += ' @id';
+
     columns.push(field);
   }
   const modelName = toModelName(tableName);
   schema.push(`model ${modelName} {`);
   schema.push(...columns);
+
   schema.push(`  @@map("${tableName}")`);
   schema.push('}');
   schema.push('');
