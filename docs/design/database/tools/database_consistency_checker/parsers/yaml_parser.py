@@ -15,8 +15,8 @@ from core.models import (
 class YAMLParser:
     """基本YAML解析クラス（既存機能との互換性維持）"""
     
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
     
     def parse_yaml_file(self, file_path: Path) -> Optional[Dict[str, Any]]:
         """YAMLファイルの基本解析（既存機能）"""
@@ -31,8 +31,8 @@ class YAMLParser:
 class EnhancedYAMLParser(YAMLParser):
     """拡張YAML解析クラス - データ型整合性チェック用"""
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, logger: logging.Logger):
+        super().__init__(logger)
         self.data_type_mapping = self._init_data_type_mapping()
     
     def _init_data_type_mapping(self) -> Dict[str, str]:

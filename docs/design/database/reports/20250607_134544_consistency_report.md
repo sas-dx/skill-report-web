@@ -1,8 +1,8 @@
 # データベース整合性チェックレポート
 
-**チェック日時:** 2025-06-06 23:11:50
-**対象テーブル数:** 51
-**総チェック数:** 562
+**チェック日時:** 2025-06-07 13:45:44
+**対象テーブル数:** 100
+**総チェック数:** 1180
 
 ## 🔍 チェック内容について
 
@@ -100,9 +100,9 @@
 
 | 重要度 | 件数 | 割合 |
 |--------|------|------|
-| ✅ SUCCESS | 11 | 2.0% |
-| ⚠️ WARNING | 361 | 64.2% |
-| ❌ ERROR | 190 | 33.8% |
+| ⚠️ WARNING | 493 | 41.8% |
+| ❌ ERROR | 339 | 28.7% |
+| ℹ️ INFO | 348 | 29.5% |
 
 ### 🎯 総合判定
 
@@ -114,17 +114,351 @@
 
 | チェック名 | 成功 | 警告 | エラー | 情報 | 合計 |
 |------------|------|------|--------|------|------|
-| テーブル存在確認 | 0 | 0 | 1 | 0 | 1 |
+| テーブル存在確認 | 0 | 0 | 100 | 0 | 100 |
 | 孤立ファイル検出 | 0 | 102 | 0 | 0 | 102 |
 | 外部キー整合性 | 0 | 187 | 188 | 0 | 375 |
-| データ型整合性 | 10 | 24 | 1 | 0 | 35 |
-| YAMLフォーマット整合性 | 1 | 48 | 0 | 0 | 49 |
+| データ型整合性 | 0 | 0 | 51 | 0 | 51 |
+| 制約整合性 | 0 | 51 | 0 | 0 | 51 |
+| 修正提案 | 0 | 0 | 0 | 348 | 348 |
+| マルチテナント対応 | 0 | 51 | 0 | 0 | 51 |
+| 要求仕様ID追跡 | 0 | 51 | 0 | 0 | 51 |
+| パフォーマンス影響分析 | 0 | 51 | 0 | 0 | 51 |
 
 ## 📋 詳細結果
 
-### 🔍 テーブル存在確認 (1件)
+### 🔍 テーブル存在確認 (100件)
 
 #### 1. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** HIS_AuditLog
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'HIS_AuditLog'を追加してください
+
+---
+
+#### 2. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** HIS_NotificationLog
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'HIS_NotificationLog'を追加してください
+
+---
+
+#### 3. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** HIS_ReportGeneration
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'HIS_ReportGeneration'を追加してください
+
+---
+
+#### 4. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** HIS_TenantBilling
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'HIS_TenantBilling'を追加してください
+
+---
+
+#### 5. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_CareerPlan
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_CareerPlan'を追加してください
+
+---
+
+#### 6. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Certification
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Certification'を追加してください
+
+---
+
+#### 7. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_CertificationRequirement
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_CertificationRequirement'を追加してください
+
+---
+
+#### 8. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Department
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Department'を追加してください
+
+---
+
+#### 9. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Employee
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Employee'を追加してください
+
+---
+
+#### 10. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_EmployeeDepartment
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_EmployeeDepartment'を追加してください
+
+---
+
+#### 11. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_EmployeeJobType
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_EmployeeJobType'を追加してください
+
+---
+
+#### 12. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_EmployeePosition
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_EmployeePosition'を追加してください
+
+---
+
+#### 13. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_JobType
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_JobType'を追加してください
+
+---
+
+#### 14. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_JobTypeSkill
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_JobTypeSkill'を追加してください
+
+---
+
+#### 15. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_JobTypeSkillGrade
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_JobTypeSkillGrade'を追加してください
+
+---
+
+#### 16. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_NotificationSettings
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_NotificationSettings'を追加してください
+
+---
+
+#### 17. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_NotificationTemplate
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_NotificationTemplate'を追加してください
+
+---
+
+#### 18. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Permission
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Permission'を追加してください
+
+---
+
+#### 19. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Position
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Position'を追加してください
+
+---
+
+#### 20. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_ReportTemplate
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_ReportTemplate'を追加してください
+
+---
+
+#### 21. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Role
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Role'を追加してください
+
+---
+
+#### 22. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_RolePermission
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_RolePermission'を追加してください
+
+---
+
+#### 23. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
 
 **テーブル:** MST_Skill
 
@@ -136,6 +470,1406 @@
   - テーブル詳細YAML: ✅ 存在
 - **修正提案:**
   - テーブル一覧.mdに'MST_Skill'を追加してください
+
+---
+
+#### 24. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_SkillCategory
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_SkillCategory'を追加してください
+
+---
+
+#### 25. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_SkillGrade
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_SkillGrade'を追加してください
+
+---
+
+#### 26. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_SkillGradeRequirement
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_SkillGradeRequirement'を追加してください
+
+---
+
+#### 27. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_SkillHierarchy
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_SkillHierarchy'を追加してください
+
+---
+
+#### 28. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_SkillItem
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_SkillItem'を追加してください
+
+---
+
+#### 29. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_SystemConfig
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_SystemConfig'を追加してください
+
+---
+
+#### 30. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_Tenant
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_Tenant'を追加してください
+
+---
+
+#### 31. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_TenantSettings
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_TenantSettings'を追加してください
+
+---
+
+#### 32. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_TrainingProgram
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_TrainingProgram'を追加してください
+
+---
+
+#### 33. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_UserAuth
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_UserAuth'を追加してください
+
+---
+
+#### 34. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** MST_UserRole
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'MST_UserRole'を追加してください
+
+---
+
+#### 35. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_BackupHistory
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_BackupHistory'を追加してください
+
+---
+
+#### 36. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_IntegrationConfig
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_IntegrationConfig'を追加してください
+
+---
+
+#### 37. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_MasterData
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_MasterData'を追加してください
+
+---
+
+#### 38. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_SkillIndex
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_SkillIndex'を追加してください
+
+---
+
+#### 39. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_SkillMatrix
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_SkillMatrix'を追加してください
+
+---
+
+#### 40. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_SystemLog
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_SystemLog'を追加してください
+
+---
+
+#### 41. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_TenantUsage
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_TenantUsage'を追加してください
+
+---
+
+#### 42. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** SYS_TokenStore
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'SYS_TokenStore'を追加してください
+
+---
+
+#### 43. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-001
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-001.sql
+  - TBL-001_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-001.sql'を作成してください
+  - テーブル詳細YAML'TBL-001_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-001'の関連定義を追加してください
+
+---
+
+#### 44. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-002
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-002.sql
+  - TBL-002_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-002.sql'を作成してください
+  - テーブル詳細YAML'TBL-002_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-002'の関連定義を追加してください
+
+---
+
+#### 45. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-003
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-003.sql
+  - TBL-003_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-003.sql'を作成してください
+  - テーブル詳細YAML'TBL-003_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-003'の関連定義を追加してください
+
+---
+
+#### 46. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-004
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-004.sql
+  - TBL-004_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-004.sql'を作成してください
+  - テーブル詳細YAML'TBL-004_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-004'の関連定義を追加してください
+
+---
+
+#### 47. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-005
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-005.sql
+  - TBL-005_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-005.sql'を作成してください
+  - テーブル詳細YAML'TBL-005_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-005'の関連定義を追加してください
+
+---
+
+#### 48. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-006
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-006.sql
+  - TBL-006_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-006.sql'を作成してください
+  - テーブル詳細YAML'TBL-006_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-006'の関連定義を追加してください
+
+---
+
+#### 49. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-007
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-007.sql
+  - TBL-007_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-007.sql'を作成してください
+  - テーブル詳細YAML'TBL-007_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-007'の関連定義を追加してください
+
+---
+
+#### 50. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-008
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-008.sql
+  - TBL-008_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-008.sql'を作成してください
+  - テーブル詳細YAML'TBL-008_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-008'の関連定義を追加してください
+
+---
+
+#### 51. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-009
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-009.sql
+  - TBL-009_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-009.sql'を作成してください
+  - テーブル詳細YAML'TBL-009_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-009'の関連定義を追加してください
+
+---
+
+#### 52. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-010
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-010.sql
+  - TBL-010_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-010.sql'を作成してください
+  - テーブル詳細YAML'TBL-010_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-010'の関連定義を追加してください
+
+---
+
+#### 53. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-011
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-011.sql
+  - TBL-011_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-011.sql'を作成してください
+  - テーブル詳細YAML'TBL-011_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-011'の関連定義を追加してください
+
+---
+
+#### 54. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-012
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-012.sql
+  - TBL-012_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-012.sql'を作成してください
+  - テーブル詳細YAML'TBL-012_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-012'の関連定義を追加してください
+
+---
+
+#### 55. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-013
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-013.sql
+  - TBL-013_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-013.sql'を作成してください
+  - テーブル詳細YAML'TBL-013_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-013'の関連定義を追加してください
+
+---
+
+#### 56. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-014
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-014.sql
+  - TBL-014_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-014.sql'を作成してください
+  - テーブル詳細YAML'TBL-014_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-014'の関連定義を追加してください
+
+---
+
+#### 57. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-015
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-015.sql
+  - TBL-015_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-015.sql'を作成してください
+  - テーブル詳細YAML'TBL-015_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-015'の関連定義を追加してください
+
+---
+
+#### 58. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-016
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-016.sql
+  - TBL-016_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-016.sql'を作成してください
+  - テーブル詳細YAML'TBL-016_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-016'の関連定義を追加してください
+
+---
+
+#### 59. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-017
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-017.sql
+  - TBL-017_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-017.sql'を作成してください
+  - テーブル詳細YAML'TBL-017_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-017'の関連定義を追加してください
+
+---
+
+#### 60. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-018
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-018.sql
+  - TBL-018_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-018.sql'を作成してください
+  - テーブル詳細YAML'TBL-018_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-018'の関連定義を追加してください
+
+---
+
+#### 61. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-019
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-019.sql
+  - TBL-019_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-019.sql'を作成してください
+  - テーブル詳細YAML'TBL-019_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-019'の関連定義を追加してください
+
+---
+
+#### 62. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-020
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-020.sql
+  - TBL-020_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-020.sql'を作成してください
+  - テーブル詳細YAML'TBL-020_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-020'の関連定義を追加してください
+
+---
+
+#### 63. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-021
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-021.sql
+  - TBL-021_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-021.sql'を作成してください
+  - テーブル詳細YAML'TBL-021_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-021'の関連定義を追加してください
+
+---
+
+#### 64. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-022
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-022.sql
+  - TBL-022_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-022.sql'を作成してください
+  - テーブル詳細YAML'TBL-022_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-022'の関連定義を追加してください
+
+---
+
+#### 65. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-023
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-023.sql
+  - TBL-023_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-023.sql'を作成してください
+  - テーブル詳細YAML'TBL-023_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-023'の関連定義を追加してください
+
+---
+
+#### 66. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-024
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-024.sql
+  - TBL-024_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-024.sql'を作成してください
+  - テーブル詳細YAML'TBL-024_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-024'の関連定義を追加してください
+
+---
+
+#### 67. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-025
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-025.sql
+  - TBL-025_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-025.sql'を作成してください
+  - テーブル詳細YAML'TBL-025_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-025'の関連定義を追加してください
+
+---
+
+#### 68. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-026
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-026.sql
+  - TBL-026_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-026.sql'を作成してください
+  - テーブル詳細YAML'TBL-026_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-026'の関連定義を追加してください
+
+---
+
+#### 69. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-027
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-027.sql
+  - TBL-027_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-027.sql'を作成してください
+  - テーブル詳細YAML'TBL-027_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-027'の関連定義を追加してください
+
+---
+
+#### 70. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-028
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-028.sql
+  - TBL-028_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-028.sql'を作成してください
+  - テーブル詳細YAML'TBL-028_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-028'の関連定義を追加してください
+
+---
+
+#### 71. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-029
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-029.sql
+  - TBL-029_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-029.sql'を作成してください
+  - テーブル詳細YAML'TBL-029_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-029'の関連定義を追加してください
+
+---
+
+#### 72. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-030
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-030.sql
+  - TBL-030_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-030.sql'を作成してください
+  - テーブル詳細YAML'TBL-030_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-030'の関連定義を追加してください
+
+---
+
+#### 73. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-031
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-031.sql
+  - TBL-031_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-031.sql'を作成してください
+  - テーブル詳細YAML'TBL-031_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-031'の関連定義を追加してください
+
+---
+
+#### 74. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-032
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-032.sql
+  - TBL-032_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-032.sql'を作成してください
+  - テーブル詳細YAML'TBL-032_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-032'の関連定義を追加してください
+
+---
+
+#### 75. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-033
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-033.sql
+  - TBL-033_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-033.sql'を作成してください
+  - テーブル詳細YAML'TBL-033_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-033'の関連定義を追加してください
+
+---
+
+#### 76. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-034
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-034.sql
+  - TBL-034_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-034.sql'を作成してください
+  - テーブル詳細YAML'TBL-034_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-034'の関連定義を追加してください
+
+---
+
+#### 77. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-035
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-035.sql
+  - TBL-035_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-035.sql'を作成してください
+  - テーブル詳細YAML'TBL-035_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-035'の関連定義を追加してください
+
+---
+
+#### 78. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-036
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-036.sql
+  - TBL-036_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-036.sql'を作成してください
+  - テーブル詳細YAML'TBL-036_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-036'の関連定義を追加してください
+
+---
+
+#### 79. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-037
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-037.sql
+  - TBL-037_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-037.sql'を作成してください
+  - テーブル詳細YAML'TBL-037_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-037'の関連定義を追加してください
+
+---
+
+#### 80. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-038
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-038.sql
+  - TBL-038_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-038.sql'を作成してください
+  - テーブル詳細YAML'TBL-038_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-038'の関連定義を追加してください
+
+---
+
+#### 81. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-039
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-039.sql
+  - TBL-039_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-039.sql'を作成してください
+  - テーブル詳細YAML'TBL-039_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-039'の関連定義を追加してください
+
+---
+
+#### 82. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-040
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-040.sql
+  - TBL-040_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-040.sql'を作成してください
+  - テーブル詳細YAML'TBL-040_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-040'の関連定義を追加してください
+
+---
+
+#### 83. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-041
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-041.sql
+  - TBL-041_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-041.sql'を作成してください
+  - テーブル詳細YAML'TBL-041_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-041'の関連定義を追加してください
+
+---
+
+#### 84. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-042
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-042.sql
+  - TBL-042_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-042.sql'を作成してください
+  - テーブル詳細YAML'TBL-042_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-042'の関連定義を追加してください
+
+---
+
+#### 85. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-043
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-043.sql
+  - TBL-043_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-043.sql'を作成してください
+  - テーブル詳細YAML'TBL-043_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-043'の関連定義を追加してください
+
+---
+
+#### 86. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-044
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-044.sql
+  - TBL-044_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-044.sql'を作成してください
+  - テーブル詳細YAML'TBL-044_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-044'の関連定義を追加してください
+
+---
+
+#### 87. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-045
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-045.sql
+  - TBL-045_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-045.sql'を作成してください
+  - テーブル詳細YAML'TBL-045_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-045'の関連定義を追加してください
+
+---
+
+#### 88. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-046
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-046.sql
+  - TBL-046_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-046.sql'を作成してください
+  - テーブル詳細YAML'TBL-046_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-046'の関連定義を追加してください
+
+---
+
+#### 89. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-047
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-047.sql
+  - TBL-047_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-047.sql'を作成してください
+  - テーブル詳細YAML'TBL-047_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-047'の関連定義を追加してください
+
+---
+
+#### 90. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-048
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-048.sql
+  - TBL-048_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-048.sql'を作成してください
+  - テーブル詳細YAML'TBL-048_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-048'の関連定義を追加してください
+
+---
+
+#### 91. ❌ テーブル定義の不整合 - 存在: テーブル一覧.md | 不足: entity_relationships.yaml, DDLファイル, テーブル詳細YAML
+
+**テーブル:** TBL-049
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ✅ 存在
+  - entity_relationships.yaml: ❌ 不足
+  - DDLファイル: ❌ 不足
+  - テーブル詳細YAML: ❌ 不足
+- **期待されるファイル:**
+  - TBL-049.sql
+  - TBL-049_details.yaml
+- **修正提案:**
+  - DDLファイル'TBL-049.sql'を作成してください
+  - テーブル詳細YAML'TBL-049_details.yaml'を作成してください
+  - entity_relationships.yamlに'TBL-049'の関連定義を追加してください
+
+---
+
+#### 92. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_EmployeeSkillGrade
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_EmployeeSkillGrade'を追加してください
+
+---
+
+#### 93. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_GoalProgress
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_GoalProgress'を追加してください
+
+---
+
+#### 94. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_Notification
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_Notification'を追加してください
+
+---
+
+#### 95. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_PDU
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_PDU'を追加してください
+
+---
+
+#### 96. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_ProjectRecord
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_ProjectRecord'を追加してください
+
+---
+
+#### 97. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_SkillEvidence
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_SkillEvidence'を追加してください
+
+---
+
+#### 98. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_SkillRecord
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_SkillRecord'を追加してください
+
+---
+
+#### 99. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** TRN_TrainingHistory
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'TRN_TrainingHistory'を追加してください
+
+---
+
+#### 100. ❌ テーブル定義の不整合 - 存在: entity_relationships.yaml, DDLファイル, テーブル詳細YAML | 不足: テーブル一覧.md
+
+**テーブル:** WRK_BatchJobLog
+
+**詳細情報:**
+- **存在状況:**
+  - テーブル一覧.md: ❌ 不足
+  - entity_relationships.yaml: ✅ 存在
+  - DDLファイル: ✅ 存在
+  - テーブル詳細YAML: ✅ 存在
+- **修正提案:**
+  - テーブル一覧.mdに'WRK_BatchJobLog'を追加してください
 
 
 ### 🔍 孤立ファイル検出 (102件)
@@ -5423,31 +7157,7 @@
 
 ---
 
-#### 197. ⚠️ 外部キー fk_notification_log_setting のON DELETE設定が不一致
-
-**テーブル:** HIS_NotificationLog
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_notification_log_setting
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 198. ⚠️ 外部キー fk_notification_log_integration のON DELETE設定が不一致
-
-**テーブル:** HIS_NotificationLog
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_notification_log_integration
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 199. ⚠️ 外部キー fk_notification_log_template のON DELETE設定が不一致
+#### 197. ⚠️ 外部キー fk_notification_log_template のON DELETE設定が不一致
 
 **テーブル:** HIS_NotificationLog
 
@@ -5459,28 +7169,31 @@
 
 ---
 
-#### 200. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
+#### 198. ⚠️ 外部キー fk_notification_log_setting のON DELETE設定が不一致
 
-**テーブル:** MST_CareerPlan
+**テーブル:** HIS_NotificationLog
 
 **詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - target_job_type_id
-- **target_table:** MST_JobType
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_career_plan_target_job_type
-  - columns: ['target_job_type_id']
-  - reference_table: MST_JobType
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_notification_log_setting
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
 
 ---
 
-#### 201. ⚠️ 外部キー ['employee_id'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 199. ⚠️ 外部キー fk_notification_log_integration のON DELETE設定が不一致
+
+**テーブル:** HIS_NotificationLog
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_notification_log_integration
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 200. ⚠️ 外部キー ['employee_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
@@ -5498,6 +7211,27 @@
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: RESTRICT
+
+---
+
+#### 201. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
+
+**テーブル:** MST_CareerPlan
+
+**詳細情報:**
+- **issue_type:** unexpected_ddl_foreign_key
+- **source_columns:**
+  - supervisor_id
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **ddl_definition:**
+  - name: fk_career_plan_supervisor
+  - columns: ['supervisor_id']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET
 
 ---
 
@@ -5522,49 +7256,28 @@
 
 ---
 
-#### 203. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 203. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - mentor_id
-- **target_table:** MST_Employee
+  - target_job_type_id
+- **target_table:** MST_JobType
 - **target_columns:**
   - id
 - **ddl_definition:**
-  - name: fk_career_plan_mentor
-  - columns: ['mentor_id']
-  - reference_table: MST_Employee
+  - name: fk_career_plan_target_job_type
+  - columns: ['target_job_type_id']
+  - reference_table: MST_JobType
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET
 
 ---
 
-#### 204. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
-
-**テーブル:** MST_CareerPlan
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - supervisor_id
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_career_plan_supervisor
-  - columns: ['supervisor_id']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 205. ⚠️ 外部キー ['target_position_id'] -> MST_Position.['id'] がDDLにのみ存在します
+#### 204. ⚠️ 外部キー ['target_position_id'] -> MST_Position.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
@@ -5585,29 +7298,28 @@
 
 ---
 
-#### 206. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
+#### 205. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - target_job_type_id
-- **target_table:** MST_JobType
+  - mentor_id
+- **target_table:** MST_Employee
 - **target_columns:**
   - id
-- **yaml_definition:**
-  - name: fk_career_plan_target_job_type
-  - columns: ['target_job_type_id']
-  - reference_table: MST_JobType
+- **ddl_definition:**
+  - name: fk_career_plan_mentor
+  - columns: ['mentor_id']
+  - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 目標職種への外部キー
+  - on_delete: SET
 
 ---
 
-#### 207. ⚠️ 外部キー ['employee_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 206. ⚠️ 外部キー ['employee_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
@@ -5626,6 +7338,28 @@
   - on_update: CASCADE
   - on_delete: RESTRICT
   - description: 社員への外部キー
+
+---
+
+#### 207. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+
+**テーブル:** MST_CareerPlan
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - supervisor_id
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_career_plan_supervisor
+  - columns: ['supervisor_id']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 上司への外部キー
 
 ---
 
@@ -5651,51 +7385,29 @@
 
 ---
 
-#### 209. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 209. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - mentor_id
-- **target_table:** MST_Employee
+  - target_job_type_id
+- **target_table:** MST_JobType
 - **target_columns:**
   - id
 - **yaml_definition:**
-  - name: fk_career_plan_mentor
-  - columns: ['mentor_id']
-  - reference_table: MST_Employee
+  - name: fk_career_plan_target_job_type
+  - columns: ['target_job_type_id']
+  - reference_table: MST_JobType
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET NULL
-  - description: メンターへの外部キー
+  - description: 目標職種への外部キー
 
 ---
 
-#### 210. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
-
-**テーブル:** MST_CareerPlan
-
-**詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
-- **source_columns:**
-  - supervisor_id
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **yaml_definition:**
-  - name: fk_career_plan_supervisor
-  - columns: ['supervisor_id']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 上司への外部キー
-
----
-
-#### 211. ⚠️ 外部キー ['target_position_id'] -> MST_Position.['id'] がYAMLにのみ存在します
+#### 210. ⚠️ 外部キー ['target_position_id'] -> MST_Position.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_CareerPlan
 
@@ -5717,13 +7429,35 @@
 
 ---
 
-#### 212. ⚠️ 外部キー fk_career_plan_target_job_type のON DELETE設定が不一致
+#### 211. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+
+**テーブル:** MST_CareerPlan
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - mentor_id
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_career_plan_mentor
+  - columns: ['mentor_id']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: メンターへの外部キー
+
+---
+
+#### 212. ⚠️ 外部キー fk_career_plan_supervisor のON DELETE設定が不一致
 
 **テーブル:** MST_CareerPlan
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_career_plan_target_job_type
+- **foreign_key_name:** fk_career_plan_supervisor
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -5741,37 +7475,37 @@
 
 ---
 
-#### 214. ⚠️ 外部キー fk_career_plan_mentor のON DELETE設定が不一致
+#### 214. ⚠️ 外部キー fk_career_plan_target_job_type のON DELETE設定が不一致
 
 **テーブル:** MST_CareerPlan
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_career_plan_mentor
+- **foreign_key_name:** fk_career_plan_target_job_type
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
 ---
 
-#### 215. ⚠️ 外部キー fk_career_plan_supervisor のON DELETE設定が不一致
-
-**テーブル:** MST_CareerPlan
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_career_plan_supervisor
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 216. ⚠️ 外部キー fk_career_plan_target_position のON DELETE設定が不一致
+#### 215. ⚠️ 外部キー fk_career_plan_target_position のON DELETE設定が不一致
 
 **テーブル:** MST_CareerPlan
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
 - **foreign_key_name:** fk_career_plan_target_position
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 216. ⚠️ 外部キー fk_career_plan_mentor のON DELETE設定が不一致
+
+**テーブル:** MST_CareerPlan
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_career_plan_mentor
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -5832,45 +7566,45 @@
 
 ---
 
-#### 220. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
+#### 220. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - target_job_type_id
-- **target_table:** MST_JobType
+  - approved_by
+- **target_table:** MST_Employee
 - **target_columns:**
   - id
 - **ddl_definition:**
-  - name: fk_cert_req_target_job_type
-  - columns: ['target_job_type_id']
-  - reference_table: MST_JobType
+  - name: fk_cert_req_approved_by
+  - columns: ['approved_by']
+  - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET
 
 ---
 
-#### 221. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 221. ⚠️ 外部キー ['target_skill_grade_id'] -> MST_SkillGrade.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - created_by
-- **target_table:** MST_Employee
+  - target_skill_grade_id
+- **target_table:** MST_SkillGrade
 - **target_columns:**
   - id
 - **ddl_definition:**
-  - name: fk_cert_req_created_by
-  - columns: ['created_by']
-  - reference_table: MST_Employee
+  - name: fk_cert_req_target_skill_grade
+  - columns: ['target_skill_grade_id']
+  - reference_table: MST_SkillGrade
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: RESTRICT
+  - on_delete: SET
 
 ---
 
@@ -5895,45 +7629,45 @@
 
 ---
 
-#### 223. ⚠️ 外部キー ['target_skill_grade_id'] -> MST_SkillGrade.['id'] がDDLにのみ存在します
+#### 223. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - target_skill_grade_id
-- **target_table:** MST_SkillGrade
+  - target_job_type_id
+- **target_table:** MST_JobType
 - **target_columns:**
   - id
 - **ddl_definition:**
-  - name: fk_cert_req_target_skill_grade
-  - columns: ['target_skill_grade_id']
-  - reference_table: MST_SkillGrade
+  - name: fk_cert_req_target_job_type
+  - columns: ['target_job_type_id']
+  - reference_table: MST_JobType
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET
 
 ---
 
-#### 224. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 224. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - approved_by
+  - created_by
 - **target_table:** MST_Employee
 - **target_columns:**
   - id
 - **ddl_definition:**
-  - name: fk_cert_req_approved_by
-  - columns: ['approved_by']
+  - name: fk_cert_req_created_by
+  - columns: ['created_by']
   - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET
+  - on_delete: RESTRICT
 
 ---
 
@@ -5958,47 +7692,47 @@
 
 ---
 
-#### 226. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
+#### 226. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - target_job_type_id
-- **target_table:** MST_JobType
-- **target_columns:**
-  - id
-- **yaml_definition:**
-  - name: fk_cert_req_target_job_type
-  - columns: ['target_job_type_id']
-  - reference_table: MST_JobType
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 対象職種への外部キー
-
----
-
-#### 227. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
-
-**テーブル:** MST_CertificationRequirement
-
-**詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
-- **source_columns:**
-  - created_by
+  - approved_by
 - **target_table:** MST_Employee
 - **target_columns:**
   - id
 - **yaml_definition:**
-  - name: fk_cert_req_created_by
-  - columns: ['created_by']
+  - name: fk_cert_req_approved_by
+  - columns: ['approved_by']
   - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: RESTRICT
-  - description: 作成者への外部キー
+  - on_delete: SET NULL
+  - description: 承認者への外部キー
+
+---
+
+#### 227. ⚠️ 外部キー ['target_skill_grade_id'] -> MST_SkillGrade.['id'] がYAMLにのみ存在します
+
+**テーブル:** MST_CertificationRequirement
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - target_skill_grade_id
+- **target_table:** MST_SkillGrade
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_cert_req_target_skill_grade
+  - columns: ['target_skill_grade_id']
+  - reference_table: MST_SkillGrade
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 対象スキルグレードへの外部キー
 
 ---
 
@@ -6024,47 +7758,47 @@
 
 ---
 
-#### 229. ⚠️ 外部キー ['target_skill_grade_id'] -> MST_SkillGrade.['id'] がYAMLにのみ存在します
+#### 229. ⚠️ 外部キー ['target_job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - target_skill_grade_id
-- **target_table:** MST_SkillGrade
+  - target_job_type_id
+- **target_table:** MST_JobType
 - **target_columns:**
   - id
 - **yaml_definition:**
-  - name: fk_cert_req_target_skill_grade
-  - columns: ['target_skill_grade_id']
-  - reference_table: MST_SkillGrade
+  - name: fk_cert_req_target_job_type
+  - columns: ['target_job_type_id']
+  - reference_table: MST_JobType
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET NULL
-  - description: 対象スキルグレードへの外部キー
+  - description: 対象職種への外部キー
 
 ---
 
-#### 230. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 230. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - approved_by
+  - created_by
 - **target_table:** MST_Employee
 - **target_columns:**
   - id
 - **yaml_definition:**
-  - name: fk_cert_req_approved_by
-  - columns: ['approved_by']
+  - name: fk_cert_req_created_by
+  - columns: ['created_by']
   - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 承認者への外部キー
+  - on_delete: RESTRICT
+  - description: 作成者への外部キー
 
 ---
 
@@ -6090,31 +7824,19 @@
 
 ---
 
-#### 232. ⚠️ 外部キー fk_cert_req_target_job_type のON DELETE設定が不一致
+#### 232. ⚠️ 外部キー fk_cert_req_approved_by のON DELETE設定が不一致
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_cert_req_target_job_type
+- **foreign_key_name:** fk_cert_req_approved_by
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
 ---
 
-#### 233. ⚠️ 外部キー fk_cert_req_target_department のON DELETE設定が不一致
-
-**テーブル:** MST_CertificationRequirement
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_cert_req_target_department
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 234. ⚠️ 外部キー fk_cert_req_target_skill_grade のON DELETE設定が不一致
+#### 233. ⚠️ 外部キー fk_cert_req_target_skill_grade のON DELETE設定が不一致
 
 **テーブル:** MST_CertificationRequirement
 
@@ -6126,13 +7848,25 @@
 
 ---
 
-#### 235. ⚠️ 外部キー fk_cert_req_approved_by のON DELETE設定が不一致
+#### 234. ⚠️ 外部キー fk_cert_req_target_department のON DELETE設定が不一致
 
 **テーブル:** MST_CertificationRequirement
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_cert_req_approved_by
+- **foreign_key_name:** fk_cert_req_target_department
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 235. ⚠️ 外部キー fk_cert_req_target_job_type のON DELETE設定が不一致
+
+**テーブル:** MST_CertificationRequirement
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_cert_req_target_job_type
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -6236,19 +7970,7 @@
 
 ---
 
-#### 241. ⚠️ 外部キー fk_department_parent のON DELETE設定が不一致
-
-**テーブル:** MST_Department
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_department_parent
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 242. ⚠️ 外部キー fk_department_manager のON DELETE設定が不一致
+#### 241. ⚠️ 外部キー fk_department_manager のON DELETE設定が不一致
 
 **テーブル:** MST_Department
 
@@ -6260,7 +7982,7 @@
 
 ---
 
-#### 243. ⚠️ 外部キー fk_department_deputy のON DELETE設定が不一致
+#### 242. ⚠️ 外部キー fk_department_deputy のON DELETE設定が不一致
 
 **テーブル:** MST_Department
 
@@ -6272,25 +7994,37 @@
 
 ---
 
-#### 244. ⚠️ 外部キー fk_employee_job_type のON DELETE設定が不一致
+#### 243. ⚠️ 外部キー fk_department_parent のON DELETE設定が不一致
 
-**テーブル:** MST_Employee
+**テーブル:** MST_Department
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_employee_job_type
+- **foreign_key_name:** fk_department_parent
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
 ---
 
-#### 245. ⚠️ 外部キー fk_employee_manager のON DELETE設定が不一致
+#### 244. ⚠️ 外部キー fk_employee_manager のON DELETE設定が不一致
 
 **テーブル:** MST_Employee
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
 - **foreign_key_name:** fk_employee_manager
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 245. ⚠️ 外部キー fk_employee_job_type のON DELETE設定が不一致
+
+**テーブル:** MST_Employee
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_employee_job_type
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -6308,28 +8042,7 @@
 
 ---
 
-#### 247. ⚠️ 外部キー ['reporting_manager_id'] -> MST_Employee.['id'] がDDLにのみ存在します
-
-**テーブル:** MST_EmployeeDepartment
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - reporting_manager_id
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_MST_EmployeeDepartment_reporting_manager
-  - columns: ['reporting_manager_id']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 248. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 247. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_EmployeeDepartment
 
@@ -6350,29 +8063,28 @@
 
 ---
 
-#### 249. ⚠️ 外部キー ['reporting_manager_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 248. ⚠️ 外部キー ['reporting_manager_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_EmployeeDepartment
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - reporting_manager_id
 - **target_table:** MST_Employee
 - **target_columns:**
   - id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_MST_EmployeeDepartment_reporting_manager
   - columns: ['reporting_manager_id']
   - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 報告先上司への外部キー
+  - on_delete: SET
 
 ---
 
-#### 250. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 249. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_EmployeeDepartment
 
@@ -6391,6 +8103,28 @@
   - on_update: CASCADE
   - on_delete: SET NULL
   - description: 承認者への外部キー
+
+---
+
+#### 250. ⚠️ 外部キー ['reporting_manager_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+
+**テーブル:** MST_EmployeeDepartment
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - reporting_manager_id
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_MST_EmployeeDepartment_reporting_manager
+  - columns: ['reporting_manager_id']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 報告先上司への外部キー
 
 ---
 
@@ -6418,70 +8152,7 @@
 
 ---
 
-#### 253. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
-
-**テーブル:** MST_EmployeeJobType
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - job_type_id
-- **target_table:** MST_JobType
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_emp_job_type_job_type
-  - columns: ['job_type_id']
-  - reference_table: MST_JobType
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: RESTRICT
-
----
-
-#### 254. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がDDLにのみ存在します
-
-**テーブル:** MST_EmployeeJobType
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - created_by
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_emp_job_type_created_by
-  - columns: ['created_by']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: RESTRICT
-
----
-
-#### 255. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
-
-**テーブル:** MST_EmployeeJobType
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - mentor_id
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_emp_job_type_mentor
-  - columns: ['mentor_id']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 256. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 253. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
@@ -6502,7 +8173,28 @@
 
 ---
 
-#### 257. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 254. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
+
+**テーブル:** MST_EmployeeJobType
+
+**詳細情報:**
+- **issue_type:** unexpected_ddl_foreign_key
+- **source_columns:**
+  - job_type_id
+- **target_table:** MST_JobType
+- **target_columns:**
+  - id
+- **ddl_definition:**
+  - name: fk_emp_job_type_job_type
+  - columns: ['job_type_id']
+  - reference_table: MST_JobType
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: RESTRICT
+
+---
+
+#### 255. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
@@ -6523,73 +8215,49 @@
 
 ---
 
-#### 258. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
+#### 256. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - job_type_id
-- **target_table:** MST_JobType
+  - mentor_id
+- **target_table:** MST_Employee
 - **target_columns:**
   - id
-- **yaml_definition:**
-  - name: fk_emp_job_type_job_type
-  - columns: ['job_type_id']
-  - reference_table: MST_JobType
+- **ddl_definition:**
+  - name: fk_emp_job_type_mentor
+  - columns: ['mentor_id']
+  - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: RESTRICT
-  - description: 職種への外部キー
+  - on_delete: SET
 
 ---
 
-#### 259. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 257. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - created_by
 - **target_table:** MST_Employee
 - **target_columns:**
   - id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_emp_job_type_created_by
   - columns: ['created_by']
   - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: RESTRICT
-  - description: 作成者への外部キー
 
 ---
 
-#### 260. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
-
-**テーブル:** MST_EmployeeJobType
-
-**詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
-- **source_columns:**
-  - mentor_id
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **yaml_definition:**
-  - name: fk_emp_job_type_mentor
-  - columns: ['mentor_id']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: メンターへの外部キー
-
----
-
-#### 261. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 258. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
@@ -6611,7 +8279,29 @@
 
 ---
 
-#### 262. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 259. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
+
+**テーブル:** MST_EmployeeJobType
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - job_type_id
+- **target_table:** MST_JobType
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_emp_job_type_job_type
+  - columns: ['job_type_id']
+  - reference_table: MST_JobType
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: RESTRICT
+  - description: 職種への外部キー
+
+---
+
+#### 260. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
@@ -6633,19 +8323,51 @@
 
 ---
 
-#### 263. ⚠️ 外部キー fk_emp_job_type_mentor のON DELETE設定が不一致
+#### 261. ⚠️ 外部キー ['mentor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** MST_EmployeeJobType
 
 **詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_emp_job_type_mentor
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - mentor_id
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_emp_job_type_mentor
+  - columns: ['mentor_id']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: メンターへの外部キー
 
 ---
 
-#### 264. ⚠️ 外部キー fk_emp_job_type_approved_by のON DELETE設定が不一致
+#### 262. ⚠️ 外部キー ['created_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+
+**テーブル:** MST_EmployeeJobType
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - created_by
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_emp_job_type_created_by
+  - columns: ['created_by']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: RESTRICT
+  - description: 作成者への外部キー
+
+---
+
+#### 263. ⚠️ 外部キー fk_emp_job_type_approved_by のON DELETE設定が不一致
 
 **テーブル:** MST_EmployeeJobType
 
@@ -6657,13 +8379,25 @@
 
 ---
 
-#### 265. ⚠️ 外部キー fk_emp_job_type_supervisor のON DELETE設定が不一致
+#### 264. ⚠️ 外部キー fk_emp_job_type_supervisor のON DELETE設定が不一致
 
 **テーブル:** MST_EmployeeJobType
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
 - **foreign_key_name:** fk_emp_job_type_supervisor
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 265. ⚠️ 外部キー fk_emp_job_type_mentor のON DELETE設定が不一致
+
+**テーブル:** MST_EmployeeJobType
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_emp_job_type_mentor
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -7410,49 +9144,7 @@
 
 ---
 
-#### 304. ⚠️ 外部キー ['delegation_source_user_id'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
-
-**テーブル:** MST_UserRole
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - delegation_source_user_id
-- **target_table:** MST_UserAuth
-- **target_columns:**
-  - user_id
-- **ddl_definition:**
-  - name: fk_userrole_delegation_source
-  - columns: ['delegation_source_user_id']
-  - reference_table: MST_UserAuth
-  - reference_columns: ['user_id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 305. ⚠️ 外部キー ['approved_by'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
-
-**テーブル:** MST_UserRole
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - approved_by
-- **target_table:** MST_UserAuth
-- **target_columns:**
-  - user_id
-- **ddl_definition:**
-  - name: fk_userrole_approved_by
-  - columns: ['approved_by']
-  - reference_table: MST_UserAuth
-  - reference_columns: ['user_id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 306. ⚠️ 外部キー ['user_id'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
+#### 304. ⚠️ 外部キー ['user_id'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
 
 **テーブル:** MST_UserRole
 
@@ -7473,7 +9165,7 @@
 
 ---
 
-#### 307. ⚠️ 外部キー ['assigned_by'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
+#### 305. ⚠️ 外部キー ['assigned_by'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
 
 **テーブル:** MST_UserRole
 
@@ -7494,51 +9186,49 @@
 
 ---
 
-#### 308. ⚠️ 外部キー ['delegation_source_user_id'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
+#### 306. ⚠️ 外部キー ['approved_by'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
 
 **テーブル:** MST_UserRole
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
-- **source_columns:**
-  - delegation_source_user_id
-- **target_table:** MST_UserAuth
-- **target_columns:**
-  - user_id
-- **yaml_definition:**
-  - name: fk_userrole_delegation_source
-  - columns: ['delegation_source_user_id']
-  - reference_table: MST_UserAuth
-  - reference_columns: ['user_id']
-  - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 委譲元ユーザーへの外部キー
-
----
-
-#### 309. ⚠️ 外部キー ['approved_by'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
-
-**テーブル:** MST_UserRole
-
-**詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - approved_by
 - **target_table:** MST_UserAuth
 - **target_columns:**
   - user_id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_userrole_approved_by
   - columns: ['approved_by']
   - reference_table: MST_UserAuth
   - reference_columns: ['user_id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 承認者への外部キー
+  - on_delete: SET
 
 ---
 
-#### 310. ⚠️ 外部キー ['user_id'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
+#### 307. ⚠️ 外部キー ['delegation_source_user_id'] -> MST_UserAuth.['user_id'] がDDLにのみ存在します
+
+**テーブル:** MST_UserRole
+
+**詳細情報:**
+- **issue_type:** unexpected_ddl_foreign_key
+- **source_columns:**
+  - delegation_source_user_id
+- **target_table:** MST_UserAuth
+- **target_columns:**
+  - user_id
+- **ddl_definition:**
+  - name: fk_userrole_delegation_source
+  - columns: ['delegation_source_user_id']
+  - reference_table: MST_UserAuth
+  - reference_columns: ['user_id']
+  - on_update: CASCADE
+  - on_delete: SET
+
+---
+
+#### 308. ⚠️ 外部キー ['user_id'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
 
 **テーブル:** MST_UserRole
 
@@ -7560,7 +9250,7 @@
 
 ---
 
-#### 311. ⚠️ 外部キー ['assigned_by'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
+#### 309. ⚠️ 外部キー ['assigned_by'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
 
 **テーブル:** MST_UserRole
 
@@ -7579,6 +9269,50 @@
   - on_update: CASCADE
   - on_delete: SET NULL
   - description: 割り当て者への外部キー
+
+---
+
+#### 310. ⚠️ 外部キー ['approved_by'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
+
+**テーブル:** MST_UserRole
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - approved_by
+- **target_table:** MST_UserAuth
+- **target_columns:**
+  - user_id
+- **yaml_definition:**
+  - name: fk_userrole_approved_by
+  - columns: ['approved_by']
+  - reference_table: MST_UserAuth
+  - reference_columns: ['user_id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 承認者への外部キー
+
+---
+
+#### 311. ⚠️ 外部キー ['delegation_source_user_id'] -> MST_UserAuth.['user_id'] がYAMLにのみ存在します
+
+**テーブル:** MST_UserRole
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - delegation_source_user_id
+- **target_table:** MST_UserAuth
+- **target_columns:**
+  - user_id
+- **yaml_definition:**
+  - name: fk_userrole_delegation_source
+  - columns: ['delegation_source_user_id']
+  - reference_table: MST_UserAuth
+  - reference_columns: ['user_id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 委譲元ユーザーへの外部キー
 
 ---
 
@@ -7716,28 +9450,7 @@
 
 ---
 
-#### 320. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
-
-**テーブル:** TRN_EmployeeSkillGrade
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - job_type_id
-- **target_table:** MST_JobType
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_skill_grade_job_type
-  - columns: ['job_type_id']
-  - reference_table: MST_JobType
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: RESTRICT
-
----
-
-#### 321. ⚠️ 外部キー ['evaluator_id'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 320. ⚠️ 外部キー ['evaluator_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_EmployeeSkillGrade
 
@@ -7758,29 +9471,28 @@
 
 ---
 
-#### 322. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
+#### 321. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_EmployeeSkillGrade
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - job_type_id
 - **target_table:** MST_JobType
 - **target_columns:**
   - id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_skill_grade_job_type
   - columns: ['job_type_id']
   - reference_table: MST_JobType
   - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: RESTRICT
-  - description: 職種への外部キー
 
 ---
 
-#### 323. ⚠️ 外部キー ['evaluator_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 322. ⚠️ 外部キー ['evaluator_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_EmployeeSkillGrade
 
@@ -7802,6 +9514,28 @@
 
 ---
 
+#### 323. ⚠️ 外部キー ['job_type_id'] -> MST_JobType.['id'] がYAMLにのみ存在します
+
+**テーブル:** TRN_EmployeeSkillGrade
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - job_type_id
+- **target_table:** MST_JobType
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_skill_grade_job_type
+  - columns: ['job_type_id']
+  - reference_table: MST_JobType
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: RESTRICT
+  - description: 職種への外部キー
+
+---
+
 #### 324. ⚠️ 外部キー fk_skill_grade_evaluator のON DELETE設定が不一致
 
 **テーブル:** TRN_EmployeeSkillGrade
@@ -7814,49 +9548,7 @@
 
 ---
 
-#### 325. ⚠️ 外部キー ['related_career_plan_id'] -> MST_CareerPlan.['id'] がDDLにのみ存在します
-
-**テーブル:** TRN_GoalProgress
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - related_career_plan_id
-- **target_table:** MST_CareerPlan
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_TRN_GoalProgress_career_plan
-  - columns: ['related_career_plan_id']
-  - reference_table: MST_CareerPlan
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 326. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
-
-**テーブル:** TRN_GoalProgress
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - supervisor_id
-- **target_table:** MST_Employee
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_TRN_GoalProgress_supervisor
-  - columns: ['supervisor_id']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 327. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 325. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_GoalProgress
 
@@ -7877,51 +9569,49 @@
 
 ---
 
-#### 328. ⚠️ 外部キー ['related_career_plan_id'] -> MST_CareerPlan.['id'] がYAMLにのみ存在します
+#### 326. ⚠️ 外部キー ['related_career_plan_id'] -> MST_CareerPlan.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_GoalProgress
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - related_career_plan_id
 - **target_table:** MST_CareerPlan
 - **target_columns:**
   - id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_TRN_GoalProgress_career_plan
   - columns: ['related_career_plan_id']
   - reference_table: MST_CareerPlan
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: キャリアプランへの外部キー
+  - on_delete: SET
 
 ---
 
-#### 329. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 327. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_GoalProgress
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - supervisor_id
 - **target_table:** MST_Employee
 - **target_columns:**
   - id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_TRN_GoalProgress_supervisor
   - columns: ['supervisor_id']
   - reference_table: MST_Employee
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 上司への外部キー
+  - on_delete: SET
 
 ---
 
-#### 330. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 328. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_GoalProgress
 
@@ -7943,7 +9633,63 @@
 
 ---
 
-#### 331. ⚠️ 外部キー fk_TRN_GoalProgress_career_plan のON DELETE設定が不一致
+#### 329. ⚠️ 外部キー ['related_career_plan_id'] -> MST_CareerPlan.['id'] がYAMLにのみ存在します
+
+**テーブル:** TRN_GoalProgress
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - related_career_plan_id
+- **target_table:** MST_CareerPlan
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_TRN_GoalProgress_career_plan
+  - columns: ['related_career_plan_id']
+  - reference_table: MST_CareerPlan
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: キャリアプランへの外部キー
+
+---
+
+#### 330. ⚠️ 外部キー ['supervisor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+
+**テーブル:** TRN_GoalProgress
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - supervisor_id
+- **target_table:** MST_Employee
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_TRN_GoalProgress_supervisor
+  - columns: ['supervisor_id']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 上司への外部キー
+
+---
+
+#### 331. ⚠️ 外部キー fk_TRN_GoalProgress_supervisor のON DELETE設定が不一致
+
+**テーブル:** TRN_GoalProgress
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_TRN_GoalProgress_supervisor
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 332. ⚠️ 外部キー fk_TRN_GoalProgress_career_plan のON DELETE設定が不一致
 
 **テーブル:** TRN_GoalProgress
 
@@ -7955,25 +9701,13 @@
 
 ---
 
-#### 332. ⚠️ 外部キー fk_TRN_GoalProgress_approved_by のON DELETE設定が不一致
+#### 333. ⚠️ 外部キー fk_TRN_GoalProgress_approved_by のON DELETE設定が不一致
 
 **テーブル:** TRN_GoalProgress
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
 - **foreign_key_name:** fk_TRN_GoalProgress_approved_by
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 333. ⚠️ 外部キー fk_TRN_GoalProgress_supervisor のON DELETE設定が不一致
-
-**テーブル:** TRN_GoalProgress
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_TRN_GoalProgress_supervisor
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -8077,22 +9811,22 @@
 
 ---
 
-#### 339. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がDDLにのみ存在します
+#### 339. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_PDU
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - related_project_id
-- **target_table:** TRN_ProjectRecord
+  - approved_by
+- **target_table:** MST_Employee
 - **target_columns:**
-  - project_record_id
+  - id
 - **ddl_definition:**
-  - name: fk_pdu_project
-  - columns: ['related_project_id']
-  - reference_table: TRN_ProjectRecord
-  - reference_columns: ['project_record_id']
+  - name: fk_pdu_approver
+  - columns: ['approved_by']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET
 
@@ -8119,46 +9853,46 @@
 
 ---
 
-#### 341. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 341. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がDDLにのみ存在します
 
 **テーブル:** TRN_PDU
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - approved_by
-- **target_table:** MST_Employee
+  - related_project_id
+- **target_table:** TRN_ProjectRecord
 - **target_columns:**
-  - id
+  - project_record_id
 - **ddl_definition:**
-  - name: fk_pdu_approver
-  - columns: ['approved_by']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
+  - name: fk_pdu_project
+  - columns: ['related_project_id']
+  - reference_table: TRN_ProjectRecord
+  - reference_columns: ['project_record_id']
   - on_update: CASCADE
   - on_delete: SET
 
 ---
 
-#### 342. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がYAMLにのみ存在します
+#### 342. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_PDU
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - related_project_id
-- **target_table:** TRN_ProjectRecord
+  - approved_by
+- **target_table:** MST_Employee
 - **target_columns:**
-  - project_record_id
+  - id
 - **yaml_definition:**
-  - name: fk_pdu_project
-  - columns: ['related_project_id']
-  - reference_table: TRN_ProjectRecord
-  - reference_columns: ['project_record_id']
+  - name: fk_pdu_approver
+  - columns: ['approved_by']
+  - reference_table: MST_Employee
+  - reference_columns: ['id']
   - on_update: CASCADE
   - on_delete: SET NULL
-  - description: 関連案件への外部キー
+  - description: 承認者への外部キー
 
 ---
 
@@ -8184,29 +9918,41 @@
 
 ---
 
-#### 344. ⚠️ 外部キー ['approved_by'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 344. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_PDU
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - approved_by
-- **target_table:** MST_Employee
+  - related_project_id
+- **target_table:** TRN_ProjectRecord
 - **target_columns:**
-  - id
+  - project_record_id
 - **yaml_definition:**
-  - name: fk_pdu_approver
-  - columns: ['approved_by']
-  - reference_table: MST_Employee
-  - reference_columns: ['id']
+  - name: fk_pdu_project
+  - columns: ['related_project_id']
+  - reference_table: TRN_ProjectRecord
+  - reference_columns: ['project_record_id']
   - on_update: CASCADE
   - on_delete: SET NULL
-  - description: 承認者への外部キー
+  - description: 関連案件への外部キー
 
 ---
 
-#### 345. ⚠️ 外部キー fk_pdu_certification のON DELETE設定が不一致
+#### 345. ⚠️ 外部キー fk_pdu_approver のON DELETE設定が不一致
+
+**テーブル:** TRN_PDU
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_pdu_approver
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 346. ⚠️ 外部キー fk_pdu_certification のON DELETE設定が不一致
 
 **テーブル:** TRN_PDU
 
@@ -8218,25 +9964,13 @@
 
 ---
 
-#### 346. ⚠️ 外部キー fk_pdu_training のON DELETE設定が不一致
+#### 347. ⚠️ 外部キー fk_pdu_training のON DELETE設定が不一致
 
 **テーブル:** TRN_PDU
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
 - **foreign_key_name:** fk_pdu_training
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 347. ⚠️ 外部キー fk_pdu_approver のON DELETE設定が不一致
-
-**テーブル:** TRN_PDU
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_pdu_approver
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -8254,24 +9988,24 @@
 
 ---
 
-#### 349. ⚠️ 外部キー ['related_training_id'] -> TRN_TrainingHistory.['training_history_id'] がDDLにのみ存在します
+#### 349. ⚠️ 外部キー ['skill_id'] -> MST_SkillItem.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_SkillEvidence
 
 **詳細情報:**
 - **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
-  - related_training_id
-- **target_table:** TRN_TrainingHistory
+  - skill_id
+- **target_table:** MST_SkillItem
 - **target_columns:**
-  - training_history_id
+  - id
 - **ddl_definition:**
-  - name: fk_evidence_training
-  - columns: ['related_training_id']
-  - reference_table: TRN_TrainingHistory
-  - reference_columns: ['training_history_id']
+  - name: fk_evidence_skill
+  - columns: ['skill_id']
+  - reference_table: MST_SkillItem
+  - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET
+  - on_delete: RESTRICT
 
 ---
 
@@ -8317,7 +10051,28 @@
 
 ---
 
-#### 352. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がDDLにのみ存在します
+#### 352. ⚠️ 外部キー ['related_training_id'] -> TRN_TrainingHistory.['training_history_id'] がDDLにのみ存在します
+
+**テーブル:** TRN_SkillEvidence
+
+**詳細情報:**
+- **issue_type:** unexpected_ddl_foreign_key
+- **source_columns:**
+  - related_training_id
+- **target_table:** TRN_TrainingHistory
+- **target_columns:**
+  - training_history_id
+- **ddl_definition:**
+  - name: fk_evidence_training
+  - columns: ['related_training_id']
+  - reference_table: TRN_TrainingHistory
+  - reference_columns: ['training_history_id']
+  - on_update: CASCADE
+  - on_delete: SET
+
+---
+
+#### 353. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がDDLにのみ存在します
 
 **テーブル:** TRN_SkillEvidence
 
@@ -8338,46 +10093,25 @@
 
 ---
 
-#### 353. ⚠️ 外部キー ['skill_id'] -> MST_SkillItem.['id'] がDDLにのみ存在します
-
-**テーブル:** TRN_SkillEvidence
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - skill_id
-- **target_table:** MST_SkillItem
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_evidence_skill
-  - columns: ['skill_id']
-  - reference_table: MST_SkillItem
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: RESTRICT
-
----
-
-#### 354. ⚠️ 外部キー ['related_training_id'] -> TRN_TrainingHistory.['training_history_id'] がYAMLにのみ存在します
+#### 354. ⚠️ 外部キー ['skill_id'] -> MST_SkillItem.['id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_SkillEvidence
 
 **詳細情報:**
 - **issue_type:** unexpected_yaml_foreign_key
 - **source_columns:**
-  - related_training_id
-- **target_table:** TRN_TrainingHistory
+  - skill_id
+- **target_table:** MST_SkillItem
 - **target_columns:**
-  - training_history_id
+  - id
 - **yaml_definition:**
-  - name: fk_evidence_training
-  - columns: ['related_training_id']
-  - reference_table: TRN_TrainingHistory
-  - reference_columns: ['training_history_id']
+  - name: fk_evidence_skill
+  - columns: ['skill_id']
+  - reference_table: MST_SkillItem
+  - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 関連研修への外部キー
+  - on_delete: RESTRICT
+  - description: スキル項目への外部キー
 
 ---
 
@@ -8425,7 +10159,29 @@
 
 ---
 
-#### 357. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がYAMLにのみ存在します
+#### 357. ⚠️ 外部キー ['related_training_id'] -> TRN_TrainingHistory.['training_history_id'] がYAMLにのみ存在します
+
+**テーブル:** TRN_SkillEvidence
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - related_training_id
+- **target_table:** TRN_TrainingHistory
+- **target_columns:**
+  - training_history_id
+- **yaml_definition:**
+  - name: fk_evidence_training
+  - columns: ['related_training_id']
+  - reference_table: TRN_TrainingHistory
+  - reference_columns: ['training_history_id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 関連研修への外部キー
+
+---
+
+#### 358. ⚠️ 外部キー ['related_project_id'] -> TRN_ProjectRecord.['project_record_id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_SkillEvidence
 
@@ -8447,35 +10203,13 @@
 
 ---
 
-#### 358. ⚠️ 外部キー ['skill_id'] -> MST_SkillItem.['id'] がYAMLにのみ存在します
-
-**テーブル:** TRN_SkillEvidence
-
-**詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
-- **source_columns:**
-  - skill_id
-- **target_table:** MST_SkillItem
-- **target_columns:**
-  - id
-- **yaml_definition:**
-  - name: fk_evidence_skill
-  - columns: ['skill_id']
-  - reference_table: MST_SkillItem
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: RESTRICT
-  - description: スキル項目への外部キー
-
----
-
-#### 359. ⚠️ 外部キー fk_evidence_training のON DELETE設定が不一致
+#### 359. ⚠️ 外部キー fk_evidence_certification のON DELETE設定が不一致
 
 **テーブル:** TRN_SkillEvidence
 
 **詳細情報:**
 - **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_evidence_training
+- **foreign_key_name:** fk_evidence_certification
 - **ddl_on_delete:** SET
 - **yaml_on_delete:** SET NULL
 
@@ -8493,7 +10227,19 @@
 
 ---
 
-#### 361. ⚠️ 外部キー fk_evidence_project のON DELETE設定が不一致
+#### 361. ⚠️ 外部キー fk_evidence_training のON DELETE設定が不一致
+
+**テーブル:** TRN_SkillEvidence
+
+**詳細情報:**
+- **issue_type:** on_delete_mismatch
+- **foreign_key_name:** fk_evidence_training
+- **ddl_on_delete:** SET
+- **yaml_on_delete:** SET NULL
+
+---
+
+#### 362. ⚠️ 外部キー fk_evidence_project のON DELETE設定が不一致
 
 **テーブル:** TRN_SkillEvidence
 
@@ -8505,40 +10251,7 @@
 
 ---
 
-#### 362. ⚠️ 外部キー fk_evidence_certification のON DELETE設定が不一致
-
-**テーブル:** TRN_SkillEvidence
-
-**詳細情報:**
-- **issue_type:** on_delete_mismatch
-- **foreign_key_name:** fk_evidence_certification
-- **ddl_on_delete:** SET
-- **yaml_on_delete:** SET NULL
-
----
-
-#### 363. ⚠️ 外部キー ['certification_id'] -> MST_Certification.['id'] がDDLにのみ存在します
-
-**テーブル:** TRN_SkillRecord
-
-**詳細情報:**
-- **issue_type:** unexpected_ddl_foreign_key
-- **source_columns:**
-  - certification_id
-- **target_table:** MST_Certification
-- **target_columns:**
-  - id
-- **ddl_definition:**
-  - name: fk_skill_certification
-  - columns: ['certification_id']
-  - reference_table: MST_Certification
-  - reference_columns: ['id']
-  - on_update: CASCADE
-  - on_delete: SET
-
----
-
-#### 364. ⚠️ 外部キー ['assessor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
+#### 363. ⚠️ 外部キー ['assessor_id'] -> MST_Employee.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_SkillRecord
 
@@ -8559,29 +10272,28 @@
 
 ---
 
-#### 365. ⚠️ 外部キー ['certification_id'] -> MST_Certification.['id'] がYAMLにのみ存在します
+#### 364. ⚠️ 外部キー ['certification_id'] -> MST_Certification.['id'] がDDLにのみ存在します
 
 **テーブル:** TRN_SkillRecord
 
 **詳細情報:**
-- **issue_type:** unexpected_yaml_foreign_key
+- **issue_type:** unexpected_ddl_foreign_key
 - **source_columns:**
   - certification_id
 - **target_table:** MST_Certification
 - **target_columns:**
   - id
-- **yaml_definition:**
+- **ddl_definition:**
   - name: fk_skill_certification
   - columns: ['certification_id']
   - reference_table: MST_Certification
   - reference_columns: ['id']
   - on_update: CASCADE
-  - on_delete: SET NULL
-  - description: 資格への外部キー
+  - on_delete: SET
 
 ---
 
-#### 366. ⚠️ 外部キー ['assessor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
+#### 365. ⚠️ 外部キー ['assessor_id'] -> MST_Employee.['id'] がYAMLにのみ存在します
 
 **テーブル:** TRN_SkillRecord
 
@@ -8600,6 +10312,28 @@
   - on_update: CASCADE
   - on_delete: SET NULL
   - description: 評価者への外部キー
+
+---
+
+#### 366. ⚠️ 外部キー ['certification_id'] -> MST_Certification.['id'] がYAMLにのみ存在します
+
+**テーブル:** TRN_SkillRecord
+
+**詳細情報:**
+- **issue_type:** unexpected_yaml_foreign_key
+- **source_columns:**
+  - certification_id
+- **target_table:** MST_Certification
+- **target_columns:**
+  - id
+- **yaml_definition:**
+  - name: fk_skill_certification
+  - columns: ['certification_id']
+  - reference_table: MST_Certification
+  - reference_columns: ['id']
+  - on_update: CASCADE
+  - on_delete: SET NULL
+  - description: 資格への外部キー
 
 ---
 
@@ -8748,396 +10482,418 @@
   - description: 実行者（ユーザー認証情報）への外部キー
 
 
-### 🔍 データ型整合性 (35件)
+### 🔍 データ型整合性 (51件)
 
-#### 1. ❌ カラム 'updated_at' のデータ型が一致しません
+#### 1. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-001.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-001
 
-**詳細情報:**
-- **column:** updated_at
-- **ddl_type:** DATE
-- **yaml_type:** TIMESTAMP
-- **compatibility:** incompatible
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-001.sql`
 
 ---
 
-#### 2. ⚠️ カラム 'tenant_id' のNULL制約が一致しません
+#### 2. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-002.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-002
 
-**詳細情報:**
-- **column:** tenant_id
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-002.sql`
 
 ---
 
-#### 3. ⚠️ カラム 'skill_name' のNULL制約が一致しません
+#### 3. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-003.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-003
 
-**詳細情報:**
-- **column:** skill_name
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-003.sql`
 
 ---
 
-#### 4. ⚠️ カラム 'market_demand' のNULL制約が一致しません
+#### 4. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-004.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-004
 
-**詳細情報:**
-- **column:** market_demand
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-004.sql`
 
 ---
 
-#### 5. ⚠️ カラム 'market_demand' のデフォルト値が一致しません
+#### 5. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-005.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-005
 
-**詳細情報:**
-- **column:** market_demand
-- **ddl_default:** MEDIUM' COMMENT '市場での需要レベル（LOW:低、MEDIUM:中、HIGH:高、VERY_HIGH:非常に高）
-- **yaml_default:** MEDIUM
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-005.sql`
 
 ---
 
-#### 6. ⚠️ カラム 'difficulty_level' のNULL制約が一致しません
+#### 6. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-005.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-005
 
-**詳細情報:**
-- **column:** difficulty_level
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-005.sql`
 
 ---
 
-#### 7. ⚠️ カラム 'difficulty_level' のデフォルト値が一致しません
+#### 7. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-006.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-006
 
-**詳細情報:**
-- **column:** difficulty_level
-- **ddl_default:** 3 COMMENT 'スキルの習得難易度（1:易、2:普通、3:難、4:非常に難、5:最高難度）'
-- **yaml_default:** 3
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-006.sql`
 
 ---
 
-#### 8. ⚠️ カラム 'is_core_skill' のNULL制約が一致しません
+#### 8. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-007.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-007
 
-**詳細情報:**
-- **column:** is_core_skill
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-007.sql`
 
 ---
 
-#### 9. ⚠️ カラム 'is_core_skill' のデフォルト値が一致しません
+#### 9. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-008.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-008
 
-**詳細情報:**
-- **column:** is_core_skill
-- **ddl_default:** FALSE COMMENT '組織のコアスキルかどうか'
-- **yaml_default:** False
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-008.sql`
 
 ---
 
-#### 10. ⚠️ カラム 'is_deleted' のNULL制約が一致しません
+#### 10. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-009.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-009
 
-**詳細情報:**
-- **column:** is_deleted
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-009.sql`
 
 ---
 
-#### 11. ⚠️ カラム 'is_deleted' のデフォルト値が一致しません
+#### 11. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-010.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-010
 
-**詳細情報:**
-- **column:** is_deleted
-- **ddl_default:** FALSE COMMENT '論理削除フラグ'
-- **yaml_default:** False
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-010.sql`
 
 ---
 
-#### 12. ⚠️ カラム 'created_at' のNULL制約が一致しません
+#### 12. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-010.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-010
 
-**詳細情報:**
-- **column:** created_at
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-010.sql`
 
 ---
 
-#### 13. ⚠️ カラム 'created_at' のデフォルト値が一致しません
+#### 13. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-011.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-011
 
-**詳細情報:**
-- **column:** created_at
-- **ddl_default:** CURRENT_TIMESTAMP COMMENT '作成日時'
-- **yaml_default:** CURRENT_TIMESTAMP
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-011.sql`
 
 ---
 
-#### 14. ⚠️ カラム 'display_order' のNULL制約が一致しません
+#### 14. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-012.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-012
 
-**詳細情報:**
-- **column:** display_order
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-012.sql`
 
 ---
 
-#### 15. ⚠️ カラム 'display_order' のデフォルト値が一致しません
+#### 15. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-013.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-013
 
-**詳細情報:**
-- **column:** display_order
-- **ddl_default:** 0 COMMENT '同一カテゴリ内での表示順序'
-- **yaml_default:** 0
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-013.sql`
 
 ---
 
-#### 16. ⚠️ カラム 'category_id' のNULL制約が一致しません
+#### 16. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-014.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-014
 
-**詳細情報:**
-- **column:** category_id
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-014.sql`
 
 ---
 
-#### 17. ⚠️ カラム 'updated_at' のNULL制約が一致しません
+#### 17. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-015.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-015
 
-**詳細情報:**
-- **column:** updated_at
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-015.sql`
 
 ---
 
-#### 18. ⚠️ カラム 'updated_at' のデフォルト値が一致しません
+#### 18. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-016.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-016
 
-**詳細情報:**
-- **column:** updated_at
-- **ddl_default:** CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日時'
-- **yaml_default:** CURRENT_TIMESTAMP
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-016.sql`
 
 ---
 
-#### 19. ⚠️ カラム 'id' のNULL制約が一致しません
+#### 19. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-017.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-017
 
-**詳細情報:**
-- **column:** id
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-017.sql`
 
 ---
 
-#### 20. ⚠️ カラム 'technology_trend' のNULL制約が一致しません
+#### 20. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-018.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-018
 
-**詳細情報:**
-- **column:** technology_trend
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-018.sql`
 
 ---
 
-#### 21. ⚠️ カラム 'technology_trend' のデフォルト値が一致しません
+#### 21. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-019.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-019
 
-**詳細情報:**
-- **column:** technology_trend
-- **ddl_default:** STABLE' COMMENT '技術トレンド（EMERGING:新興、GROWING:成長中、STABLE:安定、DECLINING:衰退）
-- **yaml_default:** STABLE
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-019.sql`
 
 ---
 
-#### 22. ⚠️ カラム 'skill_type' のNULL制約が一致しません
+#### 22. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-020.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-020
 
-**詳細情報:**
-- **column:** skill_type
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-020.sql`
 
 ---
 
-#### 23. ⚠️ カラム 'skill_type' のデフォルト値が一致しません
+#### 23. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-021.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-021
 
-**詳細情報:**
-- **column:** skill_type
-- **ddl_default:** TECHNICAL' COMMENT 'スキルの種別（TECHNICAL:技術スキル、BUSINESS:ビジネススキル、SOFT:ソフトスキル、LANGUAGE:言語スキル）
-- **yaml_default:** TECHNICAL
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-021.sql`
 
 ---
 
-#### 24. ⚠️ カラム 'is_active' のNULL制約が一致しません
+#### 24. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-022.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-022
 
-**詳細情報:**
-- **column:** is_active
-- **ddl_nullable:** False
-- **yaml_nullable:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-022.sql`
 
 ---
 
-#### 25. ⚠️ カラム 'is_active' のデフォルト値が一致しません
+#### 25. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-023.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-023
 
-**詳細情報:**
-- **column:** is_active
-- **ddl_default:** TRUE COMMENT 'スキルが有効かどうか'
-- **yaml_default:** True
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-023.sql`
 
 ---
 
-#### 26. ✅ カラム 'related_skills' のデータ型整合性OK
+#### 26. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-024.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-024
 
-**詳細情報:**
-- **column:** related_skills
-- **ddl_type:** TEXT
-- **yaml_type:** TEXT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-024.sql`
 
 ---
 
-#### 27. ✅ カラム 'prerequisite_skills' のデータ型整合性OK
+#### 27. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-025.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-025
 
-**詳細情報:**
-- **column:** prerequisite_skills
-- **ddl_type:** TEXT
-- **yaml_type:** TEXT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-025.sql`
 
 ---
 
-#### 28. ✅ カラム 'effective_to' のデータ型整合性OK
+#### 28. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-026.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-026
 
-**詳細情報:**
-- **column:** effective_to
-- **ddl_type:** DATE
-- **yaml_type:** DATE
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-026.sql`
 
 ---
 
-#### 29. ✅ カラム 'required_experience_months' のデータ型整合性OK
+#### 29. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-027.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-027
 
-**詳細情報:**
-- **column:** required_experience_months
-- **ddl_type:** INT
-- **yaml_type:** INT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-027.sql`
 
 ---
 
-#### 30. ✅ カラム 'skill_name_en' のデータ型整合性OK
+#### 30. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-028.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-028
 
-**詳細情報:**
-- **column:** skill_name_en
-- **ddl_type:** VARCHAR
-- **yaml_type:** VARCHAR
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-028.sql`
 
 ---
 
-#### 31. ✅ カラム 'effective_from' のデータ型整合性OK
+#### 31. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-029.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-029
 
-**詳細情報:**
-- **column:** effective_from
-- **ddl_type:** DATE
-- **yaml_type:** DATE
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-029.sql`
 
 ---
 
-#### 32. ✅ カラム 'description' のデータ型整合性OK
+#### 32. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-030.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-030
 
-**詳細情報:**
-- **column:** description
-- **ddl_type:** TEXT
-- **yaml_type:** TEXT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-030.sql`
 
 ---
 
-#### 33. ✅ カラム 'evaluation_criteria' のデータ型整合性OK
+#### 33. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-031.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-031
 
-**詳細情報:**
-- **column:** evaluation_criteria
-- **ddl_type:** TEXT
-- **yaml_type:** TEXT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-031.sql`
 
 ---
 
-#### 34. ✅ カラム 'learning_resources' のデータ型整合性OK
+#### 34. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-032.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-032
 
-**詳細情報:**
-- **column:** learning_resources
-- **ddl_type:** TEXT
-- **yaml_type:** TEXT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-032.sql`
 
 ---
 
-#### 35. ✅ カラム 'certification_info' のデータ型整合性OK
+#### 35. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-033.sql
 
-**テーブル:** MST_Skill
+**テーブル:** TBL-033
 
-**詳細情報:**
-- **column:** certification_info
-- **ddl_type:** TEXT
-- **yaml_type:** TEXT
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-033.sql`
+
+---
+
+#### 36. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-034.sql
+
+**テーブル:** TBL-034
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-034.sql`
+
+---
+
+#### 37. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-035.sql
+
+**テーブル:** TBL-035
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-035.sql`
+
+---
+
+#### 38. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-036.sql
+
+**テーブル:** TBL-036
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-036.sql`
+
+---
+
+#### 39. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-037.sql
+
+**テーブル:** TBL-037
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-037.sql`
+
+---
+
+#### 40. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-038.sql
+
+**テーブル:** TBL-038
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-038.sql`
+
+---
+
+#### 41. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-039.sql
+
+**テーブル:** TBL-039
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-039.sql`
+
+---
+
+#### 42. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-040.sql
+
+**テーブル:** TBL-040
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-040.sql`
+
+---
+
+#### 43. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-041.sql
+
+**テーブル:** TBL-041
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-041.sql`
+
+---
+
+#### 44. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-042.sql
+
+**テーブル:** TBL-042
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-042.sql`
+
+---
+
+#### 45. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-043.sql
+
+**テーブル:** TBL-043
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-043.sql`
+
+---
+
+#### 46. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-044.sql
+
+**テーブル:** TBL-044
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-044.sql`
+
+---
+
+#### 47. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-045.sql
+
+**テーブル:** TBL-045
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-045.sql`
+
+---
+
+#### 48. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-046.sql
+
+**テーブル:** TBL-046
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-046.sql`
+
+---
+
+#### 49. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-047.sql
+
+**テーブル:** TBL-047
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-047.sql`
+
+---
+
+#### 50. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-048.sql
+
+**テーブル:** TBL-048
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-048.sql`
+
+---
+
+#### 51. ❌ DDLファイルが存在しません: /home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-049.sql
+
+**テーブル:** TBL-049
+
+**ファイル:** `/home/kurosawa/skill-report-web/docs/design/database/ddl/TBL-049.sql`
 
 
 ## 🔧 修正提案
 
-### ALL 修正 (241件)
+### ALL 修正 (240件)
 
 #### 1. MST_TenantSettings
 
@@ -21214,12 +22970,12 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
-#### fk_employee_job_type - ON DELETE設定
+#### fk_employee_manager - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_employee_manager - ON DELETE設定
+#### fk_employee_job_type - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -21235,16 +22991,16 @@ foreign_keys:
 ```sql
 -- 既存の外部キー制約を削除して再作成
 
--- fk_employee_job_typeの修正
-ALTER TABLE MST_Employee DROP FOREIGN KEY fk_employee_job_type;
-ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type
+-- fk_employee_managerの修正
+ALTER TABLE MST_Employee DROP FOREIGN KEY fk_employee_manager;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
 
--- fk_employee_managerの修正
-ALTER TABLE MST_Employee DROP FOREIGN KEY fk_employee_manager;
-ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager
+-- fk_employee_job_typeの修正
+ALTER TABLE MST_Employee DROP FOREIGN KEY fk_employee_job_type;
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -21262,11 +23018,11 @@ ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_position
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
-  - name: fk_employee_job_type
+  - name: fk_employee_manager
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
-  - name: fk_employee_manager
+  - name: fk_employee_job_type
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -21300,11 +23056,6 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
-#### fk_department_parent - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
 #### fk_department_manager - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
@@ -21315,18 +23066,16 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
+#### fk_department_parent - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
 ### DDL修正手順：
 
 #### 1. 外部キー制約の再作成
 ```sql
 -- 既存の外部キー制約を削除して再作成
-
--- fk_department_parentの修正
-ALTER TABLE MST_Department DROP FOREIGN KEY fk_department_parent;
-ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
 
 -- fk_department_managerの修正
 ALTER TABLE MST_Department DROP FOREIGN KEY fk_department_manager;
@@ -21341,6 +23090,13 @@ ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
+
+-- fk_department_parentの修正
+ALTER TABLE MST_Department DROP FOREIGN KEY fk_department_parent;
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
 ```
 
 ### YAML修正手順：
@@ -21348,15 +23104,15 @@ ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
-  - name: fk_department_parent
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
   - name: fk_department_manager
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
   - name: fk_department_deputy
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
+  - name: fk_department_parent
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -21510,11 +23266,6 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
-#### fk_emp_job_type_mentor - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
 #### fk_emp_job_type_approved_by - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
@@ -21525,18 +23276,16 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
+#### fk_emp_job_type_mentor - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
 ### DDL修正手順：
 
 #### 1. 外部キー制約の再作成
 ```sql
 -- 既存の外部キー制約を削除して再作成
-
--- fk_emp_job_type_mentorの修正
-ALTER TABLE MST_EmployeeJobType DROP FOREIGN KEY fk_emp_job_type_mentor;
-ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_mentor
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
 
 -- fk_emp_job_type_approved_byの修正
 ALTER TABLE MST_EmployeeJobType DROP FOREIGN KEY fk_emp_job_type_approved_by;
@@ -21551,6 +23300,13 @@ ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_supervisor
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
+
+-- fk_emp_job_type_mentorの修正
+ALTER TABLE MST_EmployeeJobType DROP FOREIGN KEY fk_emp_job_type_mentor;
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_mentor
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
 ```
 
 ### YAML修正手順：
@@ -21558,15 +23314,15 @@ ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_supervisor
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
-  - name: fk_emp_job_type_mentor
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
   - name: fk_emp_job_type_approved_by
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
   - name: fk_emp_job_type_supervisor
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
+  - name: fk_emp_job_type_mentor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -21704,12 +23460,7 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
-#### fk_cert_req_target_job_type - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
-#### fk_cert_req_target_department - ON DELETE設定
+#### fk_cert_req_approved_by - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -21719,7 +23470,12 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_cert_req_approved_by - ON DELETE設定
+#### fk_cert_req_target_department - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
+#### fk_cert_req_target_job_type - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -21735,16 +23491,9 @@ foreign_keys:
 ```sql
 -- 既存の外部キー制約を削除して再作成
 
--- fk_cert_req_target_job_typeの修正
-ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_job_type;
-ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_job_type
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
-
--- fk_cert_req_target_departmentの修正
-ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_department;
-ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_department
+-- fk_cert_req_approved_byの修正
+ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_approved_by;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_approved_by
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -21756,9 +23505,16 @@ ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_skill
     ON UPDATE CASCADE
     ON DELETE SET NULL;
 
--- fk_cert_req_approved_byの修正
-ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_approved_by;
-ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_approved_by
+-- fk_cert_req_target_departmentの修正
+ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_department;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_department
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+-- fk_cert_req_target_job_typeの修正
+ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_job_type;
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_job_type
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -21776,11 +23532,7 @@ ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_posit
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
-  - name: fk_cert_req_target_job_type
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
-  - name: fk_cert_req_target_department
+  - name: fk_cert_req_approved_by
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -21788,7 +23540,11 @@ foreign_keys:
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
-  - name: fk_cert_req_approved_by
+  - name: fk_cert_req_target_department
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
+  - name: fk_cert_req_target_job_type
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -21876,7 +23632,7 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
-#### fk_career_plan_target_job_type - ON DELETE設定
+#### fk_career_plan_supervisor - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -21886,17 +23642,17 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_career_plan_mentor - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
-#### fk_career_plan_supervisor - ON DELETE設定
+#### fk_career_plan_target_job_type - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
 #### fk_career_plan_target_position - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
+#### fk_career_plan_mentor - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -21907,9 +23663,9 @@ foreign_keys:
 ```sql
 -- 既存の外部キー制約を削除して再作成
 
--- fk_career_plan_target_job_typeの修正
-ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_target_job_type;
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_job_type
+-- fk_career_plan_supervisorの修正
+ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_supervisor;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_supervisor
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -21921,16 +23677,9 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_department
     ON UPDATE CASCADE
     ON DELETE SET NULL;
 
--- fk_career_plan_mentorの修正
-ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_mentor;
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
-
--- fk_career_plan_supervisorの修正
-ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_supervisor;
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_supervisor
+-- fk_career_plan_target_job_typeの修正
+ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_target_job_type;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_job_type
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -21941,6 +23690,13 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_position
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
+
+-- fk_career_plan_mentorの修正
+ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_mentor;
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
 ```
 
 ### YAML修正手順：
@@ -21948,7 +23704,7 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_position
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
-  - name: fk_career_plan_target_job_type
+  - name: fk_career_plan_supervisor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -21956,15 +23712,15 @@ foreign_keys:
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
-  - name: fk_career_plan_mentor
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
-  - name: fk_career_plan_supervisor
+  - name: fk_career_plan_target_job_type
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
   - name: fk_career_plan_target_position
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
+  - name: fk_career_plan_mentor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -22188,6 +23944,11 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
+#### fk_TRN_GoalProgress_supervisor - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
 #### fk_TRN_GoalProgress_career_plan - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
@@ -22198,16 +23959,18 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_TRN_GoalProgress_supervisor - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
 ### DDL修正手順：
 
 #### 1. 外部キー制約の再作成
 ```sql
 -- 既存の外部キー制約を削除して再作成
+
+-- fk_TRN_GoalProgress_supervisorの修正
+ALTER TABLE TRN_GoalProgress DROP FOREIGN KEY fk_TRN_GoalProgress_supervisor;
+ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_supervisor
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
 
 -- fk_TRN_GoalProgress_career_planの修正
 ALTER TABLE TRN_GoalProgress DROP FOREIGN KEY fk_TRN_GoalProgress_career_plan;
@@ -22222,13 +23985,6 @@ ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_approved_by
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
-
--- fk_TRN_GoalProgress_supervisorの修正
-ALTER TABLE TRN_GoalProgress DROP FOREIGN KEY fk_TRN_GoalProgress_supervisor;
-ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_supervisor
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
 ```
 
 ### YAML修正手順：
@@ -22236,15 +23992,15 @@ ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_supervisor
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
+  - name: fk_TRN_GoalProgress_supervisor
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
   - name: fk_TRN_GoalProgress_career_plan
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
   - name: fk_TRN_GoalProgress_approved_by
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
-  - name: fk_TRN_GoalProgress_supervisor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -22344,17 +24100,17 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
+#### fk_pdu_approver - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
 #### fk_pdu_certification - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
 #### fk_pdu_training - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
-#### fk_pdu_approver - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -22370,6 +24126,13 @@ foreign_keys:
 ```sql
 -- 既存の外部キー制約を削除して再作成
 
+-- fk_pdu_approverの修正
+ALTER TABLE TRN_PDU DROP FOREIGN KEY fk_pdu_approver;
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_approver
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
 -- fk_pdu_certificationの修正
 ALTER TABLE TRN_PDU DROP FOREIGN KEY fk_pdu_certification;
 ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_certification
@@ -22380,13 +24143,6 @@ ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_certification
 -- fk_pdu_trainingの修正
 ALTER TABLE TRN_PDU DROP FOREIGN KEY fk_pdu_training;
 ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_training
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
-
--- fk_pdu_approverの修正
-ALTER TABLE TRN_PDU DROP FOREIGN KEY fk_pdu_approver;
-ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_approver
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -22404,15 +24160,15 @@ ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_project
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
+  - name: fk_pdu_approver
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
   - name: fk_pdu_certification
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
   - name: fk_pdu_training
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
-  - name: fk_pdu_approver
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -22446,7 +24202,7 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
-#### fk_evidence_training - ON DELETE設定
+#### fk_evidence_certification - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -22456,12 +24212,12 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_evidence_project - ON DELETE設定
+#### fk_evidence_training - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_evidence_certification - ON DELETE設定
+#### fk_evidence_project - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
 - **推奨**: SET NULL
@@ -22472,9 +24228,9 @@ foreign_keys:
 ```sql
 -- 既存の外部キー制約を削除して再作成
 
--- fk_evidence_trainingの修正
-ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_training;
-ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_training
+-- fk_evidence_certificationの修正
+ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_certification;
+ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_certification
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -22486,16 +24242,16 @@ ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_verifier
     ON UPDATE CASCADE
     ON DELETE SET NULL;
 
--- fk_evidence_projectの修正
-ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_project;
-ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_project
+-- fk_evidence_trainingの修正
+ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_training;
+ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_training
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
 
--- fk_evidence_certificationの修正
-ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_certification;
-ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_certification
+-- fk_evidence_projectの修正
+ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_project;
+ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_project
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
@@ -22506,7 +24262,7 @@ ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_certification
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
-  - name: fk_evidence_training
+  - name: fk_evidence_certification
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -22514,11 +24270,11 @@ foreign_keys:
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
-  - name: fk_evidence_project
+  - name: fk_evidence_training
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
-  - name: fk_evidence_certification
+  - name: fk_evidence_project
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -22656,6 +24412,11 @@ foreign_keys:
 
 ### 不一致が検出された外部キー：
 
+#### fk_notification_log_template - ON DELETE設定
+- **DDL**: SET
+- **YAML**: SET NULL
+- **推奨**: SET NULL
+
 #### fk_notification_log_setting - ON DELETE設定
 - **DDL**: SET
 - **YAML**: SET NULL
@@ -22666,16 +24427,18 @@ foreign_keys:
 - **YAML**: SET NULL
 - **推奨**: SET NULL
 
-#### fk_notification_log_template - ON DELETE設定
-- **DDL**: SET
-- **YAML**: SET NULL
-- **推奨**: SET NULL
-
 ### DDL修正手順：
 
 #### 1. 外部キー制約の再作成
 ```sql
 -- 既存の外部キー制約を削除して再作成
+
+-- fk_notification_log_templateの修正
+ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_template;
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_template
+    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
 
 -- fk_notification_log_settingの修正
 ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_setting;
@@ -22690,13 +24453,6 @@ ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_integration
     FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
     ON UPDATE CASCADE
     ON DELETE SET NULL;
-
--- fk_notification_log_templateの修正
-ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_template;
-ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_template
-    FOREIGN KEY (参照元カラム) REFERENCES 参照先テーブル(参照先カラム)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
 ```
 
 ### YAML修正手順：
@@ -22704,15 +24460,15 @@ ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_template
 #### {table_name}_details.yaml の修正
 ```yaml
 foreign_keys:
+  - name: fk_notification_log_template
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: SET NULL
   - name: fk_notification_log_setting
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
   - name: fk_notification_log_integration
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: SET NULL
-  - name: fk_notification_log_template
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: SET NULL
@@ -22730,96 +24486,6 @@ foreign_keys:
 ```
 
 #### 186. HIS_NotificationLog
-
-**説明:** 外部キーfk_notification_log_settingのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_notification_log_setting` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_setting;
-
--- 新しい外部キー制約を追加
-ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_setting
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_notification_log_setting
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 187. HIS_NotificationLog
-
-**説明:** 外部キーfk_notification_log_integrationのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_notification_log_integration` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_integration;
-
--- 新しい外部キー制約を追加
-ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_integration
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_notification_log_integration
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 188. HIS_NotificationLog
 
 **説明:** 外部キーfk_notification_log_templateのON DELETE設定を統一
 
@@ -22864,9 +24530,9 @@ foreign_keys:
 
 ```
 
-#### 189. MST_CareerPlan
+#### 187. HIS_NotificationLog
 
-**説明:** 外部キーfk_career_plan_target_job_typeのON DELETE設定を統一
+**説明:** 外部キーfk_notification_log_settingのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
 
@@ -22875,7 +24541,7 @@ foreign_keys:
 
 ## 外部キーカスケード設定統一提案
 
-外部キー `fk_career_plan_target_job_type` のON DELETE設定を統一してください。
+外部キー `fk_notification_log_setting` のON DELETE設定を統一してください。
 
 ### 現在の設定：
 - DDL: SET
@@ -22889,10 +24555,10 @@ foreign_keys:
 #### DDLファイルの修正：
 ```sql
 -- 既存の外部キー制約を削除
-ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_target_job_type;
+ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_setting;
 
 -- 新しい外部キー制約を追加
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_job_type
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_setting
     FOREIGN KEY (...) REFERENCES ...
     ON UPDATE CASCADE
     ON DELETE CASCADE;
@@ -22901,7 +24567,97 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_job_type
 #### YAMLファイルの修正：
 ```yaml
 foreign_keys:
-  - name: fk_career_plan_target_job_type
+  - name: fk_notification_log_setting
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 188. HIS_NotificationLog
+
+**説明:** 外部キーfk_notification_log_integrationのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_notification_log_integration` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE HIS_NotificationLog DROP FOREIGN KEY fk_notification_log_integration;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE HIS_NotificationLog ADD CONSTRAINT fk_notification_log_integration
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_notification_log_integration
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 189. MST_CareerPlan
+
+**説明:** 外部キーfk_career_plan_supervisorのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_career_plan_supervisor` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_supervisor;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_supervisor
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_career_plan_supervisor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -22956,7 +24712,7 @@ foreign_keys:
 
 #### 191. MST_CareerPlan
 
-**説明:** 外部キーfk_career_plan_mentorのON DELETE設定を統一
+**説明:** 外部キーfk_career_plan_target_job_typeのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
 
@@ -22965,7 +24721,7 @@ foreign_keys:
 
 ## 外部キーカスケード設定統一提案
 
-外部キー `fk_career_plan_mentor` のON DELETE設定を統一してください。
+外部キー `fk_career_plan_target_job_type` のON DELETE設定を統一してください。
 
 ### 現在の設定：
 - DDL: SET
@@ -22979,10 +24735,10 @@ foreign_keys:
 #### DDLファイルの修正：
 ```sql
 -- 既存の外部キー制約を削除
-ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_mentor;
+ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_target_job_type;
 
 -- 新しい外部キー制約を追加
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_job_type
     FOREIGN KEY (...) REFERENCES ...
     ON UPDATE CASCADE
     ON DELETE CASCADE;
@@ -22991,7 +24747,7 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor
 #### YAMLファイルの修正：
 ```yaml
 foreign_keys:
-  - name: fk_career_plan_mentor
+  - name: fk_career_plan_target_job_type
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -23000,51 +24756,6 @@ foreign_keys:
 ```
 
 #### 192. MST_CareerPlan
-
-**説明:** 外部キーfk_career_plan_supervisorのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_career_plan_supervisor` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_supervisor;
-
--- 新しい外部キー制約を追加
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_supervisor
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_career_plan_supervisor
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 193. MST_CareerPlan
 
 **説明:** 外部キーfk_career_plan_target_positionのON DELETE設定を統一
 
@@ -23082,6 +24793,51 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_target_position
 ```yaml
 foreign_keys:
   - name: fk_career_plan_target_position
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 193. MST_CareerPlan
+
+**説明:** 外部キーfk_career_plan_mentorのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_career_plan_mentor` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE MST_CareerPlan DROP FOREIGN KEY fk_career_plan_mentor;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_career_plan_mentor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -23136,7 +24892,7 @@ foreign_keys:
 
 #### 195. MST_CertificationRequirement
 
-**説明:** 外部キーfk_cert_req_target_job_typeのON DELETE設定を統一
+**説明:** 外部キーfk_cert_req_approved_byのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
 
@@ -23145,7 +24901,7 @@ foreign_keys:
 
 ## 外部キーカスケード設定統一提案
 
-外部キー `fk_cert_req_target_job_type` のON DELETE設定を統一してください。
+外部キー `fk_cert_req_approved_by` のON DELETE設定を統一してください。
 
 ### 現在の設定：
 - DDL: SET
@@ -23159,10 +24915,10 @@ foreign_keys:
 #### DDLファイルの修正：
 ```sql
 -- 既存の外部キー制約を削除
-ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_job_type;
+ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_approved_by;
 
 -- 新しい外部キー制約を追加
-ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_job_type
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_approved_by
     FOREIGN KEY (...) REFERENCES ...
     ON UPDATE CASCADE
     ON DELETE CASCADE;
@@ -23171,7 +24927,7 @@ ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_job_t
 #### YAMLファイルの修正：
 ```yaml
 foreign_keys:
-  - name: fk_cert_req_target_job_type
+  - name: fk_cert_req_approved_by
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -23180,51 +24936,6 @@ foreign_keys:
 ```
 
 #### 196. MST_CertificationRequirement
-
-**説明:** 外部キーfk_cert_req_target_departmentのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_cert_req_target_department` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_department;
-
--- 新しい外部キー制約を追加
-ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_department
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_cert_req_target_department
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 197. MST_CertificationRequirement
 
 **説明:** 外部キーfk_cert_req_target_skill_gradeのON DELETE設定を統一
 
@@ -23269,9 +24980,9 @@ foreign_keys:
 
 ```
 
-#### 198. MST_CertificationRequirement
+#### 197. MST_CertificationRequirement
 
-**説明:** 外部キーfk_cert_req_approved_byのON DELETE設定を統一
+**説明:** 外部キーfk_cert_req_target_departmentのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
 
@@ -23280,7 +24991,7 @@ foreign_keys:
 
 ## 外部キーカスケード設定統一提案
 
-外部キー `fk_cert_req_approved_by` のON DELETE設定を統一してください。
+外部キー `fk_cert_req_target_department` のON DELETE設定を統一してください。
 
 ### 現在の設定：
 - DDL: SET
@@ -23294,10 +25005,10 @@ foreign_keys:
 #### DDLファイルの修正：
 ```sql
 -- 既存の外部キー制約を削除
-ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_approved_by;
+ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_department;
 
 -- 新しい外部キー制約を追加
-ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_approved_by
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_department
     FOREIGN KEY (...) REFERENCES ...
     ON UPDATE CASCADE
     ON DELETE CASCADE;
@@ -23306,7 +25017,52 @@ ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_approved_by
 #### YAMLファイルの修正：
 ```yaml
 foreign_keys:
-  - name: fk_cert_req_approved_by
+  - name: fk_cert_req_target_department
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 198. MST_CertificationRequirement
+
+**説明:** 外部キーfk_cert_req_target_job_typeのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_cert_req_target_job_type` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE MST_CertificationRequirement DROP FOREIGN KEY fk_cert_req_target_job_type;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE MST_CertificationRequirement ADD CONSTRAINT fk_cert_req_target_job_type
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_cert_req_target_job_type
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -23361,51 +25117,6 @@ foreign_keys:
 
 #### 200. MST_Department
 
-**説明:** 外部キーfk_department_parentのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_department_parent` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE MST_Department DROP FOREIGN KEY fk_department_parent;
-
--- 新しい外部キー制約を追加
-ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_department_parent
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 201. MST_Department
-
 **説明:** 外部キーfk_department_managerのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
@@ -23449,7 +25160,7 @@ foreign_keys:
 
 ```
 
-#### 202. MST_Department
+#### 201. MST_Department
 
 **説明:** 外部キーfk_department_deputyのON DELETE設定を統一
 
@@ -23494,9 +25205,9 @@ foreign_keys:
 
 ```
 
-#### 203. MST_Employee
+#### 202. MST_Department
 
-**説明:** 外部キーfk_employee_job_typeのON DELETE設定を統一
+**説明:** 外部キーfk_department_parentのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
 
@@ -23505,7 +25216,7 @@ foreign_keys:
 
 ## 外部キーカスケード設定統一提案
 
-外部キー `fk_employee_job_type` のON DELETE設定を統一してください。
+外部キー `fk_department_parent` のON DELETE設定を統一してください。
 
 ### 現在の設定：
 - DDL: SET
@@ -23519,10 +25230,10 @@ foreign_keys:
 #### DDLファイルの修正：
 ```sql
 -- 既存の外部キー制約を削除
-ALTER TABLE MST_Employee DROP FOREIGN KEY fk_employee_job_type;
+ALTER TABLE MST_Department DROP FOREIGN KEY fk_department_parent;
 
 -- 新しい外部キー制約を追加
-ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent
     FOREIGN KEY (...) REFERENCES ...
     ON UPDATE CASCADE
     ON DELETE CASCADE;
@@ -23531,7 +25242,7 @@ ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type
 #### YAMLファイルの修正：
 ```yaml
 foreign_keys:
-  - name: fk_employee_job_type
+  - name: fk_department_parent
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -23539,7 +25250,7 @@ foreign_keys:
 
 ```
 
-#### 204. MST_Employee
+#### 203. MST_Employee
 
 **説明:** 外部キーfk_employee_managerのON DELETE設定を統一
 
@@ -23577,6 +25288,51 @@ ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_manager
 ```yaml
 foreign_keys:
   - name: fk_employee_manager
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 204. MST_Employee
+
+**説明:** 外部キーfk_employee_job_typeのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_employee_job_type` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE MST_Employee DROP FOREIGN KEY fk_employee_job_type;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE MST_Employee ADD CONSTRAINT fk_employee_job_type
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_employee_job_type
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -23721,51 +25477,6 @@ foreign_keys:
 
 #### 208. MST_EmployeeJobType
 
-**説明:** 外部キーfk_emp_job_type_mentorのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_emp_job_type_mentor` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE MST_EmployeeJobType DROP FOREIGN KEY fk_emp_job_type_mentor;
-
--- 新しい外部キー制約を追加
-ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_mentor
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_emp_job_type_mentor
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 209. MST_EmployeeJobType
-
 **説明:** 外部キーfk_emp_job_type_approved_byのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
@@ -23809,7 +25520,7 @@ foreign_keys:
 
 ```
 
-#### 210. MST_EmployeeJobType
+#### 209. MST_EmployeeJobType
 
 **説明:** 外部キーfk_emp_job_type_supervisorのON DELETE設定を統一
 
@@ -23847,6 +25558,51 @@ ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_supervisor
 ```yaml
 foreign_keys:
   - name: fk_emp_job_type_supervisor
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 210. MST_EmployeeJobType
+
+**説明:** 外部キーfk_emp_job_type_mentorのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_emp_job_type_mentor` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE MST_EmployeeJobType DROP FOREIGN KEY fk_emp_job_type_mentor;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE MST_EmployeeJobType ADD CONSTRAINT fk_emp_job_type_mentor
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_emp_job_type_mentor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -24034,31 +25790,7 @@ foreign_keys:
 
 ```
 
-#### 215. MST_Skill
-
-**説明:** データ型の整合性を修正
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## データ型整合性修正提案
-
-カラムのデータ型が一致していません。
-
-### 修正手順：
-1. DDLファイルとYAMLファイルのデータ型定義を確認
-2. より制限の厳しい方（通常はYAML）に合わせて統一
-3. 必要に応じてデータ移行を実施
-
-### 注意事項：
-- データ型変更は既存データに影響する可能性があります
-- 本番環境での変更前に十分なテストを実施してください
-
-```
-
-#### 216. MST_SkillCategory
+#### 215. MST_SkillCategory
 
 **説明:** 外部キーfk_skillcategory_parentのON DELETE設定を統一
 
@@ -24103,7 +25835,7 @@ foreign_keys:
 
 ```
 
-#### 217. MST_Tenant
+#### 216. MST_Tenant
 
 **説明:** 外部キーfk_tenant_parentのON DELETE設定を統一
 
@@ -24148,7 +25880,7 @@ foreign_keys:
 
 ```
 
-#### 218. MST_TrainingProgram
+#### 217. MST_TrainingProgram
 
 **説明:** 外部キーfk_training_program_approved_byのON DELETE設定を統一
 
@@ -24193,7 +25925,7 @@ foreign_keys:
 
 ```
 
-#### 219. MST_UserAuth
+#### 218. MST_UserAuth
 
 **説明:** 外部キーfk_userauth_employeeのON DELETE設定を統一
 
@@ -24238,7 +25970,7 @@ foreign_keys:
 
 ```
 
-#### 220. MST_UserRole
+#### 219. MST_UserRole
 
 **説明:** 外部キーfk_userrole_delegation_sourceのON DELETE設定を統一
 
@@ -24283,7 +26015,7 @@ foreign_keys:
 
 ```
 
-#### 221. MST_UserRole
+#### 220. MST_UserRole
 
 **説明:** 外部キーfk_userrole_assigned_byのON DELETE設定を統一
 
@@ -24328,7 +26060,7 @@ foreign_keys:
 
 ```
 
-#### 222. MST_UserRole
+#### 221. MST_UserRole
 
 **説明:** 外部キーfk_userrole_approved_byのON DELETE設定を統一
 
@@ -24373,7 +26105,7 @@ foreign_keys:
 
 ```
 
-#### 223. SYS_SystemLog
+#### 222. SYS_SystemLog
 
 **説明:** 外部キーfk_log_userのON DELETE設定を統一
 
@@ -24418,7 +26150,7 @@ foreign_keys:
 
 ```
 
-#### 224. TRN_EmployeeSkillGrade
+#### 223. TRN_EmployeeSkillGrade
 
 **説明:** 外部キーfk_skill_grade_evaluatorのON DELETE設定を統一
 
@@ -24456,6 +26188,51 @@ ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_evaluator
 ```yaml
 foreign_keys:
   - name: fk_skill_grade_evaluator
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 224. TRN_GoalProgress
+
+**説明:** 外部キーfk_TRN_GoalProgress_supervisorのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_TRN_GoalProgress_supervisor` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE TRN_GoalProgress DROP FOREIGN KEY fk_TRN_GoalProgress_supervisor;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_supervisor
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_TRN_GoalProgress_supervisor
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -24553,52 +26330,7 @@ foreign_keys:
 
 ```
 
-#### 227. TRN_GoalProgress
-
-**説明:** 外部キーfk_TRN_GoalProgress_supervisorのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_TRN_GoalProgress_supervisor` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE TRN_GoalProgress DROP FOREIGN KEY fk_TRN_GoalProgress_supervisor;
-
--- 新しい外部キー制約を追加
-ALTER TABLE TRN_GoalProgress ADD CONSTRAINT fk_TRN_GoalProgress_supervisor
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_TRN_GoalProgress_supervisor
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 228. TRN_Notification
+#### 227. TRN_Notification
 
 **説明:** 外部キーfk_notification_senderのON DELETE設定を統一
 
@@ -24636,6 +26368,51 @@ ALTER TABLE TRN_Notification ADD CONSTRAINT fk_notification_sender
 ```yaml
 foreign_keys:
   - name: fk_notification_sender
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 228. TRN_PDU
+
+**説明:** 外部キーfk_pdu_approverのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_pdu_approver` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE TRN_PDU DROP FOREIGN KEY fk_pdu_approver;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_approver
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_pdu_approver
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -24735,51 +26512,6 @@ foreign_keys:
 
 #### 231. TRN_PDU
 
-**説明:** 外部キーfk_pdu_approverのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_pdu_approver` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE TRN_PDU DROP FOREIGN KEY fk_pdu_approver;
-
--- 新しい外部キー制約を追加
-ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_approver
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_pdu_approver
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 232. TRN_PDU
-
 **説明:** 外部キーfk_pdu_projectのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
@@ -24823,9 +26555,9 @@ foreign_keys:
 
 ```
 
-#### 233. TRN_SkillEvidence
+#### 232. TRN_SkillEvidence
 
-**説明:** 外部キーfk_evidence_trainingのON DELETE設定を統一
+**説明:** 外部キーfk_evidence_certificationのON DELETE設定を統一
 
 💾 **注意:** 修正前にバックアップを取得してください。
 
@@ -24834,7 +26566,7 @@ foreign_keys:
 
 ## 外部キーカスケード設定統一提案
 
-外部キー `fk_evidence_training` のON DELETE設定を統一してください。
+外部キー `fk_evidence_certification` のON DELETE設定を統一してください。
 
 ### 現在の設定：
 - DDL: SET
@@ -24848,10 +26580,10 @@ foreign_keys:
 #### DDLファイルの修正：
 ```sql
 -- 既存の外部キー制約を削除
-ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_training;
+ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_certification;
 
 -- 新しい外部キー制約を追加
-ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_training
+ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_certification
     FOREIGN KEY (...) REFERENCES ...
     ON UPDATE CASCADE
     ON DELETE CASCADE;
@@ -24860,7 +26592,7 @@ ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_training
 #### YAMLファイルの修正：
 ```yaml
 foreign_keys:
-  - name: fk_evidence_training
+  - name: fk_evidence_certification
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -24868,7 +26600,7 @@ foreign_keys:
 
 ```
 
-#### 234. TRN_SkillEvidence
+#### 233. TRN_SkillEvidence
 
 **説明:** 外部キーfk_evidence_verifierのON DELETE設定を統一
 
@@ -24906,6 +26638,51 @@ ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_verifier
 ```yaml
 foreign_keys:
   - name: fk_evidence_verifier
+    # ... 他の設定 ...
+    on_update: CASCADE
+    on_delete: CASCADE
+```
+
+```
+
+#### 234. TRN_SkillEvidence
+
+**説明:** 外部キーfk_evidence_trainingのON DELETE設定を統一
+
+💾 **注意:** 修正前にバックアップを取得してください。
+
+**修正内容:**
+```sql
+
+## 外部キーカスケード設定統一提案
+
+外部キー `fk_evidence_training` のON DELETE設定を統一してください。
+
+### 現在の設定：
+- DDL: SET
+- YAML: SET NULL
+
+### 推奨設定：
+- 統一設定: CASCADE
+
+### 修正手順：
+
+#### DDLファイルの修正：
+```sql
+-- 既存の外部キー制約を削除
+ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_training;
+
+-- 新しい外部キー制約を追加
+ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_training
+    FOREIGN KEY (...) REFERENCES ...
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+```
+
+#### YAMLファイルの修正：
+```yaml
+foreign_keys:
+  - name: fk_evidence_training
     # ... 他の設定 ...
     on_update: CASCADE
     on_delete: CASCADE
@@ -24958,52 +26735,7 @@ foreign_keys:
 
 ```
 
-#### 236. TRN_SkillEvidence
-
-**説明:** 外部キーfk_evidence_certificationのON DELETE設定を統一
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## 外部キーカスケード設定統一提案
-
-外部キー `fk_evidence_certification` のON DELETE設定を統一してください。
-
-### 現在の設定：
-- DDL: SET
-- YAML: SET NULL
-
-### 推奨設定：
-- 統一設定: CASCADE
-
-### 修正手順：
-
-#### DDLファイルの修正：
-```sql
--- 既存の外部キー制約を削除
-ALTER TABLE TRN_SkillEvidence DROP FOREIGN KEY fk_evidence_certification;
-
--- 新しい外部キー制約を追加
-ALTER TABLE TRN_SkillEvidence ADD CONSTRAINT fk_evidence_certification
-    FOREIGN KEY (...) REFERENCES ...
-    ON UPDATE CASCADE
-    ON DELETE CASCADE;
-```
-
-#### YAMLファイルの修正：
-```yaml
-foreign_keys:
-  - name: fk_evidence_certification
-    # ... 他の設定 ...
-    on_update: CASCADE
-    on_delete: CASCADE
-```
-
-```
-
-#### 237. TRN_SkillRecord
+#### 236. TRN_SkillRecord
 
 **説明:** 外部キーfk_skill_certificationのON DELETE設定を統一
 
@@ -25048,7 +26780,7 @@ foreign_keys:
 
 ```
 
-#### 238. TRN_SkillRecord
+#### 237. TRN_SkillRecord
 
 **説明:** 外部キーfk_skill_assessorのON DELETE設定を統一
 
@@ -25093,7 +26825,7 @@ foreign_keys:
 
 ```
 
-#### 239. TRN_SkillRecord
+#### 238. TRN_SkillRecord
 
 **説明:** 外部キーfk_skill_categoryのON DELETE設定を統一
 
@@ -25138,7 +26870,7 @@ foreign_keys:
 
 ```
 
-#### 240. TRN_TrainingHistory
+#### 239. TRN_TrainingHistory
 
 **説明:** 外部キーfk_training_history_programのON DELETE設定を統一
 
@@ -25183,7 +26915,7 @@ foreign_keys:
 
 ```
 
-#### 241. TRN_TrainingHistory
+#### 240. TRN_TrainingHistory
 
 **説明:** 外部キーfk_training_history_approverのON DELETE設定を統一
 
@@ -27282,7 +29014,7 @@ ADD CONSTRAINT fk_wrk_batchjoblog_tenant_id
 
 ```
 
-### YAML 修正 (55件)
+### YAML 修正 (54件)
 
 #### 1. MST_UserAuth
 
@@ -29333,33 +31065,5 @@ foreign_keys:
 ### 注意事項：
 - 複数カラムの外部キーの場合は適切に調整してください
 - 業務要件に応じてカスケード設定を調整してください
-
-```
-
-#### 55. MST_Skill
-
-**説明:** YAMLフォーマットを修正
-
-💾 **注意:** 修正前にバックアップを取得してください。
-
-**修正内容:**
-```sql
-
-## YAMLフォーマット修正提案
-
-YAMLファイルのフォーマットに問題があります。
-
-### 修正手順：
-1. YAMLファイルの構文を確認
-2. 必須フィールドが存在することを確認
-3. データ型と制約の妥当性を検証
-
-### 標準テンプレートに準拠してください：
-- table_name: 必須
-- description: 必須
-- columns: 必須（配列形式）
-- indexes: オプション
-- foreign_keys: オプション
-- constraints: オプション
 
 ```

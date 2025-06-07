@@ -19,8 +19,8 @@ class DataTypeConsistencyChecker:
     def __init__(self, base_dir: Path):
         self.base_dir = base_dir
         self.logger = logging.getLogger(__name__)
-        self.ddl_parser = EnhancedDDLParser()
-        self.yaml_parser = EnhancedYAMLParser()
+        self.ddl_parser = EnhancedDDLParser(self.logger)
+        self.yaml_parser = EnhancedYAMLParser(self.logger)
         
         # データ型の互換性マッピング
         self.type_compatibility = self._init_type_compatibility()

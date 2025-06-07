@@ -23,7 +23,7 @@ class TableExistenceChecker:
         self.logger = logger or ConsistencyLogger()
         self.table_list_parser = TableListParser(logger)
         self.entity_parser = EntityYamlParser(logger)
-        self.ddl_parser = DDLParser()
+        self.ddl_parser = DDLParser(self.logger)
     
     def check_table_existence(
         self,

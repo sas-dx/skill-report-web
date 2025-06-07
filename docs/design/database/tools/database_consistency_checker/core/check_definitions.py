@@ -64,6 +64,13 @@ CHECK_DEFINITIONS: Dict[str, CheckDefinition] = {
         check_content="必須セクション存在確認、セクション内構造確認、データ型妥当性確認、テンプレート準拠確認",
         detected_issues="必須セクション不足、構造不整合、データ型不正、テンプレート非準拠"
     ),
+    "constraint_consistency": CheckDefinition(
+        japanese_name="制約整合性",
+        description="DDLとYAMLファイル間での制約定義の詳細整合性確認",
+        purpose="CHECK制約、UNIQUE制約、PRIMARY KEY制約、インデックス制約の整合性確認",
+        check_content="CHECK制約の条件一致、UNIQUE制約の対象カラム一致、PRIMARY KEY制約の整合性、インデックス制約の詳細比較",
+        detected_issues="制約条件不一致、制約対象カラム相違、制約定義漏れ、インデックス設定不整合"
+    ),
     "fix_suggestions": CheckDefinition(
         japanese_name="修正提案",
         description="検出された問題に対する具体的な修正方法の提案",

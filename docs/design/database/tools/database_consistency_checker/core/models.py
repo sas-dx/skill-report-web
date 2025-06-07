@@ -120,6 +120,7 @@ class FixSuggestion:
     file_path: str = ""
     backup_required: bool = True
     critical: bool = False
+    details: Dict[str, Any] = field(default_factory=dict) # details属性を追加
 
 
 @dataclass

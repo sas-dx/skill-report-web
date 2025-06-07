@@ -15,8 +15,8 @@ from core.models import (
 class DDLParser:
     """基本DDL解析クラス（既存機能との互換性維持）"""
     
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
     
     def parse_ddl_file(self, file_path: Path) -> Optional[str]:
         """DDLファイルからテーブル名を抽出（既存機能）"""
@@ -42,8 +42,8 @@ class DDLParser:
 class EnhancedDDLParser(DDLParser):
     """拡張DDL解析クラス - データ型整合性チェック用"""
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, logger: logging.Logger):
+        super().__init__(logger)
         self.data_type_patterns = self._init_data_type_patterns()
         self.constraint_patterns = self._init_constraint_patterns()
     

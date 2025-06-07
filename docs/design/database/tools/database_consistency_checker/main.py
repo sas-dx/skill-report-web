@@ -42,8 +42,17 @@ def create_argument_parser() -> argparse.ArgumentParser:
   python -m database_consistency_checker --verbose
 
 利用可能なチェック:
-  - table_existence: テーブル存在整合性
+  - table_existence: テーブル存在確認
   - orphaned_files: 孤立ファイル検出
+  - yaml_format_consistency: YAMLフォーマット整合性
+  - column_consistency: カラム定義整合性
+  - foreign_key_consistency: 外部キー整合性
+  - data_type_consistency: データ型整合性
+  - constraint_consistency: 制約整合性
+  - fix_suggestions: 修正提案
+  - multitenant_compliance: マルチテナント対応
+  - requirement_traceability: 要求仕様ID追跡
+  - performance_impact: パフォーマンス影響分析
         """
     )
     
@@ -226,7 +235,7 @@ def main():
     
     # レポート出力
     try:
-        output_report(report, check_config)
+        output_report(report, check_config, config) # config引数を追加
     except Exception as e:
         print(f"❌ レポート出力エラー: {e}", file=sys.stderr)
         sys.exit(1)
@@ -239,7 +248,7 @@ def main():
         sys.exit(0)  # 成功
 
 
-def output_report(report, check_config):
+def output_report(report, check_config, config): # config引数を追加
     """レポートを出力"""
     # レポーター初期化
     if check_config.output_format == "console":
@@ -269,7 +278,7 @@ def output_report(report, check_config):
         if check_config.output_format != "console":
             # レポートマネージャー初期化
             report_manager = ReportManager(
-                base_dir=check_config.base_dir,
+                base_dir=config.base_dir,
                 report_dir=check_config.report_dir
             )
             
