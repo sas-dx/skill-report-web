@@ -20,7 +20,7 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # 共通ライブラリをインポート
-from docs.design.database.tools.shared.core.config import Config
+from docs.design.database.tools.shared.core.config import get_config, DatabaseToolsConfig
 from docs.design.database.tools.shared.parsers.yaml_parser import YamlParser
 from docs.design.database.tools.shared.generators.ddl_generator import DDLGenerator
 from docs.design.database.tools.shared.generators.markdown_generator import MarkdownGenerator
@@ -45,7 +45,7 @@ def setup_logger(verbose: bool = False):
 class TableGeneratorService:
     """テーブル生成サービス - 共通ライブラリ使用版"""
     
-    def __init__(self, config: Config):
+    def __init__(self, config: DatabaseToolsConfig):
         self.config = config
         self.logger = logging.getLogger(__name__)
         
@@ -68,7 +68,7 @@ class TableGeneratorService:
             self.logger.info(f"テーブル処理開始: {table_name}")
             
             # YAML詳細定義の読み込み
-            yaml_file = self.config.yaml_dir / f"{table_name}_details.yaml"
+            yaml_file = self.config.table_details_dir / f"{table_name}_details.yaml"
             if not yaml_file.exists():
                 raise ParsingError(f"YAML詳細定義ファイルが見つかりません: {yaml_file}")
             
@@ -186,51 +186,26 @@ def main():
         setup_logger(args.verbose)
         logger = logging.getLogger(__name__)
         
-        # 設定読み込み
-        config_path = Path(args.config)
-        if not config_path.exists():
-            # デフォルト設定ファイルパスを試行
-            default_config = Path(__file__).parent / 'config.yaml'
-            if default_config.exists():
-                config_path = default_config
-            else:
-                # 設定ファイルがない場合はデフォルト設定を使用
-                config = Config()
-                config_path = None
+        # 統合設定を使用
+        config = get_config()
         
-        if config_path:
-            config = Config.from_yaml(config_path)
-        else:
-            config = Config()
-        
-        # コマンドライン引数で設定を上書き
-        if args.output_dir:
-            config.output_dir = Path(args.output_dir)
-        if args.yaml_dir:
-            config.yaml_dir = Path(args.yaml_dir)
+        # コマンドライン引数で設定を上書き（必要に応じて）
         if args.verbose:
             config.verbose = True
         
-        # 出力ディレクトリの設定
-        if not hasattr(config, 'ddl_dir'):
-            config.ddl_dir = config.output_dir / 'ddl'
-        if not hasattr(config, 'tables_dir'):
-            config.tables_dir = config.output_dir / 'tables'
-        if not hasattr(config, 'data_dir'):
-            config.data_dir = config.output_dir / 'data'
-        
         logger.info("テーブル生成ツール開始（共通ライブラリ対応版）")
-        if config_path:
-            logger.info(f"設定ファイル: {config_path}")
-        logger.info(f"YAML詳細定義ディレクトリ: {config.yaml_dir}")
-        logger.info(f"出力ディレクトリ: {config.output_dir}")
+        logger.info(f"ベースディレクトリ: {config.base_dir}")
+        logger.info(f"YAML詳細定義ディレクトリ: {config.table_details_dir}")
+        logger.info(f"DDLディレクトリ: {config.ddl_dir}")
+        logger.info(f"テーブル定義書ディレクトリ: {config.tables_dir}")
+        logger.info(f"サンプルデータディレクトリ: {config.data_dir}")
         
         # 処理対象テーブル決定
         if args.table:
             target_tables = [t.strip() for t in args.table.split(',')]
         else:
             # 全テーブル処理の場合、YAML詳細定義ディレクトリから取得
-            yaml_files = list(config.yaml_dir.glob("*_details.yaml"))
+            yaml_files = list(config.table_details_dir.glob("*_details.yaml"))
             target_tables = [f.stem.replace("_details", "") for f in yaml_files]
         
         if not target_tables:

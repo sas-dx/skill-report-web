@@ -21,7 +21,7 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # 共通ライブラリをインポート
-from docs.design.database.tools.shared.core.config import Config
+from docs.design.database.tools.shared.core.config import get_config, DatabaseToolsConfig
 from docs.design.database.tools.shared.parsers.yaml_parser import YamlParser
 from docs.design.database.tools.shared.parsers.ddl_parser import DDLParser
 from docs.design.database.tools.shared.parsers.markdown_parser import MarkdownParser
@@ -45,7 +45,7 @@ def setup_logger(verbose: bool = False):
 class ConsistencyCheckService:
     """整合性チェックサービス - 共通ライブラリ使用版"""
     
-    def __init__(self, config: Config):
+    def __init__(self, config: DatabaseToolsConfig):
         self.config = config
         self.logger = logging.getLogger(__name__)
         
@@ -73,7 +73,7 @@ class ConsistencyCheckService:
         try:
             # 対象テーブル決定
             if target_tables is None:
-                yaml_files = list(self.config.yaml_dir.glob("*_details.yaml"))
+                yaml_files = list(self.config.table_details_dir.glob("*_details.yaml"))
                 target_tables = [f.stem.replace("_details", "") for f in yaml_files]
             
             if not target_tables:
@@ -134,7 +134,7 @@ class ConsistencyCheckService:
             }
             
             # YAMLファイル存在チェック
-            yaml_file = self.config.yaml_dir / f"{table_name}_details.yaml"
+            yaml_file = self.config.table_details_dir / f"{table_name}_details.yaml"
             table_result['yaml_exists'] = yaml_file.exists()
             
             # DDLファイル存在チェック
@@ -180,7 +180,7 @@ class ConsistencyCheckService:
         for table_name in target_tables:
             try:
                 # YAMLファイル読み込み
-                yaml_file = self.config.yaml_dir / f"{table_name}_details.yaml"
+                yaml_file = self.config.table_details_dir / f"{table_name}_details.yaml"
                 if not yaml_file.exists():
                     continue
                 
@@ -277,7 +277,7 @@ class ConsistencyCheckService:
         # 実装は簡略化（実際の実装では外部キー制約の詳細チェックを行う）
         for table_name in target_tables:
             try:
-                yaml_file = self.config.yaml_dir / f"{table_name}_details.yaml"
+                yaml_file = self.config.table_details_dir / f"{table_name}_details.yaml"
                 if not yaml_file.exists():
                     continue
                 
@@ -291,7 +291,7 @@ class ConsistencyCheckService:
                 # 外部キー制約チェック
                 for fk in yaml_table_def.foreign_keys:
                     # 参照先テーブルの存在確認
-                    ref_table_yaml = self.config.yaml_dir / f"{fk.references_table}_details.yaml"
+                    ref_table_yaml = self.config.table_details_dir / f"{fk.references_table}_details.yaml"
                     if not ref_table_yaml.exists():
                         error_msg = f"{table_name}: 外部キー参照先テーブル '{fk.references_table}' が存在しません"
                         result['errors'].append(error_msg)
@@ -429,33 +429,14 @@ def main():
         setup_logger(args.verbose)
         logger = logging.getLogger(__name__)
         
-        # 設定読み込み
-        config_path = Path(args.config)
-        if not config_path.exists():
-            # デフォルト設定ファイルパスを試行
-            default_config = Path(__file__).parent / 'config.yaml'
-            if default_config.exists():
-                config_path = default_config
-            else:
-                config = Config()
-                config_path = None
-        
-        if config_path:
-            config = Config.from_yaml(config_path)
-        else:
-            config = Config()
-        
-        # 出力ディレクトリの設定
-        if not hasattr(config, 'ddl_dir'):
-            config.ddl_dir = config.output_dir / 'ddl'
-        if not hasattr(config, 'tables_dir'):
-            config.tables_dir = config.output_dir / 'tables'
+        # 統合設定を使用
+        config = get_config()
         
         logger.info("データベース整合性チェック開始（共通ライブラリ対応版）")
-        if config_path:
-            logger.info(f"設定ファイル: {config_path}")
-        logger.info(f"YAML詳細定義ディレクトリ: {config.yaml_dir}")
-        logger.info(f"出力ディレクトリ: {config.output_dir}")
+        logger.info(f"ベースディレクトリ: {config.base_dir}")
+        logger.info(f"YAML詳細定義ディレクトリ: {config.table_details_dir}")
+        logger.info(f"DDLディレクトリ: {config.ddl_dir}")
+        logger.info(f"テーブル定義書ディレクトリ: {config.tables_dir}")
         
         # チェック対象テーブル決定
         target_tables = None
