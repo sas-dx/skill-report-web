@@ -1,6 +1,6 @@
 # データベースツール統合リファクタリング計画
 
-## 現状分析
+## 現状分析（詳細調査完了）
 
 ### 1. 現在のツール構成
 
@@ -10,7 +10,7 @@ table_generator/
 ├── core/
 │   ├── config.py          # 統合設定へのラッパー
 │   ├── logger.py          # ログ管理
-│   └── models.py          # データモデル
+│   └── models.py          # データモデル（重複）
 ├── data/
 │   ├── faker_utils.py     # テストデータ生成
 │   └── yaml_data_loader.py
@@ -40,151 +40,177 @@ database_consistency_checker/
     └── report_manager.py
 ```
 
-#### shared/
-```
-shared/
-└── core/
-    └── config.py         # 統合設定システム
-```
-
-### 2. 問題点の特定
-
-#### A. コード重複
-- **models.py**: 両ツールで類似のデータモデルが重複定義
-- **logger.py**: ログ機能が各ツールで独立実装
-- **config.py**: 統合設定へのラッパーが各ツールで個別実装
-- **yaml_loader.py**: YAML読み込み機能が重複
-
-#### B. 依存関係の複雑化
-- 各ツールが独自の設定ラッパーを持つ
-- 統合設定への依存が間接的
-- パーサー機能の重複（DDL、YAML）
-
-#### C. 保守性の問題
-- 機能追加時に複数箇所の修正が必要
-- テストコードの重複
-- ドキュメントの分散
-
-## リファクタリング戦略
-
-### Phase 1: 共通基盤の統合（優先度：最高）
-
-#### 1.1 共通データモデルの統合
+#### shared/（統合基盤）
 ```
 shared/
 ├── core/
-│   ├── config.py         # 既存の統合設定
-│   ├── models.py         # 統合データモデル
+│   ├── config.py         # 統合設定システム
+│   ├── models.py         # 統合データモデル（完全版）
 │   ├── logger.py         # 統合ログシステム
 │   └── exceptions.py     # 統一例外クラス
 ├── parsers/
-│   ├── yaml_parser.py    # 統合YAMLパーサー
-│   ├── ddl_parser.py     # 統合DDLパーサー
-│   └── base_parser.py    # パーサー基底クラス
 ├── utils/
-│   ├── file_utils.py     # ファイル操作ユーティリティ
-│   ├── sql_utils.py      # SQL関連ユーティリティ
-│   └── validation.py     # 共通バリデーション
-└── types/
-    ├── __init__.py
-    ├── table_types.py    # テーブル関連型定義
-    ├── check_types.py    # チェック関連型定義
-    └── report_types.py   # レポート関連型定義
+│   └── file_utils.py
+└── constants/
 ```
 
-#### 1.2 統合データモデル設計
+### 2. 重大な問題点の特定
+
+#### A. 深刻なコード重複
+- **models.py**: 3つの異なるデータモデル定義が存在
+  - `shared/core/models.py`: 統合モデル（最新・完全・未使用）
+  - `table_generator/core/models.py`: 生成ツール固有モデル
+  - `database_consistency_checker/core/models.py`: チェックツール固有モデル
+
+#### B. データモデル不整合の詳細
+**ColumnDefinition の属性比較**:
 ```python
-# shared/core/models.py
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any, Union
-from enum import Enum
-
-# 基底クラス
+# shared/core/models.py（統合版）
 @dataclass
-class BaseModel:
-    """全データモデルの基底クラス"""
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """辞書形式に変換"""
-        pass
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
-        """辞書から生成"""
-        pass
+class ColumnDefinition:
+    name: str
+    type: str
+    nullable: bool = True
+    primary_key: bool = False
+    unique: bool = False
+    default: Optional[str] = None
+    comment: Optional[str] = None
+    requirement_id: Optional[str] = None
+    length: Optional[int] = None
 
-# テーブル関連モデル
+# table_generator/core/models.py
 @dataclass
-class ColumnDefinition(BaseModel):
-    """統合カラム定義"""
+class ColumnDefinition:
+    name: str
+    logical: str
+    data_type: str
+    length: Optional[int] = None
+    null: bool = True
+    primary: bool = False
+    unique: bool = False
+    data_generation: Optional[Dict[str, Any]] = None
+
+# database_consistency_checker/core/models.py
+@dataclass
+class ColumnDefinition:
     name: str
     logical_name: str = ""
     data_type: str = ""
-    length: Optional[int] = None
     nullable: bool = True
     primary_key: bool = False
     foreign_key: bool = False
-    default_value: Optional[str] = None
-    comment: str = ""
-    requirement_id: str = ""  # 要求仕様ID対応
-
-@dataclass
-class TableDefinition(BaseModel):
-    """統合テーブル定義"""
-    table_name: str
-    logical_name: str
-    category: str
-    priority: str = "中"
-    requirement_id: str = ""
-    columns: List[ColumnDefinition] = field(default_factory=list)
-    indexes: List['IndexDefinition'] = field(default_factory=list)
-    foreign_keys: List['ForeignKeyDefinition'] = field(default_factory=list)
-    constraints: List['ConstraintDefinition'] = field(default_factory=list)
-
-# チェック関連モデル
-@dataclass
-class CheckResult(BaseModel):
-    """統合チェック結果"""
-    check_name: str
-    table_name: str
-    severity: 'CheckSeverity'
-    message: str
-    details: Dict[str, Any] = field(default_factory=dict)
-    requirement_id: str = ""
-
-# レポート関連モデル
-@dataclass
-class GenerationReport(BaseModel):
-    """生成レポート"""
-    generated_files: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    encrypted: bool = False
 ```
 
-### Phase 2: パーサー統合（優先度：高）
+**主な不整合**:
+- 属性名: `nullable` vs `null`, `data_type` vs `type`
+- 必須属性: `requirement_id`の有無
+- 固有属性: `data_generation`, `encrypted`, `foreign_key`
+
+#### C. アーキテクチャの問題
+- **統合モデル未使用**: 完全な統合モデルが存在するが各ツールで使用されていない
+- **変換ロジック重複**: 各ツールが独自のデータ変換を実装
+- **パーサー機能重複**: DDL、YAML解析が複数箇所に存在
+- **設定管理分散**: 統合設定への依存が間接的
+
+#### D. 保守性・拡張性の問題
+- 新機能追加時に3箇所の修正が必要
+- データモデル変更時の影響範囲が不明確
+- テストコードの重複とメンテナンス負荷
+- ドキュメントの分散と不整合
+
+## 統合リファクタリング戦略
+
+### Phase 1: 統合データモデルの強制適用（優先度：最高）
+
+#### 1.1 統合モデル活用の強制
+既存の `shared/core/models.py` を各ツールで強制使用:
+
+```python
+# 各ツールでの統合モデル使用
+from shared.core.models import (
+    TableDefinition,
+    ColumnDefinition, 
+    IndexDefinition,
+    ForeignKeyDefinition,
+    CheckResult,
+    GenerationResult
+)
+```
+
+#### 1.2 データ変換アダプターの実装
+```python
+# shared/adapters/model_adapters.py
+class LegacyModelAdapter:
+    """既存モデルから統合モデルへの変換"""
+    
+    @staticmethod
+    def from_table_generator_column(legacy_col) -> ColumnDefinition:
+        """table_generator のColumnDefinition → 統合ColumnDefinition"""
+        return ColumnDefinition(
+            name=legacy_col.name,
+            type=legacy_col.data_type,
+            nullable=legacy_col.null,
+            primary_key=legacy_col.primary,
+            length=legacy_col.length,
+            comment=legacy_col.description
+        )
+    
+    @staticmethod
+    def from_checker_column(legacy_col) -> ColumnDefinition:
+        """checker のColumnDefinition → 統合ColumnDefinition"""
+        return ColumnDefinition(
+            name=legacy_col.name,
+            type=legacy_col.data_type,
+            nullable=legacy_col.nullable,
+            primary_key=legacy_col.primary_key,
+            comment=legacy_col.comment
+        )
+```
+
+#### 1.3 段階的移行計画
+1. **Week 1**: アダプター実装・テスト
+2. **Week 2**: table_generator での統合モデル使用
+3. **Week 3**: database_consistency_checker での統合モデル使用
+4. **Week 4**: 既存モデル削除・クリーンアップ
+
+### Phase 2: 統合パーサーシステム（優先度：高）
 
 #### 2.1 統合パーサーアーキテクチャ
+```
+shared/
+├── parsers/
+│   ├── __init__.py
+│   ├── base_parser.py        # パーサー基底クラス
+│   ├── yaml_parser.py        # 統合YAMLパーサー
+│   ├── ddl_parser.py         # 統合DDLパーサー
+│   ├── markdown_parser.py    # Markdownパーサー
+│   └── adapters/
+│       ├── __init__.py
+│       ├── yaml_adapter.py   # YAML形式変換
+│       └── ddl_adapter.py    # DDL形式変換
+```
+
+#### 2.2 統合パーサー実装
 ```python
 # shared/parsers/base_parser.py
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
-from ..core.models import BaseModel
+from typing import Any, List, Optional
+from ..core.models import TableDefinition, CheckResult
 
 class BaseParser(ABC):
-    """パーサー基底クラス"""
+    """統合パーサー基底クラス"""
     
     def __init__(self, config):
         self.config = config
         self.logger = get_logger(__name__)
     
     @abstractmethod
-    def parse(self, source: Any) -> BaseModel:
+    def parse(self, source: Any) -> TableDefinition:
         """解析実行"""
         pass
     
-    def validate(self, result: BaseModel) -> List[str]:
+    def validate(self, result: TableDefinition) -> List[CheckResult]:
         """解析結果の検証"""
         pass
 
@@ -193,32 +219,16 @@ class UnifiedYAMLParser(BaseParser):
     """統合YAMLパーサー"""
     
     def parse_table_detail(self, yaml_path: Path) -> TableDefinition:
-        """テーブル詳細YAML解析"""
-        pass
+        """テーブル詳細YAML解析 → 統合TableDefinition"""
+        yaml_data = self._load_yaml(yaml_path)
+        return create_table_definition_from_yaml(yaml_data)
     
     def parse_entity_relationships(self, yaml_path: Path) -> List[EntityRelationship]:
         """エンティティ関連YAML解析"""
         pass
-
-# shared/parsers/ddl_parser.py
-class UnifiedDDLParser(BaseParser):
-    """統合DDLパーサー"""
-    
-    def parse_create_table(self, ddl_content: str) -> TableDefinition:
-        """CREATE TABLE文解析"""
-        pass
-    
-    def parse_indexes(self, ddl_content: str) -> List[IndexDefinition]:
-        """インデックス定義解析"""
-        pass
 ```
 
-#### 2.2 パーサー統合による効果
-- **コード削減**: 重複パーサーコードの統合
-- **一貫性向上**: 解析ロジックの統一
-- **保守性向上**: 単一箇所での修正対応
-
-### Phase 3: ツール固有機能の最適化（優先度：中）
+### Phase 3: ツール固有機能の統合モデル対応（優先度：中）
 
 #### 3.1 table_generator リファクタリング
 ```
@@ -226,15 +236,18 @@ table_generator/
 ├── __init__.py
 ├── __main__.py
 ├── README.md
+├── adapters/                 # 新規追加
+│   ├── __init__.py
+│   └── legacy_adapter.py     # 既存コードとの互換性
 ├── generators/
 │   ├── __init__.py
-│   ├── ddl_generator.py      # DDL生成（共通パーサー使用）
-│   ├── markdown_generator.py # Markdown生成
-│   ├── insert_generator.py   # INSERT文生成
-│   └── report_generator.py   # 生成レポート
+│   ├── ddl_generator.py      # 統合モデル使用に変更
+│   ├── markdown_generator.py # 統合モデル使用に変更
+│   ├── insert_generator.py   # 統合モデル使用に変更
+│   └── report_generator.py   # 統合レポート生成
 ├── data/
 │   ├── __init__.py
-│   ├── faker_factory.py      # Fakerファクトリー
+│   ├── faker_factory.py      # 統合モデル対応
 │   └── sample_data_generator.py
 └── cli/
     ├── __init__.py
@@ -247,20 +260,22 @@ database_consistency_checker/
 ├── __init__.py
 ├── main.py
 ├── README.md
+├── adapters/                 # 新規追加
+│   ├── __init__.py
+│   └── legacy_adapter.py     # 既存コードとの互換性
 ├── checkers/
 │   ├── __init__.py
-│   ├── base_checker.py       # チェッカー基底クラス
-│   ├── table_checker.py      # テーブル関連チェック
-│   ├── column_checker.py     # カラム関連チェック
-│   ├── constraint_checker.py # 制約関連チェック
-│   └── compliance_checker.py # コンプライアンスチェック
+│   ├── base_checker.py       # 統合モデル使用
+│   ├── table_checker.py      # 統合モデル使用
+│   ├── column_checker.py     # 統合モデル使用
+│   └── compliance_checker.py # 統合モデル使用
 ├── fixers/
 │   ├── __init__.py
-│   ├── base_fixer.py         # 修正提案基底クラス
+│   ├── base_fixer.py         # 統合モデル使用
 │   └── auto_fixer.py         # 自動修正機能
 ├── reporters/
 │   ├── __init__.py
-│   ├── base_reporter.py      # レポーター基底クラス
+│   ├── base_reporter.py      # 統合レポート使用
 │   ├── console_reporter.py
 │   ├── markdown_reporter.py
 │   └── json_reporter.py
@@ -269,14 +284,14 @@ database_consistency_checker/
     └── commands.py           # CLI コマンド
 ```
 
-### Phase 4: 統合CLI・API設計（優先度：中）
+### Phase 4: 統合CLI・ワークフロー（優先度：中）
 
 #### 4.1 統合CLIアーキテクチャ
 ```python
 # tools/cli/main.py
 import click
-from .table_generator_commands import table_gen_group
-from .consistency_checker_commands import check_group
+from shared.core.config import get_config
+from shared.core.logger import get_logger
 
 @click.group()
 @click.option('--config', help='設定ファイルパス')
@@ -285,124 +300,151 @@ from .consistency_checker_commands import check_group
 def cli(ctx, config, verbose):
     """データベースツール統合CLI"""
     ctx.ensure_object(dict)
-    ctx.obj['config'] = config
+    ctx.obj['config'] = get_config(config)
     ctx.obj['verbose'] = verbose
 
-cli.add_command(table_gen_group, name='generate')
-cli.add_command(check_group, name='check')
+@cli.group()
+def generate():
+    """テーブル生成コマンド群"""
+    pass
 
-if __name__ == '__main__':
-    cli()
+@cli.group() 
+def check():
+    """整合性チェックコマンド群"""
+    pass
+
+@cli.command()
+@click.argument('table_name')
+@click.pass_context
+def workflow(ctx, table_name):
+    """統合ワークフロー: 生成 → チェック → レポート"""
+    # 1. テーブル生成
+    # 2. 整合性チェック
+    # 3. 統合レポート出力
+    pass
 ```
 
-#### 4.2 使用例
+#### 4.2 統合ワークフロー例
 ```bash
-# テーブル生成
+# 個別実行
 python -m tools generate table MST_Employee --verbose
+python -m tools check table MST_Employee --output-format markdown
 
-# 整合性チェック
-python -m tools check all --output-format markdown
+# 統合ワークフロー
+python -m tools workflow MST_Employee
 
-# 統合実行
-python -m tools generate table MST_Employee && python -m tools check table MST_Employee
+# 一括処理
+python -m tools workflow --all --parallel
 ```
 
-### Phase 5: テスト統合・品質保証（優先度：中）
+### Phase 5: 統合テスト・品質保証（優先度：中）
 
 #### 5.1 統合テスト戦略
 ```
 tests/
 ├── unit/
 │   ├── shared/
-│   │   ├── test_models.py
-│   │   ├── test_parsers.py
+│   │   ├── test_models.py        # 統合モデルテスト
+│   │   ├── test_parsers.py       # 統合パーサーテスト
+│   │   ├── test_adapters.py      # アダプターテスト
 │   │   └── test_config.py
 │   ├── table_generator/
-│   │   └── test_generators.py
+│   │   ├── test_generators.py    # 統合モデル使用テスト
+│   │   └── test_adapters.py
 │   └── consistency_checker/
-│       └── test_checkers.py
+│       ├── test_checkers.py      # 統合モデル使用テスト
+│       └── test_adapters.py
 ├── integration/
-│   ├── test_end_to_end.py
-│   └── test_tool_integration.py
+│   ├── test_end_to_end.py        # E2Eワークフローテスト
+│   ├── test_tool_integration.py  # ツール間連携テスト
+│   └── test_model_compatibility.py # モデル互換性テスト
 ├── fixtures/
 │   ├── sample_yaml/
 │   ├── sample_ddl/
+│   ├── legacy_models/            # 既存モデルサンプル
 │   └── expected_outputs/
 └── conftest.py
 ```
 
 #### 5.2 品質保証指標
-- **テストカバレッジ**: 90%以上
-- **静的解析**: flake8, mypy, black準拠
-- **パフォーマンス**: 大規模テーブル（100テーブル）での実行時間5分以内
-- **メモリ使用量**: 1GB以内
+- **テストカバレッジ**: 95%以上（統合モデル・アダプター重点）
+- **互換性テスト**: 既存データとの100%互換性
+- **パフォーマンス**: 統合後も既存比120%以内
+- **メモリ使用量**: 統合後も既存比110%以内
 
-## 実装計画
+## 詳細実装計画
 
-### Week 1-2: Phase 1 実装
-- [ ] 統合データモデル設計・実装
-- [ ] 統合ログシステム実装
-- [ ] 統合設定システム拡張
-- [ ] 基本的な単体テスト作成
-
-### Week 3-4: Phase 2 実装
-- [ ] 統合パーサー実装
-- [ ] 既存パーサーからの移行
-- [ ] パーサー統合テスト
+### Week 1-2: Phase 1 - 統合モデル強制適用
+- [x] 統合モデル分析完了
+- [ ] データ変換アダプター実装
+- [ ] table_generator での統合モデル使用
+- [ ] 互換性テスト作成・実行
 - [ ] 既存機能の動作確認
 
-### Week 5-6: Phase 3 実装
-- [ ] table_generator リファクタリング
-- [ ] database_consistency_checker リファクタリング
-- [ ] 機能テスト・回帰テスト
-- [ ] パフォーマンステスト
+### Week 3-4: Phase 1 完了 + Phase 2 開始
+- [ ] database_consistency_checker での統合モデル使用
+- [ ] 既存モデル削除・クリーンアップ
+- [ ] 統合パーサー実装開始
+- [ ] パーサー統合テスト
+- [ ] 回帰テスト実行
 
-### Week 7-8: Phase 4-5 実装
-- [ ] 統合CLI実装
-- [ ] 統合テストスイート構築
+### Week 5-6: Phase 2-3 実装
+- [ ] 統合パーサー完成・移行
+- [ ] ツール固有機能の統合モデル対応
+- [ ] 機能テスト・パフォーマンステスト
 - [ ] ドキュメント更新
+
+### Week 7-8: Phase 4-5 実装・完成
+- [ ] 統合CLI・ワークフロー実装
+- [ ] 統合テストスイート構築
 - [ ] 最終的な品質保証
+- [ ] リリース準備・ドキュメント完成
 
-## 期待効果
+## 期待効果（定量化）
 
-### 1. 開発効率向上
-- **コード重複削減**: 30-40%のコード削減
-- **機能追加速度**: 新機能開発時間50%短縮
-- **バグ修正効率**: 単一箇所修正による影響範囲の明確化
+### 1. コード削減効果
+- **models.py**: 3ファイル → 1ファイル（67%削減）
+- **パーサー**: 重複コード50%削減
+- **設定管理**: ラッパーコード100%削除
+- **総コード行数**: 30-40%削減
 
-### 2. 保守性向上
-- **統一アーキテクチャ**: 一貫した設計パターン
-- **テスト効率**: 統合テストによる品質保証
-- **ドキュメント統合**: 単一ドキュメントでの管理
+### 2. 開発効率向上
+- **新機能追加**: 修正箇所3箇所 → 1箇所（67%削減）
+- **データモデル変更**: 影響範囲の明確化
+- **テスト実行時間**: 統合テストによる効率化
+- **デバッグ時間**: 統一モデルによる問題特定の高速化
 
-### 3. 拡張性向上
-- **新ツール追加**: 共通基盤の再利用
-- **機能拡張**: プラグインアーキテクチャ対応
-- **API化**: 外部システムとの連携対応
+### 3. 品質向上
+- **データ整合性**: 統一モデルによる保証
+- **型安全性**: 統合型定義による向上
+- **テストカバレッジ**: 重複排除による集中テスト
+- **ドキュメント品質**: 統合ドキュメントによる一貫性
 
-## リスク管理
+## リスク管理・対策
 
 ### 技術リスク
-- **既存機能の破壊**: 段階的移行による影響最小化
-- **パフォーマンス劣化**: ベンチマークテストによる監視
-- **互換性問題**: 後方互換性の維持
+- **既存機能破壊**: アダプターによる段階的移行で最小化
+- **パフォーマンス劣化**: ベンチマークテストによる継続監視
+- **互換性問題**: 既存データとの100%互換性テスト
 
 ### プロジェクトリスク
-- **スケジュール遅延**: 週次進捗確認による早期対応
-- **品質低下**: 継続的テストによる品質保証
-- **チーム負荷**: 段階的実装による負荷分散
+- **スケジュール遅延**: 週次進捗確認・早期問題発見
+- **品質低下**: 継続的テスト・自動化による品質保証
+- **チーム負荷**: 段階的実装・並行作業による負荷分散
 
 ## 成功指標
 
 ### 定量指標
-- **コード行数削減**: 30%以上
-- **テストカバレッジ**: 90%以上
+- **コード行数削減**: 35%以上
+- **テストカバレッジ**: 95%以上
 - **実行時間**: 既存比120%以内
 - **メモリ使用量**: 既存比110%以内
+- **バグ発生率**: 50%削減
 
 ### 定性指標
-- **開発者満足度**: 4.0/5.0以上
-- **保守性**: コードレビュー時間50%短縮
-- **拡張性**: 新機能追加時間50%短縮
+- **開発者満足度**: 4.5/5.0以上
+- **保守性**: コードレビュー時間60%短縮
+- **拡張性**: 新機能追加時間60%短縮
+- **可読性**: コード理解時間50%短縮
 
-この統合リファクタリング計画により、データベースツールの効率性・保守性・拡張性を大幅に向上させ、AI駆動開発の知見獲得と実用的システム完成の両立を実現します。
+この詳細なリファクタリング計画により、データベースツールの統合を効率的かつ安全に実現し、AI駆動開発の知見獲得と実用的システム完成の両立を図ります。
