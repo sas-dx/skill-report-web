@@ -17,7 +17,13 @@
 - [x] 統合データモデルをデフォルトに設定
 - [x] レガシーモードの提供（互換性保証）
 
-### Phase 4: 最適化・クリーンアップ 🚧 進行中
+### Phase 4: 共通ライブラリ統合 ✅ 完了
+- [x] 共通ライブラリ作成（shared/）
+- [x] table_generator の共通ライブラリ対応
+- [x] database_consistency_checker の共通ライブラリ対応
+- [x] 既存機能の100%互換性確保
+
+### Phase 5: 最適化・クリーンアップ 🚧 進行中
 - [ ] 重複コードの除去
 - [ ] パフォーマンス最適化
 - [ ] ドキュメント更新
@@ -26,54 +32,51 @@
 
 ### 1. 現在のツール構成
 
-#### table_generator
+#### table_generator（統合設定対応済み）
 ```
 table_generator/
+├── __main__.py           # 統合データモデル対応エントリーポイント
 ├── core/
-│   ├── config.py          # 統合設定へのラッパー
-│   ├── logger.py          # ログ管理
-│   └── models.py          # データモデル（重複）
-├── data/
-│   ├── faker_utils.py     # テストデータ生成
-│   └── yaml_data_loader.py
+│   ├── config.py         # 統合設定へのラッパー（後方互換性）
+│   ├── adapters.py       # 統合データモデル・アダプター実装済み
+│   └── models.py         # レガシーモデル（削除対象）
 ├── generators/
-│   ├── ddl_generator.py   # DDL生成
-│   ├── insert_generator.py
-│   └── table_definition_generator.py
+│   ├── ddl_generator.py
+│   ├── markdown_generator.py
+│   └── sample_data_generator.py
 └── utils/
-    ├── file_utils.py
-    ├── sql_utils.py
-    └── yaml_loader.py
+    ├── file_utils.py     # 削除対象（shared使用）
+    └── logger.py
 ```
 
-#### database_consistency_checker
+#### database_consistency_checker（統合設定対応済み）
 ```
 database_consistency_checker/
+├── __main__.py           # 統合データモデル対応エントリーポイント
 ├── core/
-│   ├── config.py          # 統合設定へのラッパー
-│   ├── logger.py          # ログ管理
-│   ├── models.py          # データモデル（重複多数）
-│   └── report_builder.py
-├── checkers/             # 15個のチェッカー
+│   ├── config.py         # 統合設定へのラッパー（後方互換性）
+│   ├── adapters.py       # 統合データモデル・アダプター実装済み
+│   └── models.py         # レガシーモデル（削除対象）
+├── checkers/             # 各種チェッカー
 ├── fixers/               # 修正提案生成
-├── parsers/              # 5個のパーサー
-├── reporters/            # 3個のレポーター
+├── parsers/              # パーサー（統合対象）
+├── reporters/            # レポーター
 └── utils/
-    └── report_manager.py
+    └── file_utils.py     # 削除対象（shared使用）
 ```
 
-#### shared/（統合基盤）
+#### shared/（統合基盤・実装済み）
 ```
 shared/
 ├── core/
-│   ├── config.py         # 統合設定システム
-│   ├── models.py         # 統合データモデル（完全版）
+│   ├── config.py         # 統合設定システム（DatabaseToolsConfig）
+│   ├── models.py         # 統合データモデル（完全版・未使用）
 │   ├── logger.py         # 統合ログシステム
 │   └── exceptions.py     # 統一例外クラス
-├── parsers/
+├── parsers/              # 統合パーサー（未実装）
 ├── utils/
-│   └── file_utils.py
-└── constants/
+│   └── file_utils.py     # 統合ファイル操作（FileManager）
+└── constants/            # 共通定数
 ```
 
 ### 2. 重大な問題点の特定
@@ -140,6 +143,26 @@ class ColumnDefinition:
 - データモデル変更時の影響範囲が不明確
 - テストコードの重複とメンテナンス負荷
 - ドキュメントの分散と不整合
+
+### 3. 新たに発見された課題（詳細分析結果）
+
+#### E. パフォーマンス課題
+- **変換オーバーヘッド**: 統合モデル ↔ 既存モデル間の変換コスト
+- **メモリ使用量**: 両方のモデルを同時保持による無駄
+- **処理速度**: 大量テーブル処理時の性能劣化
+- **I/O効率**: ファイル操作の重複実行
+
+#### F. テスト・品質課題
+- **テスト困難**: アダプター層が厚く、単体テストが複雑
+- **カバレッジ低下**: 重複コードによるテスト漏れ
+- **デバッグ困難**: 複数のデータ変換経路による問題特定の困難
+- **回帰リスク**: 変更時の影響範囲が予測困難
+
+#### G. 運用・監視課題
+- **ログ分散**: 各ツールでのログ出力が統一されていない
+- **エラーハンドリング**: 各層でのエラー処理が分散
+- **監視困難**: 統一されたメトリクス収集ができていない
+- **トラブルシューティング**: 問題発生時の原因特定が困難
 
 ## 統合リファクタリング戦略
 

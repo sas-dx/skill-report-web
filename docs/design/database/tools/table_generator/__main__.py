@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-テーブル生成ツール - 統合データモデル対応メインエントリーポイント
+テーブル生成ツール - 共通ライブラリ対応メインエントリーポイント
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
 実装日: 2025-06-08
 実装者: AI駆動開発チーム
 
-統合データモデルを使用したテーブル定義書・DDL・サンプルデータの自動生成
-既存機能の100%互換性を保証
+共通ライブラリを使用したテーブル定義書・DDL・サンプルデータの自動生成
 """
 
 import sys
@@ -20,41 +19,133 @@ import logging
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-# 統合データモデル対応のアダプターをインポート
-from docs.design.database.tools.table_generator.core.adapters import (
-    create_legacy_compatible_service,
-    UnifiedTableGeneratorService
+# 共通ライブラリをインポート
+from docs.design.database.tools.shared.core.config import Config
+from docs.design.database.tools.shared.parsers.yaml_parser import YamlParser
+from docs.design.database.tools.shared.generators.ddl_generator import DDLGenerator
+from docs.design.database.tools.shared.generators.markdown_generator import MarkdownGenerator
+from docs.design.database.tools.shared.generators.sample_data_generator import SampleDataGenerator
+from docs.design.database.tools.shared.core.exceptions import (
+    DatabaseToolsError, 
+    ParsingError, 
+    GenerationError
 )
-from docs.design.database.tools.table_generator.core.config import TableGeneratorConfig
-from docs.design.database.tools.table_generator.utils.logger import setup_logger
+
+
+def setup_logger(verbose: bool = False):
+    """ログ設定"""
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+
+class TableGeneratorService:
+    """テーブル生成サービス - 共通ライブラリ使用版"""
+    
+    def __init__(self, config: Config):
+        self.config = config
+        self.logger = logging.getLogger(__name__)
+        
+        # パーサーとジェネレーターの初期化
+        self.yaml_parser = YamlParser(config.to_dict())
+        self.ddl_generator = DDLGenerator(config.to_dict())
+        self.markdown_generator = MarkdownGenerator(config.to_dict())
+        self.sample_data_generator = SampleDataGenerator(config.to_dict())
+    
+    def process_table(self, table_name: str) -> dict:
+        """テーブル処理実行"""
+        result = {
+            'table_name': table_name,
+            'success': False,
+            'files_generated': [],
+            'errors': []
+        }
+        
+        try:
+            self.logger.info(f"テーブル処理開始: {table_name}")
+            
+            # YAML詳細定義の読み込み
+            yaml_file = self.config.yaml_dir / f"{table_name}_details.yaml"
+            if not yaml_file.exists():
+                raise ParsingError(f"YAML詳細定義ファイルが見つかりません: {yaml_file}")
+            
+            # テーブル定義の解析
+            table_def = self.yaml_parser.parse_file(yaml_file)
+            self.logger.debug(f"テーブル定義解析完了: {table_def.name}")
+            
+            # 出力ディレクトリの作成
+            self._ensure_output_directories()
+            
+            # DDLファイル生成
+            ddl_content = self.ddl_generator.generate(table_def)
+            ddl_file = self.config.ddl_dir / f"{table_name}.sql"
+            ddl_file.write_text(ddl_content, encoding='utf-8')
+            result['files_generated'].append(str(ddl_file))
+            self.logger.info(f"DDLファイル生成完了: {ddl_file}")
+            
+            # Markdownファイル生成
+            markdown_content = self.markdown_generator.generate(table_def)
+            logical_name = table_def.logical_name or table_def.name
+            markdown_file = self.config.tables_dir / f"テーブル定義書_{table_name}_{logical_name}.md"
+            markdown_file.write_text(markdown_content, encoding='utf-8')
+            result['files_generated'].append(str(markdown_file))
+            self.logger.info(f"Markdownファイル生成完了: {markdown_file}")
+            
+            # サンプルデータファイル生成
+            sample_data_content = self.sample_data_generator.generate(table_def)
+            sample_data_file = self.config.data_dir / f"{table_name}_sample_data.sql"
+            sample_data_file.write_text(sample_data_content, encoding='utf-8')
+            result['files_generated'].append(str(sample_data_file))
+            self.logger.info(f"サンプルデータファイル生成完了: {sample_data_file}")
+            
+            result['success'] = True
+            self.logger.info(f"テーブル処理完了: {table_name}")
+            
+        except Exception as e:
+            error_msg = f"テーブル処理エラー: {table_name} - {str(e)}"
+            self.logger.error(error_msg)
+            result['errors'].append(error_msg)
+            
+        return result
+    
+    def _ensure_output_directories(self):
+        """出力ディレクトリの作成"""
+        directories = [
+            self.config.ddl_dir,
+            self.config.tables_dir,
+            self.config.data_dir
+        ]
+        
+        for directory in directories:
+            directory.mkdir(parents=True, exist_ok=True)
 
 
 def main():
-    """メイン処理 - 統合データモデル強制適用版"""
+    """メイン処理"""
     parser = argparse.ArgumentParser(
-        description='テーブル生成ツール - 統合データモデル対応版',
+        description='テーブル生成ツール - 共通ライブラリ対応版',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 使用例:
-  # 全テーブル生成（統合データモデル使用）
+  # 全テーブル生成
   python3 -m table_generator
   
   # 個別テーブル生成
   python3 -m table_generator --table MST_Employee
   python3 -m table_generator --table MST_Role,MST_Permission
   
-  # 統合モデル強制使用
-  python3 -m table_generator --unified-model
-  
-  # 既存互換モード（レガシーサポート）
-  python3 -m table_generator --legacy-mode
+  # 詳細ログ出力
+  python3 -m table_generator --verbose
         """
     )
     
     parser.add_argument(
         '--table', '-t',
         type=str,
-        help='処理対象テーブル名（カンマ区切りで複数指定可能、*でワイルドカード指定可能）'
+        help='処理対象テーブル名（カンマ区切りで複数指定可能）'
     )
     
     parser.add_argument(
@@ -83,18 +174,6 @@ def main():
     )
     
     parser.add_argument(
-        '--unified-model',
-        action='store_true',
-        help='統合データモデル強制使用（デフォルト）'
-    )
-    
-    parser.add_argument(
-        '--legacy-mode',
-        action='store_true',
-        help='既存互換モード（レガシーサポート）'
-    )
-    
-    parser.add_argument(
         '--dry-run',
         action='store_true',
         help='ドライラン（ファイルを実際には作成しない）'
@@ -103,6 +182,10 @@ def main():
     args = parser.parse_args()
     
     try:
+        # ログ設定
+        setup_logger(args.verbose)
+        logger = logging.getLogger(__name__)
+        
         # 設定読み込み
         config_path = Path(args.config)
         if not config_path.exists():
@@ -112,13 +195,13 @@ def main():
                 config_path = default_config
             else:
                 # 設定ファイルがない場合はデフォルト設定を使用
-                config = TableGeneratorConfig()
+                config = Config()
                 config_path = None
         
         if config_path:
-            config = TableGeneratorConfig.from_yaml(config_path)
+            config = Config.from_yaml(config_path)
         else:
-            config = TableGeneratorConfig()
+            config = Config()
         
         # コマンドライン引数で設定を上書き
         if args.output_dir:
@@ -128,25 +211,19 @@ def main():
         if args.verbose:
             config.verbose = True
         
-        # ログ設定
-        setup_logger(config.verbose)
-        logger = logging.getLogger(__name__)
+        # 出力ディレクトリの設定
+        if not hasattr(config, 'ddl_dir'):
+            config.ddl_dir = config.output_dir / 'ddl'
+        if not hasattr(config, 'tables_dir'):
+            config.tables_dir = config.output_dir / 'tables'
+        if not hasattr(config, 'data_dir'):
+            config.data_dir = config.output_dir / 'data'
         
-        logger.info("テーブル生成ツール開始（統合データモデル対応版）")
+        logger.info("テーブル生成ツール開始（共通ライブラリ対応版）")
         if config_path:
             logger.info(f"設定ファイル: {config_path}")
         logger.info(f"YAML詳細定義ディレクトリ: {config.yaml_dir}")
         logger.info(f"出力ディレクトリ: {config.output_dir}")
-        
-        # 処理モード決定（統合データモデルをデフォルトに）
-        use_unified_model = not args.legacy_mode  # レガシーモード指定時のみ既存モード
-        
-        if use_unified_model:
-            logger.info("統合データモデルを使用します")
-            service = UnifiedTableGeneratorService()
-        else:
-            logger.info("既存互換モードを使用します")
-            service = create_legacy_compatible_service()
         
         # 処理対象テーブル決定
         if args.table:
@@ -162,83 +239,50 @@ def main():
         
         logger.info(f"処理対象テーブル: {', '.join(target_tables)}")
         
-        # テーブル処理実行
-        results = []
-        for table_name in target_tables:
-            logger.info(f"テーブル処理開始: {table_name}")
-            
-            if args.dry_run:
-                logger.info(f"ドライラン: {table_name} の処理をスキップ")
-                continue
-            
-            try:
-                if use_unified_model:
-                    # 統合データモデルで処理
-                    result = service.process_table_with_unified_model(
-                        table_name, config.yaml_dir, config.output_dir
-                    )
-                    # 統合結果を既存形式に変換（サマリー表示用）
-                    from docs.design.database.tools.table_generator.core.adapters import TableGeneratorAdapter
-                    adapter = TableGeneratorAdapter()
-                    legacy_result = adapter.unified_to_legacy_result(result)
-                    results.append(legacy_result)
-                else:
-                    # 既存互換モードで処理
-                    result = service.process_table(
-                        table_name, config.yaml_dir, config.output_dir
-                    )
-                    results.append(result)
-                
-                if result.success if hasattr(result, 'success') else result.is_success():
-                    logger.info(f"テーブル処理完了: {table_name}")
-                else:
-                    logger.error(f"テーブル処理エラー: {table_name}")
-                    
-            except Exception as e:
-                logger.error(f"テーブル処理中にエラーが発生: {table_name} - {e}")
-                # エラー結果を作成
-                from docs.design.database.tools.table_generator.core.models import ProcessingResult
-                error_result = ProcessingResult(
-                    table_name=table_name,
-                    logical_name=table_name,
-                    success=False,
-                    has_yaml=False,
-                    error_message=str(e)
-                )
-                results.append(error_result)
-        
-        # 結果サマリー出力
-        if not args.dry_run:
-            total_tables = len(results)
-            success_count = sum(1 for r in results if r.success)
-            error_count = total_tables - success_count
-            
-            print(f"\n=== 処理結果サマリー ===")
-            print(f"処理対象テーブル数: {total_tables}")
-            print(f"成功: {success_count}")
-            print(f"エラー: {error_count}")
-            print(f"使用モデル: {'統合データモデル' if use_unified_model else '既存互換モード'}")
-            
-            if error_count > 0:
-                print(f"\n=== エラー詳細 ===")
-                for result in results:
-                    if not result.success:
-                        print(f"テーブル: {result.table_name}")
-                        if result.error_message:
-                            print(f"  エラー: {result.error_message}")
-                        if hasattr(result, 'errors') and result.errors:
-                            for error in result.errors:
-                                print(f"  - {error}")
-            
-            logger.info("テーブル生成ツール完了")
-            return 0 if error_count == 0 else 1
-        else:
+        if args.dry_run:
             print(f"\n=== ドライラン結果 ===")
             print(f"処理対象テーブル数: {len(target_tables)}")
             print(f"対象テーブル: {', '.join(target_tables)}")
-            print(f"使用モデル: {'統合データモデル' if use_unified_model else '既存互換モード'}")
             logger.info("ドライラン完了")
             return 0
+        
+        # テーブル処理サービス初期化
+        service = TableGeneratorService(config)
+        
+        # テーブル処理実行
+        results = []
+        for table_name in target_tables:
+            result = service.process_table(table_name)
+            results.append(result)
+        
+        # 結果サマリー出力
+        total_tables = len(results)
+        success_count = sum(1 for r in results if r['success'])
+        error_count = total_tables - success_count
+        
+        print(f"\n=== 処理結果サマリー ===")
+        print(f"処理対象テーブル数: {total_tables}")
+        print(f"成功: {success_count}")
+        print(f"エラー: {error_count}")
+        
+        if success_count > 0:
+            print(f"\n=== 生成ファイル ===")
+            for result in results:
+                if result['success']:
+                    print(f"テーブル: {result['table_name']}")
+                    for file_path in result['files_generated']:
+                        print(f"  - {file_path}")
+        
+        if error_count > 0:
+            print(f"\n=== エラー詳細 ===")
+            for result in results:
+                if not result['success']:
+                    print(f"テーブル: {result['table_name']}")
+                    for error in result['errors']:
+                        print(f"  - {error}")
+        
+        logger.info("テーブル生成ツール完了")
+        return 0 if error_count == 0 else 1
         
     except Exception as e:
         print(f"予期しないエラーが発生しました: {e}")
