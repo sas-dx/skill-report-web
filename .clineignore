@@ -12,18 +12,12 @@ src/app/login/**
 docs/design/database/ddl/------------.sql
 
 # レポートファイルの除外
-**/reports/
-**/reports/**
-
-# 大容量ドキュメント・ツールファイルの除外
-docs/design/database/tools/
-docs/design/database/tools/**
-docs/design/database/table-details/
-docs/design/database/table-details/**
+docs/design/database/tools/reports/
+docs/design/database/tools/reports/**
 
 # テストファイルの除外
-**/test_*.py
-**/test_*.md
+docs/design/database/tools/test_*.py
+docs/design/database/tools/test_*.md
 
 # 自動生成ファイルの除外
 src/database/prisma/migrations/
