@@ -1,45 +1,62 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-データベース整合性チェックツール - 設定管理
+データベース整合性チェックツール - 設定管理（統合設定への移行）
+
+統合設定システムを使用するためのラッパークラス。
+後方互換性を保ちながら、統合設定に移行します。
+
+対応要求仕様ID: PLT.2-TOOL.2
 """
+
 import os
+import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, Any, List, Optional
+
+# 統合設定をインポート
+sys.path.append(str(Path(__file__).parent.parent.parent / "shared"))
+from core.config import get_config as get_unified_config, DatabaseToolsConfig, ReportFormat, CheckType
+
+# 既存のモデルをインポート（後方互換性のため）
 from .models import CheckConfig, FixType
 
 
 class Config:
-    """設定管理クラス"""
+    """設定管理クラス（統合設定へのラッパー）
+    
+    既存のdatabase_consistency_checkerコードとの互換性を保ちながら、
+    統合設定システムを使用します。
+    """
     
     def __init__(self, base_dir: str = ""):
-        """
-        設定初期化
+        """設定初期化
         
         Args:
             base_dir: ベースディレクトリ（デフォルトは現在のディレクトリの親）
         """
-        if not base_dir:
-            # tools/database_consistency_checker から ../../../ に移動してdatabaseディレクトリへ
-            current_dir = Path(__file__).parent.parent.parent.parent
-            self.base_dir = current_dir.resolve()
-        else:
-            self.base_dir = Path(base_dir).resolve()
+        self._unified_config = get_unified_config()
         
-        # 各ディレクトリパス
-        self.table_list_file = self.base_dir / "テーブル一覧.md"
-        self.entity_relationships_file = self.base_dir / "entity_relationships.yaml"
-        self.entity_diagram_file = self.base_dir / "エンティティ関連図.md"
-        self.table_details_dir = self.base_dir / "table-details"
-        self.tables_dir = self.base_dir / "tables"
-        self.ddl_dir = self.base_dir / "ddl"
-        self.data_dir = self.base_dir / "data"
+        # ベースディレクトリが指定された場合は更新
+        if base_dir:
+            self._unified_config.base_dir = Path(base_dir)
+            # ディレクトリパスを再計算
+            self._unified_config.__post_init__()
         
-        # 出力ディレクトリ
-        self.output_dir = self.base_dir / "consistency_reports"
-        self.fixes_dir = self.base_dir / "fixes"
+        # 後方互換性のためのプロパティ設定
+        self.base_dir = self._unified_config.base_dir
+        self.table_list_file = self._unified_config.base_dir / "テーブル一覧.md"
+        self.entity_relationships_file = self._unified_config.base_dir / "entity_relationships.yaml"
+        self.entity_diagram_file = self._unified_config.base_dir / "エンティティ関連図.md"
+        self.table_details_dir = self._unified_config.table_details_dir
+        self.tables_dir = self._unified_config.tables_dir
+        self.ddl_dir = self._unified_config.ddl_dir
+        self.data_dir = self._unified_config.data_dir
+        self.output_dir = self._unified_config.reports_dir
+        self.fixes_dir = self._unified_config.base_dir / "fixes"
     
     def validate_paths(self) -> List[str]:
-        """
-        必要なパスの存在確認
+        """必要なパスの存在確認
         
         Returns:
             存在しないパスのリスト
@@ -101,8 +118,7 @@ class Config:
 
 
 def parse_fix_types(fix_types_str: str) -> List[FixType]:
-    """
-    修正タイプ文字列をFixTypeリストに変換
+    """修正タイプ文字列をFixTypeリストに変換
     
     Args:
         fix_types_str: カンマ区切りの修正タイプ文字列
@@ -145,8 +161,7 @@ def create_check_config(
     report_prefix: Optional[str] = None,
     auto_cleanup: bool = True
 ) -> CheckConfig:
-    """
-    チェック設定を作成
+    """チェック設定を作成
     
     Args:
         suggest_fixes: 修正提案を生成するか

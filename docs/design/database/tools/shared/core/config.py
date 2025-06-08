@@ -66,10 +66,33 @@ class DatabaseToolsConfig:
     
     # テーブル生成ツール設定
     default_sample_count: int = 10
+    max_sample_count: int = 10000
+    default_seed: int = 12345
     faker_locale: str = "ja_JP"
+    faker_seed: Optional[int] = None
     batch_insert_size: int = 1000
     ddl_template_dir: str = "templates/ddl"
     output_encoding: str = "utf-8"
+    
+    # データベース設定
+    default_charset: str = "utf8mb4"
+    default_collation: str = "utf8mb4_unicode_ci"
+    
+    # 業務固有設定
+    company_domain: str = "company.com"
+    default_department_prefix: str = "DEPT_"
+    default_employee_prefix: str = "EMP"
+    default_skill_prefix: str = "SKL_"
+    
+    # データ生成ルール
+    skill_levels: List[int] = field(default_factory=lambda: [1, 2, 3, 4])
+    skill_level_weights: List[int] = field(default_factory=lambda: [10, 30, 40, 20])
+    department_distribution: Dict[str, int] = field(default_factory=lambda: {
+        'DEPT_DEV': 40,    # 開発部40%
+        'DEPT_SYS': 20,    # システム部20%
+        'DEPT_BIZ': 30,    # 業務部30%
+        'DEPT_MGT': 10     # 管理部10%
+    })
     
     # 整合性チェックツール設定
     report_formats: List[ReportFormat] = field(default_factory=lambda: [
@@ -143,6 +166,19 @@ class DatabaseToolsConfig:
         
         if backup_enabled := os.getenv('DB_TOOLS_BACKUP_ENABLED'):
             config.backup_enabled = backup_enabled.lower() in ('true', '1', 'yes')
+        
+        # table_generator固有の環境変数
+        if seed := os.getenv('TABLE_GEN_SEED'):
+            try:
+                config.default_seed = int(seed)
+            except ValueError:
+                pass
+        
+        if faker_locale := os.getenv('TABLE_GEN_FAKER_LOCALE'):
+            config.faker_locale = faker_locale
+        
+        if company_domain := os.getenv('TABLE_GEN_COMPANY_DOMAIN'):
+            config.company_domain = company_domain
         
         return config
     
