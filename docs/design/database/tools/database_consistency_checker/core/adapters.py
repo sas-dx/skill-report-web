@@ -1,554 +1,465 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-データベース整合性チェックツール - 統合データモデルアダプター
+データベース整合性チェックツール - 統合データモデルサービス
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
 実装日: 2025-06-08
 実装者: AI駆動開発チーム
 
-統合データモデルと既存database_consistency_checkerモデル間の変換を提供
-既存機能の100%互換性を保証
+統合データモデルを使用したデータベース整合性チェックサービス
+レガシーモデルの依存関係を除去し、統合データモデルのみを使用
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Set, Tuple
 from pathlib import Path
 import logging
-from datetime import datetime
+from dataclasses import dataclass
+from enum import Enum
 
 # 統合データモデルのインポート
-from ..shared.core.models import (
-    TableDefinition as UnifiedTableDefinition,
-    ColumnDefinition as UnifiedColumnDefinition,
-    IndexDefinition as UnifiedIndexDefinition,
-    ForeignKeyDefinition as UnifiedForeignKeyDefinition,
-    CheckResult as UnifiedCheckResult,
-    CheckSeverity as UnifiedCheckSeverity,
-    ConsistencyReport as UnifiedConsistencyReport,
+from ...shared.core.models import (
+    TableDefinition,
+    ColumnDefinition,
+    IndexDefinition,
+    ForeignKeyDefinition,
+    CheckResult,
+    CheckStatus,
     create_table_definition_from_yaml
 )
 
-# 既存database_consistency_checkerモデルのインポート
-from .models import (
-    TableDefinition as LegacyTableDefinition,
-    ColumnDefinition as LegacyColumnDefinition,
-    IndexDefinition as LegacyIndexDefinition,
-    ForeignKeyDefinition as LegacyForeignKeyDefinition,
-    ConstraintDefinition as LegacyConstraintDefinition,
-    CheckResult as LegacyCheckResult,
-    CheckSeverity as LegacyCheckSeverity,
-    FixSuggestion as LegacyFixSuggestion,
-    ConsistencyReport as LegacyConsistencyReport,
-    CheckConfig as LegacyCheckConfig,
-    FixType,
-    DDLTable,
-    InsertStatement,
-    EntityRelationship,
-    TableListEntry
-)
+# 統合パーサーのインポート
+from ...shared.parsers.yaml_parser import YamlParser
+from ...shared.parsers.ddl_parser import DDLParser
+from ...shared.parsers.markdown_parser import MarkdownParser
 
 logger = logging.getLogger(__name__)
 
 
-class ConsistencyCheckerAdapter:
-    """
-    統合データモデルと既存database_consistency_checkerモデル間の変換アダプター
-    
-    既存のdatabase_consistency_checker機能を統合データモデルで動作させるための
-    アダプターパターン実装
-    """
-    
-    @staticmethod
-    def unified_to_legacy_column(unified_col: UnifiedColumnDefinition) -> LegacyColumnDefinition:
-        """統合カラム定義を既存形式に変換"""
-        try:
-            return LegacyColumnDefinition(
-                name=unified_col.name,
-                logical_name=unified_col.comment or unified_col.name,
-                data_type=unified_col.type,
-                length=unified_col.length,
-                nullable=unified_col.nullable,
-                unique=unified_col.unique,
-                primary_key=unified_col.primary_key,
-                foreign_key=False,  # 外部キーは別途判定
-                default_value=str(unified_col.default) if unified_col.default is not None else None,
-                comment=unified_col.comment or "",
-                encrypted=False,  # 統合モデルには暗号化フラグがないため
-                enum_values=[],  # 統合モデルには列挙値がないため
-                validation=""  # 統合モデルには検証ルールがないため
-            )
-        except Exception as e:
-            logger.error(f"カラム変換エラー: {unified_col.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_column(legacy_col: LegacyColumnDefinition, requirement_id: str = None) -> UnifiedColumnDefinition:
-        """既存カラム定義を統合形式に変換"""
-        try:
-            return UnifiedColumnDefinition(
-                name=legacy_col.name,
-                type=legacy_col.data_type,
-                nullable=legacy_col.nullable,
-                primary_key=legacy_col.primary_key,
-                unique=legacy_col.unique,
-                default=legacy_col.default_value,
-                comment=legacy_col.comment,
-                requirement_id=requirement_id,
-                length=legacy_col.length
-            )
-        except Exception as e:
-            logger.error(f"カラム変換エラー: {legacy_col.name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_index(unified_idx: UnifiedIndexDefinition) -> LegacyIndexDefinition:
-        """統合インデックス定義を既存形式に変換"""
-        try:
-            return LegacyIndexDefinition(
-                name=unified_idx.name,
-                columns=unified_idx.columns,
-                unique=unified_idx.unique,
-                description=unified_idx.comment or ""
-            )
-        except Exception as e:
-            logger.error(f"インデックス変換エラー: {unified_idx.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_index(legacy_idx: LegacyIndexDefinition) -> UnifiedIndexDefinition:
-        """既存インデックス定義を統合形式に変換"""
-        try:
-            return UnifiedIndexDefinition(
-                name=legacy_idx.name,
-                columns=legacy_idx.columns,
-                unique=legacy_idx.unique,
-                comment=legacy_idx.description
-            )
-        except Exception as e:
-            logger.error(f"インデックス変換エラー: {legacy_idx.name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_foreign_key(unified_fk: UnifiedForeignKeyDefinition) -> LegacyForeignKeyDefinition:
-        """統合外部キー定義を既存形式に変換"""
-        try:
-            # 統合モデルは複数カラム対応、既存モデルは単一カラムのみ
-            column = unified_fk.columns[0] if unified_fk.columns else ""
-            reference_column = unified_fk.references.get("columns", [""])[0]
-            
-            return LegacyForeignKeyDefinition(
-                name=unified_fk.name,
-                column=column,
-                reference_table=unified_fk.references.get("table", ""),
-                reference_column=reference_column,
-                on_update=unified_fk.on_update,
-                on_delete=unified_fk.on_delete,
-                description=""
-            )
-        except Exception as e:
-            logger.error(f"外部キー変換エラー: {unified_fk.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_foreign_key(legacy_fk: LegacyForeignKeyDefinition) -> UnifiedForeignKeyDefinition:
-        """既存外部キー定義を統合形式に変換"""
-        try:
-            return UnifiedForeignKeyDefinition(
-                name=legacy_fk.name,
-                columns=[legacy_fk.column],
-                references={
-                    "table": legacy_fk.reference_table,
-                    "columns": [legacy_fk.reference_column]
-                },
-                on_update=legacy_fk.on_update,
-                on_delete=legacy_fk.on_delete
-            )
-        except Exception as e:
-            logger.error(f"外部キー変換エラー: {legacy_fk.name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_table(unified_table: UnifiedTableDefinition) -> LegacyTableDefinition:
-        """統合テーブル定義を既存形式に変換"""
-        try:
-            # カラム変換
-            columns = []
-            for col in unified_table.columns:
-                legacy_col = ConsistencyCheckerAdapter.unified_to_legacy_column(col)
-                columns.append(legacy_col)
-            
-            # インデックス変換
-            indexes = []
-            for idx in unified_table.indexes:
-                legacy_idx = ConsistencyCheckerAdapter.unified_to_legacy_index(idx)
-                indexes.append(legacy_idx)
-            
-            # 外部キー変換
-            foreign_keys = []
-            for fk in unified_table.foreign_keys:
-                legacy_fk = ConsistencyCheckerAdapter.unified_to_legacy_foreign_key(fk)
-                foreign_keys.append(legacy_fk)
-            
-            return LegacyTableDefinition(
-                table_name=unified_table.name,
-                logical_name=unified_table.logical_name,
-                category=unified_table.category,
-                overview=unified_table.comment or "",
-                columns=columns,
-                indexes=indexes,
-                foreign_keys=foreign_keys,
-                constraints=[],  # 統合モデルには制約定義がないため空
-                sample_data=[],
-                notes=[],
-                business_rules=[]
-            )
-        except Exception as e:
-            logger.error(f"テーブル変換エラー: {unified_table.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_table(legacy_table: LegacyTableDefinition, requirement_id: str = None) -> UnifiedTableDefinition:
-        """既存テーブル定義を統合形式に変換"""
-        try:
-            # カラム変換
-            columns = []
-            for col in legacy_table.columns:
-                unified_col = ConsistencyCheckerAdapter.legacy_to_unified_column(col, requirement_id)
-                columns.append(unified_col)
-            
-            # インデックス変換
-            indexes = []
-            for idx in legacy_table.indexes:
-                unified_idx = ConsistencyCheckerAdapter.legacy_to_unified_index(idx)
-                indexes.append(unified_idx)
-            
-            # 外部キー変換
-            foreign_keys = []
-            for fk in legacy_table.foreign_keys:
-                unified_fk = ConsistencyCheckerAdapter.legacy_to_unified_foreign_key(fk)
-                foreign_keys.append(unified_fk)
-            
-            return UnifiedTableDefinition(
-                name=legacy_table.table_name,
-                logical_name=legacy_table.logical_name,
-                category=legacy_table.category,
-                priority="中",  # デフォルト値
-                requirement_id=requirement_id or "PLT.1-WEB.1",
-                columns=columns,
-                indexes=indexes,
-                foreign_keys=foreign_keys,
-                comment=legacy_table.overview
-            )
-        except Exception as e:
-            logger.error(f"テーブル変換エラー: {legacy_table.table_name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_check_severity(unified_severity: UnifiedCheckSeverity) -> LegacyCheckSeverity:
-        """統合チェック重要度を既存形式に変換"""
-        severity_mapping = {
-            UnifiedCheckSeverity.SUCCESS: LegacyCheckSeverity.SUCCESS,
-            UnifiedCheckSeverity.INFO: LegacyCheckSeverity.INFO,
-            UnifiedCheckSeverity.WARNING: LegacyCheckSeverity.WARNING,
-            UnifiedCheckSeverity.ERROR: LegacyCheckSeverity.ERROR
-        }
-        return severity_mapping.get(unified_severity, LegacyCheckSeverity.INFO)
-    
-    @staticmethod
-    def legacy_to_unified_check_severity(legacy_severity: LegacyCheckSeverity) -> UnifiedCheckSeverity:
-        """既存チェック重要度を統合形式に変換"""
-        severity_mapping = {
-            LegacyCheckSeverity.SUCCESS: UnifiedCheckSeverity.SUCCESS,
-            LegacyCheckSeverity.INFO: UnifiedCheckSeverity.INFO,
-            LegacyCheckSeverity.WARNING: UnifiedCheckSeverity.WARNING,
-            LegacyCheckSeverity.ERROR: UnifiedCheckSeverity.ERROR
-        }
-        return severity_mapping.get(legacy_severity, UnifiedCheckSeverity.INFO)
-    
-    @staticmethod
-    def unified_to_legacy_check_result(unified_result: UnifiedCheckResult) -> LegacyCheckResult:
-        """統合チェック結果を既存形式に変換"""
-        try:
-            return LegacyCheckResult(
-                check_name=unified_result.check_name,
-                table_name=unified_result.table_name,
-                severity=ConsistencyCheckerAdapter.unified_to_legacy_check_severity(unified_result.severity),
-                message=unified_result.message,
-                details=unified_result.details,
-                file_path=unified_result.file_path,
-                line_number=unified_result.line_number
-            )
-        except Exception as e:
-            logger.error(f"チェック結果変換エラー: {unified_result.check_name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_check_result(legacy_result: LegacyCheckResult) -> UnifiedCheckResult:
-        """既存チェック結果を統合形式に変換"""
-        try:
-            return UnifiedCheckResult(
-                check_name=legacy_result.check_name,
-                table_name=legacy_result.table_name,
-                severity=ConsistencyCheckerAdapter.legacy_to_unified_check_severity(legacy_result.severity),
-                message=legacy_result.message,
-                details=legacy_result.details,
-                file_path=legacy_result.file_path,
-                line_number=legacy_result.line_number
-            )
-        except Exception as e:
-            logger.error(f"チェック結果変換エラー: {legacy_result.check_name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_report(unified_report: UnifiedConsistencyReport) -> LegacyConsistencyReport:
-        """統合整合性レポートを既存形式に変換"""
-        try:
-            # チェック結果変換
-            results = []
-            for result in unified_report.results:
-                legacy_result = ConsistencyCheckerAdapter.unified_to_legacy_check_result(result)
-                results.append(legacy_result)
-            
-            # 修正提案は統合モデルにないため空のリスト
-            fix_suggestions = []
-            
-            return LegacyConsistencyReport(
-                check_date=unified_report.check_date,
-                total_tables=unified_report.total_tables,
-                total_checks=unified_report.total_checks,
-                results=results,
-                fix_suggestions=fix_suggestions,
-                summary=unified_report.summary
-            )
-        except Exception as e:
-            logger.error(f"レポート変換エラー: {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_report(legacy_report: LegacyConsistencyReport) -> UnifiedConsistencyReport:
-        """既存整合性レポートを統合形式に変換"""
-        try:
-            # チェック結果変換
-            results = []
-            for result in legacy_report.results:
-                unified_result = ConsistencyCheckerAdapter.legacy_to_unified_check_result(result)
-                results.append(unified_result)
-            
-            return UnifiedConsistencyReport(
-                check_date=legacy_report.check_date,
-                total_tables=legacy_report.total_tables,
-                total_checks=legacy_report.total_checks,
-                results=results,
-                summary=legacy_report.summary
-            )
-        except Exception as e:
-            logger.error(f"レポート変換エラー: {e}")
-            raise
+class CheckType(Enum):
+    """チェック種別"""
+    TABLE_EXISTENCE = "table_existence"
+    COLUMN_CONSISTENCY = "column_consistency"
+    FOREIGN_KEY_CONSISTENCY = "foreign_key_consistency"
+    DATA_TYPE_CONSISTENCY = "data_type_consistency"
+    ORPHANED_FILES = "orphaned_files"
+    NAMING_CONVENTION = "naming_convention"
 
 
-class UnifiedConsistencyCheckerService:
-    """
-    統合データモデルを使用する整合性チェックサービス
+@dataclass
+class ConsistencyIssue:
+    """整合性問題の詳細"""
+    check_type: CheckType
+    severity: str  # "error", "warning", "info"
+    table_name: str
+    column_name: Optional[str] = None
+    message: str = ""
+    details: Dict[str, Any] = None
     
-    既存のdatabase_consistency_checker機能を統合データモデルで提供
+    def __post_init__(self):
+        if self.details is None:
+            self.details = {}
+
+
+class DatabaseConsistencyService:
+    """
+    統合データモデルを使用するデータベース整合性チェックサービス
+    
+    統合データモデルとパーサーを使用してデータベース整合性をチェック
     """
     
     def __init__(self):
-        self.adapter = ConsistencyCheckerAdapter()
+        self.yaml_parser = YamlParser()
+        self.ddl_parser = DDLParser()
+        self.markdown_parser = MarkdownParser()
+        self.issues: List[ConsistencyIssue] = []
     
-    def load_table_definitions_from_yaml(self, yaml_dir: Path) -> List[UnifiedTableDefinition]:
-        """YAML詳細定義ディレクトリから統合テーブル定義を読み込み"""
-        try:
-            import yaml
-            table_definitions = []
-            
-            for yaml_file in yaml_dir.glob("*_details.yaml"):
-                with open(yaml_file, 'r', encoding='utf-8') as f:
-                    yaml_data = yaml.safe_load(f)
-                
-                table_def = create_table_definition_from_yaml(yaml_data)
-                table_definitions.append(table_def)
-            
-            return table_definitions
-        except Exception as e:
-            logger.error(f"YAML読み込みエラー: {yaml_dir} - {e}")
-            raise
-    
-    def check_consistency_with_unified_model(self, base_dir: Path) -> UnifiedConsistencyReport:
-        """統合データモデルを使用した整合性チェック"""
-        try:
-            # YAML詳細定義の読み込み
-            yaml_dir = base_dir / "table-details"
-            table_definitions = self.load_table_definitions_from_yaml(yaml_dir)
-            
-            # 整合性チェック実行
-            results = []
-            total_checks = 0
-            
-            for table_def in table_definitions:
-                # 各テーブルに対してチェック実行
-                table_results = self._check_table_consistency(table_def, base_dir)
-                results.extend(table_results)
-                total_checks += len(table_results)
-            
-            # サマリー作成
-            summary = self._create_summary(results)
-            
-            return UnifiedConsistencyReport(
-                check_date=datetime.now().isoformat(),
-                total_tables=len(table_definitions),
-                total_checks=total_checks,
-                results=results,
-                summary=summary
-            )
-            
-        except Exception as e:
-            logger.error(f"統合モデル整合性チェックエラー: {e}")
-            raise
-    
-    def _check_table_consistency(self, table_def: UnifiedTableDefinition, base_dir: Path) -> List[UnifiedCheckResult]:
-        """個別テーブルの整合性チェック"""
-        results = []
+    def load_table_definitions_from_yaml(self, yaml_dir: Path) -> Dict[str, TableDefinition]:
+        """YAML詳細定義ディレクトリから全テーブル定義を読み込み"""
+        table_definitions = {}
         
         try:
-            # DDLファイル存在チェック
-            ddl_file = base_dir / "ddl" / f"{table_def.name}.sql"
-            if not ddl_file.exists():
-                results.append(UnifiedCheckResult(
-                    check_name="ddl_file_existence",
-                    table_name=table_def.name,
-                    severity=UnifiedCheckSeverity.ERROR,
-                    message=f"DDLファイルが存在しません: {ddl_file}",
-                    file_path=str(ddl_file)
-                ))
-            
-            # Markdownファイル存在チェック
-            md_file = base_dir / "tables" / f"テーブル定義書_{table_def.name}_{table_def.logical_name}.md"
-            if not md_file.exists():
-                results.append(UnifiedCheckResult(
-                    check_name="markdown_file_existence",
-                    table_name=table_def.name,
-                    severity=UnifiedCheckSeverity.WARNING,
-                    message=f"Markdownファイルが存在しません: {md_file}",
-                    file_path=str(md_file)
-                ))
-            
-            # カラム定義チェック
-            for col in table_def.columns:
-                if not col.name:
-                    results.append(UnifiedCheckResult(
-                        check_name="column_name_validation",
-                        table_name=table_def.name,
-                        severity=UnifiedCheckSeverity.ERROR,
-                        message=f"カラム名が空です",
-                        details={"column": col.name}
-                    ))
+            for yaml_file in yaml_dir.glob("*_details.yaml"):
+                table_name = yaml_file.stem.replace("_details", "")
+                try:
+                    yaml_data = self.yaml_parser.parse_file(yaml_file)
+                    table_def = create_table_definition_from_yaml(yaml_data)
+                    table_definitions[table_name] = table_def
+                    logger.debug(f"YAML定義読み込み完了: {table_name}")
+                except Exception as e:
+                    logger.error(f"YAML読み込みエラー: {yaml_file} - {e}")
+                    self.add_issue(CheckType.TABLE_EXISTENCE, "error", table_name, 
+                                 message=f"YAML読み込みエラー: {e}")
+        
+        except Exception as e:
+            logger.error(f"YAMLディレクトリ読み込みエラー: {yaml_dir} - {e}")
+        
+        return table_definitions
+    
+    def load_ddl_definitions(self, ddl_dir: Path) -> Dict[str, TableDefinition]:
+        """DDLディレクトリから全テーブル定義を読み込み"""
+        ddl_definitions = {}
+        
+        try:
+            for ddl_file in ddl_dir.glob("*.sql"):
+                if ddl_file.name.startswith("------------"):
+                    continue  # テンプレートファイルをスキップ
                 
-                if not col.type:
-                    results.append(UnifiedCheckResult(
-                        check_name="column_type_validation",
-                        table_name=table_def.name,
-                        severity=UnifiedCheckSeverity.ERROR,
-                        message=f"カラム型が空です: {col.name}",
-                        details={"column": col.name}
-                    ))
+                table_name = ddl_file.stem
+                try:
+                    ddl_content = ddl_file.read_text(encoding='utf-8')
+                    table_def = self.ddl_parser.parse_ddl(ddl_content, table_name)
+                    ddl_definitions[table_name] = table_def
+                    logger.debug(f"DDL定義読み込み完了: {table_name}")
+                except Exception as e:
+                    logger.error(f"DDL読み込みエラー: {ddl_file} - {e}")
+                    self.add_issue(CheckType.TABLE_EXISTENCE, "error", table_name,
+                                 message=f"DDL読み込みエラー: {e}")
+        
+        except Exception as e:
+            logger.error(f"DDLディレクトリ読み込みエラー: {ddl_dir} - {e}")
+        
+        return ddl_definitions
+    
+    def load_markdown_definitions(self, markdown_dir: Path) -> Dict[str, TableDefinition]:
+        """Markdownディレクトリから全テーブル定義を読み込み"""
+        markdown_definitions = {}
+        
+        try:
+            for md_file in markdown_dir.glob("テーブル定義書_*.md"):
+                try:
+                    # ファイル名からテーブル名を抽出
+                    filename_parts = md_file.stem.split("_")
+                    if len(filename_parts) >= 2:
+                        table_name = filename_parts[1]
+                        
+                        md_content = md_file.read_text(encoding='utf-8')
+                        table_def = self.markdown_parser.parse_markdown(md_content, table_name)
+                        markdown_definitions[table_name] = table_def
+                        logger.debug(f"Markdown定義読み込み完了: {table_name}")
+                except Exception as e:
+                    logger.error(f"Markdown読み込みエラー: {md_file} - {e}")
+                    # テーブル名が特定できない場合は汎用エラー
+                    self.add_issue(CheckType.TABLE_EXISTENCE, "error", "unknown",
+                                 message=f"Markdown読み込みエラー: {e}")
+        
+        except Exception as e:
+            logger.error(f"Markdownディレクトリ読み込みエラー: {markdown_dir} - {e}")
+        
+        return markdown_definitions
+    
+    def check_table_existence_consistency(self, yaml_defs: Dict[str, TableDefinition], 
+                                        ddl_defs: Dict[str, TableDefinition],
+                                        markdown_defs: Dict[str, TableDefinition]) -> CheckResult:
+        """テーブル存在整合性チェック"""
+        result = CheckResult(check_name="table_existence")
+        
+        all_tables = set(yaml_defs.keys()) | set(ddl_defs.keys()) | set(markdown_defs.keys())
+        
+        for table_name in all_tables:
+            yaml_exists = table_name in yaml_defs
+            ddl_exists = table_name in ddl_defs
+            markdown_exists = table_name in markdown_defs
             
-            # 外部キー整合性チェック
+            if not yaml_exists:
+                self.add_issue(CheckType.TABLE_EXISTENCE, "error", table_name,
+                             message="YAML詳細定義が存在しません")
+                result.add_error(f"{table_name}: YAML詳細定義が存在しません")
+            
+            if not ddl_exists:
+                self.add_issue(CheckType.TABLE_EXISTENCE, "error", table_name,
+                             message="DDLファイルが存在しません")
+                result.add_error(f"{table_name}: DDLファイルが存在しません")
+            
+            if not markdown_exists:
+                self.add_issue(CheckType.TABLE_EXISTENCE, "warning", table_name,
+                             message="Markdownファイルが存在しません")
+                result.add_warning(f"{table_name}: Markdownファイルが存在しません")
+        
+        if result.errors:
+            result.set_failed()
+        else:
+            result.set_success()
+        
+        return result
+    
+    def check_column_consistency(self, yaml_defs: Dict[str, TableDefinition],
+                               ddl_defs: Dict[str, TableDefinition]) -> CheckResult:
+        """カラム定義整合性チェック"""
+        result = CheckResult(check_name="column_consistency")
+        
+        common_tables = set(yaml_defs.keys()) & set(ddl_defs.keys())
+        
+        for table_name in common_tables:
+            yaml_table = yaml_defs[table_name]
+            ddl_table = ddl_defs[table_name]
+            
+            # カラム名の比較
+            yaml_columns = {col.name: col for col in yaml_table.columns}
+            ddl_columns = {col.name: col for col in ddl_table.columns}
+            
+            yaml_col_names = set(yaml_columns.keys())
+            ddl_col_names = set(ddl_columns.keys())
+            
+            # YAML にのみ存在するカラム
+            yaml_only = yaml_col_names - ddl_col_names
+            for col_name in yaml_only:
+                self.add_issue(CheckType.COLUMN_CONSISTENCY, "error", table_name, col_name,
+                             message="YAMLにのみ存在するカラムです")
+                result.add_error(f"{table_name}.{col_name}: YAMLにのみ存在")
+            
+            # DDL にのみ存在するカラム
+            ddl_only = ddl_col_names - yaml_col_names
+            for col_name in ddl_only:
+                self.add_issue(CheckType.COLUMN_CONSISTENCY, "error", table_name, col_name,
+                             message="DDLにのみ存在するカラムです")
+                result.add_error(f"{table_name}.{col_name}: DDLにのみ存在")
+            
+            # 共通カラムの詳細比較
+            common_columns = yaml_col_names & ddl_col_names
+            for col_name in common_columns:
+                yaml_col = yaml_columns[col_name]
+                ddl_col = ddl_columns[col_name]
+                
+                # データ型比較
+                if yaml_col.type != ddl_col.type:
+                    self.add_issue(CheckType.DATA_TYPE_CONSISTENCY, "error", table_name, col_name,
+                                 message=f"データ型不一致: YAML({yaml_col.type}) ≠ DDL({ddl_col.type})")
+                    result.add_error(f"{table_name}.{col_name}: データ型不一致")
+                
+                # NULL制約比較
+                if yaml_col.nullable != ddl_col.nullable:
+                    self.add_issue(CheckType.COLUMN_CONSISTENCY, "error", table_name, col_name,
+                                 message=f"NULL制約不一致: YAML({yaml_col.nullable}) ≠ DDL({ddl_col.nullable})")
+                    result.add_error(f"{table_name}.{col_name}: NULL制約不一致")
+                
+                # プライマリキー比較
+                if yaml_col.primary_key != ddl_col.primary_key:
+                    self.add_issue(CheckType.COLUMN_CONSISTENCY, "error", table_name, col_name,
+                                 message=f"プライマリキー設定不一致: YAML({yaml_col.primary_key}) ≠ DDL({ddl_col.primary_key})")
+                    result.add_error(f"{table_name}.{col_name}: プライマリキー設定不一致")
+        
+        if result.errors:
+            result.set_failed()
+        else:
+            result.set_success()
+        
+        return result
+    
+    def check_foreign_key_consistency(self, yaml_defs: Dict[str, TableDefinition]) -> CheckResult:
+        """外部キー整合性チェック"""
+        result = CheckResult(check_name="foreign_key_consistency")
+        
+        for table_name, table_def in yaml_defs.items():
             for fk in table_def.foreign_keys:
                 ref_table = fk.references.get("table")
-                if ref_table:
-                    # 参照先テーブルの存在確認（簡易版）
-                    ref_yaml = base_dir / "table-details" / f"{ref_table}_details.yaml"
-                    if not ref_yaml.exists():
-                        results.append(UnifiedCheckResult(
-                            check_name="foreign_key_reference_validation",
-                            table_name=table_def.name,
-                            severity=UnifiedCheckSeverity.ERROR,
-                            message=f"参照先テーブルが存在しません: {ref_table}",
-                            details={"foreign_key": fk.name, "reference_table": ref_table}
-                        ))
+                ref_columns = fk.references.get("columns", [])
+                
+                # 参照先テーブルの存在チェック
+                if ref_table not in yaml_defs:
+                    self.add_issue(CheckType.FOREIGN_KEY_CONSISTENCY, "error", table_name,
+                                 message=f"外部キー {fk.name} の参照先テーブル '{ref_table}' が存在しません")
+                    result.add_error(f"{table_name}: 参照先テーブル '{ref_table}' が存在しません")
+                    continue
+                
+                # 参照先カラムの存在チェック
+                ref_table_def = yaml_defs[ref_table]
+                ref_table_columns = {col.name: col for col in ref_table_def.columns}
+                
+                for ref_col in ref_columns:
+                    if ref_col not in ref_table_columns:
+                        self.add_issue(CheckType.FOREIGN_KEY_CONSISTENCY, "error", table_name,
+                                     message=f"外部キー {fk.name} の参照先カラム '{ref_table}.{ref_col}' が存在しません")
+                        result.add_error(f"{table_name}: 参照先カラム '{ref_table}.{ref_col}' が存在しません")
+                
+                # データ型整合性チェック
+                source_columns = {col.name: col for col in table_def.columns}
+                for i, source_col_name in enumerate(fk.columns):
+                    if i < len(ref_columns):
+                        ref_col_name = ref_columns[i]
+                        if (source_col_name in source_columns and 
+                            ref_col_name in ref_table_columns):
+                            source_col = source_columns[source_col_name]
+                            ref_col = ref_table_columns[ref_col_name]
+                            
+                            if source_col.type != ref_col.type:
+                                self.add_issue(CheckType.FOREIGN_KEY_CONSISTENCY, "warning", table_name,
+                                             message=f"外部キー {fk.name} のデータ型不一致: {source_col.type} ≠ {ref_col.type}")
+                                result.add_warning(f"{table_name}: 外部キーデータ型不一致")
+        
+        if result.errors:
+            result.set_failed()
+        else:
+            result.set_success()
+        
+        return result
+    
+    def check_naming_convention(self, yaml_defs: Dict[str, TableDefinition]) -> CheckResult:
+        """命名規則チェック"""
+        result = CheckResult(check_name="naming_convention")
+        
+        valid_prefixes = ["MST_", "TRN_", "HIS_", "SYS_", "WRK_", "IF_"]
+        
+        for table_name, table_def in yaml_defs.items():
+            # テーブル名プレフィックスチェック
+            if not any(table_name.startswith(prefix) for prefix in valid_prefixes):
+                self.add_issue(CheckType.NAMING_CONVENTION, "warning", table_name,
+                             message=f"テーブル名が命名規則に従っていません。有効なプレフィックス: {valid_prefixes}")
+                result.add_warning(f"{table_name}: 命名規則違反")
             
-        except Exception as e:
-            results.append(UnifiedCheckResult(
-                check_name="table_check_error",
-                table_name=table_def.name,
-                severity=UnifiedCheckSeverity.ERROR,
-                message=f"テーブルチェック中にエラーが発生しました: {e}"
-            ))
+            # カラム名チェック（基本的なルール）
+            for col in table_def.columns:
+                # 予約語チェック（簡易版）
+                reserved_words = ["order", "group", "select", "from", "where"]
+                if col.name.lower() in reserved_words:
+                    self.add_issue(CheckType.NAMING_CONVENTION, "warning", table_name, col.name,
+                                 message="予約語がカラム名に使用されています")
+                    result.add_warning(f"{table_name}.{col.name}: 予約語使用")
+        
+        if result.errors:
+            result.set_failed()
+        else:
+            result.set_success()
+        
+        return result
+    
+    def check_orphaned_files(self, yaml_dir: Path, ddl_dir: Path, markdown_dir: Path) -> CheckResult:
+        """孤立ファイル検出"""
+        result = CheckResult(check_name="orphaned_files")
+        
+        # 各ディレクトリのファイル一覧取得
+        yaml_files = {f.stem.replace("_details", "") for f in yaml_dir.glob("*_details.yaml")}
+        ddl_files = {f.stem for f in ddl_dir.glob("*.sql") if not f.name.startswith("------------")}
+        markdown_files = set()
+        
+        for md_file in markdown_dir.glob("テーブル定義書_*.md"):
+            filename_parts = md_file.stem.split("_")
+            if len(filename_parts) >= 2:
+                markdown_files.add(filename_parts[1])
+        
+        all_tables = yaml_files | ddl_files | markdown_files
+        
+        # 孤立ファイル検出
+        for table_name in all_tables:
+            file_count = sum([
+                table_name in yaml_files,
+                table_name in ddl_files,
+                table_name in markdown_files
+            ])
+            
+            if file_count == 1:
+                file_types = []
+                if table_name in yaml_files:
+                    file_types.append("YAML")
+                if table_name in ddl_files:
+                    file_types.append("DDL")
+                if table_name in markdown_files:
+                    file_types.append("Markdown")
+                
+                self.add_issue(CheckType.ORPHANED_FILES, "warning", table_name,
+                             message=f"孤立ファイル: {', '.join(file_types)}のみ存在")
+                result.add_warning(f"{table_name}: 孤立ファイル ({', '.join(file_types)})")
+        
+        result.set_success()  # 孤立ファイルは警告レベル
+        return result
+    
+    def run_all_checks(self, yaml_dir: Path, ddl_dir: Path, markdown_dir: Path, 
+                      check_types: Optional[List[CheckType]] = None) -> List[CheckResult]:
+        """全チェックの実行"""
+        self.issues.clear()
+        results = []
+        
+        if check_types is None:
+            check_types = list(CheckType)
+        
+        # データ読み込み
+        yaml_defs = self.load_table_definitions_from_yaml(yaml_dir)
+        ddl_defs = self.load_ddl_definitions(ddl_dir)
+        markdown_defs = self.load_markdown_definitions(markdown_dir)
+        
+        # 各チェックの実行
+        if CheckType.TABLE_EXISTENCE in check_types:
+            result = self.check_table_existence_consistency(yaml_defs, ddl_defs, markdown_defs)
+            results.append(result)
+        
+        if CheckType.COLUMN_CONSISTENCY in check_types:
+            result = self.check_column_consistency(yaml_defs, ddl_defs)
+            results.append(result)
+        
+        if CheckType.FOREIGN_KEY_CONSISTENCY in check_types:
+            result = self.check_foreign_key_consistency(yaml_defs)
+            results.append(result)
+        
+        if CheckType.NAMING_CONVENTION in check_types:
+            result = self.check_naming_convention(yaml_defs)
+            results.append(result)
+        
+        if CheckType.ORPHANED_FILES in check_types:
+            result = self.check_orphaned_files(yaml_dir, ddl_dir, markdown_dir)
+            results.append(result)
         
         return results
     
-    def _create_summary(self, results: List[UnifiedCheckResult]) -> Dict[str, int]:
-        """チェック結果のサマリー作成"""
-        summary = {
-            "total": len(results),
-            "success": 0,
-            "info": 0,
-            "warning": 0,
-            "error": 0
+    def add_issue(self, check_type: CheckType, severity: str, table_name: str, 
+                 column_name: Optional[str] = None, message: str = "", 
+                 details: Optional[Dict[str, Any]] = None):
+        """問題の追加"""
+        issue = ConsistencyIssue(
+            check_type=check_type,
+            severity=severity,
+            table_name=table_name,
+            column_name=column_name,
+            message=message,
+            details=details or {}
+        )
+        self.issues.append(issue)
+    
+    def get_issues_by_severity(self, severity: str) -> List[ConsistencyIssue]:
+        """重要度別問題取得"""
+        return [issue for issue in self.issues if issue.severity == severity]
+    
+    def get_issues_by_table(self, table_name: str) -> List[ConsistencyIssue]:
+        """テーブル別問題取得"""
+        return [issue for issue in self.issues if issue.table_name == table_name]
+    
+    def get_summary(self, results: List[CheckResult]) -> Dict[str, Any]:
+        """チェック結果サマリー"""
+        total_checks = len(results)
+        passed_checks = len([r for r in results if r.is_success()])
+        failed_checks = total_checks - passed_checks
+        
+        total_errors = sum(len(r.errors) for r in results)
+        total_warnings = sum(len(r.warnings) for r in results)
+        
+        error_issues = self.get_issues_by_severity("error")
+        warning_issues = self.get_issues_by_severity("warning")
+        
+        return {
+            "total_checks": total_checks,
+            "passed_checks": passed_checks,
+            "failed_checks": failed_checks,
+            "success_rate": (passed_checks / total_checks * 100) if total_checks > 0 else 0,
+            "total_errors": total_errors,
+            "total_warnings": total_warnings,
+            "total_issues": len(self.issues),
+            "error_issues": len(error_issues),
+            "warning_issues": len(warning_issues),
+            "issues_by_type": {
+                check_type.value: len([i for i in self.issues if i.check_type == check_type])
+                for check_type in CheckType
+            }
         }
-        
-        for result in results:
-            if result.severity == UnifiedCheckSeverity.SUCCESS:
-                summary["success"] += 1
-            elif result.severity == UnifiedCheckSeverity.INFO:
-                summary["info"] += 1
-            elif result.severity == UnifiedCheckSeverity.WARNING:
-                summary["warning"] += 1
-            elif result.severity == UnifiedCheckSeverity.ERROR:
-                summary["error"] += 1
-        
-        return summary
 
 
-# 既存コードとの互換性を保つためのファサード
-def create_legacy_compatible_checker() -> 'LegacyConsistencyCheckerService':
-    """既存コード互換性のためのチェッカー作成"""
-    return LegacyConsistencyCheckerService()
+# 便利関数
+def create_consistency_service() -> DatabaseConsistencyService:
+    """整合性チェックサービスのファクトリー関数"""
+    return DatabaseConsistencyService()
 
 
-class LegacyConsistencyCheckerService:
-    """既存コード互換性のためのファサードサービス"""
-    
-    def __init__(self):
-        self.unified_service = UnifiedConsistencyCheckerService()
-        self.adapter = ConsistencyCheckerAdapter()
-    
-    def check_consistency(self, config: LegacyCheckConfig) -> LegacyConsistencyReport:
-        """既存インターフェースでの整合性チェック"""
-        try:
-            # 統合モデルでチェック実行
-            base_dir = Path(config.base_dir) if config.base_dir else Path.cwd()
-            unified_report = self.unified_service.check_consistency_with_unified_model(base_dir)
-            
-            # 既存形式に変換して返却
-            return self.adapter.unified_to_legacy_report(unified_report)
-            
-        except Exception as e:
-            logger.error(f"互換チェッカー処理エラー: {e}")
-            return LegacyConsistencyReport(
-                check_date=datetime.now().isoformat(),
-                total_tables=0,
-                total_checks=0,
-                results=[],
-                fix_suggestions=[],
-                summary={"total": 0, "success": 0, "info": 0, "warning": 0, "error": 1}
-            )
-    
-    def load_table_definitions(self, yaml_dir: Path) -> List[LegacyTableDefinition]:
-        """既存インターフェースでのテーブル定義読み込み"""
-        try:
-            # 統合モデルで読み込み
-            unified_tables = self.unified_service.load_table_definitions_from_yaml(yaml_dir)
-            
-            # 既存形式に変換
-            legacy_tables = []
-            for unified_table in unified_tables:
-                legacy_table = self.adapter.unified_to_legacy_table(unified_table)
-                legacy_tables.append(legacy_table)
-            
-            return legacy_tables
-            
-        except Exception as e:
-            logger.error(f"テーブル定義読み込みエラー: {e}")
-            return []
+def run_consistency_check(yaml_dir: Path, ddl_dir: Path, markdown_dir: Path,
+                         check_types: Optional[List[CheckType]] = None) -> Tuple[List[CheckResult], List[ConsistencyIssue]]:
+    """整合性チェック実行の便利関数"""
+    service = create_consistency_service()
+    results = service.run_all_checks(yaml_dir, ddl_dir, markdown_dir, check_types)
+    return results, service.issues

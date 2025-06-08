@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-テーブル生成ツール - 統合データモデルアダプター
+テーブル生成ツール - 統合データモデルサービス
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
 実装日: 2025-06-08
 実装者: AI駆動開発チーム
 
-統合データモデルと既存table_generatorモデル間の変換を提供
-既存機能の100%互換性を保証
+統合データモデルを使用したテーブル生成サービス
+レガシーモデルの依存関係を除去し、統合データモデルのみを使用
 """
 
 from typing import List, Dict, Any, Optional
@@ -16,361 +16,99 @@ from pathlib import Path
 import logging
 
 # 統合データモデルのインポート
-from ..shared.core.models import (
-    TableDefinition as UnifiedTableDefinition,
-    ColumnDefinition as UnifiedColumnDefinition,
-    IndexDefinition as UnifiedIndexDefinition,
-    ForeignKeyDefinition as UnifiedForeignKeyDefinition,
-    GenerationResult as UnifiedGenerationResult,
+from ...shared.core.models import (
+    TableDefinition,
+    ColumnDefinition,
+    IndexDefinition,
+    ForeignKeyDefinition,
+    GenerationResult,
     GenerationStatus,
     create_table_definition_from_yaml
 )
 
-# 既存table_generatorモデルのインポート
-from .models import (
-    TableDefinition as LegacyTableDefinition,
-    ColumnDefinition as LegacyColumnDefinition,
-    IndexDefinition as LegacyIndexDefinition,
-    ForeignKeyDefinition as LegacyForeignKeyDefinition,
-    ConstraintDefinition as LegacyConstraintDefinition,
-    ProcessingResult as LegacyProcessingResult,
-    DataGenerationConfig,
-    DataGenerationType
-)
+# 統合パーサーのインポート
+from ...shared.parsers.yaml_parser import YamlParser
+
+# 統合ジェネレーターのインポート
+from ...shared.generators.ddl_generator import DDLGenerator
+from ...shared.generators.markdown_generator import MarkdownGenerator
+from ...shared.generators.sample_data_generator import SampleDataGenerator
 
 logger = logging.getLogger(__name__)
 
 
-class TableGeneratorAdapter:
-    """
-    統合データモデルと既存table_generatorモデル間の変換アダプター
-    
-    既存のtable_generator機能を統合データモデルで動作させるための
-    アダプターパターン実装
-    """
-    
-    @staticmethod
-    def unified_to_legacy_column(unified_col: UnifiedColumnDefinition) -> LegacyColumnDefinition:
-        """統合カラム定義を既存形式に変換"""
-        try:
-            # データ生成設定のデフォルト値
-            data_generation = None
-            if unified_col.type in ['VARCHAR', 'TEXT']:
-                data_generation = {
-                    'type': DataGenerationType.FAKER,
-                    'method': 'text',
-                    'unique': unified_col.unique
-                }
-            elif unified_col.type in ['INTEGER', 'BIGINT']:
-                data_generation = {
-                    'type': DataGenerationType.SEQUENCE,
-                    'start': 1,
-                    'unique': unified_col.unique
-                }
-            
-            return LegacyColumnDefinition(
-                name=unified_col.name,
-                logical=unified_col.comment or unified_col.name,
-                data_type=unified_col.type,
-                length=unified_col.length,
-                null=unified_col.nullable,
-                default=unified_col.default,
-                description=unified_col.comment or "",
-                primary=unified_col.primary_key,
-                unique=unified_col.unique,
-                data_generation=data_generation
-            )
-        except Exception as e:
-            logger.error(f"カラム変換エラー: {unified_col.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_column(legacy_col: LegacyColumnDefinition, requirement_id: str = None) -> UnifiedColumnDefinition:
-        """既存カラム定義を統合形式に変換"""
-        try:
-            return UnifiedColumnDefinition(
-                name=legacy_col.name,
-                type=legacy_col.data_type,
-                nullable=legacy_col.null,
-                primary_key=legacy_col.primary,
-                unique=legacy_col.unique,
-                default=legacy_col.default,
-                comment=legacy_col.description,
-                requirement_id=requirement_id,
-                length=legacy_col.length
-            )
-        except Exception as e:
-            logger.error(f"カラム変換エラー: {legacy_col.name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_index(unified_idx: UnifiedIndexDefinition) -> LegacyIndexDefinition:
-        """統合インデックス定義を既存形式に変換"""
-        try:
-            return LegacyIndexDefinition(
-                name=unified_idx.name,
-                columns=unified_idx.columns,
-                unique=unified_idx.unique,
-                description=unified_idx.comment or ""
-            )
-        except Exception as e:
-            logger.error(f"インデックス変換エラー: {unified_idx.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_index(legacy_idx: LegacyIndexDefinition) -> UnifiedIndexDefinition:
-        """既存インデックス定義を統合形式に変換"""
-        try:
-            return UnifiedIndexDefinition(
-                name=legacy_idx.name,
-                columns=legacy_idx.columns,
-                unique=legacy_idx.unique,
-                comment=legacy_idx.description
-            )
-        except Exception as e:
-            logger.error(f"インデックス変換エラー: {legacy_idx.name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_foreign_key(unified_fk: UnifiedForeignKeyDefinition) -> LegacyForeignKeyDefinition:
-        """統合外部キー定義を既存形式に変換"""
-        try:
-            # 統合モデルは複数カラム対応、既存モデルは単一カラムのみ
-            column = unified_fk.columns[0] if unified_fk.columns else ""
-            reference_column = unified_fk.references.get("columns", [""])[0]
-            
-            return LegacyForeignKeyDefinition(
-                name=unified_fk.name,
-                column=column,
-                reference_table=unified_fk.references.get("table", ""),
-                reference_column=reference_column,
-                on_update=unified_fk.on_update,
-                on_delete=unified_fk.on_delete,
-                description=""
-            )
-        except Exception as e:
-            logger.error(f"外部キー変換エラー: {unified_fk.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_foreign_key(legacy_fk: LegacyForeignKeyDefinition) -> UnifiedForeignKeyDefinition:
-        """既存外部キー定義を統合形式に変換"""
-        try:
-            return UnifiedForeignKeyDefinition(
-                name=legacy_fk.name,
-                columns=[legacy_fk.column],
-                references={
-                    "table": legacy_fk.reference_table,
-                    "columns": [legacy_fk.reference_column]
-                },
-                on_update=legacy_fk.on_update,
-                on_delete=legacy_fk.on_delete
-            )
-        except Exception as e:
-            logger.error(f"外部キー変換エラー: {legacy_fk.name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_table(unified_table: UnifiedTableDefinition) -> LegacyTableDefinition:
-        """統合テーブル定義を既存形式に変換"""
-        try:
-            # カラム変換
-            business_columns = []
-            for col in unified_table.columns:
-                legacy_col = TableGeneratorAdapter.unified_to_legacy_column(col)
-                business_columns.append(legacy_col)
-            
-            # インデックス変換
-            business_indexes = []
-            for idx in unified_table.indexes:
-                legacy_idx = TableGeneratorAdapter.unified_to_legacy_index(idx)
-                business_indexes.append(legacy_idx)
-            
-            # 外部キー変換
-            foreign_keys = []
-            for fk in unified_table.foreign_keys:
-                legacy_fk = TableGeneratorAdapter.unified_to_legacy_foreign_key(fk)
-                foreign_keys.append(legacy_fk)
-            
-            return LegacyTableDefinition(
-                table_name=unified_table.name,
-                logical_name=unified_table.logical_name,
-                category=unified_table.category,
-                overview=unified_table.comment or "",
-                description=unified_table.comment or "",
-                business_columns=business_columns,
-                business_indexes=business_indexes,
-                foreign_keys=foreign_keys,
-                business_constraints=[],  # 統合モデルには制約定義がないため空
-                sample_data=[],
-                initial_data=[],
-                notes=[],
-                business_rules=[],
-                revision_history=[]
-            )
-        except Exception as e:
-            logger.error(f"テーブル変換エラー: {unified_table.name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_table(legacy_table: LegacyTableDefinition, requirement_id: str = None) -> UnifiedTableDefinition:
-        """既存テーブル定義を統合形式に変換"""
-        try:
-            # カラム変換
-            columns = []
-            for col in legacy_table.business_columns:
-                unified_col = TableGeneratorAdapter.legacy_to_unified_column(col, requirement_id)
-                columns.append(unified_col)
-            
-            # インデックス変換
-            indexes = []
-            for idx in legacy_table.business_indexes:
-                unified_idx = TableGeneratorAdapter.legacy_to_unified_index(idx)
-                indexes.append(unified_idx)
-            
-            # 外部キー変換
-            foreign_keys = []
-            for fk in legacy_table.foreign_keys:
-                unified_fk = TableGeneratorAdapter.legacy_to_unified_foreign_key(fk)
-                foreign_keys.append(unified_fk)
-            
-            return UnifiedTableDefinition(
-                name=legacy_table.table_name,
-                logical_name=legacy_table.logical_name,
-                category=legacy_table.category,
-                priority="中",  # デフォルト値
-                requirement_id=requirement_id or "PLT.1-WEB.1",
-                columns=columns,
-                indexes=indexes,
-                foreign_keys=foreign_keys,
-                comment=legacy_table.overview
-            )
-        except Exception as e:
-            logger.error(f"テーブル変換エラー: {legacy_table.table_name} - {e}")
-            raise
-    
-    @staticmethod
-    def unified_to_legacy_result(unified_result: UnifiedGenerationResult) -> LegacyProcessingResult:
-        """統合生成結果を既存形式に変換"""
-        try:
-            success = unified_result.is_success()
-            error_message = "; ".join(unified_result.errors) if unified_result.errors else None
-            warning_message = "; ".join(unified_result.warnings) if unified_result.warnings else None
-            
-            return LegacyProcessingResult(
-                table_name=unified_result.table_name,
-                logical_name=unified_result.table_name,  # 論理名は別途設定が必要
-                success=success,
-                has_yaml=True,  # 統合モデル使用時は常にYAMLベース
-                error_message=error_message,
-                warning_message=warning_message,
-                generated_files=[str(f) for f in unified_result.generated_files],
-                processed_files=[],
-                errors=unified_result.errors,
-                data_count=None
-            )
-        except Exception as e:
-            logger.error(f"結果変換エラー: {unified_result.table_name} - {e}")
-            raise
-    
-    @staticmethod
-    def legacy_to_unified_result(legacy_result: LegacyProcessingResult) -> UnifiedGenerationResult:
-        """既存処理結果を統合形式に変換"""
-        try:
-            # ステータス判定
-            if legacy_result.success:
-                status = GenerationStatus.SUCCESS
-            elif legacy_result.errors:
-                status = GenerationStatus.FAILED
-            else:
-                status = GenerationStatus.PARTIAL
-            
-            # ファイルパス変換
-            generated_files = [Path(f) for f in legacy_result.generated_files]
-            
-            unified_result = UnifiedGenerationResult(
-                table_name=legacy_result.table_name,
-                generated_files=generated_files,
-                status=status,
-                errors=legacy_result.errors or [],
-                warnings=[],
-                execution_time=None
-            )
-            
-            # エラーメッセージがある場合は追加
-            if legacy_result.error_message:
-                unified_result.add_error(legacy_result.error_message)
-            
-            # 警告メッセージがある場合は追加
-            if legacy_result.warning_message:
-                unified_result.add_warning(legacy_result.warning_message)
-            
-            return unified_result
-        except Exception as e:
-            logger.error(f"結果変換エラー: {legacy_result.table_name} - {e}")
-            raise
-
-
-class UnifiedTableGeneratorService:
+class TableGeneratorService:
     """
     統合データモデルを使用するテーブル生成サービス
     
-    既存のtable_generator機能を統合データモデルで提供
+    統合データモデルとジェネレーターを使用してテーブル関連ファイルを生成
     """
     
     def __init__(self):
-        self.adapter = TableGeneratorAdapter()
+        self.yaml_parser = YamlParser()
+        self.ddl_generator = DDLGenerator()
+        self.markdown_generator = MarkdownGenerator()
+        self.sample_data_generator = SampleDataGenerator()
     
-    def load_table_definition_from_yaml(self, yaml_file: Path) -> UnifiedTableDefinition:
+    def load_table_definition_from_yaml(self, yaml_file: Path) -> TableDefinition:
         """YAMLファイルから統合テーブル定義を読み込み"""
         try:
-            import yaml
-            
-            with open(yaml_file, 'r', encoding='utf-8') as f:
-                yaml_data = yaml.safe_load(f)
-            
+            yaml_data = self.yaml_parser.parse_file(yaml_file)
             return create_table_definition_from_yaml(yaml_data)
         except Exception as e:
             logger.error(f"YAML読み込みエラー: {yaml_file} - {e}")
             raise
     
-    def generate_table_files(self, table_def: UnifiedTableDefinition, output_dir: Path) -> UnifiedGenerationResult:
+    def generate_table_files(self, table_def: TableDefinition, output_dirs: Dict[str, Path]) -> GenerationResult:
         """統合テーブル定義からファイル生成"""
         try:
-            result = UnifiedGenerationResult(table_name=table_def.name)
+            result = GenerationResult(table_name=table_def.name)
             
-            # 既存のtable_generator機能を使用するため、一時的に変換
-            legacy_table = self.adapter.unified_to_legacy_table(table_def)
+            # DDLファイル生成
+            if 'ddl' in output_dirs:
+                ddl_content = self.ddl_generator.generate(table_def)
+                ddl_file = output_dirs['ddl'] / f"{table_def.name}.sql"
+                ddl_file.parent.mkdir(parents=True, exist_ok=True)
+                ddl_file.write_text(ddl_content, encoding='utf-8')
+                result.add_generated_file(ddl_file)
+                logger.info(f"DDLファイル生成完了: {ddl_file}")
             
-            # ここで既存のファイル生成ロジックを呼び出し
-            # （実際の実装では既存のgeneratorクラスを使用）
+            # Markdownファイル生成
+            if 'tables' in output_dirs:
+                markdown_content = self.markdown_generator.generate(table_def)
+                markdown_file = output_dirs['tables'] / f"テーブル定義書_{table_def.name}_{table_def.logical_name}.md"
+                markdown_file.parent.mkdir(parents=True, exist_ok=True)
+                markdown_file.write_text(markdown_content, encoding='utf-8')
+                result.add_generated_file(markdown_file)
+                logger.info(f"Markdownファイル生成完了: {markdown_file}")
             
-            # 生成ファイルの記録
-            markdown_file = output_dir / f"テーブル定義書_{table_def.name}_{table_def.logical_name}.md"
-            ddl_file = output_dir / f"{table_def.name}.sql"
-            sample_data_file = output_dir / f"{table_def.name}_sample_data.sql"
+            # サンプルデータファイル生成
+            if 'data' in output_dirs:
+                sample_data_content = self.sample_data_generator.generate(table_def)
+                sample_data_file = output_dirs['data'] / f"{table_def.name}_sample_data.sql"
+                sample_data_file.parent.mkdir(parents=True, exist_ok=True)
+                sample_data_file.write_text(sample_data_content, encoding='utf-8')
+                result.add_generated_file(sample_data_file)
+                logger.info(f"サンプルデータファイル生成完了: {sample_data_file}")
             
-            result.add_generated_file(markdown_file)
-            result.add_generated_file(ddl_file)
-            result.add_generated_file(sample_data_file)
-            
+            result.set_success()
             logger.info(f"テーブル生成完了: {table_def.name}")
             return result
             
         except Exception as e:
             logger.error(f"テーブル生成エラー: {table_def.name} - {e}")
-            result = UnifiedGenerationResult(table_name=table_def.name)
+            result = GenerationResult(table_name=table_def.name)
             result.add_error(str(e))
             result.set_failed()
             return result
     
-    def process_table_with_unified_model(self, table_name: str, yaml_dir: Path, output_dir: Path) -> UnifiedGenerationResult:
-        """統合データモデルを使用したテーブル処理"""
+    def process_table(self, table_name: str, yaml_dir: Path, output_dirs: Dict[str, Path]) -> GenerationResult:
+        """テーブル処理のメインエントリーポイント"""
         try:
             # YAML詳細定義ファイルの読み込み
             yaml_file = yaml_dir / f"{table_name}_details.yaml"
             if not yaml_file.exists():
-                result = UnifiedGenerationResult(table_name=table_name)
+                result = GenerationResult(table_name=table_name)
                 result.add_error(f"YAML詳細定義ファイルが見つかりません: {yaml_file}")
                 result.set_failed()
                 return result
@@ -379,46 +117,128 @@ class UnifiedTableGeneratorService:
             table_def = self.load_table_definition_from_yaml(yaml_file)
             
             # ファイル生成
-            return self.generate_table_files(table_def, output_dir)
+            return self.generate_table_files(table_def, output_dirs)
             
         except Exception as e:
-            logger.error(f"統合モデル処理エラー: {table_name} - {e}")
-            result = UnifiedGenerationResult(table_name=table_name)
+            logger.error(f"テーブル処理エラー: {table_name} - {e}")
+            result = GenerationResult(table_name=table_name)
             result.add_error(str(e))
             result.set_failed()
             return result
-
-
-# 既存コードとの互換性を保つためのファサード
-def create_legacy_compatible_service() -> 'LegacyTableGeneratorService':
-    """既存コード互換性のためのサービス作成"""
-    return LegacyTableGeneratorService()
-
-
-class LegacyTableGeneratorService:
-    """既存コード互換性のためのファサードサービス"""
     
-    def __init__(self):
-        self.unified_service = UnifiedTableGeneratorService()
-        self.adapter = TableGeneratorAdapter()
+    def process_multiple_tables(self, table_names: List[str], yaml_dir: Path, output_dirs: Dict[str, Path]) -> List[GenerationResult]:
+        """複数テーブルの一括処理"""
+        results = []
+        
+        for table_name in table_names:
+            try:
+                result = self.process_table(table_name, yaml_dir, output_dirs)
+                results.append(result)
+                
+                if result.is_success():
+                    logger.info(f"テーブル処理成功: {table_name}")
+                else:
+                    logger.warning(f"テーブル処理失敗: {table_name} - {result.errors}")
+                    
+            except Exception as e:
+                logger.error(f"テーブル処理例外: {table_name} - {e}")
+                result = GenerationResult(table_name=table_name)
+                result.add_error(str(e))
+                result.set_failed()
+                results.append(result)
+        
+        return results
     
-    def process_table(self, table_name: str, yaml_dir: Path, output_dir: Path) -> LegacyProcessingResult:
-        """既存インターフェースでのテーブル処理"""
+    def validate_table_definition(self, table_def: TableDefinition) -> List[str]:
+        """テーブル定義の妥当性検証"""
+        errors = []
+        
         try:
-            # 統合モデルで処理
-            unified_result = self.unified_service.process_table_with_unified_model(
-                table_name, yaml_dir, output_dir
-            )
+            # 基本項目チェック
+            if not table_def.name:
+                errors.append("テーブル名が設定されていません")
             
-            # 既存形式に変換して返却
-            return self.adapter.unified_to_legacy_result(unified_result)
+            if not table_def.logical_name:
+                errors.append("論理名が設定されていません")
+            
+            if not table_def.columns:
+                errors.append("カラム定義が存在しません")
+            
+            # プライマリキーチェック
+            primary_keys = [col for col in table_def.columns if col.primary_key]
+            if not primary_keys:
+                errors.append("プライマリキーが定義されていません")
+            
+            # カラム名重複チェック
+            column_names = [col.name for col in table_def.columns]
+            if len(column_names) != len(set(column_names)):
+                errors.append("重複するカラム名が存在します")
+            
+            # 外部キー参照チェック
+            for fk in table_def.foreign_keys:
+                if not fk.references.get("table"):
+                    errors.append(f"外部キー {fk.name} の参照テーブルが設定されていません")
+                
+                if not fk.references.get("columns"):
+                    errors.append(f"外部キー {fk.name} の参照カラムが設定されていません")
+            
+            # インデックス定義チェック
+            for idx in table_def.indexes:
+                if not idx.columns:
+                    errors.append(f"インデックス {idx.name} のカラムが設定されていません")
+                
+                # インデックス対象カラムの存在チェック
+                for col_name in idx.columns:
+                    if col_name not in column_names:
+                        errors.append(f"インデックス {idx.name} の対象カラム {col_name} が存在しません")
             
         except Exception as e:
-            logger.error(f"互換サービス処理エラー: {table_name} - {e}")
-            return LegacyProcessingResult(
-                table_name=table_name,
-                logical_name=table_name,
-                success=False,
-                has_yaml=False,
-                error_message=str(e)
-            )
+            errors.append(f"検証処理中にエラーが発生しました: {e}")
+        
+        return errors
+    
+    def get_generation_summary(self, results: List[GenerationResult]) -> Dict[str, Any]:
+        """生成結果のサマリー作成"""
+        total_tables = len(results)
+        successful_tables = len([r for r in results if r.is_success()])
+        failed_tables = total_tables - successful_tables
+        
+        all_errors = []
+        all_warnings = []
+        all_generated_files = []
+        
+        for result in results:
+            all_errors.extend(result.errors)
+            all_warnings.extend(result.warnings)
+            all_generated_files.extend([str(f) for f in result.generated_files])
+        
+        return {
+            "total_tables": total_tables,
+            "successful_tables": successful_tables,
+            "failed_tables": failed_tables,
+            "success_rate": (successful_tables / total_tables * 100) if total_tables > 0 else 0,
+            "total_generated_files": len(all_generated_files),
+            "total_errors": len(all_errors),
+            "total_warnings": len(all_warnings),
+            "generated_files": all_generated_files,
+            "errors": all_errors,
+            "warnings": all_warnings
+        }
+
+
+# 便利関数
+def create_table_generator_service() -> TableGeneratorService:
+    """テーブル生成サービスのファクトリー関数"""
+    return TableGeneratorService()
+
+
+def process_single_table(table_name: str, yaml_dir: Path, output_dirs: Dict[str, Path]) -> GenerationResult:
+    """単一テーブル処理の便利関数"""
+    service = create_table_generator_service()
+    return service.process_table(table_name, yaml_dir, output_dirs)
+
+
+def process_tables_batch(table_names: List[str], yaml_dir: Path, output_dirs: Dict[str, Path]) -> List[GenerationResult]:
+    """複数テーブル一括処理の便利関数"""
+    service = create_table_generator_service()
+    return service.process_multiple_tables(table_names, yaml_dir, output_dirs)
