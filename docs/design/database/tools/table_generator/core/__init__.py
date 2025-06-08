@@ -14,7 +14,7 @@
 """
 
 from .logger import EnhancedLogger, Colors, LogLevel
-from .models import ProcessingResult
+from ...shared.core.models import GenerationResult, TableDefinition
 from .config import Config
 
-__all__ = ['EnhancedLogger', 'Colors', 'LogLevel', 'ProcessingResult', 'Config']
+__all__ = ['EnhancedLogger', 'Colors', 'LogLevel', 'GenerationResult', 'TableDefinition', 'Config']
