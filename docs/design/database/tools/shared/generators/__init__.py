@@ -10,12 +10,12 @@
 from .base_generator import BaseGenerator, GeneratorFactory
 from .ddl_generator import DdlGenerator
 from .markdown_generator import MarkdownGenerator
-from .yaml_generator import YamlGenerator
+from .sample_data_generator import SampleDataGenerator
 
 __all__ = [
     'BaseGenerator',
     'GeneratorFactory', 
     'DdlGenerator',
     'MarkdownGenerator',
-    'YamlGenerator'
+    'SampleDataGenerator'
 ]

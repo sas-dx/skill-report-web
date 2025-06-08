@@ -14,7 +14,19 @@
 """
 
 from .logger import EnhancedLogger, Colors, LogLevel
-from ...shared.core.models import GenerationResult, TableDefinition
-from .config import Config
+from shared.core.models import GenerationResult, TableDefinition
+from shared.core.config import DatabaseToolsConfig as Config
+from shared.core.exceptions import (
+    DatabaseToolsException, ValidationError, FileOperationError,
+    ModelConversionError, ParsingError, GenerationError,
+    ConsistencyCheckError, ConfigurationError, SystemError,
+    YamlParsingError, BackupError, ConversionError
+)
 
-__all__ = ['EnhancedLogger', 'Colors', 'LogLevel', 'GenerationResult', 'TableDefinition', 'Config']
+__all__ = [
+    'EnhancedLogger', 'Colors', 'LogLevel', 'GenerationResult', 'TableDefinition', 'Config',
+    'DatabaseToolsException', 'ValidationError', 'FileOperationError',
+    'ModelConversionError', 'ParsingError', 'GenerationError',
+    'ConsistencyCheckError', 'ConfigurationError', 'SystemError',
+    'YamlParsingError', 'BackupError', 'ConversionError'
+]

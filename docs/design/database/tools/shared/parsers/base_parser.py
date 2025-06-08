@@ -86,6 +86,7 @@ class BaseParser(ABC):
         if not table.name:
             results.append(CheckResult(
                 check_type="table_validation",
+                table_name=table.name or "unknown",
                 status="error",
                 message="テーブル名が設定されていません",
                 details={"table": table.name}
@@ -93,7 +94,8 @@ class BaseParser(ABC):
         
         if not table.columns:
             results.append(CheckResult(
-                check_type="table_validation", 
+                check_type="table_validation",
+                table_name=table.name or "unknown",
                 status="error",
                 message="カラムが定義されていません",
                 details={"table": table.name}
@@ -112,6 +114,7 @@ class BaseParser(ABC):
         if primary_key_count == 0:
             results.append(CheckResult(
                 check_type="table_validation",
+                table_name=table.name or "unknown",
                 status="warning", 
                 message="プライマリキーが定義されていません",
                 details={"table": table.name}
@@ -119,6 +122,7 @@ class BaseParser(ABC):
         elif primary_key_count > 1:
             results.append(CheckResult(
                 check_type="table_validation",
+                table_name=table.name or "unknown",
                 status="warning",
                 message="複数のプライマリキーが定義されています",
                 details={"table": table.name, "primary_key_count": primary_key_count}
@@ -143,6 +147,7 @@ class BaseParser(ABC):
         if not column.name:
             results.append(CheckResult(
                 check_type="column_validation",
+                table_name=table_name,
                 status="error",
                 message="カラム名が設定されていません",
                 details={"table": table_name}
@@ -152,6 +157,7 @@ class BaseParser(ABC):
         if not column.type:
             results.append(CheckResult(
                 check_type="column_validation",
+                table_name=table_name,
                 status="error", 
                 message="データ型が設定されていません",
                 details={"table": table_name, "column": column.name}
@@ -181,6 +187,7 @@ class BaseParser(ABC):
         if column.name and not column.name.islower():
             results.append(CheckResult(
                 check_type="naming_validation",
+                table_name=table_name,
                 status="warning",
                 message="カラム名は小文字で記述することを推奨します",
                 details={"table": table_name, "column": column.name}

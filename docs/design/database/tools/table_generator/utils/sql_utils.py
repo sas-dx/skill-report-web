@@ -9,8 +9,8 @@ SQL文生成の共通機能を提供します。
 """
 
 from typing import List, Dict, Any, Optional
-from ..core.logger import EnhancedLogger
-from ..core.models import ColumnDefinition
+from shared.core.logger import get_logger
+from shared.core.models import ColumnDefinition
 
 
 class SqlUtils:
@@ -19,13 +19,13 @@ class SqlUtils:
     DDL、DML、INSERT文などのSQL生成機能を提供します。
     """
     
-    def __init__(self, logger: EnhancedLogger = None):
+    def __init__(self, logger=None):
         """初期化
         
         Args:
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.logger = logger or EnhancedLogger()
+        self.logger = logger or get_logger()
     
     def generate_create_table_sql(self, table_name: str, columns: List[ColumnDefinition], 
                                   charset: str = 'utf8mb4', collation: str = 'utf8mb4_unicode_ci') -> str:

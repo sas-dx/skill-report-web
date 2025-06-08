@@ -13,11 +13,11 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 # パッケージのパスを追加
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from table_generator.core.logger import EnhancedLogger
-from table_generator.core.config import Config
-from table_generator.core.models import TableDefinition, ProcessingResult
+from shared.core.logger import DatabaseToolsLogger, get_logger
+from shared.core.config import DatabaseToolsConfig
+from shared.core.models import TableDefinition, GenerationResult, ProcessingResult
 from table_generator.utils.yaml_loader import YamlLoader
 from table_generator.utils.file_utils import FileUtils
 from table_generator.utils.sql_utils import SqlUtils
@@ -34,15 +34,15 @@ class TableDefinitionGenerator:
     DDLファイルを生成する統合処理を提供します。
     """
     
-    def __init__(self, base_dir: str = None, logger: EnhancedLogger = None):
+    def __init__(self, base_dir: str = None, logger: DatabaseToolsLogger = None):
         """初期化
         
         Args:
             base_dir (str, optional): ベースディレクトリパス
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.config = Config(base_dir=base_dir)
-        self.logger = logger or EnhancedLogger()
+        self.config = DatabaseToolsConfig(base_dir=base_dir)
+        self.logger = logger or get_logger()
         self.yaml_loader = YamlLoader(logger=self.logger)
         self.file_utils = FileUtils(logger=self.logger)
         self.sql_utils = SqlUtils(logger=self.logger)
@@ -57,7 +57,7 @@ class TableDefinitionGenerator:
     
     def generate_files(self, table_names: Optional[List[str]] = None, 
                       output_dir: Optional[str] = None, 
-                      dry_run: bool = False) -> ProcessingResult:
+                      dry_run: bool = False) -> GenerationResult:
         """テーブル定義書とDDLファイルを生成
         
         Args:
@@ -66,13 +66,10 @@ class TableDefinitionGenerator:
             dry_run (bool): ドライラン実行フラグ
             
         Returns:
-            ProcessingResult: 処理結果
+            GenerationResult: 処理結果
         """
-        result = ProcessingResult(
-            table_name="",
-            logical_name="",
-            success=True,
-            has_yaml=False
+        result = GenerationResult(
+            table_name="multiple_tables"
         )
         
         try:

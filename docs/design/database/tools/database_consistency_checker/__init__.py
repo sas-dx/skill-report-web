@@ -8,8 +8,8 @@ __version__ = "1.0.0"
 __author__ = "Database Design Team"
 __description__ = "データベース整合性チェックツール"
 
-from .core.models import CheckResult, CheckSeverity, ConsistencyReport
-from .core.config import Config
+from shared.core.models import CheckResult, CheckSeverity, ConsistencyReport
+from shared.core.config import Config
 from .checkers.consistency_checker import ConsistencyChecker
 
 __all__ = [

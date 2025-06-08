@@ -11,7 +11,7 @@ import os
 import shutil
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Union
-from datetime import datetime
+from datetime import datetime, timedelta
 import yaml
 import json
 
@@ -425,7 +425,7 @@ class BackupManager:
     def cleanup_old_backups(self, days: int = None):
         """古いバックアップファイルのクリーンアップ"""
         days = days or self.config.keep_reports
-        cutoff_date = datetime.now() - datetime.timedelta(days=days)
+        cutoff_date = datetime.now() - timedelta(days=days)
         
         try:
             backup_files = self.file_manager.list_files(

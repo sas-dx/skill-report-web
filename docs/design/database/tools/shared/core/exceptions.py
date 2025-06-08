@@ -48,6 +48,7 @@ class DatabaseToolsException(Exception):
     ):
         super().__init__(message)
         self.message = message
+        self.timestamp = datetime.now()  # timestampを先に設定
         self.error_code = error_code or self._generate_error_code()
         self.category = category
         self.severity = severity
@@ -55,7 +56,6 @@ class DatabaseToolsException(Exception):
         self.suggestion = suggestion
         self.file_path = file_path
         self.line_number = line_number
-        self.timestamp = datetime.now()
     
     def _generate_error_code(self) -> str:
         """エラーコード自動生成"""
@@ -298,6 +298,52 @@ class SystemError(DatabaseToolsException):
             self.details['system_component'] = system_component
 
 
+class YamlParsingError(ParsingError):
+    """YAML解析エラー"""
+    
+    def __init__(
+        self,
+        message: str,
+        yaml_content: Optional[str] = None,
+        **kwargs
+    ):
+        super().__init__(
+            message,
+            parser_type="yaml",
+            source_format="yaml",
+            **kwargs
+        )
+        self.yaml_content = yaml_content
+        
+        if yaml_content:
+            self.details['yaml_content_length'] = len(yaml_content)
+
+
+class BackupError(DatabaseToolsException):
+    """バックアップエラー"""
+    
+    def __init__(
+        self,
+        message: str,
+        source_file: Optional[str] = None,
+        backup_file: Optional[str] = None,
+        **kwargs
+    ):
+        super().__init__(
+            message,
+            category=ErrorCategory.FILE_OPERATION,
+            severity=ErrorSeverity.HIGH,
+            **kwargs
+        )
+        self.source_file = source_file
+        self.backup_file = backup_file
+        
+        if source_file:
+            self.details['source_file'] = str(source_file)
+        if backup_file:
+            self.details['backup_file'] = str(backup_file)
+
+
 # 例外ハンドリングユーティリティ
 class ExceptionHandler:
     """統一例外ハンドリングユーティリティ"""
@@ -316,6 +362,73 @@ class ExceptionHandler:
             log_method(f"Exception occurred: {exception}")
             if exception.details:
                 logger.debug(f"Exception details: {exception.details}")
+    
+    @staticmethod
+    def handle_file_operation_error(func):
+        """ファイル操作エラーハンドリングデコレータ"""
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except FileOperationError:
+                # FileOperationErrorはそのまま再発生
+                raise
+            except Exception as e:
+                # その他の例外をFileOperationErrorに変換
+                raise FileOperationError(
+                    f"ファイル操作中にエラーが発生しました: {str(e)}",
+                    operation=func.__name__
+                ) from e
+        return wrapper
+    
+    @staticmethod
+    def handle_yaml_parsing_error(func):
+        """YAML解析エラーハンドリングデコレータ"""
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except YamlParsingError:
+                # YamlParsingErrorはそのまま再発生
+                raise
+            except Exception as e:
+                # その他の例外をYamlParsingErrorに変換
+                raise YamlParsingError(
+                    f"YAML解析中にエラーが発生しました: {str(e)}"
+                ) from e
+        return wrapper
+    
+    @staticmethod
+    def handle_parsing_error(func):
+        """一般的な解析エラーハンドリングデコレータ"""
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except ParsingError:
+                # ParsingErrorはそのまま再発生
+                raise
+            except Exception as e:
+                # その他の例外をParsingErrorに変換
+                raise ParsingError(
+                    f"解析中にエラーが発生しました: {str(e)}",
+                    parser_type=func.__name__
+                ) from e
+        return wrapper
+    
+    @staticmethod
+    def handle_generation_error(func):
+        """生成エラーハンドリングデコレータ"""
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except GenerationError:
+                # GenerationErrorはそのまま再発生
+                raise
+            except Exception as e:
+                # その他の例外をGenerationErrorに変換
+                raise GenerationError(
+                    f"生成中にエラーが発生しました: {str(e)}",
+                    generator_type=func.__name__
+                ) from e
+        return wrapper
     
     @staticmethod
     def create_error_report(exceptions: List[DatabaseToolsException]) -> Dict[str, Any]:
@@ -383,3 +496,32 @@ def model_conversion_error(source: str, target: str, **kwargs) -> ModelConversio
         target_model=target,
         **kwargs
     )
+
+
+class DataTransformError(DatabaseToolsException):
+    """データ変換エラー"""
+    
+    def __init__(
+        self,
+        message: str,
+        transform_type: Optional[str] = None,
+        source_data: Any = None,
+        **kwargs
+    ):
+        super().__init__(
+            message,
+            category=ErrorCategory.MODEL_CONVERSION,
+            severity=ErrorSeverity.HIGH,
+            **kwargs
+        )
+        self.transform_type = transform_type
+        self.source_data = source_data
+        
+        if transform_type:
+            self.details['transform_type'] = transform_type
+        if source_data is not None:
+            self.details['source_data_type'] = type(source_data).__name__
+
+
+# 後方互換性のためのエイリアス
+ConversionError = ModelConversionError

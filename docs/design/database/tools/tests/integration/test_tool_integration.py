@@ -31,8 +31,8 @@ sys.path.insert(0, str(project_root))
 from docs.design.database.tools.shared.core.config import get_config, DatabaseToolsConfig
 from docs.design.database.tools.shared.core.models import TableDefinition, ColumnDefinition
 from docs.design.database.tools.shared.core.exceptions import ValidationError, DatabaseToolsError
-from docs.design.database.tools.table_generator.__main__ import main as table_generator_main
-from docs.design.database.tools.database_consistency_checker.__main__ import main as consistency_checker_main
+# from docs.design.database.tools.table_generator.__main__ import main as table_generator_main
+# from docs.design.database.tools.database_consistency_checker.__main__ import main as consistency_checker_main
 
 
 class TestToolIntegration(unittest.TestCase):

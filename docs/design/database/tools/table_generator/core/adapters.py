@@ -16,7 +16,7 @@ from pathlib import Path
 import logging
 
 # 統合データモデルのインポート
-from ...shared.core.models import (
+from shared.core.models import (
     TableDefinition,
     ColumnDefinition,
     IndexDefinition,
@@ -27,12 +27,12 @@ from ...shared.core.models import (
 )
 
 # 統合パーサーのインポート
-from ...shared.parsers.yaml_parser import YamlParser
+from shared.parsers.yaml_parser import YamlParser
 
 # 統合ジェネレーターのインポート
-from ...shared.generators.ddl_generator import DDLGenerator
-from ...shared.generators.markdown_generator import MarkdownGenerator
-from ...shared.generators.sample_data_generator import SampleDataGenerator
+from shared.generators.ddl_generator import DdlGenerator
+from shared.generators.markdown_generator import MarkdownGenerator
+from shared.generators.sample_data_generator import SampleDataGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class TableGeneratorService:
     
     def __init__(self):
         self.yaml_parser = YamlParser()
-        self.ddl_generator = DDLGenerator()
+        self.ddl_generator = DdlGenerator()
         self.markdown_generator = MarkdownGenerator()
         self.sample_data_generator = SampleDataGenerator()
     

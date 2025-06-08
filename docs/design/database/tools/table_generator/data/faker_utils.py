@@ -13,7 +13,13 @@ import random
 import datetime
 from typing import Any, List, Dict, Optional
 
-from ..core.logger import EnhancedLogger
+import sys
+from pathlib import Path
+
+# パッケージのパスを追加
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from shared.core.logger import DatabaseToolsLogger, get_logger
 
 
 class JapaneseSkillProvider:
@@ -107,14 +113,14 @@ class BasicDataUtils:
     外部ライブラリに依存しない軽量な実装です。
     """
     
-    def __init__(self, seed: Optional[int] = None, logger: EnhancedLogger = None):
+    def __init__(self, seed: Optional[int] = None, logger: DatabaseToolsLogger = None):
         """初期化
         
         Args:
             seed (Optional[int]): 乱数シード
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.logger = logger or EnhancedLogger()
+        self.logger = logger or get_logger(__name__)
         self.provider = JapaneseSkillProvider()
         
         self.logger.info("基本データ生成ユーティリティを初期化しました（外部依存なし）")

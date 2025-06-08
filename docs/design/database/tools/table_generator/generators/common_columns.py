@@ -9,7 +9,7 @@
 """
 
 from typing import List, Dict, Any
-from ..core.models import ColumnDefinition
+from shared.core.models import ColumnDefinition
 
 
 class CommonColumns:

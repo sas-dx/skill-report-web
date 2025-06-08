@@ -15,8 +15,8 @@ from datetime import datetime
 # パッケージのパスを追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from table_generator.core.logger import EnhancedLogger
-from table_generator.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition
+from shared.core.logger import DatabaseToolsLogger, get_logger
+from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition
 from table_generator.utils.sql_utils import SqlUtils
 
 
@@ -27,13 +27,13 @@ class DDLGenerator:
     DDLを生成します。
     """
     
-    def __init__(self, logger: EnhancedLogger = None):
+    def __init__(self, logger: DatabaseToolsLogger = None):
         """初期化
         
         Args:
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.logger = logger or EnhancedLogger()
+        self.logger = logger or get_logger()
         self.sql_utils = SqlUtils(logger=self.logger)
         
         self.logger.info("DDLGenerator が初期化されました")

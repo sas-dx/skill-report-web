@@ -16,7 +16,7 @@ from ..core.models import TableDefinition, ColumnDefinition, IndexDefinition, Fo
 from ..core.exceptions import ParsingError
 
 
-class DdlParser(BaseParser):
+class DDLParser(BaseParser):
     """DDLファイルパーサー"""
     
     def __init__(self, config=None):
@@ -265,11 +265,8 @@ class DdlParser(BaseParser):
             nullable=not self.constraint_patterns['not_null'].search(constraints_text),
             primary_key=bool(self.constraint_patterns['primary_key'].search(constraints_text)),
             unique=bool(self.constraint_patterns['unique'].search(constraints_text)),
-            auto_increment=bool(self.constraint_patterns['auto_increment'].search(constraints_text)),
             comment=self._extract_column_comment(constraints_text),
             requirement_id='',  # DDLからは取得できない
-            check_constraint='',
-            references=''
         )
         
         # デフォルト値の抽出
@@ -369,6 +366,7 @@ class DdlParser(BaseParser):
             if base_type not in valid_types:
                 results.append(CheckResult(
                     check_type="ddl_validation",
+                    table_name=table.name,
                     status="warning",
                     message=f"未知のデータ型が使用されています: {column.type}",
                     details={"table": table.name, "column": column.name, "type": column.type}
@@ -389,7 +387,7 @@ class DdlParser(BaseParser):
 
 # パーサーファクトリーへの登録
 from .base_parser import ParserFactory
-ParserFactory.register_parser('.sql', DdlParser)
+ParserFactory.register_parser('.sql', DDLParser)
 
 
 # 便利関数
@@ -408,7 +406,7 @@ def parse_ddl_file(file_path: str, config=None, validate: bool = True) -> List[T
     Raises:
         ParsingError: 解析エラー
     """
-    parser = DdlParser(config)
+    parser = DDLParser(config)
     parser.set_validation_enabled(validate)
     return parser.parse(file_path)
 
@@ -428,6 +426,6 @@ def parse_ddl_string(ddl_string: str, config=None, validate: bool = True) -> Lis
     Raises:
         ParsingError: 解析エラー
     """
-    parser = DdlParser(config)
+    parser = DDLParser(config)
     parser.set_validation_enabled(validate)
     return parser.parse(ddl_string)

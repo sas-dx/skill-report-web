@@ -16,8 +16,8 @@ from datetime import datetime
 # パッケージのパスを追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from table_generator.core.logger import EnhancedLogger
-from table_generator.core.models import TableDefinition, ColumnDefinition
+from shared.core.logger import DatabaseToolsLogger, get_logger
+from shared.core.models import TableDefinition, ColumnDefinition
 
 
 class InsertGenerator:
@@ -26,13 +26,13 @@ class InsertGenerator:
     テーブル定義とサンプルデータからINSERT文を生成します。
     """
     
-    def __init__(self, logger: EnhancedLogger = None):
+    def __init__(self, logger: DatabaseToolsLogger = None):
         """初期化
         
         Args:
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.logger = logger or EnhancedLogger()
+        self.logger = logger or get_logger()
     
     def generate_insert_sql(self, table_def: TableDefinition) -> str:
         """INSERT文を生成

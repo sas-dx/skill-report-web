@@ -15,8 +15,8 @@ import re
 # パッケージのパスを追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from table_generator.core.logger import EnhancedLogger
-from table_generator.core.models import (
+from shared.core.logger import DatabaseToolsLogger, get_logger
+from shared.core.models import (
     TableDefinition, ColumnDefinition, IndexDefinition, 
     ForeignKeyDefinition, ConstraintDefinition, ProcessingResult
 )
@@ -31,15 +31,15 @@ class YamlDataLoader:
     TableDefinitionオブジェクトに変換します。
     """
     
-    def __init__(self, base_dir: str = None, logger: EnhancedLogger = None):
+    def __init__(self, base_dir: str = None, logger: DatabaseToolsLogger = None):
         """初期化
         
         Args:
             base_dir (str, optional): ベースディレクトリパス
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
         self.base_dir = Path(base_dir) if base_dir else Path.cwd()
-        self.logger = logger or EnhancedLogger()
+        self.logger = logger or get_logger(__name__)
         self.yaml_loader = YamlLoader(logger=self.logger)
         self.file_utils = FileUtils(logger=self.logger)
         

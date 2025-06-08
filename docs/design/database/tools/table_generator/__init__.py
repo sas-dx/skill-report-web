@@ -16,8 +16,8 @@ YAML駆動サンプルデータ生成機能が含まれています。
 """
 
 from .core.logger import EnhancedLogger, Colors, LogLevel
-from .core.models import ProcessingResult
-from .core.config import Config
+from shared.core.models import GenerationResult, CheckResult, TableDefinition
+from shared.core.config import DatabaseToolsConfig
 from .generators.table_definition_generator import TableDefinitionGenerator
 from .generators.ddl_generator import DDLGenerator
 from .generators.common_columns import CommonColumns
@@ -34,8 +34,10 @@ __all__ = [
     'EnhancedLogger',
     'Colors', 
     'LogLevel',
-    'ProcessingResult',
-    'Config',
+    'GenerationResult',
+    'CheckResult',
+    'TableDefinition',
+    'DatabaseToolsConfig',
     'TableDefinitionGenerator',
     'DDLGenerator',
     'CommonColumns',

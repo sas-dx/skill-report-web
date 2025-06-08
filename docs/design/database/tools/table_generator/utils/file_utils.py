@@ -12,7 +12,7 @@ import os
 import shutil
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-from ..core.logger import EnhancedLogger
+from shared.core.logger import get_logger
 
 
 class FileUtils:
@@ -22,13 +22,13 @@ class FileUtils:
     共通操作を提供します。
     """
     
-    def __init__(self, logger: EnhancedLogger = None):
+    def __init__(self, logger=None):
         """初期化
         
         Args:
-            logger (EnhancedLogger, optional): ログ出力インスタンス
+            logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.logger = logger or EnhancedLogger()
+        self.logger = logger or get_logger()
     
     def ensure_directory(self, directory_path: Path) -> bool:
         """ディレクトリの存在を確認し、存在しない場合は作成

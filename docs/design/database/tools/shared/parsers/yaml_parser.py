@@ -145,9 +145,9 @@ class YamlParser(BaseParser):
             default=col_data.get('default'),
             comment=col_data.get('comment', ''),
             requirement_id=col_data.get('requirement_id', ''),
-            auto_increment=col_data.get('auto_increment', False),
-            check_constraint=col_data.get('check_constraint', ''),
-            references=col_data.get('references', '')
+            length=col_data.get('length'),
+            precision=col_data.get('precision'),
+            scale=col_data.get('scale')
         )
     
     def _build_index_definition(self, idx_data: Dict[str, Any]) -> IndexDefinition:
@@ -167,11 +167,9 @@ class YamlParser(BaseParser):
         return ForeignKeyDefinition(
             name=fk_data.get('name', ''),
             columns=fk_data.get('columns', []),
-            references_table=references.get('table', ''),
-            references_columns=references.get('columns', []),
+            references=references,
             on_update=fk_data.get('on_update', 'RESTRICT'),
-            on_delete=fk_data.get('on_delete', 'RESTRICT'),
-            comment=fk_data.get('comment', '')
+            on_delete=fk_data.get('on_delete', 'RESTRICT')
         )
     
     def _validate_yaml_structure(self, yaml_data: Dict[str, Any]) -> List[str]:
@@ -227,6 +225,7 @@ class YamlParser(BaseParser):
         if not table.name.isupper():
             results.append(CheckResult(
                 check_type="yaml_validation",
+                table_name=table.name,
                 status="warning",
                 message="テーブル名は大文字で記述することを推奨します",
                 details={"table": table.name}
@@ -237,6 +236,7 @@ class YamlParser(BaseParser):
         if not any(table.name.startswith(prefix) for prefix in valid_prefixes):
             results.append(CheckResult(
                 check_type="yaml_validation",
+                table_name=table.name,
                 status="warning",
                 message=f"テーブル名は適切なプレフィックス ({', '.join(valid_prefixes)}) で始めることを推奨します",
                 details={"table": table.name, "valid_prefixes": valid_prefixes}
@@ -246,6 +246,7 @@ class YamlParser(BaseParser):
         if not table.requirement_id:
             results.append(CheckResult(
                 check_type="yaml_validation",
+                table_name=table.name,
                 status="warning",
                 message="要求仕様IDが設定されていません",
                 details={"table": table.name}
@@ -256,6 +257,7 @@ class YamlParser(BaseParser):
             if not column.requirement_id:
                 results.append(CheckResult(
                     check_type="yaml_validation",
+                    table_name=table.name,
                     status="info",
                     message="カラムに要求仕様IDが設定されていません",
                     details={"table": table.name, "column": column.name}

@@ -209,6 +209,10 @@ class DatabaseToolsConfig:
         from datetime import datetime
         return datetime.now().strftime("%Y%m%d_%H%M%S")
     
+    def get_timestamp(self) -> str:
+        """タイムスタンプ文字列を取得（パブリックメソッド）"""
+        return self._get_timestamp()
+    
     def to_dict(self) -> Dict[str, Any]:
         """設定を辞書形式で取得"""
         return {

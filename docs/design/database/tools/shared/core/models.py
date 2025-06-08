@@ -76,6 +76,8 @@ class ColumnDefinition:
     length: Optional[int] = None
     precision: Optional[int] = None
     scale: Optional[int] = None
+    auto_increment: bool = False
+    check_constraint: Optional[str] = None
     
     def __post_init__(self):
         """初期化後の処理"""
@@ -116,6 +118,7 @@ class IndexDefinition:
     columns: List[str]
     unique: bool = False
     comment: Optional[str] = None
+    type: str = "btree"  # インデックスタイプ（btree, hash, gin, gist等）
     
     def to_ddl(self, table_name: str) -> str:
         """DDL文を生成"""
@@ -132,6 +135,21 @@ class ForeignKeyDefinition:
     references: Dict[str, Any]  # table, columns
     on_update: str = "CASCADE"
     on_delete: str = "RESTRICT"
+    # 旧形式との互換性のため
+    column: Optional[str] = None
+    reference_table: Optional[str] = None
+    reference_column: Optional[str] = None
+    
+    def __post_init__(self):
+        """初期化後の処理 - 旧形式との互換性"""
+        if self.column and not self.columns:
+            self.columns = [self.column]
+        if self.reference_table and self.reference_column:
+            if not self.references:
+                self.references = {
+                    "table": self.reference_table,
+                    "columns": [self.reference_column]
+                }
     
     def to_ddl(self) -> str:
         """DDL文を生成"""
@@ -142,6 +160,76 @@ class ForeignKeyDefinition:
         return (f"CONSTRAINT {self.name} FOREIGN KEY ({columns_str}) "
                 f"REFERENCES {ref_table} ({ref_columns_str}) "
                 f"ON UPDATE {self.on_update} ON DELETE {self.on_delete}")
+
+
+@dataclass
+class ConstraintDefinition:
+    """制約定義（チェック制約など）"""
+    name: str
+    type: str  # CHECK, UNIQUE, etc.
+    columns: List[str] = field(default_factory=list)
+    condition: Optional[str] = None
+    comment: Optional[str] = None
+    
+    def to_ddl(self) -> str:
+        """DDL文を生成"""
+        if self.type.upper() == "CHECK" and self.condition:
+            return f"CONSTRAINT {self.name} CHECK ({self.condition})"
+        elif self.type.upper() == "UNIQUE":
+            columns_str = ", ".join(self.columns)
+            return f"CONSTRAINT {self.name} UNIQUE ({columns_str})"
+        else:
+            return f"CONSTRAINT {self.name} {self.type}"
+
+
+@dataclass
+class BusinessColumnDefinition:
+    """ビジネスカラム定義（旧形式との互換性）"""
+    name: str
+    data_type: str
+    nullable: bool = True
+    primary: bool = False
+    unique: bool = False
+    default: Optional[str] = None
+    comment: Optional[str] = None
+    requirement_id: Optional[str] = None
+    length: Optional[int] = None
+    precision: Optional[int] = None
+    scale: Optional[int] = None
+    
+    def to_column_definition(self) -> ColumnDefinition:
+        """ColumnDefinitionに変換"""
+        return ColumnDefinition(
+            name=self.name,
+            type=self.data_type,
+            nullable=self.nullable,
+            primary_key=self.primary,
+            unique=self.unique,
+            default=self.default,
+            comment=self.comment,
+            requirement_id=self.requirement_id,
+            length=self.length,
+            precision=self.precision,
+            scale=self.scale
+        )
+
+
+@dataclass
+class BusinessIndexDefinition:
+    """ビジネスインデックス定義（旧形式との互換性）"""
+    name: str
+    columns: List[str]
+    unique: bool = False
+    comment: Optional[str] = None
+    
+    def to_index_definition(self) -> IndexDefinition:
+        """IndexDefinitionに変換"""
+        return IndexDefinition(
+            name=self.name,
+            columns=self.columns,
+            unique=self.unique,
+            comment=self.comment
+        )
 
 
 @dataclass
@@ -159,11 +247,24 @@ class TableDefinition:
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     
+    # 旧形式との互換性のため
+    table_name: Optional[str] = None
+    description: Optional[str] = None
+    business_columns: List[BusinessColumnDefinition] = field(default_factory=list)
+    business_indexes: List[BusinessIndexDefinition] = field(default_factory=list)
+    constraints: List[ConstraintDefinition] = field(default_factory=list)
+    
     def __post_init__(self):
         """初期化後の処理"""
         if self.created_at is None:
             self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        
+        # 旧形式との互換性
+        if self.table_name is None:
+            self.table_name = self.name
+        if self.description is None:
+            self.description = self.comment
     
     def get_primary_key_columns(self) -> List[ColumnDefinition]:
         """プライマリキーカラムを取得"""
@@ -236,23 +337,31 @@ class CheckResult:
     details: Dict[str, Any] = field(default_factory=dict)
     fix_suggestion: Optional[str] = None
     timestamp: Optional[datetime] = None
+    severity: str = 'info'  # 'error', 'warning', 'info'
+    is_valid: Optional[bool] = None
+    errors: List['CheckResult'] = field(default_factory=list)
+    warnings: List['CheckResult'] = field(default_factory=list)
     
     def __post_init__(self):
         """初期化後の処理"""
         if self.timestamp is None:
             self.timestamp = datetime.now()
+        
+        # is_validが設定されていない場合は自動判定
+        if self.is_valid is None:
+            self.is_valid = not self.is_error()
     
     def is_error(self) -> bool:
         """エラーかどうか判定"""
-        return self.status == CheckStatus.ERROR
+        return self.status == CheckStatus.ERROR or self.severity == 'error'
     
     def is_warning(self) -> bool:
         """警告かどうか判定"""
-        return self.status == CheckStatus.WARNING
+        return self.status == CheckStatus.WARNING or self.severity == 'warning'
     
     def is_success(self) -> bool:
         """成功かどうか判定"""
-        return self.status == CheckStatus.SUCCESS
+        return self.status == CheckStatus.SUCCESS and self.severity not in ['error', 'warning']
     
     def to_dict(self) -> Dict[str, Any]:
         """辞書形式に変換"""
@@ -263,7 +372,107 @@ class CheckResult:
             'message': self.message,
             'details': self.details,
             'fix_suggestion': self.fix_suggestion,
+            'severity': self.severity,
+            'is_valid': self.is_valid,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+
+@dataclass
+class CheckResultSummary:
+    """チェック結果サマリー - テストコードとの互換性のため"""
+    results: List[CheckResult] = field(default_factory=list)
+    table_name: str = ""
+    
+    @property
+    def is_valid(self) -> bool:
+        """全体的に有効かどうか判定"""
+        return len(self.errors) == 0
+    
+    @property
+    def errors(self) -> List[CheckResult]:
+        """エラー結果のリスト"""
+        return [r for r in self.results if r.is_error()]
+    
+    @property
+    def warnings(self) -> List[CheckResult]:
+        """警告結果のリスト"""
+        return [r for r in self.results if r.is_warning()]
+    
+    @property
+    def successes(self) -> List[CheckResult]:
+        """成功結果のリスト"""
+        return [r for r in self.results if r.is_success()]
+    
+    def add_result(self, result: CheckResult):
+        """結果を追加"""
+        self.results.append(result)
+    
+    def add_error(self, check_type: str, table_name: str, message: str, details: Dict[str, Any] = None):
+        """エラーを追加"""
+        result = CheckResult(
+            check_type=check_type,
+            table_name=table_name,
+            status=CheckStatus.ERROR,
+            message=message,
+            details=details or {},
+            severity='error'
+        )
+        self.add_result(result)
+    
+    def add_warning(self, check_type: str, table_name: str, message: str, details: Dict[str, Any] = None):
+        """警告を追加"""
+        result = CheckResult(
+            check_type=check_type,
+            table_name=table_name,
+            status=CheckStatus.WARNING,
+            message=message,
+            details=details or {},
+            severity='warning'
+        )
+        self.add_result(result)
+    
+    def add_success(self, check_type: str, table_name: str, message: str, details: Dict[str, Any] = None):
+        """成功を追加"""
+        result = CheckResult(
+            check_type=check_type,
+            table_name=table_name,
+            status=CheckStatus.SUCCESS,
+            message=message,
+            details=details or {},
+            severity='info'
+        )
+        self.add_result(result)
+    
+    def get_error_count(self) -> int:
+        """エラー数を取得"""
+        return len(self.errors)
+    
+    def get_warning_count(self) -> int:
+        """警告数を取得"""
+        return len(self.warnings)
+    
+    def get_success_count(self) -> int:
+        """成功数を取得"""
+        return len(self.successes)
+    
+    def has_errors(self) -> bool:
+        """エラーがあるかチェック"""
+        return len(self.errors) > 0
+    
+    def has_warnings(self) -> bool:
+        """警告があるかチェック"""
+        return len(self.warnings) > 0
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """辞書形式に変換"""
+        return {
+            'is_valid': self.is_valid,
+            'total_results': len(self.results),
+            'error_count': len(self.errors),
+            'warning_count': len(self.warnings),
+            'success_count': len(self.successes),
+            'results': [r.to_dict() for r in self.results]
         }
 
 
@@ -277,6 +486,9 @@ class GenerationResult:
     warnings: List[str] = field(default_factory=list)
     execution_time: Optional[float] = None
     timestamp: Optional[datetime] = None
+    success: bool = True
+    error_message: str = ""
+    processed_files: List[str] = field(default_factory=list)
     
     def __post_init__(self):
         """初期化後の処理"""
@@ -300,6 +512,7 @@ class GenerationResult:
     def set_failed(self):
         """失敗状態に設定"""
         self.status = GenerationStatus.FAILED
+        self.success = False
     
     def is_success(self) -> bool:
         """成功かどうか判定"""
@@ -317,6 +530,76 @@ class GenerationResult:
             'status': self.status.value,
             'errors': self.errors,
             'warnings': self.warnings,
+            'execution_time': self.execution_time,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'success': self.success,
+            'error_message': self.error_message,
+            'processed_files': self.processed_files
+        }
+
+
+@dataclass
+class ProcessingResult:
+    """処理結果モデル - 個別テーブル処理結果"""
+    table_name: str
+    logical_name: str = ""
+    success: bool = True
+    has_yaml: bool = False
+    error_message: str = ""
+    generated_files: List[str] = field(default_factory=list)
+    processed_files: List[str] = field(default_factory=list)
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+    status: GenerationStatus = GenerationStatus.SUCCESS
+    execution_time: Optional[float] = None
+    timestamp: Optional[datetime] = None
+    
+    def __post_init__(self):
+        """初期化後の処理"""
+        if self.timestamp is None:
+            self.timestamp = datetime.now()
+    
+    def add_generated_file(self, file_path: Union[Path, str]):
+        """生成ファイルを追加"""
+        self.generated_files.append(str(file_path))
+    
+    def add_error(self, error: str):
+        """エラーを追加"""
+        self.errors.append(error)
+        self.success = False
+        if self.status == GenerationStatus.SUCCESS:
+            self.status = GenerationStatus.PARTIAL
+    
+    def add_warning(self, warning: str):
+        """警告を追加"""
+        self.warnings.append(warning)
+    
+    def set_failed(self):
+        """失敗状態に設定"""
+        self.status = GenerationStatus.FAILED
+        self.success = False
+    
+    def is_success(self) -> bool:
+        """成功かどうか判定"""
+        return self.success and self.status == GenerationStatus.SUCCESS
+    
+    def is_failed(self) -> bool:
+        """失敗かどうか判定"""
+        return not self.success or self.status == GenerationStatus.FAILED
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """辞書形式に変換"""
+        return {
+            'table_name': self.table_name,
+            'logical_name': self.logical_name,
+            'success': self.success,
+            'has_yaml': self.has_yaml,
+            'error_message': self.error_message,
+            'generated_files': self.generated_files,
+            'processed_files': self.processed_files,
+            'errors': self.errors,
+            'warnings': self.warnings,
+            'status': self.status.value,
             'execution_time': self.execution_time,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
         }
@@ -348,6 +631,33 @@ class FixResult:
             'backup_file': str(self.backup_file) if self.backup_file else None,
             'errors': self.errors,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+
+@dataclass
+class FileMetadata:
+    """ファイルメタデータ"""
+    path: Path
+    size: int
+    modified_time: datetime
+    file_type: str
+    encoding: str = 'utf-8'
+    checksum: Optional[str] = None
+    
+    def __post_init__(self):
+        """初期化後の処理"""
+        if isinstance(self.path, str):
+            self.path = Path(self.path)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """辞書形式に変換"""
+        return {
+            'path': str(self.path),
+            'size': self.size,
+            'modified_time': self.modified_time.isoformat(),
+            'file_type': self.file_type,
+            'encoding': self.encoding,
+            'checksum': self.checksum
         }
 
 

@@ -8,13 +8,13 @@
 """
 
 from .base_parser import BaseParser
-from .yaml_parser import UnifiedYAMLParser
-from .ddl_parser import UnifiedDDLParser
-from .markdown_parser import UnifiedMarkdownParser
+from .yaml_parser import YamlParser
+from .ddl_parser import DDLParser
+from .markdown_parser import MarkdownParser
 
 __all__ = [
     'BaseParser',
-    'UnifiedYAMLParser', 
-    'UnifiedDDLParser',
-    'UnifiedMarkdownParser'
+    'YamlParser', 
+    'DDLParser',
+    'MarkdownParser'
 ]
