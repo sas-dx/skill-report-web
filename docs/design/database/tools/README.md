@@ -60,13 +60,13 @@ python3 -m table_generator --table MST_* --verbose
 #### 整合性チェック
 ```bash
 # 全体整合性チェック
-python run_check.py --verbose
+python3 database_consistency_checker/run_check.py --verbose
 
 # 特定テーブルのみチェック
-python run_check.py --tables MST_Employee,MST_Department
+python3 database_consistency_checker/run_check.py --tables MST_Employee,MST_Department
 
 # 特定のチェックのみ実行
-python run_check.py --checks table_existence,column_consistency
+python3 database_consistency_checker/run_check.py --checks table_existence,column_consistency
 ```
 
 #### 統合テスト実行
@@ -171,16 +171,16 @@ python3 -m table_generator --table MST_Employee --ddl-only
 #### 使用例
 ```bash
 # 全体チェック（推奨）
-python run_check.py --verbose
+python3 database_consistency_checker/run_check.py --verbose
 
 # レポート出力
-python run_check.py --verbose --output-format markdown --output-file report.md
+python3 database_consistency_checker/run_check.py --verbose --output-format markdown --output-file report.md
 
 # 特定チェックのみ
-python run_check.py --checks table_existence,foreign_key_consistency
+python3 database_consistency_checker/run_check.py --checks table_existence,foreign_key_consistency
 
 # 修正提案付き
-python run_check.py --suggest-fixes
+python3 database_consistency_checker/run_check.py --suggest-fixes
 ```
 
 ## 📊 品質保証・テスト
@@ -229,10 +229,10 @@ python3 run_tests.py --verbose --output-json
 python3 -m table_generator --table NEW_TABLE --verbose
 
 # 5. 個別整合性チェック
-python run_check.py --tables NEW_TABLE
+python3 database_consistency_checker/run_check.py --tables NEW_TABLE
 
 # 6. 全体整合性確認
-python run_check.py --verbose
+python3 database_consistency_checker/run_check.py --verbose
 
 # 7. Git コミット
 git add .
@@ -258,10 +258,10 @@ git commit -m "🆕 feat: NEW_TABLEテーブル追加
 python3 -m table_generator --table MODIFIED_TABLE --verbose
 
 # 4. 影響範囲チェック
-python run_check.py --checks foreign_key_consistency
+python3 database_consistency_checker/run_check.py --checks foreign_key_consistency
 
 # 5. 関連テーブルの整合性確認
-python run_check.py --tables MODIFIED_TABLE,RELATED_TABLE
+python3 database_consistency_checker/run_check.py --tables MODIFIED_TABLE,RELATED_TABLE
 
 # 6. Git コミット
 git add .
