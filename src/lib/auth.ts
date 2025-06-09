@@ -41,7 +41,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
  * @returns JWTトークン
  */
 export function generateToken(payload: { userId: string; email: string; role: string }): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET as jwt.Secret, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
 }
 
 /**
