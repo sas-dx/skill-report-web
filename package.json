@@ -25,7 +25,7 @@
     "db:push": "prisma db push --schema=src/database/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema=src/database/prisma/schema.prisma",
     "db:migrate:reset": "prisma migrate reset --schema=src/database/prisma/schema.prisma",
-    "db:seed": "tsx src/database/prisma/seed.ts",
+    "db:seed": "tsx scripts/run-seed.ts",
     "db:studio": "prisma studio --schema=src/database/prisma/schema.prisma",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -120,7 +120,7 @@
   },
   "prisma": {
     "schema": "src/database/prisma/schema.prisma",
-    "seed": "tsx src/database/prisma/seed.ts"
+    "seed": "tsx scripts/run-seed.ts"
   },
   "engines": {
     "node": ">=18.17.0",
