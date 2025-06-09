@@ -11,7 +11,7 @@ import { Spinner } from '@/components/ui/Spinner';
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    empNo: '',
+    loginId: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +45,11 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        // トークンを保存
+        if (data.data?.token) {
+          localStorage.setItem('token', data.data.token);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+        }
         // ログイン成功時はダッシュボードにリダイレクト
         router.push('/dashboard');
       } else {
@@ -99,19 +104,19 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* 社員番号 */}
+            {/* ログインID */}
             <div>
-              <label htmlFor="empNo" className="block text-sm font-medium text-gray-700 mb-2">
-                社員番号
+              <label htmlFor="loginId" className="block text-sm font-medium text-gray-700 mb-2">
+                ログインID
               </label>
               <Input
-                id="empNo"
-                name="empNo"
+                id="loginId"
+                name="loginId"
                 type="text"
                 required
-                value={formData.empNo}
+                value={formData.loginId}
                 onChange={handleInputChange}
-                placeholder="社員番号を入力してください"
+                placeholder="ログインIDを入力してください"
                 disabled={isLoading}
                 className="w-full"
               />
@@ -155,7 +160,7 @@ export default function LoginPage() {
                 type="submit"
                 variant="primary"
                 size="lg"
-                disabled={isLoading || !formData.empNo || !formData.password}
+                disabled={isLoading || !formData.loginId || !formData.password}
                 className="w-full"
               >
                 {isLoading ? (
@@ -185,8 +190,7 @@ export default function LoginPage() {
           <div className="mt-6 p-4 bg-gray-50 rounded-md">
             <h3 className="text-sm font-medium text-gray-700 mb-2">デモ用ログイン情報</h3>
             <div className="text-xs text-gray-600 space-y-1">
-              <div>一般ユーザー: EMP001 / password123</div>
-              <div>管理者: admin / admin123</div>
+              <div>テストユーザー: 000001 / password</div>
             </div>
           </div>
         </div>

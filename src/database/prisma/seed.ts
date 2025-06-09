@@ -3,6 +3,7 @@
 // 設計書: docs/design/database/data/ 配下のサンプルデータSQLファイル群
 // 自動生成日時: 2025-06-09 11:20:00
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -407,6 +408,11 @@ export async function runSampleSeed() {
 
     // MST_UserAuthデータ
     console.log('📊 MST_UserAuthデータを投入中...')
+    
+    // パスワードを正しくハッシュ化
+    const passwordHash = await bcrypt.hash('password', 12);
+    console.log('🔐 Generated password hash for "password":', passwordHash);
+    
     const userAuthData = await Promise.all([
       prisma.userAuth.upsert({
         where: { user_id: 'USER000001' },
@@ -414,7 +420,7 @@ export async function runSampleSeed() {
         create: {
           user_id: 'USER000001',
           login_id: '000001',
-          password_hash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5uIoS',
+          password_hash: passwordHash,
           password_salt: 'randomsalt123',
           employee_id: '000001',
           account_status: 'ACTIVE',
