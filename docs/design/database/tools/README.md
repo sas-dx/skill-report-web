@@ -291,14 +291,14 @@ git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 ```bash
 # 全テスト実行
 cd ~/skill-report-web/docs/design/database/tools
-python run_tests.py
+python3 run_tests.py
 
 # 個別テスト実行
-python -m pytest tests/test_table_generator.py -v
-python -m pytest tests/test_consistency_checker.py -v
+python3 -m pytest tests/test_table_generator.py -v
+python3 -m pytest tests/test_consistency_checker.py -v
 
 # カバレッジ付きテスト実行
-python -m pytest --cov=shared --cov=table_generator --cov=database_consistency_checker --cov-report=html
+python3 -m pytest --cov=shared --cov=table_generator --cov=database_consistency_checker --cov-report=html
 ```
 
 ### テスト構成
