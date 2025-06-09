@@ -4,16 +4,58 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export async function runSampleSeed() {
-  console.log('🌱 データベースの初期データ投入を開始します...')
+  console.log('🌱 データベースの初期データ投入を開始します…')
   // HIS_AuditLog_sample_data.sql
-  console.log('📊 HIS_AuditLogデータを投入中...')
+  console.log('📊 HIS_AuditLog データを投入中…')
   await prisma.auditLog.createMany({
     data: [
+      {
+        id: "audit_001",
+        user_id: "emp_001",
+        session_id: "sess_abc123",
+        action_type: "LOGIN",
+        target_table: null,
+        target_id: null,
+        old_values: null,
+        new_values: null,
+        ip_address: "192.168.1.100",
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        result_status: "SUCCESS",
+        error_message: null,
+        execution_time_ms: 150,
+        is_deleted: false,
+        tenant_id: "tenant_001",
+        created_at: null,
+        updated_at: null,
+        created_by: "system",
+        updated_by: "system",
+      },
+      {
+        id: "audit_002",
+        user_id: "emp_001",
+        session_id: "sess_abc123",
+        action_type: "UPDATE",
+        target_table: "MST_Employee",
+        target_id: "emp_001",
+        old_values: "{"name": "田中太郎", "email": "tanaka@example.com"}",
+        new_values: "{"name": "田中太郎", "email": "tanaka.new@example.com"}",
+        ip_address: "192.168.1.100",
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        result_status: "SUCCESS",
+        error_message: null,
+        execution_time_ms: 250,
+        is_deleted: false,
+        tenant_id: "tenant_001",
+        created_at: null,
+        updated_at: null,
+        created_by: "emp_001",
+        updated_by: "emp_001",
+      },
     ],
   })
   
   // HIS_NotificationLog_sample_data.sql
-  console.log('📊 HIS_NotificationLogデータを投入中...')
+  console.log('📊 HIS_NotificationLog データを投入中…')
   await prisma.notificationLog.createMany({
     data: [
       {
@@ -90,8 +132,61 @@ export async function runSampleSeed() {
     ],
   })
   
+  // HIS_ReportGeneration_sample_data.sql
+  console.log('📊 HIS_ReportGeneration データを投入中…')
+  await prisma.reportGeneration.createMany({
+    data: [
+      {
+        id: "RG001",
+        tenant_id: "TENANT001",
+        template_id: "RT001",
+        requested_by: "USER001",
+        report_title: "山田太郎さんのスキルサマリーレポート",
+        report_category: "SKILL",
+        output_format: "PDF",
+        generation_status: "SUCCESS",
+        parameters: "{"employee_id": "EMP001", "report_date": "2025-06-01"}",
+        file_path: "/reports/2025/06/01/skill_summary_EMP001_20250601.pdf",
+        file_size: 1048576,
+        download_count: 3,
+        last_downloaded_at: "2025-06-01 18:45:00",
+        requested_at: "2025-06-01 15:30:00",
+        started_at: "2025-06-01 15:30:05",
+        completed_at: "2025-06-01 15:30:25",
+        processing_time_ms: 20000,
+        error_message: null,
+        error_details: null,
+        expires_at: "2025-06-08 15:30:00",
+        is_deleted: null,
+      },
+      {
+        id: "RG002",
+        tenant_id: "TENANT001",
+        template_id: "RT002",
+        requested_by: "USER002",
+        report_title: "開発部目標進捗レポート",
+        report_category: "GOAL",
+        output_format: "EXCEL",
+        generation_status: "FAILED",
+        parameters: "{"department_id": "DEPT001", "period_start": "2025-05-01", "period_end": "2025-05-31"}",
+        file_path: null,
+        file_size: null,
+        download_count: 0,
+        last_downloaded_at: null,
+        requested_at: "2025-06-01 16:00:00",
+        started_at: "2025-06-01 16:00:10",
+        completed_at: "2025-06-01 16:00:15",
+        processing_time_ms: 5000,
+        error_message: "データ取得エラー: 指定された期間のデータが見つかりません",
+        error_details: "{"error_code": "DATA_NOT_FOUND", "sql_error": "No rows found for the specified period"}",
+        expires_at: null,
+        is_deleted: null,
+      },
+    ],
+  })
+  
   // HIS_TenantBilling_sample_data.sql
-  console.log('📊 HIS_TenantBillingデータを投入中...')
+  console.log('📊 HIS_TenantBilling データを投入中…')
   await prisma.tenantBilling.createMany({
     data: [
       {
@@ -152,7 +247,7 @@ export async function runSampleSeed() {
   })
   
   // MST_CareerPlan_sample_data.sql
-  console.log('📊 MST_CareerPlanデータを投入中...')
+  console.log('📊 MST_CareerPlan データを投入中…')
   await prisma.careerPlan.createMany({
     data: [
       {
@@ -249,7 +344,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Certification_sample_data.sql
-  console.log('📊 MST_Certificationデータを投入中...')
+  console.log('📊 MST_Certification データを投入中…')
   await prisma.certification.createMany({
     data: [
       {
@@ -261,7 +356,7 @@ export async function runSampleSeed() {
         certification_category: "IT",
         certification_level: "INTERMEDIATE",
         validity_period_months: 36,
-        renewal_required: "TRUE",
+        renewal_required: true,
         renewal_requirements: "再認定試験の受験または上位資格の取得",
         exam_fee: 15000,
         exam_language: "日本語/英語",
@@ -269,8 +364,8 @@ export async function runSampleSeed() {
         official_url: "https://aws.amazon.com/jp/certification/certified-solutions-architect-associate/",
         description: "AWSクラウドでのソリューション設計・実装スキルを証明する資格",
         skill_category_id: "SKILL_CAT_CLOUD",
-        is_recommended: "TRUE",
-        is_active: "TRUE",
+        is_recommended: true,
+        is_active: true,
         code: null,
         name: null,
       },
@@ -283,7 +378,7 @@ export async function runSampleSeed() {
         certification_category: "BUSINESS",
         certification_level: "ADVANCED",
         validity_period_months: 36,
-        renewal_required: "TRUE",
+        renewal_required: true,
         renewal_requirements: "60 PDU（Professional Development Units）の取得",
         exam_fee: 55500,
         exam_language: "日本語/英語",
@@ -291,8 +386,8 @@ export async function runSampleSeed() {
         official_url: "https://www.pmi.org/certifications/project-management-pmp",
         description: "プロジェクトマネジメントの国際的な資格",
         skill_category_id: "SKILL_CAT_PM",
-        is_recommended: "TRUE",
-        is_active: "TRUE",
+        is_recommended: true,
+        is_active: true,
         code: null,
         name: null,
       },
@@ -300,7 +395,7 @@ export async function runSampleSeed() {
   })
   
   // MST_CertificationRequirement_sample_data.sql
-  console.log('📊 MST_CertificationRequirementデータを投入中...')
+  console.log('📊 MST_CertificationRequirement データを投入中…')
   await prisma.certificationRequirement.createMany({
     data: [
       {
@@ -319,28 +414,28 @@ export async function runSampleSeed() {
         minimum_experience_years: 2,
         minimum_skill_level: "INTERMEDIATE",
         grace_period_months: 12,
-        renewal_required: "FALSE",
+        renewal_required: false,
         renewal_interval_months: null,
         exemption_conditions: "同等の実務経験5年以上、または関連する上位資格保有",
         assessment_criteria: "資格証明書の提出、実務経験の確認",
         business_justification: "技術的基礎知識の担保、顧客への信頼性向上",
-        compliance_requirement: "FALSE",
-        client_requirement: "TRUE",
-        internal_policy: "TRUE",
+        compliance_requirement: false,
+        client_requirement: true,
+        internal_policy: true,
         effective_start_date: "2024-04-01",
         effective_end_date: null,
         notification_timing: 90,
         escalation_timing: 30,
-        cost_support_available: "TRUE",
+        cost_support_available: true,
         cost_support_amount: 50000.0,
         cost_support_conditions: "初回受験のみ、合格時に全額支給",
-        training_support_available: "TRUE",
+        training_support_available: true,
         recommended_training_programs: "["TRN_PROG_003", "TRN_PROG_004"]",
         study_time_allocation: 2.0,
         success_rate: 75.5,
         average_study_hours: 150.0,
         difficulty_rating: "MEDIUM",
-        active_flag: "TRUE",
+        active_flag: true,
         created_by: "EMP000010",
         approved_by: "EMP000005",
         approval_date: "2024-03-15",
@@ -366,28 +461,28 @@ export async function runSampleSeed() {
         minimum_experience_years: 5,
         minimum_skill_level: "ADVANCED",
         grace_period_months: 18,
-        renewal_required: "TRUE",
+        renewal_required: true,
         renewal_interval_months: 36,
         exemption_conditions: "大規模プロジェクト成功実績3件以上",
         assessment_criteria: "資格証明書、プロジェクト実績評価、360度評価",
         business_justification: "プロジェクト管理能力の客観的証明、国際標準への準拠",
-        compliance_requirement: "FALSE",
-        client_requirement: "TRUE",
-        internal_policy: "TRUE",
+        compliance_requirement: false,
+        client_requirement: true,
+        internal_policy: true,
         effective_start_date: "2024-01-01",
         effective_end_date: null,
         notification_timing: 180,
         escalation_timing: 60,
-        cost_support_available: "TRUE",
+        cost_support_available: true,
         cost_support_amount: 100000.0,
         cost_support_conditions: "受験料・研修費用全額支給、PDU維持費用も支援",
-        training_support_available: "TRUE",
+        training_support_available: true,
         recommended_training_programs: "["TRN_PROG_001", "TRN_PROG_005"]",
         study_time_allocation: 4.0,
         success_rate: 65.0,
         average_study_hours: 300.0,
         difficulty_rating: "HARD",
-        active_flag: "TRUE",
+        active_flag: true,
         created_by: "EMP000015",
         approved_by: "EMP000008",
         approval_date: "2023-12-01",
@@ -401,7 +496,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Department_sample_data.sql
-  console.log('📊 MST_Departmentデータを投入中...')
+  console.log('📊 MST_Department データを投入中…')
   await prisma.department.createMany({
     data: [
       {
@@ -452,7 +547,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Employee_sample_data.sql
-  console.log('📊 MST_Employeeデータを投入中...')
+  console.log('📊 MST_Employee データを投入中…')
   await prisma.employee.createMany({
     data: [
       {
@@ -497,7 +592,7 @@ export async function runSampleSeed() {
   })
   
   // MST_EmployeeDepartment_sample_data.sql
-  console.log('📊 MST_EmployeeDepartmentデータを投入中...')
+  console.log('📊 MST_EmployeeDepartment データを投入中…')
   await prisma.employeeDepartment.createMany({
     data: [
       {
@@ -558,7 +653,7 @@ export async function runSampleSeed() {
   })
   
   // MST_EmployeeJobType_sample_data.sql
-  console.log('📊 MST_EmployeeJobTypeデータを投入中...')
+  console.log('📊 MST_EmployeeJobType データを投入中…')
   await prisma.employeeJobType.createMany({
     data: [
       {
@@ -591,14 +686,14 @@ export async function runSampleSeed() {
         achievements: "新人研修システム開発、パフォーマンス改善20%達成",
         goals: "AWS認定取得、チームリーダー経験積む",
         workload_percentage: 100.0,
-        billable_flag: "TRUE",
+        billable_flag: true,
         cost_center: "DEV001",
         budget_allocation: 5000000.0,
         hourly_rate: 3500.0,
-        overtime_eligible: "TRUE",
-        remote_work_eligible: "TRUE",
-        travel_required: "FALSE",
-        security_clearance_required: "FALSE",
+        overtime_eligible: true,
+        remote_work_eligible: true,
+        travel_required: false,
+        security_clearance_required: false,
         created_by: "EMP000005",
         approved_by: "EMP000008",
         approval_date: "2024-03-25",
@@ -637,14 +732,14 @@ export async function runSampleSeed() {
         achievements: "3つの大規模プロジェクト成功、チーム満足度向上",
         goals: "PMP取得、PMO体制構築",
         workload_percentage: 80.0,
-        billable_flag: "TRUE",
+        billable_flag: true,
         cost_center: "PMO001",
         budget_allocation: 8000000.0,
         hourly_rate: 5000.0,
-        overtime_eligible: "FALSE",
-        remote_work_eligible: "TRUE",
-        travel_required: "TRUE",
-        security_clearance_required: "FALSE",
+        overtime_eligible: false,
+        remote_work_eligible: true,
+        travel_required: true,
+        security_clearance_required: false,
         created_by: "EMP000008",
         approved_by: "EMP000001",
         approval_date: "2023-12-15",
@@ -657,7 +752,7 @@ export async function runSampleSeed() {
   })
   
   // MST_EmployeePosition_sample_data.sql
-  console.log('📊 MST_EmployeePositionデータを投入中...')
+  console.log('📊 MST_EmployeePosition データを投入中…')
   await prisma.employeePosition.createMany({
     data: [
       {
@@ -724,7 +819,7 @@ export async function runSampleSeed() {
   })
   
   // MST_JobType_sample_data.sql
-  console.log('📊 MST_JobTypeデータを投入中...')
+  console.log('📊 MST_JobType データを投入中…')
   await prisma.jobType.createMany({
     data: [
       {
@@ -741,10 +836,10 @@ export async function runSampleSeed() {
         required_certifications: "["基本情報技術者", "応用情報技術者"]",
         required_skills: "["Java", "SQL", "システム設計", "要件定義"]",
         department_affinity: "["開発部", "システム部"]",
-        remote_work_eligible: "TRUE",
+        remote_work_eligible: true,
         travel_frequency: "LOW",
         sort_order: 1,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -762,10 +857,10 @@ export async function runSampleSeed() {
         required_certifications: "["PMP", "プロジェクトマネージャ試験"]",
         required_skills: "["プロジェクト管理", "リーダーシップ", "コミュニケーション", "リスク管理"]",
         department_affinity: "["開発部", "PMO"]",
-        remote_work_eligible: "TRUE",
+        remote_work_eligible: true,
         travel_frequency: "MEDIUM",
         sort_order: 2,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -783,10 +878,10 @@ export async function runSampleSeed() {
         required_certifications: "["JSTQB", "ソフトウェア品質技術者資格"]",
         required_skills: "["テスト設計", "自動化テスト", "品質管理", "バグ分析"]",
         department_affinity: "["品質保証部", "開発部"]",
-        remote_work_eligible: "TRUE",
+        remote_work_eligible: true,
         travel_frequency: "NONE",
         sort_order: 3,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -794,7 +889,7 @@ export async function runSampleSeed() {
   })
   
   // MST_JobTypeSkill_sample_data.sql
-  console.log('📊 MST_JobTypeSkillデータを投入中...')
+  console.log('📊 MST_JobTypeSkill データを投入中…')
   await prisma.jobTypeSkill.createMany({
     data: [
       {
@@ -804,7 +899,7 @@ export async function runSampleSeed() {
         skill_priority: "CRITICAL",
         skill_category: "TECHNICAL",
         experience_years: 3.0,
-        certification_required: "TRUE",
+        certification_required: true,
         skill_weight: 25.0,
         evaluation_criteria: "実務プロジェクトでの設計・実装経験、コードレビュー能力",
         learning_path: "基礎研修→実践プロジェクト→上級研修→資格取得",
@@ -824,7 +919,7 @@ export async function runSampleSeed() {
         skill_priority: "HIGH",
         skill_category: "BUSINESS",
         experience_years: 2.0,
-        certification_required: "FALSE",
+        certification_required: false,
         skill_weight: 20.0,
         evaluation_criteria: "業務要件の理解度、顧客とのコミュニケーション能力",
         learning_path: "業務知識研修→OJT→実践経験",
@@ -844,7 +939,7 @@ export async function runSampleSeed() {
         skill_priority: "CRITICAL",
         skill_category: "MANAGEMENT",
         experience_years: 5.0,
-        certification_required: "TRUE",
+        certification_required: true,
         skill_weight: 30.0,
         evaluation_criteria: "チーム運営実績、プロジェクト成功率、メンバー育成実績",
         learning_path: "リーダーシップ研修→実践経験→管理職研修→資格取得",
@@ -861,7 +956,7 @@ export async function runSampleSeed() {
   })
   
   // MST_JobTypeSkillGrade_sample_data.sql
-  console.log('📊 MST_JobTypeSkillGradeデータを投入中...')
+  console.log('📊 MST_JobTypeSkillGrade データを投入中…')
   await prisma.jobTypeSkillGrade.createMany({
     data: [
       {
@@ -937,7 +1032,7 @@ export async function runSampleSeed() {
   })
   
   // MST_NotificationSettings_sample_data.sql
-  console.log('📊 MST_NotificationSettingsデータを投入中...')
+  console.log('📊 MST_NotificationSettings データを投入中…')
   await prisma.notificationSettings.createMany({
     data: [
       {
@@ -952,7 +1047,7 @@ export async function runSampleSeed() {
         frequency_value: null,
         template_id: "NT001",
         channel_config: "{"smtp_server": "smtp.company.com", "from_address": "noreply@company.com"}",
-        is_enabled: "TRUE",
+        is_enabled: true,
         priority_level: "MEDIUM",
         code: null,
         name: null,
@@ -970,7 +1065,7 @@ export async function runSampleSeed() {
         frequency_value: 9,
         template_id: "NT002",
         channel_config: "{"webhook_url": "https://hooks.slack.com/services/xxx", "channel": "#notifications"}",
-        is_enabled: "TRUE",
+        is_enabled: true,
         priority_level: "HIGH",
         code: null,
         name: null,
@@ -980,7 +1075,7 @@ export async function runSampleSeed() {
   })
   
   // MST_NotificationTemplate_sample_data.sql
-  console.log('📊 MST_NotificationTemplateデータを投入中...')
+  console.log('📊 MST_NotificationTemplate データを投入中…')
   await prisma.notificationTemplate.createMany({
     data: [
       {
@@ -1007,8 +1102,8 @@ export async function runSampleSeed() {
         format_type: "PLAIN",
         parameters: "{"employee_name": "社員名", "skill_name": "スキル名", "updated_at": "更新日時", "updated_by": "更新者", "skill_detail_url": "詳細URL"}",
         sample_data: "{"employee_name": "山田太郎", "skill_name": "Java", "updated_at": "2025-06-01 10:30:00", "updated_by": "佐藤花子", "skill_detail_url": "https://system.company.com/skills/123"}",
-        is_default: "TRUE",
-        is_active: "TRUE",
+        is_default: true,
+        is_active: true,
         version: "1.0.0",
         code: null,
         name: null,
@@ -1035,8 +1130,8 @@ export async function runSampleSeed() {
         format_type: "MARKDOWN",
         parameters: "{"employee_name": "社員名", "goal_title": "目標タイトル", "deadline_date": "期限日", "remaining_days": "残り日数", "progress_rate": "進捗率", "goal_detail_url": "詳細URL"}",
         sample_data: "{"employee_name": "山田太郎", "goal_title": "Java認定資格取得", "deadline_date": "2025-06-30", "remaining_days": "29", "progress_rate": "75", "goal_detail_url": "https://system.company.com/goals/456"}",
-        is_default: "TRUE",
-        is_active: "TRUE",
+        is_default: true,
+        is_active: true,
         version: "1.0.0",
         code: null,
         name: null,
@@ -1046,7 +1141,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Permission_sample_data.sql
-  console.log('📊 MST_Permissionデータを投入中...')
+  console.log('📊 MST_Permission データを投入中…')
   await prisma.permission.createMany({
     data: [
       {
@@ -1058,12 +1153,12 @@ export async function runSampleSeed() {
         action_type: "READ",
         scope_level: "TENANT",
         parent_permission_id: null,
-        is_system_permission: "TRUE",
-        requires_conditions: "FALSE",
+        is_system_permission: true,
+        requires_conditions: false,
         condition_expression: null,
         risk_level: 1,
-        requires_approval: "FALSE",
-        audit_required: "TRUE",
+        requires_approval: false,
+        audit_required: true,
         permission_status: "ACTIVE",
         effective_from: "2025-01-01",
         effective_to: null,
@@ -1081,12 +1176,12 @@ export async function runSampleSeed() {
         action_type: "UPDATE",
         scope_level: "DEPARTMENT",
         parent_permission_id: null,
-        is_system_permission: "TRUE",
-        requires_conditions: "TRUE",
+        is_system_permission: true,
+        requires_conditions: true,
         condition_expression: "department_id = :user_department_id",
         risk_level: 2,
-        requires_approval: "FALSE",
-        audit_required: "TRUE",
+        requires_approval: false,
+        audit_required: true,
         permission_status: "ACTIVE",
         effective_from: "2025-01-01",
         effective_to: null,
@@ -1104,12 +1199,12 @@ export async function runSampleSeed() {
         action_type: "EXECUTE",
         scope_level: "GLOBAL",
         parent_permission_id: null,
-        is_system_permission: "TRUE",
-        requires_conditions: "FALSE",
+        is_system_permission: true,
+        requires_conditions: false,
         condition_expression: null,
         risk_level: 4,
-        requires_approval: "TRUE",
-        audit_required: "TRUE",
+        requires_approval: true,
+        audit_required: true,
         permission_status: "ACTIVE",
         effective_from: "2025-01-01",
         effective_to: null,
@@ -1122,7 +1217,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Position_sample_data.sql
-  console.log('📊 MST_Positionデータを投入中...')
+  console.log('📊 MST_Position データを投入中…')
   await prisma.position.createMany({
     data: [
       {
@@ -1136,11 +1231,11 @@ export async function runSampleSeed() {
         approval_limit: 999999999.99,
         salary_grade: "E1",
         allowance_amount: 500000.0,
-        is_management: "TRUE",
-        is_executive: "TRUE",
-        requires_approval: "TRUE",
-        can_hire: "TRUE",
-        can_evaluate: "TRUE",
+        is_management: true,
+        is_executive: true,
+        requires_approval: true,
+        can_hire: true,
+        can_evaluate: true,
         position_status: "ACTIVE",
         sort_order: 1,
         description: "会社の最高責任者として経営全般を統括",
@@ -1158,11 +1253,11 @@ export async function runSampleSeed() {
         approval_limit: 100000000.0,
         salary_grade: "E2",
         allowance_amount: 300000.0,
-        is_management: "TRUE",
-        is_executive: "TRUE",
-        requires_approval: "TRUE",
-        can_hire: "TRUE",
-        can_evaluate: "TRUE",
+        is_management: true,
+        is_executive: true,
+        requires_approval: true,
+        can_hire: true,
+        can_evaluate: true,
         position_status: "ACTIVE",
         sort_order: 2,
         description: "取締役会メンバーとして経営方針決定に参画",
@@ -1180,11 +1275,11 @@ export async function runSampleSeed() {
         approval_limit: 10000000.0,
         salary_grade: "M1",
         allowance_amount: 100000.0,
-        is_management: "TRUE",
-        is_executive: "FALSE",
-        requires_approval: "TRUE",
-        can_hire: "TRUE",
-        can_evaluate: "TRUE",
+        is_management: true,
+        is_executive: false,
+        requires_approval: true,
+        can_hire: true,
+        can_evaluate: true,
         position_status: "ACTIVE",
         sort_order: 3,
         description: "部門の責任者として業務全般を管理",
@@ -1195,14 +1290,103 @@ export async function runSampleSeed() {
   })
   
   // MST_ReportTemplate_sample_data.sql
-  console.log('📊 MST_ReportTemplateデータを投入中...')
+  console.log('📊 MST_ReportTemplate データを投入中…')
   await prisma.reportTemplate.createMany({
     data: [
+      {
+        id: "RT001",
+        tenant_id: "TENANT001",
+        template_key: "skill_summary_report",
+        template_name: "スキルサマリーレポート",
+        report_category: "SKILL",
+        output_format: "PDF",
+        language_code: "ja",
+        template_content: "<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="UTF-8">
+      <title>{{report_title}}</title>
+  </head>
+  <body>
+      <h1>{{employee_name}}さんのスキルサマリー</h1>
+      <div class="summary-section">
+          <h2>保有スキル一覧</h2>
+          {{#skills}}
+          <div class="skill-item">
+              <span class="skill-name">{{skill_name}}</span>
+              <span class="skill-level">レベル: {{skill_level}}</span>
+          </div>
+          {{/skills}}
+      </div>
+  </body>
+  </html>
+  ",
+        style_sheet: "body { font-family: ''Noto Sans JP'', sans-serif; }
+  .skill-item { margin: 10px 0; padding: 5px; border-bottom: 1px solid #ccc; }
+  .skill-name { font-weight: bold; }
+  .skill-level { color: #666; }
+  ",
+        parameters_schema: "{"type": "object", "properties": {"employee_id": {"type": "string"}, "report_date": {"type": "string", "format": "date"}}}",
+        data_source_config: "{"tables": ["MST_Employee", "TRN_EmployeeSkill", "MST_Skill"], "joins": ["employee_skills", "skill_details"]}",
+        page_settings: "{"size": "A4", "orientation": "portrait", "margin": {"top": "20mm", "bottom": "20mm", "left": "15mm", "right": "15mm"}}",
+        header_template: "<div style="text-align: center; font-size: 12px;">{{company_name}} - スキル管理システム</div>",
+        footer_template: "<div style="text-align: center; font-size: 10px;">出力日時: {{generated_at}} - ページ {{page_number}}</div>",
+        is_default: true,
+        is_active: true,
+        version: "1.0.0",
+        preview_image_url: "/assets/templates/skill_summary_preview.png",
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        id: "RT002",
+        tenant_id: "TENANT001",
+        template_key: "goal_progress_report",
+        template_name: "目標進捗レポート",
+        report_category: "GOAL",
+        output_format: "EXCEL",
+        language_code: "ja",
+        template_content: "<workbook>
+      <worksheet name="目標進捗">
+          <row>
+              <cell>社員名</cell>
+              <cell>目標タイトル</cell>
+              <cell>進捗率</cell>
+              <cell>期限</cell>
+              <cell>状態</cell>
+          </row>
+          {{#goals}}
+          <row>
+              <cell>{{employee_name}}</cell>
+              <cell>{{goal_title}}</cell>
+              <cell>{{progress_rate}}%</cell>
+              <cell>{{deadline}}</cell>
+              <cell>{{status}}</cell>
+          </row>
+          {{/goals}}
+      </worksheet>
+  </workbook>
+  ",
+        style_sheet: null,
+        parameters_schema: "{"type": "object", "properties": {"department_id": {"type": "string"}, "period_start": {"type": "string", "format": "date"}, "period_end": {"type": "string", "format": "date"}}}",
+        data_source_config: "{"tables": ["MST_Employee", "TRN_Goal"], "joins": ["employee_goals"]}",
+        page_settings: "{"orientation": "landscape"}",
+        header_template: null,
+        footer_template: null,
+        is_default: true,
+        is_active: true,
+        version: "1.0.0",
+        preview_image_url: "/assets/templates/goal_progress_preview.png",
+        code: null,
+        name: null,
+        description: null,
+      },
     ],
   })
   
   // MST_Role_sample_data.sql
-  console.log('📊 MST_Roleデータを投入中...')
+  console.log('📊 MST_Role データを投入中…')
   await prisma.role.createMany({
     data: [
       {
@@ -1212,8 +1396,8 @@ export async function runSampleSeed() {
         role_category: "SYSTEM",
         role_level: 1,
         parent_role_id: null,
-        is_system_role: "TRUE",
-        is_tenant_specific: "FALSE",
+        is_system_role: true,
+        is_tenant_specific: false,
         max_users: 5,
         role_priority: 1,
         auto_assign_conditions: null,
@@ -1232,8 +1416,8 @@ export async function runSampleSeed() {
         role_category: "TENANT",
         role_level: 2,
         parent_role_id: null,
-        is_system_role: "TRUE",
-        is_tenant_specific: "TRUE",
+        is_system_role: true,
+        is_tenant_specific: true,
         max_users: 10,
         role_priority: 2,
         auto_assign_conditions: null,
@@ -1252,8 +1436,8 @@ export async function runSampleSeed() {
         role_category: "BUSINESS",
         role_level: 3,
         parent_role_id: null,
-        is_system_role: "TRUE",
-        is_tenant_specific: "FALSE",
+        is_system_role: true,
+        is_tenant_specific: false,
         max_users: null,
         role_priority: 10,
         auto_assign_conditions: "{"default": true}",
@@ -1268,8 +1452,159 @@ export async function runSampleSeed() {
     ],
   })
   
+  // MST_RolePermission_sample_data.sql
+  console.log('📊 MST_RolePermission データを投入中…')
+  await prisma.rolePermission.createMany({
+    data: [
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+      {
+        code: null,
+        name: null,
+        description: null,
+      },
+    ],
+  })
+  
+  // MST_Skill_sample_data.sql
+  console.log('📊 MST_Skill データを投入中…')
+  await prisma.skill.createMany({
+    data: [
+      {
+        id: "SKILL001",
+        skill_name: "React",
+        skill_name_en: "React",
+        category_id: "CAT_FRONTEND",
+        skill_type: "TECHNICAL",
+        difficulty_level: 3,
+        description: "Reactライブラリを使用したフロントエンド開発スキル。コンポーネント設計、状態管理、Hooksの理解が含まれます。",
+        evaluation_criteria: "{"level1":"基本的なコンポーネント作成","level2":"状態管理とイベント処理","level3":"Hooks活用とパフォーマンス最適化","level4":"複雑なアプリケーション設計","level5":"ライブラリ開発とベストプラクティス"}",
+        required_experience_months: 6,
+        related_skills: "["SKILL002", "SKILL003", "SKILL004"]",
+        prerequisite_skills: "["SKILL_JS001", "SKILL_HTML001"]",
+        certification_info: "{"name":"React Developer Certification","provider":"Meta","url":"https://developers.facebook.com/certification/"}",
+        learning_resources: "["https://reactjs.org/docs/","https://react.dev/learn","https://egghead.io/courses/react"]",
+        market_demand: "HIGH",
+        technology_trend: "GROWING",
+        is_core_skill: true,
+        display_order: 1,
+        is_active: true,
+        effective_from: "2024-01-01",
+        effective_to: null,
+        code: null,
+        name: null,
+      },
+      {
+        id: "SKILL002",
+        skill_name: "TypeScript",
+        skill_name_en: "TypeScript",
+        category_id: "CAT_FRONTEND",
+        skill_type: "TECHNICAL",
+        difficulty_level: 3,
+        description: "TypeScriptを使用した型安全なJavaScript開発スキル。型定義、ジェネリクス、高度な型操作が含まれます。",
+        evaluation_criteria: "{"level1":"基本的な型定義","level2":"インターフェースとクラス","level3":"ジェネリクスと高度な型","level4":"型レベルプログラミング","level5":"ライブラリ型定義作成"}",
+        required_experience_months: 4,
+        related_skills: "["SKILL001", "SKILL003"]",
+        prerequisite_skills: "["SKILL_JS001"]",
+        certification_info: null,
+        learning_resources: "["https://www.typescriptlang.org/docs/","https://typescript-jp.gitbook.io/deep-dive/"]",
+        market_demand: "VERY_HIGH",
+        technology_trend: "GROWING",
+        is_core_skill: true,
+        display_order: 2,
+        is_active: true,
+        effective_from: "2024-01-01",
+        effective_to: null,
+        code: null,
+        name: null,
+      },
+      {
+        id: "SKILL003",
+        skill_name: "Node.js",
+        skill_name_en: "Node.js",
+        category_id: "CAT_BACKEND",
+        skill_type: "TECHNICAL",
+        difficulty_level: 3,
+        description: "Node.jsを使用したサーバーサイド開発スキル。非同期処理、API開発、パフォーマンス最適化が含まれます。",
+        evaluation_criteria: "{"level1":"基本的なサーバー構築","level2":"Express.jsでのAPI開発","level3":"非同期処理とストリーム","level4":"パフォーマンス最適化","level5":"スケーラブルアーキテクチャ設計"}",
+        required_experience_months: 8,
+        related_skills: "["SKILL001", "SKILL002", "SKILL004"]",
+        prerequisite_skills: "["SKILL_JS001"]",
+        certification_info: null,
+        learning_resources: "["https://nodejs.org/en/docs/","https://expressjs.com/","https://nodeschool.io/"]",
+        market_demand: "HIGH",
+        technology_trend: "STABLE",
+        is_core_skill: true,
+        display_order: 1,
+        is_active: true,
+        effective_from: "2024-01-01",
+        effective_to: null,
+        code: null,
+        name: null,
+      },
+    ],
+  })
+  
   // MST_SkillCategory_sample_data.sql
-  console.log('📊 MST_SkillCategoryデータを投入中...')
+  console.log('📊 MST_SkillCategory データを投入中…')
   await prisma.skillCategory.createMany({
     data: [
       {
@@ -1281,15 +1616,15 @@ export async function runSampleSeed() {
         parent_category_id: null,
         category_level: 1,
         category_path: "/プログラミング言語",
-        is_system_category: "TRUE",
-        is_leaf_category: "FALSE",
+        is_system_category: true,
+        is_leaf_category: false,
         skill_count: 25,
         evaluation_method: "LEVEL",
         max_level: 5,
         icon_url: "/icons/programming.svg",
         color_code: "#007ACC",
         display_order: 1,
-        is_popular: "TRUE",
+        is_popular: true,
         category_status: "ACTIVE",
         effective_from: "2025-01-01",
         effective_to: null,
@@ -1306,15 +1641,15 @@ export async function runSampleSeed() {
         parent_category_id: "CAT001",
         category_level: 2,
         category_path: "/プログラミング言語/Java",
-        is_system_category: "TRUE",
-        is_leaf_category: "TRUE",
+        is_system_category: true,
+        is_leaf_category: true,
         skill_count: 8,
         evaluation_method: "LEVEL",
         max_level: 5,
         icon_url: "/icons/java.svg",
         color_code: "#ED8B00",
         display_order: 1,
-        is_popular: "TRUE",
+        is_popular: true,
         category_status: "ACTIVE",
         effective_from: "2025-01-01",
         effective_to: null,
@@ -1331,15 +1666,15 @@ export async function runSampleSeed() {
         parent_category_id: null,
         category_level: 1,
         category_path: "/コミュニケーション",
-        is_system_category: "TRUE",
-        is_leaf_category: "TRUE",
+        is_system_category: true,
+        is_leaf_category: true,
         skill_count: 12,
         evaluation_method: "LEVEL",
         max_level: 4,
         icon_url: "/icons/communication.svg",
         color_code: "#28A745",
         display_order: 10,
-        is_popular: "TRUE",
+        is_popular: true,
         category_status: "ACTIVE",
         effective_from: "2025-01-01",
         effective_to: null,
@@ -1351,7 +1686,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillGrade_sample_data.sql
-  console.log('📊 MST_SkillGradeデータを投入中...')
+  console.log('📊 MST_SkillGrade データを投入中…')
   await prisma.skillGrade.createMany({
     data: [
       {
@@ -1366,13 +1701,13 @@ export async function runSampleSeed() {
         competency_requirements: "["基礎理論の理解", "基本操作の習得"]",
         certification_requirements: "[]",
         project_complexity: "SIMPLE",
-        mentoring_capability: "FALSE",
+        mentoring_capability: false,
         leadership_level: "NONE",
         salary_impact_factor: 1.0,
-        promotion_eligibility: "FALSE",
+        promotion_eligibility: false,
         color_code: "#90EE90",
         sort_order: 1,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1388,13 +1723,13 @@ export async function runSampleSeed() {
         competency_requirements: "["実践的スキル", "問題分析能力", "コミュニケーション能力"]",
         certification_requirements: "["基本情報技術者"]",
         project_complexity: "MODERATE",
-        mentoring_capability: "TRUE",
+        mentoring_capability: true,
         leadership_level: "TEAM",
         salary_impact_factor: 1.2,
-        promotion_eligibility: "TRUE",
+        promotion_eligibility: true,
         color_code: "#FFD700",
         sort_order: 2,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1410,13 +1745,13 @@ export async function runSampleSeed() {
         competency_requirements: "["専門技術", "チーム管理", "技術戦略立案"]",
         certification_requirements: "["応用情報技術者", "専門資格"]",
         project_complexity: "COMPLEX",
-        mentoring_capability: "TRUE",
+        mentoring_capability: true,
         leadership_level: "PROJECT",
         salary_impact_factor: 1.5,
-        promotion_eligibility: "TRUE",
+        promotion_eligibility: true,
         color_code: "#FF8C00",
         sort_order: 3,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1432,13 +1767,13 @@ export async function runSampleSeed() {
         competency_requirements: "["業界知識", "組織運営", "技術革新"]",
         certification_requirements: "["高度情報技術者", "業界認定資格"]",
         project_complexity: "CRITICAL",
-        mentoring_capability: "TRUE",
+        mentoring_capability: true,
         leadership_level: "ORGANIZATION",
         salary_impact_factor: 2.0,
-        promotion_eligibility: "TRUE",
+        promotion_eligibility: true,
         color_code: "#DC143C",
         sort_order: 4,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1446,7 +1781,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillGradeRequirement_sample_data.sql
-  console.log('📊 MST_SkillGradeRequirementデータを投入中...')
+  console.log('📊 MST_SkillGradeRequirement データを投入中…')
   await prisma.skillGradeRequirement.createMany({
     data: [
       {
@@ -1525,7 +1860,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillHierarchy_sample_data.sql
-  console.log('📊 MST_SkillHierarchyデータを投入中...')
+  console.log('📊 MST_SkillHierarchy データを投入中…')
   await prisma.skillHierarchy.createMany({
     data: [
       {
@@ -1534,10 +1869,10 @@ export async function runSampleSeed() {
         hierarchy_level: 1,
         skill_path: "/技術スキル",
         sort_order: 1,
-        is_leaf: "FALSE",
+        is_leaf: false,
         skill_category: "TECHNICAL",
         description: "技術系スキルの大分類",
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1547,10 +1882,10 @@ export async function runSampleSeed() {
         hierarchy_level: 2,
         skill_path: "/技術スキル/プログラミング",
         sort_order: 1,
-        is_leaf: "FALSE",
+        is_leaf: false,
         skill_category: "TECHNICAL",
         description: "プログラミング言語・技術",
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1560,10 +1895,10 @@ export async function runSampleSeed() {
         hierarchy_level: 3,
         skill_path: "/技術スキル/プログラミング/Java",
         sort_order: 1,
-        is_leaf: "TRUE",
+        is_leaf: true,
         skill_category: "TECHNICAL",
         description: "Java言語でのプログラミングスキル",
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1571,7 +1906,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SkillItem_sample_data.sql
-  console.log('📊 MST_SkillItemデータを投入中...')
+  console.log('📊 MST_SkillItem データを投入中…')
   await prisma.skillItem.createMany({
     data: [
       {
@@ -1589,7 +1924,7 @@ export async function runSampleSeed() {
   })
   
   // MST_SystemConfig_sample_data.sql
-  console.log('📊 MST_SystemConfigデータを投入中...')
+  console.log('📊 MST_SystemConfig データを投入中…')
   await prisma.systemConfig.createMany({
     data: [
       {
@@ -1601,16 +1936,16 @@ export async function runSampleSeed() {
         default_value: 3,
         validation_rule: "^[1-9][0-9]*$",
         description: "アカウントロックまでの最大ログイン失敗回数",
-        is_encrypted: "FALSE",
-        is_system_only: "FALSE",
-        is_user_configurable: "TRUE",
-        requires_restart: "FALSE",
+        is_encrypted: false,
+        is_system_only: false,
+        is_user_configurable: true,
+        requires_restart: false,
         environment: "ALL",
-        tenant_specific: "TRUE",
+        tenant_specific: true,
         last_modified_by: "admin",
         last_modified_reason: "セキュリティ強化のため",
         sort_order: 1,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1623,16 +1958,16 @@ export async function runSampleSeed() {
         default_value: 60,
         validation_rule: "^[1-9][0-9]*$",
         description: "ユーザーセッションの自動タイムアウト時間",
-        is_encrypted: "FALSE",
-        is_system_only: "FALSE",
-        is_user_configurable: "TRUE",
-        requires_restart: "FALSE",
+        is_encrypted: false,
+        is_system_only: false,
+        is_user_configurable: true,
+        requires_restart: false,
         environment: "ALL",
-        tenant_specific: "TRUE",
+        tenant_specific: true,
         last_modified_by: "admin",
         last_modified_reason: "セキュリティポリシー変更",
         sort_order: 2,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1645,16 +1980,16 @@ export async function runSampleSeed() {
         default_value: 12,
         validation_rule: "^[1-9][0-9]*$",
         description: "スキル評価の実施間隔",
-        is_encrypted: "FALSE",
-        is_system_only: "FALSE",
-        is_user_configurable: "TRUE",
-        requires_restart: "FALSE",
+        is_encrypted: false,
+        is_system_only: false,
+        is_user_configurable: true,
+        requires_restart: false,
         environment: "ALL",
-        tenant_specific: "TRUE",
+        tenant_specific: true,
         last_modified_by: "hr_admin",
         last_modified_reason: "評価頻度の見直し",
         sort_order: 10,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1667,16 +2002,16 @@ export async function runSampleSeed() {
         default_value: null,
         validation_rule: null,
         description: "メール送信用SMTP認証パスワード",
-        is_encrypted: "TRUE",
-        is_system_only: "TRUE",
-        is_user_configurable: "FALSE",
-        requires_restart: "TRUE",
+        is_encrypted: true,
+        is_system_only: true,
+        is_user_configurable: false,
+        requires_restart: true,
         environment: "PROD",
-        tenant_specific: "FALSE",
+        tenant_specific: false,
         last_modified_by: "system",
         last_modified_reason: "初期設定",
         sort_order: 100,
-        is_active: "TRUE",
+        is_active: true,
         code: null,
         name: null,
       },
@@ -1684,7 +2019,7 @@ export async function runSampleSeed() {
   })
   
   // MST_Tenant_sample_data.sql
-  console.log('📊 MST_Tenantデータを投入中...')
+  console.log('📊 MST_Tenant データを投入中…')
   await prisma.tenant.createMany({
     data: [
       {
@@ -1719,7 +2054,7 @@ export async function runSampleSeed() {
         custom_settings: "{"theme": "corporate", "dashboard_layout": "advanced", "notification_preferences": {"email": true, "slack": true}}",
         security_policy: "{"password_policy": {"min_length": 8, "require_special_chars": true}, "session_timeout": 480, "ip_whitelist": ["192.168.1.0/24"]}",
         data_retention_days: 2555,
-        backup_enabled: "TRUE",
+        backup_enabled: true,
         backup_frequency: "DAILY",
         contract_start_date: "2024-01-01",
         contract_end_date: "2024-12-31",
@@ -1735,7 +2070,7 @@ export async function runSampleSeed() {
         current_users_count: 250,
         storage_used_gb: 125.5,
         api_rate_limit: 10000,
-        sso_enabled: "TRUE",
+        sso_enabled: true,
         sso_provider: "SAML",
         sso_config: "{"entity_id": "acme-corp", "sso_url": "https://sso.acme-corp.com/saml", "certificate": "..."}",
         webhook_url: "https://api.acme-corp.com/webhooks/skill-system",
@@ -1778,7 +2113,7 @@ export async function runSampleSeed() {
         custom_settings: "{"theme": "modern", "dashboard_layout": "standard"}",
         security_policy: "{"password_policy": {"min_length": 6, "require_special_chars": false}, "session_timeout": 240}",
         data_retention_days: 1825,
-        backup_enabled: "TRUE",
+        backup_enabled: true,
         backup_frequency: "WEEKLY",
         contract_start_date: "2024-03-01",
         contract_end_date: "2025-02-28",
@@ -1794,7 +2129,7 @@ export async function runSampleSeed() {
         current_users_count: 85,
         storage_used_gb: 23.75,
         api_rate_limit: 2000,
-        sso_enabled: "FALSE",
+        sso_enabled: false,
         sso_provider: null,
         sso_config: null,
         webhook_url: null,
@@ -1809,7 +2144,7 @@ export async function runSampleSeed() {
   })
   
   // MST_TenantSettings_sample_data.sql
-  console.log('📊 MST_TenantSettingsデータを投入中...')
+  console.log('📊 MST_TenantSettings データを投入中…')
   await prisma.tenantSettings.createMany({
     data: [
       {
@@ -1823,10 +2158,10 @@ export async function runSampleSeed() {
         setting_value: 100,
         default_value: 50,
         validation_rules: "{"min": 1, "max": 1000}",
-        is_required: "TRUE",
-        is_encrypted: "FALSE",
-        is_system_managed: "FALSE",
-        is_user_configurable: "FALSE",
+        is_required: true,
+        is_encrypted: false,
+        is_system_managed: false,
+        is_user_configurable: false,
         display_order: 1,
         effective_from: "2025-01-01 00:00:00",
         effective_until: null,
@@ -1846,10 +2181,10 @@ export async function runSampleSeed() {
         setting_value: "#2563eb",
         default_value: "#3b82f6",
         validation_rules: "{"pattern": "^#[0-9a-fA-F]{6}$"}",
-        is_required: "FALSE",
-        is_encrypted: "FALSE",
-        is_system_managed: "FALSE",
-        is_user_configurable: "TRUE",
+        is_required: false,
+        is_encrypted: false,
+        is_system_managed: false,
+        is_user_configurable: true,
         display_order: 1,
         effective_from: null,
         effective_until: null,
@@ -1869,10 +2204,10 @@ export async function runSampleSeed() {
         setting_value: "true",
         default_value: "false",
         validation_rules: null,
-        is_required: "TRUE",
-        is_encrypted: "FALSE",
-        is_system_managed: "FALSE",
-        is_user_configurable: "TRUE",
+        is_required: true,
+        is_encrypted: false,
+        is_system_managed: false,
+        is_user_configurable: true,
         display_order: 1,
         effective_from: null,
         effective_until: null,
@@ -1892,10 +2227,10 @@ export async function runSampleSeed() {
         setting_value: "{"min_length": 8, "require_uppercase": true, "require_lowercase": true, "require_numbers": true, "require_symbols": false}",
         default_value: "{"min_length": 6, "require_uppercase": false, "require_lowercase": false, "require_numbers": false, "require_symbols": false}",
         validation_rules: "{"type": "object", "properties": {"min_length": {"type": "integer", "minimum": 4, "maximum": 128}}}",
-        is_required: "TRUE",
-        is_encrypted: "FALSE",
-        is_system_managed: "FALSE",
-        is_user_configurable: "TRUE",
+        is_required: true,
+        is_encrypted: false,
+        is_system_managed: false,
+        is_user_configurable: true,
         display_order: 1,
         effective_from: null,
         effective_until: null,
@@ -1908,7 +2243,7 @@ export async function runSampleSeed() {
   })
   
   // MST_TrainingProgram_sample_data.sql
-  console.log('📊 MST_TrainingProgramデータを投入中...')
+  console.log('📊 MST_TrainingProgram データを投入中…')
   await prisma.trainingProgram.createMany({
     data: [
       {
@@ -1934,7 +2269,7 @@ export async function runSampleSeed() {
         instructor_requirements: "PMP資格保有、実務経験5年以上",
         assessment_method: "COMPREHENSIVE",
         passing_score: 70.0,
-        certification_provided: "TRUE",
+        certification_provided: true,
         pdu_credits: 16.0,
         related_skills: "["プロジェクト管理", "リーダーシップ", "コミュニケーション"]",
         related_certifications: "["PMP", "プロジェクトマネージャ試験"]",
@@ -1945,8 +2280,8 @@ export async function runSampleSeed() {
         venue_requirements: "20名収容可能な研修室、プロジェクター設備",
         language: "JA",
         repeat_interval: 24,
-        mandatory_flag: "FALSE",
-        active_flag: "TRUE",
+        mandatory_flag: false,
+        active_flag: true,
         effective_start_date: "2024-01-01",
         effective_end_date: null,
         created_by: "EMP000010",
@@ -1982,7 +2317,7 @@ export async function runSampleSeed() {
         instructor_requirements: "AWS認定資格保有、実務経験3年以上",
         assessment_method: "TEST",
         passing_score: 80.0,
-        certification_provided: "TRUE",
+        certification_provided: true,
         pdu_credits: 24.0,
         related_skills: "["AWS", "クラウドアーキテクチャ", "インフラ設計"]",
         related_certifications: "["AWS認定ソリューションアーキテクト"]",
@@ -1993,8 +2328,8 @@ export async function runSampleSeed() {
         venue_requirements: "PC環境、AWS環境アクセス可能",
         language: "JA",
         repeat_interval: 12,
-        mandatory_flag: "FALSE",
-        active_flag: "TRUE",
+        mandatory_flag: false,
+        active_flag: true,
         effective_start_date: "2024-02-01",
         effective_end_date: null,
         created_by: "EMP000015",
@@ -2011,7 +2346,7 @@ export async function runSampleSeed() {
   })
   
   // MST_UserAuth_sample_data.sql
-  console.log('📊 MST_UserAuthデータを投入中...')
+  console.log('📊 MST_UserAuth データを投入中…')
   await prisma.userAuth.createMany({
     data: [
       {
@@ -2027,7 +2362,7 @@ export async function runSampleSeed() {
         last_failed_login_at: null,
         password_changed_at: "2025-01-01 00:00:00",
         password_expires_at: "2025-12-31 23:59:59",
-        mfa_enabled: "TRUE",
+        mfa_enabled: true,
         mfa_secret: "JBSWY3DPEHPK3PXP",
         recovery_token: null,
         recovery_token_expires_at: null,
@@ -2051,7 +2386,7 @@ export async function runSampleSeed() {
         last_failed_login_at: null,
         password_changed_at: "2025-02-01 00:00:00",
         password_expires_at: "2026-01-31 23:59:59",
-        mfa_enabled: "FALSE",
+        mfa_enabled: false,
         mfa_secret: null,
         recovery_token: null,
         recovery_token_expires_at: null,
@@ -2066,7 +2401,7 @@ export async function runSampleSeed() {
   })
   
   // MST_UserRole_sample_data.sql
-  console.log('📊 MST_UserRoleデータを投入中...')
+  console.log('📊 MST_UserRole データを投入中…')
   await prisma.userRole.createMany({
     data: [
       {
@@ -2077,13 +2412,13 @@ export async function runSampleSeed() {
         assignment_reason: "新規ユーザー登録時の標準ロール割り当て",
         effective_from: "2025-01-01 00:00:00",
         effective_to: null,
-        is_primary_role: "TRUE",
+        is_primary_role: true,
         priority_order: 1,
         conditions: null,
         delegation_source_user_id: null,
         delegation_expires_at: null,
-        auto_assigned: "TRUE",
-        requires_approval: "FALSE",
+        auto_assigned: true,
+        requires_approval: false,
         approval_status: null,
         approved_by: null,
         approved_at: null,
@@ -2102,13 +2437,13 @@ export async function runSampleSeed() {
         assignment_reason: "テナント管理者権限付与",
         effective_from: "2025-02-01 00:00:00",
         effective_to: null,
-        is_primary_role: "TRUE",
+        is_primary_role: true,
         priority_order: 1,
         conditions: "{"tenant_id": "TENANT001"}",
         delegation_source_user_id: null,
         delegation_expires_at: null,
-        auto_assigned: "FALSE",
-        requires_approval: "TRUE",
+        auto_assigned: false,
+        requires_approval: true,
         approval_status: "APPROVED",
         approved_by: "USER000001",
         approved_at: "2025-01-31 15:30:00",
@@ -2123,7 +2458,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_BackupHistory_sample_data.sql
-  console.log('📊 SYS_BackupHistoryデータを投入中...')
+  console.log('📊 SYS_BackupHistory データを投入中…')
   await prisma.backupHistory.createMany({
     data: [
       {
@@ -2137,14 +2472,14 @@ export async function runSampleSeed() {
         backup_file_path: "/backup/full/skill_report_20240101_020000.sql.gz",
         backup_file_size: 1073741824,
         compression_type: "GZIP",
-        encryption_enabled: "TRUE",
+        encryption_enabled: true,
         checksum: "a1b2c3d4e5f6789012345678901234567890abcd",
         retention_period_days: 90,
         expiry_date: "2024-04-01",
         backup_trigger: "SCHEDULED",
         executed_by: "system_backup_job",
         error_message: null,
-        recovery_tested: "TRUE",
+        recovery_tested: true,
         recovery_test_date: "2024-01-15",
         id: null,
         is_deleted: null,
@@ -2160,14 +2495,14 @@ export async function runSampleSeed() {
         backup_file_path: "/backup/incremental/skill_report_20240101_140000.sql.gz",
         backup_file_size: 52428800,
         compression_type: "GZIP",
-        encryption_enabled: "TRUE",
+        encryption_enabled: true,
         checksum: "b2c3d4e5f6789012345678901234567890abcde1",
         retention_period_days: 30,
         expiry_date: "2024-01-31",
         backup_trigger: "SCHEDULED",
         executed_by: "system_backup_job",
         error_message: null,
-        recovery_tested: "FALSE",
+        recovery_tested: false,
         recovery_test_date: null,
         id: null,
         is_deleted: null,
@@ -2176,7 +2511,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_IntegrationConfig_sample_data.sql
-  console.log('📊 SYS_IntegrationConfigデータを投入中...')
+  console.log('📊 SYS_IntegrationConfig データを投入中…')
   await prisma.integrationConfig.createMany({
     data: [
       {
@@ -2194,7 +2529,7 @@ export async function runSampleSeed() {
         retry_count: 3,
         retry_interval: 5,
         rate_limit_per_minute: 60,
-        is_enabled: "TRUE",
+        is_enabled: true,
         health_check_url: null,
         last_health_check: null,
         health_status: "UNKNOWN",
@@ -2215,7 +2550,7 @@ export async function runSampleSeed() {
         retry_count: 3,
         retry_interval: 5,
         rate_limit_per_minute: 30,
-        is_enabled: "TRUE",
+        is_enabled: true,
         health_check_url: null,
         last_health_check: null,
         health_status: "UNKNOWN",
@@ -2236,7 +2571,7 @@ export async function runSampleSeed() {
         retry_count: 2,
         retry_interval: 10,
         rate_limit_per_minute: 100,
-        is_enabled: "TRUE",
+        is_enabled: true,
         health_check_url: null,
         last_health_check: "2025-06-01 19:00:00",
         health_status: "HEALTHY",
@@ -2246,7 +2581,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_MasterData_sample_data.sql
-  console.log('📊 SYS_MasterDataデータを投入中...')
+  console.log('📊 SYS_MasterData データを投入中…')
   await prisma.masterData.createMany({
     data: [
       {
@@ -2257,8 +2592,8 @@ export async function runSampleSeed() {
         data_type: "INTEGER",
         default_value: 3,
         validation_rule: "^[1-9][0-9]*$",
-        is_system_managed: "TRUE",
-        is_editable: "TRUE",
+        is_system_managed: true,
+        is_editable: true,
         display_order: 1,
         description: "ログイン失敗時の最大試行回数。この回数を超えるとアカウントがロックされます。",
         effective_from: "2024-01-01",
@@ -2277,8 +2612,8 @@ export async function runSampleSeed() {
         data_type: "INTEGER",
         default_value: 30,
         validation_rule: "^[1-9][0-9]*$",
-        is_system_managed: "TRUE",
-        is_editable: "TRUE",
+        is_system_managed: true,
+        is_editable: true,
         display_order: 2,
         description: "ユーザーセッションの有効時間（分）。この時間を過ぎると自動的にログアウトされます。",
         effective_from: "2024-01-01",
@@ -2297,8 +2632,8 @@ export async function runSampleSeed() {
         data_type: "JSON",
         default_value: "{"1":"初級","2":"中級","3":"上級","4":"エキスパート","5":"マスター"}",
         validation_rule: null,
-        is_system_managed: "FALSE",
-        is_editable: "TRUE",
+        is_system_managed: false,
+        is_editable: true,
         display_order: 1,
         description: "スキル評価で使用するレベル定義。1-5の数値とその意味を定義します。",
         effective_from: "2024-01-01",
@@ -2317,8 +2652,8 @@ export async function runSampleSeed() {
         data_type: "INTEGER",
         default_value: 30,
         validation_rule: "^[1-9][0-9]*$",
-        is_system_managed: "TRUE",
-        is_editable: "TRUE",
+        is_system_managed: true,
+        is_editable: true,
         display_order: 1,
         description: "フルバックアップファイルの保持期間（日数）。この期間を過ぎたバックアップは自動削除されます。",
         effective_from: "2024-01-01",
@@ -2333,7 +2668,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_SkillIndex_sample_data.sql
-  console.log('📊 SYS_SkillIndexデータを投入中...')
+  console.log('📊 SYS_SkillIndex データを投入中…')
   await prisma.skillIndex.createMany({
     data: [
       {
@@ -2348,7 +2683,7 @@ export async function runSampleSeed() {
         position_weight: 1.0,
         language_code: "ja",
         source_field: "NAME",
-        is_active: "TRUE",
+        is_active: true,
         search_count: 150,
         last_searched_at: "2025-06-01 18:30:00",
         index_updated_at: "2025-06-01 10:00:00",
@@ -2366,7 +2701,7 @@ export async function runSampleSeed() {
         position_weight: 0.9,
         language_code: "ja",
         source_field: "DESCRIPTION",
-        is_active: "TRUE",
+        is_active: true,
         search_count: 85,
         last_searched_at: "2025-06-01 17:45:00",
         index_updated_at: "2025-06-01 10:00:00",
@@ -2384,7 +2719,7 @@ export async function runSampleSeed() {
         position_weight: 1.0,
         language_code: "ja",
         source_field: "KEYWORD",
-        is_active: "TRUE",
+        is_active: true,
         search_count: 25,
         last_searched_at: "2025-06-01 16:20:00",
         index_updated_at: "2025-06-01 10:00:00",
@@ -2394,7 +2729,7 @@ export async function runSampleSeed() {
   })
   
   // SYS_SkillMatrix_sample_data.sql
-  console.log('📊 SYS_SkillMatrixデータを投入中...')
+  console.log('📊 SYS_SkillMatrix データを投入中…')
   await prisma.skillMatrix.createMany({
     data: [
       {
@@ -2431,14 +2766,60 @@ export async function runSampleSeed() {
   })
   
   // SYS_SystemLog_sample_data.sql
-  console.log('📊 SYS_SystemLogデータを投入中...')
+  console.log('📊 SYS_SystemLog データを投入中…')
   await prisma.systemLog.createMany({
     data: [
+      {
+        log_level: "INFO",
+        log_category: "AUTH",
+        message: "ユーザーログイン成功",
+        user_id: "user001",
+        session_id: "sess_abc123",
+        ip_address: "192.168.1.100",
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        request_url: "/api/auth/login",
+        request_method: "POST",
+        response_status: 200,
+        response_time: 150,
+        error_code: null,
+        stack_trace: null,
+        request_body: null,
+        response_body: null,
+        correlation_id: "corr_xyz789",
+        component_name: "AuthService",
+        thread_name: "http-nio-8080-exec-1",
+        server_name: "app-server-01",
+        id: null,
+        is_deleted: null,
+      },
+      {
+        log_level: "ERROR",
+        log_category: "API",
+        message: "データベース接続エラー",
+        user_id: "user002",
+        session_id: "sess_def456",
+        ip_address: "192.168.1.101",
+        user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        request_url: "/api/employees",
+        request_method: "GET",
+        response_status: 500,
+        response_time: 5000,
+        error_code: "DB_CONNECTION_ERROR",
+        stack_trace: "java.sql.SQLException: Connection timeout...",
+        request_body: null,
+        response_body: null,
+        correlation_id: "corr_abc456",
+        component_name: "EmployeeService",
+        thread_name: "http-nio-8080-exec-2",
+        server_name: "app-server-02",
+        id: null,
+        is_deleted: null,
+      },
     ],
   })
   
   // SYS_TenantUsage_sample_data.sql
-  console.log('📊 SYS_TenantUsageデータを投入中...')
+  console.log('📊 SYS_TenantUsage データを投入中…')
   await prisma.tenantUsage.createMany({
     data: [
       {
@@ -2495,14 +2876,52 @@ export async function runSampleSeed() {
   })
   
   // SYS_TokenStore_sample_data.sql
-  console.log('📊 SYS_TokenStoreデータを投入中...')
+  console.log('📊 SYS_TokenStore データを投入中…')
   await prisma.tokenStore.createMany({
     data: [
+      {
+        id: "TS001",
+        tenant_id: "TENANT001",
+        user_id: "USER001",
+        token_type: "ACCESS",
+        token_value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        token_hash: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+        expires_at: "2025-06-01 20:00:00",
+        issued_at: "2025-06-01 19:00:00",
+        last_used_at: "2025-06-01 19:30:00",
+        client_ip: "192.168.1.100",
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        device_fingerprint: "fp_abc123def456",
+        scope: "["read:profile", "write:skills", "read:goals"]",
+        is_revoked: false,
+        revoked_at: null,
+        revoked_reason: null,
+        is_deleted: null,
+      },
+      {
+        id: "TS002",
+        tenant_id: "TENANT001",
+        user_id: "USER001",
+        token_type: "REFRESH",
+        token_value: "rt_xyz789abc123def456ghi789jkl012mno345",
+        token_hash: "b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1",
+        expires_at: "2025-06-08 19:00:00",
+        issued_at: "2025-06-01 19:00:00",
+        last_used_at: null,
+        client_ip: "192.168.1.100",
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        device_fingerprint: "fp_abc123def456",
+        scope: "["refresh"]",
+        is_revoked: false,
+        revoked_at: null,
+        revoked_reason: null,
+        is_deleted: null,
+      },
     ],
   })
   
   // TRN_EmployeeSkillGrade_sample_data.sql
-  console.log('📊 TRN_EmployeeSkillGradeデータを投入中...')
+  console.log('📊 TRN_EmployeeSkillGrade データを投入中…')
   await prisma.employeeSkillGrade.createMany({
     data: [
       {
@@ -2515,7 +2934,7 @@ export async function runSampleSeed() {
         evaluation_date: "2024-03-15",
         evaluator_id: "EMP000010",
         evaluation_comment: "優秀な技術力と指導力を発揮している",
-        certification_flag: "TRUE",
+        certification_flag: true,
         next_evaluation_date: "2025-04-01",
         id: null,
         is_deleted: null,
@@ -2535,7 +2954,7 @@ export async function runSampleSeed() {
         evaluation_date: "2024-03-20",
         evaluator_id: "EMP000001",
         evaluation_comment: "着実にスキルアップしており、次のレベルが期待される",
-        certification_flag: "TRUE",
+        certification_flag: true,
         next_evaluation_date: "2025-04-01",
         id: null,
         is_deleted: null,
@@ -2555,7 +2974,7 @@ export async function runSampleSeed() {
         evaluation_date: "2023-03-15",
         evaluator_id: "EMP000010",
         evaluation_comment: "前年度からの成長が顕著",
-        certification_flag: "TRUE",
+        certification_flag: true,
         next_evaluation_date: "2024-04-01",
         id: null,
         is_deleted: null,
@@ -2569,7 +2988,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_GoalProgress_sample_data.sql
-  console.log('📊 TRN_GoalProgressデータを投入中...')
+  console.log('📊 TRN_GoalProgress データを投入中…')
   await prisma.goalProgress.createMany({
     data: [
       {
@@ -2693,14 +3112,100 @@ export async function runSampleSeed() {
   })
   
   // TRN_Notification_sample_data.sql
-  console.log('📊 TRN_Notificationデータを投入中...')
+  console.log('📊 TRN_Notification データを投入中…')
   await prisma.notification.createMany({
     data: [
+      {
+        notification_id: "NOTIF_001",
+        recipient_id: "EMP000001",
+        sender_id: null,
+        notification_type: "REMINDER",
+        notification_category: "CERTIFICATION",
+        priority_level: "HIGH",
+        title: "AWS認定資格の更新期限が近づいています",
+        message: "お持ちのAWS認定ソリューションアーキテクト資格の有効期限が30日後に迫っています。更新手続きをお忘れなく。",
+        message_format: "PLAIN",
+        action_url: "/certifications/renewal/CERT_AWS_001",
+        action_label: "更新手続きへ",
+        delivery_method: "EMAIL",
+        delivery_status: "DELIVERED",
+        sent_at: "2024-05-01 09:00:00",
+        delivered_at: "2024-05-01 09:01:23",
+        read_status: "READ",
+        read_at: "2024-05-01 10:30:45",
+        archived_at: null,
+        expiry_date: "2024-06-01",
+        retry_count: 0,
+        max_retry_count: 3,
+        last_retry_at: null,
+        error_message: null,
+        external_message_id: "email_12345",
+        template_id: "TMPL_CERT_RENEWAL",
+        template_variables: "{"certification_name": "AWS認定ソリューションアーキテクト", "days_until_expiry": 30}",
+        related_entity_type: "CERTIFICATION",
+        related_entity_id: "CERT_AWS_001",
+        batch_id: null,
+        user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        ip_address: "192.168.1.100",
+        device_type: "PC",
+        is_bulk_notification: false,
+        personalization_data: "{"preferred_language": "ja", "timezone": "Asia/Tokyo"}",
+        id: null,
+        is_deleted: null,
+        tenant_id: null,
+        created_at: null,
+        updated_at: null,
+        created_by: null,
+        updated_by: null,
+      },
+      {
+        notification_id: "NOTIF_002",
+        recipient_id: "EMP000002",
+        sender_id: "EMP000010",
+        notification_type: "APPROVAL",
+        notification_category: "TRAINING",
+        priority_level: "NORMAL",
+        title: "研修参加申請が承認されました",
+        message: "申請いただいた「プロジェクトマネジメント基礎研修」への参加が承認されました。研修日程をご確認ください。",
+        message_format: "HTML",
+        action_url: "/training/details/TRN_PROG_001",
+        action_label: "研修詳細を確認",
+        delivery_method: "IN_APP",
+        delivery_status: "DELIVERED",
+        sent_at: "2024-04-15 14:30:00",
+        delivered_at: "2024-04-15 14:30:01",
+        read_status: "READ",
+        read_at: "2024-04-15 15:45:20",
+        archived_at: "2024-04-20 10:00:00",
+        expiry_date: null,
+        retry_count: 0,
+        max_retry_count: 3,
+        last_retry_at: null,
+        error_message: null,
+        external_message_id: null,
+        template_id: "TMPL_TRAINING_APPROVAL",
+        template_variables: "{"training_name": "プロジェクトマネジメント基礎研修", "approver_name": "田中部長"}",
+        related_entity_type: "TRAINING",
+        related_entity_id: "TRN_PROG_001",
+        batch_id: null,
+        user_agent: "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)",
+        ip_address: "192.168.1.101",
+        device_type: "MOBILE",
+        is_bulk_notification: false,
+        personalization_data: "{"preferred_language": "ja", "notification_sound": true}",
+        id: null,
+        is_deleted: null,
+        tenant_id: null,
+        created_at: null,
+        updated_at: null,
+        created_by: null,
+        updated_by: null,
+      },
     ],
   })
   
   // TRN_PDU_sample_data.sql
-  console.log('📊 TRN_PDUデータを投入中...')
+  console.log('📊 TRN_PDU データを投入中…')
   await prisma.pDU.createMany({
     data: [
       {
@@ -2733,7 +3238,7 @@ export async function runSampleSeed() {
         approval_date: "2024-03-20",
         approval_comment: "PMP資格維持に適切なPDU活動として承認",
         expiry_date: "2027-03-15",
-        is_recurring: "FALSE",
+        is_recurring: false,
         recurrence_pattern: null,
         related_training_id: "TRN_HIS_003",
         related_project_id: null,
@@ -2775,7 +3280,7 @@ export async function runSampleSeed() {
         approval_date: "2024-12-05",
         approval_comment: "AWS認定維持に有効なPDU活動として承認",
         expiry_date: "2027-11-28",
-        is_recurring: "FALSE",
+        is_recurring: false,
         recurrence_pattern: null,
         related_training_id: null,
         related_project_id: "PRJ_REC_002",
@@ -2791,7 +3296,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_ProjectRecord_sample_data.sql
-  console.log('📊 TRN_ProjectRecordデータを投入中...')
+  console.log('📊 TRN_ProjectRecord データを投入中…')
   await prisma.projectRecord.createMany({
     data: [
       {
@@ -2817,8 +3322,8 @@ export async function runSampleSeed() {
         project_status: "COMPLETED",
         evaluation_score: 4.5,
         evaluation_comment: "技術リーダーシップを発揮し、プロジェクトを成功に導いた",
-        is_confidential: "FALSE",
-        is_public_reference: "TRUE",
+        is_confidential: false,
+        is_public_reference: true,
         id: null,
         is_deleted: null,
         tenant_id: null,
@@ -2850,8 +3355,8 @@ export async function runSampleSeed() {
         project_status: "ONGOING",
         evaluation_score: null,
         evaluation_comment: null,
-        is_confidential: "TRUE",
-        is_public_reference: "FALSE",
+        is_confidential: true,
+        is_public_reference: false,
         id: null,
         is_deleted: null,
         tenant_id: null,
@@ -2864,7 +3369,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_SkillEvidence_sample_data.sql
-  console.log('📊 TRN_SkillEvidenceデータを投入中...')
+  console.log('📊 TRN_SkillEvidence データを投入中…')
   await prisma.skillEvidence.createMany({
     data: [
       {
@@ -2900,8 +3405,8 @@ export async function runSampleSeed() {
         technologies_used: "["Java", "Spring Boot", "PostgreSQL", "Redis", "Docker"]",
         achievements: "予定より2週間早期リリース、性能要件120%達成、バグ発生率0.1%以下",
         lessons_learned: "大規模システムでのマイクロサービス設計、チーム間連携の重要性",
-        is_public: "FALSE",
-        is_portfolio_item: "TRUE",
+        is_public: false,
+        is_portfolio_item: true,
         tags: "["Java", "Spring Boot", "システム設計", "チームリード"]",
         id: null,
         is_deleted: null,
@@ -2944,8 +3449,8 @@ export async function runSampleSeed() {
         technologies_used: "["AWS", "EC2", "S3", "RDS", "Lambda"]",
         achievements: "一発合格、スコア850点（合格ライン720点）",
         lessons_learned: "クラウドアーキテクチャの設計原則、AWSサービスの適切な選択方法",
-        is_public: "TRUE",
-        is_portfolio_item: "TRUE",
+        is_public: true,
+        is_portfolio_item: true,
         tags: "["AWS", "クラウド", "認定資格", "アーキテクチャ"]",
         id: null,
         is_deleted: null,
@@ -2959,7 +3464,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_SkillRecord_sample_data.sql
-  console.log('📊 TRN_SkillRecordデータを投入中...')
+  console.log('📊 TRN_SkillRecord データを投入中…')
   await prisma.skillRecord.createMany({
     data: [
       {
@@ -3016,7 +3521,7 @@ export async function runSampleSeed() {
   })
   
   // TRN_TrainingHistory_sample_data.sql
-  console.log('📊 TRN_TrainingHistoryデータを投入中...')
+  console.log('📊 TRN_TrainingHistory データを投入中…')
   await prisma.trainingHistory.createMany({
     data: [
       {
@@ -3038,7 +3543,7 @@ export async function runSampleSeed() {
         completion_rate: 100.0,
         test_score: 85.0,
         grade: "合格",
-        certificate_obtained: "TRUE",
+        certificate_obtained: true,
         certificate_number: "AWS-SAA-2024-001",
         pdu_earned: 24.0,
         skills_acquired: "["AWS設計", "クラウドアーキテクチャ", "セキュリティ設計"]",
@@ -3047,9 +3552,9 @@ export async function runSampleSeed() {
         feedback: "実践的な内容で非常に有用だった。講師の説明も分かりやすい。",
         satisfaction_score: 4.5,
         recommendation_score: 5.0,
-        follow_up_required: "TRUE",
+        follow_up_required: true,
         follow_up_date: "2024-06-01",
-        manager_approval: "TRUE",
+        manager_approval: true,
         approved_by: "EMP000010",
         id: null,
         is_deleted: null,
@@ -3078,7 +3583,7 @@ export async function runSampleSeed() {
         completion_rate: 100.0,
         test_score: 92.0,
         grade: "A",
-        certificate_obtained: "TRUE",
+        certificate_obtained: true,
         certificate_number: "PM-BASIC-2024-002",
         pdu_earned: 8.0,
         skills_acquired: "["プロジェクト計画", "リスク管理", "チームマネジメント"]",
@@ -3087,9 +3592,9 @@ export async function runSampleSeed() {
         feedback: "基礎から体系的に学べて良かった。実例が豊富で理解しやすい。",
         satisfaction_score: 4.0,
         recommendation_score: 4.0,
-        follow_up_required: "FALSE",
+        follow_up_required: false,
         follow_up_date: null,
-        manager_approval: "TRUE",
+        manager_approval: true,
         approved_by: "EMP000010",
         id: null,
         is_deleted: null,
@@ -3103,7 +3608,7 @@ export async function runSampleSeed() {
   })
   
   // WRK_BatchJobLog_sample_data.sql
-  console.log('📊 WRK_BatchJobLogデータを投入中...')
+  console.log('📊 WRK_BatchJobLog データを投入中…')
   await prisma.batchJobLog.createMany({
     data: [
       {
