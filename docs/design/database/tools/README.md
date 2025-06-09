@@ -1,169 +1,217 @@
-# データベース設計ツール統合システム
+# データベース設計ツール統合パッケージ
 
-## 概要
+年間スキル報告書WEB化PJTのデータベース設計・管理を効率化する統合ツールセットです。
 
-年間スキル報告書WEB化PJTにおけるデータベース設計・開発を効率化するための統合ツールシステムです。YAML詳細定義からテーブル定義書・DDL・サンプルデータの自動生成と、データベース設計の整合性チェックを提供します。
+## 🎯 概要
 
-## 要求仕様ID
+このツールパッケージは、YAML詳細定義からテーブル定義書・DDL・サンプルデータを自動生成し、データベース設計の整合性を保証する統合システムです。
 
-- **PLT.1-WEB.1**: システム基盤要件（データベース設計ツール）
-- **TNT.1-MGMT**: マルチテナント基盤要件（テナント分離対応）
+### 主要機能
 
-## システム構成
+- **📝 YAML詳細定義**: 構造化されたテーブル定義の作成・管理
+- **🔄 自動生成**: Markdown定義書・DDL・サンプルデータの一括生成
+- **✅ 整合性チェック**: 全ファイル間の整合性検証
+- **🔍 品質保証**: 命名規則・データ型・外部キー制約の検証
+- **📊 レポート生成**: 整合性チェック結果の詳細レポート
+
+## 🏗️ アーキテクチャ
 
 ```
 docs/design/database/tools/
-├── README.md                           # 本ファイル
-├── __init__.py                         # パッケージ初期化
-├── run_tests.py                        # テスト実行スクリプト
-├── shared/                             # 共通ライブラリ
-│   ├── core/                          # コア機能
-│   │   ├── config.py                  # 統合設定管理
-│   │   ├── exceptions.py              # 例外定義
-│   │   └── models.py                  # データモデル
-│   ├── parsers/                       # パーサー群
-│   │   ├── yaml_parser.py             # YAML解析
-│   │   ├── ddl_parser.py              # DDL解析
-│   │   └── markdown_parser.py         # Markdown解析
-│   ├── generators/                    # ジェネレーター群
-│   │   ├── ddl_generator.py           # DDL生成
-│   │   ├── markdown_generator.py      # Markdown生成
-│   │   └── sample_data_generator.py   # サンプルデータ生成
-│   └── utils/                         # ユーティリティ
-│       ├── file_utils.py              # ファイル操作
-│       ├── validation_utils.py        # バリデーション
-│       └── faker_utils.py             # テストデータ生成
-├── table_generator/                   # テーブル生成ツール
-│   ├── __main__.py                    # メインエントリーポイント
-│   └── ...                           # 個別実装
-├── database_consistency_checker/      # 整合性チェックツール
-│   ├── __main__.py                    # メインエントリーポイント
-│   └── ...                           # 個別実装
-├── tests/                             # テストスイート
-│   ├── test_table_generator.py        # テーブル生成テスト
-│   ├── test_consistency_checker.py    # 整合性チェックテスト
-│   └── fixtures/                      # テストデータ
-└── docs/                              # ドキュメント
-    ├── table_generator_guide.md       # テーブル生成ツールガイド
-    ├── consistency_checker_guide.md   # 整合性チェックツールガイド
-    └── development_guide.md           # 開発者ガイド
+├── 📁 shared/                    # 共通コンポーネント
+│   ├── adapters/                 # アダプター層
+│   ├── core/                     # コアロジック
+│   └── generators/               # 生成エンジン
+├── 📁 table_generator/           # テーブル生成ツール
+├── 📁 consistency_checker/       # 整合性チェックツール
+├── 📁 tests/                     # テストスイート
+├── 📁 configs/                   # 設定ファイル
+└── 📄 run_tests.py              # 統合テストランナー
 ```
 
-## 主要機能
+## 🚀 クイックスタート
 
-### 1. テーブル生成ツール（table_generator）
+### 1. 環境セットアップ
 
-YAML詳細定義からテーブル定義書・DDL・サンプルデータを自動生成します。
-
-#### 主要機能
-- **YAML詳細定義解析**: テーブル構造・制約・インデックス定義の読み込み
-- **DDL自動生成**: PostgreSQL対応のCREATE TABLE文生成
-- **Markdown定義書生成**: 人間が読みやすいテーブル定義書作成
-- **サンプルデータ生成**: 業務に即したテストデータ作成
-- **マルチテナント対応**: 全テーブルでtenant_id分離実装
-
-#### 使用方法
 ```bash
-# 全テーブル生成
-cd ~/skill-report-web/docs/design/database/tools
-python3 -m table_generator
+# 仮想環境の作成・有効化
+cd docs/design/database/tools
+python3 -m venv test_env
+source test_env/bin/activate
 
-# 個別テーブル生成
-python3 -m table_generator --table MST_Employee
+# 依存関係のインストール
+pip install faker psutil pyyaml
+```
+
+### 2. 基本的な使用方法
+
+#### テーブル生成
+```bash
+# 単一テーブル生成
+python3 -m table_generator --table MST_Employee --verbose
 
 # 複数テーブル生成
-python3 -m table_generator --table MST_Employee,MST_Department,MST_Position
+python3 -m table_generator --table MST_Employee,MST_Department
 
-# 詳細ログ出力
-python3 -m table_generator --verbose
-
-# ドライラン（実際にはファイル作成しない）
-python3 -m table_generator --dry-run
+# カテゴリ別生成
+python3 -m table_generator --table MST_* --verbose
 ```
 
-### 2. データベース整合性チェックツール（database_consistency_checker）
-
-データベース設計の整合性を多角的にチェックし、品質を保証します。
-
-#### 主要機能
-- **テーブル存在整合性**: YAML・DDL・Markdownファイル間の整合性確認
-- **カラム定義整合性**: データ型・制約・NULL許可の一致確認
-- **外部キー整合性**: 参照関係の妥当性チェック
-- **データ型整合性**: YAML↔DDL間のデータ型完全一致確認
-- **命名規則チェック**: テーブル・カラム命名規則の準拠確認
-- **孤立ファイル検出**: 未使用・重複ファイルの特定
-
-#### 使用方法
+#### 整合性チェック
 ```bash
 # 全体整合性チェック
-cd ~/skill-report-web/docs/design/database/tools
-python3 -m database_consistency_checker
+python run_check.py --verbose
 
-# 個別テーブルチェック
-python3 -m database_consistency_checker --tables MST_Employee,MST_Department
+# 特定テーブルのみチェック
+python run_check.py --tables MST_Employee,MST_Department
 
-# 特定チェックのみ実行
-python3 -m database_consistency_checker --checks table_existence,column_consistency
-
-# 詳細ログ出力
-python3 -m database_consistency_checker --verbose
-
-# 結果をファイル出力
-python3 -m database_consistency_checker --output-file consistency_report.md --output-format markdown
+# 特定のチェックのみ実行
+python run_check.py --checks table_existence,column_consistency
 ```
 
-## 設定管理
-
-### 統合設定（shared/core/config.py）
-
-両ツールの設定を統合管理し、一貫した動作を保証します。
-
-#### 主要設定項目
-```python
-# 基本設定
-base_dir: プロジェクトルートディレクトリ
-encoding: ファイルエンコーディング（utf-8）
-log_level: ログレベル（INFO/DEBUG/WARNING/ERROR）
-
-# ディレクトリ設定
-table_details_dir: YAML詳細定義ディレクトリ
-ddl_dir: DDLファイル出力ディレクトリ
-tables_dir: テーブル定義書出力ディレクトリ
-data_dir: サンプルデータ出力ディレクトリ
-
-# テーブル生成設定
-default_sample_count: デフォルトサンプルデータ件数（10件）
-faker_locale: テストデータ生成ロケール（ja_JP）
-company_domain: 会社ドメイン（company.com）
-
-# 整合性チェック設定
-report_formats: レポート形式（CONSOLE, MARKDOWN, JSON）
-check_types: 実行するチェック種別
-auto_fix_enabled: 自動修正機能（false）
-```
-
-#### 環境変数による設定上書き
+#### 統合テスト実行
 ```bash
-# ベースディレクトリ
-export DB_TOOLS_BASE_DIR=/path/to/project
+# 全テスト実行
+python3 run_tests.py --verbose
 
-# ログレベル
-export DB_TOOLS_LOG_LEVEL=DEBUG
-
-# サンプルデータ件数
-export DB_TOOLS_SAMPLE_COUNT=50
-
-# バックアップ有効化
-export DB_TOOLS_BACKUP_ENABLED=true
-
-# Fakerロケール
-export TABLE_GEN_FAKER_LOCALE=ja_JP
-
-# 会社ドメイン
-export TABLE_GEN_COMPANY_DOMAIN=example.com
+# 特定テストのみ実行
+python3 run_tests.py --unit-only
+python3 run_tests.py --integration-only
 ```
 
-## 開発フロー
+## 📋 YAML詳細定義の作成
+
+### 基本構造
+
+```yaml
+# table-details/{テーブル名}_details.yaml
+table_name: "MST_Employee"
+logical_name: "社員基本情報"
+category: "マスタ系"
+priority: "最高"
+requirement_id: "PRO.1-BASE.1"
+
+columns:
+  - name: "id"
+    type: "VARCHAR(50)"
+    nullable: false
+    primary_key: true
+    comment: "プライマリキー（UUID）"
+    requirement_id: "PLT.1-WEB.1"
+  
+  - name: "tenant_id"
+    type: "VARCHAR(50)"
+    nullable: false
+    comment: "マルチテナント識別子"
+    requirement_id: "TNT.1-MGMT.1"
+
+indexes:
+  - name: "idx_employee_tenant"
+    columns: ["tenant_id"]
+    unique: false
+    comment: "テナント別検索用インデックス"
+
+foreign_keys:
+  - name: "fk_employee_tenant"
+    columns: ["tenant_id"]
+    references:
+      table: "MST_Tenant"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "RESTRICT"
+```
+
+### テーブル命名規則
+
+- **MST_**: マスタ系テーブル（ユーザー、ロール、部署、スキル階層等）
+- **TRN_**: トランザクション系テーブル（スキル情報、目標進捗、案件実績等）
+- **HIS_**: 履歴系テーブル（監査ログ、操作履歴等）
+- **SYS_**: システム系テーブル（検索インデックス、システムログ、トークン等）
+- **WRK_**: ワーク系テーブル（一括登録ジョブログ、バッチワーク等）
+- **IF_**: インターフェイス系テーブル（外部連携・インポート/エクスポート用）
+
+## 🔧 詳細機能
+
+### テーブル生成ツール（table_generator）
+
+#### 主要機能
+- YAML詳細定義の解析・検証
+- Markdown定義書の自動生成
+- PostgreSQL DDLの生成
+- サンプルデータの生成
+- マルチテナント対応の自動実装
+
+#### 生成される出力ファイル
+- **Markdown定義書**: `tables/テーブル定義書_{テーブル名}_{論理名}.md`
+- **DDLファイル**: `ddl/{テーブル名}.sql`
+- **サンプルデータ**: `data/{テーブル名}_sample_data.sql`
+
+#### 使用例
+```bash
+# 詳細ログ付きで生成
+python3 -m table_generator --table MST_Employee --verbose
+
+# 出力ディレクトリ指定
+python3 -m table_generator --table MST_Employee --output-dir custom_output
+
+# 特定フォーマットのみ生成
+python3 -m table_generator --table MST_Employee --ddl-only
+```
+
+### 整合性チェックツール（consistency_checker）
+
+#### チェック項目
+- ✅ **テーブル存在整合性**: 全ソース間でのテーブル定義一致
+- ✅ **カラム定義整合性**: YAML ↔ DDL ↔ 定義書の整合性
+- ✅ **外部キー整合性**: 参照関係の妥当性チェック
+- ✅ **データ型整合性**: DDLとYAML間のデータ型完全一致・互換性チェック
+- ✅ **孤立ファイル検出**: 未使用・重複ファイルの特定
+- ✅ **命名規則チェック**: プレフィックス・命名規則の準拠確認
+
+#### 使用例
+```bash
+# 全体チェック（推奨）
+python run_check.py --verbose
+
+# レポート出力
+python run_check.py --verbose --output-format markdown --output-file report.md
+
+# 特定チェックのみ
+python run_check.py --checks table_existence,foreign_key_consistency
+
+# 修正提案付き
+python run_check.py --suggest-fixes
+```
+
+## 📊 品質保証・テスト
+
+### テスト構成
+- **ユニットテスト**: 個別コンポーネントの動作検証（72テスト）
+- **統合テスト**: ツール間連携の検証（4テスト）
+- **パフォーマンステスト**: 大量データ処理の性能検証
+
+### テスト実行
+```bash
+# 全テスト実行
+python3 run_tests.py --verbose
+
+# 特定テストカテゴリのみ
+python3 run_tests.py --unit-only
+python3 run_tests.py --integration-only
+python3 run_tests.py --performance-only
+
+# テスト結果の詳細出力
+python3 run_tests.py --verbose --output-json
+```
+
+### 品質指標
+- **整合性チェック通過率**: 100%維持（必須）
+- **要求仕様ID対応率**: 100%（全テーブル・全カラム）
+- **命名規則準拠率**: 100%（プレフィックス・命名規則）
+- **テストカバレッジ**: 80%以上
+- **マルチテナント対応率**: 100%（全テーブル）
+
+## 🔄 開発ワークフロー
 
 ### 新規テーブル追加時の標準フロー
 
@@ -178,20 +226,15 @@ export TABLE_GEN_COMPANY_DOMAIN=example.com
 # 新規テーブルをテーブル一覧に追加
 
 # 4. 自動生成実行
-cd ~/skill-report-web/docs/design/database/tools
 python3 -m table_generator --table NEW_TABLE --verbose
 
 # 5. 個別整合性チェック
-python3 -m database_consistency_checker --tables NEW_TABLE
+python run_check.py --tables NEW_TABLE
 
 # 6. 全体整合性確認
-python3 -m database_consistency_checker --verbose
+python run_check.py --verbose
 
-# 7. 設計レビュー実施
-# 業務要件・非機能要件・マルチテナント対応の確認
-
-# 8. Git コミット
-cd ~/skill-report-web
+# 7. Git コミット
 git add .
 git commit -m "🆕 feat: NEW_TABLEテーブル追加
 
@@ -215,15 +258,12 @@ git commit -m "🆕 feat: NEW_TABLEテーブル追加
 python3 -m table_generator --table MODIFIED_TABLE --verbose
 
 # 4. 影響範囲チェック
-python3 -m database_consistency_checker --checks foreign_key_consistency
+python run_check.py --checks foreign_key_consistency
 
 # 5. 関連テーブルの整合性確認
-python3 -m database_consistency_checker --tables MODIFIED_TABLE,RELATED_TABLE
+python run_check.py --tables MODIFIED_TABLE,RELATED_TABLE
 
-# 6. 破壊的変更チェック
-# 既存データ・既存機能への影響を確認
-
-# 7. Git コミット
+# 6. Git コミット
 git add .
 git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 
@@ -234,80 +274,69 @@ git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 - 整合性チェック通過確認"
 ```
 
-## 品質保証
+## 🛠️ 設定・カスタマイズ
 
-### 自動チェック項目
+### 設定ファイル
 
-#### 1. テーブル存在整合性チェック
-- ✅ YAML詳細定義ファイルの存在確認
-- ✅ DDLファイルの存在確認
-- ✅ Markdownファイルの存在確認
-- ✅ テーブル一覧.mdとの整合性確認
+#### configs/database_tools_config.yaml
+```yaml
+# データベース設定
+database:
+  type: "postgresql"
+  charset: "UTF8"
+  collation: "ja_JP.UTF-8"
 
-#### 2. カラム定義整合性チェック
-- ✅ YAML ↔ DDL間のカラム定義一致確認
-- ✅ データ型の完全一致・互換性チェック
-- ✅ NULL制約の整合性確認
-- ✅ デフォルト値の比較
-- ✅ 主キー・外部キー制約の整合性
+# 生成設定
+generation:
+  include_drop_statements: true
+  include_comments: true
+  include_sample_data: true
+  sample_data_rows: 10
 
-#### 3. 外部キー整合性チェック
-- ✅ 参照先テーブルの存在確認
-- ✅ 参照先カラムのデータ型一致確認
-- ✅ CASCADE/RESTRICT設定の妥当性確認
-- ✅ 循環参照の検出
+# 検証設定
+validation:
+  enforce_naming_convention: true
+  require_tenant_id: true
+  require_primary_key: true
+  max_table_name_length: 63
+  max_column_name_length: 63
 
-#### 4. 命名規則チェック
-- ✅ テーブル名プレフィックス準拠確認（MST_, TRN_, HIS_, SYS_, WRK_, IF_）
-- ✅ カラム名命名規則準拠確認
-- ✅ インデックス名命名規則準拠確認
-- ✅ 制約名命名規則準拠確認
+# パフォーマンス設定
+performance:
+  batch_size: 100
+  max_concurrent_operations: 4
+  timeout_seconds: 30
+```
 
-#### 5. マルチテナント対応チェック
-- ✅ 全テーブルでのtenant_idカラム存在確認
-- ✅ テナントIDを含む複合インデックス確認
-- ✅ 外部キー制約でのテナント分離確認
+### 環境変数
+```bash
+# データベース接続
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=skill_report
+export DB_USER=postgres
+export DB_PASSWORD=password
 
-### 品質指標・成功基準
+# ツール設定
+export TOOLS_BASE_DIR=/path/to/tools
+export TOOLS_LOG_LEVEL=INFO
+export TOOLS_OUTPUT_FORMAT=markdown
+```
 
-#### 設計品質指標
-- **整合性チェック通過率**: 100%維持（必須）
-- **要求仕様ID対応率**: 100%（全テーブル・全カラム）
-- **命名規則準拠率**: 100%（プレフィックス・命名規則）
-- **ドキュメント自動生成率**: 95%以上
-- **マルチテナント対応率**: 100%（全テーブル）
+## 📈 パフォーマンス・スケーラビリティ
 
-#### 開発効率指標
+### パフォーマンス指標
 - **新規テーブル追加時間**: 30分以内（設計〜生成〜チェック完了）
 - **既存テーブル修正時間**: 15分以内（修正〜チェック完了）
 - **整合性チェック実行時間**: 5分以内（全テーブル）
-- **エラー修正時間**: 問題発見から修正完了まで1時間以内
 - **自動生成成功率**: 95%以上（エラーなしでの生成）
 
-## テスト
+### 大量データ対応
+- **バッチ処理**: 100テーブル単位での一括処理
+- **並列処理**: 最大4並列での生成・チェック
+- **メモリ最適化**: ストリーミング処理による省メモリ実装
 
-### テスト実行
-
-```bash
-# 全テスト実行
-cd ~/skill-report-web/docs/design/database/tools
-python3 run_tests.py
-
-# 個別テスト実行
-python3 -m pytest tests/test_table_generator.py -v
-python3 -m pytest tests/test_consistency_checker.py -v
-
-# カバレッジ付きテスト実行
-python3 -m pytest --cov=shared --cov=table_generator --cov=database_consistency_checker --cov-report=html
-```
-
-### テスト構成
-- **ユニットテスト**: 各コンポーネントの個別機能テスト
-- **統合テスト**: ツール間連携・ファイル入出力テスト
-- **エンドツーエンドテスト**: 実際のワークフローテスト
-- **パフォーマンステスト**: 大量データでの処理時間測定
-
-## トラブルシューティング
+## 🔍 トラブルシューティング
 
 ### よくある問題と解決方法
 
@@ -317,135 +346,110 @@ python3 -m pytest --cov=shared --cov=table_generator --cov=database_consistency_
 ❌ MST_Department: DDLファイルが存在しません
 
 # 解決方法
-# 1. エラー詳細確認
-python3 -m database_consistency_checker --verbose --tables MST_Department
-
-# 2. 個別ファイル確認
-ls -la table-details/MST_Department_details.yaml
-ls -la ddl/MST_Department.sql
-ls -la tables/テーブル定義書_MST_Department_*.md
-
-# 3. 再生成実行
+python run_check.py --verbose --tables MST_Department
 python3 -m table_generator --table MST_Department --verbose
-
-# 4. 再チェック
-python3 -m database_consistency_checker --tables MST_Department
+python run_check.py --tables MST_Department
 ```
 
-#### 2. DDL生成エラー
+#### 2. YAML構文エラー
 ```bash
-# 問題: YAML構文エラー
+# 問題: YAML解析エラー
 ❌ YAML解析エラー: mapping values are not allowed here
 
 # 解決方法
-# 1. YAML構文チェック
 python3 -c "import yaml; yaml.safe_load(open('table-details/MST_Employee_details.yaml'))"
-
-# 2. インデント・構文確認
-# - インデントはスペース2文字で統一
-# - コロン後にスペース必須
-# - 文字列は引用符で囲む
-
-# 3. 再生成実行
+# インデント・構文を修正後
 python3 -m table_generator --table MST_Employee --verbose
 ```
 
-#### 3. パフォーマンス問題
+#### 3. 外部キー制約エラー
 ```bash
-# 問題: 処理時間が長い
-⚠️ 整合性チェック実行時間: 10分 > 目標値 5分
+# 問題: 外部キー制約違反
+❌ 参照先テーブル 'MST_Department' が存在しません
 
 # 解決方法
-# 1. 並列処理有効化
-export DB_TOOLS_PARALLEL_PROCESSING=true
-export DB_TOOLS_MAX_WORKERS=8
-
-# 2. キャッシュ有効化
-export DB_TOOLS_CACHE_ENABLED=true
-
-# 3. 個別テーブルでのテスト
-python3 -m database_consistency_checker --tables MST_Employee
+python3 -m table_generator --table MST_Department
+python3 -m table_generator --table MST_Employee
+python run_check.py --checks foreign_key_consistency
 ```
 
-## 定期メンテナンス
+### 緊急時対応フロー
+1. **問題発見** → 影響範囲特定
+2. **根本原因分析** → ログ・エラーメッセージ確認
+3. **応急処置** → サービス継続のための一時対応
+4. **恒久対策** → YAML修正・再生成・整合性確認
+5. **再発防止策** → チェック項目追加・手順見直し
 
-### 月次作業
-```bash
-# 1. 全体整合性チェック実行
-python3 -m database_consistency_checker --verbose --output-file monthly_check.log
-
-# 2. 新規追加テーブルの品質確認
-# 要求仕様IDとの対応確認
-# 命名規則準拠確認
-# マルチテナント対応確認
-
-# 3. パフォーマンス監視
-# 想定データ量との乖離チェック
-# 応答時間の監視結果確認
-# スロークエリの分析
-```
-
-### 四半期作業
-```bash
-# 1. 孤立ファイル・重複ファイルのクリーンアップ
-python3 -m database_consistency_checker --checks orphaned_files
-# 検出されたファイルの手動確認・削除
-
-# 2. パフォーマンス要件の見直し
-# 応答時間・データ量の再評価
-# インデックス設計の最適化
-
-# 3. セキュリティ監査
-# 個人情報・機密情報含有テーブルの棚卸
-# アクセス権限の見直し
-```
-
-## 関連ドキュメント
+## 📚 関連ドキュメント
 
 ### 内部ドキュメント
 - **テーブル一覧**: `docs/design/database/テーブル一覧.md`
 - **エンティティ関連図**: `docs/design/database/エンティティ関連図.md`
+- **整合性チェックツール**: `consistency_checker/README.md`
+- **テーブル生成ツール**: `table_generator/README.md`
+
+### 設計ガイドライン
 - **データベース設計ガイドライン**: `.clinerules/08-database-design-guidelines.md`
+- **マルチテナント開発**: `.clinerules/06-multitenant-development.md`
+- **バックエンド設計**: `.clinerules/04-backend-guidelines.md`
 
 ### 外部参照
 - **PostgreSQL公式ドキュメント**: https://www.postgresql.org/docs/
 - **Prisma公式ドキュメント**: https://www.prisma.io/docs/
-- **マルチテナント設計パターン**: `.clinerules/06-multitenant-development.md`
 
-## 開発者向け情報
+## 🤝 コントリビューション
 
 ### 開発環境セットアップ
 ```bash
-# 1. 仮想環境作成
-cd ~/skill-report-web/docs/design/database/tools
-python3 -m venv venv
-source venv/bin/activate
+# リポジトリクローン
+git clone <repository-url>
+cd skill-report-web/docs/design/database/tools
 
-# 2. 依存関係インストール
-pip install -r requirements.txt
-
-# 3. 開発用依存関係インストール
+# 仮想環境セットアップ
+python3 -m venv dev_env
+source dev_env/bin/activate
 pip install -r requirements-dev.txt
 
-# 4. テスト実行
-python run_tests.py
+# テスト実行
+python3 run_tests.py --verbose
 ```
 
-### 新機能追加ガイドライン
-1. **共通ライブラリ優先**: 新機能は可能な限り共通ライブラリ（shared/）に実装
-2. **テスト駆動開発**: 新機能追加時は必ずテストを先に作成
-3. **設定管理統合**: 新しい設定項目は統合設定（config.py）に追加
-4. **ドキュメント更新**: 機能追加時は本READMEと関連ドキュメントを更新
+### コーディング規約
+- **Python**: PEP 8準拠
+- **YAML**: 2スペースインデント
+- **コメント**: 日本語での詳細説明
+- **ログ**: 構造化ログ（JSON形式）
 
-### コントリビューション
-- **コーディング規約**: `.clinerules/02-coding-standards.md`に準拠
-- **Git ワークフロー**: `.clinerules/05-git-workflow.md`に準拠
-- **要求仕様ID**: 全実装に要求仕様IDを明記
-- **レビュープロセス**: Pull Request必須、コードレビュー実施
+### プルリクエスト
+1. **機能ブランチ作成**: `feature/database-tool-enhancement`
+2. **テスト実装**: 新機能に対応するテストケース追加
+3. **ドキュメント更新**: README・コメントの更新
+4. **整合性チェック**: 全テスト通過確認
+
+## 📄 ライセンス
+
+このプロジェクトは年間スキル報告書WEB化PJTの一部として開発されています。
 
 ---
 
-**実装日**: 2025-06-10  
-**実装者**: AI駆動開発チーム  
-**要求仕様ID**: PLT.1-WEB.1, TNT.1-MGMT  
-**バージョン**: 2.0.0（共通ライブラリ統合版）
+## 🔄 更新履歴
+
+### v1.2.0 (2025-06-10)
+- ✨ データ型整合性チェック機能追加
+- 🔧 パフォーマンステスト環境改善
+- 📚 README.md包括的更新
+- 🐛 孤立ファイル検出ロジック修正
+
+### v1.1.0 (2025-06-06)
+- ✨ 統合テストスイート実装
+- 🔧 YAML解析エンジン強化
+- 📊 レポート生成機能追加
+
+### v1.0.0 (2025-06-01)
+- 🎉 初回リリース
+- ✨ テーブル生成・整合性チェック基本機能
+- 📝 YAML詳細定義システム実装
+
+---
+
+**📞 サポート**: 技術的な質問や問題については、プロジェクトチームまでお問い合わせください。
