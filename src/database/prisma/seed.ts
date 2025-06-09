@@ -86,7 +86,7 @@ export async function runSampleSeed() {
           department_name_short: '経営企画',
           department_level: 1,
           department_type: 'HEADQUARTERS',
-          manager_id: 'EMP000001',
+          manager_id: '000001',
           cost_center_code: 'CC001',
           budget_amount: 50000000.0,
           location: '本社ビル 10F',
@@ -274,10 +274,10 @@ export async function runSampleSeed() {
     console.log('📊 MST_Employeeデータを投入中...')
     const employeeData = await Promise.all([
       prisma.employee.upsert({
-        where: { employee_code: 'EMP000001' },
+        where: { employee_code: '000001' },
         update: {},
         create: {
-          employee_code: 'EMP000001',
+          employee_code: '000001',
           full_name: '山田太郎',
           full_name_kana: 'ヤマダタロウ',
           email: 'yamada.taro@company.com',
@@ -290,9 +290,117 @@ export async function runSampleSeed() {
           job_type_id: 'SE',
           employment_status: 'FULL_TIME',
           employee_status: 'ACTIVE',
-          code: 'EMP000001',
+          code: '000001',
           name: '山田太郎',
           description: '経営企画本部所属の社員',
+        },
+      }),
+    ])
+
+    // MST_EmployeeDepartmentデータ
+    console.log('📊 MST_EmployeeDepartmentデータを投入中...')
+    const employeeDepartmentData = await Promise.all([
+      prisma.employeeDepartment.upsert({
+        where: { employee_id: '000001' },
+        update: {},
+        create: {
+          employee_id: '000001',
+          department_id: 'DEPT001',
+          assignment_type: 'PRIMARY',
+          start_date: new Date('2020-04-01'),
+          assignment_ratio: 100.0,
+          role_in_department: '部長',
+          reporting_manager_id: '000001',
+          assignment_reason: '新規採用時の配属',
+          assignment_status: 'ACTIVE',
+          approval_status: 'APPROVED',
+          approved_by: 'SYSTEM',
+          approved_at: new Date('2020-04-01'),
+          code: 'EMP_DEPT_000001',
+          name: '山田太郎の経営企画本部配属',
+          description: '経営企画本部への主担当配属',
+        },
+      }),
+    ])
+
+    // MST_EmployeeJobTypeデータ
+    console.log('📊 MST_EmployeeJobTypeデータを投入中...')
+    const employeeJobTypeData = await Promise.all([
+      prisma.employeeJobType.upsert({
+        where: { employee_job_type_id: 'EMP_JOB_000001_SE' },
+        update: {},
+        create: {
+          employee_job_type_id: 'EMP_JOB_000001_SE',
+          employee_id: '000001',
+          job_type_id: 'SE',
+          assignment_type: 'PRIMARY',
+          assignment_ratio: 100.0,
+          effective_start_date: new Date('2020-04-01'),
+          assignment_reason: '新規採用時の職種配属',
+          assignment_status: 'ACTIVE',
+          proficiency_level: 'SENIOR',
+          target_proficiency_level: 'EXPERT',
+          target_achievement_date: new Date('2025-12-31'),
+          certification_requirements: '["基本情報技術者", "応用情報技術者"]',
+          skill_requirements: '["Java", "SQL", "システム設計", "要件定義"]',
+          experience_requirements: '3年以上のシステム開発経験',
+          development_plan: 'シニアSEからテックリードへのキャリアパス',
+          training_plan: '年間40時間の技術研修受講',
+          mentor_id: '000001',
+          supervisor_id: '000001',
+          performance_rating: 'EXCELLENT',
+          last_evaluation_date: new Date('2025-04-01'),
+          next_evaluation_date: new Date('2025-10-01'),
+          evaluation_frequency: 'SEMI_ANNUAL',
+          career_path: 'SE → シニアSE → テックリード → エンジニアリングマネージャー',
+          strengths: 'Java開発、システム設計、チームリーダーシップ',
+          improvement_areas: 'クラウド技術、AI/ML技術',
+          achievements: 'プロジェクト成功率95%、チーム生産性20%向上',
+          goals: '新技術習得、後進育成、プロジェクト品質向上',
+          workload_percentage: 100.0,
+          billable_flag: true,
+          cost_center: 'CC001',
+          budget_allocation: 8000000.0,
+          hourly_rate: 5000.0,
+          overtime_eligible: true,
+          remote_work_eligible: true,
+          travel_required: false,
+          security_clearance_required: false,
+          created_by: 'SYSTEM',
+          approved_by: 'SYSTEM',
+          approval_date: new Date('2020-04-01'),
+          notes: 'システムエンジニアとしての主担当職種',
+          code: 'EMP_JOB_000001_SE',
+          name: '山田太郎のSE職種配属',
+          description: 'システムエンジニア職種への配属情報',
+        },
+      }),
+    ])
+
+    // MST_EmployeePositionデータ
+    console.log('📊 MST_EmployeePositionデータを投入中...')
+    const employeePositionData = await Promise.all([
+      prisma.employeePosition.upsert({
+        where: { employee_id: '000001' },
+        update: {},
+        create: {
+          employee_id: '000001',
+          position_id: 'POS001',
+          appointment_type: 'PERMANENT',
+          start_date: new Date('2020-04-01'),
+          appointment_reason: '新規採用時の役職任命',
+          responsibility_scope: '会社全体の経営戦略立案・推進・統括',
+          authority_level: 10,
+          salary_grade: 'E1',
+          appointment_status: 'ACTIVE',
+          approval_status: 'APPROVED',
+          approved_by: 'BOARD_OF_DIRECTORS',
+          approved_at: new Date('2020-04-01'),
+          performance_target: '売上前年比110%、利益率15%以上',
+          delegation_authority: '取締役会決議事項以外の全権限',
+          code: 'EMP_POS_000001',
+          name: '山田太郎の代表取締役社長任命',
+          description: '代表取締役社長としての任命情報',
         },
       }),
     ])
@@ -308,7 +416,7 @@ export async function runSampleSeed() {
           login_id: '000001',
           password_hash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5uIoS',
           password_salt: 'randomsalt123',
-          employee_id: 'EMP000001',
+          employee_id: '000001',
           account_status: 'ACTIVE',
           last_login_at: new Date('2025-06-01 09:00:00'),
           last_login_ip: '192.168.1.100',
@@ -356,10 +464,10 @@ export async function runSampleSeed() {
     console.log('📊 TRN_SkillRecordデータを投入中...')
     const skillRecordData = await Promise.all([
       prisma.skillRecord.upsert({
-        where: { employee_id_skill_item_id: { employee_id: 'EMP000001', skill_item_id: 'SKILL001' } },
+        where: { employee_id_skill_item_id: { employee_id: '000001', skill_item_id: 'SKILL001' } },
         update: {},
         create: {
-          employee_id: 'EMP000001',
+          employee_id: '000001',
           skill_item_id: 'SKILL001',
           skill_level: 4,
           self_assessment: 4,
@@ -369,7 +477,7 @@ export async function runSampleSeed() {
           last_used_date: new Date('2025-05-30'),
           skill_category_id: 'CAT001',
           assessment_date: new Date('2025-04-01'),
-          assessor_id: 'EMP000001',
+          assessor_id: '000001',
           skill_status: 'ACTIVE',
           learning_hours: 120,
           project_experience_count: 3,
@@ -395,8 +503,8 @@ export async function runSampleSeed() {
     console.log('   - スキルカテゴリ: 1件')
     console.log('   - スキル項目: 1件')
     console.log('   - 社員: 1件')
-    console.log('   - ユーザー認証: 1件')
-    console.log('   - ユーザーロール: 1件')
+    console.log('   - 社員部署配属: 1件')
+    console.log('   - 社員職種配属: 1件')
     console.log('   - スキル記録: 1件')
     console.log('')
     console.log('🔐 ログイン情報:')
