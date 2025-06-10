@@ -880,20 +880,22 @@ Cline Rulesは、システムレベルのガイダンスをClineに提供する�
 ```bash
 # リポジトリのクローン
 git clone <repository-url>
+# 年間スキル報告書PJTのリポジトリのクローン具体例
+git clone https://github.com/sas-dx/skill-report-web.git my-skill-report 
+# ※自身のローカルに作成した年間スキル報告書用のディレクトリへ移動
 cd skill-report-web
 
 # 依存関係のインストール
 npm install
 
-# 環境変数の設定
-cp .env.example .env
-# .envファイルを編集して適切な値を設定
-
 # データベースの初期化
-npm run db:setup
+npx prisma migrate reset --force
 
 # 開発サーバーの起動
 npm run dev
+
+# ローカル環境の切断
+taskkill /F /IM node.exe
 ```
 
 ### Docker環境での開発
@@ -902,14 +904,16 @@ npm run dev
 # Docker環境の起動
 docker-compose up -d
 
-# 開発用コンテナでの作業
-./scripts/docker-dev.sh  # Linux/Mac
-./scripts/docker-dev.bat # Windows
+# Dockerコンテナ内でマイグレーション実行
+npm run docker:db:migrate
+
+# Dockerコンテナ内でサンプルデータ投入
+ ./scripts/docker-seed.bat # Windows環境
+ ./scripts/docker-seed.sh # Linux/Mac
+
+# Dockerコンテナのシャットダウン
+docker-compose down
 ```
-
-### 環境変数
-
-`.env.example` をコピーして `.env` を作成し、以下の環境変数を設定してください。
 
 #### データベース設定
 | 変数名 | 用途 | 例 |
@@ -931,43 +935,6 @@ docker-compose up -d
 | ENCRYPTION_KEY | データ暗号化キー（32文字） | your-32-character-encryption-key |
 | BCRYPT_ROUNDS | パスワードハッシュ化ラウンド数 | 12 |
 | SESSION_TIMEOUT | セッションタイムアウト（秒） | 3600 |
-
-#### メール設定（通知機能用）
-| 変数名 | 用途 | 例 |
-|--------|------|----|
-| SMTP_HOST | SMTPサーバーホスト | smtp.example.com |
-| SMTP_PORT | SMTPポート | 587 |
-| SMTP_USER | SMTP認証ユーザー | your-email@example.com |
-| SMTP_PASS | SMTP認証パスワード | your-email-password |
-| SMTP_FROM | 送信者メールアドレス | noreply@example.com |
-
-#### 外部システム連携
-| 変数名 | 用途 | 例 |
-|--------|------|----|
-| HR_SYSTEM_API_URL | 人事システムAPI URL | https://hr-api.example.com |
-| HR_SYSTEM_API_KEY | 人事システムAPIキー | your-hr-api-key |
-| SSO_PROVIDER_URL | SSO プロバイダーURL | https://sso.example.com |
-| SSO_CLIENT_ID | SSO クライアントID | your-sso-client-id |
-| SSO_CLIENT_SECRET | SSO クライアントシークレット | your-sso-client-secret |
-
-#### ファイルアップロード設定
-| 変数名 | 用途 | 例 |
-|--------|------|----|
-| UPLOAD_MAX_SIZE | アップロード最大サイズ（バイト） | 10485760 |
-| UPLOAD_ALLOWED_TYPES | 許可ファイルタイプ | image/jpeg,image/png,application/pdf |
-
-#### ログ・監視設定
-| 変数名 | 用途 | 例 |
-|--------|------|----|
-| LOG_LEVEL | ログレベル | info |
-| LOG_FILE_PATH | ログファイルパス | ./logs |
-
-#### バックアップ設定
-| 変数名 | 用途 | 例 |
-|--------|------|----|
-| BACKUP_SCHEDULE | バックアップスケジュール（cron形式） | 0 2 * * * |
-| BACKUP_RETENTION_DAYS | バックアップ保持日数 | 30 |
-
 
 ## 使用技術
 
