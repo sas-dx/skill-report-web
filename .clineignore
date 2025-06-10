@@ -24,3 +24,9 @@ node_modules/
 node_modules/**
 .next/
 .next/**
+# Memory Bank exclusion (読込不要)
+memory-bank/
+memory-bank/**
+
+# Cline Memory Bank configuration exclusion
+.clinerules/.clinerules

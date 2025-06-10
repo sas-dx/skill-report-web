@@ -1,119 +1,121 @@
 // 要求仕様ID: ACC.1-AUTH.1 - ユーザー認証API
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
 
-// モックユーザーデータ（デモ用）
-const mockUsers = [
-  {
-    id: '1',
-    empNo: 'EMP001',
-    email: 'test.user@example.com',
-    name: '山田太郎',
-    nameKana: 'ヤマダタロウ',
-    password: 'password123',
-    isActive: true,
-    department: { name: '開発部' },
-    position: { name: 'エンジニア' },
-    deptId: 'DEPT001',
-    positionId: 'POS001',
-  },
-  {
-    id: '2',
-    empNo: 'admin',
-    email: 'admin@example.com',
-    name: '管理者',
-    nameKana: 'カンリシャ',
-    password: 'admin123',
-    isActive: true,
-    department: { name: '管理部' },
-    position: { name: '管理者' },
-    deptId: 'DEPT002',
-    positionId: 'POS002',
-  },
-];
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { empNo, password } = await request.json();
+    const { loginId, password } = await request.json();
 
-    console.log('Login attempt:', { empNo, password }); // デバッグ用
+    console.log('Login attempt:', { 
+      loginId, 
+      passwordReceived: !!password,
+      passwordLength: password?.length || 0 
+    }); // パスワードの内容ではなく、受信状況のみログ出力
 
     // 入力値検証
-    if (!empNo || !password) {
+    if (!loginId || !password) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: '社員番号とパスワードは必須です',
+            message: 'ログインIDとパスワードは必須です',
           },
         },
         { status: 400 }
       );
     }
 
-    // モックユーザー検索
-    const user = mockUsers.find(u => u.empNo === empNo && u.isActive);
+    // UserAuthテーブルのみを使用してシンプルに認証
+    const userAuth = await prisma.userAuth.findFirst({
+      where: {
+        login_id: loginId,
+        account_status: 'ACTIVE',
+      },
+    });
 
-    if (!user) {
+    console.log('User lookup result:', {
+      loginId,
+      userFound: !!userAuth,
+      userId: userAuth?.user_id,
+      hasPasswordHash: !!userAuth?.password_hash,
+      accountStatus: userAuth?.account_status
+    });
+
+    if (!userAuth) {
+      console.log('User not found or inactive for loginId:', loginId);
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_ERROR',
-            message: '社員番号またはパスワードが正しくありません',
+            message: 'ログインIDまたはパスワードが正しくありません',
           },
         },
         { status: 401 }
       );
     }
 
-    // パスワード検証
-    const isValidPassword = password === user.password;
+    // パスワード検証（bcryptハッシュ比較）
+    const isValidPassword = await bcrypt.compare(password, userAuth.password_hash || '');
+    
+    console.log('Password validation:', {
+      loginId,
+      passwordProvided: !!password,
+      hashExists: !!userAuth.password_hash,
+      isValidPassword
+    });
     
     if (!isValidPassword) {
+      console.log('Password validation failed for loginId:', loginId);
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'AUTHENTICATION_ERROR',
-            message: '社員番号またはパスワードが正しくありません',
+            message: 'ログインIDまたはパスワードが正しくありません',
           },
         },
         { status: 401 }
       );
     }
 
-    // JWTトークン生成
+    // ログイン成功時の処理
+    await prisma.userAuth.update({
+      where: { user_id: userAuth.user_id },
+      data: {
+        last_login_at: new Date(),
+        failed_login_count: 0,
+      },
+    });
+
+    // JWTトークン生成（login_idのみ）
     const token = jwt.sign(
       {
-        userId: user.id,
-        empNo: user.empNo,
-        email: user.email,
-        name: user.name,
-        deptId: user.deptId,
-        positionId: user.positionId,
+        loginId: userAuth.login_id,
       },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '8h' }
     );
 
-    console.log('Login successful for:', user.empNo); // デバッグ用
+    console.log('Login successful for:', userAuth.login_id);
 
-    // レスポンス
+    // レスポンス（UserAuthテーブルの情報のみ）
     return NextResponse.json(
       {
         success: true,
         data: {
           token,
           user: {
-            id: user.id,
-            empNo: user.empNo,
-            email: user.email,
-            name: user.name,
-            nameKana: user.nameKana,
-            department: user.department?.name || null,
-            position: user.position?.name || null,
+            id: userAuth.user_id,
+            loginId: userAuth.login_id,
+            employeeId: userAuth.employee_id,
+            name: userAuth.name || userAuth.login_id, // nameがない場合はlogin_idを使用
+            lastLoginAt: userAuth.last_login_at,
           },
         },
         timestamp: new Date().toISOString(),
@@ -132,5 +134,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

@@ -734,7 +734,7 @@ async function main() {
           skill_status: 'ACTIVE',
           learning_hours: 80,
           project_experience_count: 2,
-          name: 'EMP000001'-'SKILL002',
+          name: 'EMP000001-SKILL002',
           code: 'EMP000001',
         },
       }),

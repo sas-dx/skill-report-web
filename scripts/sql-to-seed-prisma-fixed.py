@@ -20,6 +20,9 @@ import re
 from pathlib import Path
 from typing import List, Tuple, Any
 
+# プロジェクトルート (このスクリプトの親ディレクトリ)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 
 # --------------------------------------------------------------------------- #
 # 名称変換ユーティリティ
@@ -133,7 +136,14 @@ def format_value(value: Any) -> str:
         # 数値のまま文字列に入っていたケースを数値扱い
         return value
     if isinstance(value, str):
-        return f'"{value}"'
+        escaped = (
+            value
+            .replace('\\', '\\\\')
+            .replace('"', '\\"')
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+        )
+        return f'"{escaped}"'
     return str(value)
 
 
@@ -160,7 +170,11 @@ def generate_ts(table: str, columns: List[str], rows: List[List[Any]]) -> str:
 # --------------------------------------------------------------------------- #
 def main(sql_dir: str, output_file: str) -> None:
     sql_path = Path(sql_dir)
+    if not sql_path.is_absolute():
+        sql_path = PROJECT_ROOT / sql_path
     out_path = Path(output_file)
+    if not out_path.is_absolute():
+        out_path = PROJECT_ROOT / out_path
 
     snippets: List[str] = []
     for sql_file in sorted(sql_path.glob("*_sample_data.sql")):
@@ -202,5 +216,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     sql_dir = sys.argv[1]
-    out_file = sys.argv[2] if len(sys.argv) == 3 else "src/database/prisma/seed.ts"
+    out_file = sys.argv[2] if len(sys.argv) == 3 else str(PROJECT_ROOT / "src/database/prisma/seed.ts")
     main(sql_dir, out_file)
