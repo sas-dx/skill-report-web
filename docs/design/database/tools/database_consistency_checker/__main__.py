@@ -21,15 +21,32 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # 共通ライブラリをインポート
-from docs.design.database.tools.shared.core.config import get_config, DatabaseToolsConfig
-from docs.design.database.tools.shared.parsers.yaml_parser import YamlParser
-from docs.design.database.tools.shared.parsers.ddl_parser import DDLParser
-from docs.design.database.tools.shared.parsers.markdown_parser import MarkdownParser
-from docs.design.database.tools.shared.core.exceptions import (
-    DatabaseToolsError, 
-    ParsingError, 
-    ValidationError
-)
+try:
+    from shared.core.config import get_config, DatabaseToolsConfig
+    from shared.parsers.yaml_parser import YamlParser
+    from shared.parsers.ddl_parser import DDLParser
+    from shared.parsers.markdown_parser import MarkdownParser
+    from shared.core.exceptions import (
+        DatabaseToolsException, 
+        ParsingError, 
+        ValidationError
+    )
+except ImportError:
+    # フォールバック: 相対パスでインポート
+    import sys
+    from pathlib import Path
+    tools_dir = Path(__file__).parent.parent
+    sys.path.insert(0, str(tools_dir))
+    
+    from shared.core.config import get_config, DatabaseToolsConfig
+    from shared.parsers.yaml_parser import YamlParser
+    from shared.parsers.ddl_parser import DDLParser
+    from shared.parsers.markdown_parser import MarkdownParser
+    from shared.core.exceptions import (
+        DatabaseToolsException, 
+        ParsingError, 
+        ValidationError
+    )
 
 
 def setup_logger(verbose: bool = False):
@@ -52,7 +69,7 @@ class ConsistencyCheckService:
         # パーサーの初期化
         self.yaml_parser = YamlParser(config.to_dict())
         self.ddl_parser = DDLParser(config.to_dict())
-        self.markdown_parser = MarkdownParser(config.to_dict())
+        self.markdown_parser = MarkdownParser()
         
         # チェック結果
         self.check_results = []
@@ -184,14 +201,27 @@ class ConsistencyCheckService:
                 if not yaml_file.exists():
                     continue
                 
-                yaml_table_def = self.yaml_parser.parse_file(yaml_file)
+                yaml_table_def = self.yaml_parser.parse(yaml_file)
                 
                 # DDLファイル読み込み
                 ddl_file = self.config.ddl_dir / f"{table_name}.sql"
                 if not ddl_file.exists():
                     continue
                 
-                ddl_table_def = self.ddl_parser.parse_file(ddl_file)
+                ddl_table_defs = self.ddl_parser.parse(ddl_file)
+                
+                # DDLパーサーはリストを返すので、対象テーブルを検索
+                ddl_table_def = None
+                for table_def in ddl_table_defs:
+                    if table_def.table_name == table_name:
+                        ddl_table_def = table_def
+                        break
+                
+                if ddl_table_def is None:
+                    error_msg = f"{table_name}: DDLファイルに該当テーブルの定義が見つかりません"
+                    result['errors'].append(error_msg)
+                    result['status'] = 'FAIL'
+                    continue
                 
                 # カラム比較
                 yaml_columns = {col.name: col for col in yaml_table_def.columns}
@@ -230,16 +260,19 @@ class ConsistencyCheckService:
                         yaml_col = yaml_columns[col_name]
                         ddl_col = ddl_columns[col_name]
                         
-                        # データ型比較
-                        if yaml_col.data_type != ddl_col.data_type:
-                            error_msg = f"{table_name}.{col_name}: データ型不一致 YAML({yaml_col.data_type}) ≠ DDL({ddl_col.data_type})"
+                        # データ型比較（DDLパーサーはtype属性、YAMLパーサーはdata_type属性を使用）
+                        yaml_type = getattr(yaml_col, 'data_type', getattr(yaml_col, 'type', ''))
+                        ddl_type = getattr(ddl_col, 'type', getattr(ddl_col, 'data_type', ''))
+                        
+                        if yaml_type != ddl_type:
+                            error_msg = f"{table_name}.{col_name}: データ型不一致 YAML({yaml_type}) ≠ DDL({ddl_type})"
                             result['errors'].append(error_msg)
                             result['status'] = 'FAIL'
                             table_result['column_mismatches'].append({
                                 'column': col_name,
                                 'issue': 'data_type_mismatch',
-                                'yaml_type': yaml_col.data_type,
-                                'ddl_type': ddl_col.data_type
+                                'yaml_type': yaml_type,
+                                'ddl_type': ddl_type
                             })
                         
                         # NULL制約比較
@@ -281,7 +314,7 @@ class ConsistencyCheckService:
                 if not yaml_file.exists():
                     continue
                 
-                yaml_table_def = self.yaml_parser.parse_file(yaml_file)
+                yaml_table_def = self.yaml_parser.parse(yaml_file)
                 
                 table_result = {
                     'table_name': table_name,

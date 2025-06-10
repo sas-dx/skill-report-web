@@ -40,6 +40,14 @@ class CheckStatus(Enum):
     SKIPPED = "SKIPPED"
 
 
+class CheckSeverity(Enum):
+    """チェック重要度"""
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
+
+
 class GenerationStatus(Enum):
     """生成結果ステータス"""
     SUCCESS = "SUCCESS"
@@ -731,6 +739,69 @@ class ReportSummary:
             'success_rate': self.get_success_rate(),
             'execution_time': self.execution_time,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+
+@dataclass
+class ConsistencyReport:
+    """整合性チェックレポート"""
+    summary: ReportSummary = field(default_factory=ReportSummary)
+    check_results: List[CheckResult] = field(default_factory=list)
+    table_results: Dict[str, CheckResultSummary] = field(default_factory=dict)
+    execution_time: Optional[float] = None
+    timestamp: Optional[datetime] = None
+    
+    def __post_init__(self):
+        """初期化後の処理"""
+        if self.timestamp is None:
+            self.timestamp = datetime.now()
+    
+    def add_check_result(self, result: CheckResult):
+        """チェック結果を追加"""
+        self.check_results.append(result)
+        self.summary.add_check_result(result)
+        
+        # テーブル別結果に追加
+        if result.table_name not in self.table_results:
+            self.table_results[result.table_name] = CheckResultSummary(table_name=result.table_name)
+        self.table_results[result.table_name].add_result(result)
+    
+    def get_error_count(self) -> int:
+        """エラー数を取得"""
+        return len([r for r in self.check_results if r.is_error()])
+    
+    def get_warning_count(self) -> int:
+        """警告数を取得"""
+        return len([r for r in self.check_results if r.is_warning()])
+    
+    def get_success_count(self) -> int:
+        """成功数を取得"""
+        return len([r for r in self.check_results if r.is_success()])
+    
+    def has_errors(self) -> bool:
+        """エラーがあるかチェック"""
+        return self.get_error_count() > 0
+    
+    def has_warnings(self) -> bool:
+        """警告があるかチェック"""
+        return self.get_warning_count() > 0
+    
+    def is_valid(self) -> bool:
+        """全体的に有効かどうか判定"""
+        return not self.has_errors()
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """辞書形式に変換"""
+        return {
+            'summary': self.summary.to_dict(),
+            'check_results': [r.to_dict() for r in self.check_results],
+            'table_results': {k: v.to_dict() for k, v in self.table_results.items()},
+            'execution_time': self.execution_time,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'error_count': self.get_error_count(),
+            'warning_count': self.get_warning_count(),
+            'success_count': self.get_success_count(),
+            'is_valid': self.is_valid()
         }
 
 

@@ -67,8 +67,8 @@ class SampleDataGenerator:
         # シーケンス管理
         self.sequences = {}
     
-    def generate_sample_data(self, table_definition: TableDefinition, 
-                           record_count: int = 10) -> str:
+    def generate(self, table_definition: TableDefinition, 
+                record_count: int = 10) -> str:
         """
         テーブル定義からサンプルデータのINSERT文を生成
         
@@ -133,21 +133,21 @@ class SampleDataGenerator:
                 return 'NULL'
             
             # デフォルト値がある場合
-            if column.default_value and random.random() < 0.2:  # 20%の確率でデフォルト値
-                return f"'{column.default_value}'"
+            if column.default and random.random() < 0.2:  # 20%の確率でデフォルト値
+                return f"'{column.default}'"
             
             # カラム名に基づく特別な生成ルール
             column_name_lower = column.name.lower()
             for pattern, generator in self.column_name_generators.items():
                 if pattern in column_name_lower:
                     value = generator()
-                    return self._format_value(value, column.data_type)
+                    return self._format_value(value, column.type)
             
             # データ型に基づく生成
-            base_type = self._extract_base_type(column.data_type)
+            base_type = self._extract_base_type(column.type)
             if base_type in self.data_generators:
                 value = self.data_generators[base_type](column, record_index)
-                return self._format_value(value, column.data_type)
+                return self._format_value(value, column.type)
             
             # デフォルト値
             return "'sample_value'"
@@ -187,7 +187,7 @@ class SampleDataGenerator:
     def _generate_varchar(self, column: ColumnDefinition, record_index: int) -> str:
         """VARCHAR型の値を生成"""
         # 長さ制限を取得
-        max_length = self._extract_length(column.data_type, 50)
+        max_length = self._extract_length(column.type, 50)
         text = self.fake.text(max_nb_chars=max_length)
         return text[:max_length]
     
@@ -229,7 +229,7 @@ class SampleDataGenerator:
     
     def _generate_decimal(self, column: ColumnDefinition, record_index: int) -> float:
         """DECIMAL/NUMERIC型の値を生成"""
-        precision, scale = self._extract_precision_scale(column.data_type, 10, 2)
+        precision, scale = self._extract_precision_scale(column.type, 10, 2)
         max_value = 10 ** (precision - scale) - 1
         return round(random.uniform(0, max_value), scale)
     

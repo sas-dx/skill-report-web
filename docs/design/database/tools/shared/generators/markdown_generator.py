@@ -58,9 +58,11 @@ class MarkdownGenerator:
             for column in table_definition.columns:
                 null_allowed = "YES" if column.nullable else "NO"
                 primary_key = "YES" if column.primary_key else "NO"
-                default_value = column.default_value if column.default_value else "-"
+                default_value = column.default if column.default else "-"
+                comment = column.comment if column.comment else "-"
+                requirement_id = column.requirement_id if column.requirement_id else "-"
                 
-                lines.append(f"| {column.name} | {column.data_type} | {null_allowed} | {primary_key} | {default_value} | {column.comment} | {column.requirement_id} |")
+                lines.append(f"| {column.name} | {column.type} | {null_allowed} | {primary_key} | {default_value} | {comment} | {requirement_id} |")
             
             lines.append("")
             

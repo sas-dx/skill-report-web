@@ -16,17 +16,25 @@ from pathlib import Path
 import logging
 
 # プロジェクトルートをパスに追加
-project_root = Path(__file__).parent.parent.parent.parent.parent
+# __file__ = docs/design/database/tools/table_generator/__main__.py
+# .parent = docs/design/database/tools/table_generator/
+# .parent = docs/design/database/tools/
+# .parent = docs/design/database/
+# .parent = docs/design/
+# .parent = docs/
+# .parent = /home/kurosawa/skill-report-web/
+project_root = Path(__file__).parent.parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
+print(f"DEBUG: project_root = {project_root}")
 
 # 共通ライブラリをインポート
-from docs.design.database.tools.shared.core.config import get_config, DatabaseToolsConfig
-from docs.design.database.tools.shared.parsers.yaml_parser import YamlParser
-from docs.design.database.tools.shared.generators.ddl_generator import DDLGenerator
-from docs.design.database.tools.shared.generators.markdown_generator import MarkdownGenerator
-from docs.design.database.tools.shared.generators.sample_data_generator import SampleDataGenerator
-from docs.design.database.tools.shared.core.exceptions import (
-    DatabaseToolsError, 
+from shared.core.config import get_config, DatabaseToolsConfig
+from shared.parsers.yaml_parser import YamlParser
+from shared.generators.ddl_generator import DDLGenerator
+from shared.generators.markdown_generator import MarkdownGenerator
+from shared.generators.sample_data_generator import SampleDataGenerator
+from shared.core.exceptions import (
+    DatabaseToolsException, 
     ParsingError, 
     GenerationError
 )
@@ -50,10 +58,10 @@ class TableGeneratorService:
         self.logger = logging.getLogger(__name__)
         
         # パーサーとジェネレーターの初期化
-        self.yaml_parser = YamlParser(config.to_dict())
-        self.ddl_generator = DDLGenerator(config.to_dict())
-        self.markdown_generator = MarkdownGenerator(config.to_dict())
-        self.sample_data_generator = SampleDataGenerator(config.to_dict())
+        self.yaml_parser = YamlParser()
+        self.ddl_generator = DDLGenerator()
+        self.markdown_generator = MarkdownGenerator()
+        self.sample_data_generator = SampleDataGenerator()
     
     def process_table(self, table_name: str) -> dict:
         """テーブル処理実行"""
@@ -73,7 +81,7 @@ class TableGeneratorService:
                 raise ParsingError(f"YAML詳細定義ファイルが見つかりません: {yaml_file}")
             
             # テーブル定義の解析
-            table_def = self.yaml_parser.parse_file(yaml_file)
+            table_def = self.yaml_parser.parse(yaml_file)
             self.logger.debug(f"テーブル定義解析完了: {table_def.name}")
             
             # 出力ディレクトリの作成
@@ -189,9 +197,13 @@ def main():
         # 統合設定を使用
         config = get_config()
         
+        # プロジェクトルートを正しく設定
+        config.base_dir = project_root
+        config.__post_init__()  # パスを再計算
+        
         # コマンドライン引数で設定を上書き（必要に応じて）
         if args.verbose:
-            config.verbose = True
+            config.log_level = config.log_level  # verboseフラグの処理は後で実装
         
         logger.info("テーブル生成ツール開始（共通ライブラリ対応版）")
         logger.info(f"ベースディレクトリ: {config.base_dir}")

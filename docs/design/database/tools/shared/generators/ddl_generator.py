@@ -147,10 +147,24 @@ class DDLGenerator:
             parts.append("NOT NULL")
         
         # デフォルト値
-        if column.default:
-            if column.default.upper() in ['CURRENT_TIMESTAMP', 'NOW()', 'UUID_GENERATE_V4()']:
+        if column.default is not None:
+            # 文字列の場合のみ.upper()を呼び出し
+            if isinstance(column.default, str):
+                if column.default.upper() in ['CURRENT_TIMESTAMP', 'NOW()', 'UUID_GENERATE_V4()']:
+                    parts.append(f"DEFAULT {column.default}")
+                elif column.default.lower() in ['true', 'false']:
+                    # ブール値の場合
+                    parts.append(f"DEFAULT {column.default.upper()}")
+                else:
+                    parts.append(f"DEFAULT '{column.default}'")
+            elif isinstance(column.default, bool):
+                # ブール値の場合
+                parts.append(f"DEFAULT {str(column.default).upper()}")
+            elif isinstance(column.default, (int, float)):
+                # 数値の場合
                 parts.append(f"DEFAULT {column.default}")
             else:
+                # その他の場合は文字列として扱う
                 parts.append(f"DEFAULT '{column.default}'")
         
         # MySQLのCOMMENT構文（設定に応じて）

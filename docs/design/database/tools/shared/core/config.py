@@ -118,13 +118,26 @@ class DatabaseToolsConfig:
     
     def __post_init__(self):
         """初期化後の設定"""
-        self.tools_dir = self.base_dir / "docs" / "design" / "database" / "tools"
-        self.table_details_dir = self.base_dir / "docs" / "design" / "database" / "table-details"
-        self.ddl_dir = self.base_dir / "docs" / "design" / "database" / "ddl"
-        self.tables_dir = self.base_dir / "docs" / "design" / "database" / "tables"
-        self.data_dir = self.base_dir / "docs" / "design" / "database" / "data"
-        self.reports_dir = self.base_dir / "docs" / "design" / "database" / "reports"
-        self.backup_dir = self.base_dir / "docs" / "design" / "database" / "backups"
+        # 実行時のディレクトリを考慮してパスを設定
+        if self.base_dir.name == "tools":
+            # toolsディレクトリから実行されている場合
+            db_dir = self.base_dir.parent
+            self.tools_dir = self.base_dir
+            self.table_details_dir = db_dir / "table-details"
+            self.ddl_dir = db_dir / "ddl"
+            self.tables_dir = db_dir / "tables"
+            self.data_dir = db_dir / "data"
+            self.reports_dir = db_dir / "reports"
+            self.backup_dir = db_dir / "backups"
+        else:
+            # プロジェクトルートから実行されている場合
+            self.tools_dir = self.base_dir / "docs" / "design" / "database" / "tools"
+            self.table_details_dir = self.base_dir / "docs" / "design" / "database" / "table-details"
+            self.ddl_dir = self.base_dir / "docs" / "design" / "database" / "ddl"
+            self.tables_dir = self.base_dir / "docs" / "design" / "database" / "tables"
+            self.data_dir = self.base_dir / "docs" / "design" / "database" / "data"
+            self.reports_dir = self.base_dir / "docs" / "design" / "database" / "reports"
+            self.backup_dir = self.base_dir / "docs" / "design" / "database" / "backups"
         
         # ディレクトリ作成
         self._ensure_directories()
