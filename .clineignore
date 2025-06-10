@@ -15,10 +15,6 @@ docs/design/database/ddl/------------.sql
 docs/design/database/tools/reports/
 docs/design/database/tools/reports/**
 
-# テストファイルの除外
-docs/design/database/tools/test_*.py
-docs/design/database/tools/test_*.md
-
 # 自動生成ファイルの除外
 src/database/prisma/migrations/
 src/database/prisma/migrations/**
