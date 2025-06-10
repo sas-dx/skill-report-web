@@ -522,6 +522,22 @@ class AdvancedConsistencyChecker(BaseChecker):
             'index_pattern': r'^idx_[a-z0-9_]+$'
         }
     
+    def _create_result(self, table_name: str, status: str, message: str, 
+                      details: dict = None, severity: str = 'info') -> CheckResult:
+        """CheckResultオブジェクトを作成"""
+        status_enum = CheckStatus.ERROR if status == 'error' else \
+                     CheckStatus.WARNING if status == 'warning' else \
+                     CheckStatus.SUCCESS
+        
+        return CheckResult(
+            check_type='advanced_check',
+            table_name=table_name,
+            status=status_enum,
+            message=message,
+            severity=severity,
+            details=details
+        )
+    
     def _check_primary_key_constraints(self, table_def: TableDefinition) -> Optional[CheckResult]:
         """主キー制約チェック"""
         pk_columns = [col for col in table_def.columns if getattr(col, 'primary_key', False)]
@@ -661,7 +677,6 @@ class AdvancedConsistencyChecker(BaseChecker):
             warnings.extend(orphan_warnings)
         
         # 結果をまとめる
-        all_results = errors + warnings
         is_valid = len(errors) == 0
         
         return CheckResult(
@@ -849,26 +864,29 @@ class AdvancedConsistencyChecker(BaseChecker):
         
         for table_name in all_tables:
             if table_name in yaml_files and table_name not in ddl_files:
-                warnings.append(self._create_result(
-                    table_name,
-                    'warning',
-                    f'孤立したYAML詳細定義ファイル: {table_name}',
+                warnings.append(CheckResult(
+                    check_type='orphaned_files',
+                    table_name=table_name,
+                    status=CheckStatus.WARNING,
+                    message=f'孤立したYAML詳細定義ファイル: {table_name}',
                     severity='warning'
                 ))
             
             if table_name in ddl_files and table_name not in yaml_files:
-                warnings.append(self._create_result(
-                    table_name,
-                    'warning',
-                    f'孤立したDDLファイル: {table_name}',
+                warnings.append(CheckResult(
+                    check_type='orphaned_files',
+                    table_name=table_name,
+                    status=CheckStatus.WARNING,
+                    message=f'孤立したDDLファイル: {table_name}',
                     severity='warning'
                 ))
             
             if table_name in md_files and table_name not in yaml_files:
-                warnings.append(self._create_result(
-                    table_name,
-                    'warning',
-                    f'孤立したMarkdown定義書: {table_name}',
+                warnings.append(CheckResult(
+                    check_type='orphaned_files',
+                    table_name=table_name,
+                    status=CheckStatus.WARNING,
+                    message=f'孤立したMarkdown定義書: {table_name}',
                     severity='warning'
                 ))
         

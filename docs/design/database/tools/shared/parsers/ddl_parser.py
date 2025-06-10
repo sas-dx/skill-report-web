@@ -146,11 +146,21 @@ class DDLParser(BaseParser):
                 elif char == ')':
                     paren_count -= 1
                     if paren_count == 0:
-                        # セミコロンまたは次のCREATE文まで検索
+                        # 閉じ括弧の後、セミコロンまたは次のCREATE文まで検索
                         j = i + 1
-                        while j < len(ddl_content) and ddl_content[j] not in (';', '\n'):
+                        # セミコロンを探す
+                        while j < len(ddl_content):
+                            if ddl_content[j] == ';':
+                                return j + 1
+                            elif ddl_content[j:j+6].upper() == 'CREATE':
+                                # 次のCREATE文が見つかった場合
+                                return j
+                            elif not ddl_content[j].isspace():
+                                # セミコロンもCREATE文もない場合は、空白以外の文字まで
+                                break
                             j += 1
-                        return j + 1 if j < len(ddl_content) else len(ddl_content)
+                        # セミコロンが見つからない場合は、ファイル末尾まで
+                        return len(ddl_content)
             else:
                 if char == string_char and (i == 0 or ddl_content[i-1] != '\\'):
                     in_string = False
@@ -164,7 +174,8 @@ class DDLParser(BaseParser):
         """テーブル定義の解析"""
         # 基本情報
         table_def = TableDefinition(
-            name=table_name,
+            name=table_name,  # nameパラメータを追加
+            table_name=table_name,
             logical_name=table_name,  # DDLからは論理名を取得できないため物理名を使用
             category=self._infer_category_from_name(table_name),
             priority='',
@@ -219,27 +230,79 @@ class DDLParser(BaseParser):
         
         columns_section = table_ddl[paren_start + 1:paren_end]
         
-        # 行ごとに分割して解析
-        lines = columns_section.split('\n')
-        current_column_def = ''
+        # デバッグ: 抽出されたカラムセクションを出力
+        if self.logger:
+            self.logger.debug(f"カラムセクション全体: '{columns_section}'")
         
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith('--'):
+        # カンマで分割（ただし括弧内のカンマは除外）
+        column_defs = []
+        current_def = ''
+        paren_count = 0
+        in_string = False
+        string_char = None
+        
+        for char in columns_section:
+            if not in_string:
+                if char in ('"', "'", '`'):
+                    in_string = True
+                    string_char = char
+                elif char == '(':
+                    paren_count += 1
+                elif char == ')':
+                    paren_count -= 1
+                elif char == ',' and paren_count == 0:
+                    # カンマで分割
+                    if current_def.strip():
+                        column_defs.append(current_def.strip())
+                    current_def = ''
+                    continue
+            else:
+                if char == string_char:
+                    in_string = False
+                    string_char = None
+            
+            current_def += char
+        
+        # 最後のカラム定義を追加
+        if current_def.strip():
+            column_defs.append(current_def.strip())
+        
+        # デバッグ: 分割されたカラム定義を出力
+        if self.logger:
+            self.logger.debug(f"分割されたカラム定義数: {len(column_defs)}")
+            for i, def_text in enumerate(column_defs):
+                self.logger.debug(f"カラム定義 {i+1}: '{def_text}'")
+        
+        # 各カラム定義を解析
+        for i, column_def in enumerate(column_defs):
+            column_def = column_def.strip()
+            if not column_def or column_def.startswith('--'):
                 continue
             
-            # 制約定義の場合はスキップ
-            if any(keyword in line.upper() for keyword in ['CONSTRAINT', 'PRIMARY KEY', 'FOREIGN KEY', 'INDEX']):
+            # 制約定義の場合はスキップ（カラム定義ではない行）
+            upper_def = column_def.upper()
+            if (upper_def.startswith('CONSTRAINT') or 
+                upper_def.startswith('PRIMARY KEY') or 
+                upper_def.startswith('FOREIGN KEY') or 
+                upper_def.startswith('INDEX') or 
+                upper_def.startswith('KEY ') or
+                upper_def.startswith('UNIQUE KEY')):
+                if self.logger:
+                    self.logger.debug(f"制約定義をスキップ: '{column_def}'")
                 continue
             
-            current_column_def += ' ' + line
+            # デバッグログ
+            if self.logger:
+                self.logger.debug(f"カラム定義解析開始 {i+1}: '{column_def}'")
             
-            # カラム定義の完了判定（カンマで終わるか、最後の行）
-            if line.endswith(',') or line == lines[-1].strip():
-                column = self._parse_single_column(current_column_def.strip())
-                if column:
-                    columns.append(column)
-                current_column_def = ''
+            column = self._parse_single_column(column_def)
+            if column:
+                columns.append(column)
+                if self.logger:
+                    self.logger.debug(f"カラム解析成功: {column.name} ({column.type})")
+            else:
+                if self.logger:
+                    self.logger.debug(f"カラム解析失敗: '{column_def}'")
         
         return columns
     
@@ -247,6 +310,10 @@ class DDLParser(BaseParser):
         """単一カラム定義の解析"""
         # カンマを除去
         column_def = column_def.rstrip(',').strip()
+        
+        # 空の定義や制約定義をスキップ
+        if not column_def:
+            return None
         
         # カラム名とデータ型の抽出
         parts = column_def.split()
@@ -257,8 +324,9 @@ class DDLParser(BaseParser):
         data_type = parts[1]
         
         # 制約の解析
-        constraints_text = ' '.join(parts[2:])
+        constraints_text = ' '.join(parts[2:]) if len(parts) > 2 else ''
         
+        # ColumnDefinitionオブジェクトの作成
         column = ColumnDefinition(
             name=column_name,
             type=data_type,
@@ -272,7 +340,9 @@ class DDLParser(BaseParser):
         # デフォルト値の抽出
         default_match = self.constraint_patterns['default'].search(constraints_text)
         if default_match:
-            column.default = default_match.group(1).strip("'\"")
+            default_value = default_match.group(1).strip("'\"")
+            # CURRENT_TIMESTAMPなどの関数は文字列として保存
+            column.default = default_value
         
         # CHECK制約の抽出
         check_match = self.constraint_patterns['check'].search(constraints_text)
@@ -319,7 +389,7 @@ class DDLParser(BaseParser):
     
     def _parse_indexes(self, ddl_content: str, table_definitions: List[TableDefinition]):
         """インデックス定義の解析"""
-        table_dict = {table.name: table for table in table_definitions}
+        table_dict = {table.table_name: table for table in table_definitions}
         
         for match in self.index_pattern.finditer(ddl_content):
             unique = bool(match.group(1))
@@ -366,10 +436,10 @@ class DDLParser(BaseParser):
             if base_type not in valid_types:
                 results.append(CheckResult(
                     check_type="ddl_validation",
-                    table_name=table.name,
+                    table_name=table.table_name,
                     status="warning",
                     message=f"未知のデータ型が使用されています: {column.type}",
-                    details={"table": table.name, "column": column.name, "type": column.type}
+                    details={"table": table.table_name, "column": column.name, "type": column.type}
                 ))
         
         # 外部キー制約の検証
@@ -377,9 +447,10 @@ class DDLParser(BaseParser):
             if not fk.references_table:
                 results.append(CheckResult(
                     check_type="ddl_validation",
+                    table_name=table.table_name,
                     status="error",
                     message="外部キー制約の参照先テーブルが指定されていません",
-                    details={"table": table.name, "foreign_key": fk.name}
+                    details={"table": table.table_name, "foreign_key": fk.name}
                 ))
         
         return results

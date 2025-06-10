@@ -18,7 +18,7 @@ from ...core.models import TableDefinition, ColumnDefinition, IndexDefinition, F
 from ...parsers.yaml_parser import YamlParser
 from ...parsers.ddl_parser import DDLParser
 from ...parsers.markdown_parser import MarkdownParser
-from ...generators.ddl_generator import DdlGenerator
+from ...generators.ddl_generator import DDLGenerator
 from ...generators.markdown_generator import MarkdownGenerator
 from ...generators.sample_data_generator import SampleDataGenerator
 
@@ -50,7 +50,7 @@ class UnifiedDataTransformAdapter:
         self.yaml_parser = YamlParser()
         self.ddl_parser = DDLParser()
         self.markdown_parser = MarkdownParser()
-        self.ddl_generator = DdlGenerator()
+        self.ddl_generator = DDLGenerator()
         self.markdown_generator = MarkdownGenerator()
         self.sample_data_generator = SampleDataGenerator()
         
@@ -601,3 +601,232 @@ class UnifiedDataTransformAdapter:
                 results.append(TransformResult(False, None, [str(e)], []))
         
         return results
+    
+    # ===== テスト用メソッド =====
+    
+    def transform_yaml_to_ddl(self, yaml_data: Dict[str, Any]) -> str:
+        """
+        YAMLデータをDDLに変換（テスト用簡易メソッド）
+        
+        Args:
+            yaml_data: YAMLデータ
+            
+        Returns:
+            str: DDL内容
+            
+        Raises:
+            DataTransformError: 変換エラー
+        """
+        result = self.yaml_to_ddl(yaml_data)
+        if not result.success:
+            raise DataTransformError(f"YAML→DDL変換に失敗しました: {', '.join(result.errors)}")
+        return result.data
+    
+    def transform_ddl_to_yaml(self, ddl_content: str) -> Dict[str, Any]:
+        """
+        DDLをYAMLデータに変換（テスト用簡易メソッド）
+        
+        Args:
+            ddl_content: DDL内容
+            
+        Returns:
+            Dict[str, Any]: YAMLデータ
+            
+        Raises:
+            DataTransformError: 変換エラー
+        """
+        result = self.ddl_to_yaml(ddl_content)
+        if not result.success:
+            raise DataTransformError(f"DDL→YAML変換に失敗しました: {', '.join(result.errors)}")
+        return result.data
+    
+    def normalize_data_type(self, data_type: str) -> str:
+        """
+        データ型を正規化（テスト用公開メソッド）
+        
+        Args:
+            data_type: データ型
+            
+        Returns:
+            str: 正規化されたデータ型
+        """
+        return self._normalize_data_type(data_type)
+    
+    def check_data_type_compatibility(self, type1: str, type2: str) -> bool:
+        """
+        データ型の互換性をチェック（テスト用公開メソッド）
+        
+        Args:
+            type1: データ型1
+            type2: データ型2
+            
+        Returns:
+            bool: 互換性があるかどうか
+        """
+        return self._are_data_types_compatible(type1, type2)
+    
+    def _validate_table_name(self, table_name: str) -> bool:
+        """
+        テーブル名のバリデーション
+        
+        Args:
+            table_name: テーブル名
+            
+        Returns:
+            bool: 有効なテーブル名かどうか
+        """
+        if not table_name:
+            return False
+        
+        # プレフィックスチェック
+        valid_prefixes = ['MST_', 'TRN_', 'HIS_', 'SYS_', 'WRK_', 'IF_']
+        if not any(table_name.startswith(prefix) for prefix in valid_prefixes):
+            return False
+        
+        # 大文字チェック
+        if table_name != table_name.upper():
+            return False
+        
+        return True
+    
+    def _normalize_data_type(self, data_type: str) -> str:
+        """
+        データ型の正規化
+        
+        Args:
+            data_type: データ型
+            
+        Returns:
+            str: 正規化されたデータ型
+        """
+        if not data_type:
+            return data_type
+        
+        # 大文字に変換
+        normalized = data_type.upper()
+        
+        # 基本的な正規化マッピング
+        type_mapping = {
+            'INT': 'INTEGER',
+            'BOOL': 'BOOLEAN',
+            'DATETIME': 'TIMESTAMP'
+        }
+        
+        # 括弧を含む型の処理
+        for old_type, new_type in type_mapping.items():
+            if normalized.startswith(old_type):
+                return normalized.replace(old_type, new_type, 1)
+        
+        return normalized
+    
+    def create_table_definition_from_yaml(self, yaml_data: Dict[str, Any]) -> TableDefinition:
+        """
+        YAMLデータからTableDefinitionを作成（テスト用簡易メソッド）
+        
+        Args:
+            yaml_data: YAMLデータ
+            
+        Returns:
+            TableDefinition: テーブル定義オブジェクト
+            
+        Raises:
+            DataTransformError: 変換エラー
+        """
+        result = self.yaml_to_table_definition(yaml_data)
+        if not result.success:
+            raise DataTransformError(f"YAML→TableDefinition変換に失敗しました: {', '.join(result.errors)}")
+        return result.data
+    
+    def validate_consistency(self, yaml_data: Dict[str, Any], ddl_content: str) -> ValidationResult:
+        """
+        データ整合性をチェック（テスト用簡易メソッド）
+        
+        Args:
+            yaml_data: YAMLデータ
+            ddl_content: DDL内容
+            
+        Returns:
+            ValidationResult: バリデーション結果
+        """
+        return self.validate_data_consistency(yaml_data, ddl_content)
+    
+    def dict_to_table_definition(self, data: Dict[str, Any]) -> TableDefinition:
+        """
+        辞書データからTableDefinitionオブジェクトを作成
+        
+        Args:
+            data: 辞書データ
+            
+        Returns:
+            TableDefinition: テーブル定義オブジェクト
+            
+        Raises:
+            DataTransformError: 変換エラー
+        """
+        try:
+            # 必須フィールドの検証
+            required_fields = ['table_name', 'logical_name', 'columns']
+            for field in required_fields:
+                if field not in data:
+                    raise DataTransformError(f"必須フィールドが不足しています: {field}")
+            
+            # カラム定義の変換
+            columns = []
+            for col_data in data['columns']:
+                column = ColumnDefinition(
+                    name=col_data['name'],
+                    type=col_data.get('type', col_data.get('data_type', '')),
+                    nullable=col_data.get('nullable', True),
+                    primary_key=col_data.get('primary_key', False),
+                    unique=col_data.get('unique', False),
+                    default=col_data.get('default', col_data.get('default_value')),
+                    comment=col_data.get('comment', ''),
+                    requirement_id=col_data.get('requirement_id', '')
+                )
+                columns.append(column)
+            
+            # インデックス定義の変換
+            indexes = []
+            for idx_data in data.get('indexes', []):
+                index = IndexDefinition(
+                    name=idx_data['name'],
+                    columns=idx_data['columns'],
+                    unique=idx_data.get('unique', False),
+                    comment=idx_data.get('comment', ''),
+                    type=idx_data.get('type', 'btree')
+                )
+                indexes.append(index)
+            
+            # 外部キー定義の変換
+            foreign_keys = []
+            for fk_data in data.get('foreign_keys', []):
+                references = fk_data.get('references', {})
+                foreign_key = ForeignKeyDefinition(
+                    name=fk_data.get('name', ''),
+                    columns=fk_data['columns'],
+                    references_table=references.get('table', ''),
+                    references_columns=references.get('columns', []),
+                    on_update=fk_data.get('on_update', 'NO ACTION'),
+                    on_delete=fk_data.get('on_delete', 'NO ACTION'),
+                    comment=fk_data.get('comment', '')
+                )
+                foreign_keys.append(foreign_key)
+            
+            # TableDefinitionオブジェクトの作成
+            table_def = TableDefinition(
+                name=data['table_name'],
+                logical_name=data['logical_name'],
+                category=data.get('category', ''),
+                priority=data.get('priority', ''),
+                requirement_id=data.get('requirement_id', ''),
+                comment=data.get('comment', ''),
+                columns=columns,
+                indexes=indexes,
+                foreign_keys=foreign_keys
+            )
+            
+            return table_def
+            
+        except Exception as e:
+            logger.error(f"辞書→TableDefinition変換エラー: {e}")
+            raise DataTransformError(f"辞書→TableDefinition変換に失敗しました: {str(e)}")

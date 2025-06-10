@@ -17,7 +17,12 @@ import unittest
 import tempfile
 import shutil
 import time
-import psutil
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 import threading
 import concurrent.futures
 from pathlib import Path
@@ -27,10 +32,10 @@ from typing import List, Dict, Any
 import statistics
 
 # テスト対象のインポート
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from table_generator.__main__ import main as table_generator_main
-from database_consistency_checker.__main__ import main as consistency_checker_main
+# from table_generator.__main__ import main as table_generator_main
+# from database_consistency_checker.__main__ import main as consistency_checker_main
 
 
 class PerformanceTestCase(unittest.TestCase):
@@ -182,6 +187,11 @@ class PerformanceTestCase(unittest.TestCase):
 
 class TestTableGenerationPerformance(PerformanceTestCase):
     """テーブル生成パフォーマンステスト"""
+    
+    def setUp(self):
+        if not PSUTIL_AVAILABLE:
+            self.skipTest("psutil is not available")
+        super().setUp()
     
     def test_single_table_generation_performance(self):
         """単一テーブル生成パフォーマンス"""

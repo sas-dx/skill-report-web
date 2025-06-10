@@ -1,405 +1,350 @@
-#!/usr/bin/env python3
 """
-データベースツールテスト実行スクリプト
+データベースツール統合テストスイート実行スクリプト
 
 要求仕様ID: PLT.1-WEB.1, SKL.1-HIER.1
 設計書: docs/design/database/08-database-design-guidelines.md
 実装日: 2025-06-08
 実装者: AI Assistant
 
-テスト実行機能：
+テストスイート実行機能：
 - ユニットテスト実行
 - 統合テスト実行
 - パフォーマンステスト実行
-- カバレッジレポート生成
-- テスト結果レポート出力
+- テストレポート生成
 """
 
+import unittest
 import sys
-import subprocess
+import os
 import argparse
 import time
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Optional
 import json
+
+# プロジェクトルートをパスに追加
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
 
 class TestRunner:
     """テスト実行管理クラス"""
     
-    def __init__(self, base_dir: Path):
-        self.base_dir = base_dir
-        self.test_dir = base_dir / 'tests'
-        self.results = {}
+    def __init__(self, verbose: bool = False):
+        self.verbose = verbose
+        self.test_results = {}
+        self.start_time = None
+        self.end_time = None
     
-    def run_unit_tests(self, verbose: bool = False) -> Dict[str, Any]:
+    def run_unit_tests(self) -> bool:
         """ユニットテスト実行"""
         print("🧪 ユニットテスト実行中...")
         
-        unit_test_dir = self.test_dir / 'unit'
-        if not unit_test_dir.exists():
-            return {'status': 'skipped', 'reason': 'ユニットテストディレクトリが存在しません'}
+        # テストディスカバリー
+        loader = unittest.TestLoader()
+        suite = loader.discover(
+            start_dir=str(project_root / 'tests' / 'unit'),
+            pattern='test_*.py',
+            top_level_dir=str(project_root)
+        )
         
-        try:
-            cmd = [
-                sys.executable, '-m', 'unittest', 'discover',
-                '-s', str(unit_test_dir),
-                '-p', 'test_*.py'
-            ]
-            
-            if verbose:
-                cmd.append('-v')
-            
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                cwd=self.base_dir
-            )
-            
-            return {
-                'status': 'success' if result.returncode == 0 else 'failed',
-                'returncode': result.returncode,
-                'stdout': result.stdout,
-                'stderr': result.stderr,
-                'duration': 0  # 実際の実装では時間測定
-            }
-            
-        except Exception as e:
-            return {
-                'status': 'error',
-                'error': str(e)
-            }
+        # テスト実行
+        runner = unittest.TextTestRunner(
+            verbosity=2 if self.verbose else 1,
+            stream=sys.stdout
+        )
+        
+        result = runner.run(suite)
+        
+        self.test_results['unit_tests'] = {
+            'tests_run': result.testsRun,
+            'failures': len(result.failures),
+            'errors': len(result.errors),
+            'skipped': len(result.skipped),
+            'success': result.wasSuccessful()
+        }
+        
+        return result.wasSuccessful()
     
-    def run_integration_tests(self, verbose: bool = False) -> Dict[str, Any]:
+    def run_integration_tests(self) -> bool:
         """統合テスト実行"""
         print("🔗 統合テスト実行中...")
         
-        integration_test_dir = self.test_dir / 'integration'
-        if not integration_test_dir.exists():
-            return {'status': 'skipped', 'reason': '統合テストディレクトリが存在しません'}
+        # テストディスカバリー
+        loader = unittest.TestLoader()
+        suite = loader.discover(
+            start_dir=str(project_root / 'tests' / 'integration'),
+            pattern='test_*.py',
+            top_level_dir=str(project_root)
+        )
         
-        try:
-            cmd = [
-                sys.executable, '-m', 'unittest', 'discover',
-                '-s', str(integration_test_dir),
-                '-p', 'test_*.py'
-            ]
-            
-            if verbose:
-                cmd.append('-v')
-            
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                cwd=self.base_dir
-            )
-            
-            return {
-                'status': 'success' if result.returncode == 0 else 'failed',
-                'returncode': result.returncode,
-                'stdout': result.stdout,
-                'stderr': result.stderr,
-                'duration': 0
-            }
-            
-        except Exception as e:
-            return {
-                'status': 'error',
-                'error': str(e)
-            }
+        # テスト実行
+        runner = unittest.TextTestRunner(
+            verbosity=2 if self.verbose else 1,
+            stream=sys.stdout
+        )
+        
+        result = runner.run(suite)
+        
+        self.test_results['integration_tests'] = {
+            'tests_run': result.testsRun,
+            'failures': len(result.failures),
+            'errors': len(result.errors),
+            'skipped': len(result.skipped),
+            'success': result.wasSuccessful()
+        }
+        
+        return result.wasSuccessful()
     
-    def run_performance_tests(self, verbose: bool = False) -> Dict[str, Any]:
+    def run_performance_tests(self) -> bool:
         """パフォーマンステスト実行"""
         print("⚡ パフォーマンステスト実行中...")
         
-        performance_test_dir = self.test_dir / 'performance'
-        if not performance_test_dir.exists():
-            return {'status': 'skipped', 'reason': 'パフォーマンステストディレクトリが存在しません'}
-        
+        # psutilの可用性チェック
         try:
-            cmd = [
-                sys.executable, '-m', 'unittest', 'discover',
-                '-s', str(performance_test_dir),
-                '-p', 'test_*.py'
-            ]
-            
-            if verbose:
-                cmd.append('-v')
-            
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                cwd=self.base_dir
-            )
-            
-            return {
-                'status': 'success' if result.returncode == 0 else 'failed',
-                'returncode': result.returncode,
-                'stdout': result.stdout,
-                'stderr': result.stderr,
-                'duration': 0
+            import psutil
+            psutil_available = True
+        except ImportError:
+            print("⚠️  psutilが利用できません。パフォーマンステストをスキップします。")
+            print("   インストール: pip install psutil")
+            psutil_available = False
+        
+        if not psutil_available:
+            self.test_results['performance_tests'] = {
+                'tests_run': 0,
+                'failures': 0,
+                'errors': 0,
+                'skipped': 1,
+                'success': True,
+                'message': 'psutil not available'
             }
-            
-        except Exception as e:
-            return {
-                'status': 'error',
-                'error': str(e)
-            }
+            return True
+        
+        # テストディスカバリー
+        loader = unittest.TestLoader()
+        suite = loader.discover(
+            start_dir=str(project_root / 'tests' / 'performance'),
+            pattern='test_*.py',
+            top_level_dir=str(project_root)
+        )
+        
+        # テスト実行
+        runner = unittest.TextTestRunner(
+            verbosity=2 if self.verbose else 1,
+            stream=sys.stdout
+        )
+        
+        result = runner.run(suite)
+        
+        self.test_results['performance_tests'] = {
+            'tests_run': result.testsRun,
+            'failures': len(result.failures),
+            'errors': len(result.errors),
+            'skipped': len(result.skipped),
+            'success': result.wasSuccessful()
+        }
+        
+        return result.wasSuccessful()
     
-    def run_coverage_analysis(self) -> Dict[str, Any]:
-        """カバレッジ分析実行"""
-        print("📊 カバレッジ分析実行中...")
-        
-        try:
-            # coverage.pyがインストールされているかチェック
-            subprocess.run([sys.executable, '-m', 'coverage', '--version'], 
-                         capture_output=True, check=True)
-            
-            # カバレッジ測定付きでテスト実行
-            coverage_cmd = [
-                sys.executable, '-m', 'coverage', 'run',
-                '--source', str(self.base_dir),
-                '--omit', f'{self.test_dir}/*',
-                '-m', 'unittest', 'discover',
-                '-s', str(self.test_dir),
-                '-p', 'test_*.py'
-            ]
-            
-            result = subprocess.run(
-                coverage_cmd,
-                capture_output=True,
-                text=True,
-                cwd=self.base_dir
-            )
-            
-            if result.returncode != 0:
-                return {
-                    'status': 'failed',
-                    'error': 'カバレッジ測定付きテスト実行に失敗',
-                    'stderr': result.stderr
-                }
-            
-            # カバレッジレポート生成
-            report_cmd = [sys.executable, '-m', 'coverage', 'report']
-            report_result = subprocess.run(
-                report_cmd,
-                capture_output=True,
-                text=True,
-                cwd=self.base_dir
-            )
-            
-            # HTMLレポート生成
-            html_cmd = [sys.executable, '-m', 'coverage', 'html', '-d', 'htmlcov']
-            subprocess.run(html_cmd, cwd=self.base_dir)
-            
-            return {
-                'status': 'success',
-                'report': report_result.stdout,
-                'html_report': 'htmlcov/index.html'
-            }
-            
-        except subprocess.CalledProcessError:
-            return {
-                'status': 'skipped',
-                'reason': 'coverage.pyがインストールされていません'
-            }
-        except Exception as e:
-            return {
-                'status': 'error',
-                'error': str(e)
-            }
-    
-    def generate_test_report(self, output_file: str = None) -> str:
-        """テスト結果レポート生成"""
-        report_lines = []
-        report_lines.append("# データベースツール テスト実行結果")
-        report_lines.append("")
-        report_lines.append(f"実行日時: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        report_lines.append("")
-        
-        # 各テストの結果
-        for test_type, result in self.results.items():
-            report_lines.append(f"## {test_type}")
-            
-            if result['status'] == 'success':
-                report_lines.append("✅ **成功**")
-            elif result['status'] == 'failed':
-                report_lines.append("❌ **失敗**")
-            elif result['status'] == 'skipped':
-                report_lines.append("⏭️ **スキップ**")
-                report_lines.append(f"理由: {result.get('reason', '不明')}")
-            elif result['status'] == 'error':
-                report_lines.append("💥 **エラー**")
-                report_lines.append(f"エラー: {result.get('error', '不明')}")
-            
-            if 'duration' in result:
-                report_lines.append(f"実行時間: {result['duration']:.2f}秒")
-            
-            if result['status'] in ['failed', 'error'] and 'stderr' in result:
-                report_lines.append("")
-                report_lines.append("### エラー詳細")
-                report_lines.append("```")
-                report_lines.append(result['stderr'])
-                report_lines.append("```")
-            
-            report_lines.append("")
-        
-        # カバレッジ情報
-        if 'coverage' in self.results:
-            coverage_result = self.results['coverage']
-            if coverage_result['status'] == 'success':
-                report_lines.append("## カバレッジ")
-                report_lines.append("```")
-                report_lines.append(coverage_result['report'])
-                report_lines.append("```")
-                report_lines.append("")
-                report_lines.append(f"HTMLレポート: {coverage_result['html_report']}")
-                report_lines.append("")
-        
-        # 総合結果
-        report_lines.append("## 総合結果")
-        
-        success_count = sum(1 for r in self.results.values() if r['status'] == 'success')
-        total_count = len(self.results)
-        
-        if success_count == total_count:
-            report_lines.append("🎉 **全テスト成功**")
-        else:
-            failed_count = sum(1 for r in self.results.values() if r['status'] == 'failed')
-            error_count = sum(1 for r in self.results.values() if r['status'] == 'error')
-            skipped_count = sum(1 for r in self.results.values() if r['status'] == 'skipped')
-            
-            report_lines.append(f"📊 **テスト結果サマリー**")
-            report_lines.append(f"- 成功: {success_count}")
-            report_lines.append(f"- 失敗: {failed_count}")
-            report_lines.append(f"- エラー: {error_count}")
-            report_lines.append(f"- スキップ: {skipped_count}")
-        
-        report_content = "\n".join(report_lines)
-        
-        # ファイル出力
-        if output_file:
-            output_path = Path(output_file)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w', encoding='utf-8') as f:
-                f.write(report_content)
-            print(f"📄 テストレポートを出力しました: {output_file}")
-        
-        return report_content
-    
-    def run_all_tests(self, verbose: bool = False, coverage: bool = False, 
-                     output_report: str = None) -> Dict[str, Any]:
+    def run_all_tests(self) -> bool:
         """全テスト実行"""
-        print("🚀 データベースツール テスト実行開始")
+        print("🚀 データベースツール統合テストスイート開始")
         print("=" * 60)
         
-        start_time = time.time()
+        self.start_time = time.time()
         
-        # ユニットテスト実行
-        self.results['ユニットテスト'] = self.run_unit_tests(verbose)
+        # 各テストスイート実行
+        unit_success = self.run_unit_tests()
+        print()
         
-        # 統合テスト実行
-        self.results['統合テスト'] = self.run_integration_tests(verbose)
+        integration_success = self.run_integration_tests()
+        print()
         
-        # パフォーマンステスト実行
-        self.results['パフォーマンステスト'] = self.run_performance_tests(verbose)
+        performance_success = self.run_performance_tests()
+        print()
         
-        # カバレッジ分析
-        if coverage:
-            self.results['coverage'] = self.run_coverage_analysis()
+        self.end_time = time.time()
         
-        end_time = time.time()
-        total_duration = end_time - start_time
-        
-        print("=" * 60)
-        print(f"⏱️ 総実行時間: {total_duration:.2f}秒")
-        
-        # レポート生成
-        if output_report:
-            self.generate_test_report(output_report)
-        
-        # 結果サマリー表示
+        # 結果サマリー出力
         self._print_summary()
         
-        return self.results
+        # 全テストが成功したかどうか
+        return unit_success and integration_success and performance_success
     
-    def _print_summary(self):
-        """結果サマリー表示"""
-        print("\n📋 テスト結果サマリー:")
+    def run_specific_tests(self, test_patterns: List[str]) -> bool:
+        """特定のテストパターン実行"""
+        print(f"🎯 特定テスト実行: {', '.join(test_patterns)}")
+        print("=" * 60)
         
-        for test_type, result in self.results.items():
-            if test_type == 'coverage':
-                continue
-                
-            status_emoji = {
-                'success': '✅',
-                'failed': '❌',
-                'skipped': '⏭️',
-                'error': '💥'
+        self.start_time = time.time()
+        
+        all_success = True
+        
+        for pattern in test_patterns:
+            print(f"\n📋 テストパターン実行: {pattern}")
+            
+            # テストディスカバリー
+            loader = unittest.TestLoader()
+            suite = loader.discover(
+                start_dir=str(project_root / 'tests'),
+                pattern=pattern,
+                top_level_dir=str(project_root)
+            )
+            
+            # テスト実行
+            runner = unittest.TextTestRunner(
+                verbosity=2 if self.verbose else 1,
+                stream=sys.stdout
+            )
+            
+            result = runner.run(suite)
+            
+            self.test_results[f'pattern_{pattern}'] = {
+                'tests_run': result.testsRun,
+                'failures': len(result.failures),
+                'errors': len(result.errors),
+                'skipped': len(result.skipped),
+                'success': result.wasSuccessful()
             }
             
-            emoji = status_emoji.get(result['status'], '❓')
-            print(f"  {emoji} {test_type}: {result['status']}")
+            if not result.wasSuccessful():
+                all_success = False
         
-        # 総合判定
-        failed_tests = [name for name, result in self.results.items() 
-                       if result['status'] in ['failed', 'error'] and name != 'coverage']
+        self.end_time = time.time()
         
-        if failed_tests:
-            print(f"\n❌ 失敗したテスト: {', '.join(failed_tests)}")
-            return False
-        else:
-            print("\n🎉 全テスト成功!")
-            return True
+        # 結果サマリー出力
+        self._print_summary()
+        
+        return all_success
+    
+    def _print_summary(self):
+        """テスト結果サマリー出力"""
+        print("=" * 60)
+        print("📊 テスト実行結果サマリー")
+        print("=" * 60)
+        
+        total_tests = 0
+        total_failures = 0
+        total_errors = 0
+        total_skipped = 0
+        all_success = True
+        
+        for test_type, results in self.test_results.items():
+            status = "✅ PASS" if results['success'] else "❌ FAIL"
+            print(f"{test_type:20} {status:8} "
+                  f"実行:{results['tests_run']:3d} "
+                  f"失敗:{results['failures']:3d} "
+                  f"エラー:{results['errors']:3d} "
+                  f"スキップ:{results['skipped']:3d}")
+            
+            total_tests += results['tests_run']
+            total_failures += results['failures']
+            total_errors += results['errors']
+            total_skipped += results['skipped']
+            
+            if not results['success']:
+                all_success = False
+        
+        print("-" * 60)
+        overall_status = "✅ 全テスト成功" if all_success else "❌ テスト失敗あり"
+        print(f"{'総合結果':20} {overall_status:8} "
+              f"実行:{total_tests:3d} "
+              f"失敗:{total_failures:3d} "
+              f"エラー:{total_errors:3d} "
+              f"スキップ:{total_skipped:3d}")
+        
+        if self.start_time and self.end_time:
+            execution_time = self.end_time - self.start_time
+            print(f"\n⏱️  総実行時間: {execution_time:.2f}秒")
+        
+        # 詳細結果をJSONファイルに出力
+        self._save_results_to_file()
+    
+    def _save_results_to_file(self):
+        """テスト結果をファイルに保存"""
+        results_file = project_root / 'test_results.json'
+        
+        detailed_results = {
+            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
+            'execution_time': self.end_time - self.start_time if self.start_time and self.end_time else 0,
+            'results': self.test_results
+        }
+        
+        try:
+            with open(results_file, 'w', encoding='utf-8') as f:
+                json.dump(detailed_results, f, indent=2, ensure_ascii=False)
+            print(f"\n📄 詳細結果を保存: {results_file}")
+        except Exception as e:
+            print(f"⚠️  結果ファイル保存に失敗: {e}")
 
 
 def main():
     """メイン関数"""
-    parser = argparse.ArgumentParser(description='データベースツール テスト実行')
+    parser = argparse.ArgumentParser(
+        description='データベースツール統合テストスイート',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+使用例:
+  python run_tests.py                    # 全テスト実行
+  python run_tests.py --unit             # ユニットテストのみ
+  python run_tests.py --integration      # 統合テストのみ
+  python run_tests.py --performance      # パフォーマンステストのみ
+  python run_tests.py --pattern "test_*" # 特定パターンのテスト
+  python run_tests.py --verbose          # 詳細出力
+        """
+    )
     
-    parser.add_argument('--unit', action='store_true', 
-                       help='ユニットテストのみ実行')
-    parser.add_argument('--integration', action='store_true', 
-                       help='統合テストのみ実行')
-    parser.add_argument('--performance', action='store_true', 
-                       help='パフォーマンステストのみ実行')
-    parser.add_argument('--coverage', action='store_true', 
-                       help='カバレッジ分析を実行')
-    parser.add_argument('--verbose', '-v', action='store_true', 
-                       help='詳細出力')
-    parser.add_argument('--output-report', '-o', type=str, 
-                       help='テストレポート出力ファイル')
+    parser.add_argument(
+        '--unit', 
+        action='store_true',
+        help='ユニットテストのみ実行'
+    )
+    
+    parser.add_argument(
+        '--integration',
+        action='store_true', 
+        help='統合テストのみ実行'
+    )
+    
+    parser.add_argument(
+        '--performance',
+        action='store_true',
+        help='パフォーマンステストのみ実行'
+    )
+    
+    parser.add_argument(
+        '--pattern',
+        nargs='+',
+        help='特定のテストパターンを実行'
+    )
+    
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='詳細出力'
+    )
     
     args = parser.parse_args()
     
-    # 実行ディレクトリ設定
-    base_dir = Path(__file__).parent
-    runner = TestRunner(base_dir)
+    # テストランナー初期化
+    runner = TestRunner(verbose=args.verbose)
     
-    # 個別テスト実行
+    # テスト実行
+    success = True
+    
     if args.unit:
-        result = runner.run_unit_tests(args.verbose)
-        runner.results['ユニットテスト'] = result
+        success = runner.run_unit_tests()
     elif args.integration:
-        result = runner.run_integration_tests(args.verbose)
-        runner.results['統合テスト'] = result
+        success = runner.run_integration_tests()
     elif args.performance:
-        result = runner.run_performance_tests(args.verbose)
-        runner.results['パフォーマンステスト'] = result
+        success = runner.run_performance_tests()
+    elif args.pattern:
+        success = runner.run_specific_tests(args.pattern)
     else:
-        # 全テスト実行
-        runner.run_all_tests(args.verbose, args.coverage, args.output_report)
-        return
+        success = runner.run_all_tests()
     
-    # 個別実行時のレポート生成
-    if args.output_report:
-        runner.generate_test_report(args.output_report)
-    
-    # 結果表示
-    runner._print_summary()
+    # 終了コード設定
+    sys.exit(0 if success else 1)
 
 
 if __name__ == '__main__':

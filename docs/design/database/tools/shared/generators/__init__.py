@@ -8,14 +8,14 @@
 """
 
 from .base_generator import BaseGenerator, GeneratorFactory
-from .ddl_generator import DdlGenerator
+from .ddl_generator import DDLGenerator
 from .markdown_generator import MarkdownGenerator
 from .sample_data_generator import SampleDataGenerator
 
 __all__ = [
     'BaseGenerator',
     'GeneratorFactory', 
-    'DdlGenerator',
+    'DDLGenerator',
     'MarkdownGenerator',
     'SampleDataGenerator'
 ]

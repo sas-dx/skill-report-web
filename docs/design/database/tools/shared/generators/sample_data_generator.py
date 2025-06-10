@@ -1,337 +1,281 @@
 """
 サンプルデータジェネレーター
-テーブル定義からサンプルデータ（SQL INSERT文）を生成する機能
 
-要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
-実装日: 2025-06-08
-実装者: AI駆動開発チーム
+TableDefinitionからサンプルデータを生成する
 """
 
-from typing import List, Optional, Any, Dict
-from datetime import datetime, date, timedelta
+from typing import Dict, List, Any, Optional
+import logging
 import random
-import uuid
+from datetime import datetime, timedelta
+from faker import Faker
 
-from .base_generator import BaseGenerator
 from ..core.models import TableDefinition, ColumnDefinition
 
+logger = logging.getLogger(__name__)
 
-class SampleDataGenerator(BaseGenerator):
+
+class SampleDataGenerator:
     """サンプルデータジェネレーター"""
     
-    def __init__(self, config=None):
-        super().__init__(config)
-        self.sample_count = self.config.get('sample_count', 5)
-        self.include_header = self.config.get('include_header', True)
-        self.use_realistic_data = self.config.get('use_realistic_data', True)
-        self.tenant_id = self.config.get('tenant_id', 'tenant001')
+    def __init__(self):
+        """初期化"""
+        self.fake = Faker('ja_JP')  # 日本語ロケール
         
-        # サンプルデータのパターン
-        self._init_sample_patterns()
+        # データ型別のサンプルデータ生成ルール
+        self.data_generators = {
+            'VARCHAR': self._generate_varchar,
+            'TEXT': self._generate_text,
+            'INTEGER': self._generate_integer,
+            'BIGINT': self._generate_bigint,
+            'SMALLINT': self._generate_smallint,
+            'BOOLEAN': self._generate_boolean,
+            'TIMESTAMP': self._generate_timestamp,
+            'DATE': self._generate_date,
+            'TIME': self._generate_time,
+            'DECIMAL': self._generate_decimal,
+            'NUMERIC': self._generate_decimal,
+            'FLOAT': self._generate_float,
+            'REAL': self._generate_float,
+            'DOUBLE': self._generate_float,
+            'SERIAL': self._generate_serial,
+            'BIGSERIAL': self._generate_bigserial
+        }
+        
+        # カラム名に基づく特別なデータ生成ルール
+        self.column_name_generators = {
+            'name': lambda: self.fake.name(),
+            'email': lambda: self.fake.email(),
+            'phone': lambda: self.fake.phone_number(),
+            'address': lambda: self.fake.address(),
+            'company': lambda: self.fake.company(),
+            'department': lambda: random.choice(['開発部', '営業部', '総務部', '人事部', '経理部']),
+            'position': lambda: random.choice(['部長', '課長', '主任', '一般', 'アルバイト']),
+            'skill_name': lambda: random.choice(['Java', 'Python', 'JavaScript', 'React', 'Vue.js', 'Angular', 'Node.js', 'Spring Boot']),
+            'skill_level': lambda: random.randint(1, 4),
+            'tenant_id': lambda: f"tenant_{random.randint(1, 5):03d}",
+            'emp_no': lambda: f"EMP{random.randint(1, 9999):04d}",
+            'user_id': lambda: f"user_{random.randint(1, 1000):03d}",
+            'password': lambda: self.fake.password(),
+            'status': lambda: random.choice(['active', 'inactive', 'pending']),
+            'created_at': lambda: self.fake.date_time_between(start_date='-1y', end_date='now'),
+            'updated_at': lambda: self.fake.date_time_between(start_date='-30d', end_date='now'),
+            'is_deleted': lambda: random.choice([True, False]),
+            'version': lambda: random.randint(1, 10)
+        }
+        
+        # シーケンス管理
+        self.sequences = {}
     
-    def _init_sample_patterns(self):
-        """サンプルデータパターンの初期化"""
-        self.sample_names = [
-            '山田太郎', '佐藤花子', '田中一郎', '鈴木美咲', '高橋健太',
-            '渡辺由美', '伊藤誠', '中村麻衣', '小林大輔', '加藤愛子'
-        ]
-        
-        self.sample_emails = [
-            'yamada@example.com', 'sato@example.com', 'tanaka@example.com',
-            'suzuki@example.com', 'takahashi@example.com', 'watanabe@example.com',
-            'ito@example.com', 'nakamura@example.com', 'kobayashi@example.com', 'kato@example.com'
-        ]
-        
-        self.sample_departments = [
-            '開発部', '営業部', '総務部', '人事部', '経理部', 'マーケティング部'
-        ]
-        
-        self.sample_skills = [
-            'Java', 'Python', 'JavaScript', 'TypeScript', 'React', 'Vue.js',
-            'Node.js', 'Spring Boot', 'Django', 'PostgreSQL', 'MySQL', 'AWS'
-        ]
-        
-        self.sample_companies = [
-            'ABC株式会社', 'XYZ商事', 'テクノロジー企業', 'システム開発会社'
-        ]
-    
-    def generate(self, table_def: TableDefinition, output_path: Optional[str] = None) -> str:
+    def generate_sample_data(self, table_definition: TableDefinition, 
+                           record_count: int = 10) -> str:
         """
-        テーブル定義からサンプルデータを生成
+        テーブル定義からサンプルデータのINSERT文を生成
         
         Args:
-            table_def: テーブル定義オブジェクト
-            output_path: 出力ファイルパス（未使用）
+            table_definition: テーブル定義
+            record_count: 生成するレコード数
             
         Returns:
-            str: 生成されたサンプルデータSQL
+            str: INSERT文
         """
-        self._log_generation_start(table_def)
-        
         try:
-            sql_parts = []
+            lines = []
             
             # ヘッダーコメント
-            if self.include_header:
-                sql_parts.append(self._generate_header_comment(table_def))
+            lines.append(f"-- {table_definition.table_name} サンプルデータ")
+            lines.append(f"-- 生成日時: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            lines.append(f"-- レコード数: {record_count}")
+            lines.append("")
             
-            # INSERT文の生成
-            insert_sql = self._generate_insert_statements(table_def)
-            sql_parts.append(insert_sql)
+            # カラム名リスト
+            column_names = [col.name for col in table_definition.columns]
+            columns_str = ", ".join(column_names)
             
-            sql_content = '\n\n'.join(filter(None, sql_parts))
+            # INSERT文の開始
+            lines.append(f"INSERT INTO {table_definition.table_name} ({columns_str}) VALUES")
             
-            self._log_generation_complete(table_def)
-            return sql_content
+            # データ生成
+            values_list = []
+            for i in range(record_count):
+                values = []
+                for column in table_definition.columns:
+                    value = self._generate_column_value(column, i)
+                    values.append(value)
+                
+                values_str = ", ".join(str(v) for v in values)
+                values_list.append(f"  ({values_str})")
+            
+            # VALUES句を結合
+            lines.append(",\n".join(values_list) + ";")
+            lines.append("")
+            
+            return "\n".join(lines)
             
         except Exception as e:
-            raise self._handle_generation_error(e, table_def, "サンプルデータ生成エラー")
+            logger.error(f"サンプルデータ生成エラー: {e}")
+            raise
     
-    def get_file_extension(self) -> str:
-        """ファイル拡張子を取得"""
-        return '_sample_data.sql'
+    def _generate_column_value(self, column: ColumnDefinition, record_index: int) -> Any:
+        """
+        カラムの値を生成
+        
+        Args:
+            column: カラム定義
+            record_index: レコードインデックス
+            
+        Returns:
+            Any: 生成された値
+        """
+        try:
+            # NULL値の処理
+            if column.nullable and random.random() < 0.1:  # 10%の確率でNULL
+                return 'NULL'
+            
+            # デフォルト値がある場合
+            if column.default_value and random.random() < 0.2:  # 20%の確率でデフォルト値
+                return f"'{column.default_value}'"
+            
+            # カラム名に基づく特別な生成ルール
+            column_name_lower = column.name.lower()
+            for pattern, generator in self.column_name_generators.items():
+                if pattern in column_name_lower:
+                    value = generator()
+                    return self._format_value(value, column.data_type)
+            
+            # データ型に基づく生成
+            base_type = self._extract_base_type(column.data_type)
+            if base_type in self.data_generators:
+                value = self.data_generators[base_type](column, record_index)
+                return self._format_value(value, column.data_type)
+            
+            # デフォルト値
+            return "'sample_value'"
+            
+        except Exception as e:
+            logger.error(f"カラム値生成エラー: {column.name}, {e}")
+            return "'error_value'"
     
-    def _generate_header_comment(self, table_def: TableDefinition) -> str:
-        """ヘッダーコメントの生成"""
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        lines = [
-            "-- " + "=" * 70,
-            f"-- サンプルデータ: {table_def.name}",
-            f"-- 論理名: {table_def.logical_name}",
-            f"-- 生成件数: {self.sample_count}件",
-            f"-- 生成日時: {timestamp}",
-            "-- " + "=" * 70,
-            "",
-            "-- 注意: このファイルはサンプルデータです。",
-            "-- 本番環境では使用しないでください。"
-        ]
-        
-        return '\n'.join(lines)
+    def _extract_base_type(self, data_type: str) -> str:
+        """データ型からベース型を抽出"""
+        if '(' in data_type:
+            return data_type.split('(')[0].upper()
+        return data_type.upper()
     
-    def _generate_insert_statements(self, table_def: TableDefinition) -> str:
-        """INSERT文の生成"""
-        lines = [
-            f"-- {table_def.name} サンプルデータ挿入",
-            f"INSERT INTO {table_def.name} ("
-        ]
+    def _format_value(self, value: Any, data_type: str) -> str:
+        """値をSQL形式にフォーマット"""
+        if value is None or value == 'NULL':
+            return 'NULL'
         
-        # カラム名リスト（AUTO_INCREMENTカラムを除く）
-        insert_columns = [col for col in table_def.columns if not col.auto_increment]
-        column_names = [col.name for col in insert_columns]
+        base_type = self._extract_base_type(data_type)
         
-        lines.append("    " + ",\n    ".join(column_names))
-        lines.append(") VALUES")
+        # 文字列型
+        if base_type in ['VARCHAR', 'TEXT', 'CHAR']:
+            escaped_value = str(value).replace("'", "''")
+            return f"'{escaped_value}'"
         
-        # サンプルデータ行の生成
-        value_rows = []
-        for i in range(self.sample_count):
-            row_values = self._generate_sample_row(table_def, insert_columns, i)
-            value_rows.append(f"    ({', '.join(row_values)})")
+        # 日時型
+        elif base_type in ['TIMESTAMP', 'DATE', 'TIME']:
+            return f"'{value}'"
         
-        lines.append(",\n".join(value_rows) + ";")
-        
-        return '\n'.join(lines)
+        # 数値型・ブール型
+        else:
+            return str(value)
     
-    def _generate_sample_row(self, table_def: TableDefinition, columns: List[ColumnDefinition], row_index: int) -> List[str]:
-        """サンプルデータ行の生成"""
-        values = []
-        
-        for column in columns:
-            value = self._generate_column_value(table_def, column, row_index)
-            values.append(value)
-        
-        return values
+    # データ型別生成メソッド
     
-    def _generate_column_value(self, table_def: TableDefinition, column: ColumnDefinition, row_index: int) -> str:
-        """カラム値の生成"""
-        # デフォルト値がある場合
-        if column.default is not None:
-            if isinstance(column.default, str):
-                if column.default.upper() in ['CURRENT_TIMESTAMP', 'NOW()']:
-                    return "CURRENT_TIMESTAMP"
+    def _generate_varchar(self, column: ColumnDefinition, record_index: int) -> str:
+        """VARCHAR型の値を生成"""
+        # 長さ制限を取得
+        max_length = self._extract_length(column.data_type, 50)
+        text = self.fake.text(max_nb_chars=max_length)
+        return text[:max_length]
+    
+    def _generate_text(self, column: ColumnDefinition, record_index: int) -> str:
+        """TEXT型の値を生成"""
+        return self.fake.text(max_nb_chars=200)
+    
+    def _generate_integer(self, column: ColumnDefinition, record_index: int) -> int:
+        """INTEGER型の値を生成"""
+        if column.primary_key:
+            return record_index + 1
+        return random.randint(1, 1000000)
+    
+    def _generate_bigint(self, column: ColumnDefinition, record_index: int) -> int:
+        """BIGINT型の値を生成"""
+        if column.primary_key:
+            return record_index + 1
+        return random.randint(1, 9223372036854775807)
+    
+    def _generate_smallint(self, column: ColumnDefinition, record_index: int) -> int:
+        """SMALLINT型の値を生成"""
+        return random.randint(1, 32767)
+    
+    def _generate_boolean(self, column: ColumnDefinition, record_index: int) -> bool:
+        """BOOLEAN型の値を生成"""
+        return random.choice([True, False])
+    
+    def _generate_timestamp(self, column: ColumnDefinition, record_index: int) -> datetime:
+        """TIMESTAMP型の値を生成"""
+        return self.fake.date_time_between(start_date='-1y', end_date='now')
+    
+    def _generate_date(self, column: ColumnDefinition, record_index: int) -> str:
+        """DATE型の値を生成"""
+        return self.fake.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d')
+    
+    def _generate_time(self, column: ColumnDefinition, record_index: int) -> str:
+        """TIME型の値を生成"""
+        return self.fake.time()
+    
+    def _generate_decimal(self, column: ColumnDefinition, record_index: int) -> float:
+        """DECIMAL/NUMERIC型の値を生成"""
+        precision, scale = self._extract_precision_scale(column.data_type, 10, 2)
+        max_value = 10 ** (precision - scale) - 1
+        return round(random.uniform(0, max_value), scale)
+    
+    def _generate_float(self, column: ColumnDefinition, record_index: int) -> float:
+        """FLOAT/REAL/DOUBLE型の値を生成"""
+        return round(random.uniform(0, 1000000), 2)
+    
+    def _generate_serial(self, column: ColumnDefinition, record_index: int) -> int:
+        """SERIAL型の値を生成"""
+        sequence_name = f"{column.name}_seq"
+        if sequence_name not in self.sequences:
+            self.sequences[sequence_name] = 0
+        self.sequences[sequence_name] += 1
+        return self.sequences[sequence_name]
+    
+    def _generate_bigserial(self, column: ColumnDefinition, record_index: int) -> int:
+        """BIGSERIAL型の値を生成"""
+        sequence_name = f"{column.name}_seq"
+        if sequence_name not in self.sequences:
+            self.sequences[sequence_name] = 0
+        self.sequences[sequence_name] += 1
+        return self.sequences[sequence_name]
+    
+    # ヘルパーメソッド
+    
+    def _extract_length(self, data_type: str, default: int = 50) -> int:
+        """データ型から長さを抽出"""
+        try:
+            if '(' in data_type:
+                length_str = data_type.split('(')[1].split(')')[0]
+                return int(length_str)
+            return default
+        except:
+            return default
+    
+    def _extract_precision_scale(self, data_type: str, default_precision: int = 10, 
+                                default_scale: int = 2) -> tuple:
+        """データ型から精度とスケールを抽出"""
+        try:
+            if '(' in data_type:
+                params = data_type.split('(')[1].split(')')[0]
+                if ',' in params:
+                    precision, scale = params.split(',')
+                    return int(precision.strip()), int(scale.strip())
                 else:
-                    return f"'{column.default}'"
-            else:
-                return str(column.default)
-        
-        # NULL許可の場合、一部をNULLにする
-        if column.nullable and random.random() < 0.1:  # 10%の確率でNULL
-            return "NULL"
-        
-        # データ型に基づく値生成
-        return self._generate_value_by_type(table_def, column, row_index)
-    
-    def _generate_value_by_type(self, table_def: TableDefinition, column: ColumnDefinition, row_index: int) -> str:
-        """データ型に基づく値生成"""
-        column_name = column.name.lower()
-        data_type = column.type.upper()
-        
-        # 特定のカラム名パターンに基づく生成
-        if 'tenant_id' in column_name:
-            return f"'{self.tenant_id}'"
-        elif 'id' in column_name and column.primary_key:
-            return f"'{uuid.uuid4()}'"
-        elif 'emp_no' in column_name or 'employee_no' in column_name:
-            return f"'EMP{str(row_index + 1).zfill(3)}'"
-        elif 'name' in column_name and 'file' not in column_name:
-            return f"'{self.sample_names[row_index % len(self.sample_names)]}'"
-        elif 'email' in column_name:
-            return f"'{self.sample_emails[row_index % len(self.sample_emails)]}'"
-        elif 'department' in column_name or 'dept' in column_name:
-            return f"'{self.sample_departments[row_index % len(self.sample_departments)]}'"
-        elif 'skill' in column_name and 'name' in column_name:
-            return f"'{self.sample_skills[row_index % len(self.sample_skills)]}'"
-        elif 'company' in column_name:
-            return f"'{self.sample_companies[row_index % len(self.sample_companies)]}'"
-        elif 'level' in column_name:
-            return str(random.randint(1, 4))
-        elif 'status' in column_name:
-            statuses = ['active', 'inactive', 'pending']
-            return f"'{statuses[row_index % len(statuses)]}'"
-        elif 'created_at' in column_name or 'updated_at' in column_name:
-            return "CURRENT_TIMESTAMP"
-        elif 'is_deleted' in column_name or 'deleted' in column_name:
-            return 'false'
-        elif 'version' in column_name:
-            return '1'
-        
-        # データ型に基づく生成
-        if 'VARCHAR' in data_type or 'TEXT' in data_type or 'CHAR' in data_type:
-            return self._generate_string_value(column, row_index)
-        elif 'INT' in data_type or 'SERIAL' in data_type:
-            return self._generate_integer_value(column, row_index)
-        elif 'DECIMAL' in data_type or 'NUMERIC' in data_type or 'FLOAT' in data_type:
-            return self._generate_decimal_value(column, row_index)
-        elif 'BOOLEAN' in data_type or 'BOOL' in data_type:
-            return 'true' if row_index % 2 == 0 else 'false'
-        elif 'DATE' in data_type:
-            return self._generate_date_value(column, row_index)
-        elif 'TIMESTAMP' in data_type or 'DATETIME' in data_type:
-            return "CURRENT_TIMESTAMP"
-        elif 'UUID' in data_type:
-            return f"'{uuid.uuid4()}'"
-        else:
-            # 不明な型の場合はデフォルト文字列
-            return f"'sample_value_{row_index + 1}'"
-    
-    def _generate_string_value(self, column: ColumnDefinition, row_index: int) -> str:
-        """文字列値の生成"""
-        # 長さ制限の取得
-        max_length = self._extract_length_from_type(column.type)
-        
-        base_value = f"sample_text_{row_index + 1}"
-        
-        # 長さ制限がある場合は調整
-        if max_length and len(base_value) > max_length:
-            base_value = base_value[:max_length-3] + "..."
-        
-        return f"'{base_value}'"
-    
-    def _generate_integer_value(self, column: ColumnDefinition, row_index: int) -> str:
-        """整数値の生成"""
-        if 'level' in column.name.lower():
-            return str(random.randint(1, 4))
-        elif 'version' in column.name.lower():
-            return '1'
-        elif 'count' in column.name.lower():
-            return str(random.randint(0, 100))
-        else:
-            return str(row_index + 1)
-    
-    def _generate_decimal_value(self, column: ColumnDefinition, row_index: int) -> str:
-        """小数値の生成"""
-        if 'rate' in column.name.lower() or 'ratio' in column.name.lower():
-            return str(round(random.uniform(0.0, 1.0), 2))
-        elif 'price' in column.name.lower() or 'amount' in column.name.lower():
-            return str(round(random.uniform(100.0, 10000.0), 2))
-        else:
-            return str(round(random.uniform(1.0, 100.0), 2))
-    
-    def _generate_date_value(self, column: ColumnDefinition, row_index: int) -> str:
-        """日付値の生成"""
-        base_date = date.today()
-        
-        if 'birth' in column.name.lower():
-            # 生年月日は20-60歳の範囲
-            years_ago = random.randint(20, 60)
-            birth_date = base_date - timedelta(days=years_ago * 365)
-            return f"'{birth_date}'"
-        elif 'start' in column.name.lower() or 'join' in column.name.lower():
-            # 開始日・入社日は過去1-10年
-            days_ago = random.randint(365, 3650)
-            start_date = base_date - timedelta(days=days_ago)
-            return f"'{start_date}'"
-        else:
-            # その他は過去1年以内
-            days_ago = random.randint(0, 365)
-            sample_date = base_date - timedelta(days=days_ago)
-            return f"'{sample_date}'"
-    
-    def _extract_length_from_type(self, data_type: str) -> Optional[int]:
-        """データ型から長さ制限を抽出"""
-        import re
-        match = re.search(r'\((\d+)\)', data_type)
-        return int(match.group(1)) if match else None
-    
-    def _generate_filename(self, table_def: TableDefinition) -> str:
-        """ファイル名の生成（オーバーライド）"""
-        return f"{table_def.name}_sample_data.sql"
-
-
-# ジェネレーターファクトリーへの登録
-from .base_generator import GeneratorFactory
-GeneratorFactory.register_generator('_sample_data.sql', SampleDataGenerator)
-
-
-# 便利関数
-def generate_sample_data(table_def: TableDefinition, config=None) -> str:
-    """
-    テーブル定義からサンプルデータを生成する便利関数
-    
-    Args:
-        table_def: テーブル定義オブジェクト
-        config: 設定オブジェクト
-        
-    Returns:
-        str: 生成されたサンプルデータSQL
-    """
-    generator = SampleDataGenerator(config)
-    return generator.generate(table_def)
-
-
-def generate_sample_data_file(table_def: TableDefinition, output_path: str, config=None) -> None:
-    """
-    テーブル定義からサンプルデータファイルを生成する便利関数
-    
-    Args:
-        table_def: テーブル定義オブジェクト
-        output_path: 出力ファイルパス
-        config: 設定オブジェクト
-    """
-    generator = SampleDataGenerator(config)
-    generator.generate_to_file(table_def, output_path)
-
-
-def generate_realistic_sample_data(table_def: TableDefinition, sample_count: int = 10, 
-                                 tenant_id: str = 'tenant001') -> str:
-    """
-    リアルなサンプルデータを生成する便利関数
-    
-    Args:
-        table_def: テーブル定義オブジェクト
-        sample_count: サンプル件数
-        tenant_id: テナントID
-        
-    Returns:
-        str: 生成されたサンプルデータSQL
-    """
-    config = {
-        'sample_count': sample_count,
-        'use_realistic_data': True,
-        'tenant_id': tenant_id,
-        'include_header': True
-    }
-    
-    generator = SampleDataGenerator(config)
-    return generator.generate(table_def)
+                    return int(params.strip()), 0
+            return default_precision, default_scale
+        except:
+            return default_precision, default_scale

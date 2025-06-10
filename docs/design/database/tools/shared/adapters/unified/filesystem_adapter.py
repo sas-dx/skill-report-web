@@ -469,6 +469,140 @@ class UnifiedFileSystemAdapter:
         
         shutil.copy2(file_path, target_dir / filename)
     
+    # ===== 汎用ファイル操作 =====
+    
+    def write_text_file(self, file_path: str, content: str) -> None:
+        """
+        テキストファイルを書き込み
+        
+        Args:
+            file_path: ファイルパス（相対パス）
+            content: ファイル内容
+            
+        Raises:
+            FileOperationError: ファイル書き込みエラー
+        """
+        try:
+            full_path = self.base_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            full_path.write_text(content, encoding='utf-8')
+            logger.info(f"テキストファイルを保存しました: {full_path}")
+            
+        except Exception as e:
+            logger.error(f"テキストファイル書き込みエラー: {file_path}, {e}")
+            raise FileOperationError(f"テキストファイル書き込みに失敗しました: {e}")
+    
+    def read_text_file(self, file_path: str) -> str:
+        """
+        テキストファイルを読み込み
+        
+        Args:
+            file_path: ファイルパス（相対パス）
+            
+        Returns:
+            str: ファイル内容
+            
+        Raises:
+            FileOperationError: ファイル読み込みエラー
+        """
+        try:
+            full_path = self.base_path / file_path
+            
+            if not full_path.exists():
+                raise FileOperationError(f"ファイルが見つかりません: {full_path}")
+            
+            return full_path.read_text(encoding='utf-8')
+            
+        except Exception as e:
+            logger.error(f"テキストファイル読み込みエラー: {file_path}, {e}")
+            raise FileOperationError(f"テキストファイル読み込みに失敗しました: {e}")
+    
+    def ensure_directory(self, dir_path: str) -> None:
+        """
+        ディレクトリを作成
+        
+        Args:
+            dir_path: ディレクトリパス（相対パス）
+            
+        Raises:
+            FileOperationError: ディレクトリ作成エラー
+        """
+        try:
+            full_path = self.base_path / dir_path
+            full_path.mkdir(parents=True, exist_ok=True)
+            logger.info(f"ディレクトリを作成しました: {full_path}")
+            
+        except Exception as e:
+            logger.error(f"ディレクトリ作成エラー: {dir_path}, {e}")
+            raise FileOperationError(f"ディレクトリ作成に失敗しました: {e}")
+    
+    def list_files(self, pattern: str = "*", directory: str = None) -> List[str]:
+        """
+        ファイル一覧を取得
+        
+        Args:
+            pattern: 検索パターン
+            directory: 検索対象ディレクトリ（相対パス）
+            
+        Returns:
+            List[str]: ファイルパスのリスト（相対パス）
+        """
+        try:
+            if directory:
+                search_path = self.base_path / directory
+            else:
+                search_path = self.base_path
+            
+            files = list(search_path.glob(pattern))
+            # 相対パスに変換
+            relative_files = []
+            for file_path in files:
+                if file_path.is_file():
+                    relative_path = file_path.relative_to(self.base_path)
+                    relative_files.append(str(relative_path))
+            
+            return sorted(relative_files)
+            
+        except Exception as e:
+            logger.error(f"ファイル一覧取得エラー: {pattern}, {e}")
+            raise FileOperationError(f"ファイル一覧取得に失敗しました: {e}")
+    
+    def file_exists(self, file_path: str) -> bool:
+        """
+        ファイルの存在確認
+        
+        Args:
+            file_path: ファイルパス（相対パス）
+            
+        Returns:
+            bool: ファイルが存在するかどうか
+        """
+        try:
+            full_path = self.base_path / file_path
+            return full_path.exists() and full_path.is_file()
+            
+        except Exception as e:
+            logger.error(f"ファイル存在確認エラー: {file_path}, {e}")
+            return False
+    
+    def directory_exists(self, dir_path: str) -> bool:
+        """
+        ディレクトリの存在確認
+        
+        Args:
+            dir_path: ディレクトリパス（相対パス）
+            
+        Returns:
+            bool: ディレクトリが存在するかどうか
+        """
+        try:
+            full_path = self.base_path / dir_path
+            return full_path.exists() and full_path.is_dir()
+            
+        except Exception as e:
+            logger.error(f"ディレクトリ存在確認エラー: {dir_path}, {e}")
+            return False
+    
     # ===== ユーティリティ =====
     
     def cleanup_orphaned_files(self) -> List[str]:

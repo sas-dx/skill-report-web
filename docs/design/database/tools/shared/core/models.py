@@ -132,24 +132,43 @@ class ForeignKeyDefinition:
     """外部キー定義"""
     name: str
     columns: List[str]
-    references: Dict[str, Any]  # table, columns
+    references: Dict[str, Any] = field(default_factory=dict)  # table, columns
     on_update: str = "CASCADE"
     on_delete: str = "RESTRICT"
     # 旧形式との互換性のため
     column: Optional[str] = None
     reference_table: Optional[str] = None
     reference_column: Optional[str] = None
+    # DDLParser互換性のため
+    references_table: Optional[str] = None
+    references_columns: Optional[List[str]] = None
+    comment: str = ""
     
     def __post_init__(self):
         """初期化後の処理 - 旧形式との互換性"""
         if self.column and not self.columns:
             self.columns = [self.column]
+        
+        # DDLParser形式からreferences辞書への変換
+        if self.references_table and self.references_columns:
+            if not self.references:
+                self.references = {
+                    "table": self.references_table,
+                    "columns": self.references_columns
+                }
+        
+        # 旧形式からreferences辞書への変換
         if self.reference_table and self.reference_column:
             if not self.references:
                 self.references = {
                     "table": self.reference_table,
                     "columns": [self.reference_column]
                 }
+        
+        # references辞書からDDLParser形式への逆変換
+        if self.references and not self.references_table:
+            self.references_table = self.references.get("table")
+            self.references_columns = self.references.get("columns", [])
     
     def to_ddl(self) -> str:
         """DDL文を生成"""

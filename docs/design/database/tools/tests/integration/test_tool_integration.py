@@ -23,16 +23,15 @@ import yaml
 import time
 import json
 
-# プロジェクトルートをパスに追加
-project_root = Path(__file__).parent.parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
+# テスト対象のインポート
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# 共通ライブラリをインポート
-from docs.design.database.tools.shared.core.config import get_config, DatabaseToolsConfig
-from docs.design.database.tools.shared.core.models import TableDefinition, ColumnDefinition
-from docs.design.database.tools.shared.core.exceptions import ValidationError, DatabaseToolsError
-# from docs.design.database.tools.table_generator.__main__ import main as table_generator_main
-# from docs.design.database.tools.database_consistency_checker.__main__ import main as consistency_checker_main
+from shared.core.config import DatabaseToolsConfig
+from shared.core.models import TableDefinition, ColumnDefinition
+from shared.core.exceptions import ValidationError, ParsingError
+# from table_generator.__main__ import main as table_generator_main
+# from database_consistency_checker.__main__ import main as consistency_checker_main
 
 
 class TestToolIntegration(unittest.TestCase):

@@ -122,51 +122,51 @@ pip install pyyaml
 
 ```bash
 # 全チェック実行
-python run_check.py
+python3 run_check.py
 
 # 特定のテーブルのみチェック
-python run_check.py --tables MST_Employee MST_Department
+python3 run_check.py --tables MST_Employee MST_Department
 
 # 詳細ログ付きでチェック
-python run_check.py --verbose
+python3 run_check.py --verbose
 ```
 
 ### 出力形式の指定
 
 ```bash
 # Markdown形式で出力
-python run_check.py --output-format markdown --output-file report.md
+python3 run_check.py --output-format markdown --output-file report.md
 
 # JSON形式で出力
-python run_check.py --output-format json --output-file report.json
+python3 run_check.py --output-format json --output-file report.json
 
 # コンソール出力（デフォルト）
-python run_check.py --output-format console
+python3 run_check.py --output-format console
 ```
 
 ### 特定のチェックのみ実行
 
 ```bash
 # テーブル存在チェックのみ
-python run_check.py --checks table_existence
+python3 run_check.py --checks table_existence
 
 # 孤立ファイルチェックのみ
-python run_check.py --checks orphaned_files
+python3 run_check.py --checks orphaned_files
 
 # カラム整合性チェックのみ
-python run_check.py --checks column_consistency
+python3 run_check.py --checks column_consistency
 
 # 外部キー整合性チェックのみ
-python run_check.py --checks foreign_key_consistency
+python3 run_check.py --checks foreign_key_consistency
 
 # データ型整合性チェックのみ
-python run_check.py --checks data_type_consistency
+python3 run_check.py --checks data_type_consistency
 
 # YAMLフォーマット整合性チェックのみ
-python run_check.py --checks yaml_format_consistency
+python3 run_check.py --checks yaml_format_consistency
 
 # 複数のチェックを指定
-python run_check.py --checks table_existence column_consistency foreign_key_consistency data_type_consistency yaml_format_consistency
+python3 run_check.py --checks table_existence column_consistency foreign_key_consistency data_type_consistency yaml_format_consistency
 ```
 
 ### レポート管理機能 (v1.1.0で追加)

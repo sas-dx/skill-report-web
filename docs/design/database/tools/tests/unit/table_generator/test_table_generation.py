@@ -23,11 +23,11 @@ import yaml
 
 # テスト対象のインポート
 import sys
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition
 from shared.core.exceptions import ValidationError, GenerationError, ParsingError
-from shared.generators.ddl_generator import DdlGenerator
+from shared.generators.ddl_generator import DDLGenerator
 from shared.parsers.yaml_parser import YamlParser
 
 
@@ -174,7 +174,7 @@ class TestDDLGenerator(unittest.TestCase):
     
     def setUp(self):
         """テストセットアップ"""
-        self.generator = DdlGenerator()
+        self.generator = DDLGenerator()
         self.table_def = TableDefinition(
             name='MST_Employee',
             logical_name='社員基本情報',
@@ -250,7 +250,7 @@ class TestDDLGenerator(unittest.TestCase):
     def test_generate_with_comments(self):
         """コメント付きDDL生成のテスト"""
         config = {'include_comments': True}
-        generator = DdlGenerator(config)
+        generator = DDLGenerator(config)
         ddl = generator.generate(self.table_def)
 
         self.assertIn('COMMENT ON TABLE', ddl)
@@ -259,7 +259,7 @@ class TestDDLGenerator(unittest.TestCase):
     def test_generate_without_comments(self):
         """コメントなしDDL生成のテスト"""
         config = {'include_comments': False}
-        generator = DdlGenerator(config)
+        generator = DDLGenerator(config)
         ddl = generator.generate(self.table_def)
 
         self.assertNotIn('COMMENT ON TABLE', ddl)
@@ -268,7 +268,7 @@ class TestDDLGenerator(unittest.TestCase):
     def test_generate_with_drop_statements(self):
         """DROP文付きDDL生成のテスト"""
         config = {'include_drop_statements': True}
-        generator = DdlGenerator(config)
+        generator = DDLGenerator(config)
         ddl = generator.generate(self.table_def)
 
         self.assertIn('DROP TABLE IF EXISTS MST_Employee CASCADE', ddl)
@@ -276,7 +276,7 @@ class TestDDLGenerator(unittest.TestCase):
     def test_generate_without_indexes(self):
         """インデックスなしDDL生成のテスト"""
         config = {'include_indexes': False}
-        generator = DdlGenerator(config)
+        generator = DDLGenerator(config)
         ddl = generator.generate(self.table_def)
 
         self.assertNotIn('CREATE INDEX', ddl)
@@ -284,7 +284,7 @@ class TestDDLGenerator(unittest.TestCase):
     def test_generate_without_foreign_keys(self):
         """外部キーなしDDL生成のテスト"""
         config = {'include_foreign_keys': False}
-        generator = DdlGenerator(config)
+        generator = DDLGenerator(config)
         ddl = generator.generate(self.table_def)
 
         self.assertNotIn('FOREIGN KEY', ddl)
@@ -292,7 +292,7 @@ class TestDDLGenerator(unittest.TestCase):
     def test_generate_mysql_format(self):
         """MySQL形式DDL生成のテスト"""
         config = {'database_type': 'mysql'}
-        generator = DdlGenerator(config)
+        generator = DDLGenerator(config)
         ddl = generator.generate(self.table_def)
 
         # MySQLの場合はCOMMENT構文が異なる
@@ -364,7 +364,7 @@ class TestErrorHandling(unittest.TestCase):
             requirement_id=''
         )
         
-        generator = DdlGenerator()
+        generator = DDLGenerator()
         
         # 空の名前でもDDL生成は実行されるが、結果が不正になる
         ddl = generator.generate(invalid_table_def)
