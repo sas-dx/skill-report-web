@@ -31,18 +31,24 @@
 ## YAMLフォーマット統一
 
 ### 統一フォーマット（MST_TEMPLATE_details.yamlベース）
+
+**重要**: 全てのテーブル定義は `docs/design/database/table-details/MST_TEMPLATE_details.yaml` をベースとして作成してください。
+
+#### テンプレートファイルの構造
 ```yaml
 # table-details/{テーブル名}_details.yaml
 table_name: "MST_Employee"
 logical_name: "社員基本情報"
 category: "マスタ系"
 
+# 改版履歴
 revision_history:
   - version: "1.0.0"
     date: "2025-06-01"
     author: "開発チーム"
-    changes: "初版作成"
+    changes: "初版作成 - MST_Employeeの詳細定義"
 
+# テーブル概要・目的
 overview: |
   社員の基本情報を管理するマスタテーブル
   
@@ -51,6 +57,7 @@ overview: |
   - 組織構造の管理
   - 認証・権限管理の基盤
 
+# 業務固有カラム定義
 columns:
   - name: "employee_code"
     logical: "社員コード"
@@ -69,13 +76,44 @@ columns:
     unique: false
     encrypted: true
     description: "社員の氏名（暗号化対象）"
+    
+  # ENUM型カラム例
+  - name: "status"
+    logical: "ステータス"
+    type: ENUM
+    length: null
+    null: false
+    unique: false
+    encrypted: false
+    description: "社員ステータス（active:在籍、inactive:退職、suspended:休職）"
+    enum_values: ['active', 'inactive', 'suspended']
+    default: 'active'
 
+# 業務固有インデックス
 business_indexes:
   - name: idx_employee_code
     columns: [employee_code]
     unique: true
     description: "社員コード検索用（一意）"
+    
+  - name: idx_employee_status
+    columns: [status]
+    unique: false
+    description: "ステータス検索用"
 
+# 業務固有制約
+business_constraints:
+  - name: uk_employee_code
+    type: UNIQUE
+    columns: [employee_code]
+    description: "社員コード一意制約"
+    
+  - name: chk_employee_status
+    type: CHECK
+    condition: "status IN ('active', 'inactive', 'suspended')"
+    description: "ステータス値チェック制約"
+
+# 外部キー関係
 foreign_keys:
   - name: fk_employee_department
     column: department_id
@@ -84,39 +122,114 @@ foreign_keys:
     on_update: CASCADE
     on_delete: RESTRICT
     description: "部署への外部キー"
+
+# サンプルデータ
+sample_data:
+  - employee_code: "EMP001"
+    full_name: "山田太郎"
+    status: "active"
+    department_id: "DEPT001"
+  - employee_code: "EMP002"
+    full_name: "佐藤花子"
+    status: "active"
+    department_id: "DEPT002"
+
+# 特記事項
+notes:
+  - "論理削除は is_active フラグで管理"
+  - "個人情報は暗号化対象"
+  - "パフォーマンス要件: 検索応答時間5ms以内"
+
+# 業務ルール
+business_rules:
+  - "社員コードは一意である必要がある"
+  - "退職者のデータは論理削除で管理"
+  - "個人情報の暗号化は必須"
 ```
+
+#### テンプレートファイルの主要セクション
+- **table_name**: 物理テーブル名
+- **logical_name**: 論理テーブル名（日本語）
+- **category**: テーブル分類（マスタ系/トランザクション系）
+- **revision_history**: 改版履歴管理
+- **overview**: テーブルの概要と目的
+- **columns**: 業務固有カラム定義（詳細な型・制約情報）
+- **business_indexes**: 業務固有インデックス定義
+- **business_constraints**: 業務固有制約定義
+- **foreign_keys**: 外部キー関係定義
+- **sample_data**: サンプルデータ
+- **notes**: 特記事項
+- **business_rules**: 業務ルール
 
 ## 簡素化された開発フロー
 
 ### 新規テーブル追加（簡素版）
 ```bash
-# 1. YAMLファイル作成（MST_TEMPLATE_details.yamlをコピー）
+# 1. テンプレートファイルをコピー（必須）
 cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
    docs/design/database/table-details/NEW_TABLE_details.yaml
 
-# 2. YAML内容を編集（テーブル名、カラム定義等）
+# 2. YAML内容を編集
+# - table_name: "NEW_TABLE"
+# - logical_name: "新規テーブル論理名"
+# - category: "マスタ系" または "トランザクション系"
+# - columns: 業務固有カラム定義
+# - business_indexes: 必要なインデックス
+# - foreign_keys: 外部キー関係
+# - sample_data: サンプルデータ
 
-# 3. 自動生成実行
+# 3. テーブル一覧.mdに追加
+# 新規テーブルをテーブル一覧に追加
+
+# 4. 自動生成実行
 cd docs/design/database/tools
 python3 -m table_generator --table NEW_TABLE --verbose
 
-# 4. 整合性チェック
-python run_check.py --tables NEW_TABLE
+# 5. 整合性チェック
+python database_consistency_checker/run_check.py --tables NEW_TABLE
 
-# 5. Git コミット
+# 6. Git コミット
 git add .
-git commit -m "✨ feat: NEW_TABLEテーブル追加"
+git commit -m "✨ feat: NEW_TABLEテーブル追加
+
+要求仕様ID: XXX.X-XXX.X
+- MST_TEMPLATE_details.yamlベースで作成
+- 業務固有カラム・インデックス・制約を定義
+- 自動生成ツールで定義書・DDL・サンプルデータ生成
+- 整合性チェック通過確認"
 ```
 
 ### 既存テーブル修正（簡素版）
 ```bash
-# 1. YAMLファイル修正
-# 2. 再生成実行
+# 1. 影響範囲調査
+# 修正対象テーブルの参照関係・依存関係を確認
+
+# 2. YAML詳細定義修正
+# table-details/{テーブル名}_details.yamlを更新
+# - columns: カラム追加・修正・削除
+# - business_indexes: インデックス追加・修正
+# - foreign_keys: 外部キー関係の変更
+# - revision_history: 改版履歴を更新
+
+# 3. 該当テーブルのみ再生成
+cd docs/design/database/tools
 python3 -m table_generator --table MODIFIED_TABLE --verbose
-# 3. 整合性チェック
-python run_check.py --tables MODIFIED_TABLE
-# 4. Git コミット
-git commit -am "🔧 fix: MODIFIED_TABLEテーブル修正"
+
+# 4. 整合性チェック
+python database_consistency_checker/run_check.py --tables MODIFIED_TABLE
+
+# 5. 関連テーブルの整合性確認（必要に応じて）
+python database_consistency_checker/run_check.py --checks foreign_key_consistency
+
+# 6. Git コミット
+git add .
+git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
+
+要求仕様ID: XXX.X-XXX.X
+- カラム追加/修正: {変更内容}
+- 影響範囲: {関連テーブル・機能}
+- 破壊的変更: なし/あり（詳細）
+- 整合性チェック通過確認"
 ```
 
 ## 品質保証（簡素版）
@@ -140,8 +253,10 @@ git commit -am "🔧 fix: MODIFIED_TABLEテーブル修正"
 # 1. 要求仕様ID確認・割当
 # 要求仕様書で対応するIDを確認
 
-# 2. YAML詳細定義作成
-# table-details/{テーブル名}_details.yamlを作成
+# 2. テンプレートベースでYAML詳細定義作成
+# MST_TEMPLATE_details.yamlをコピーして作成
+cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
+   docs/design/database/table-details/{テーブル名}_details.yaml
 
 # 3. テーブル一覧.md更新
 # 新規テーブルをテーブル一覧に追加
@@ -178,6 +293,7 @@ git commit -m "🆕 feat: NEW_TABLEテーブル追加
 
 # 2. YAML詳細定義修正
 # table-details/{テーブル名}_details.yamlを更新
+# ※MST_TEMPLATE_details.yamlの構造に従って修正
 
 # 3. 該当テーブルのみ再生成
 python3 -m table_generator --table MODIFIED_TABLE --verbose
