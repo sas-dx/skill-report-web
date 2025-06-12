@@ -34,118 +34,163 @@
 
 **重要**: 全てのテーブル定義は `docs/design/database/table-details/MST_TEMPLATE_details.yaml` をベースとして作成してください。
 
-#### テンプレートファイルの構造
+#### 実際のテーブル定義ファイル構造（MST_Employee_details.yaml準拠）
+
 ```yaml
-# table-details/{テーブル名}_details.yaml
+# [テーブル名] テーブル詳細定義
 table_name: "MST_Employee"
 logical_name: "社員基本情報"
 category: "マスタ系"
+priority: "最高"
+requirement_id: "PRO.1-BASE.1"
+comment: "組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブル"
 
-# 改版履歴
-revision_history:
-  - version: "1.0.0"
-    date: "2025-06-01"
-    author: "開発チーム"
-    changes: "初版作成 - MST_Employeeの詳細定義"
-
-# テーブル概要・目的
-overview: |
-  社員の基本情報を管理するマスタテーブル
-  
-  主な目的：
-  - 社員の個人情報管理
-  - 組織構造の管理
-  - 認証・権限管理の基盤
-
-# 業務固有カラム定義
+# カラム定義
 columns:
+  - name: "id"
+    type: "VARCHAR(50)"
+    nullable: false
+    primary_key: true
+    comment: "プライマリキー（UUID）"
+    requirement_id: "PLT.1-WEB.1"
+  
   - name: "employee_code"
-    logical: "社員コード"
-    type: VARCHAR
-    length: 50
-    null: false
+    type: "VARCHAR(30)"
+    nullable: false
     unique: true
-    encrypted: false
-    description: "社員を一意に識別するコード"
+    comment: "社員番号（例：EMP000001）"
+    requirement_id: "PRO.1-BASE.1"
     
   - name: "full_name"
-    logical: "氏名"
-    type: VARCHAR
-    length: 100
-    null: false
-    unique: false
-    encrypted: true
-    description: "社員の氏名（暗号化対象）"
+    type: "VARCHAR(100)"
+    nullable: false
+    comment: "氏名（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
     
-  # ENUM型カラム例
-  - name: "status"
-    logical: "ステータス"
-    type: ENUM
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: "社員ステータス（active:在籍、inactive:退職、suspended:休職）"
-    enum_values: ['active', 'inactive', 'suspended']
-    default: 'active'
+  - name: "employment_status"
+    type: "VARCHAR(20)"
+    nullable: false
+    default: "FULL_TIME"
+    comment: "雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "employee_status"
+    type: "VARCHAR(20)"
+    nullable: false
+    default: "ACTIVE"
+    comment: "在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "created_at"
+    type: "TIMESTAMP"
+    nullable: false
+    default: "CURRENT_TIMESTAMP"
+    comment: "作成日時"
+    requirement_id: "PLT.1-WEB.1"
+    
+  - name: "updated_at"
+    type: "TIMESTAMP"
+    nullable: false
+    default: "CURRENT_TIMESTAMP"
+    comment: "更新日時"
+    requirement_id: "PLT.1-WEB.1"
+    
+  - name: "is_deleted"
+    type: "BOOLEAN"
+    nullable: false
+    default: false
+    comment: "論理削除フラグ"
+    requirement_id: "PLT.1-WEB.1"
 
-# 業務固有インデックス
-business_indexes:
-  - name: idx_employee_code
-    columns: [employee_code]
+# インデックス定義
+indexes:
+  - name: "idx_employee_code"
+    columns: ["employee_code"]
     unique: true
-    description: "社員コード検索用（一意）"
+    comment: "社員番号検索用（一意）"
     
-  - name: idx_employee_status
-    columns: [status]
+  - name: "idx_email"
+    columns: ["email"]
+    unique: true
+    comment: "メールアドレス検索用（一意）"
+    
+  - name: "idx_department"
+    columns: ["department_id"]
     unique: false
-    description: "ステータス検索用"
-
-# 業務固有制約
-business_constraints:
-  - name: uk_employee_code
-    type: UNIQUE
-    columns: [employee_code]
-    description: "社員コード一意制約"
+    comment: "部署別検索用"
     
-  - name: chk_employee_status
-    type: CHECK
-    condition: "status IN ('active', 'inactive', 'suspended')"
-    description: "ステータス値チェック制約"
+  - name: "idx_status"
+    columns: ["employee_status"]
+    unique: false
+    comment: "在籍状況別検索用"
 
-# 外部キー関係
+# 外部キー定義
 foreign_keys:
-  - name: fk_employee_department
-    column: department_id
-    reference_table: MST_Department
-    reference_column: id
-    on_update: CASCADE
-    on_delete: RESTRICT
-    description: "部署への外部キー"
-
-# サンプルデータ
-sample_data:
-  - employee_code: "EMP001"
-    full_name: "山田太郎"
-    status: "active"
-    department_id: "DEPT001"
-  - employee_code: "EMP002"
-    full_name: "佐藤花子"
-    status: "active"
-    department_id: "DEPT002"
-
-# 特記事項
-notes:
-  - "論理削除は is_active フラグで管理"
-  - "個人情報は暗号化対象"
-  - "パフォーマンス要件: 検索応答時間5ms以内"
-
-# 業務ルール
-business_rules:
-  - "社員コードは一意である必要がある"
-  - "退職者のデータは論理削除で管理"
-  - "個人情報の暗号化は必須"
+  - name: "fk_employee_department"
+    columns: ["department_id"]
+    references:
+      table: "MST_Department"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "RESTRICT"
+    
+  - name: "fk_employee_position"
+    columns: ["position_id"]
+    references:
+      table: "MST_Position"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "SET NULL"
+    
+  - name: "fk_employee_manager"
+    columns: ["manager_id"]
+    references:
+      table: "MST_Employee"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "SET NULL"
 ```
+
+#### カラム定義の各属性説明
+
+| 属性 | 説明 | 必須 | 例 |
+|------|------|------|------|
+| name | 物理カラム名 | ✅ | "employee_code" |
+| type | データ型（PostgreSQL準拠、長さ含む） | ✅ | "VARCHAR(50)", "INTEGER", "TIMESTAMP" |
+| nullable | NULL許可フラグ | ✅ | true/false |
+| primary_key | 主キーフラグ | ❌ | true/false |
+| unique | 一意制約フラグ | ❌ | true/false |
+| default | デフォルト値 | ❌ | "CURRENT_TIMESTAMP", "0", "'ACTIVE'" |
+| comment | カラム説明 | ✅ | "社員番号（例：EMP000001）" |
+| requirement_id | 要求仕様ID | ✅ | "PRO.1-BASE.1" |
+
+#### 要求仕様IDの設定
+
+各カラムには必ず対応する要求仕様IDを設定してください。要求仕様IDは以下の形式に従います：
+
+- **カテゴリ.シリーズ-機能**: 例 "PRO.1-BASE.1"
+- **カテゴリ一覧**:
+  - PLT: Platform (システム基盤要件)
+  - ACC: Access Control (ユーザー権限管理)
+  - PRO: Profile (個人プロフィール管理)
+  - SKL: Skill (スキル情報管理)
+  - CAR: Career (目標・キャリア管理)
+  - WPM: Work Performance Mgmt (作業実績管理)
+  - TRN: Training (研修・セミナー管理)
+  - RPT: Report (レポート出力)
+
+要求仕様IDが不明な場合は、関連する機能の要求仕様IDを調査するか、新規IDの発行を検討してください。
+
+#### テンプレートファイルとの違い
+
+**MST_TEMPLATE_details.yaml**は詳細なテンプレートファイルですが、実際の実装では以下の簡素化された構造を使用しています：
+
+- `logical`属性は使用せず、`comment`で説明
+- `length`属性は使用せず、`type`に含める（例：`VARCHAR(50)`）
+- `encrypted`属性は使用せず、`comment`で明記
+- `business_indexes`ではなく`indexes`を使用
+- `business_constraints`は使用せず、制約は`columns`の属性で表現
+- `revision_history`、`overview`、`notes`、`business_rules`は省略可能
 
 #### テンプレートファイルの主要セクション
 - **table_name**: 物理テーブル名
