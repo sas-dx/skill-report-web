@@ -2,11 +2,11 @@
 
 ## 基本設計原則
 
-### 1. マルチテナント対応の徹底
-- **テナントID必須**: 全テーブルに`tenant_id`カラムを必須で追加
-- **データ分離**: テナント間の完全なデータ分離を保証
-- **アクセス制御**: 全クエリでテナントIDによるフィルタリング必須
-- **インデックス設計**: テナントIDを含む複合インデックスの設計
+### 1. 現実的な実装方針（シングルテナント設計）
+- **シングルテナント実装**: 現在の実装はシングルテナント設計で進行
+- **将来拡張性**: マルチテナント化への移行を考慮した設計
+- **データ整合性**: 外部キー制約による整合性保証
+- **パフォーマンス**: シンプルな設計による高速化
 
 ### 2. テーブル命名規則の厳守
 - **MST_**: マスタ系テーブル（ユーザー、ロール、部署、スキル階層等）
@@ -22,6 +22,12 @@
 - **システム系**: 書き込み重視、参照は許容範囲
 - **履歴系**: 書き込み重視、参照は低頻度
 - **ワーク系**: 処理効率重視
+
+### 4. 実装と設計書の乖離への対応
+- **設計書**: マルチテナント対応として設計済み
+- **実装**: シングルテナント設計で開発中
+- **段階的移行**: 現在の実装完成後、将来的にマルチテナント化を検討
+- **実用性重視**: 7週間での完成を重視した実用的な設計
 
 ## テーブル定義書作成ツール統合ワークフロー
 
@@ -55,31 +61,38 @@ priority: "最高"
 requirement_id: "PRO.1-BASE.1"
 
 columns:
-  - name: "id"
+  - name: "employee_code"
     type: "VARCHAR(50)"
     nullable: false
     primary_key: true
-    comment: "プライマリキー（UUID）"
+    comment: "社員コード（プライマリキー）"
     requirement_id: "PLT.1-WEB.1"
   
-  - name: "tenant_id"
-    type: "VARCHAR(50)"
-    nullable: false
-    comment: "マルチテナント識別子"
-    requirement_id: "TNT.1-MGMT.1"
+  - name: "full_name"
+    type: "VARCHAR(100)"
+    nullable: true
+    comment: "氏名"
+    requirement_id: "PRO.1-BASE.1"
+  
+  - name: "email"
+    type: "VARCHAR(255)"
+    nullable: true
+    unique: true
+    comment: "メールアドレス"
+    requirement_id: "PRO.1-BASE.1"
 
 indexes:
-  - name: "idx_employee_tenant"
-    columns: ["tenant_id"]
-    unique: false
-    comment: "テナント別検索用インデックス"
+  - name: "idx_employee_email"
+    columns: ["email"]
+    unique: true
+    comment: "メールアドレス一意制約"
 
 foreign_keys:
-  - name: "fk_employee_tenant"
-    columns: ["tenant_id"]
+  - name: "fk_employee_department"
+    columns: ["department_id"]
     references:
-      table: "MST_Tenant"
-      columns: ["id"]
+      table: "MST_Department"
+      columns: ["department_code"]
     on_update: "CASCADE"
     on_delete: "RESTRICT"
 ```
@@ -95,6 +108,10 @@ python3 -m table_generator --table MST_Employee,MST_Department,MST_Position
 
 # カテゴリ別生成
 python3 -m table_generator --table MST_* --verbose
+
+# 現在の実装状況確認
+cd ~/skill-report-web/src/database/prisma
+cat schema.prisma | grep "model " | wc -l  # 実装済みテーブル数確認
 ```
 
 #### 2.1 生成される出力ファイル
@@ -138,7 +155,8 @@ python run_check.py --checks table_existence,column_consistency
 - 🔗 **エンティティ関連の妥当性**: 正規化・非正規化の適切性
 - 📊 **パフォーマンス要件**: インデックス設計・クエリ最適化
 - 🔒 **セキュリティ要件**: 暗号化・アクセス制御の実装
-- 🏗️ **マルチテナント対応**: テナント分離の実装確認
+- 🏗️ **Prisma対応**: Prisma ORM との整合性確認
+- 📱 **実装整合性**: 設計書と実装の乖離確認・対応方針決定
 
 ## 実践的な開発フロー
 
@@ -175,7 +193,7 @@ git commit -m "🆕 feat: NEW_TABLEテーブル追加
 - YAML詳細定義作成
 - 自動生成ツールによる定義書・DDL・サンプルデータ生成
 - 整合性チェック通過確認
-- マルチテナント対応実装"
+- Prisma スキーマとの整合性確認"
 ```
 
 ### 既存テーブル修正時の標準フロー
@@ -206,7 +224,8 @@ git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 - カラム追加/修正: {変更内容}
 - 影響範囲: {関連テーブル・機能}
 - 破壊的変更: なし/あり（詳細）
-- 整合性チェック通過確認"
+- 整合性チェック通過確認
+- Prisma スキーマ更新確認"
 ```
 
 ### 一括メンテナンス作業
@@ -294,11 +313,11 @@ python run_check.py --checks orphaned_files
 - [ ] 監査証跡テーブルで改ざん防止策が実装されている
 - [ ] パスワード等の機密データがハッシュ化されている
 
-#### マルチテナント対応
-- [ ] 全テーブルにtenant_idカラムが追加されている
-- [ ] テナントIDを含む複合インデックスが設計されている
-- [ ] 外部キー制約でテナント間の参照が防止されている
-- [ ] 共有マスタテーブルの設計が適切である
+#### 実装整合性
+- [ ] Prisma スキーマとの整合性が確保されている
+- [ ] 設計書と実装の乖離が文書化されている
+- [ ] 将来のマルチテナント化への移行計画が明確である
+- [ ] シングルテナント設計での制約が適切に設定されている
 
 ## 定期メンテナンス指針
 
@@ -375,7 +394,7 @@ python run_check.py --checks orphaned_files
 - **要求仕様ID対応率**: 100%（全テーブル・全カラム）
 - **命名規則準拠率**: 100%（プレフィックス・命名規則）
 - **ドキュメント自動生成率**: 95%以上
-- **マルチテナント対応率**: 100%（全テーブル）
+- **Prisma整合性**: 100%（設計書とPrismaスキーマの整合性）
 
 ### 開発効率指標
 - **新規テーブル追加時間**: 30分以内（設計〜生成〜チェック完了）
@@ -514,8 +533,29 @@ python run_check.py --checks foreign_key_consistency
 ### 外部参照
 - **PostgreSQL公式ドキュメント**: https://www.postgresql.org/docs/
 - **Prisma公式ドキュメント**: https://www.prisma.io/docs/
-- **マルチテナント設計パターン**: 06-multitenant-development.md
+- **Next.js + Prisma ガイド**: https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/next-js
+- **マルチテナント設計パターン**: 06-multitenant-development.md（将来対応）
 - **バックエンド設計ガイドライン**: 04-backend-guidelines.md
+
+## 現在の実装状況と今後の方針
+
+### 実装済みテーブル（Prismaスキーマベース）
+- **マスタ系**: 22テーブル（MST_Employee, MST_Department等）
+- **トランザクション系**: 8テーブル（TRN_SkillRecord, TRN_GoalProgress等）
+- **履歴系**: 3テーブル（HIS_AuditLog, HIS_NotificationLog等）
+- **システム系**: 8テーブル（SYS_SkillMatrix, SYS_SystemLog等）
+- **ワーク系**: 1テーブル（WRK_BatchJobLog）
+
+### 設計書との主な乖離点
+1. **テナント対応**: 設計書はマルチテナント、実装はシングルテナント
+2. **カラム構成**: 一部テーブルで設計書と実装のカラム構成が異なる
+3. **制約設定**: 外部キー制約の設定方法が異なる
+
+### 今後の対応方針
+1. **Phase 1**: 現在のシングルテナント実装を完成
+2. **Phase 2**: 設計書と実装の乖離を文書化
+3. **Phase 3**: 将来のマルチテナント化計画を策定
+4. **Phase 4**: 段階的なマルチテナント化実装（必要に応じて）
 
 ---
 
