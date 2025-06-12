@@ -183,28 +183,44 @@ foreign_keys:
 
 #### テンプレートファイルとの違い
 
-**MST_TEMPLATE_details.yaml**は詳細なテンプレートファイルですが、実際の実装では以下の簡素化された構造を使用しています：
+**MST_TEMPLATE_details.yaml**は詳細なテンプレートファイルであり、実際の実装でも以下の項目を含む完全な形式を使用する必要があります：
 
+**必須セクション（省略不可）**：
+- `table_name`、`logical_name`、`category`：基本情報
+- `revision_history`：変更履歴の追跡（品質管理・監査要件）
+- `overview`：テーブルの目的と概要（設計意図の明確化）
+- `columns`：業務固有カラム定義
+- `business_indexes`/`indexes`：検索最適化
+- `business_constraints`/制約：データ整合性保証
+- `foreign_keys`：テーブル間関係定義
+- `notes`：特記事項・考慮点（運用・保守要件）
+- `business_rules`：業務ルール・制約（要件トレーサビリティ）
+
+**推奨セクション**：
+- `sample_data`：テスト・検証用データ
+
+**実装での簡素化項目**：
 - `logical`属性は使用せず、`comment`で説明
 - `length`属性は使用せず、`type`に含める（例：`VARCHAR(50)`）
 - `encrypted`属性は使用せず、`comment`で明記
-- `business_indexes`ではなく`indexes`を使用
-- `business_constraints`は使用せず、制約は`columns`の属性で表現
-- `revision_history`、`overview`、`notes`、`business_rules`は省略可能
 
 #### テンプレートファイルの主要セクション
+
+**必須セクション（省略不可）**：
 - **table_name**: 物理テーブル名
 - **logical_name**: 論理テーブル名（日本語）
 - **category**: テーブル分類（マスタ系/トランザクション系）
-- **revision_history**: 改版履歴管理
-- **overview**: テーブルの概要と目的
+- **revision_history**: 改版履歴管理（品質管理・監査要件）
+- **overview**: テーブルの概要と目的（設計意図の明確化）
 - **columns**: 業務固有カラム定義（詳細な型・制約情報）
-- **business_indexes**: 業務固有インデックス定義
-- **business_constraints**: 業務固有制約定義
-- **foreign_keys**: 外部キー関係定義
-- **sample_data**: サンプルデータ
-- **notes**: 特記事項
-- **business_rules**: 業務ルール
+- **business_indexes**: 業務固有インデックス定義（検索最適化）
+- **business_constraints**: 業務固有制約定義（データ整合性保証）
+- **foreign_keys**: 外部キー関係定義（テーブル間関係）
+- **notes**: 特記事項（運用・保守要件）
+- **business_rules**: 業務ルール（要件トレーサビリティ）
+
+**推奨セクション**：
+- **sample_data**: サンプルデータ（テスト・検証用）
 
 ## 簡素化された開発フロー
 
@@ -214,14 +230,18 @@ foreign_keys:
 cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
    docs/design/database/table-details/NEW_TABLE_details.yaml
 
-# 2. YAML内容を編集
+# 2. YAML内容を編集（必須セクション含む）
 # - table_name: "NEW_TABLE"
 # - logical_name: "新規テーブル論理名"
 # - category: "マスタ系" または "トランザクション系"
+# - revision_history: 改版履歴（必須）
+# - overview: テーブルの概要と目的（必須）
 # - columns: 業務固有カラム定義
 # - business_indexes: 必要なインデックス
 # - foreign_keys: 外部キー関係
-# - sample_data: サンプルデータ
+# - notes: 特記事項・考慮点（必須）
+# - business_rules: 業務ルール・制約（必須）
+# - sample_data: サンプルデータ（推奨）
 
 # 3. テーブル一覧.mdに追加
 # 新規テーブルをテーブル一覧に追加
@@ -249,12 +269,15 @@ git commit -m "✨ feat: NEW_TABLEテーブル追加
 # 1. 影響範囲調査
 # 修正対象テーブルの参照関係・依存関係を確認
 
-# 2. YAML詳細定義修正
+# 2. YAML詳細定義修正（必須セクション含む）
 # table-details/{テーブル名}_details.yamlを更新
+# - revision_history: 改版履歴を更新（必須）
+# - overview: 変更に伴う概要更新（必要に応じて）
 # - columns: カラム追加・修正・削除
 # - business_indexes: インデックス追加・修正
 # - foreign_keys: 外部キー関係の変更
-# - revision_history: 改版履歴を更新
+# - notes: 特記事項・考慮点の更新（必須）
+# - business_rules: 業務ルール・制約の更新（必須）
 
 # 3. 該当テーブルのみ再生成
 cd docs/design/database/tools
@@ -284,12 +307,14 @@ git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 - **カラム定義整合性**: データ型・制約の一致
 - **外部キー整合性**: 参照関係の妥当性
 - **命名規則チェック**: プレフィックス・命名規則の準拠
+- **必須セクション確認**: revision_history、overview、notes、business_rulesの存在チェック
 
 ### 手動レビュー項目
 - **業務要件との整合性**: 機能要件との一致
 - **Prisma対応**: Prisma ORM との整合性
 - **パフォーマンス**: インデックス設計の妥当性
 - **セキュリティ**: 暗号化・制約の適切性
+- **必須セクション内容確認**: revision_history、overview、notes、business_rulesの内容妥当性
 
 ## 実践的な開発フロー
 
@@ -430,6 +455,12 @@ python run_check.py --checks orphaned_files
 - [ ] 業務ルールがテーブル制約として適切に実装されている
 - [ ] データ項目の定義が業務要件と一致している
 - [ ] 必須項目・任意項目の設定が適切である
+
+#### 必須セクション内容確認
+- [ ] revision_historyに適切な改版履歴が記録されている
+- [ ] overviewにテーブルの目的と概要が明確に記載されている
+- [ ] notesに運用・保守に必要な特記事項が記載されている
+- [ ] business_rulesに業務ルール・制約が要件と整合している
 
 #### エンティティ関連の妥当性
 - [ ] 正規化が適切に行われている（第3正規形まで）
