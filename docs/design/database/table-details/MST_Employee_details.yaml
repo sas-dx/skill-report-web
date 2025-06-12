@@ -2,314 +2,269 @@
 table_name: "MST_Employee"
 logical_name: "社員基本情報"
 category: "マスタ系"
+priority: "最高"
+requirement_id: "PRO.1-BASE.1"
+comment: "組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブル"
 
-# 改版履歴
+# 改版履歴（必須）
 revision_history:
   - version: "1.0.0"
     date: "2025-06-01"
     author: "開発チーム"
-    changes: "初版作成 - 社員基本情報テーブルの詳細定義"
-    
+    changes: "初版作成 - MST_Employeeテーブルの詳細定義"
   - version: "1.1.0"
-    date: "2025-06-01"
+    date: "2025-06-12"
     author: "開発チーム"
-    changes: "改版履歴管理機能追加、個人情報暗号化対応強化"
-    
-  - version: "1.2.0"
-    date: "2025-06-01"
-    author: "開発チーム"
-    changes: "社員番号桁数拡張（20→30桁）、現行システム移行対応、スキルグレード管理の別テーブル化対応"
+    changes: "カラム追加 - manager_id, job_type_idを追加"
 
-# テーブル概要・目的
+# テーブル概要・目的（必須）
 overview: |
-  MST_Employee（社員基本情報）は、組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブルです。
+  組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブル。
   
   主な目的：
-  - 社員の基本プロフィール情報（氏名、連絡先、入社日等）の管理
-  - 組織階層（部署、役職、上司関係）の管理
-  - 認証システムとの連携（メールアドレスによるログイン）
-  - 人事システムとの連携（社員番号による突合）
-  - 個人情報保護法に準拠したセキュアなデータ管理
+  - 社員の基本情報（氏名、連絡先、入社日等）の管理
+  - 組織構造（部署、役職、上司関係）の管理
+  - 認証・権限管理のためのユーザー情報提供
+  - 人事システムとの連携データ基盤
   
-  このテーブルは、スキル管理、目標管理、評価管理など、システム全体の基盤となる重要なマスタデータです。
+  このテーブルは年間スキル報告書システムの中核となるマスタデータであり、
+  スキル管理、目標管理、作業実績管理の全ての機能で参照される。
 
-# 業務固有カラム定義
-business_columns:
-  - name: employee_code
-    logical: 社員番号
-    type: VARCHAR
-    length: 30
-    null: false
+# カラム定義
+columns:
+  - name: "id"
+    type: "VARCHAR(50)"
+    nullable: false
+    primary_key: true
+    comment: "プライマリキー（UUID）"
+    requirement_id: "PLT.1-WEB.1"
+  
+  - name: "employee_code"
+    type: "VARCHAR(30)"
+    nullable: false
     unique: true
-    encrypted: false
-    description: 社員を一意に識別する番号（例：EMP000001、現行システムからの移行番号も対応）
-    validation: "^[A-Z0-9]{1,30}$"
+    comment: "社員番号（例：EMP000001）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: full_name
-    logical: 氏名
-    type: VARCHAR
-    length: 100
-    null: false
-    unique: false
-    encrypted: true
-    description: 社員の氏名（個人情報のため暗号化対象）
+  - name: "full_name"
+    type: "VARCHAR(100)"
+    nullable: false
+    comment: "氏名（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: full_name_kana
-    logical: 氏名カナ
-    type: VARCHAR
-    length: 100
-    null: false
-    unique: false
-    encrypted: true
-    description: 社員の氏名カナ（個人情報のため暗号化対象）
+  - name: "full_name_kana"
+    type: "VARCHAR(100)"
+    nullable: false
+    comment: "氏名カナ（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: email
-    logical: メールアドレス
-    type: VARCHAR
-    length: 255
-    null: false
+  - name: "email"
+    type: "VARCHAR(255)"
+    nullable: false
     unique: true
-    encrypted: false
-    description: 社員のメールアドレス（ログイン認証に使用）
-    validation: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    comment: "メールアドレス（ログイン認証用）"
+    requirement_id: "ACC.1-AUTH.1"
     
-  - name: phone
-    logical: 電話番号
-    type: VARCHAR
-    length: 20
-    null: true
-    unique: false
-    encrypted: true
-    description: 社員の電話番号（個人情報のため暗号化対象）
+  - name: "phone"
+    type: "VARCHAR(20)"
+    nullable: true
+    comment: "電話番号（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: hire_date
-    logical: 入社日
-    type: DATE
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 社員の入社日
+  - name: "hire_date"
+    type: "DATE"
+    nullable: false
+    comment: "入社日"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: birth_date
-    logical: 生年月日
-    type: DATE
-    length: null
-    null: true
-    unique: false
-    encrypted: true
-    description: 社員の生年月日（個人情報のため暗号化対象）
+  - name: "birth_date"
+    type: "DATE"
+    nullable: true
+    comment: "生年月日（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: gender
-    logical: 性別
-    type: ENUM
-    length: null
-    null: true
-    unique: false
-    encrypted: false
-    description: 性別（M:男性、F:女性、O:その他）
-    enum_values: ['M', 'F', 'O']
+  - name: "gender"
+    type: "VARCHAR(1)"
+    nullable: true
+    comment: "性別（M:男性、F:女性、O:その他）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: department_id
-    logical: 部署ID
-    type: VARCHAR
-    length: 50
-    null: false
-    unique: false
-    encrypted: false
-    description: 所属部署のID（MST_Departmentへの外部キー）
+  - name: "department_id"
+    type: "VARCHAR(50)"
+    nullable: false
+    comment: "所属部署ID"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: position_id
-    logical: 役職ID
-    type: VARCHAR
-    length: 50
-    null: true
-    unique: false
-    encrypted: false
-    description: 役職のID（MST_Positionへの外部キー）
+  - name: "position_id"
+    type: "VARCHAR(50)"
+    nullable: true
+    comment: "役職ID"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: job_type_id
-    logical: 職種ID
-    type: VARCHAR
-    length: 50
-    null: true
-    unique: false
-    encrypted: false
-    description: 職種のID（MST_JobTypeへの外部キー）
+  - name: "job_type_id"
+    type: "VARCHAR(50)"
+    nullable: true
+    comment: "職種ID"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: employment_status
-    logical: 雇用形態
-    type: ENUM
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）
-    enum_values: ['FULL_TIME', 'PART_TIME', 'CONTRACT']
-    default: 'FULL_TIME'
+  - name: "employment_status"
+    type: "VARCHAR(20)"
+    nullable: false
+    default: "FULL_TIME"
+    comment: "雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: manager_id
-    logical: 上司ID
-    type: VARCHAR
-    length: 50
-    null: true
-    unique: false
-    encrypted: false
-    description: 直属の上司のID（MST_Employeeへの自己参照外部キー）
+  - name: "manager_id"
+    type: "VARCHAR(50)"
+    nullable: true
+    comment: "直属の上司ID（自己参照）"
+    requirement_id: "PRO.1-BASE.1"
     
-  - name: employee_status
-    logical: 在籍状況
-    type: ENUM
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職）
-    enum_values: ['ACTIVE', 'RETIRED', 'SUSPENDED']
-    default: 'ACTIVE'
+  - name: "employee_status"
+    type: "VARCHAR(20)"
+    nullable: false
+    default: "ACTIVE"
+    comment: "在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "created_at"
+    type: "TIMESTAMP"
+    nullable: false
+    default: "CURRENT_TIMESTAMP"
+    comment: "作成日時"
+    requirement_id: "PLT.1-WEB.1"
+    
+  - name: "updated_at"
+    type: "TIMESTAMP"
+    nullable: false
+    default: "CURRENT_TIMESTAMP"
+    comment: "更新日時"
+    requirement_id: "PLT.1-WEB.1"
+    
+  - name: "is_deleted"
+    type: "BOOLEAN"
+    nullable: false
+    default: false
+    comment: "論理削除フラグ"
+    requirement_id: "PLT.1-WEB.1"
 
-# 業務固有インデックス
-business_indexes:
-  - name: idx_employee_code
-    columns: [employee_code]
+# インデックス定義
+indexes:
+  - name: "idx_employee_code"
+    columns: ["employee_code"]
     unique: true
-    description: 社員番号検索用（一意）
+    comment: "社員番号検索用（一意）"
     
-  - name: idx_email
-    columns: [email]
+  - name: "idx_email"
+    columns: ["email"]
     unique: true
-    description: メールアドレス検索用（一意）
+    comment: "メールアドレス検索用（一意）"
     
-  - name: idx_department
-    columns: [department_id]
+  - name: "idx_department"
+    columns: ["department_id"]
     unique: false
-    description: 部署別検索用
+    comment: "部署別検索用"
     
-  - name: idx_manager
-    columns: [manager_id]
+  - name: "idx_manager"
+    columns: ["manager_id"]
     unique: false
-    description: 上司別検索用
+    comment: "上司別検索用"
     
-  - name: idx_status
-    columns: [employee_status]
+  - name: "idx_status"
+    columns: ["employee_status"]
     unique: false
-    description: 在籍状況別検索用
+    comment: "在籍状況別検索用"
     
-  - name: idx_hire_date
-    columns: [hire_date]
+  - name: "idx_hire_date"
+    columns: ["hire_date"]
     unique: false
-    description: 入社日検索用
+    comment: "入社日検索用"
 
-# 業務固有制約
-business_constraints:
-  - name: uk_employee_code
-    type: UNIQUE
-    columns: [employee_code]
-    description: 社員番号一意制約
-    
-  - name: uk_email
-    type: UNIQUE
-    columns: [email]
-    description: メールアドレス一意制約
-    
-  - name: chk_gender
-    type: CHECK
-    condition: "gender IN ('M', 'F', 'O')"
-    description: 性別値チェック制約
-    
-  - name: chk_employment_status
-    type: CHECK
-    condition: "employment_status IN ('FULL_TIME', 'PART_TIME', 'CONTRACT')"
-    description: 雇用形態値チェック制約
-    
-  - name: chk_employee_status
-    type: CHECK
-    condition: "employee_status IN ('ACTIVE', 'RETIRED', 'SUSPENDED')"
-    description: 在籍状況値チェック制約
-
-# 外部キー関係
+# 外部キー定義
 foreign_keys:
-  - name: fk_employee_department
-    column: department_id
-    reference_table: MST_Department
-    reference_column: id
-    on_update: CASCADE
-    on_delete: RESTRICT
-    description: 部署への外部キー
+  - name: "fk_employee_department"
+    columns: ["department_id"]
+    references:
+      table: "MST_Department"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "RESTRICT"
     
-  - name: fk_employee_position
-    column: position_id
-    reference_table: MST_Position
-    reference_column: id
-    on_update: CASCADE
-    on_delete: SET NULL
-    description: 役職への外部キー
+  - name: "fk_employee_position"
+    columns: ["position_id"]
+    references:
+      table: "MST_Position"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "SET NULL"
     
-  - name: fk_employee_job_type
-    column: job_type_id
-    reference_table: MST_JobType
-    reference_column: id
-    on_update: CASCADE
-    on_delete: SET NULL
-    description: 職種への外部キー
+  - name: "fk_employee_job_type"
+    columns: ["job_type_id"]
+    references:
+      table: "MST_JobType"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "SET NULL"
     
-  - name: fk_employee_manager
-    column: manager_id
-    reference_table: MST_Employee
-    reference_column: id
-    on_update: CASCADE
-    on_delete: SET NULL
-    description: 上司への自己参照外部キー
+  - name: "fk_employee_manager"
+    columns: ["manager_id"]
+    references:
+      table: "MST_Employee"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "SET NULL"
 
-# サンプルデータ
+# 特記事項（必須）
+notes:
+  - "個人情報（氏名、氏名カナ、電話番号、生年月日）は暗号化対象"
+  - "論理削除は is_deleted フラグで管理"
+  - "manager_idによる自己参照で組織階層を表現"
+  - "人事システムとの連携でマスタデータを同期"
+  - "認証・権限管理システムの基盤テーブル"
+  - "スキル管理・目標管理・作業実績管理の全機能で参照される"
+
+# 業務ルール（必須）
+business_rules:
+  - "社員番号（employee_code）は一意で変更不可"
+  - "メールアドレス（email）は認証用のため一意制約必須"
+  - "在籍状況（employee_status）がRETIREDの場合、論理削除フラグをtrueに設定"
+  - "直属の上司（manager_id）は同一部署内の上位役職者のみ設定可能"
+  - "雇用形態（employment_status）に応じた権限・機能制限を適用"
+  - "個人情報の暗号化は法的要件に基づく必須対応"
+  - "監査証跡として作成日時・更新日時は自動設定"
+
+# サンプルデータ（推奨）
 sample_data:
-  - employee_code: "EMP000001"
+  - id: "emp_001"
+    employee_code: "EMP000001"
     full_name: "山田太郎"
     full_name_kana: "ヤマダタロウ"
-    email: "yamada.taro@company.com"
+    email: "yamada.taro@example.com"
     phone: "090-1234-5678"
     hire_date: "2020-04-01"
     birth_date: "1990-01-15"
     gender: "M"
-    department_id: "DEPT001"
-    position_id: "POS001"
-    job_type_id: "JOB001"
+    department_id: "dept_001"
+    position_id: "pos_003"
+    job_type_id: "job_001"
+    employment_status: "FULL_TIME"
+    manager_id: "emp_002"
+    employee_status: "ACTIVE"
+    is_deleted: false
+    
+  - id: "emp_002"
+    employee_code: "EMP000002"
+    full_name: "佐藤花子"
+    full_name_kana: "サトウハナコ"
+    email: "sato.hanako@example.com"
+    phone: "090-2345-6789"
+    hire_date: "2018-04-01"
+    birth_date: "1985-03-20"
+    gender: "F"
+    department_id: "dept_001"
+    position_id: "pos_002"
+    job_type_id: "job_001"
     employment_status: "FULL_TIME"
     manager_id: null
     employee_status: "ACTIVE"
-    
-  - employee_code: "EMP000002"
-    full_name: "佐藤花子"
-    full_name_kana: "サトウハナコ"
-    email: "sato.hanako@company.com"
-    phone: "090-2345-6789"
-    hire_date: "2021-04-01"
-    birth_date: "1992-03-20"
-    gender: "F"
-    department_id: "DEPT002"
-    position_id: "POS002"
-    job_type_id: "JOB002"
-    employment_status: "FULL_TIME"
-    manager_id: "EMP000001"
-    employee_status: "ACTIVE"
-
-# 特記事項
-notes:
-  - "個人情報保護法に基づき氏名・氏名カナ・電話番号・生年月日は暗号化必須"
-  - "社員番号は人事システムとの連携キーとして使用"
-  - "メールアドレスは認証システムのユーザーIDとして使用"
-  - "上司IDは組織階層の管理に使用（自己参照）"
-  - "在籍状況により論理削除を実現（物理削除は行わない）"
-  - "部署・役職・職種の変更履歴は別途履歴テーブルで管理"
-  - "社員番号は30桁まで対応、現行システムからの移行番号も格納可能"
-  - "スキルグレード情報は別テーブル（TRN_EmployeeSkillGrade）で管理"
-
-# 業務ルール
-business_rules:
-  - "社員番号は入社時に自動採番（EMP + 6桁連番）または現行システムからの移行番号を使用"
-  - "現行システム移行時は既存の社員番号体系をそのまま使用可能"
-  - "メールアドレスは会社ドメイン必須"
-  - "退職時は employee_status を RETIRED に変更"
-  - "休職時は employee_status を SUSPENDED に変更"
-  - "上司は同一部署または上位部署の社員のみ設定可能"
-  - "スキルグレードは職種ごとに TRN_EmployeeSkillGrade テーブルで管理"
+    is_deleted: false

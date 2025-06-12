@@ -36,14 +36,40 @@
 
 #### 実際のテーブル定義ファイル構造（MST_Employee_details.yaml準拠）
 
+**注意**: 現在のMST_Employee_details.yamlは簡素化された形式ですが、品質管理・監査要件のため、以下の必須セクションを含む完全な形式を使用してください。
+
 ```yaml
-# [テーブル名] テーブル詳細定義
+# MST_Employee テーブル詳細定義
 table_name: "MST_Employee"
 logical_name: "社員基本情報"
 category: "マスタ系"
 priority: "最高"
 requirement_id: "PRO.1-BASE.1"
 comment: "組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブル"
+
+# 改版履歴（必須）
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-01"
+    author: "開発チーム"
+    changes: "初版作成 - MST_Employeeテーブルの詳細定義"
+  - version: "1.1.0"
+    date: "2025-06-12"
+    author: "開発チーム"
+    changes: "カラム追加 - manager_id, job_type_idを追加"
+
+# テーブル概要・目的（必須）
+overview: |
+  組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブル。
+  
+  主な目的：
+  - 社員の基本情報（氏名、連絡先、入社日等）の管理
+  - 組織構造（部署、役職、上司関係）の管理
+  - 認証・権限管理のためのユーザー情報提供
+  - 人事システムとの連携データ基盤
+  
+  このテーブルは年間スキル報告書システムの中核となるマスタデータであり、
+  スキル管理、目標管理、作業実績管理の全ての機能で参照される。
 
 # カラム定義
 columns:
@@ -67,11 +93,72 @@ columns:
     comment: "氏名（暗号化対象）"
     requirement_id: "PRO.1-BASE.1"
     
+  - name: "full_name_kana"
+    type: "VARCHAR(100)"
+    nullable: false
+    comment: "氏名カナ（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "email"
+    type: "VARCHAR(255)"
+    nullable: false
+    unique: true
+    comment: "メールアドレス（ログイン認証用）"
+    requirement_id: "ACC.1-AUTH.1"
+    
+  - name: "phone"
+    type: "VARCHAR(20)"
+    nullable: true
+    comment: "電話番号（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "hire_date"
+    type: "DATE"
+    nullable: false
+    comment: "入社日"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "birth_date"
+    type: "DATE"
+    nullable: true
+    comment: "生年月日（暗号化対象）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "gender"
+    type: "VARCHAR(1)"
+    nullable: true
+    comment: "性別（M:男性、F:女性、O:その他）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "department_id"
+    type: "VARCHAR(50)"
+    nullable: false
+    comment: "所属部署ID"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "position_id"
+    type: "VARCHAR(50)"
+    nullable: true
+    comment: "役職ID"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "job_type_id"
+    type: "VARCHAR(50)"
+    nullable: true
+    comment: "職種ID"
+    requirement_id: "PRO.1-BASE.1"
+    
   - name: "employment_status"
     type: "VARCHAR(20)"
     nullable: false
     default: "FULL_TIME"
     comment: "雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）"
+    requirement_id: "PRO.1-BASE.1"
+    
+  - name: "manager_id"
+    type: "VARCHAR(50)"
+    nullable: true
+    comment: "直属の上司ID（自己参照）"
     requirement_id: "PRO.1-BASE.1"
     
   - name: "employee_status"
@@ -119,10 +206,20 @@ indexes:
     unique: false
     comment: "部署別検索用"
     
+  - name: "idx_manager"
+    columns: ["manager_id"]
+    unique: false
+    comment: "上司別検索用"
+    
   - name: "idx_status"
     columns: ["employee_status"]
     unique: false
     comment: "在籍状況別検索用"
+    
+  - name: "idx_hire_date"
+    columns: ["hire_date"]
+    unique: false
+    comment: "入社日検索用"
 
 # 外部キー定義
 foreign_keys:
@@ -142,6 +239,14 @@ foreign_keys:
     on_update: "CASCADE"
     on_delete: "SET NULL"
     
+  - name: "fk_employee_job_type"
+    columns: ["job_type_id"]
+    references:
+      table: "MST_JobType"
+      columns: ["id"]
+    on_update: "CASCADE"
+    on_delete: "SET NULL"
+    
   - name: "fk_employee_manager"
     columns: ["manager_id"]
     references:
@@ -149,6 +254,61 @@ foreign_keys:
       columns: ["id"]
     on_update: "CASCADE"
     on_delete: "SET NULL"
+
+# 特記事項（必須）
+notes:
+  - "個人情報（氏名、氏名カナ、電話番号、生年月日）は暗号化対象"
+  - "論理削除は is_deleted フラグで管理"
+  - "manager_idによる自己参照で組織階層を表現"
+  - "人事システムとの連携でマスタデータを同期"
+  - "認証・権限管理システムの基盤テーブル"
+  - "スキル管理・目標管理・作業実績管理の全機能で参照される"
+
+# 業務ルール（必須）
+business_rules:
+  - "社員番号（employee_code）は一意で変更不可"
+  - "メールアドレス（email）は認証用のため一意制約必須"
+  - "在籍状況（employee_status）がRETIREDの場合、論理削除フラグをtrueに設定"
+  - "直属の上司（manager_id）は同一部署内の上位役職者のみ設定可能"
+  - "雇用形態（employment_status）に応じた権限・機能制限を適用"
+  - "個人情報の暗号化は法的要件に基づく必須対応"
+  - "監査証跡として作成日時・更新日時は自動設定"
+
+# サンプルデータ（推奨）
+sample_data:
+  - id: "emp_001"
+    employee_code: "EMP000001"
+    full_name: "山田太郎"
+    full_name_kana: "ヤマダタロウ"
+    email: "yamada.taro@example.com"
+    phone: "090-1234-5678"
+    hire_date: "2020-04-01"
+    birth_date: "1990-01-15"
+    gender: "M"
+    department_id: "dept_001"
+    position_id: "pos_003"
+    job_type_id: "job_001"
+    employment_status: "FULL_TIME"
+    manager_id: "emp_002"
+    employee_status: "ACTIVE"
+    is_deleted: false
+    
+  - id: "emp_002"
+    employee_code: "EMP000002"
+    full_name: "佐藤花子"
+    full_name_kana: "サトウハナコ"
+    email: "sato.hanako@example.com"
+    phone: "090-2345-6789"
+    hire_date: "2018-04-01"
+    birth_date: "1985-03-20"
+    gender: "F"
+    department_id: "dept_001"
+    position_id: "pos_002"
+    job_type_id: "job_001"
+    employment_status: "FULL_TIME"
+    manager_id: null
+    employee_status: "ACTIVE"
+    is_deleted: false
 ```
 
 #### カラム定義の各属性説明
@@ -251,7 +411,7 @@ cd docs/design/database/tools
 python3 -m table_generator --table NEW_TABLE --verbose
 
 # 5. 整合性チェック
-python database_consistency_checker/run_check.py --tables NEW_TABLE
+python3 database_consistency_checker/run_check.py --tables NEW_TABLE
 
 # 6. Git コミット
 git add .
@@ -284,10 +444,10 @@ cd docs/design/database/tools
 python3 -m table_generator --table MODIFIED_TABLE --verbose
 
 # 4. 整合性チェック
-python database_consistency_checker/run_check.py --tables MODIFIED_TABLE
+python3 database_consistency_checker/run_check.py --tables MODIFIED_TABLE
 
 # 5. 関連テーブルの整合性確認（必要に応じて）
-python database_consistency_checker/run_check.py --checks foreign_key_consistency
+python3 database_consistency_checker/run_check.py --checks foreign_key_consistency
 
 # 6. Git コミット
 git add .
@@ -336,10 +496,10 @@ cd ~/skill-report-web/docs/design/database/tools
 python3 -m table_generator --table NEW_TABLE --verbose
 
 # 5. 個別整合性チェック
-python run_check.py --tables NEW_TABLE
+python3 database_consistency_checker/run_check.py --tables NEW_TABLE
 
 # 6. 全体整合性確認
-python run_check.py --verbose
+python3 database_consistency_checker/run_check.py --verbose
 
 # 7. 設計レビュー実施
 # 業務要件・非機能要件・マルチテナント対応の確認
@@ -369,10 +529,10 @@ git commit -m "🆕 feat: NEW_TABLEテーブル追加
 python3 -m table_generator --table MODIFIED_TABLE --verbose
 
 # 4. 影響範囲チェック
-python run_check.py --checks foreign_key_consistency
+python3 database_consistency_checker/run_check.py --checks foreign_key_consistency
 
 # 5. 関連テーブルの整合性確認
-python run_check.py --tables MODIFIED_TABLE,RELATED_TABLE
+python3 database_consistency_checker/run_check.py --tables MODIFIED_TABLE,RELATED_TABLE
 
 # 6. 破壊的変更チェック
 # 既存データ・既存機能への影響を確認
@@ -395,10 +555,10 @@ git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 python3 -m table_generator --verbose
 
 # 全体整合性チェック（レポート出力）
-python run_check.py --verbose --output-format markdown --output-file consistency_report.md
+python3 database_consistency_checker/run_check.py --verbose --output-format markdown --output-file consistency_report.md
 
 # 孤立ファイル検出・クリーンアップ
-python run_check.py --checks orphaned_files
+python3 database_consistency_checker/run_check.py --checks orphaned_files
 
 # パフォーマンス監視レポート生成
 # 想定データ量との乖離・応答時間の確認
@@ -491,7 +651,7 @@ python run_check.py --checks orphaned_files
 ### 月次作業
 ```bash
 # 1. 全体整合性チェック実行
-python run_check.py --verbose --output-file monthly_check.log
+python3 database_consistency_checker/run_check.py --verbose --output-file monthly_check.log
 
 # 2. 新規追加テーブルの品質確認
 # 要求仕様IDとの対応確認
@@ -512,7 +672,7 @@ python run_check.py --verbose --output-file monthly_check.log
 ### 四半期作業
 ```bash
 # 1. 孤立ファイル・重複ファイルのクリーンアップ
-python run_check.py --checks orphaned_files
+python3 database_consistency_checker/run_check.py --checks orphaned_files
 # 検出されたファイルの手動確認・削除
 
 # 2. パフォーマンス要件の見直し
@@ -588,7 +748,7 @@ python run_check.py --checks orphaned_files
 
 # 解決方法
 # 1. エラー詳細確認
-python run_check.py --verbose --tables MST_Department
+python3 database_consistency_checker/run_check.py --verbose --tables MST_Department
 
 # 2. 個別ファイル確認
 ls -la table-details/MST_Department_details.yaml
@@ -599,7 +759,7 @@ ls -la tables/テーブル定義書_MST_Department_*.md
 python3 -m table_generator --table MST_Department --verbose
 
 # 4. 再チェック
-python run_check.py --tables MST_Department
+python3 database_consistency_checker/run_check.py --tables MST_Department
 ```
 
 #### 2. DDL生成エラー
@@ -627,7 +787,7 @@ python3 -m table_generator --table MST_Employee --verbose
 
 # 解決方法
 # 1. 参照先テーブルの存在確認
-python run_check.py --tables MST_Department
+python3 database_consistency_checker/run_check.py --tables MST_Department
 
 # 2. 参照先テーブルの生成
 python3 -m table_generator --table MST_Department
@@ -636,7 +796,7 @@ python3 -m table_generator --table MST_Department
 python3 -m table_generator --table MST_Employee
 
 # 4. 外部キー整合性チェック
-python run_check.py --checks foreign_key_consistency
+python3 database_consistency_checker/run_check.py --checks foreign_key_consistency
 ```
 
 #### 4. パフォーマンス問題
