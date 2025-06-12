@@ -347,14 +347,16 @@ sample_data:
 
 **必須セクション（省略不可）**：
 - `table_name`、`logical_name`、`category`：基本情報
-- `revision_history`：変更履歴の追跡（品質管理・監査要件）
-- `overview`：テーブルの目的と概要（設計意図の明確化）
+- `revision_history`：変更履歴の追跡（品質管理・監査要件）**※省略不可**
+- `overview`：テーブルの目的と概要（設計意図の明確化）**※省略不可**
 - `columns`：業務固有カラム定義
 - `business_indexes`/`indexes`：検索最適化
 - `business_constraints`/制約：データ整合性保証
 - `foreign_keys`：テーブル間関係定義
-- `notes`：特記事項・考慮点（運用・保守要件）
-- `business_rules`：業務ルール・制約（要件トレーサビリティ）
+- `notes`：特記事項・考慮点（運用・保守要件）**※省略不可**
+- `business_rules`：業務ルール・制約（要件トレーサビリティ）**※省略不可**
+
+**重要**: `revision_history`、`overview`、`notes`、`business_rules`の4つのセクションは品質管理・監査・運用保守の観点から**絶対に省略してはいけません**。
 
 **推奨セクション**：
 - `sample_data`：テスト・検証用データ
