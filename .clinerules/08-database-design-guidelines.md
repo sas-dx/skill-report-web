@@ -345,18 +345,85 @@ sample_data:
 
 **MST_TEMPLATE_details.yaml**は詳細なテンプレートファイルであり、実際の実装でも以下の項目を含む完全な形式を使用する必要があります：
 
+## 🚨 **絶対必須セクション - 省略禁止** 🚨
+
+以下の4つのセクションは品質管理・監査・運用保守の観点から**いかなる場合も省略禁止**です。これらのセクションが欠けているテーブル定義は、自動検証ツールによって拒否され、コミットできません：
+
+| セクション | 目的 | 省略時のリスク | 最低要件 | 重要度 |
+|------------|------|----------------|----------|---------|
+| `revision_history` | 変更履歴の追跡・監査証跡 | 監査不能、変更管理の崩壊 | 最低1エントリ必須 | 🔴 **必須** |
+| `overview` | テーブルの目的・設計意図の明確化 | 設計意図の喪失、誤用 | 最低50文字以上 | 🔴 **必須** |
+| `notes` | 運用・保守に必要な特記事項 | 運用障害、保守困難化 | 最低3項目以上 | 🔴 **必須** |
+| `business_rules` | 業務ルール・制約の明文化 | 要件逸脱、整合性喪失 | 最低3項目以上 | 🔴 **必須** |
+
+### ⚠️ **重要な警告** ⚠️
+- これらのセクションを省略したテーブル定義は**品質基準を満たさない**と判定されます
+- 自動検証ツールによって**コミットが拒否**されます
+- 運用・保守時に**重大な問題**を引き起こす可能性があります
+- **例外は一切認められません** - 全てのテーブル定義で必須です
+
+**必須セクションの検証方法**:
+```bash
+# 全テーブル検証
+python docs/design/database/tools/yaml_validator/validate_yaml_format.py --all --verbose
+
+# 特定テーブル検証
+python docs/design/database/tools/yaml_validator/validate_yaml_format.py --table MST_Employee --verbose
+```
+
+詳細なガイドラインは `docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md` を参照してください。
+
 **必須セクション（省略不可）**：
 - `table_name`、`logical_name`、`category`：基本情報
-- `revision_history`：変更履歴の追跡（品質管理・監査要件）**※省略不可**
-- `overview`：テーブルの目的と概要（設計意図の明確化）**※省略不可**
+- 🔴 **`revision_history`**：変更履歴の追跡（品質管理・監査要件）**※絶対省略禁止**
+- 🔴 **`overview`**：テーブルの目的と概要（設計意図の明確化）**※絶対省略禁止**
 - `columns`：業務固有カラム定義
 - `business_indexes`/`indexes`：検索最適化
 - `business_constraints`/制約：データ整合性保証
 - `foreign_keys`：テーブル間関係定義
-- `notes`：特記事項・考慮点（運用・保守要件）**※省略不可**
-- `business_rules`：業務ルール・制約（要件トレーサビリティ）**※省略不可**
+- 🔴 **`notes`**：特記事項・考慮点（運用・保守要件）**※絶対省略禁止**
+- 🔴 **`business_rules`**：業務ルール・制約（要件トレーサビリティ）**※絶対省略禁止**
 
-**重要**: `revision_history`、`overview`、`notes`、`business_rules`の4つのセクションは品質管理・監査・運用保守の観点から**絶対に省略してはいけません**。
+### 🚨 必須セクション詳細ガイドライン
+
+必須セクションの詳細なガイドラインは `docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md` に移動しました。このドキュメントには、各必須セクションの目的、必須要素、記述スタイル、例などが詳細に記載されています。
+
+以下は各必須セクションの概要です：
+
+#### 🔴 revision_history（改版履歴）- 【絶対省略禁止】
+- **目的**: 変更管理・監査の基盤となる重要情報
+- **内容**: バージョン番号、日付、変更者、変更内容を記録
+- **運用**: テーブル定義変更時に必ず更新（最新の変更を先頭に追加）
+- **最低要件**: 最低1エントリ必須
+- **省略時のリスク**: 監査証跡の欠如、変更管理の破綻、コンプライアンス違反
+
+#### 🔴 overview（概要・目的）- 【絶対省略禁止】
+- **目的**: テーブルの存在理由と使用方法を明確にする基本情報
+- **内容**: 主な目的、関連する業務プロセス、他テーブルとの関係を説明
+- **記述方法**: 箇条書きと説明文の組み合わせで記述
+- **最低要件**: 最低50文字以上必須
+- **省略時のリスク**: 設計意図の喪失、テーブル誤用、保守困難化
+
+#### 🔴 notes（特記事項）- 【絶対省略禁止】
+- **目的**: 運用・保守・セキュリティに関わる重要な補足情報
+- **内容**: 暗号化要件、論理削除方針、特殊な制約条件を記録
+- **記述方法**: 箇条書きで簡潔に記述
+- **最低要件**: 最低3項目以上必須
+- **省略時のリスク**: 運用障害、セキュリティ問題、保守困難化
+
+#### 🔴 business_rules（業務ルール）- 【絶対省略禁止】
+- **目的**: データの整合性と業務要件を保証するための制約条件
+- **内容**: 一意性制約、参照整合性、業務固有の制約条件を明文化
+- **記述方法**: 箇条書きで明確に記述
+- **最低要件**: 最低3項目以上必須
+- **省略時のリスク**: 要件逸脱、データ整合性喪失、業務ルール違反
+
+**必須セクションの自動検証**:
+```bash
+# Git コミット前に自動検証を有効化
+cd docs/design/database/tools/yaml_validator
+./install_git_hook.sh
+```
 
 **推奨セクション**：
 - `sample_data`：テスト・検証用データ
@@ -392,18 +459,21 @@ sample_data:
 cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
    docs/design/database/table-details/NEW_TABLE_details.yaml
 
-# 2. YAML内容を編集（必須セクション含む）
+# 2. YAML内容を編集（必須セクション確認）
 # - table_name: "NEW_TABLE"
 # - logical_name: "新規テーブル論理名"
 # - category: "マスタ系" または "トランザクション系"
-# - revision_history: 改版履歴（必須）
-# - overview: テーブルの概要と目的（必須）
+# - 🔴 revision_history: 改版履歴（絶対省略禁止・最低1エントリ）
+# - 🔴 overview: テーブルの概要と目的（絶対省略禁止・最低50文字）
 # - columns: 業務固有カラム定義
 # - business_indexes: 必要なインデックス
 # - foreign_keys: 外部キー関係
-# - notes: 特記事項・考慮点（必須）
-# - business_rules: 業務ルール・制約（必須）
+# - 🔴 notes: 特記事項・考慮点（絶対省略禁止・最低3項目）
+# - 🔴 business_rules: 業務ルール・制約（絶対省略禁止・最低3項目）
 # - sample_data: サンプルデータ（推奨）
+
+# 2.5 必須セクション検証
+python docs/design/database/tools/yaml_validator/validate_yaml_format.py --table NEW_TABLE --verbose
 
 # 3. テーブル一覧.mdに追加
 # 新規テーブルをテーブル一覧に追加
@@ -431,15 +501,18 @@ git commit -m "✨ feat: NEW_TABLEテーブル追加
 # 1. 影響範囲調査
 # 修正対象テーブルの参照関係・依存関係を確認
 
-# 2. YAML詳細定義修正（必須セクション含む）
+# 2. YAML詳細定義修正（必須セクション確認）
 # table-details/{テーブル名}_details.yamlを更新
-# - revision_history: 改版履歴を更新（必須）
-# - overview: 変更に伴う概要更新（必要に応じて）
+# - 🔴 revision_history: 改版履歴を更新（絶対省略禁止・変更内容記録）
+# - 🔴 overview: 変更に伴う概要更新（必要に応じて・設計意図明確化）
 # - columns: カラム追加・修正・削除
 # - business_indexes: インデックス追加・修正
 # - foreign_keys: 外部キー関係の変更
-# - notes: 特記事項・考慮点の更新（必須）
-# - business_rules: 業務ルール・制約の更新（必須）
+# - 🔴 notes: 特記事項・考慮点の更新（絶対省略禁止・運用影響確認）
+# - 🔴 business_rules: 業務ルール・制約の更新（絶対省略禁止・制約変更確認）
+
+# 2.5 必須セクション検証
+python docs/design/database/tools/yaml_validator/validate_yaml_format.py --table MODIFIED_TABLE --verbose
 
 # 3. 該当テーブルのみ再生成
 cd docs/design/database/tools
@@ -469,14 +542,33 @@ git commit -m "🔧 fix: MODIFIED_TABLEテーブル修正
 - **カラム定義整合性**: データ型・制約の一致
 - **外部キー整合性**: 参照関係の妥当性
 - **命名規則チェック**: プレフィックス・命名規則の準拠
-- **必須セクション確認**: revision_history、overview、notes、business_rulesの存在チェック
+- **必須セクション確認**: 🔴 revision_history、🔴 overview、🔴 notes、🔴 business_rulesの存在と内容チェック
+  ```bash
+  # 必須セクション検証（全テーブル）
+  python docs/design/database/tools/yaml_validator/validate_yaml_format.py --all --verbose
+  
+  # 特定テーブルの必須セクション検証
+  python docs/design/database/tools/yaml_validator/validate_yaml_format.py --table MST_Employee --verbose
+  
+  # 必須セクション不備の詳細確認
+  python docs/design/database/tools/yaml_validator/validate_yaml_format.py --check-required-only
+  ```
 
 ### 手動レビュー項目
 - **業務要件との整合性**: 機能要件との一致
 - **Prisma対応**: Prisma ORM との整合性
 - **パフォーマンス**: インデックス設計の妥当性
 - **セキュリティ**: 暗号化・制約の適切性
-- **必須セクション内容確認**: revision_history、overview、notes、business_rulesの内容妥当性
+- **必須セクション内容確認**: 以下のチェックリストを使用
+  ```
+  # 🔴 必須セクション内容チェックリスト（省略禁止）
+  - [ ] 🔴 revision_history: 最新の変更が記録されているか（最低1エントリ）
+  - [ ] 🔴 overview: テーブルの目的と使用コンテキストが明確か（最低50文字）
+  - [ ] 🔴 notes: 運用・保守・セキュリティの考慮点が記載されているか（最低3項目）
+  - [ ] 🔴 business_rules: 業務ルール・制約が明確に定義されているか（最低3項目）
+  
+  # ⚠️ 警告: これらのセクションが不備の場合、コミットが拒否されます
+  ```
 
 ## 実践的な開発フロー
 
@@ -618,11 +710,17 @@ python3 database_consistency_checker/run_check.py --checks orphaned_files
 - [ ] データ項目の定義が業務要件と一致している
 - [ ] 必須項目・任意項目の設定が適切である
 
-#### 必須セクション内容確認
-- [ ] revision_historyに適切な改版履歴が記録されている
-- [ ] overviewにテーブルの目的と概要が明確に記載されている
-- [ ] notesに運用・保守に必要な特記事項が記載されている
-- [ ] business_rulesに業務ルール・制約が要件と整合している
+#### 🔴 必須セクション内容確認（省略禁止）
+- [ ] 🔴 revision_historyに適切な改版履歴が記録されている（最低1エントリ必須）
+- [ ] 🔴 overviewにテーブルの目的と概要が明確に記載されている（最低50文字必須）
+- [ ] 🔴 notesに運用・保守に必要な特記事項が記載されている（最低3項目必須）
+- [ ] 🔴 business_rulesに業務ルール・制約が要件と整合している（最低3項目必須）
+
+#### ⚠️ 必須セクション不備時の対応
+- **自動検証エラー**: Git pre-commitフックで自動的に検出・拒否
+- **手動確認**: レビュー時に必須セクションの内容品質を確認
+- **修正必須**: 不備が発見された場合は即座に修正が必要
+- **例外なし**: いかなる理由でも省略は認められない
 
 #### エンティティ関連の妥当性
 - [ ] 正規化が適切に行われている（第3正規形まで）
