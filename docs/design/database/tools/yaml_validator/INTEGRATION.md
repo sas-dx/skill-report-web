@@ -1,635 +1,523 @@
-# YAML検証ツール統合ガイド（正確なデータベース整合性チェッカー統合対応版）
+# YAML検証ツール統合ガイド
 
 ## 概要
 
-このドキュメントは、YAML検証ツール（yaml_validator）を他のデータベース設計ツールと統合する方法について説明します。特に、データベース整合性チェッカー（database_consistency_checker）との正確な統合に焦点を当て、現在の実装状況に基づいた実用的な統合を実現します。
+このドキュメントは、YAML検証ツール（yaml_validator）とデータベース整合性チェッカー（database_consistency_checker）の統合について説明します。
 
-## 🚨 重要な統合修正事項（実装ベース）
+## 統合アーキテクチャ
 
-### 現在の実装状況分析
-1. **既存統合の問題点**: 
-   - `yaml_format_check.py`は独立したモジュールとして実装済み
-   - `__main__.py`では`check_yaml_format`関数を直接インポートして使用
-   - 共通ライブラリとの統合は部分的（パーサーのみ）
-   - 必須セクション検証は実装済みだが、統合APIが不統一
+### 統合方針
+- **基本検証**: `check_yaml_format()` - 従来の基本的なYAMLフォーマット検証
+- **拡張検証**: `check_yaml_format_enhanced()` - 必須セクション詳細対応・要求仕様ID検証
+- **統合API**: database_consistency_checkerから両方の検証機能を利用可能
 
-2. **実際の統合状況**:
-   - ✅ YAMLフォーマット検証: 実装済み（`yaml_format_check.py`）
-   - ✅ 必須セクション検証: 実装済み（🔴絶対省略禁止セクション対応）
-   - ✅ データベース整合性チェッカー統合: 実装済み（`__main__.py`）
-   - 🔄 共通ライブラリ完全統合: 部分的実装
-   - ❌ 統合API統一: 未実装
-
-### 修正された統合方針
-- **現実的統合**: 既存実装を活用した段階的統合
-- **API統一**: 統合結果形式の標準化
-- **必須セクション強制**: 🔴絶対省略禁止セクションの厳格な検証維持
-- **エラーハンドリング改善**: 一貫したエラー処理とレポート形式
-
-## 統合対象ツール
-
-### 1. データベース整合性チェッカー（database_consistency_checker）
-- **統合方法**: 直接インポート統合（`from yaml_format_check import check_yaml_format`）
-- **呼び出し方法**: `ConsistencyCheckService._check_yaml_format()`メソッド
-- **統合レベル**: 機能レベル統合（既存実装ベース）
-- **統合状況**: ✅ 実装済み（v2.1.0 - 現在の実装）
-- **改善点**: API統一、エラーハンドリング強化
-
-### 2. テーブル生成ツール（table_generator）
-- **統合方法**: 生成前の事前検証として統合
-- **呼び出し方法**: validate_yaml_format()関数
-- **統合レベル**: プロセス統合
-- **統合状況**: 🔄 計画中（v2.2.0予定）
-
-### 3. CI/CDパイプライン
-- **統合方法**: Git pre-commitフック + GitHub Actions
-- **呼び出し方法**: install_git_hook.sh + workflow統合
-- **統合レベル**: ワークフロー統合
-- **統合状況**: ✅ 実装済み（スタンドアロン版）
-
-## 統合実装詳細（現在の実装ベース）
-
-### database_consistency_checkerとの統合
-
-#### 現在の統合ファイル構成
+### ファイル構成
 ```
-database_consistency_checker/
-├── __main__.py                        # メインモジュール（✅ 統合済み）
-├── yaml_format_check.py              # YAML検証モジュール（✅ 実装済み）
-└── required_sections_guide.md        # 必須セクションガイド（✅ 実装済み）
-
-yaml_validator/
-├── validate_yaml_format.py           # スタンドアロン検証（✅ 実装済み）
-├── install_git_hook.sh              # Git統合（✅ 実装済み）
-└── README_REQUIRED_SECTIONS.md      # 必須セクション詳細（✅ 実装済み）
+docs/design/database/tools/
+├── yaml_validator/
+│   ├── INTEGRATION.md                    # 本ファイル
+│   ├── README.md                         # YAML検証ツール基本ガイド
+│   ├── README_REQUIRED_SECTIONS.md      # 必須セクション詳細ガイド
+│   ├── validate_yaml_format.py          # スタンドアロン検証ツール
+│   └── install_git_hook.sh              # Git pre-commitフック設定
+└── database_consistency_checker/
+    ├── yaml_format_check.py             # 統合YAML検証モジュール
+    ├── yaml_format_check_integration.py # 統合API実装
+    └── __main__.py                       # メインエントリーポイント
 ```
 
-#### 現在の統合API仕様
+## 統合API仕様
 
+### 基本検証API
+
+#### `check_yaml_format(tables=None, verbose=False)`
+
+**目的**: 基本的なYAMLフォーマット検証と必須セクション存在確認
+
+**パラメータ**:
+- `tables` (list, optional): 検証対象テーブル名リスト（Noneで全テーブル）
+- `verbose` (bool): 詳細ログ出力フラグ
+
+**戻り値**:
 ```python
-# database_consistency_checker/yaml_format_check.py（現在の実装）
-def check_yaml_format(tables=None, verbose=False):
-    """
-    テーブル詳細YAMLファイルのフォーマットを検証する
-    
-    Args:
-        tables (list): 検証対象のテーブル名リスト（Noneの場合は全テーブル）
-        verbose (bool): 詳細なログを出力するかどうか
-        
-    Returns:
-        dict: 検証結果
+{
+    'success': bool,           # 全体の成功/失敗
+    'total': int,             # 総テーブル数
+    'valid': int,             # 検証成功テーブル数
+    'invalid': int,           # 検証失敗テーブル数
+    'results': [              # 個別テーブル結果
         {
-            'success': bool,        # 全体の成功/失敗
-            'total': int,          # 総テーブル数
-            'valid': int,          # 検証成功テーブル数
-            'invalid': int,        # 検証失敗テーブル数
-            'results': [           # 個別テーブル結果
-                {
-                    'valid': bool,     # 検証結果
-                    'file': str,       # YAMLファイルパス
-                    'table': str,      # テーブル名
-                    'errors': list     # エラーメッセージリスト
-                }
-            ]
+            'valid': bool,        # 検証結果
+            'file': str,          # YAMLファイルパス
+            'table': str,         # テーブル名
+            'errors': list        # エラーメッセージリスト
         }
-    """
-
-# database_consistency_checker/__main__.py での統合（現在の実装）
-class ConsistencyCheckService:
-    """整合性チェックサービス - 現在の実装版"""
-    
-    def _check_yaml_format(self, target_tables: List[str]) -> Dict[str, Any]:
-        """
-        YAMLフォーマット検証チェック（現在の統合実装）
-        """
-        result = {
-            'check_name': 'yaml_format',
-            'description': 'YAMLフォーマット・必須セクション検証',
-            'status': 'PASS',
-            'errors': [],
-            'warnings': [],
-            'details': []
-        }
-        
-        try:
-            # 既存のYAMLフォーマット検証実行
-            yaml_check_result = check_yaml_format(tables=target_tables, verbose=False)
-            
-            # 結果を整合性チェック形式に変換
-            if not yaml_check_result['success']:
-                result['status'] = 'FAIL'
-                
-                for yaml_result in yaml_check_result['results']:
-                    if not yaml_result['valid']:
-                        table_detail = {
-                            'table_name': yaml_result['table'],
-                            'yaml_format_issues': yaml_result['errors']
-                        }
-                        result['details'].append(table_detail)
-                        
-                        # エラーメッセージを追加
-                        for error in yaml_result['errors']:
-                            error_msg = f"{yaml_result['table']}: {error}"
-                            result['errors'].append(error_msg)
-            
-            # 成功した場合の詳細情報
-            if result['status'] == 'PASS':
-                result['details'].append({
-                    'note': f"全{yaml_check_result['valid']}テーブルのYAMLフォーマット検証に成功しました"
-                })
-            
-        except Exception as e:
-            error_msg = f"YAMLフォーマット検証中にエラーが発生: {str(e)}"
-            result['errors'].append(error_msg)
-            result['status'] = 'FAIL'
-            self.logger.error(error_msg)
-        
-        return result
+    ]
+}
 ```
 
-#### 改善された統合API仕様（提案）
-
+**使用例**:
 ```python
-# database_consistency_checker/yaml_format_check.py（改善版）
-def check_yaml_format_enhanced(tables=None, verbose=False):
-    """
-    拡張YAMLフォーマット検証（必須セクション詳細対応）
-    
-    Args:
-        tables (list): 検証対象のテーブル名リスト（Noneの場合は全テーブル）
-        verbose (bool): 詳細なログを出力するかどうか
-        
-    Returns:
-        dict: 拡張検証結果
-        {
-            'success': bool,           # 全体の成功/失敗
-            'total': int,             # 総テーブル数
-            'valid': int,             # 検証成功テーブル数
-            'invalid': int,           # 検証失敗テーブル数
-            'warning': int,           # 警告ありテーブル数
-            'results': [              # 個別テーブル結果
-                {
-                    'valid': bool,            # 検証結果
-                    'file': str,              # YAMLファイルパス
-                    'table': str,             # テーブル名
-                    'errors': list,           # エラーメッセージリスト
-                    'warnings': list,         # 警告メッセージリスト
-                    'required_sections': {    # 必須セクション検証結果
-                        'revision_history': bool,
-                        'overview': bool,
-                        'notes': bool,
-                        'business_rules': bool
-                    },
-                    'format_issues': list,    # フォーマット問題リスト
-                    'requirement_id_issues': list  # 要求仕様ID問題リスト
-                }
-            ],
-            'summary': {              # 検証サマリー
-                'critical_errors': int,       # 🔴 必須セクション不備数
-                'format_errors': int,         # フォーマットエラー数
-                'requirement_errors': int,    # 要求仕様IDエラー数
-                'execution_time': float       # 実行時間（秒）
-            }
-        }
-    """
-    
-    import time
-    start_time = time.time()
-    
-    results = []
-    critical_errors = 0
-    format_errors = 0
-    requirement_errors = 0
-    warning_count = 0
-    
-    if tables:
-        # 指定されたテーブルのみ検証
-        for table in tables:
-            result = validate_table_yaml_enhanced(table, verbose)
-            results.append(result)
-            
-            # エラー分類
-            if not result['valid']:
-                # 必須セクション不備をカウント
-                for section, valid in result['required_sections'].items():
-                    if not valid:
-                        critical_errors += 1
-                        break
-                
-                format_errors += len(result['format_issues'])
-                requirement_errors += len(result['requirement_id_issues'])
-            
-            if result['warnings']:
-                warning_count += 1
-    else:
-        # 全テーブルを検証
-        yaml_files = glob.glob(os.path.join(TABLE_DETAILS_DIR, "*_details.yaml"))
-        for yaml_file in yaml_files:
-            table_name = os.path.basename(yaml_file).replace("_details.yaml", "")
-            if table_name == "MST_TEMPLATE":  # テンプレートファイルはスキップ
-                continue
-            
-            if verbose:
-                print(f"\n{Fore.BLUE}テーブル {table_name} の検証を開始...{Style.RESET_ALL}")
-            
-            result = validate_table_yaml_enhanced(table_name, verbose)
-            results.append(result)
-            
-            # エラー分類
-            if not result['valid']:
-                # 必須セクション不備をカウント
-                for section, valid in result['required_sections'].items():
-                    if not valid:
-                        critical_errors += 1
-                        break
-                
-                format_errors += len(result['format_issues'])
-                requirement_errors += len(result['requirement_id_issues'])
-            
-            if result['warnings']:
-                warning_count += 1
-    
-    # 結果サマリー
-    valid_count = sum(1 for r in results if r['valid'])
-    invalid_count = len(results) - valid_count
-    execution_time = time.time() - start_time
-    
-    if verbose:
-        print(f"\n{Fore.CYAN}=== YAMLフォーマット検証結果（拡張版） ==={Style.RESET_ALL}")
-        print(f"総ファイル数: {len(results)}")
-        print(f"有効: {valid_count}")
-        print(f"無効: {invalid_count}")
-        print(f"警告: {warning_count}")
-        print(f"🔴 必須セクション不備: {critical_errors}テーブル")
-        print(f"⏱️ 実行時間: {execution_time:.2f}秒")
-        
-        if invalid_count > 0:
-            print(f"\n{Fore.RED}無効なファイル:{Style.RESET_ALL}")
-            for result in results:
-                if not result['valid']:
-                    print(f"  {Fore.RED}❌ {result['table']}{Style.RESET_ALL}")
-                    
-                    # 必須セクション不備の詳細表示
-                    for section, valid in result['required_sections'].items():
-                        if not valid:
-                            print(f"    🔴 {section}: 不備（絶対省略禁止）")
-                    
-                    # その他のエラー
-                    for error in result['errors']:
-                        print(f"    - {error}")
-    
-    # エラーがある場合の詳細表示
-    if invalid_count > 0 and not verbose:
-        print(f"{Fore.RED}以下のテーブルの検証に失敗しました:{Style.RESET_ALL}")
-        for result in results:
-            if not result['valid']:
-                print(f"{Fore.RED}  - {result['table']}{Style.RESET_ALL}")
-                
-                # 必須セクション不備を優先表示
-                critical_issues = []
-                for section, valid in result['required_sections'].items():
-                    if not valid:
-                        critical_issues.append(f"🔴 {section}（絶対省略禁止）")
-                
-                if critical_issues:
-                    for issue in critical_issues:
-                        print(f"    {Fore.RED}{issue}{Style.RESET_ALL}")
-                
-                # その他のエラー
-                for error in result['errors']:
-                    print(f"    {Fore.RED}- {error}{Style.RESET_ALL}")
-        
-        print(f"{Fore.YELLOW}詳細なガイドラインは docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md を参照してください。{Style.RESET_ALL}")
-    
-    return {
-        'success': invalid_count == 0,
-        'total': len(results),
-        'valid': valid_count,
-        'invalid': invalid_count,
-        'warning': warning_count,
-        'results': results,
-        'summary': {
-            'critical_errors': critical_errors,
-            'format_errors': format_errors,
-            'requirement_errors': requirement_errors,
-            'execution_time': execution_time
-        }
-    }
+from yaml_format_check import check_yaml_format
 
+# 全テーブル検証
+result = check_yaml_format(verbose=True)
 
-def validate_table_yaml_enhanced(table_name: str, verbose: bool = False) -> Dict[str, Any]:
-    """拡張テーブルYAML検証"""
-    yaml_file = os.path.join(TABLE_DETAILS_DIR, f"{table_name}_details.yaml")
-    
-    result = {
-        'valid': True,
-        'file': yaml_file,
-        'table': table_name,
-        'errors': [],
-        'warnings': [],
-        'required_sections': {
-            'revision_history': False,
-            'overview': False,
-            'notes': False,
-            'business_rules': False
-        },
-        'format_issues': [],
-        'requirement_id_issues': []
-    }
-    
-    if not os.path.exists(yaml_file):
-        result['valid'] = False
-        result['errors'].append(f"ファイル {yaml_file} が存在しません")
-        return result
-    
-    yaml_data = load_yaml_file(yaml_file)
-    if not yaml_data:
-        result['valid'] = False
-        result['errors'].append("YAMLファイルの読み込みに失敗しました")
-        return result
-    
-    # 必須セクション検証
-    is_valid, errors = validate_required_sections(yaml_data, table_name, verbose)
-    if not is_valid:
-        result['valid'] = False
-        result['errors'].extend(errors)
-    
-    # 必須セクション個別チェック
-    for section in REQUIRED_SECTIONS.keys():
-        if section in yaml_data:
-            if section == "revision_history":
-                result['required_sections'][section] = (
-                    isinstance(yaml_data[section], list) and 
-                    len(yaml_data[section]) >= REQUIRED_SECTIONS[section]["min_entries"]
-                )
-            elif section == "overview":
-                result['required_sections'][section] = (
-                    len(str(yaml_data[section])) >= REQUIRED_SECTIONS[section]["min_length"]
-                )
-            elif section in ["notes", "business_rules"]:
-                result['required_sections'][section] = (
-                    isinstance(yaml_data[section], list) and 
-                    len(yaml_data[section]) >= REQUIRED_SECTIONS[section]["min_entries"]
-                )
-    
-    # フォーマット検証（基本的なYAML構文チェック）
-    try:
-        # インデント統一チェック
-        with open(yaml_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-            lines = content.split('\n')
-            for i, line in enumerate(lines, 1):
-                if line.strip() and line.startswith('\t'):
-                    result['format_issues'].append(f"行{i}: タブ文字使用（スペース2文字推奨）")
-                    result['warnings'].append(f"行{i}: インデント不統一")
-    except Exception as e:
-        result['format_issues'].append(f"ファイル読み込みエラー: {str(e)}")
-    
-    # 要求仕様ID検証
-    if 'columns' in yaml_data and isinstance(yaml_data['columns'], list):
-        for col in yaml_data['columns']:
-            if isinstance(col, dict):
-                col_name = col.get('name', 'unknown')
-                requirement_id = col.get('requirement_id', '')
-                
-                if not requirement_id:
-                    result['requirement_id_issues'].append(f"カラム {col_name}: 要求仕様ID未設定")
-                    result['warnings'].append(f"カラム {col_name}: 要求仕様ID未設定")
-                elif not _validate_requirement_id_format(requirement_id):
-                    result['requirement_id_issues'].append(f"カラム {col_name}: 要求仕様ID形式エラー ({requirement_id})")
-                    result['warnings'].append(f"カラム {col_name}: 要求仕様ID形式エラー")
-    
-    # 警告がある場合でも、必須セクション不備がなければ有効とする
-    if result['warnings'] and result['valid']:
-        # 必須セクション不備がある場合のみ無効とする
-        has_critical_error = not all(result['required_sections'].values())
-        if has_critical_error:
-            result['valid'] = False
-    
-    return result
+# 特定テーブル検証
+result = check_yaml_format(tables=['MST_Employee', 'MST_Department'])
 
-
-def _validate_requirement_id_format(requirement_id: str) -> bool:
-    """要求仕様ID形式検証"""
-    import re
-    # カテゴリ.シリーズ-機能 形式（例: PRO.1-BASE.1）
-    pattern = r'^[A-Z]{3}\.\d+-[A-Z]+\.\d+$'
-    return bool(re.match(pattern, requirement_id))
-
-
-# database_consistency_checker/__main__.py での改善された統合
-class ConsistencyCheckService:
-    """整合性チェックサービス - 改善された統合版"""
-    
-    def _check_yaml_format(self, target_tables: List[str]) -> Dict[str, Any]:
-        """
-        YAMLフォーマット検証チェック（改善された統合実装）
-        """
-        result = {
-            'check_name': 'yaml_format',
-            'description': 'YAMLフォーマット・必須セクション検証（拡張版）',
-            'status': 'PASS',
-            'errors': [],
-            'warnings': [],
-            'details': []
-        }
-        
-        try:
-            # 拡張YAMLフォーマット検証実行
-            yaml_check_result = check_yaml_format_enhanced(tables=target_tables, verbose=False)
-            
-            # 結果を整合性チェック形式に変換
-            if not yaml_check_result['success']:
-                result['status'] = 'FAIL'
-                
-                # 🔴 必須セクション不備の重要度を最高に設定
-                critical_errors = yaml_check_result['summary']['critical_errors']
-                if critical_errors > 0:
-                    result['errors'].append(
-                        f"🔴 必須セクション不備: {critical_errors}テーブル "
-                        f"（revision_history, overview, notes, business_rules は絶対省略禁止）"
-                    )
-                
-                # 個別テーブルエラーの詳細化
-                for table_result in yaml_check_result['results']:
-                    if not table_result['valid']:
-                        table_detail = {
-                            'table_name': table_result['table'],
-                            'yaml_file': table_result['file'],
-                            'critical_issues': [],  # 🔴 必須セクション不備
-                            'format_issues': table_result['format_issues'],
-                            'requirement_issues': table_result['requirement_id_issues']
-                        }
-                        
-                        # 必須セクション不備の詳細化
-                        for section, valid in table_result['required_sections'].items():
-                            if not valid:
-                                table_detail['critical_issues'].append({
-                                    'section': section,
-                                    'severity': 'CRITICAL',
-                                    'message': f"🔴 {section}セクションが存在しないか要件を満たしていません（絶対省略禁止）"
-                                })
-                        
-                        result['details'].append(table_detail)
-                        
-                        # エラーメッセージを追加
-                        for error in table_result['errors']:
-                            error_msg = f"{table_result['table']}: {error}"
-                            result['errors'].append(error_msg)
-            
-            # 成功した場合の詳細情報
-            if result['status'] == 'PASS':
-                result['details'].append({
-                    'summary': f"✅ 全{yaml_check_result['valid']}テーブルのYAML検証に成功",
-                    'execution_time': yaml_check_result['summary']['execution_time'],
-                    'validated_sections': list(REQUIRED_SECTIONS.keys())
-                })
-            
-            # 警告がある場合
-            if yaml_check_result['warning'] > 0:
-                if result['status'] == 'PASS':
-                    result['status'] = 'WARNING'
-                result['warnings'].append(
-                    f"⚠️ 警告あり: {yaml_check_result['warning']}テーブル"
-                )
-            
-        except Exception as e:
-            error_msg = f"YAML検証統合中にエラーが発生: {str(e)}"
-            result['errors'].append(error_msg)
-            result['status'] = 'FAIL'
-            self.logger.error(error_msg, exc_info=True)
-        
-        return result
-```
-
-#### 使用例（現在の実装ベース）
-
-```python
-# 現在の統合版（実装済み）
-from database_consistency_checker.yaml_format_check import check_yaml_format
-
-# YAML検証実行
-result = check_yaml_format(tables=['MST_Employee'], verbose=True)
-
-# 結果確認
-if result['success']:
-    print(f"✅ 検証成功: {result['valid']}/{result['total']}テーブル")
-else:
-    print(f"❌ 検証失敗: {result['invalid']}/{result['total']}テーブル")
-    
-    # 個別エラーの詳細表示
+if not result['success']:
+    print(f"検証失敗: {result['invalid']}テーブル")
     for table_result in result['results']:
         if not table_result['valid']:
-            print(f"\n❌ {table_result['table']}:")
-            for error in table_result['errors']:
-                print(f"  - {error}")
-
-# データベース整合性チェッカーでの統合実行
-from database_consistency_checker.__main__ import ConsistencyCheckService
-from shared.core.config import get_config
-
-config = get_config()
-service = ConsistencyCheckService(config)
-consistency_result = service.run_all_checks(['MST_Employee'])
-
-# YAML検証結果の抽出
-yaml_check = next(
-    (r for r in consistency_result['details'] if r['check_name'] == 'yaml_format'),
-    None
-)
-
-if yaml_check:
-    print(f"統合YAML検証結果: {yaml_check['status']}")
-    if yaml_check['status'] == 'FAIL':
-        print("🔴 必須セクション不備の修正が必要です")
-        for error in yaml_check['errors']:
-            print(f"  - {error}")
-
-# 改善版（提案）
-from database_consistency_checker.yaml_format_check import check_yaml_format_enhanced
-
-# 拡張YAML検証実行
-enhanced_result = check_yaml_format_enhanced(tables=['MST_Employee'], verbose=True)
-
-# 拡張結果確認
-if enhanced_result['success']:
-    print(f"✅ 検証成功: {enhanced_result['valid']}/{enhanced_result['total']}テーブル")
-    print(f"⏱️ 実行時間: {enhanced_result['summary']['execution_time']:.2f}秒")
-else:
-    print(f"❌ 検証失敗: {enhanced_result['invalid']}/{enhanced_result['total']}テーブル")
-    
-    # 🔴 必須セクション不備の重点表示
-    critical_errors = enhanced_result['summary']['critical_errors']
-    if critical_errors > 0:
-        print(f"🔴 重要: {critical_errors}テーブルで必須セクション不備（絶対省略禁止）")
-        print("   必須セクション: revision_history, overview, notes, business_rules")
-        print("   修正方法: MST_TEMPLATE_details.yamlを参照してセクションを追加")
-    
-    # 個別エラーの詳細表示
-    for table_result in enhanced_result['results']:
-        if not table_result['valid']:
-            print(f"\n❌ {table_result['table']}:")
-            
-            # 必須セクション不備の詳細
-            for section, valid in table_result['required_sections'].items():
-                if not valid:
-                    print(f"  🔴 {section}: 不備（絶対省略禁止）")
-            
-            # フォーマット問題
-            for issue in table_result['format_issues']:
-                print(f"  ⚠️ フォーマット: {issue}")
-            
-            # 要求仕様ID問題
-            for issue in table_result['requirement_id_issues']:
-                print(f"  ⚠️ 要求仕様ID: {issue}")
+            print(f"- {table_result['table']}: {table_result['errors']}")
 ```
 
-### 統合チェック実行方法（現在の実装ベース）
+### 拡張検証API
 
-#### 基本実行コマンド
+#### `check_yaml_format_enhanced(tables=None, verbose=False)`
+
+**目的**: 詳細なYAMLフォーマット検証・必須セクション内容検証・要求仕様ID検証
+
+**パラメータ**:
+- `tables` (list, optional): 検証対象テーブル名リスト（Noneで全テーブル）
+- `verbose` (bool): 詳細ログ出力フラグ
+
+**戻り値**:
+```python
+{
+    'success': bool,           # 全体の成功/失敗
+    'total': int,             # 総テーブル数
+    'valid': int,             # 検証成功テーブル数
+    'invalid': int,           # 検証失敗テーブル数
+    'warning': int,           # 警告ありテーブル数
+    'results': [              # 個別テーブル結果
+        {
+            'valid': bool,            # 検証結果
+            'file': str,              # YAMLファイルパス
+            'table': str,             # テーブル名
+            'errors': list,           # エラーメッセージリスト
+            'warnings': list,         # 警告メッセージリスト
+            'required_sections': {    # 必須セクション検証結果
+                'revision_history': bool,
+                'overview': bool,
+                'notes': bool,
+                'business_rules': bool
+            },
+            'format_issues': list,    # フォーマット問題リスト
+            'requirement_id_issues': list  # 要求仕様ID問題リスト
+        }
+    ],
+    'summary': {              # 検証サマリー
+        'critical_errors': int,       # 🔴 必須セクション不備数
+        'format_errors': int,         # フォーマットエラー数
+        'requirement_errors': int,    # 要求仕様IDエラー数
+        'execution_time': float       # 実行時間（秒）
+    }
+}
+```
+
+**使用例**:
+```python
+from yaml_format_check import check_yaml_format_enhanced
+
+# 拡張検証実行
+result = check_yaml_format_enhanced(verbose=True)
+
+# 結果分析
+print(f"🔴 必須セクション不備: {result['summary']['critical_errors']}テーブル")
+print(f"⚠️ フォーマット問題: {result['summary']['format_errors']}件")
+print(f"📋 要求仕様ID問題: {result['summary']['requirement_errors']}件")
+print(f"⏱️ 実行時間: {result['summary']['execution_time']:.2f}秒")
+
+# 必須セクション不備の詳細確認
+for table_result in result['results']:
+    if not table_result['valid']:
+        critical_issues = [
+            section for section, valid in table_result['required_sections'].items()
+            if not valid
+        ]
+        if critical_issues:
+            print(f"🔴 {table_result['table']}: {', '.join(critical_issues)} 不備")
+```
+
+## database_consistency_checkerとの統合
+
+### 統合実装
+
+database_consistency_checkerでは、YAML検証機能が以下のように統合されています：
+
+#### 統合モジュール構成
+```
+database_consistency_checker/
+├── __main__.py                       # メインエントリーポイント
+├── yaml_format_check.py             # YAML検証モジュール（統合版）
+└── yaml_format_check_integration.py # 統合API実装
+```
+
+#### 統合API実装
+
+`yaml_format_check.py`では、以下の2つの主要な検証関数を提供：
+
+```python
+# 基本検証
+def check_yaml_format(tables=None, verbose=False):
+    """基本的なYAMLフォーマット検証と必須セクション存在確認"""
+    # 実装詳細は yaml_format_check.py を参照
+
+# 拡張検証  
+def check_yaml_format_enhanced(tables=None, verbose=False):
+    """詳細なYAMLフォーマット検証・必須セクション内容検証・要求仕様ID検証"""
+    # 実装詳細は yaml_format_check.py を参照
+```
+
+#### database_consistency_checkerでの呼び出し
+
+`__main__.py`では、以下のチェック名で統合されています：
+
+- **`yaml_format`**: 基本的なYAMLフォーマット検証
+- **`yaml_format_enhanced`**: 拡張YAML検証（必須セクション詳細・要求仕様ID検証）
+
+### 統合コマンド実行例
 
 ```bash
-# 全チェック実行（YAML検証含む・現在の実装）
+# 基本的なYAML検証
 cd docs/design/database/tools
-python3 database_consistency_checker/__main__.py --verbose
+python3 -m database_consistency_checker --checks yaml_format --tables MST_Employee
 
-# YAML検証のみ実行（統合版）
-python3 database_consistency_checker/__main__.py --checks yaml_format --verbose
+# 拡張YAML検証
+python3 -m database_consistency_checker --checks yaml_format_enhanced --tables MST_Employee
 
-# 特定テーブルのYAML検証（統合版）
-python3 database_consistency_checker/__main__.py --checks yaml_format --tables MST_Employee,MST_Department --verbose
+# 詳細ログ付きでYAML検証
+python3 -m database_consistency_checker --checks yaml_format --verbose
 
-# 必須セクション重点チェック（スタンドアロン）
-python3 yaml_validator/validate_yaml_format.py --check-required-only --verbose
+# 複数テーブルの検証
+python3 -m database_consistency_checker --checks yaml_format --tables MST_Employee,MST_Department
 
-# 詳細レポート出力（統合版）
-python3 database_consistency_checker/__main__.py --checks yaml_format --output-format markdown --output-file yaml_validation_report.md --verbose
+# 全テーブルの拡張検証
+python3 -m database_consistency_checker --checks yaml_format_enhanced --verbose
 
-# 直接YAML検証実行（現在の実装）
+# 直接実行（スタンドアロン）
 python3 database_consistency_checker/yaml_format_check.py --tables MST_Employee --verbose
 ```
 
-#### 高度な実行オプション
+### 実行結果例
+
+#### 成功時
+```
+2025-06-17 04:32:51 - __main__ - INFO - データベース整合性チェック開始
+2025-06-17 04:32:51 - __main__ - INFO - チェック実行: yaml_format
+
+=== データベース整合性チェック結果 ===
+総チェック数: 1
+成功: 1
+失敗: 0
+警告: 0
+
+✅ すべてのチェックが正常に完了しました
+```
+
+#### 失敗時
+```
+以下のテーブルの検証に失敗しました:
+  - MST_Employee
+    🔴 revision_history（絶対省略禁止）
+    🔴 overview（絶対省略禁止）
+    - カラム employee_code: 要求仕様ID未設定
+
+詳細なガイドラインは docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md を参照してください。
+
+=== データベース整合性チェック結果 ===
+総チェック数: 1
+成功: 0
+失敗: 1
+警告: 0
+
+❌ 整合性エラーが検出されました
+```
+
+## 必須セクション検証詳細
+
+### 🔴 絶対省略禁止セクション
+
+以下の4つのセクションは品質管理・監査・運用保守の観点から**絶対省略禁止**です：
+
+| セクション | 目的 | 最低要件 | 検証内容 |
+|------------|------|----------|----------|
+| `revision_history` | 変更履歴の追跡・監査証跡 | 最低1エントリ | リスト形式・エントリ数確認 |
+| `overview` | テーブルの目的・設計意図の明確化 | 最低50文字 | 文字数・内容の妥当性 |
+| `notes` | 運用・保守に必要な特記事項 | 最低3項目 | リスト形式・項目数確認 |
+| `business_rules` | 業務ルール・制約の明文化 | 最低3項目 | リスト形式・項目数確認 |
+
+### 検証エラー例
+
+```
+🔴 MST_Employee: 必須セクション不備
+  - revision_history: 最低1エントリが必要です
+  - overview: 最低50文字以上の説明が必要です (現在: 25文字)
+  - notes: 最低3項目以上の記載が必要です
+  - business_rules: 最低3項目以上の記載が必要です
+```
+
+## 要求仕様ID検証
+
+### 検証対象
+- **テーブルレベル**: `requirement_id`フィールド
+- **カラムレベル**: 各カラムの`requirement_id`フィールド
+
+### 形式要件
+- **パターン**: `[カテゴリ].[シリーズ]-[機能].[番号]`
+- **例**: `PRO.1-BASE.1`, `SKL.2-HIER.3`, `ACC.1-AUTH.2`
+
+### 有効なカテゴリ
+- **PLT**: Platform (システム基盤要件)
+- **ACC**: Access Control (ユーザー権限管理)
+- **PRO**: Profile (個人プロフィール管理)
+- **SKL**: Skill (スキル情報管理)
+- **CAR**: Career (目標・キャリア管理)
+- **WPM**: Work Performance Mgmt (作業実績管理)
+- **TRN**: Training (研修・セミナー管理)
+- **RPT**: Report (レポート出力)
+- **NTF**: Notification (通知・連携サービス)
+
+### 検証エラー例
+
+```
+⚠️ MST_Employee: 要求仕様ID問題
+  - カラム employee_code: 要求仕様ID未設定
+  - カラム full_name: 要求仕様ID形式エラー (PRO-BASE-1)
+  - カラム email: 要求仕様ID形式エラー (ACC.AUTH.1)
+```
+
+## Git統合
+
+### pre-commitフック設定
 
 ```bash
-# JSON形式での結果出力
-python3 database_consistency_checker/__main__.py --checks yaml_format --output-format json --output-file validation_results.json
-
-# 設定ファイル指定での実行
-python3 database_consistency_checker/__main__.py --config custom_config.yaml --checks yaml_format --verbose
-
-# 全テーブル一括検証
-python3 database_consistency_checker/__main__.py --checks yaml_format --verbose
-
-# 特定テーブルのみ検証
-python3 database_consistency_checker/__main__.py --checks yaml_format --tables MST_Employee,MST_Department,MST_Tenant --verbose
+# Git pre-commitフック設定
+cd docs/design/database/tools/yaml_validator
+./install_git_hook.sh
 ```
 
-#### 統合チェック結果例（現在の実装ベース）
+### フック動作
+- **コミット前**: 変更されたYAMLファイルの自動検証
+- **検証失敗**: コミット拒否・エラー詳細表示
+- **検証成功**: 正常コミット実行
 
+### フック設定例
+
+```bash
+#!/bin/sh
+# Git pre-commit hook for YAML validation
+
+# 変更されたYAMLファイルを取得
+changed_yaml_files=$(git diff --cached --name-only --diff-filter=ACM | grep "_details\.yaml$")
+
+if [ -n "$changed_yaml_files" ]; then
+    echo "🔍 YAML検証を実行中..."
+    
+    # テーブル名を抽出
+    tables=""
+    for file in $changed_yaml_files; do
+        table_name=$(basename "$file" "_details.yaml")
+        if [ "$table_name" != "MST_TEMPLATE" ]; then
+            if [ -z "$tables" ]; then
+                tables="$table_name"
+            else
+                tables="$tables,$table_name"
+            fi
+        fi
+    done
+    
+    if [ -n "$tables" ]; then
+        # YAML検証実行
+        python docs/design/database/tools/database_consistency_checker/yaml_format_check.py --tables "$tables"
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ YAML検証に失敗しました。コミットを中止します。"
+            echo "詳細は docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md を参照してください。"
+            exit 1
+        fi
+        
+        echo "✅ YAML検証に成功しました。"
+    fi
+fi
+
+exit 0
 ```
-🔍 データベース整合性チェック開始（現在の実装版 v2.1.0）
-📂 ベースディレクトリ: /home/kurosawa/skill-report-web/docs/design/database
-📂 YAML詳細定義: table-details/
-📂 DDLディレクトリ: ddl/
-📂 テーブル定義書: tables/
+
+## 運用ガイドライン
+
+### 日常的な使用
+
+#### 1. 新規テーブル作成時
+```bash
+# 1. テンプレートからYAML作成
+cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
+   docs/design/database/table-details/NEW_TABLE_details.yaml
+
+# 2. 必須セクション編集
+# - revision_history: 初版エントリ追加
+# - overview: テーブルの目的・概要記述（50文字以上）
+# - notes: 運用・保守の特記事項（3項目以上）
+# - business_rules: 業務ルール・制約（3項目以上）
+
+# 3. YAML検証実行
+python docs/design/database/tools/database_consistency_checker/yaml_format_check.py --tables NEW_TABLE --verbose
+
+# 4. 拡張検証実行
+python -c "
+from docs.design.database.tools.database_consistency_checker.yaml_format_check import check_yaml_format_enhanced
+result = check_yaml_format_enhanced(tables=['NEW_TABLE'], verbose=True)
+print(f'検証結果: {\"成功\" if result[\"success\"] else \"失敗\"}')
+"
+```
+
+#### 2. 既存テーブル修正時
+```bash
+# 1. 修正前の検証
+python docs/design/database/tools/database_consistency_checker/yaml_format_check.py --tables MODIFIED_TABLE
+
+# 2. YAML修正
+# - revision_history: 新しい変更エントリ追加
+# - 必要に応じて他のセクションも更新
+
+# 3. 修正後の検証
+python docs/design/database/tools/database_consistency_checker/yaml_format_check.py --tables MODIFIED_TABLE --verbose
+
+# 4. 統合整合性チェック
+python -m database_consistency_checker --tables MODIFIED_TABLE
+```
+
+#### 3. 定期的な全体検証
+```bash
+# 週次: 全テーブルの基本検証
+python docs/design/database/tools/database_consistency_checker/yaml_format_check.py --verbose
+
+# 月次: 拡張検証・詳細レポート
+python -c "
+from docs.design.database.tools.database_consistency_checker.yaml_format_check import check_yaml_format_enhanced
+import json
+result = check_yaml_format_enhanced(verbose=True)
+with open('yaml_validation_report.json', 'w', encoding='utf-8') as f:
+    json.dump(result, f, ensure_ascii=False, indent=2)
+print('詳細レポートを yaml_validation_report.json に出力しました')
+"
+```
+
+### トラブルシューティング
+
+#### よくあるエラーと対処法
+
+##### 1. 必須セクション不備
+```
+❌ エラー: 必須セクション 'revision_history' が存在しません
+```
+
+**対処法**:
+```yaml
+# revision_history セクションを追加
+revision_history:
+  - version: "1.0.0"
+    date: "2025-06-17"
+    author: "開発チーム"
+    changes: "初版作成"
+```
+
+##### 2. overview文字数不足
+```
+❌ エラー: 'overview': 最低50文字以上の説明が必要です (現在: 25文字)
+```
+
+**対処法**:
+```yaml
+# overview を詳細に記述
+overview: |
+  このテーブルは組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブルです。
+  主な目的は、社員の基本情報（氏名、連絡先、入社日等）の管理、組織構造（部署、役職、上司関係）の管理、
+  認証・権限管理のためのユーザー情報提供、人事システムとの連携データ基盤として機能します。
+```
+
+##### 3. 要求仕様ID形式エラー
+```
+⚠️ 警告: カラム employee_code: 要求仕様ID形式エラー (PRO-BASE-1)
+```
+
+**対処法**:
+```yaml
+# 正しい形式に修正
+columns:
+  - name: "employee_code"
+    type: "VARCHAR(30)"
+    nullable: false
+    comment: "社員番号"
+    requirement_id: "PRO.1-BASE.1"  # 正しい形式
+```
+
+### パフォーマンス最適化
+
+#### 大量テーブル検証時の最適化
+
+```python
+# バッチ処理での効率的な検証
+from docs.design.database.tools.database_consistency_checker.yaml_format_check import check_yaml_format_enhanced
+import glob
+import os
+
+def batch_validate_yaml():
+    """大量テーブルの効率的な検証"""
+    yaml_files = glob.glob("docs/design/database/table-details/*_details.yaml")
+    table_names = [
+        os.path.basename(f).replace("_details.yaml", "")
+        for f in yaml_files
+        if not f.endswith("MST_TEMPLATE_details.yaml")
+    ]
+    
+    # 10テーブルずつバッチ処理
+    batch_size = 10
+    for i in range(0, len(table_names), batch_size):
+        batch_tables = table_names[i:i+batch_size]
+        print(f"バッチ {i//batch_size + 1}: {len(batch_tables)}テーブル検証中...")
+        
+        result = check_yaml_format_enhanced(tables=batch_tables, verbose=False)
+        
+        if not result['success']:
+            print(f"  ❌ {result['invalid']}テーブルで検証失敗")
+            for table_result in result['results']:
+                if not table_result['valid']:
+                    print(f"    - {table_result['table']}")
+        else:
+            print(f"  ✅ 全{len(batch_tables)}テーブル検証成功")
+
+if __name__ == "__main__":
+    batch_validate_yaml()
+```
+
+## 今後の拡張計画
+
+### Phase 1: 基本統合（完了）
+- ✅ 基本YAML検証機能の統合
+- ✅ 必須セクション検証の実装
+- ✅ database_consistency_checkerとの統合
+
+### Phase 2: 拡張機能（完了）
+- ✅ 拡張YAML検証API実装
+- ✅ 要求仕様ID検証機能
+- ✅ 詳細エラー分類・レポート機能
+- ✅ Git pre-commitフック統合
+
+### Phase 3: 高度な機能（計画中）
+- 📋 YAML内容の意味的検証（業務ルールの妥当性チェック）
+- 📋 テーブル間関係の整合性検証
+- 📋 自動修正提案機能
+- 📋 CI/CD統合・自動レポート生成
+
+### Phase 4: 運用最適化（将来）
+- 📋 パフォーマンス最適化・並列処理
+- 📋 カスタムルール設定機能
+- 📋 ダッシュボード・可視化機能
+- 📋 外部ツール連携（Slack通知等）
+
+---
+
+このガイドに従って、YAML検証ツールとdatabase_consistency_checkerの統合を効果的に活用してください。
