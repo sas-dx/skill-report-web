@@ -2,7 +2,12 @@
 
 ## 基本方針
 
-### Gitflow戦略
+### 現状対応（masterブランチのみ環境）
+- **master**: 本番リリース用ブランチ（現在唯一のメインブランチ）
+- **feature/***: 機能開発ブランチ（要求仕様ID単位）
+- **hotfix/***: 緊急バグ修正ブランチ
+
+### 将来のGitflow戦略（developブランチ導入後）
 - **main**: 本番リリース用ブランチ（プロダクション環境）
 - **develop**: 開発統合ブランチ（開発環境）
 - **feature/***: 機能開発ブランチ（要求仕様ID単位）
@@ -212,7 +217,30 @@ Refs: docs/design/api/specs/API定義書_API-021_スキル情報取得API.md
 
 ## ブランチ運用フロー
 
-### 1. 機能開発フロー
+### 1. 機能開発フロー（現状版：masterベース）
+```bash
+# 1. masterブランチから最新を取得
+git checkout master
+git pull origin master
+
+# 2. featureブランチ作成
+git checkout -b feature/PRO.1-BASE.1-profile-management
+
+# 3. 実装・コミット
+git add .
+git commit -m "✨ feat: PRO.1-BASE.1 プロフィール管理API実装"
+
+# 4. プッシュ・PR作成（base: master）
+git push origin feature/PRO.1-BASE.1-profile-management
+# GitHub上でPR作成（base: master）
+
+# 5. レビュー・マージ後のクリーンアップ
+git checkout master
+git pull origin master
+git branch -d feature/PRO.1-BASE.1-profile-management
+```
+
+### 1-2. 機能開発フロー（将来版：developベース）
 ```bash
 # 1. developブランチから最新を取得
 git checkout develop
@@ -259,7 +287,26 @@ git push origin develop
 git branch -d release/v1.0.0
 ```
 
-### 3. 緊急修正フロー
+### 3. 緊急修正フロー（現状版：masterベース）
+```bash
+# 1. masterブランチからhotfixブランチ作成
+git checkout master
+git checkout -b hotfix/critical-login-security-fix
+
+# 2. 修正・コミット
+git commit -m "🐛 fix: ログイン認証の重大な脆弱性を修正"
+
+# 3. masterブランチにマージ
+git checkout master
+git merge hotfix/critical-login-security-fix
+git tag v1.0.1
+git push origin master --tags
+
+# 4. hotfixブランチ削除
+git branch -d hotfix/critical-login-security-fix
+```
+
+### 3-2. 緊急修正フロー（将来版：main/developベース）
 ```bash
 # 1. mainブランチからhotfixブランチ作成
 git checkout main
@@ -291,7 +338,11 @@ git branch -d hotfix/critical-login-security-fix
 - **パフォーマンステスト**: レスポンス時間測定
 - **要求仕様ID検証**: コミット・PRでの要求仕様ID存在チェック
 
-### 自動デプロイ
+### 自動デプロイ（現状版）
+- **master → 本番環境**: 手動承認後デプロイ
+- **feature → プレビュー環境**: Vercel Preview Deployment
+
+### 自動デプロイ（将来版）
 - **develop → 開発環境**: 自動デプロイ
 - **main → 本番環境**: 手動承認後デプロイ
 - **feature → プレビュー環境**: Vercel Preview Deployment
@@ -300,7 +351,7 @@ git branch -d hotfix/critical-login-security-fix
 
 ### 禁止事項
 - 要求仕様IDなしのコミット・PR
-- mainブランチへの直接コミット
+- masterブランチへの直接コミット
 - 設計書との不整合を含む実装
 - レビューなしのマージ
 - 破壊的変更の無承認実装
@@ -309,7 +360,7 @@ git branch -d hotfix/critical-login-security-fix
 - コミット前に必ず要求仕様IDを確認
 - PR作成時は対応する設計書を明記
 - マージ後は不要なブランチを削除
-- 定期的なdevelopブランチの同期
+- 定期的なmasterブランチの同期
 - 緊急修正時も必ずレビューを実施
 
 ---
