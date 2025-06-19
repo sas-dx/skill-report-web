@@ -14,6 +14,7 @@
 ├── 05-git-workflow.md                 # Git・バージョン管理ワークフロー
 ├── 06-multitenant-development.md     # マルチテナント開発ガイドライン
 ├── 07-specification-compliance.md    # 仕様書準拠・破壊的修正防止
+├── 08-database-design-guidelines.md  # データベース設計ガイドライン
 └── .archived/                         # アーカイブファイル
 ```
 
@@ -21,7 +22,7 @@
 - **00-core-rules.md**: 全体統括・基本方針・重要事項の集約
 - **01-project-specific-rules.md**: 年間スキル報告書WEB化PJT固有のルール
 - **02-04**: 技術スタック非依存の開発ガイドライン
-- **05-07**: プロジェクト特化の運用・品質管理ガイドライン
+- **05-08**: プロジェクト特化の運用・品質管理・データベース設計ガイドライン
 
 ## プロジェクト基本情報
 
@@ -158,6 +159,7 @@
 - **Git・バージョン管理**: `05-git-workflow.md`
 - **マルチテナント開発**: `06-multitenant-development.md`（将来対応）
 - **仕様書準拠・破壊的修正防止**: `07-specification-compliance.md`
+- **データベース設計**: `08-database-design-guidelines.md`
 
 ---
 

@@ -48,6 +48,17 @@ except ImportError:
         ValidationError
     )
 
+# YAMLフォーマット検証モジュールをインポート
+try:
+    from .yaml_format_check import check_yaml_format, check_yaml_format_enhanced
+except ImportError:
+    # 相対インポートが失敗した場合の絶対インポート
+    import sys
+    from pathlib import Path
+    current_dir = Path(__file__).parent
+    sys.path.insert(0, str(current_dir))
+    from yaml_format_check import check_yaml_format, check_yaml_format_enhanced
+
 
 def setup_logger(verbose: bool = False):
     """ログ設定"""
@@ -101,6 +112,7 @@ class ConsistencyCheckService:
             
             # 各チェック実行
             check_methods = [
+                ('yaml_format', self._check_yaml_format),
                 ('table_existence', self._check_table_existence),
                 ('column_consistency', self._check_column_consistency),
                 ('foreign_key_consistency', self._check_foreign_key_consistency),
@@ -130,6 +142,137 @@ class ConsistencyCheckService:
             results['errors'].append(error_msg)
         
         return results
+    
+    def _check_yaml_format(self, target_tables: List[str]) -> Dict[str, Any]:
+        """YAMLフォーマット検証チェック"""
+        result = {
+            'check_name': 'yaml_format',
+            'description': 'YAMLフォーマット・必須セクション検証',
+            'status': 'PASS',
+            'errors': [],
+            'warnings': [],
+            'details': []
+        }
+        
+        try:
+            # YAMLフォーマット検証実行
+            yaml_check_result = check_yaml_format(tables=target_tables, verbose=False)
+            
+            # 結果を統合
+            if not yaml_check_result['success']:
+                result['status'] = 'FAIL'
+                
+                for yaml_result in yaml_check_result['results']:
+                    if not yaml_result['valid']:
+                        table_detail = {
+                            'table_name': yaml_result['table'],
+                            'yaml_format_issues': yaml_result['errors']
+                        }
+                        result['details'].append(table_detail)
+                        
+                        # エラーメッセージを追加
+                        for error in yaml_result['errors']:
+                            error_msg = f"{yaml_result['table']}: {error}"
+                            result['errors'].append(error_msg)
+            
+            # 成功した場合の詳細情報
+            if result['status'] == 'PASS':
+                result['details'].append({
+                    'note': f"全{yaml_check_result['valid']}テーブルのYAMLフォーマット検証に成功しました"
+                })
+            
+        except Exception as e:
+            error_msg = f"YAMLフォーマット検証中にエラーが発生: {str(e)}"
+            result['errors'].append(error_msg)
+            result['status'] = 'FAIL'
+            self.logger.error(error_msg)
+        
+        return result
+    
+    def _check_yaml_format_enhanced(self, target_tables: List[str]) -> Dict[str, Any]:
+        """拡張YAMLフォーマット検証チェック（必須セクション詳細対応）"""
+        result = {
+            'check_name': 'yaml_format_enhanced',
+            'description': '拡張YAMLフォーマット・必須セクション詳細検証',
+            'status': 'PASS',
+            'errors': [],
+            'warnings': [],
+            'details': []
+        }
+        
+        try:
+            # 拡張YAMLフォーマット検証実行
+            yaml_check_result = check_yaml_format_enhanced(tables=target_tables, verbose=False)
+            
+            # 結果を統合
+            if not yaml_check_result['success']:
+                result['status'] = 'FAIL'
+                
+                for yaml_result in yaml_check_result['results']:
+                    if not yaml_result['valid']:
+                        table_detail = {
+                            'table_name': yaml_result['table'],
+                            'yaml_format_issues': yaml_result['errors'],
+                            'yaml_warnings': yaml_result['warnings'],
+                            'required_sections_status': yaml_result['required_sections'],
+                            'format_issues': yaml_result['format_issues'],
+                            'requirement_id_issues': yaml_result['requirement_id_issues']
+                        }
+                        result['details'].append(table_detail)
+                        
+                        # 必須セクション不備を優先的にエラーとして追加
+                        critical_issues = [
+                            section for section, valid in yaml_result['required_sections'].items()
+                            if not valid
+                        ]
+                        if critical_issues:
+                            error_msg = f"{yaml_result['table']}: 🔴 必須セクション不備 ({', '.join(critical_issues)})"
+                            result['errors'].append(error_msg)
+                        
+                        # その他のエラー
+                        for error in yaml_result['errors']:
+                            error_msg = f"{yaml_result['table']}: {error}"
+                            result['errors'].append(error_msg)
+                        
+                        # 警告
+                        for warning in yaml_result['warnings']:
+                            warning_msg = f"{yaml_result['table']}: {warning}"
+                            result['warnings'].append(warning_msg)
+            
+            # 警告のみの場合
+            elif yaml_check_result['warning'] > 0:
+                result['status'] = 'WARNING'
+                for yaml_result in yaml_check_result['results']:
+                    if yaml_result['warnings']:
+                        table_detail = {
+                            'table_name': yaml_result['table'],
+                            'yaml_warnings': yaml_result['warnings'],
+                            'requirement_id_issues': yaml_result['requirement_id_issues']
+                        }
+                        result['details'].append(table_detail)
+                        
+                        for warning in yaml_result['warnings']:
+                            warning_msg = f"{yaml_result['table']}: {warning}"
+                            result['warnings'].append(warning_msg)
+            
+            # 成功した場合の詳細情報
+            if result['status'] == 'PASS':
+                summary = yaml_check_result['summary']
+                result['details'].append({
+                    'note': f"全{yaml_check_result['valid']}テーブルの拡張YAML検証に成功しました",
+                    'execution_time': f"{summary['execution_time']:.2f}秒",
+                    'critical_errors': summary['critical_errors'],
+                    'format_errors': summary['format_errors'],
+                    'requirement_errors': summary['requirement_errors']
+                })
+            
+        except Exception as e:
+            error_msg = f"拡張YAMLフォーマット検証中にエラーが発生: {str(e)}"
+            result['errors'].append(error_msg)
+            result['status'] = 'FAIL'
+            self.logger.error(error_msg)
+        
+        return result
     
     def _check_table_existence(self, target_tables: List[str]) -> Dict[str, Any]:
         """テーブル存在整合性チェック"""
@@ -426,7 +569,7 @@ def main():
     parser.add_argument(
         '--checks', '-c',
         type=str,
-        help='実行するチェック（カンマ区切りで複数指定可能）'
+        help='実行するチェック（カンマ区切りで複数指定可能）\n利用可能: yaml_format,yaml_format_enhanced,table_existence,column_consistency,foreign_key_consistency,data_type_consistency,naming_convention'
     )
     
     parser.add_argument(
@@ -476,9 +619,56 @@ def main():
         if args.tables:
             target_tables = [t.strip() for t in args.tables.split(',')]
         
-        # 整合性チェック実行
-        service = ConsistencyCheckService(config)
-        results = service.run_all_checks(target_tables)
+        # 特定チェックのみ実行する場合
+        if args.checks:
+            available_checks = ['yaml_format', 'yaml_format_enhanced', 'table_existence', 'column_consistency', 'foreign_key_consistency', 'data_type_consistency', 'naming_convention']
+            requested_checks = [c.strip() for c in args.checks.split(',')]
+            
+            # 無効なチェック名をフィルタリング
+            invalid_checks = [c for c in requested_checks if c not in available_checks]
+            if invalid_checks:
+                logger.error(f"無効なチェック名: {', '.join(invalid_checks)}")
+                logger.error(f"利用可能なチェック: {', '.join(available_checks)}")
+                return 1
+            
+            # 特定チェックのみ実行
+            service = ConsistencyCheckService(config)
+            results = {
+                'total_checks': 0,
+                'passed_checks': 0,
+                'failed_checks': 0,
+                'warnings': 0,
+                'errors': [],
+                'details': []
+            }
+            
+            check_method_map = {
+                'yaml_format': service._check_yaml_format,
+                'yaml_format_enhanced': service._check_yaml_format_enhanced,
+                'table_existence': service._check_table_existence,
+                'column_consistency': service._check_column_consistency,
+                'foreign_key_consistency': service._check_foreign_key_consistency,
+                'data_type_consistency': service._check_data_type_consistency,
+                'naming_convention': service._check_naming_convention
+            }
+            
+            for check_name in requested_checks:
+                logger.info(f"チェック実行: {check_name}")
+                check_result = check_method_map[check_name](target_tables or [])
+                results['details'].append(check_result)
+                results['total_checks'] += 1
+                
+                if check_result['status'] == 'PASS':
+                    results['passed_checks'] += 1
+                elif check_result['status'] == 'FAIL':
+                    results['failed_checks'] += 1
+                    results['errors'].extend(check_result.get('errors', []))
+                elif check_result['status'] == 'WARNING':
+                    results['warnings'] += 1
+        else:
+            # 全チェック実行
+            service = ConsistencyCheckService(config)
+            results = service.run_all_checks(target_tables)
         
         # 結果出力
         if args.output_format == 'text':

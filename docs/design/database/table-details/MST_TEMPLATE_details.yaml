@@ -6,9 +6,9 @@
 # 3. 不要なセクションやコメントを削除
 # 4. 業務要件に応じてカラムやインデックスを追加
 
-table_name: "[テーブル名]"  # 例: "MST_Employee"
-logical_name: "[論理名]"    # 例: "社員マスタ"
-category: "[カテゴリ]"      # "マスタ系" または "トランザクション系"
+table_name: "MST_TEMPLATE"  # 例: "MST_Employee"
+logical_name: "テンプレートテーブル"    # 例: "社員マスタ"
+category: "マスタ系"      # "マスタ系" または "トランザクション系"
 
 # 改版履歴
 revision_history:
@@ -29,7 +29,7 @@ overview: |
   [このテーブルの役割や重要性について説明]
 
 # 業務固有カラム定義
-business_columns:
+columns:
   # 主キー例
   - name: "[主キーカラム名]"
     logical: "[主キー論理名]"
@@ -183,21 +183,21 @@ foreign_keys:
 # サンプルデータ
 sample_data:
   # サンプルレコード1
-  - [主キーカラム名]: "[サンプル値1]"
-    [カラム名]: "[サンプル値]"
-    [ステータスカラム名]: "値1"
-    [数値カラム名]: 100
-    [日付カラム名]: "2024-01-01"
-    [テキストカラム名]: "[サンプルテキスト]"
+  - primary_key_column: "SAMPLE001"
+    sample_column: "サンプル値"
+    status_column: "値1"
+    number_column: 100
+    date_column: "2024-01-01"
+    text_column: "サンプルテキスト"
     is_active: true
     
   # サンプルレコード2
-  - [主キーカラム名]: "[サンプル値2]"
-    [カラム名]: "[サンプル値2]"
-    [ステータスカラム名]: "値2"
-    [数値カラム名]: 200
-    [日付カラム名]: "2024-02-01"
-    [テキストカラム名]: "[サンプルテキスト2]"
+  - primary_key_column: "SAMPLE002"
+    sample_column: "サンプル値2"
+    status_column: "値2"
+    number_column: 200
+    date_column: "2024-02-01"
+    text_column: "サンプルテキスト2"
     is_active: true
 
 # 特記事項
