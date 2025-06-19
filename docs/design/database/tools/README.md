@@ -14,6 +14,7 @@
 - **🔍 品質保証**: 命名規則・データ型・外部キー制約の検証
 - **📊 レポート生成**: 整合性チェック結果の詳細レポート
 - **🛡️ YAML検証**: 必須セクション・フォーマット検証
+- **💾 サンプルデータ生成**: YAMLからのINSERT文自動生成
 
 ## 🏗️ アーキテクチャ
 
@@ -83,6 +84,10 @@ graph TD
     
     B --> K[YAML検証統合]
     K --> H
+    
+    A --> O[sample_data_generator]
+    O --> P[INSERT文]
+    P --> H
 ```
 
 ## 🚀 クイックスタート
@@ -136,7 +141,10 @@ python3 yaml_validator/validate_yaml_format.py --table MST_NewTable --verbose
 # Step 5: 自動生成実行
 python3 -m table_generator --table MST_NewTable --verbose
 
-# Step 6: 整合性チェック
+# Step 6: サンプルデータINSERT文生成
+python3 database_consistency_checker/sample_data_generator.py --tables MST_NewTable --verbose
+
+# Step 7: 整合性チェック
 python3 database_consistency_checker/run_check.py --tables MST_NewTable --verbose
 ```
 
@@ -160,6 +168,9 @@ python3 yaml_validator/validate_yaml_format.py --check-required-only
 
 # YAML検証を含む整合性チェック（統合版）
 python3 database_consistency_checker/run_check.py --include-yaml-validation --verbose
+
+# サンプルデータ生成（全テーブル）
+python3 database_consistency_checker/sample_data_generator.py --verbose
 ```
 
 ## 📋 YAML詳細定義の作成
@@ -1264,167 +1275,229 @@ revision_history:
 overview: |
   このテーブルは組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブルです。
   主な目的は、社員の基本情報（氏名、連絡先、入社日等）の管理、組織構造（部署、役職、上司関係）の管理、
-  認証・権限管理のためのユーザー情報提供、人事システムとの連携データ基盤として機能します。
+  認証・権限管理のためのユーザー情報提供、人事システムとの連携データ基盤の提供です。
 ```
 
 ##### 3. 要求仕様ID形式エラー
 ```
-⚠️ 警告: カラム employee_code: 要求仕様ID形式エラー (PRO-BASE-1)
+❌ エラー: カラム 'employee_code' の要求仕様ID形式エラー: PRO-BASE-1
 ```
 
 **対処法**:
 ```yaml
 # 正しい形式に修正
-columns:
-  - name: "employee_code"
-    type: "VARCHAR(30)"
-    nullable: false
-    comment: "社員番号"
-    requirement_id: "PRO.1-BASE.1"  # 正しい形式
+requirement_id: "PRO.1-BASE.1"  # ドット(.)とハイフン(-)の位置に注意
 ```
 
-##### 4. パフォーマンス最適化
+## 🚀 今後追加すべき機能と詳細タスクリスト
 
-大量テーブル検証時の最適化:
+### 1. **データベース移行・マイグレーション機能** 🆕
 
-```python
-# バッチ処理での効率的な検証
-from docs.design.database.tools.database_consistency_checker.yaml_format_check import check_yaml_format_enhanced
-import glob
-import os
+#### タスクリスト：
+- [ ] **マイグレーションファイル生成器の実装**
+  - YAMLの変更差分からマイグレーションSQL生成
+  - バージョン管理機能
+  - ロールバック機能
+- [ ] **スキーマ比較ツール**
+  - 現在のDBスキーマとYAML定義の差分検出
+  - ALTER TABLE文の自動生成
+  - 破壊的変更の警告
+- [ ] **マイグレーション実行管理**
+  - 実行履歴の記録
+  - 依存関係の解決
+  - ドライラン機能
 
-def batch_validate_yaml():
-    """大量テーブルの効率的な検証"""
-    yaml_files = glob.glob("docs/design/database/table-details/*_details.yaml")
-    table_names = [
-        os.path.basename(f).replace("_details.yaml", "")
-        for f in yaml_files
-        if not f.endswith("MST_TEMPLATE_details.yaml")
-    ]
-    
-    # 10テーブルずつバッチ処理
-    batch_size = 10
-    for i in range(0, len(table_names), batch_size):
-        batch_tables = table_names[i:i+batch_size]
-        print(f"バッチ {i//batch_size + 1}: {len(batch_tables)}テーブル検証中...")
-        
-        result = check_yaml_format_enhanced(tables=batch_tables, verbose=False)
-        
-        if not result['success']:
-            print(f"  ❌ {result['invalid']}テーブルで検証失敗")
-            for table_result in result['results']:
-                if not table_result['valid']:
-                    print(f"    - {table_result['table']}")
-        else:
-            print(f"  ✅ 全{len(batch_tables)}テーブル検証成功")
+### 2. **ビジュアル化・ドキュメント強化** 🆕
 
-if __name__ == "__main__":
-    batch_validate_yaml()
-```
+#### タスクリスト：
+- [ ] **ER図自動生成機能**
+  - YAMLからPlantUML/Mermaid形式のER図生成
+  - SVG/PNG出力対応
+  - インタラクティブなHTML版
+- [ ] **データ辞書生成**
+  - Excel/CSV形式での出力
+  - 業務用語集との連携
+  - 多言語対応（日英）
+- [ ] **API仕様書連携**
+  - テーブル定義とAPI仕様の相互参照
+  - OpenAPI仕様との統合
 
-## 🧪 テストスイート
+### 3. **パフォーマンス最適化支援** 🆕
 
-### テスト構成
+#### タスクリスト：
+- [ ] **インデックス最適化アドバイザー**
+  - クエリパターン分析
+  - 推奨インデックスの提案
+  - 既存インデックスの評価
+- [ ] **パーティショニング設計支援**
+  - データ量予測に基づく提案
+  - パーティション戦略の自動生成
+- [ ] **クエリ性能予測**
+  - 想定クエリの実行計画シミュレーション
+  - ボトルネック検出
 
-```bash
-# 全テスト実行
-python3 run_tests.py
+### 4. **テストデータ生成の高度化** 🆕
 
-# ユニットテストのみ
-python3 run_tests.py --unit
+#### タスクリスト：
+- [ ] **リアリスティックなテストデータ生成**
+  - 業務シナリオベースのデータ生成
+  - 統計的分布を考慮したデータ
+  - 時系列データの生成
+- [ ] **データマスキング機能**
+  - 本番データからのテストデータ生成
+  - 個人情報の自動マスキング
+  - 整合性を保持したマスキング
+- [ ] **負荷テスト用データセット**
+  - 大量データの効率的生成
+  - パフォーマンステスト用シナリオ
 
-# 統合テストのみ
-python3 run_tests.py --integration
+### 5. **CI/CD統合の強化** 🆕
 
-# パフォーマンステストのみ
-python3 run_tests.py --performance
+#### タスクリスト：
+- [ ] **GitHub Actions統合**
+  - 自動検証ワークフロー
+  - PR時の差分チェック
+  - 自動デプロイメント
+- [ ] **Docker統合**
+  - DB環境の自動構築
+  - テスト環境の分離
+  - コンテナ化されたツール実行
+- [ ] **監視・アラート**
+  - スキーマ変更の通知
+  - 品質メトリクスのダッシュボード
 
-# 特定のテストモジュール実行
-python3 run_tests.py --module table_generator
+### 6. **セキュリティ・コンプライアンス** 🆕
 
-# 詳細ログ付きテスト実行
-python3 run_tests.py --verbose
-```
+#### タスクリスト：
+- [ ] **セキュリティ監査機能**
+  - 暗号化要件のチェック
+  - アクセス権限の検証
+  - GDPR/個人情報保護法準拠チェック
+- [ ] **監査ログ設計支援**
+  - 必要な監査項目の提案
+  - トリガー自動生成
+  - ログローテーション設計
 
-### テストカバレッジ
+### 7. **マルチデータベース対応** 🆕
 
-| モジュール | カバレッジ | 状態 |
-|------------|------------|------|
-| table_generator | 85% | ✅ 良好 |
-| database_consistency_checker | 90% | ✅ 良好 |
-| yaml_validator | 88% | ✅ 良好 |
-| shared | 82% | ✅ 良好 |
+#### タスクリスト：
+- [ ] **MySQL/MariaDB対応**
+  - DDL生成の拡張
+  - データ型マッピング
+  - 方言の吸収
+- [ ] **NoSQL統合**
+  - MongoDB スキーマ生成
+  - DynamoDB 設計支援
+- [ ] **クロスDB移行**
+  - データベース間の移行支援
+  - 互換性チェック
 
-## 📈 パフォーマンス指標
+### 8. **AI/ML統合** 🆕
 
-### 処理時間目標
+#### タスクリスト：
+- [ ] **スキーマ最適化AI**
+  - 使用パターンからの最適化提案
+  - 自動正規化/非正規化提案
+- [ ] **異常検知**
+  - スキーマの異常パターン検出
+  - 命名規則違反の自動検出
+- [ ] **自然言語からのスキーマ生成**
+  - 要件文書からのテーブル設計
+  - ChatGPT/Claude統合
 
-| 処理 | 目標時間 | 現在の性能 | 状態 |
-|------|----------|------------|------|
-| 全テーブル生成 (51テーブル) | < 30秒 | 25秒 | ✅ 達成 |
-| 全体整合性チェック | < 15秒 | 12秒 | ✅ 達成 |
-| YAML検証 (全テーブル) | < 10秒 | 8秒 | ✅ 達成 |
-| サンプルデータ生成 (全テーブル) | < 20秒 | 18秒 | ✅ 達成 |
+### 9. **開発者体験（DX）の向上** 🆕
 
-### メモリ使用量
+#### タスクリスト：
+- [ ] **VSCode拡張機能**
+  - YAML編集支援
+  - リアルタイム検証
+  - スニペット機能
+- [ ] **Web UI**
+  - ブラウザベースの管理画面
+  - ビジュアルスキーマエディタ
+  - コラボレーション機能
+- [ ] **CLI改善**
+  - インタラクティブモード
+  - 自動補完
+  - プログレスバー表示
 
-| 処理 | 最大メモリ使用量 | 状態 |
-|------|------------------|------|
-| 全テーブル生成 | 128MB | ✅ 良好 |
-| 全体整合性チェック | 96MB | ✅ 良好 |
-| YAML検証 | 64MB | ✅ 良好 |
+### 10. **運用・保守機能** 🆕
 
-## 🔧 設定・カスタマイズ
+#### タスクリスト：
+- [ ] **バックアップ・リストア支援**
+  - バックアップスクリプト生成
+  - リストア手順書生成
+  - 定期バックアップ設定
+- [ ] **容量予測・管理**
+  - データ増加予測
+  - ストレージ最適化提案
+  - アーカイブ戦略
+- [ ] **ヘルスチェック**
+  - DB健全性の定期チェック
+  - インデックス断片化検出
+  - 統計情報更新提案
 
-### 環境変数
+## 📋 優先度別実装ロードマップ
 
-```bash
-# ベースディレクトリ設定
-export DB_TOOLS_BASE_DIR="/path/to/database/tools"
+### Phase 1（1-2ヶ月）- 基盤強化
+1. マイグレーション機能の基本実装
+2. ER図自動生成
+3. GitHub Actions統合
 
-# ログレベル設定
-export DB_TOOLS_LOG_LEVEL="INFO"  # DEBUG, INFO, WARNING, ERROR
+### Phase 2（3-4ヶ月）- 品質向上
+1. パフォーマンス最適化支援
+2. セキュリティ監査機能
+3. テストデータ生成の高度化
 
-# 出力形式設定
-export DB_TOOLS_OUTPUT_FORMAT="markdown"  # console, json, markdown
+### Phase 3（5-6ヶ月）- エコシステム拡張
+1. マルチデータベース対応
+2. Web UI開発
+3. VSCode拡張機能
 
-# カラー出力設定
-export DB_TOOLS_NO_COLOR="false"  # true, false
-```
+### Phase 4（7-8ヶ月）- 先進機能
+1. AI/ML統合
+2. 高度な運用支援機能
+3. エンタープライズ機能
 
-### 設定ファイル
+## 🎯 各機能の期待効果
 
-```yaml
-# config/settings.yaml
-database:
-  type: "postgresql"
-  charset: "utf8"
-  collation: "ja_JP.UTF-8"
+| 機能カテゴリ | 期待効果 | 対象ユーザー |
+|------------|---------|------------|
+| マイグレーション | 開発効率50%向上 | 開発者 |
+| ビジュアル化 | ドキュメント作成時間80%削減 | 開発者・設計者 |
+| パフォーマンス最適化 | クエリ性能30%改善 | DBA・開発者 |
+| テストデータ生成 | テスト準備時間70%削減 | QAエンジニア |
+| CI/CD統合 | デプロイ時間60%削減 | DevOpsエンジニア |
+| セキュリティ | コンプライアンス対応工数50%削減 | セキュリティ担当 |
 
-output:
-  base_dir: "../"
-  tables_dir: "tables"
-  ddl_dir: "ddl"
-  data_dir: "data"
-
-validation:
-  required_sections: ["revision_history", "overview", "notes", "business_rules"]
-  min_overview_length: 50
-  min_notes_count: 3
-  min_business_rules_count: 3
-
-performance:
-  max_parallel_processes: 4
-  timeout_seconds: 300
-```
-
-## 🚨 トラブルシューティング
+## 🔍 トラブルシューティング
 
 ### よくある問題と解決方法
 
-#### 1. YAML構文エラー
+#### 1. 整合性チェックエラー
 ```bash
-# 問題: YAML解析エラー
+# 問題: テーブル存在整合性エラー
+❌ MST_Department: DDLファイルが存在しません
+
+# 解決方法
+# 1. エラー詳細確認
+python3 database_consistency_checker/run_check.py --verbose --tables MST_Department
+
+# 2. 個別ファイル確認
+ls -la table-details/MST_Department_details.yaml
+ls -la ddl/MST_Department.sql
+ls -la tables/テーブル定義書_MST_Department_*.md
+
+# 3. 再生成実行
+python3 -m table_generator --table MST_Department --verbose
+
+# 4. 再チェック
+python3 database_consistency_checker/run_check.py --tables MST_Department
+```
+
+#### 2. DDL生成エラー
+```bash
+# 問題: YAML構文エラー
 ❌ YAML解析エラー: mapping values are not allowed here
 
 # 解決方法
@@ -1435,38 +1508,78 @@ python3 -c "import yaml; yaml.safe_load(open('table-details/MST_Employee_details
 # - インデントはスペース2文字で統一
 # - コロン後にスペース必須
 # - 文字列は引用符で囲む
+
+# 3. 再生成実行
+python3 -m table_generator --table MST_Employee --verbose
 ```
 
-#### 2. 整合性チェックエラー
+#### 3. 外部キー制約エラー
 ```bash
-# 問題: テーブル存在整合性エラー
-❌ MST_Department: DDLファイルが存在しません
+# 問題: 外部キー制約違反
+❌ 参照先テーブル 'MST_Department' が存在しません
 
 # 解決方法
-# 1. エラー詳細確認
-python3 database_consistency_checker/run_check.py --verbose --tables MST_Department
-
-# 2. 再生成実行
-python3 -m table_generator --table MST_Department --verbose
-
-# 3. 再チェック
+# 1. 参照先テーブルの存在確認
 python3 database_consistency_checker/run_check.py --tables MST_Department
+
+# 2. 参照先テーブルの生成
+python3 -m table_generator --table MST_Department
+
+# 3. 参照元テーブルの再生成
+python3 -m table_generator --table MST_Employee
+
+# 4. 外部キー整合性チェック
+python3 database_consistency_checker/run_check.py --checks foreign_key_consistency
 ```
 
-#### 3. パフォーマンス問題
+#### 4. パフォーマンス問題
 ```bash
-# 問題: 処理時間が長い
-⚠️ 全テーブル生成に45秒かかりました (目標: 30秒)
+# 問題: 応答時間が設定値を超過
+⚠️ MST_Employee: SELECT応答時間 15ms > 設定値 10ms
 
 # 解決方法
-# 1. 並列処理数の調整
-export DB_TOOLS_MAX_PARALLEL=8
+# 1. インデックス設計の見直し
+# - 検索条件に使用されるカラムにインデックス追加
+# - 複合インデックスの列順序最適化
 
-# 2. 不要なファイルの削除
-python3 database_consistency_checker/run_check.py --checks orphaned_files
+# 2. クエリの最適化
+# - WHERE句の条件見直し
+# - JOINの最適化
+# - 不要なカラムの除外
 
-# 3. キャッシュクリア
-rm -rf /tmp/db_tools_cache/
+# 3. データ量の確認
+# - 想定データ量との乖離確認
+# - パーティショニングの検討
+```
+
+### 緊急時対応フロー
+```
+1. 問題発見
+   ↓
+2. 影響範囲特定
+   - 関連テーブル・機能の確認
+   - ユーザー影響度の評価
+   ↓
+3. 根本原因分析
+   - ログ・エラーメッセージの確認
+   - 設定・データの確認
+   ↓
+4. 応急処置
+   - サービス継続のための一時対応
+   - ユーザー通知
+   ↓
+5. 恒久対策
+   - YAML修正
+   - 再生成実行
+   - 整合性確認
+   ↓
+6. 再発防止策
+   - チェック項目の追加
+   - 手順の見直し
+   ↓
+7. Git コミット
+   - 修正内容の記録
+   - 影響範囲の明記
 ```
 
 ## 📚 関連ドキュメント
@@ -1474,47 +1587,47 @@ rm -rf /tmp/db_tools_cache/
 ### 内部ドキュメント
 - **テーブル一覧**: `docs/design/database/テーブル一覧.md`
 - **エンティティ関連図**: `docs/design/database/エンティティ関連図.md`
-- **YAML検証詳細**: `yaml_validator/README_REQUIRED_SECTIONS.md`
-- **統合ガイド**: `yaml_validator/INTEGRATION.md`
+- **YAML検証詳細**: `docs/design/database/tools/yaml_validator/README.md`
+- **必須セクション詳細**: `docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md`
+- **統合ガイド**: `docs/design/database/tools/yaml_validator/INTEGRATION.md`
 
 ### 外部参照
 - **PostgreSQL公式ドキュメント**: https://www.postgresql.org/docs/
+- **Prisma公式ドキュメント**: https://www.prisma.io/docs/
 - **YAML仕様**: https://yaml.org/spec/
-- **Python PyYAML**: https://pyyaml.org/wiki/PyYAMLDocumentation
 
-## 📝 更新履歴
+## 🤝 コントリビューション
 
-### v1.5.0 (2025-06-20)
-- ✨ サンプルデータINSERT文生成ツール追加
-- ✨ 制約整合性チェック機能追加
-- ✨ 修正提案機能追加
-- 🐛 YAML検証の統合機能改善
-- 📚 ドキュメント統合・整理
+### 開発への参加
+1. Issueの作成・議論
+2. Pull Requestの提出
+3. コードレビュー
+4. マージ・リリース
 
-### v1.4.0 (2025-06-15)
-- ✨ Git pre-commitフック機能追加
-- ✨ 並列処理によるパフォーマンス向上
-- 🐛 外部キー制約チェックの精度向上
-- 📚 エラーハンドリングガイド追加
+### コーディング規約
+- Python: PEP 8準拠
+- 型ヒント使用推奨
+- docstring必須
+- ユニットテスト必須
 
-### v1.3.0 (2025-06-10)
-- ✨ YAML検証統合機能追加
-- ✨ 必須セクション検証強化
-- 🐛 データ型互換性チェック改善
-- 📚 使用方法ガイド拡充
+### テスト実行
+```bash
+# 全テスト実行
+python3 run_tests.py
 
-### v1.2.0 (2025-06-05)
-- ✨ データ型整合性チェック追加
-- ✨ レポート出力管理機能追加
-- 🐛 孤立ファイル検出の精度向上
-- 📚 トラブルシューティングガイド追加
+# 特定のテストのみ
+python3 -m pytest tests/unit/test_yaml_parser.py
 
-### v1.1.0 (2025-06-01)
-- ✨ 基本整合性チェック機能実装
-- ✨ テーブル生成ツール実装
-- ✨ YAML検証ツール実装
-- 📚 初版ドキュメント作成
+# カバレッジレポート
+python3 -m pytest --cov=. --cov-report=html
+```
+
+## 📄 ライセンス
+
+このプロジェクトは年間スキル報告書WEB化PJTの一部として開発されています。
 
 ---
 
-このツールパッケージにより、データベース設計の品質向上と開発効率化を実現してください。
+**最終更新日**: 2025年6月20日  
+**バージョン**: 2.0.0  
+**メンテナー**: 開発チーム
