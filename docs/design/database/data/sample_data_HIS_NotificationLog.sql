@@ -1,6 +1,8 @@
 -- サンプルデータ INSERT文: HIS_NotificationLog
--- 生成日時: 2025-06-20 00:15:12
+-- 生成日時: 2025-06-21 07:22:21
 -- レコード数: 2
+
+BEGIN;
 
 INSERT INTO HIS_NotificationLog (id, tenant_id, notification_id, setting_id, template_id, notification_type, recipient_type, recipient_address, subject, message_body, message_format, send_status, send_attempts, max_retry_count, scheduled_at, sent_at, delivered_at, opened_at, response_code, response_message, error_details, integration_config_id, priority_level, created_at, updated_at, is_deleted) VALUES ('NL001', 'TENANT001', 'NOTIF001', 'NS001', 'NT001', 'EMAIL', 'USER', 'yamada.taro@company.com', '【スキル更新】山田太郎さんのスキル情報が更新されました', '山田太郎さん
 
@@ -23,5 +25,7 @@ INSERT INTO HIS_NotificationLog (id, tenant_id, notification_id, setting_id, tem
 • 進捗率: 75%
 
 <https://system.company.com/goals/456|詳細を確認する>', 'MARKDOWN', 'FAILED', 3, 3, '2025-06-01 09:00:00', NULL, NULL, NULL, '404', 'channel_not_found', '{"error": "channel_not_found", "details": "The specified channel does not exist or the bot is not a member"}', 'IC001', 'HIGH', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
+
+COMMIT;
 
 -- HIS_NotificationLog サンプルデータ終了

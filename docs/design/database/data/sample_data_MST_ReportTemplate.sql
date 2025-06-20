@@ -1,6 +1,8 @@
 -- サンプルデータ INSERT文: MST_ReportTemplate
--- 生成日時: 2025-06-20 00:15:12
+-- 生成日時: 2025-06-21 07:22:21
 -- レコード数: 2
+
+BEGIN;
 
 INSERT INTO MST_ReportTemplate (id, tenant_id, template_key, template_name, report_category, output_format, language_code, template_content, style_sheet, parameters_schema, data_source_config, page_settings, header_template, footer_template, is_default, is_active, version, preview_image_url, created_at, updated_at, is_deleted) VALUES ('RT001', 'TENANT001', 'skill_summary_report', 'スキルサマリーレポート', 'SKILL', 'PDF', 'ja', '<!DOCTYPE html>
 <html>
@@ -47,5 +49,7 @@ INSERT INTO MST_ReportTemplate (id, tenant_id, template_key, template_name, repo
     </worksheet>
 </workbook>
 ', NULL, '{"type": "object", "properties": {"department_id": {"type": "string"}, "period_start": {"type": "string", "format": "date"}, "period_end": {"type": "string", "format": "date"}}}', '{"tables": ["MST_Employee", "TRN_Goal"], "joins": ["employee_goals"]}', '{"orientation": "landscape"}', NULL, NULL, TRUE, TRUE, '1.0.0', '/assets/templates/goal_progress_preview.png', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
+
+COMMIT;
 
 -- MST_ReportTemplate サンプルデータ終了
