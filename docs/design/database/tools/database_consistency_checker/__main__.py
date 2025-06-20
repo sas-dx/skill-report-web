@@ -51,6 +51,9 @@ except ImportError:
 # YAMLフォーマット検証モジュールをインポート
 try:
     from .yaml_format_check import check_yaml_format, check_yaml_format_enhanced
+    from .sample_data_generator import generate_sample_data_sql, validate_and_generate
+    from .yaml_format_check_enhanced import IntegratedValidator
+    from .sample_data_generator_enhanced import EnhancedSampleDataGenerator
 except ImportError:
     # 相対インポートが失敗した場合の絶対インポート
     import sys
@@ -58,6 +61,9 @@ except ImportError:
     current_dir = Path(__file__).parent
     sys.path.insert(0, str(current_dir))
     from yaml_format_check import check_yaml_format, check_yaml_format_enhanced
+    from sample_data_generator import generate_sample_data_sql, validate_and_generate
+    from yaml_format_check_enhanced import IntegratedValidator
+    from sample_data_generator_enhanced import EnhancedSampleDataGenerator
 
 
 def setup_logger(verbose: bool = False):
@@ -598,6 +604,30 @@ def main():
         help='結果出力ファイル'
     )
     
+    parser.add_argument(
+        '--generate-sample-data',
+        action='store_true',
+        help='サンプルデータINSERT文を生成'
+    )
+    
+    parser.add_argument(
+        '--validate-sample-data',
+        action='store_true',
+        help='サンプルデータ検証とINSERT文生成を統合実行'
+    )
+    
+    parser.add_argument(
+        '--comprehensive-validation',
+        action='store_true',
+        help='包括的検証（YAML検証+サンプルデータ生成）を実行'
+    )
+    
+    parser.add_argument(
+        '--enhanced-sample-data',
+        action='store_true',
+        help='改良版サンプルデータINSERT文生成を実行'
+    )
+    
     args = parser.parse_args()
     
     try:
@@ -618,6 +648,108 @@ def main():
         target_tables = None
         if args.tables:
             target_tables = [t.strip() for t in args.tables.split(',')]
+        
+        # サンプルデータINSERT文生成
+        if args.generate_sample_data:
+            logger.info("サンプルデータINSERT文生成を開始")
+            generation_result = generate_sample_data_sql(target_tables, args.verbose)
+            
+            if generation_result['success']:
+                print(f"\n✅ サンプルデータINSERT文生成が完了しました")
+                print(f"対象テーブル数: {generation_result['total_tables']}")
+                print(f"生成成功テーブル数: {generation_result['generated_tables']}")
+                print(f"総レコード数: {generation_result['total_records']}")
+                print(f"出力ディレクトリ: docs/design/database/data/")
+                
+                if generation_result['errors']:
+                    print(f"\n⚠️ エラーが発生したテーブル:")
+                    for error in generation_result['errors']:
+                        print(f"  - {error}")
+            else:
+                print(f"\n❌ サンプルデータINSERT文生成に失敗しました")
+                for error in generation_result['errors']:
+                    print(f"  - {error}")
+            
+            return 0 if generation_result['success'] else 1
+        
+        # サンプルデータ検証とINSERT文生成の統合実行
+        if args.validate_sample_data:
+            logger.info("サンプルデータ検証・INSERT文生成 統合実行を開始")
+            validation_result = validate_and_generate(target_tables, args.verbose)
+            
+            if validation_result['overall_success']:
+                print(f"\n✅ サンプルデータ検証・INSERT文生成が完了しました")
+                print(f"検証: {validation_result['validation']['valid_tables']}/{validation_result['validation']['total_tables']} テーブル成功")
+                print(f"生成: {validation_result['generation']['generated_tables']}/{validation_result['generation']['total_tables']} テーブル成功")
+                print(f"総レコード数: {validation_result['generation']['total_records']}")
+                print(f"出力ディレクトリ: docs/design/database/data/")
+            else:
+                print(f"\n❌ サンプルデータ検証・INSERT文生成に失敗しました")
+                
+                if validation_result['validation']['errors']:
+                    print(f"\n検証エラー:")
+                    for error in validation_result['validation']['errors']:
+                        print(f"  - {error}")
+                
+                if validation_result['generation']['errors']:
+                    print(f"\n生成エラー:")
+                    for error in validation_result['generation']['errors']:
+                        print(f"  - {error}")
+            
+            return 0 if validation_result['overall_success'] else 1
+        
+        # 包括的検証（YAML検証+サンプルデータ生成）
+        if args.comprehensive_validation:
+            logger.info("包括的検証（YAML検証+サンプルデータ生成）を開始")
+            try:
+                validator = IntegratedValidator(args.verbose)
+                comprehensive_result = validator.run_comprehensive_validation(target_tables)
+                
+                # 結果出力
+                output = validator.generate_report(comprehensive_result, args.output_format)
+                
+                if args.output_file:
+                    with open(args.output_file, 'w', encoding='utf-8') as f:
+                        f.write(output)
+                    logger.info(f"結果を {args.output_file} に出力しました")
+                else:
+                    print(output)
+                
+                return 0 if comprehensive_result['success'] else 1
+                
+            except Exception as e:
+                logger.error(f"包括的検証中にエラーが発生: {e}")
+                return 1
+        
+        # 改良版サンプルデータINSERT文生成
+        if args.enhanced_sample_data:
+            logger.info("改良版サンプルデータINSERT文生成を開始")
+            try:
+                generator = EnhancedSampleDataGenerator(args.verbose)
+                enhanced_result = generator.generate_sample_data_sql(target_tables)
+                
+                if enhanced_result['success']:
+                    print(f"\n✅ 改良版サンプルデータINSERT文生成が完了しました")
+                    print(f"対象テーブル数: {enhanced_result['total_tables']}")
+                    print(f"生成成功テーブル数: {enhanced_result['generated_tables']}")
+                    print(f"総レコード数: {enhanced_result['total_records']}")
+                    print(f"実行順序: {', '.join(enhanced_result['execution_order'])}")
+                    print(f"出力ディレクトリ: docs/design/database/data/")
+                    
+                    if enhanced_result['errors']:
+                        print(f"\n⚠️ エラーが発生したテーブル:")
+                        for error in enhanced_result['errors']:
+                            print(f"  - {error}")
+                else:
+                    print(f"\n❌ 改良版サンプルデータINSERT文生成に失敗しました")
+                    for error in enhanced_result['errors']:
+                        print(f"  - {error}")
+                
+                return 0 if enhanced_result['success'] else 1
+                
+            except Exception as e:
+                logger.error(f"改良版サンプルデータ生成中にエラーが発生: {e}")
+                return 1
         
         # 特定チェックのみ実行する場合
         if args.checks:

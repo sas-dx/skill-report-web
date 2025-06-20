@@ -396,7 +396,8 @@ def validate_table_yaml_enhanced(table_name: str, verbose: bool = False) -> Dict
             'business_rules': False
         },
         'format_issues': [],
-        'requirement_id_issues': []
+        'requirement_id_issues': [],
+        'sample_data_issues': []
     }
     
     if not os.path.exists(yaml_file):
@@ -461,6 +462,12 @@ def validate_table_yaml_enhanced(table_name: str, verbose: bool = False) -> Dict
                     result['requirement_id_issues'].append(f"カラム {col_name}: 要求仕様ID形式エラー ({requirement_id})")
                     result['warnings'].append(f"カラム {col_name}: 要求仕様ID形式エラー")
     
+    # sample_data品質検証
+    sample_data_valid, sample_data_errors = validate_sample_data_quality(yaml_data, table_name, verbose)
+    if not sample_data_valid:
+        result['sample_data_issues'].extend(sample_data_errors)
+        result['warnings'].extend([f"sample_data: {error}" for error in sample_data_errors])
+    
     # 警告がある場合でも、必須セクション不備がなければ有効とする
     if result['warnings'] and result['valid']:
         # 必須セクション不備がある場合のみ無効とする
@@ -469,6 +476,113 @@ def validate_table_yaml_enhanced(table_name: str, verbose: bool = False) -> Dict
             result['valid'] = False
     
     return result
+
+
+def validate_sample_data_quality(yaml_data: Dict[str, Any], table_name: str, verbose: bool = False) -> Tuple[bool, List[str]]:
+    """sample_dataの品質検証"""
+    errors = []
+    
+    if verbose:
+        print(f"{Fore.BLUE}テーブル {table_name} のsample_data品質検証を実行中...{Style.RESET_ALL}")
+    
+    # sample_dataセクションの存在確認
+    if 'sample_data' not in yaml_data:
+        if verbose:
+            print(f"{Fore.YELLOW}⚠️ sample_dataセクションが存在しません{Style.RESET_ALL}")
+        return True, []  # sample_dataは必須ではないため警告のみ
+    
+    sample_data = yaml_data['sample_data']
+    if not isinstance(sample_data, list) or len(sample_data) == 0:
+        errors.append("sample_dataは空でない配列である必要があります")
+        return False, errors
+    
+    # カラム定義の取得
+    columns = yaml_data.get('columns', [])
+    if not columns:
+        errors.append("カラム定義が存在しないためsample_dataを検証できません")
+        return False, errors
+    
+    # カラム名とデータ型のマッピング作成
+    column_info = {}
+    required_columns = []
+    for col in columns:
+        if isinstance(col, dict):
+            col_name = col.get('name')
+            col_type = col.get('type', '').upper()
+            nullable = col.get('nullable', True)
+            
+            if col_name:
+                column_info[col_name] = {
+                    'type': col_type,
+                    'nullable': nullable
+                }
+                if not nullable:
+                    required_columns.append(col_name)
+    
+    # 各sample_dataレコードの検証
+    for i, record in enumerate(sample_data):
+        if not isinstance(record, dict):
+            errors.append(f"sample_data[{i}]: レコードは辞書形式である必要があります")
+            continue
+        
+        # 必須カラムの存在確認
+        for req_col in required_columns:
+            if req_col not in record or record[req_col] is None:
+                errors.append(f"sample_data[{i}]: 必須カラム '{req_col}' の値が不足しています")
+        
+        # データ型整合性チェック
+        for col_name, value in record.items():
+            if col_name in column_info and value is not None:
+                col_type = column_info[col_name]['type']
+                type_error = _validate_data_type(col_name, value, col_type)
+                if type_error:
+                    errors.append(f"sample_data[{i}]: {type_error}")
+    
+    is_valid = len(errors) == 0
+    
+    if verbose:
+        if is_valid:
+            print(f"{Fore.GREEN}✓ sample_data品質検証に成功しました（{len(sample_data)}レコード）{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.RED}❌ sample_data品質検証に失敗しました（{len(errors)}個のエラー）{Style.RESET_ALL}")
+    
+    return is_valid, errors
+
+
+def _validate_data_type(col_name: str, value: Any, col_type: str) -> Optional[str]:
+    """データ型の整合性を検証"""
+    try:
+        if col_type.startswith('VARCHAR') or col_type.startswith('TEXT'):
+            if not isinstance(value, str):
+                return f"カラム '{col_name}': 文字列型が期待されますが {type(value).__name__} です"
+        
+        elif col_type.startswith('INT') or col_type.startswith('BIGINT'):
+            if not isinstance(value, int):
+                return f"カラム '{col_name}': 整数型が期待されますが {type(value).__name__} です"
+        
+        elif col_type.startswith('DECIMAL') or col_type.startswith('FLOAT'):
+            if not isinstance(value, (int, float)):
+                return f"カラム '{col_name}': 数値型が期待されますが {type(value).__name__} です"
+        
+        elif col_type == 'BOOLEAN':
+            if not isinstance(value, bool):
+                return f"カラム '{col_name}': ブール型が期待されますが {type(value).__name__} です"
+        
+        elif col_type in ['DATE', 'DATETIME', 'TIMESTAMP']:
+            if not isinstance(value, str):
+                return f"カラム '{col_name}': 日付文字列が期待されますが {type(value).__name__} です"
+            # 日付形式の簡易チェック
+            import re
+            date_pattern = r'^\d{4}-\d{2}-\d{2}$'
+            datetime_pattern = r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+            if col_type == 'DATE' and not re.match(date_pattern, value):
+                return f"カラム '{col_name}': 日付形式（YYYY-MM-DD）が期待されます"
+            elif col_type in ['DATETIME', 'TIMESTAMP'] and not (re.match(date_pattern, value) or re.match(datetime_pattern, value)):
+                return f"カラム '{col_name}': 日時形式（YYYY-MM-DD または YYYY-MM-DD HH:MM:SS）が期待されます"
+        
+        return None
+    except Exception as e:
+        return f"カラム '{col_name}': データ型検証中にエラーが発生しました: {str(e)}"
 
 
 def _validate_requirement_id_format(requirement_id: str) -> bool:

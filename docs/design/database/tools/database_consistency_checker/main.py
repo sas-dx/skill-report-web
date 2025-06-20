@@ -17,6 +17,7 @@ from reporters.console_reporter import ConsoleReporter
 from reporters.markdown_reporter import MarkdownReporter
 from reporters.json_reporter import JsonReporter
 from utils.report_manager import ReportManager
+from sample_data_generator_enhanced import SampleDataGenerator
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -53,6 +54,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
   - multitenant_compliance: マルチテナント対応
   - requirement_traceability: 要求仕様ID追跡
   - performance_impact: パフォーマンス影響分析
+  - sample_data_generation: サンプルデータINSERT文生成
         """
     )
     
@@ -156,6 +158,19 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="古いレポートの自動クリーンアップを無効化"
     )
     
+    # サンプルデータ生成オプション
+    parser.add_argument(
+        "--generate-sample-data",
+        action="store_true",
+        help="サンプルデータINSERT文を生成"
+    )
+    
+    parser.add_argument(
+        "--validate-sample-data",
+        action="store_true",
+        help="サンプルデータ生成時に検証も実行"
+    )
+    
     # その他
     parser.add_argument(
         "--list-checks",
@@ -220,7 +235,41 @@ def main():
                 print(f"  - {check_name}")
             sys.exit(1)
     
-    # チェック実行
+    # サンプルデータ生成の実行
+    if args.generate_sample_data:
+        try:
+            generator = SampleDataGenerator(
+                base_dir=config.base_dir,
+                verbose=args.verbose
+            )
+            
+            # 対象テーブルの設定
+            target_tables = args.tables if args.tables else None
+            
+            # サンプルデータ生成実行
+            generator.generate_all_sample_data(target_tables)
+            
+            # 検証も実行する場合
+            if args.validate_sample_data:
+                print("\n=== サンプルデータ検証実行 ===")
+                if args.checks:
+                    report = checker.run_specific_checks(args.checks)
+                else:
+                    report = checker.run_all_checks()
+                
+                # レポート出力
+                output_report(report, check_config, config)
+            
+            return
+            
+        except Exception as e:
+            print(f"❌ サンプルデータ生成エラー: {e}", file=sys.stderr)
+            if args.verbose:
+                import traceback
+                traceback.print_exc()
+            sys.exit(1)
+    
+    # 通常のチェック実行
     try:
         if args.checks:
             report = checker.run_specific_checks(args.checks)
