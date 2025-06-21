@@ -53,9 +53,10 @@ docs/design/database/tools/
 
 ```mermaid
 graph TD
-    A[YAML詳細定義] --> B[yaml_validator]
-    B --> |検証OK| C[table_generator]
-    B --> |検証NG| B1[修正要求]
+    A[YAML詳細定義] --> C[table_generator]
+    A --> |検証| K[YAML検証統合]
+    K --> |検証OK| C
+    K --> |検証NG| B1[修正要求]
     
     C --> D[Markdown定義書]
     C --> E[DDLファイル]
@@ -69,15 +70,12 @@ graph TD
     
     H --> I[整合性レポート]
     H --> J[修正提案]
-    H --> K[YAML検証統合]
+    H --> K
     
     L[entity_relationships.yaml] --> H
     
-    M[Git pre-commit] --> B
+    M[Git pre-commit] --> K
     N[CI/CD] --> H
-    
-    B --> K[YAML検証統合]
-    K --> H
     
     A --> O[sample_data_generator]
     O --> P[INSERT文]
@@ -155,10 +153,10 @@ python3 -m table_generator --table MST_* --verbose
 python3 database_consistency_checker/run_check.py --verbose --output-format markdown --output-file weekly_report.md
 
 # YAML検証（全テーブル）
-python3 yaml_validator/validate_yaml_format.py --all --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --verbose
 
-# 必須セクション検証のみ
-python3 yaml_validator/validate_yaml_format.py --check-required-only
+# 必須セクション検証のみ（基本検証）
+python3 database_consistency_checker/yaml_format_check_enhanced.py --all --verbose
 
 # YAML検証を含む整合性チェック（統合版）
 python3 database_consistency_checker/run_check.py --include-yaml-validation --verbose
@@ -186,7 +184,7 @@ cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
 # - 業務要件に応じてカラムやインデックスを追加
 
 # 3. YAML検証実行（必須）
-python3 yaml_validator/validate_yaml_format.py --table {テーブル名} --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --tables {テーブル名} --verbose
 ```
 
 ### 🚨 必須セクション - 省略禁止
