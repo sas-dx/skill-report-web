@@ -7,67 +7,62 @@
 | テーブル名 | SYS_IntegrationConfig |
 | 論理名 | 外部連携設定 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:35 |
 
 ## 概要
 
 SYS_IntegrationConfig（外部連携設定）は、外部システムとの連携に必要な設定情報を管理するシステムテーブルです。
-
 主な目的：
 - 外部API接続設定の管理
 - 認証情報・エンドポイント情報の管理
 - 連携パラメータ・設定値の管理
 - 外部システム別設定の管理
 - テナント別連携設定の管理
-
 このテーブルは、通知・連携管理機能において外部システムとの安全で効率的な連携を実現する重要なシステムデータです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| integration_key | 連携キー | VARCHAR | 100 | ○ |  | 連携設定の識別キー（例：slack_webhook、teams_connector等） |
-| integration_name | 連携名 | VARCHAR | 200 | ○ |  | 連携設定の表示名 |
-| integration_type | 連携タイプ | ENUM |  | ○ |  | 連携の種類（WEBHOOK:Webhook、API:REST API、OAUTH:OAuth認証、SMTP:メール送信） |
-| endpoint_url | エンドポイントURL | VARCHAR | 500 | ○ |  | 連携先のエンドポイントURL |
-| auth_type | 認証タイプ | ENUM |  | ○ |  | 認証方式（NONE:認証なし、BASIC:Basic認証、BEARER:Bearer Token、OAUTH2:OAuth2.0、API_KEY:APIキー） |
-| auth_config | 認証設定 | TEXT |  | ○ |  | 認証に必要な設定情報（JSON形式、暗号化必須） |
-| connection_config | 接続設定 | TEXT |  | ○ |  | 接続に関する設定情報（JSON形式） |
-| request_headers | リクエストヘッダー | TEXT |  | ○ |  | デフォルトリクエストヘッダー（JSON形式） |
-| timeout_seconds | タイムアウト秒数 | INTEGER |  | ○ | 30 | 接続タイムアウト時間（秒） |
-| retry_count | リトライ回数 | INTEGER |  | ○ | 3 | 失敗時のリトライ回数 |
-| retry_interval | リトライ間隔 | INTEGER |  | ○ | 5 | リトライ間隔（秒） |
-| rate_limit_per_minute | 分間レート制限 | INTEGER |  | ○ |  | 1分間あたりのリクエスト制限数 |
-| is_enabled | 有効フラグ | BOOLEAN |  | ○ | True | 連携設定が有効かどうか |
-| health_check_url | ヘルスチェックURL | VARCHAR | 500 | ○ |  | 連携先の死活監視用URL |
-| last_health_check | 最終ヘルスチェック | TIMESTAMP |  | ○ |  | 最終ヘルスチェック実行日時 |
-| health_status | ヘルス状態 | ENUM |  | ○ |  | 連携先の状態（HEALTHY:正常、UNHEALTHY:異常、UNKNOWN:不明） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| integration_key |  | VARCHAR |  | ○ |  |  |
+| integration_name |  | VARCHAR |  | ○ |  |  |
+| integration_type |  | ENUM |  | ○ |  |  |
+| endpoint_url |  | VARCHAR |  | ○ |  |  |
+| auth_type |  | ENUM |  | ○ |  |  |
+| auth_config |  | TEXT |  | ○ |  |  |
+| connection_config |  | TEXT |  | ○ |  |  |
+| request_headers |  | TEXT |  | ○ |  |  |
+| timeout_seconds |  | INTEGER |  | ○ | 30 |  |
+| retry_count |  | INTEGER |  | ○ | 3 |  |
+| retry_interval |  | INTEGER |  | ○ | 5 |  |
+| rate_limit_per_minute |  | INTEGER |  | ○ |  |  |
+| is_enabled |  | BOOLEAN |  | ○ | True |  |
+| health_check_url |  | VARCHAR |  | ○ |  |  |
+| last_health_check |  | TIMESTAMP |  | ○ |  |  |
+| health_status |  | ENUM |  | ○ |  |  |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_integration_config_tenant_key | tenant_id, integration_key | ○ | テナント別連携キー検索用（一意） |
-| idx_integration_config_type | integration_type | × | 連携タイプ別検索用 |
-| idx_integration_config_enabled | is_enabled | × | 有効設定検索用 |
-| idx_integration_config_health | health_status, last_health_check | × | ヘルス状態検索用 |
-| idx_integration_config_auth_type | auth_type | × | 認証タイプ別検索用 |
+| idx_integration_config_tenant_key | tenant_id, integration_key | ○ |  |
+| idx_integration_config_type | integration_type | × |  |
+| idx_integration_config_enabled | is_enabled | × |  |
+| idx_integration_config_health | health_status, last_health_check | × |  |
+| idx_integration_config_auth_type | auth_type | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_integration_config_tenant_key | UNIQUE |  | テナント内連携キー一意制約 |
-| chk_integration_config_type | CHECK | integration_type IN ('WEBHOOK', 'API', 'OAUTH', 'SMTP') | 連携タイプ値チェック制約 |
-| chk_integration_config_auth_type | CHECK | auth_type IN ('NONE', 'BASIC', 'BEARER', 'OAUTH2', 'API_KEY') | 認証タイプ値チェック制約 |
-| chk_integration_config_health_status | CHECK | health_status IS NULL OR health_status IN ('HEALTHY', 'UNHEALTHY', 'UNKNOWN') | ヘルス状態値チェック制約 |
-| chk_integration_config_timeout_positive | CHECK | timeout_seconds > 0 | タイムアウト秒数正数チェック制約 |
-| chk_integration_config_retry_positive | CHECK | retry_count >= 0 AND retry_interval >= 0 | リトライ設定正数チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_integration_type | CHECK | integration_type IN (...) | integration_type値チェック制約 |
+| chk_auth_type | CHECK | auth_type IN (...) | auth_type値チェック制約 |
+| chk_health_status | CHECK | health_status IN (...) | health_status値チェック制約 |
 
 ## サンプルデータ
 

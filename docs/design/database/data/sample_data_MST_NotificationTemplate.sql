@@ -1,8 +1,6 @@
 -- サンプルデータ INSERT文: MST_NotificationTemplate
--- 生成日時: 2025-06-21 07:31:30
+-- 生成日時: 2025-06-21 17:21:41
 -- レコード数: 2
-
-BEGIN;
 
 INSERT INTO MST_NotificationTemplate (id, tenant_id, template_key, template_name, notification_type, language_code, subject_template, body_template, format_type, parameters, sample_data, is_default, is_active, version, created_at, updated_at, is_deleted) VALUES ('NT001', 'TENANT001', 'skill_update_notification', 'スキル更新通知テンプレート', 'EMAIL', 'ja', '【スキル更新】{{employee_name}}さんのスキル情報が更新されました', '{{employee_name}}さん
 
@@ -27,7 +25,5 @@ INSERT INTO MST_NotificationTemplate (id, tenant_id, template_key, template_name
 
 <{{goal_detail_url}}|詳細を確認する>
 ', 'MARKDOWN', '{"employee_name": "社員名", "goal_title": "目標タイトル", "deadline_date": "期限日", "remaining_days": "残り日数", "progress_rate": "進捗率", "goal_detail_url": "詳細URL"}', '{"employee_name": "山田太郎", "goal_title": "Java認定資格取得", "deadline_date": "2025-06-30", "remaining_days": "29", "progress_rate": "75", "goal_detail_url": "https://system.company.com/goals/456"}', TRUE, TRUE, '1.0.0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);
-
-COMMIT;
 
 -- MST_NotificationTemplate サンプルデータ終了

@@ -7,12 +7,11 @@
 | テーブル名 | MST_EmployeePosition |
 | 論理名 | 社員役職関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_EmployeePosition（社員役職関連）は、社員と役職の関連付けを管理するマスタテーブルです。
-
 主な目的：
 - 社員の役職任命履歴の管理
 - 複数役職兼任の管理
@@ -20,66 +19,53 @@ MST_EmployeePosition（社員役職関連）は、社員と役職の関連付け
 - 役職変更時の影響範囲把握
 - 役職別権限管理
 - 組織階層における権限委譲の管理
-
 このテーブルにより、社員の役職変遷を詳細に管理し、
 人事評価や昇進管理の履歴を正確に追跡できます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_id | 社員ID | VARCHAR | 50 | ○ |  | 社員のID（MST_Employeeへの外部キー） |
-| position_id | 役職ID | VARCHAR | 50 | ○ |  | 役職のID（MST_Positionへの外部キー） |
-| appointment_type | 任命区分 | ENUM |  | ○ | PRIMARY | 任命区分（PRIMARY:主役職、ACTING:代理、CONCURRENT:兼任） |
-| start_date | 任命開始日 | DATE |  | ○ |  | 役職への任命開始日 |
-| end_date | 任命終了日 | DATE |  | ○ |  | 役職からの任命終了日（NULL:現在も任命中） |
-| appointment_reason | 任命理由 | VARCHAR | 500 | ○ |  | 任命・昇進・降格の理由 |
-| responsibility_scope | 責任範囲 | VARCHAR | 500 | ○ |  | 当該役職での責任範囲・職務内容 |
-| authority_level | 権限レベル | INTEGER |  | ○ |  | 権限レベル（1-10、数値が大きいほど高権限） |
-| salary_grade | 給与等級 | VARCHAR | 20 | ○ |  | 役職に対応する給与等級 |
-| appointment_status | 任命状況 | ENUM |  | ○ | ACTIVE | 任命状況（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止） |
-| approval_status | 承認状況 | ENUM |  | ○ | PENDING | 承認状況（APPROVED:承認済、PENDING:承認待ち、REJECTED:却下） |
-| approved_by | 承認者ID | VARCHAR | 50 | ○ |  | 任命を承認した管理者のID |
-| approved_at | 承認日時 | TIMESTAMP |  | ○ |  | 任命が承認された日時 |
-| performance_target | 成果目標 | TEXT |  | ○ |  | 当該役職での成果目標・KPI |
-| delegation_authority | 委譲権限 | TEXT |  | ○ |  | 委譲された権限の詳細（JSON形式） |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| employee_id |  | VARCHAR |  | ○ |  |  |
+| position_id |  | VARCHAR |  | ○ |  |  |
+| appointment_type |  | ENUM |  | ○ | PRIMARY |  |
+| start_date |  | DATE |  | ○ |  |  |
+| end_date |  | DATE |  | ○ |  |  |
+| appointment_reason |  | VARCHAR |  | ○ |  |  |
+| responsibility_scope |  | VARCHAR |  | ○ |  |  |
+| authority_level |  | INTEGER |  | ○ |  |  |
+| salary_grade |  | VARCHAR |  | ○ |  |  |
+| appointment_status |  | ENUM |  | ○ | ACTIVE |  |
+| approval_status |  | ENUM |  | ○ | PENDING |  |
+| approved_by |  | VARCHAR |  | ○ |  |  |
+| approved_at |  | TIMESTAMP |  | ○ |  |  |
+| performance_target |  | TEXT |  | ○ |  |  |
+| delegation_authority |  | TEXT |  | ○ |  |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_EmployeePosition_employee_id | employee_id | × | 社員ID検索用 |
-| idx_MST_EmployeePosition_position_id | position_id | × | 役職ID検索用 |
-| idx_MST_EmployeePosition_employee_position | employee_id, position_id | × | 社員・役職複合検索用 |
-| idx_MST_EmployeePosition_appointment_type | appointment_type | × | 任命区分別検索用 |
-| idx_MST_EmployeePosition_start_date | start_date | × | 任命開始日検索用 |
-| idx_MST_EmployeePosition_end_date | end_date | × | 任命終了日検索用 |
-| idx_MST_EmployeePosition_status | appointment_status | × | 任命状況別検索用 |
-| idx_MST_EmployeePosition_authority_level | authority_level | × | 権限レベル別検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_MST_EmployeePosition_employee | employee_id | MST_Employee | id | CASCADE | CASCADE | 社員への外部キー |
-| fk_MST_EmployeePosition_position | position_id | MST_Position | id | CASCADE | CASCADE | 役職への外部キー |
-| fk_MST_EmployeePosition_approved_by | approved_by | MST_Employee | id | CASCADE | SET NULL | 承認者への外部キー |
+| idx_MST_EmployeePosition_employee_id | employee_id | × |  |
+| idx_MST_EmployeePosition_position_id | position_id | × |  |
+| idx_MST_EmployeePosition_employee_position | employee_id, position_id | × |  |
+| idx_MST_EmployeePosition_appointment_type | appointment_type | × |  |
+| idx_MST_EmployeePosition_start_date | start_date | × |  |
+| idx_MST_EmployeePosition_end_date | end_date | × |  |
+| idx_MST_EmployeePosition_status | appointment_status | × |  |
+| idx_MST_EmployeePosition_authority_level | authority_level | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_MST_EmployeePosition_employee_pos_primary | UNIQUE |  | 社員・役職・任命区分・開始日一意制約 |
-| chk_MST_EmployeePosition_appointment_type | CHECK | appointment_type IN ('PRIMARY', 'ACTING', 'CONCURRENT') | 任命区分値チェック制約 |
-| chk_MST_EmployeePosition_appointment_status | CHECK | appointment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED') | 任命状況値チェック制約 |
-| chk_MST_EmployeePosition_approval_status | CHECK | approval_status IN ('APPROVED', 'PENDING', 'REJECTED') | 承認状況値チェック制約 |
-| chk_MST_EmployeePosition_date_range | CHECK | end_date IS NULL OR start_date <= end_date | 日付範囲整合性チェック制約 |
-| chk_MST_EmployeePosition_authority_level | CHECK | authority_level IS NULL OR (authority_level >= 1 AND authority_level <= 10) | 権限レベル範囲チェック制約 |
+| chk_appointment_type | CHECK | appointment_type IN (...) | appointment_type値チェック制約 |
+| chk_authority_level | CHECK | authority_level > 0 | authority_level正値チェック制約 |
+| chk_appointment_status | CHECK | appointment_status IN (...) | appointment_status値チェック制約 |
+| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
 
 ## サンプルデータ
 

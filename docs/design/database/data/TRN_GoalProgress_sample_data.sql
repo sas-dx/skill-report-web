@@ -1,0 +1,45 @@
+-- TRN_GoalProgress (目標進捗) サンプルデータ
+-- 生成日時: 2025-06-21 17:20:34
+
+INSERT INTO TRN_GoalProgress (
+    goal_id, employee_id, goal_title, goal_description,
+    goal_category, goal_type, priority_level, target_value,
+    current_value, unit, start_date, target_date,
+    progress_rate, achievement_status, supervisor_id, approval_status,
+    approved_at, approved_by, completion_date, achievement_rate,
+    self_evaluation, supervisor_evaluation, evaluation_comments, related_career_plan_id,
+    related_skill_items, milestones, obstacles, support_needed,
+    last_updated_at, next_review_date, id, is_deleted,
+    created_by, updated_by, created_at, updated_at
+) VALUES
+    ('GOAL000001', 'EMP000001', 'Java技術習得', 'Spring Frameworkを使用したWebアプリケーション開発技術の習得',
+     'SKILL', 'QUALITATIVE', 'HIGH', NULL,
+     NULL, NULL, '2025-01-01', '2025-12-31',
+     50.0, 'IN_PROGRESS', 'EMP000010', 'APPROVED',
+     '2025-01-05 10:00:00', 'EMP000010', NULL, NULL,
+     NULL, NULL, NULL, 'CP000001',
+     '["JAVA", "SPRING", "WEB_DEVELOPMENT"]', '["基礎学習完了", "実践プロジェクト参加", "技術認定取得"]', NULL, '外部研修参加、メンター指導',
+     '2025-06-01 09:00:00', '2025-07-01', NULL, NULL,
+     NULL, NULL, NULL, NULL),
+    ('GOAL000002', 'EMP000002', '売上目標達成', '第2四半期の個人売上目標1000万円の達成',
+     'BUSINESS', 'QUANTITATIVE', 'HIGH', 10000000.0,
+     6500000.0, '円', '2025-04-01', '2025-06-30',
+     65.0, 'IN_PROGRESS', 'EMP000011', 'APPROVED',
+     '2025-03-25 14:00:00', 'EMP000011', NULL, NULL,
+     NULL, NULL, NULL, NULL,
+     '["SALES", "NEGOTIATION", "CUSTOMER_MANAGEMENT"]', '["4月目標達成", "5月目標達成", "6月目標達成"]', '["競合他社の価格競争", "新規顧客開拓の困難"]', 'マーケティング支援、価格戦略見直し',
+     '2025-06-01 17:00:00', '2025-06-15', NULL, NULL,
+     NULL, NULL, NULL, NULL),
+    ('GOAL000003', 'EMP000003', 'チームリーダー昇進', 'リーダーシップスキル向上とチーム管理経験の積み重ね',
+     'CAREER', 'MILESTONE', 'MEDIUM', NULL,
+     NULL, NULL, '2025-01-01', '2025-12-31',
+     30.0, 'IN_PROGRESS', 'EMP000012', 'APPROVED',
+     '2025-01-10 11:00:00', 'EMP000012', NULL, NULL,
+     NULL, NULL, NULL, 'CP000002',
+     '["LEADERSHIP", "TEAM_MANAGEMENT", "COMMUNICATION"]', '["リーダーシップ研修受講", "プロジェクトリーダー経験", "昇進面談"]', NULL, 'リーダーシップ研修、メンタリング',
+     '2025-06-01 12:00:00', '2025-08-01', NULL, NULL,
+     NULL, NULL, NULL, NULL)
+;
+
+-- 実行確認用クエリ
+-- SELECT * FROM TRN_GoalProgress ORDER BY created_at DESC;

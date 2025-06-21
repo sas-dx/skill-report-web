@@ -7,81 +7,68 @@
 | テーブル名 | HIS_TenantBilling |
 | 論理名 | テナント課金履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 HIS_TenantBilling（テナント課金履歴）は、マルチテナントシステムにおける各テナントの課金情報を履歴として管理するテーブルです。
-
 主な目的：
 - テナント別課金履歴の管理
 - 使用量ベース課金の計算履歴
 - 請求書発行のための基礎データ管理
 - 課金監査のための証跡管理
 - 収益分析のためのデータ蓄積
-
 このテーブルは、マルチテナント管理機能において課金・請求業務を支える重要な履歴データです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | 課金対象のテナントID（MST_Tenantへの参照） |
-| billing_period_start | 課金期間開始日 | DATE |  | ○ |  | 課金期間の開始日 |
-| billing_period_end | 課金期間終了日 | DATE |  | ○ |  | 課金期間の終了日 |
-| billing_type | 課金タイプ | ENUM |  | ○ |  | 課金の種類（MONTHLY:月額、USAGE:従量、SETUP:初期費用、ADDITIONAL:追加費用） |
-| plan_id | プランID | VARCHAR | 50 | ○ |  | 適用されたプランのID |
-| plan_name | プラン名 | VARCHAR | 200 | ○ |  | 適用されたプランの名称 |
-| base_amount | 基本料金 | DECIMAL | 12,2 | ○ | 0.0 | 基本料金（税抜） |
-| usage_amount | 従量料金 | DECIMAL | 12,2 | ○ | 0.0 | 使用量に基づく従量料金（税抜） |
-| additional_amount | 追加料金 | DECIMAL | 12,2 | ○ | 0.0 | 追加サービス等の料金（税抜） |
-| discount_amount | 割引金額 | DECIMAL | 12,2 | ○ | 0.0 | 適用された割引金額（税抜） |
-| subtotal_amount | 小計金額 | DECIMAL | 12,2 | ○ |  | 税抜小計金額 |
-| tax_rate | 税率 | DECIMAL | 5,3 | ○ |  | 適用された税率（例：0.100 = 10%） |
-| tax_amount | 税額 | DECIMAL | 12,2 | ○ |  | 消費税額 |
-| total_amount | 合計金額 | DECIMAL | 12,2 | ○ |  | 税込合計金額 |
-| currency_code | 通貨コード | VARCHAR | 3 | ○ | JPY | 通貨コード（ISO 4217準拠、例：JPY、USD） |
-| usage_details | 使用量詳細 | TEXT |  | ○ |  | 使用量の詳細情報（JSON形式） |
-| billing_status | 課金状態 | ENUM |  | ○ | CALCULATED | 課金の状態（CALCULATED:計算済み、INVOICED:請求済み、PAID:支払済み、CANCELLED:キャンセル） |
-| invoice_number | 請求書番号 | VARCHAR | 50 | ○ |  | 発行された請求書の番号 |
-| invoice_date | 請求日 | DATE |  | ○ |  | 請求書の発行日 |
-| due_date | 支払期限 | DATE |  | ○ |  | 支払期限日 |
-| paid_date | 支払日 | DATE |  | ○ |  | 実際の支払日 |
-| payment_method | 支払方法 | ENUM |  | ○ |  | 支払方法（CREDIT_CARD:クレジットカード、BANK_TRANSFER:銀行振込、AUTO_DEBIT:自動引落） |
-| notes | 備考 | TEXT |  | ○ |  | 課金に関する備考・特記事項 |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| billing_period_start |  | DATE |  | ○ |  |  |
+| billing_period_end |  | DATE |  | ○ |  |  |
+| billing_type |  | ENUM |  | ○ |  |  |
+| plan_id |  | VARCHAR |  | ○ |  |  |
+| plan_name |  | VARCHAR |  | ○ |  |  |
+| base_amount |  | DECIMAL |  | ○ | 0.0 |  |
+| usage_amount |  | DECIMAL |  | ○ | 0.0 |  |
+| additional_amount |  | DECIMAL |  | ○ | 0.0 |  |
+| discount_amount |  | DECIMAL |  | ○ | 0.0 |  |
+| subtotal_amount |  | DECIMAL |  | ○ |  |  |
+| tax_rate |  | DECIMAL |  | ○ |  |  |
+| tax_amount |  | DECIMAL |  | ○ |  |  |
+| total_amount |  | DECIMAL |  | ○ |  |  |
+| currency_code |  | VARCHAR |  | ○ | JPY |  |
+| usage_details |  | TEXT |  | ○ |  |  |
+| billing_status |  | ENUM |  | ○ | CALCULATED |  |
+| invoice_number |  | VARCHAR |  | ○ |  |  |
+| invoice_date |  | DATE |  | ○ |  |  |
+| due_date |  | DATE |  | ○ |  |  |
+| paid_date |  | DATE |  | ○ |  |  |
+| payment_method |  | ENUM |  | ○ |  |  |
+| notes |  | TEXT |  | ○ |  |  |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_tenant_billing_tenant_period | tenant_id, billing_period_start, billing_period_end | × | テナント別課金期間検索用 |
-| idx_tenant_billing_status | billing_status | × | 課金状態別検索用 |
-| idx_tenant_billing_invoice | invoice_number | ○ | 請求書番号検索用（一意） |
-| idx_tenant_billing_dates | invoice_date, due_date, paid_date | × | 日付別検索用 |
-| idx_tenant_billing_type | billing_type | × | 課金タイプ別検索用 |
-| idx_tenant_billing_amount | total_amount | × | 金額別検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_tenant_billing_tenant | tenant_id | MST_Tenant | id | CASCADE | RESTRICT | テナント管理への外部キー |
+| idx_tenant_billing_tenant_period | tenant_id, billing_period_start, billing_period_end | × |  |
+| idx_tenant_billing_status | billing_status | × |  |
+| idx_tenant_billing_invoice | invoice_number | ○ |  |
+| idx_tenant_billing_dates | invoice_date, due_date, paid_date | × |  |
+| idx_tenant_billing_type | billing_type | × |  |
+| idx_tenant_billing_amount | total_amount | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_tenant_billing_invoice | UNIQUE |  | 請求書番号一意制約 |
-| chk_tenant_billing_type | CHECK | billing_type IN ('MONTHLY', 'USAGE', 'SETUP', 'ADDITIONAL') | 課金タイプ値チェック制約 |
-| chk_tenant_billing_status | CHECK | billing_status IN ('CALCULATED', 'INVOICED', 'PAID', 'CANCELLED') | 課金状態値チェック制約 |
-| chk_tenant_billing_payment_method | CHECK | payment_method IS NULL OR payment_method IN ('CREDIT_CARD', 'BANK_TRANSFER', 'AUTO_DEBIT') | 支払方法値チェック制約 |
-| chk_tenant_billing_period | CHECK | billing_period_end >= billing_period_start | 課金期間整合性チェック制約 |
-| chk_tenant_billing_amounts_positive | CHECK | base_amount >= 0 AND usage_amount >= 0 AND additional_amount >= 0 AND discount_amount >= 0 AND tax_amount >= 0 AND total_amount >= 0 | 金額正数チェック制約 |
-| chk_tenant_billing_tax_rate | CHECK | tax_rate >= 0 AND tax_rate <= 1 | 税率範囲チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_billing_type | CHECK | billing_type IN (...) | billing_type値チェック制約 |
+| chk_billing_status | CHECK | billing_status IN (...) | billing_status値チェック制約 |
 
 ## サンプルデータ
 

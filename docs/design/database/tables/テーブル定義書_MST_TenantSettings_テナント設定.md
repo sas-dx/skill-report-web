@@ -7,75 +7,62 @@
 | テーブル名 | MST_TenantSettings |
 | 論理名 | テナント設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_TenantSettings（テナント設定）は、マルチテナントシステムにおける各テナント固有の設定情報を管理するマスタテーブルです。
-
 主な目的：
 - テナント別システム設定の管理
 - 機能有効/無効の制御設定
 - UI・表示設定のカスタマイズ
 - 業務ルール・制限値の設定
 - 外部連携設定の管理
-
 このテーブルは、マルチテナント管理機能において各テナントの個別要件に対応する重要なマスタデータです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | 設定対象のテナントID（MST_Tenantへの参照） |
-| setting_category | 設定カテゴリ | ENUM |  | ○ |  | 設定の分類（SYSTEM:システム、UI:ユーザーインターフェース、BUSINESS:業務、SECURITY:セキュリティ、INTEGRATION:連携） |
-| setting_key | 設定キー | VARCHAR | 100 | ○ |  | 設定項目の識別キー（例：max_users、theme_color、skill_approval_required等） |
-| setting_name | 設定名 | VARCHAR | 200 | ○ |  | 設定項目の表示名 |
-| setting_description | 設定説明 | TEXT |  | ○ |  | 設定項目の詳細説明 |
-| data_type | データ型 | ENUM |  | ○ |  | 設定値のデータ型（STRING:文字列、INTEGER:整数、BOOLEAN:真偽値、JSON:JSON、DECIMAL:小数） |
-| setting_value | 設定値 | TEXT |  | ○ |  | 実際の設定値（文字列として格納、data_typeに応じて解釈） |
-| default_value | デフォルト値 | TEXT |  | ○ |  | 設定のデフォルト値 |
-| validation_rules | バリデーションルール | TEXT |  | ○ |  | 設定値のバリデーションルール（JSON形式） |
-| is_required | 必須フラグ | BOOLEAN |  | ○ | False | 設定が必須かどうか |
-| is_encrypted | 暗号化フラグ | BOOLEAN |  | ○ | False | 設定値を暗号化するかどうか |
-| is_system_managed | システム管理フラグ | BOOLEAN |  | ○ | False | システムが自動管理する設定かどうか |
-| is_user_configurable | ユーザー設定可能フラグ | BOOLEAN |  | ○ | True | テナント管理者が変更可能かどうか |
-| display_order | 表示順序 | INTEGER |  | ○ | 0 | 管理画面での表示順序 |
-| effective_from | 有効開始日時 | TIMESTAMP |  | ○ |  | 設定が有効になる日時 |
-| effective_until | 有効終了日時 | TIMESTAMP |  | ○ |  | 設定が無効になる日時 |
-| last_modified_by | 最終更新者 | VARCHAR | 50 | ○ |  | 設定を最後に更新したユーザーID |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| setting_category |  | ENUM |  | ○ |  |  |
+| setting_key |  | VARCHAR |  | ○ |  |  |
+| setting_name |  | VARCHAR |  | ○ |  |  |
+| setting_description |  | TEXT |  | ○ |  |  |
+| data_type |  | ENUM |  | ○ |  |  |
+| setting_value |  | TEXT |  | ○ |  |  |
+| default_value |  | TEXT |  | ○ |  |  |
+| validation_rules |  | TEXT |  | ○ |  |  |
+| is_required |  | BOOLEAN |  | ○ | False |  |
+| is_encrypted |  | BOOLEAN |  | ○ | False |  |
+| is_system_managed |  | BOOLEAN |  | ○ | False |  |
+| is_user_configurable |  | BOOLEAN |  | ○ | True |  |
+| display_order |  | INTEGER |  | ○ | 0 |  |
+| effective_from |  | TIMESTAMP |  | ○ |  |  |
+| effective_until |  | TIMESTAMP |  | ○ |  |  |
+| last_modified_by |  | VARCHAR |  | ○ |  |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_tenant_settings_tenant_key | tenant_id, setting_key | ○ | テナント別設定キー検索用（一意） |
-| idx_tenant_settings_category | setting_category | × | 設定カテゴリ別検索用 |
-| idx_tenant_settings_configurable | is_user_configurable | × | ユーザー設定可能フラグ検索用 |
-| idx_tenant_settings_system_managed | is_system_managed | × | システム管理フラグ検索用 |
-| idx_tenant_settings_display_order | tenant_id, setting_category, display_order | × | 表示順序検索用 |
-| idx_tenant_settings_effective | effective_from, effective_until | × | 有効期間検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_tenant_settings_tenant | tenant_id | MST_Tenant | id | CASCADE | CASCADE | テナント管理への外部キー |
+| idx_tenant_settings_tenant_key | tenant_id, setting_key | ○ |  |
+| idx_tenant_settings_category | setting_category | × |  |
+| idx_tenant_settings_configurable | is_user_configurable | × |  |
+| idx_tenant_settings_system_managed | is_system_managed | × |  |
+| idx_tenant_settings_display_order | tenant_id, setting_category, display_order | × |  |
+| idx_tenant_settings_effective | effective_from, effective_until | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_tenant_settings_tenant_key | UNIQUE |  | テナント内設定キー一意制約 |
-| chk_tenant_settings_category | CHECK | setting_category IN ('SYSTEM', 'UI', 'BUSINESS', 'SECURITY', 'INTEGRATION') | 設定カテゴリ値チェック制約 |
-| chk_tenant_settings_data_type | CHECK | data_type IN ('STRING', 'INTEGER', 'BOOLEAN', 'JSON', 'DECIMAL') | データ型値チェック制約 |
-| chk_tenant_settings_effective_period | CHECK | effective_until IS NULL OR effective_from IS NULL OR effective_until >= effective_from | 有効期間整合性チェック制約 |
-| chk_tenant_settings_display_order_positive | CHECK | display_order >= 0 | 表示順序正数チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_data_type | CHECK | data_type IN (...) | data_type値チェック制約 |
 
 ## サンプルデータ
 
@@ -84,7 +71,6 @@ MST_TenantSettings（テナント設定）は、マルチテナントシステ�
 | TS001 | TENANT001 | SYSTEM | max_users | 最大ユーザー数 | このテナントで作成可能な最大ユーザー数 | INTEGER | 100 | 50 | {"min": 1, "max": 1000} | True | False | False | False | 1 | 2025-01-01 00:00:00 | None | SYSTEM |
 | TS002 | TENANT001 | UI | theme_color | テーマカラー | システムのメインテーマカラー | STRING | #2563eb | #3b82f6 | {"pattern": "^#[0-9a-fA-F]{6}$"} | False | False | False | True | 1 | None | None | USER001 |
 | TS003 | TENANT001 | BUSINESS | skill_approval_required | スキル承認必須 | スキル登録時に承認が必要かどうか | BOOLEAN | true | false | None | True | False | False | True | 1 | None | None | USER001 |
-| TS004 | TENANT001 | SECURITY | password_policy | パスワードポリシー | パスワードの複雑性要件 | JSON | {"min_length": 8, "require_uppercase": true, "require_lowercase": true, "require_numbers": true, "require_symbols": false} | {"min_length": 6, "require_uppercase": false, "require_lowercase": false, "require_numbers": false, "require_symbols": false} | {"type": "object", "properties": {"min_length": {"type": "integer", "minimum": 4, "maximum": 128}}} | True | False | False | True | 1 | None | None | USER001 |
 
 ## 特記事項
 

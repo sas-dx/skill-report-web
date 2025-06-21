@@ -7,63 +7,58 @@
 | テーブル名 | MST_NotificationTemplate |
 | 論理名 | 通知テンプレート |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:33 |
 
 ## 概要
 
 MST_NotificationTemplate（通知テンプレート）は、システムで使用する通知メッセージのテンプレートを管理するマスタテーブルです。
-
 主な目的：
 - 通知メッセージの定型文管理
 - 多言語対応の通知テンプレート管理
 - 通知チャネル別のテンプレート管理
 - 動的パラメータを含むテンプレート管理
 - テナント別カスタマイズ対応
-
 このテーブルは、通知・連携管理機能において一貫性のあるメッセージ配信を実現する重要なマスタデータです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| template_key | テンプレートキー | VARCHAR | 100 | ○ |  | テンプレートの識別キー（例：skill_update_email、goal_reminder_slack等） |
-| template_name | テンプレート名 | VARCHAR | 200 | ○ |  | テンプレートの表示名 |
-| notification_type | 通知タイプ | ENUM |  | ○ |  | 対応する通知の種類（EMAIL:メール、SLACK:Slack、TEAMS:Teams、WEBHOOK:Webhook） |
-| language_code | 言語コード | VARCHAR | 10 | ○ | ja | テンプレートの言語（ja:日本語、en:英語等） |
-| subject_template | 件名テンプレート | VARCHAR | 500 | ○ |  | 通知の件名テンプレート（メール等で使用） |
-| body_template | 本文テンプレート | TEXT |  | ○ |  | 通知の本文テンプレート（プレースホルダー含む） |
-| format_type | フォーマットタイプ | ENUM |  | ○ | PLAIN | テンプレートのフォーマット（PLAIN:プレーンテキスト、HTML:HTML、MARKDOWN:Markdown） |
-| parameters | パラメータ定義 | TEXT |  | ○ |  | テンプレートで使用可能なパラメータの定義（JSON形式） |
-| sample_data | サンプルデータ | TEXT |  | ○ |  | テンプレート確認用のサンプルデータ（JSON形式） |
-| is_default | デフォルトフラグ | BOOLEAN |  | ○ | False | 同一キー・タイプでのデフォルトテンプレートかどうか |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | テンプレートが有効かどうか |
-| version | バージョン | VARCHAR | 20 | ○ | 1.0.0 | テンプレートのバージョン番号 |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| template_key |  | VARCHAR |  | ○ |  |  |
+| template_name |  | VARCHAR |  | ○ |  |  |
+| notification_type |  | ENUM |  | ○ |  |  |
+| language_code |  | VARCHAR |  | ○ | ja |  |
+| subject_template |  | VARCHAR |  | ○ |  |  |
+| body_template |  | TEXT |  | ○ |  |  |
+| format_type |  | ENUM |  | ○ | PLAIN |  |
+| parameters |  | TEXT |  | ○ |  |  |
+| sample_data |  | TEXT |  | ○ |  |  |
+| is_default |  | BOOLEAN |  | ○ | False |  |
+| is_active |  | BOOLEAN |  | ○ | True |  |
+| version |  | VARCHAR |  | ○ | 1.0.0 |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_notification_template_tenant_key_type | tenant_id, template_key, notification_type, language_code | ○ | テナント別テンプレート検索用（一意） |
-| idx_notification_template_type | notification_type | × | 通知タイプ別検索用 |
-| idx_notification_template_language | language_code | × | 言語別検索用 |
-| idx_notification_template_default | is_default, is_active | × | デフォルト・有効テンプレート検索用 |
-| idx_notification_template_key | template_key | × | テンプレートキー別検索用 |
+| idx_notification_template_tenant_key_type | tenant_id, template_key, notification_type, language_code | ○ |  |
+| idx_notification_template_type | notification_type | × |  |
+| idx_notification_template_language | language_code | × |  |
+| idx_notification_template_default | is_default, is_active | × |  |
+| idx_notification_template_key | template_key | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_notification_template_tenant_key_type_lang | UNIQUE |  | テナント内テンプレート一意制約 |
-| chk_notification_template_type | CHECK | notification_type IN ('EMAIL', 'SLACK', 'TEAMS', 'WEBHOOK') | 通知タイプ値チェック制約 |
-| chk_notification_template_format | CHECK | format_type IN ('PLAIN', 'HTML', 'MARKDOWN') | フォーマットタイプ値チェック制約 |
-| chk_notification_template_language | CHECK | language_code IN ('ja', 'en') | 言語コード値チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_notification_type | CHECK | notification_type IN (...) | notification_type値チェック制約 |
+| chk_format_type | CHECK | format_type IN (...) | format_type値チェック制約 |
 
 ## サンプルデータ
 

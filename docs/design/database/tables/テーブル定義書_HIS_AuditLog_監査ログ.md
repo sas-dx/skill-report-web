@@ -7,74 +7,64 @@
 | テーブル名 | HIS_AuditLog |
 | 論理名 | 監査ログ |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 システム内で発生する全ての重要な操作を記録する監査ログテーブルです。
-
 主な目的：
 - セキュリティ監査のための操作履歴記録
 - システム不正利用の検知・追跡
 - コンプライアンス要件への対応
 - トラブルシューティング時の操作履歴確認
-
 このテーブルは法的要件やセキュリティポリシーに基づき、
 90日間のログ保持期間を設けています。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| user_id | ユーザーID | VARCHAR | 50 | ○ |  | 操作を実行したユーザーのID |
-| session_id | セッションID | VARCHAR | 100 | ○ |  | 操作時のセッション識別子 |
-| action_type | アクション種別 | ENUM |  | ○ |  | 実行されたアクションの種別（CREATE:作成、READ:参照、UPDATE:更新、DELETE:削除、LOGIN:ログイン、LOGOUT:ログアウト） |
-| target_table | 対象テーブル | VARCHAR | 100 | ○ |  | 操作対象のテーブル名 |
-| target_id | 対象レコードID | VARCHAR | 50 | ○ |  | 操作対象のレコードID |
-| old_values | 変更前値 | TEXT |  | ○ |  | 更新・削除前のデータ（JSON形式） |
-| new_values | 変更後値 | TEXT |  | ○ |  | 作成・更新後のデータ（JSON形式） |
-| ip_address | IPアドレス | VARCHAR | 45 | ○ |  | 操作元のIPアドレス（IPv6対応） |
-| user_agent | ユーザーエージェント | VARCHAR | 500 | ○ |  | 操作時のブラウザ・アプリケーション情報 |
-| result_status | 実行結果 | ENUM |  | ○ | SUCCESS | 操作の実行結果（SUCCESS:成功、FAILURE:失敗、ERROR:エラー） |
-| error_message | エラーメッセージ | TEXT |  | ○ |  | 操作失敗時のエラーメッセージ |
-| execution_time_ms | 実行時間 | INTEGER |  | ○ |  | 操作の実行時間（ミリ秒） |
-| is_deleted | 削除フラグ | BOOLEAN |  | ○ | False | 論理削除フラグ（監査ログは物理削除禁止） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| created_at | 作成日時 | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | ○ |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | ○ |  | レコード更新者のユーザーID |
+| id |  | VARCHAR |  | ○ |  |  |
+| user_id |  | VARCHAR |  | ○ |  |  |
+| session_id |  | VARCHAR |  | ○ |  |  |
+| action_type |  | ENUM |  | ○ |  |  |
+| target_table |  | VARCHAR |  | ○ |  |  |
+| target_id |  | VARCHAR |  | ○ |  |  |
+| old_values |  | TEXT |  | ○ |  |  |
+| new_values |  | TEXT |  | ○ |  |  |
+| ip_address |  | VARCHAR |  | ○ |  |  |
+| user_agent |  | VARCHAR |  | ○ |  |  |
+| result_status |  | ENUM |  | ○ | SUCCESS |  |
+| error_message |  | TEXT |  | ○ |  |  |
+| execution_time_ms |  | INTEGER |  | ○ |  |  |
+| is_deleted |  | BOOLEAN |  | ○ | False |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| created_at |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
+| updated_at |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
+| created_by |  | VARCHAR |  | ○ |  |  |
+| updated_by |  | VARCHAR |  | ○ |  |  |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_his_auditlog_id | id | ○ | プライマリキー検索用（一意） |
-| idx_his_auditlog_user_id | user_id | × | ユーザーID検索用 |
-| idx_his_auditlog_tenant_id | tenant_id | × | テナントID検索用 |
-| idx_his_auditlog_action_type | action_type | × | アクション種別検索用 |
-| idx_his_auditlog_target_table | target_table | × | 対象テーブル検索用 |
-| idx_his_auditlog_created_at | created_at | × | 作成日時検索用（時系列検索） |
-| idx_his_auditlog_user_created | user_id, created_at | × | ユーザー別時系列検索用 |
-| idx_his_auditlog_tenant_created | tenant_id, created_at | × | テナント別時系列検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_his_auditlog_tenant | tenant_id | MST_Tenant | id | CASCADE | RESTRICT | テナントマスタへの外部キー |
-| fk_his_auditlog_user | user_id | MST_Employee | id | CASCADE | RESTRICT | 社員マスタへの外部キー |
+| idx_his_auditlog_id | id | ○ |  |
+| idx_his_auditlog_user_id | user_id | × |  |
+| idx_his_auditlog_tenant_id | tenant_id | × |  |
+| idx_his_auditlog_action_type | action_type | × |  |
+| idx_his_auditlog_target_table | target_table | × |  |
+| idx_his_auditlog_created_at | created_at | × |  |
+| idx_his_auditlog_user_created | user_id, created_at | × |  |
+| idx_his_auditlog_tenant_created | tenant_id, created_at | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_his_auditlog_action_type | CHECK | action_type IN ('CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT') | アクション種別値チェック制約 |
-| chk_his_auditlog_result_status | CHECK | result_status IN ('SUCCESS', 'FAILURE', 'ERROR') | 実行結果値チェック制約 |
-| chk_his_auditlog_execution_time_positive | CHECK | execution_time_ms IS NULL OR execution_time_ms >= 0 | 実行時間非負数チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_action_type | CHECK | action_type IN (...) | action_type値チェック制約 |
+| chk_result_status | CHECK | result_status IN (...) | result_status値チェック制約 |
 
 ## サンプルデータ
 

@@ -7,12 +7,11 @@
 | テーブル名 | MST_UserRole |
 | 論理名 | ユーザーロール紐付け |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_UserRole（ユーザーロール紐付け）は、ユーザーとロールの関連付けを管理するマスタテーブルです。
-
 主な目的：
 - ユーザーとロールの多対多関係管理
 - 動的なロール割り当て・解除
@@ -21,77 +20,59 @@ MST_UserRole（ユーザーロール紐付け）は、ユーザーとロール�
 - 権限昇格・降格の履歴管理
 - 職務分離・最小権限の原則実装
 - 監査・コンプライアンス対応
-
 このテーブルは、ユーザーの実際の権限を決定する重要な関連テーブルであり、
 システムセキュリティの実装において中核的な役割を果たします。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| user_id | ユーザーID | VARCHAR | 50 | ○ |  | ユーザーのID（MST_UserAuthへの外部キー） |
-| role_id | ロールID | VARCHAR | 50 | ○ |  | ロールのID（MST_Roleへの外部キー） |
-| assignment_type | 割り当て種別 | ENUM |  | ○ | DIRECT | ロール割り当ての種別（DIRECT:直接、INHERITED:継承、DELEGATED:委譲、TEMPORARY:一時的） |
-| assigned_by | 割り当て者ID | VARCHAR | 50 | ○ |  | ロールを割り当てた管理者のID（MST_UserAuthへの外部キー） |
-| assignment_reason | 割り当て理由 | TEXT |  | ○ |  | ロール割り当ての理由・根拠 |
-| effective_from | 有効開始日時 | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP | ロール割り当ての有効開始日時 |
-| effective_to | 有効終了日時 | TIMESTAMP |  | ○ |  | ロール割り当ての有効終了日時 |
-| is_primary_role | 主ロールフラグ | BOOLEAN |  | ○ | False | ユーザーの主要ロールかどうか |
-| priority_order | 優先順序 | INT |  | ○ | 999 | 複数ロール保持時の優先順序（数値が小さいほど高優先） |
-| conditions | 適用条件 | JSON |  | ○ |  | ロール適用の条件（時間帯、場所、状況等をJSON形式） |
-| delegation_source_user_id | 委譲元ユーザーID | VARCHAR | 50 | ○ |  | 委譲ロールの場合の委譲元ユーザーID |
-| delegation_expires_at | 委譲期限 | TIMESTAMP |  | ○ |  | 委譲ロールの期限 |
-| auto_assigned | 自動割り当てフラグ | BOOLEAN |  | ○ | False | システムによる自動割り当てかどうか |
-| requires_approval | 承認要求フラグ | BOOLEAN |  | ○ | False | ロール行使に承認が必要かどうか |
-| approval_status | 承認状態 | ENUM |  | ○ |  | 承認の状態（PENDING:承認待ち、APPROVED:承認済み、REJECTED:却下） |
-| approved_by | 承認者ID | VARCHAR | 50 | ○ |  | ロール割り当てを承認した管理者のID |
-| approved_at | 承認日時 | TIMESTAMP |  | ○ |  | ロール割り当てが承認された日時 |
-| assignment_status | 割り当て状態 | ENUM |  | ○ | ACTIVE | 割り当ての状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、EXPIRED:期限切れ） |
-| last_used_at | 最終使用日時 | TIMESTAMP |  | ○ |  | このロールが最後に使用された日時 |
-| usage_count | 使用回数 | INT |  | ○ | 0 | このロールが使用された回数 |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| user_id |  | VARCHAR |  | ○ |  |  |
+| role_id |  | VARCHAR |  | ○ |  |  |
+| assignment_type |  | ENUM |  | ○ | DIRECT |  |
+| assigned_by |  | VARCHAR |  | ○ |  |  |
+| assignment_reason |  | TEXT |  | ○ |  |  |
+| effective_from |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
+| effective_to |  | TIMESTAMP |  | ○ |  |  |
+| is_primary_role |  | BOOLEAN |  | ○ | False |  |
+| priority_order |  | INT |  | ○ | 999 |  |
+| conditions |  | JSON |  | ○ |  |  |
+| delegation_source_user_id |  | VARCHAR |  | ○ |  |  |
+| delegation_expires_at |  | TIMESTAMP |  | ○ |  |  |
+| auto_assigned |  | BOOLEAN |  | ○ | False |  |
+| requires_approval |  | BOOLEAN |  | ○ | False |  |
+| approval_status |  | ENUM |  | ○ |  |  |
+| approved_by |  | VARCHAR |  | ○ |  |  |
+| approved_at |  | TIMESTAMP |  | ○ |  |  |
+| assignment_status |  | ENUM |  | ○ | ACTIVE |  |
+| last_used_at |  | TIMESTAMP |  | ○ |  |  |
+| usage_count |  | INT |  | ○ | 0 |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_user_role | user_id, role_id | ○ | ユーザー・ロール組み合わせ検索用（一意） |
-| idx_user_id | user_id | × | ユーザー別検索用 |
-| idx_role_id | role_id | × | ロール別検索用 |
-| idx_assignment_type | assignment_type | × | 割り当て種別検索用 |
-| idx_assigned_by | assigned_by | × | 割り当て者別検索用 |
-| idx_effective_period | effective_from, effective_to | × | 有効期間検索用 |
-| idx_primary_role | user_id, is_primary_role | × | 主ロール検索用 |
-| idx_assignment_status | assignment_status | × | 割り当て状態別検索用 |
-| idx_approval_status | approval_status | × | 承認状態別検索用 |
-| idx_delegation_source | delegation_source_user_id | × | 委譲元ユーザー検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_userrole_user | user_id | MST_UserAuth | user_id | CASCADE | CASCADE | ユーザーへの外部キー |
-| fk_userrole_role | role_id | MST_Role | id | CASCADE | CASCADE | ロールへの外部キー |
-| fk_userrole_assigned_by | assigned_by | MST_UserAuth | user_id | CASCADE | SET NULL | 割り当て者への外部キー |
-| fk_userrole_delegation_source | delegation_source_user_id | MST_UserAuth | user_id | CASCADE | SET NULL | 委譲元ユーザーへの外部キー |
-| fk_userrole_approved_by | approved_by | MST_UserAuth | user_id | CASCADE | SET NULL | 承認者への外部キー |
+| idx_user_role | user_id, role_id | ○ |  |
+| idx_user_id | user_id | × |  |
+| idx_role_id | role_id | × |  |
+| idx_assignment_type | assignment_type | × |  |
+| idx_assigned_by | assigned_by | × |  |
+| idx_effective_period | effective_from, effective_to | × |  |
+| idx_primary_role | user_id, is_primary_role | × |  |
+| idx_assignment_status | assignment_status | × |  |
+| idx_approval_status | approval_status | × |  |
+| idx_delegation_source | delegation_source_user_id | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_user_role_active | UNIQUE |  | アクティブなユーザー・ロール組み合わせ一意制約 |
-| chk_assignment_type | CHECK | assignment_type IN ('DIRECT', 'INHERITED', 'DELEGATED', 'TEMPORARY') | 割り当て種別値チェック制約 |
-| chk_assignment_status | CHECK | assignment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED') | 割り当て状態値チェック制約 |
-| chk_approval_status | CHECK | approval_status IS NULL OR approval_status IN ('PENDING', 'APPROVED', 'REJECTED') | 承認状態値チェック制約 |
-| chk_effective_period | CHECK | effective_to IS NULL OR effective_from <= effective_to | 有効期間整合性チェック制約 |
-| chk_delegation_period | CHECK | delegation_expires_at IS NULL OR effective_from <= delegation_expires_at | 委譲期間整合性チェック制約 |
-| chk_priority_order | CHECK | priority_order > 0 | 優先順序正値チェック制約 |
-| chk_usage_count | CHECK | usage_count >= 0 | 使用回数非負値チェック制約 |
+| chk_assignment_type | CHECK | assignment_type IN (...) | assignment_type値チェック制約 |
+| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
+| chk_assignment_status | CHECK | assignment_status IN (...) | assignment_status値チェック制約 |
 
 ## サンプルデータ
 

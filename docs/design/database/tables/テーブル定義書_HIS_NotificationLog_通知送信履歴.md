@@ -7,84 +7,69 @@
 | テーブル名 | HIS_NotificationLog |
 | 論理名 | 通知送信履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:35 |
 
 ## 概要
 
 HIS_NotificationLog（通知送信履歴）は、システムから送信された全ての通知の履歴を管理するテーブルです。
-
 主な目的：
 - 通知送信の履歴管理
 - 送信成功・失敗の記録
 - 通知配信の監査証跡
 - 通知システムの分析・改善データ
 - 再送処理のための情報管理
-
 このテーブルは、通知・連携管理機能において送信状況の把握と品質向上を支える重要な履歴データです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| notification_id | 通知ID | VARCHAR | 50 | ○ |  | 送信された通知のID（TRN_Notificationへの参照） |
-| setting_id | 設定ID | VARCHAR | 50 | ○ |  | 使用された通知設定のID（MST_NotificationSettingsへの参照） |
-| template_id | テンプレートID | VARCHAR | 50 | ○ |  | 使用された通知テンプレートのID（MST_NotificationTemplateへの参照） |
-| notification_type | 通知タイプ | ENUM |  | ○ |  | 送信された通知の種類（EMAIL:メール、SLACK:Slack、TEAMS:Teams、WEBHOOK:Webhook） |
-| recipient_type | 受信者タイプ | ENUM |  | ○ |  | 受信者の種類（USER:個人、GROUP:グループ、CHANNEL:チャネル、WEBHOOK:Webhook） |
-| recipient_address | 受信者アドレス | VARCHAR | 500 | ○ |  | 送信先アドレス（メールアドレス、Slack チャネル等、暗号化必須） |
-| subject | 件名 | VARCHAR | 500 | ○ |  | 送信された通知の件名 |
-| message_body | メッセージ本文 | TEXT |  | ○ |  | 送信された通知の本文 |
-| message_format | メッセージフォーマット | ENUM |  | ○ |  | メッセージのフォーマット（PLAIN:プレーンテキスト、HTML:HTML、MARKDOWN:Markdown） |
-| send_status | 送信状態 | ENUM |  | ○ |  | 送信の状態（PENDING:送信待ち、SENDING:送信中、SUCCESS:成功、FAILED:失敗、RETRY:リトライ中） |
-| send_attempts | 送信試行回数 | INTEGER |  | ○ | 0 | 送信を試行した回数 |
-| max_retry_count | 最大リトライ回数 | INTEGER |  | ○ | 3 | 設定された最大リトライ回数 |
-| scheduled_at | 送信予定日時 | TIMESTAMP |  | ○ |  | 送信が予定された日時 |
-| sent_at | 送信日時 | TIMESTAMP |  | ○ |  | 実際に送信された日時 |
-| delivered_at | 配信確認日時 | TIMESTAMP |  | ○ |  | 配信が確認された日時（対応している場合） |
-| opened_at | 開封日時 | TIMESTAMP |  | ○ |  | 開封が確認された日時（メール等で対応している場合） |
-| response_code | レスポンスコード | VARCHAR | 20 | ○ |  | 送信先システムからのレスポンスコード |
-| response_message | レスポンスメッセージ | TEXT |  | ○ |  | 送信先システムからのレスポンスメッセージ |
-| error_details | エラー詳細 | TEXT |  | ○ |  | 送信失敗時のエラー詳細情報（JSON形式） |
-| integration_config_id | 連携設定ID | VARCHAR | 50 | ○ |  | 使用された外部連携設定のID（SYS_IntegrationConfigへの参照） |
-| priority_level | 優先度レベル | ENUM |  | ○ | MEDIUM | 通知の優先度（HIGH:高、MEDIUM:中、LOW:低） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| notification_id |  | VARCHAR |  | ○ |  |  |
+| setting_id |  | VARCHAR |  | ○ |  |  |
+| template_id |  | VARCHAR |  | ○ |  |  |
+| notification_type |  | ENUM |  | ○ |  |  |
+| recipient_type |  | ENUM |  | ○ |  |  |
+| recipient_address |  | VARCHAR |  | ○ |  |  |
+| subject |  | VARCHAR |  | ○ |  |  |
+| message_body |  | TEXT |  | ○ |  |  |
+| message_format |  | ENUM |  | ○ |  |  |
+| send_status |  | ENUM |  | ○ |  |  |
+| send_attempts |  | INTEGER |  | ○ | 0 |  |
+| max_retry_count |  | INTEGER |  | ○ | 3 |  |
+| scheduled_at |  | TIMESTAMP |  | ○ |  |  |
+| sent_at |  | TIMESTAMP |  | ○ |  |  |
+| delivered_at |  | TIMESTAMP |  | ○ |  |  |
+| opened_at |  | TIMESTAMP |  | ○ |  |  |
+| response_code |  | VARCHAR |  | ○ |  |  |
+| response_message |  | TEXT |  | ○ |  |  |
+| error_details |  | TEXT |  | ○ |  |  |
+| integration_config_id |  | VARCHAR |  | ○ |  |  |
+| priority_level |  | ENUM |  | ○ | MEDIUM |  |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_notification_log_notification | notification_id | × | 通知ID別検索用 |
-| idx_notification_log_tenant_status | tenant_id, send_status | × | テナント別送信状態検索用 |
-| idx_notification_log_type | notification_type | × | 通知タイプ別検索用 |
-| idx_notification_log_scheduled | scheduled_at | × | 送信予定日時検索用 |
-| idx_notification_log_sent | sent_at | × | 送信日時検索用 |
-| idx_notification_log_status_attempts | send_status, send_attempts | × | 送信状態・試行回数検索用 |
-| idx_notification_log_priority | priority_level, scheduled_at | × | 優先度別送信予定検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_notification_log_notification | notification_id | TRN_Notification | id | CASCADE | CASCADE | 通知履歴への外部キー |
-| fk_notification_log_setting | setting_id | MST_NotificationSettings | id | CASCADE | SET NULL | 通知設定への外部キー |
-| fk_notification_log_template | template_id | MST_NotificationTemplate | id | CASCADE | SET NULL | 通知テンプレートへの外部キー |
-| fk_notification_log_integration | integration_config_id | SYS_IntegrationConfig | id | CASCADE | SET NULL | 外部連携設定への外部キー |
+| idx_notification_log_notification | notification_id | × |  |
+| idx_notification_log_tenant_status | tenant_id, send_status | × |  |
+| idx_notification_log_type | notification_type | × |  |
+| idx_notification_log_scheduled | scheduled_at | × |  |
+| idx_notification_log_sent | sent_at | × |  |
+| idx_notification_log_status_attempts | send_status, send_attempts | × |  |
+| idx_notification_log_priority | priority_level, scheduled_at | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_notification_log_type | CHECK | notification_type IN ('EMAIL', 'SLACK', 'TEAMS', 'WEBHOOK') | 通知タイプ値チェック制約 |
-| chk_notification_log_recipient_type | CHECK | recipient_type IN ('USER', 'GROUP', 'CHANNEL', 'WEBHOOK') | 受信者タイプ値チェック制約 |
-| chk_notification_log_format | CHECK | message_format IN ('PLAIN', 'HTML', 'MARKDOWN') | メッセージフォーマット値チェック制約 |
-| chk_notification_log_status | CHECK | send_status IN ('PENDING', 'SENDING', 'SUCCESS', 'FAILED', 'RETRY') | 送信状態値チェック制約 |
-| chk_notification_log_priority | CHECK | priority_level IN ('HIGH', 'MEDIUM', 'LOW') | 優先度レベル値チェック制約 |
-| chk_notification_log_attempts_positive | CHECK | send_attempts >= 0 AND max_retry_count >= 0 | 試行回数正数チェック制約 |
-| chk_notification_log_attempts_limit | CHECK | send_attempts <= max_retry_count + 1 | 試行回数上限チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_notification_type | CHECK | notification_type IN (...) | notification_type値チェック制約 |
+| chk_recipient_type | CHECK | recipient_type IN (...) | recipient_type値チェック制約 |
+| chk_send_status | CHECK | send_status IN (...) | send_status値チェック制約 |
 
 ## サンプルデータ
 

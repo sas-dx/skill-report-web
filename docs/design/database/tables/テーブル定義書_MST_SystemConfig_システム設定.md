@@ -7,69 +7,64 @@
 | テーブル名 | MST_SystemConfig |
 | 論理名 | システム設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:35 |
 
 ## 概要
 
 MST_SystemConfig（システム設定）は、システム全体の設定値・パラメータを管理するマスタテーブルです。
-
 主な目的：
 - システム運用パラメータの一元管理
 - 機能ON/OFF設定の管理
 - 業務ルール・閾値の設定管理
 - 外部連携設定の管理
 - セキュリティ設定の管理
-
 このテーブルにより、システムの動作を柔軟に制御し、
 運用環境に応じた設定変更を効率的に行うことができます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| config_key | 設定キー | VARCHAR | 100 | ○ |  | 設定項目を一意に識別するキー（例：MAX_LOGIN_ATTEMPTS、SESSION_TIMEOUT） |
-| config_name | 設定名 | VARCHAR | 200 | ○ |  | 設定項目の表示名・説明 |
-| config_value | 設定値 | TEXT |  | ○ |  | 設定の値（文字列、数値、JSON等） |
-| config_type | 設定タイプ | ENUM |  | ○ |  | 設定値のデータタイプ（STRING:文字列、INTEGER:整数、DECIMAL:小数、BOOLEAN:真偽値、JSON:JSON、ENCRYPTED:暗号化） |
-| config_category | 設定カテゴリ | ENUM |  | ○ |  | 設定の分類（SECURITY:セキュリティ、SYSTEM:システム、BUSINESS:業務、UI:ユーザーインターフェース、INTEGRATION:連携） |
-| default_value | デフォルト値 | TEXT |  | ○ |  | 設定のデフォルト値 |
-| validation_rule | 検証ルール | TEXT |  | ○ |  | 設定値の検証ルール（正規表現、範囲等） |
-| description | 説明 | TEXT |  | ○ |  | 設定項目の詳細説明・用途 |
-| is_encrypted | 暗号化フラグ | BOOLEAN |  | ○ | False | 設定値が暗号化されているかどうか |
-| is_system_only | システム専用フラグ | BOOLEAN |  | ○ | False | システム内部でのみ使用される設定かどうか |
-| is_user_configurable | ユーザー設定可能フラグ | BOOLEAN |  | ○ | True | 管理者がUI経由で変更可能かどうか |
-| requires_restart | 再起動要否 | BOOLEAN |  | ○ | False | 設定変更時にシステム再起動が必要かどうか |
-| environment | 環境 | ENUM |  | ○ | ALL | 設定が適用される環境（DEV:開発、TEST:テスト、PROD:本番、ALL:全環境） |
-| tenant_specific | テナント固有フラグ | BOOLEAN |  | ○ | False | テナントごとに異なる値を持つ設定かどうか |
-| last_modified_by | 最終更新者 | VARCHAR | 50 | ○ |  | 設定を最後に更新したユーザーID |
-| last_modified_reason | 更新理由 | TEXT |  | ○ |  | 設定変更の理由・目的 |
-| sort_order | 表示順序 | INTEGER |  | ○ | 0 | 設定一覧での表示順序 |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 設定が有効かどうか |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| config_key |  | VARCHAR |  | ○ |  |  |
+| config_name |  | VARCHAR |  | ○ |  |  |
+| config_value |  | TEXT |  | ○ |  |  |
+| config_type |  | ENUM |  | ○ |  |  |
+| config_category |  | ENUM |  | ○ |  |  |
+| default_value |  | TEXT |  | ○ |  |  |
+| validation_rule |  | TEXT |  | ○ |  |  |
+| description |  | TEXT |  | ○ |  |  |
+| is_encrypted |  | BOOLEAN |  | ○ | False |  |
+| is_system_only |  | BOOLEAN |  | ○ | False |  |
+| is_user_configurable |  | BOOLEAN |  | ○ | True |  |
+| requires_restart |  | BOOLEAN |  | ○ | False |  |
+| environment |  | ENUM |  | ○ | ALL |  |
+| tenant_specific |  | BOOLEAN |  | ○ | False |  |
+| last_modified_by |  | VARCHAR |  | ○ |  |  |
+| last_modified_reason |  | TEXT |  | ○ |  |  |
+| sort_order |  | INTEGER |  | ○ | 0 |  |
+| is_active |  | BOOLEAN |  | ○ | True |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_config_key | config_key | ○ | 設定キー検索用（一意） |
-| idx_config_category | config_category | × | 設定カテゴリ検索用 |
-| idx_config_type | config_type | × | 設定タイプ検索用 |
-| idx_user_configurable | is_user_configurable, is_active | × | ユーザー設定可能項目検索用 |
-| idx_environment | environment, is_active | × | 環境別設定検索用 |
-| idx_tenant_specific | tenant_specific, is_active | × | テナント固有設定検索用 |
-| idx_sort_order | sort_order | × | 表示順序検索用 |
+| idx_config_key | config_key | ○ |  |
+| idx_config_category | config_category | × |  |
+| idx_config_type | config_type | × |  |
+| idx_user_configurable | is_user_configurable, is_active | × |  |
+| idx_environment | environment, is_active | × |  |
+| idx_tenant_specific | tenant_specific, is_active | × |  |
+| idx_sort_order | sort_order | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_config_key | UNIQUE |  | 設定キー一意制約 |
-| chk_config_type | CHECK | config_type IN ('STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON', 'ENCRYPTED') | 設定タイプ値チェック制約 |
-| chk_config_category | CHECK | config_category IN ('SECURITY', 'SYSTEM', 'BUSINESS', 'UI', 'INTEGRATION') | 設定カテゴリ値チェック制約 |
-| chk_environment | CHECK | environment IN ('DEV', 'TEST', 'PROD', 'ALL') | 環境値チェック制約 |
+| uk_config_key | UNIQUE |  | config_key一意制約 |
+| chk_config_type | CHECK | config_type IN (...) | config_type値チェック制約 |
 
 ## サンプルデータ
 
@@ -78,7 +73,6 @@ MST_SystemConfig（システム設定）は、システム全体の設定値・�
 | MAX_LOGIN_ATTEMPTS | 最大ログイン試行回数 | 5 | INTEGER | SECURITY | 3 | ^[1-9][0-9]*$ | アカウントロックまでの最大ログイン失敗回数 | False | False | True | False | ALL | True | admin | セキュリティ強化のため | 1 | True |
 | SESSION_TIMEOUT_MINUTES | セッションタイムアウト時間（分） | 30 | INTEGER | SECURITY | 60 | ^[1-9][0-9]*$ | ユーザーセッションの自動タイムアウト時間 | False | False | True | False | ALL | True | admin | セキュリティポリシー変更 | 2 | True |
 | SKILL_EVALUATION_PERIOD_MONTHS | スキル評価期間（月） | 6 | INTEGER | BUSINESS | 12 | ^[1-9][0-9]*$ | スキル評価の実施間隔 | False | False | True | False | ALL | True | hr_admin | 評価頻度の見直し | 10 | True |
-| EMAIL_SMTP_PASSWORD | SMTP認証パスワード | encrypted_password_value | ENCRYPTED | INTEGRATION | None | None | メール送信用SMTP認証パスワード | True | True | False | True | PROD | False | system | 初期設定 | 100 | True |
 
 ## 特記事項
 

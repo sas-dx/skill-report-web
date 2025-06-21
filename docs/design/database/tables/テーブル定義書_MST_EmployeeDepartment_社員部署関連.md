@@ -7,12 +7,11 @@
 | テーブル名 | MST_EmployeeDepartment |
 | 論理名 | 社員部署関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付けを管理するマスタテーブルです。
-
 主な目的：
 - 社員の部署所属履歴の管理
 - 複数部署兼務の管理
@@ -20,64 +19,49 @@ MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付�
 - 組織変更時の影響範囲把握
 - 部署別人員配置の管理
 - 権限管理における部署ベースアクセス制御
-
 このテーブルにより、社員の組織所属状況を詳細に管理し、
 人事異動や組織変更の履歴を正確に追跡できます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_id | 社員ID | VARCHAR | 50 | ○ |  | 社員のID（MST_Employeeへの外部キー） |
-| department_id | 部署ID | VARCHAR | 50 | ○ |  | 部署のID（MST_Departmentへの外部キー） |
-| assignment_type | 配属区分 | ENUM |  | ○ | PRIMARY | 配属区分（PRIMARY:主配属、SECONDARY:兼務、TEMPORARY:一時配属） |
-| start_date | 配属開始日 | DATE |  | ○ |  | 部署への配属開始日 |
-| end_date | 配属終了日 | DATE |  | ○ |  | 部署からの配属終了日（NULL:現在も配属中） |
-| assignment_ratio | 配属比率 | DECIMAL | 5,2 | ○ |  | 配属比率（%）兼務時の工数配分用 |
-| role_in_department | 部署内役割 | VARCHAR | 100 | ○ |  | 部署内での役割・職責 |
-| reporting_manager_id | 報告先上司ID | VARCHAR | 50 | ○ |  | 当該部署での報告先上司ID（MST_Employeeへの外部キー） |
-| assignment_reason | 配属理由 | VARCHAR | 500 | ○ |  | 配属・異動の理由 |
-| assignment_status | 配属状況 | ENUM |  | ○ | ACTIVE | 配属状況（ACTIVE:有効、INACTIVE:無効、PENDING:保留） |
-| approval_status | 承認状況 | ENUM |  | ○ | PENDING | 承認状況（APPROVED:承認済、PENDING:承認待ち、REJECTED:却下） |
-| approved_by | 承認者ID | VARCHAR | 50 | ○ |  | 配属を承認した管理者のID |
-| approved_at | 承認日時 | TIMESTAMP |  | ○ |  | 配属が承認された日時 |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| employee_id |  | VARCHAR |  | ○ |  |  |
+| department_id |  | VARCHAR |  | ○ |  |  |
+| assignment_type |  | ENUM |  | ○ | PRIMARY |  |
+| start_date |  | DATE |  | ○ |  |  |
+| end_date |  | DATE |  | ○ |  |  |
+| assignment_ratio |  | DECIMAL |  | ○ |  |  |
+| role_in_department |  | VARCHAR |  | ○ |  |  |
+| reporting_manager_id |  | VARCHAR |  | ○ |  |  |
+| assignment_reason |  | VARCHAR |  | ○ |  |  |
+| assignment_status |  | ENUM |  | ○ | ACTIVE |  |
+| approval_status |  | ENUM |  | ○ | PENDING |  |
+| approved_by |  | VARCHAR |  | ○ |  |  |
+| approved_at |  | TIMESTAMP |  | ○ |  |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_EmployeeDepartment_employee_id | employee_id | × | 社員ID検索用 |
-| idx_MST_EmployeeDepartment_department_id | department_id | × | 部署ID検索用 |
-| idx_MST_EmployeeDepartment_employee_department | employee_id, department_id | × | 社員・部署複合検索用 |
-| idx_MST_EmployeeDepartment_assignment_type | assignment_type | × | 配属区分別検索用 |
-| idx_MST_EmployeeDepartment_start_date | start_date | × | 配属開始日検索用 |
-| idx_MST_EmployeeDepartment_end_date | end_date | × | 配属終了日検索用 |
-| idx_MST_EmployeeDepartment_status | assignment_status | × | 配属状況別検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_MST_EmployeeDepartment_employee | employee_id | MST_Employee | id | CASCADE | CASCADE | 社員への外部キー |
-| fk_MST_EmployeeDepartment_department | department_id | MST_Department | id | CASCADE | CASCADE | 部署への外部キー |
-| fk_MST_EmployeeDepartment_reporting_manager | reporting_manager_id | MST_Employee | id | CASCADE | SET NULL | 報告先上司への外部キー |
-| fk_MST_EmployeeDepartment_approved_by | approved_by | MST_Employee | id | CASCADE | SET NULL | 承認者への外部キー |
+| idx_MST_EmployeeDepartment_employee_id | employee_id | × |  |
+| idx_MST_EmployeeDepartment_department_id | department_id | × |  |
+| idx_MST_EmployeeDepartment_employee_department | employee_id, department_id | × |  |
+| idx_MST_EmployeeDepartment_assignment_type | assignment_type | × |  |
+| idx_MST_EmployeeDepartment_start_date | start_date | × |  |
+| idx_MST_EmployeeDepartment_end_date | end_date | × |  |
+| idx_MST_EmployeeDepartment_status | assignment_status | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_MST_EmployeeDepartment_employee_dept_primary | UNIQUE |  | 社員・部署・配属区分・開始日一意制約 |
-| chk_MST_EmployeeDepartment_assignment_type | CHECK | assignment_type IN ('PRIMARY', 'SECONDARY', 'TEMPORARY') | 配属区分値チェック制約 |
-| chk_MST_EmployeeDepartment_assignment_status | CHECK | assignment_status IN ('ACTIVE', 'INACTIVE', 'PENDING') | 配属状況値チェック制約 |
-| chk_MST_EmployeeDepartment_approval_status | CHECK | approval_status IN ('APPROVED', 'PENDING', 'REJECTED') | 承認状況値チェック制約 |
-| chk_MST_EmployeeDepartment_date_range | CHECK | end_date IS NULL OR start_date <= end_date | 日付範囲整合性チェック制約 |
-| chk_MST_EmployeeDepartment_assignment_ratio | CHECK | assignment_ratio IS NULL OR (assignment_ratio >= 0 AND assignment_ratio <= 100) | 配属比率範囲チェック制約 |
+| chk_assignment_type | CHECK | assignment_type IN (...) | assignment_type値チェック制約 |
+| chk_assignment_status | CHECK | assignment_status IN (...) | assignment_status値チェック制約 |
+| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
 
 ## サンプルデータ
 

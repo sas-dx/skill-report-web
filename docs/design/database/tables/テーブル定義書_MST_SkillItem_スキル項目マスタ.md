@@ -7,12 +7,11 @@
 | テーブル名 | MST_SkillItem |
 | 論理名 | スキル項目マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。
-
 主な目的：
 - スキル項目の体系的管理（技術スキル、ビジネススキル、資格等）
 - スキル評価基準の標準化（レベル定義、評価指標等）
@@ -21,38 +20,38 @@ MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象�
 - プロジェクトアサインメント・スキルマッチングの基礎
 - 組織スキル分析・可視化の基盤
 - 外部資格・認定との連携管理
-
 このテーブルは、人材のスキル管理、キャリア開発、組織能力分析など、
 戦略的人材マネジメントの基盤となる重要なマスタデータです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| skill_code | スキルコード | VARCHAR | 20 | ○ |  | スキル項目を一意に識別するコード（例：SKILL001） |
-| skill_name | スキル名 | VARCHAR | 100 | ○ |  | スキル項目の正式名称 |
-| skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリのID |
-| skill_type | スキル種別 | ENUM |  | ○ |  | スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格） |
-| difficulty_level | 習得難易度 | INT |  | ○ |  | スキル習得の難易度（1-5段階） |
-| importance_level | 重要度 | INT |  | ○ |  | 組織における重要度（1-5段階） |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| skill_code |  | VARCHAR |  | ○ |  |  |
+| skill_name |  | VARCHAR |  | ○ |  |  |
+| skill_category_id |  | VARCHAR |  | ○ |  |  |
+| skill_type |  | ENUM |  | ○ |  |  |
+| difficulty_level |  | INT |  | ○ |  |  |
+| importance_level |  | INT |  | ○ |  |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_skill_code | skill_code | ○ | スキルコード検索用 |
-| idx_skill_category | skill_category_id | × | スキルカテゴリ別検索用 |
+| idx_skill_code | skill_code | ○ |  |
+| idx_skill_category | skill_category_id | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_skill_code | UNIQUE |  | スキルコード一意制約 |
+| uk_skill_code | UNIQUE |  | skill_code一意制約 |
+| chk_skill_type | CHECK | skill_type IN (...) | skill_type値チェック制約 |
+| chk_difficulty_level | CHECK | difficulty_level > 0 | difficulty_level正値チェック制約 |
+| chk_importance_level | CHECK | importance_level > 0 | importance_level正値チェック制約 |
 
 ## サンプルデータ
 

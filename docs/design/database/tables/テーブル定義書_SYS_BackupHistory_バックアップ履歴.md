@@ -7,72 +7,65 @@
 | テーブル名 | SYS_BackupHistory |
 | 論理名 | バックアップ履歴 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:35 |
 
 ## 概要
 
 バックアップ履歴テーブルは、システムのデータバックアップ実行履歴を管理するシステムテーブルです。
-
 主な目的：
 - データベースバックアップの実行履歴管理
 - バックアップの成功・失敗状況の記録
 - バックアップファイルの保存場所管理
 - 復旧時のバックアップ選択支援
-
 このテーブルは、システムの可用性とデータ保護を支える重要なテーブルで、
 障害時の迅速な復旧とデータ整合性の確保に貢献します。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| backup_id | バックアップID | VARCHAR | 50 | ○ |  | バックアップの一意識別子 |
-| backup_type | バックアップ種別 | ENUM |  | ○ | FULL | バックアップの種別（FULL:フルバックアップ、INCREMENTAL:増分バックアップ、DIFFERENTIAL:差分バックアップ） |
-| backup_scope | バックアップ範囲 | ENUM |  | ○ | DATABASE | バックアップ対象範囲（DATABASE:データベース全体、TABLE:特定テーブル、SCHEMA:特定スキーマ） |
-| target_objects | 対象オブジェクト | TEXT |  | ○ |  | バックアップ対象のテーブル名やスキーマ名（JSON配列形式） |
-| backup_start_time | バックアップ開始時刻 | TIMESTAMP |  | ○ |  | バックアップ処理の開始日時 |
-| backup_end_time | バックアップ終了時刻 | TIMESTAMP |  | ○ |  | バックアップ処理の終了日時 |
-| backup_status | バックアップ状況 | ENUM |  | ○ | RUNNING | バックアップの実行状況（RUNNING:実行中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル） |
-| backup_file_path | バックアップファイルパス | VARCHAR | 1000 | ○ |  | バックアップファイルの保存先パス |
-| backup_file_size | バックアップファイルサイズ | BIGINT |  | ○ |  | バックアップファイルのサイズ（バイト） |
-| compression_type | 圧縮形式 | ENUM |  | ○ |  | バックアップファイルの圧縮形式（NONE:無圧縮、GZIP:gzip圧縮、ZIP:zip圧縮） |
-| encryption_enabled | 暗号化有無 | BOOLEAN |  | ○ | False | バックアップファイルの暗号化有無 |
-| checksum | チェックサム | VARCHAR | 128 | ○ |  | バックアップファイルの整合性チェック用ハッシュ値 |
-| retention_period_days | 保持期間日数 | INTEGER |  | ○ | 30 | バックアップファイルの保持期間（日数） |
-| expiry_date | 有効期限 | DATE |  | ○ |  | バックアップファイルの有効期限日 |
-| backup_trigger | バックアップ契機 | ENUM |  | ○ | SCHEDULED | バックアップ実行の契機（SCHEDULED:スケジュール、MANUAL:手動、EMERGENCY:緊急） |
-| executed_by | 実行者 | VARCHAR | 100 | ○ |  | バックアップを実行したユーザーまたはシステム |
-| error_message | エラーメッセージ | TEXT |  | ○ |  | バックアップ失敗時のエラーメッセージ |
-| recovery_tested | 復旧テスト済み | BOOLEAN |  | ○ | False | このバックアップからの復旧テストが実施済みかどうか |
-| recovery_test_date | 復旧テスト日 | DATE |  | ○ |  | 復旧テストを実施した日付 |
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| backup_id |  | VARCHAR |  | ○ |  |  |
+| backup_type |  | ENUM |  | ○ | FULL |  |
+| backup_scope |  | ENUM |  | ○ | DATABASE |  |
+| target_objects |  | TEXT |  | ○ |  |  |
+| backup_start_time |  | TIMESTAMP |  | ○ |  |  |
+| backup_end_time |  | TIMESTAMP |  | ○ |  |  |
+| backup_status |  | ENUM |  | ○ | RUNNING |  |
+| backup_file_path |  | VARCHAR |  | ○ |  |  |
+| backup_file_size |  | BIGINT |  | ○ |  |  |
+| compression_type |  | ENUM |  | ○ |  |  |
+| encryption_enabled |  | BOOLEAN |  | ○ | False |  |
+| checksum |  | VARCHAR |  | ○ |  |  |
+| retention_period_days |  | INTEGER |  | ○ | 30 |  |
+| expiry_date |  | DATE |  | ○ |  |  |
+| backup_trigger |  | ENUM |  | ○ | SCHEDULED |  |
+| executed_by |  | VARCHAR |  | ○ |  |  |
+| error_message |  | TEXT |  | ○ |  |  |
+| recovery_tested |  | BOOLEAN |  | ○ | False |  |
+| recovery_test_date |  | DATE |  | ○ |  |  |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_SYS_BackupHistory_backup_id | backup_id | ○ | バックアップID検索用（一意） |
-| idx_SYS_BackupHistory_start_time | backup_start_time | × | バックアップ開始時刻検索用 |
-| idx_SYS_BackupHistory_status | backup_status | × | バックアップ状況検索用 |
-| idx_SYS_BackupHistory_type_scope | backup_type, backup_scope | × | バックアップ種別と範囲の複合検索用 |
-| idx_SYS_BackupHistory_expiry_date | expiry_date | × | 有効期限検索用（期限切れバックアップの削除処理用） |
+| idx_SYS_BackupHistory_backup_id | backup_id | ○ |  |
+| idx_SYS_BackupHistory_start_time | backup_start_time | × |  |
+| idx_SYS_BackupHistory_status | backup_status | × |  |
+| idx_SYS_BackupHistory_type_scope | backup_type, backup_scope | × |  |
+| idx_SYS_BackupHistory_expiry_date | expiry_date | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_SYS_BackupHistory_backup_id | UNIQUE |  | バックアップID一意制約 |
-| chk_SYS_BackupHistory_backup_type | CHECK | backup_type IN ('FULL', 'INCREMENTAL', 'DIFFERENTIAL') | バックアップ種別値チェック制約 |
-| chk_SYS_BackupHistory_backup_scope | CHECK | backup_scope IN ('DATABASE', 'TABLE', 'SCHEMA') | バックアップ範囲値チェック制約 |
-| chk_SYS_BackupHistory_backup_status | CHECK | backup_status IN ('RUNNING', 'SUCCESS', 'FAILED', 'CANCELLED') | バックアップ状況値チェック制約 |
-| chk_SYS_BackupHistory_compression_type | CHECK | compression_type IS NULL OR compression_type IN ('NONE', 'GZIP', 'ZIP') | 圧縮形式値チェック制約 |
-| chk_SYS_BackupHistory_backup_trigger | CHECK | backup_trigger IN ('SCHEDULED', 'MANUAL', 'EMERGENCY') | バックアップ契機値チェック制約 |
-| chk_SYS_BackupHistory_retention_period | CHECK | retention_period_days > 0 | 保持期間正数チェック制約 |
-| chk_SYS_BackupHistory_file_size | CHECK | backup_file_size IS NULL OR backup_file_size >= 0 | ファイルサイズ非負数チェック制約 |
-| chk_SYS_BackupHistory_end_time | CHECK | backup_end_time IS NULL OR backup_end_time >= backup_start_time | 終了時刻は開始時刻以降チェック制約 |
+| pk_sys_backuphistory | PRIMARY KEY | id | 主キー制約 |
+| uk_backup_id | UNIQUE |  | backup_id一意制約 |
+| chk_backup_type | CHECK | backup_type IN (...) | backup_type値チェック制約 |
+| chk_backup_status | CHECK | backup_status IN (...) | backup_status値チェック制約 |
+| chk_compression_type | CHECK | compression_type IN (...) | compression_type値チェック制約 |
 
 ## サンプルデータ
 

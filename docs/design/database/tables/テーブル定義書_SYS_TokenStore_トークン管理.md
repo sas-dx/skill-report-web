@@ -7,71 +7,60 @@
 | テーブル名 | SYS_TokenStore |
 | 論理名 | トークン管理 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 SYS_TokenStore（トークン管理）は、認証・認可システムで使用するトークン情報を管理するシステムテーブルです。
-
 主な目的：
 - JWTアクセストークンの管理
 - リフレッシュトークンの管理
 - セッション管理
 - トークンの有効期限管理
 - セキュリティ監査のためのトークン履歴管理
-
 このテーブルは、認証・認可システムの基盤となる重要なシステムデータです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| user_id | ユーザーID | VARCHAR | 50 | ○ |  | トークンの所有者ユーザーID（MST_UserAuthへの参照） |
-| token_type | トークンタイプ | ENUM |  | ○ |  | トークンの種類（ACCESS:アクセストークン、REFRESH:リフレッシュトークン、SESSION:セッション） |
-| token_value | トークン値 | TEXT |  | ○ |  | トークンの値（暗号化必須） |
-| token_hash | トークンハッシュ | VARCHAR | 255 | ○ |  | トークン値のハッシュ値（検索用） |
-| expires_at | 有効期限 | TIMESTAMP |  | ○ |  | トークンの有効期限 |
-| issued_at | 発行日時 | TIMESTAMP |  | ○ |  | トークンの発行日時 |
-| last_used_at | 最終使用日時 | TIMESTAMP |  | ○ |  | トークンの最終使用日時 |
-| client_ip | クライアントIP | VARCHAR | 45 | ○ |  | トークン発行時のクライアントIPアドレス（IPv6対応） |
-| user_agent | ユーザーエージェント | TEXT |  | ○ |  | トークン発行時のユーザーエージェント情報 |
-| device_fingerprint | デバイスフィンガープリント | VARCHAR | 255 | ○ |  | デバイス識別用フィンガープリント |
-| scope | スコープ | TEXT |  | ○ |  | トークンのアクセススコープ（JSON形式） |
-| is_revoked | 無効化フラグ | BOOLEAN |  | ○ | False | トークンが無効化されているかどうか |
-| revoked_at | 無効化日時 | TIMESTAMP |  | ○ |  | トークンが無効化された日時 |
-| revoked_reason | 無効化理由 | ENUM |  | ○ |  | 無効化の理由（LOGOUT:ログアウト、EXPIRED:期限切れ、SECURITY:セキュリティ、ADMIN:管理者操作） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| user_id |  | VARCHAR |  | ○ |  |  |
+| token_type |  | ENUM |  | ○ |  |  |
+| token_value |  | TEXT |  | ○ |  |  |
+| token_hash |  | VARCHAR |  | ○ |  |  |
+| expires_at |  | TIMESTAMP |  | ○ |  |  |
+| issued_at |  | TIMESTAMP |  | ○ |  |  |
+| last_used_at |  | TIMESTAMP |  | ○ |  |  |
+| client_ip |  | VARCHAR |  | ○ |  |  |
+| user_agent |  | TEXT |  | ○ |  |  |
+| device_fingerprint |  | VARCHAR |  | ○ |  |  |
+| scope |  | TEXT |  | ○ |  |  |
+| is_revoked |  | BOOLEAN |  | ○ | False |  |
+| revoked_at |  | TIMESTAMP |  | ○ |  |  |
+| revoked_reason |  | ENUM |  | ○ |  |  |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_token_store_hash | token_hash | ○ | トークンハッシュ検索用（一意） |
-| idx_token_store_user_type | user_id, token_type | × | ユーザー別トークンタイプ検索用 |
-| idx_token_store_expires | expires_at, is_revoked | × | 有効期限・無効化状態検索用 |
-| idx_token_store_tenant_user | tenant_id, user_id | × | テナント別ユーザー検索用 |
-| idx_token_store_issued | issued_at | × | 発行日時検索用 |
-| idx_token_store_last_used | last_used_at | × | 最終使用日時検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_token_store_user | user_id | MST_UserAuth | id | CASCADE | CASCADE | ユーザー認証情報への外部キー |
+| idx_token_store_hash | token_hash | ○ |  |
+| idx_token_store_user_type | user_id, token_type | × |  |
+| idx_token_store_expires | expires_at, is_revoked | × |  |
+| idx_token_store_tenant_user | tenant_id, user_id | × |  |
+| idx_token_store_issued | issued_at | × |  |
+| idx_token_store_last_used | last_used_at | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_token_store_hash | UNIQUE |  | トークンハッシュ一意制約 |
-| chk_token_store_type | CHECK | token_type IN ('ACCESS', 'REFRESH', 'SESSION') | トークンタイプ値チェック制約 |
-| chk_token_store_revoked_reason | CHECK | revoked_reason IS NULL OR revoked_reason IN ('LOGOUT', 'EXPIRED', 'SECURITY', 'ADMIN') | 無効化理由値チェック制約 |
-| chk_token_store_expires_after_issued | CHECK | expires_at > issued_at | 有効期限が発行日時より後であることをチェック |
-| chk_token_store_revoked_consistency | CHECK | (is_revoked = false AND revoked_at IS NULL AND revoked_reason IS NULL) OR (is_revoked = true AND revoked_at IS NOT NULL) | 無効化フラグと無効化日時の整合性チェック |
+| uk_id | UNIQUE |  | id一意制約 |
+| uk_token_hash | UNIQUE |  | token_hash一意制約 |
+| chk_token_type | CHECK | token_type IN (...) | token_type値チェック制約 |
 
 ## サンプルデータ
 

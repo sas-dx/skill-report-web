@@ -7,67 +7,60 @@
 | テーブル名 | MST_ReportTemplate |
 | 論理名 | 帳票テンプレート |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_ReportTemplate（帳票テンプレート）は、システムで生成する各種帳票のテンプレート情報を管理するマスタテーブルです。
-
 主な目的：
 - 帳票レイアウト・フォーマットの管理
 - 帳票生成パラメータの管理
 - 多言語対応の帳票テンプレート管理
 - テナント別カスタマイズ対応
 - 帳票出力形式の管理
-
 このテーブルは、帳票・レポート機能において一貫性のある帳票出力を実現する重要なマスタデータです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| template_key | テンプレートキー | VARCHAR | 100 | ○ |  | テンプレートの識別キー（例：skill_report、goal_summary等） |
-| template_name | テンプレート名 | VARCHAR | 200 | ○ |  | テンプレートの表示名 |
-| report_category | 帳票カテゴリ | ENUM |  | ○ |  | 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析） |
-| output_format | 出力形式 | ENUM |  | ○ |  | 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML） |
-| language_code | 言語コード | VARCHAR | 10 | ○ | ja | テンプレートの言語（ja:日本語、en:英語等） |
-| template_content | テンプレート内容 | TEXT |  | ○ |  | 帳票テンプレートの内容（HTML、XML等の形式） |
-| style_sheet | スタイルシート | TEXT |  | ○ |  | 帳票のスタイル定義（CSS等） |
-| parameters_schema | パラメータスキーマ | TEXT |  | ○ |  | 帳票生成に必要なパラメータの定義（JSON Schema形式） |
-| data_source_config | データソース設定 | TEXT |  | ○ |  | データ取得に関する設定（JSON形式） |
-| page_settings | ページ設定 | TEXT |  | ○ |  | ページサイズ・余白等の設定（JSON形式） |
-| header_template | ヘッダーテンプレート | TEXT |  | ○ |  | 帳票ヘッダー部分のテンプレート |
-| footer_template | フッターテンプレート | TEXT |  | ○ |  | 帳票フッター部分のテンプレート |
-| is_default | デフォルトフラグ | BOOLEAN |  | ○ | False | 同一キー・カテゴリでのデフォルトテンプレートかどうか |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | テンプレートが有効かどうか |
-| version | バージョン | VARCHAR | 20 | ○ | 1.0.0 | テンプレートのバージョン番号 |
-| preview_image_url | プレビュー画像URL | VARCHAR | 500 | ○ |  | テンプレートのプレビュー画像URL |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| template_key |  | VARCHAR |  | ○ |  |  |
+| template_name |  | VARCHAR |  | ○ |  |  |
+| report_category |  | ENUM |  | ○ |  |  |
+| output_format |  | ENUM |  | ○ |  |  |
+| language_code |  | VARCHAR |  | ○ | ja |  |
+| template_content |  | TEXT |  | ○ |  |  |
+| style_sheet |  | TEXT |  | ○ |  |  |
+| parameters_schema |  | TEXT |  | ○ |  |  |
+| data_source_config |  | TEXT |  | ○ |  |  |
+| page_settings |  | TEXT |  | ○ |  |  |
+| header_template |  | TEXT |  | ○ |  |  |
+| footer_template |  | TEXT |  | ○ |  |  |
+| is_default |  | BOOLEAN |  | ○ | False |  |
+| is_active |  | BOOLEAN |  | ○ | True |  |
+| version |  | VARCHAR |  | ○ | 1.0.0 |  |
+| preview_image_url |  | VARCHAR |  | ○ |  |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_report_template_tenant_key | tenant_id, template_key, language_code | ○ | テナント別テンプレートキー検索用（一意） |
-| idx_report_template_category | report_category | × | 帳票カテゴリ別検索用 |
-| idx_report_template_format | output_format | × | 出力形式別検索用 |
-| idx_report_template_language | language_code | × | 言語別検索用 |
-| idx_report_template_default | is_default, is_active | × | デフォルト・有効テンプレート検索用 |
+| idx_report_template_tenant_key | tenant_id, template_key, language_code | ○ |  |
+| idx_report_template_category | report_category | × |  |
+| idx_report_template_format | output_format | × |  |
+| idx_report_template_language | language_code | × |  |
+| idx_report_template_default | is_default, is_active | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_report_template_tenant_key_lang | UNIQUE |  | テナント内テンプレート一意制約 |
-| chk_report_template_category | CHECK | report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS') | 帳票カテゴリ値チェック制約 |
-| chk_report_template_format | CHECK | output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML') | 出力形式値チェック制約 |
-| chk_report_template_language | CHECK | language_code IN ('ja', 'en') | 言語コード値チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 

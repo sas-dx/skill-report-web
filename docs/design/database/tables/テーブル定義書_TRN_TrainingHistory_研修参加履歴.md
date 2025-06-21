@@ -7,106 +7,85 @@
 | テーブル名 | TRN_TrainingHistory |
 | 論理名 | 研修参加履歴 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 TRN_TrainingHistory（研修参加履歴）は、社員が参加した研修・教育プログラムの履歴を管理するトランザクションテーブルです。
-
 主な目的：
 - 研修参加履歴の記録・管理
 - 学習成果・評価の記録
 - スキル向上の追跡
 - 継続教育ポイント（PDU）の管理
 - 人材育成計画の進捗管理
-
 このテーブルにより、社員の学習履歴を体系的に記録し、
 スキル開発やキャリア形成の支援を効率的に行うことができます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| training_history_id | 研修履歴ID | VARCHAR | 50 | ○ |  | 研修参加履歴を一意に識別するID |
-| employee_id | 社員ID | VARCHAR | 50 | ○ |  | 参加した社員のID（MST_Employeeへの外部キー） |
-| training_program_id | 研修プログラムID | VARCHAR | 50 | ○ |  | 研修プログラムのID（MST_TrainingProgramへの外部キー） |
-| training_name | 研修名 | VARCHAR | 200 | ○ |  | 研修・教育プログラムの名称 |
-| training_type | 研修種別 | ENUM |  | ○ |  | 研修の種別（INTERNAL:社内研修、EXTERNAL:社外研修、ONLINE:オンライン、CERTIFICATION:資格取得、CONFERENCE:カンファレンス） |
-| training_category | 研修カテゴリ | ENUM |  | ○ |  | 研修の分野（TECHNICAL:技術、BUSINESS:ビジネス、MANAGEMENT:マネジメント、SOFT_SKILL:ソフトスキル、COMPLIANCE:コンプライアンス） |
-| provider_name | 提供機関名 | VARCHAR | 100 | ○ |  | 研修を提供する機関・会社名 |
-| instructor_name | 講師名 | VARCHAR | 100 | ○ |  | 研修講師の名前 |
-| start_date | 開始日 | DATE |  | ○ |  | 研修開始日 |
-| end_date | 終了日 | DATE |  | ○ |  | 研修終了日（単日の場合は開始日と同じ） |
-| duration_hours | 研修時間 | DECIMAL | 5,1 | ○ |  | 研修の総時間数 |
-| location | 開催場所 | VARCHAR | 200 | ○ |  | 研修開催場所（オンラインの場合は「オンライン」） |
-| cost | 費用 | DECIMAL | 10,2 | ○ |  | 研修参加費用（円） |
-| cost_covered_by | 費用負担者 | ENUM |  | ○ |  | 費用の負担者（COMPANY:会社、EMPLOYEE:個人、SHARED:折半） |
-| attendance_status | 出席状況 | ENUM |  | ○ | COMPLETED | 出席状況（COMPLETED:完了、PARTIAL:部分参加、ABSENT:欠席、CANCELLED:中止） |
-| completion_rate | 完了率 | DECIMAL | 5,2 | ○ |  | 研修の完了率（%） |
-| test_score | テスト点数 | DECIMAL | 5,2 | ○ |  | 研修テストの点数 |
-| grade | 成績 | VARCHAR | 10 | ○ |  | 研修の成績（A、B、C、合格、不合格等） |
-| certificate_obtained | 修了証取得 | BOOLEAN |  | ○ | False | 修了証・認定証を取得したかどうか |
-| certificate_number | 証明書番号 | VARCHAR | 100 | ○ |  | 修了証・認定証の番号 |
-| pdu_earned | 獲得PDU | DECIMAL | 5,1 | ○ |  | 研修で獲得した継続教育ポイント（PDU） |
-| skills_acquired | 習得スキル | TEXT |  | ○ |  | 研修で習得したスキル（JSON形式） |
-| learning_objectives | 学習目標 | TEXT |  | ○ |  | 研修の学習目標・目的 |
-| learning_outcomes | 学習成果 | TEXT |  | ○ |  | 実際の学習成果・習得内容 |
-| feedback | フィードバック | TEXT |  | ○ |  | 研修に対するフィードバック・感想 |
-| satisfaction_score | 満足度 | DECIMAL | 3,1 | ○ |  | 研修に対する満足度（1.0-5.0） |
-| recommendation_score | 推奨度 | DECIMAL | 3,1 | ○ |  | 他者への推奨度（1.0-5.0） |
-| follow_up_required | フォローアップ要否 | BOOLEAN |  | ○ | False | 追加のフォローアップが必要かどうか |
-| follow_up_date | フォローアップ予定日 | DATE |  | ○ |  | フォローアップの予定日 |
-| manager_approval | 上司承認 | BOOLEAN |  | ○ | False | 上司による参加承認があったかどうか |
-| approved_by | 承認者 | VARCHAR | 50 | ○ |  | 研修参加を承認した上司のID |
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | マルチテナント識別子 |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード更新日時 |
-| created_by | 作成者 | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | 更新者 | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| training_history_id |  | VARCHAR |  | ○ |  |  |
+| employee_id |  | VARCHAR |  | ○ |  |  |
+| training_program_id |  | VARCHAR |  | ○ |  |  |
+| training_name |  | VARCHAR |  | ○ |  |  |
+| training_type |  | ENUM |  | ○ |  |  |
+| training_category |  | ENUM |  | ○ |  |  |
+| provider_name |  | VARCHAR |  | ○ |  |  |
+| instructor_name |  | VARCHAR |  | ○ |  |  |
+| start_date |  | DATE |  | ○ |  |  |
+| end_date |  | DATE |  | ○ |  |  |
+| duration_hours |  | DECIMAL |  | ○ |  |  |
+| location |  | VARCHAR |  | ○ |  |  |
+| cost |  | DECIMAL |  | ○ |  |  |
+| cost_covered_by |  | ENUM |  | ○ |  |  |
+| attendance_status |  | ENUM |  | ○ | COMPLETED |  |
+| completion_rate |  | DECIMAL |  | ○ |  |  |
+| test_score |  | DECIMAL |  | ○ |  |  |
+| grade |  | VARCHAR |  | ○ |  |  |
+| certificate_obtained |  | BOOLEAN |  | ○ | False |  |
+| certificate_number |  | VARCHAR |  | ○ |  |  |
+| pdu_earned |  | DECIMAL |  | ○ |  |  |
+| skills_acquired |  | TEXT |  | ○ |  |  |
+| learning_objectives |  | TEXT |  | ○ |  |  |
+| learning_outcomes |  | TEXT |  | ○ |  |  |
+| feedback |  | TEXT |  | ○ |  |  |
+| satisfaction_score |  | DECIMAL |  | ○ |  |  |
+| recommendation_score |  | DECIMAL |  | ○ |  |  |
+| follow_up_required |  | BOOLEAN |  | ○ | False |  |
+| follow_up_date |  | DATE |  | ○ |  |  |
+| manager_approval |  | BOOLEAN |  | ○ | False |  |
+| approved_by |  | VARCHAR |  | ○ |  |  |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
+| updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_training_history_id | training_history_id | ○ | 研修履歴ID検索用（一意） |
-| idx_employee_id | employee_id | × | 社員ID検索用 |
-| idx_training_program_id | training_program_id | × | 研修プログラムID検索用 |
-| idx_training_type | training_type | × | 研修種別検索用 |
-| idx_training_category | training_category | × | 研修カテゴリ検索用 |
-| idx_date_range | start_date, end_date | × | 期間検索用 |
-| idx_attendance_status | attendance_status | × | 出席状況検索用 |
-| idx_employee_period | employee_id, start_date, end_date | × | 社員別期間検索用 |
-| idx_certificate | certificate_obtained, certificate_number | × | 修了証検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_training_history_employee | employee_id | MST_Employee | id | CASCADE | RESTRICT | 社員への外部キー |
-| fk_training_history_program | training_program_id | MST_TrainingProgram | id | CASCADE | SET NULL | 研修プログラムへの外部キー |
-| fk_training_history_approver | approved_by | MST_Employee | id | CASCADE | SET NULL | 承認者への外部キー |
+| idx_training_history_id | training_history_id | ○ |  |
+| idx_employee_id | employee_id | × |  |
+| idx_training_program_id | training_program_id | × |  |
+| idx_training_type | training_type | × |  |
+| idx_training_category | training_category | × |  |
+| idx_date_range | start_date, end_date | × |  |
+| idx_attendance_status | attendance_status | × |  |
+| idx_employee_period | employee_id, start_date, end_date | × |  |
+| idx_certificate | certificate_obtained, certificate_number | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_training_history_id | UNIQUE |  | 研修履歴ID一意制約 |
-| chk_training_type | CHECK | training_type IN ('INTERNAL', 'EXTERNAL', 'ONLINE', 'CERTIFICATION', 'CONFERENCE') | 研修種別値チェック制約 |
-| chk_training_category | CHECK | training_category IN ('TECHNICAL', 'BUSINESS', 'MANAGEMENT', 'SOFT_SKILL', 'COMPLIANCE') | 研修カテゴリ値チェック制約 |
-| chk_cost_covered_by | CHECK | cost_covered_by IN ('COMPANY', 'EMPLOYEE', 'SHARED') | 費用負担者値チェック制約 |
-| chk_attendance_status | CHECK | attendance_status IN ('COMPLETED', 'PARTIAL', 'ABSENT', 'CANCELLED') | 出席状況値チェック制約 |
-| chk_date_range | CHECK | end_date IS NULL OR start_date <= end_date | 開始日・終了日の整合性チェック制約 |
-| chk_duration_hours | CHECK | duration_hours IS NULL OR duration_hours > 0 | 研修時間正数チェック制約 |
-| chk_completion_rate | CHECK | completion_rate IS NULL OR (completion_rate >= 0 AND completion_rate <= 100) | 完了率範囲チェック制約 |
-| chk_test_score | CHECK | test_score IS NULL OR test_score >= 0 | テスト点数非負数チェック制約 |
-| chk_satisfaction_score | CHECK | satisfaction_score IS NULL OR (satisfaction_score >= 1.0 AND satisfaction_score <= 5.0) | 満足度範囲チェック制約 |
-| chk_recommendation_score | CHECK | recommendation_score IS NULL OR (recommendation_score >= 1.0 AND recommendation_score <= 5.0) | 推奨度範囲チェック制約 |
-| chk_cost | CHECK | cost IS NULL OR cost >= 0 | 費用非負数チェック制約 |
-| chk_pdu_earned | CHECK | pdu_earned IS NULL OR pdu_earned >= 0 | 獲得PDU非負数チェック制約 |
+| pk_trn_traininghistory | PRIMARY KEY | id | 主キー制約 |
+| uk_training_history_id | UNIQUE |  | training_history_id一意制約 |
+| chk_training_type | CHECK | training_type IN (...) | training_type値チェック制約 |
+| chk_attendance_status | CHECK | attendance_status IN (...) | attendance_status値チェック制約 |
 
 ## サンプルデータ
 

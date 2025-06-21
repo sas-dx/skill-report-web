@@ -1,32 +1,43 @@
 -- ============================================
 -- テーブル: MST_JobType
 -- 論理名: 職種マスタ
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基本情報を管理するマスタテーブルです。
+
+主な目的：
+- 職種の体系的な分類・管理
+- 職種別スキル要件の定義基盤
+- 人材配置・採用計画の基準
+- キャリアパス・昇進要件の管理
+- 職種別評価基準の設定
+
+このテーブルにより、社員のキャリア開発や適材適所の人材配置、
+職種別スキル要件の管理を効率的に行うことができます。
+
+-- 作成日: 2025-06-21 17:20:34
 -- ============================================
 
 DROP TABLE IF EXISTS MST_JobType;
 
 CREATE TABLE MST_JobType (
-    job_type_code VARCHAR(20) COMMENT '職種を一意に識別するコード（例：SE、PM、QA、BA）',
-    job_type_name VARCHAR(100) COMMENT '職種の正式名称',
-    job_type_name_en VARCHAR(100) COMMENT '英語での職種名称',
-    job_category ENUM COMMENT '職種の大分類（ENGINEERING:エンジニアリング、MANAGEMENT:マネジメント、SALES:営業、SUPPORT:サポート、OTHER:その他）',
-    job_level ENUM COMMENT '職種の階層レベル（JUNIOR:ジュニア、SENIOR:シニア、LEAD:リード、MANAGER:マネージャー、DIRECTOR:ディレクター）',
-    description TEXT COMMENT '職種の詳細説明・役割・責任範囲',
-    required_experience_years INTEGER COMMENT '職種に就くために必要な経験年数（目安）',
-    salary_grade_min INTEGER COMMENT '職種の給与グレード下限値',
-    salary_grade_max INTEGER COMMENT '職種の給与グレード上限値',
-    career_path TEXT COMMENT '職種からの一般的なキャリアパス・昇進ルート',
-    required_certifications TEXT COMMENT '職種に必要または推奨される資格（JSON形式で複数格納）',
-    required_skills TEXT COMMENT '職種に必要なスキル（JSON形式で複数格納）',
-    department_affinity TEXT COMMENT '職種が配属されやすい部署（JSON形式で複数格納）',
-    remote_work_eligible BOOLEAN DEFAULT False COMMENT 'リモートワークが可能な職種かどうか',
-    travel_frequency ENUM COMMENT '出張の頻度（NONE:なし、LOW:低、MEDIUM:中、HIGH:高）',
-    sort_order INTEGER DEFAULT 0 COMMENT '職種一覧での表示順序',
-    is_active BOOLEAN DEFAULT True COMMENT '職種が有効かどうか',
-    code VARCHAR(20) NOT NULL COMMENT 'マスタコード',
-    name VARCHAR(100) NOT NULL COMMENT 'マスタ名称'
+    job_type_code VARCHAR,
+    job_type_name VARCHAR,
+    job_type_name_en VARCHAR,
+    job_category ENUM,
+    job_level ENUM,
+    description TEXT,
+    required_experience_years INTEGER,
+    salary_grade_min INTEGER,
+    salary_grade_max INTEGER,
+    career_path TEXT,
+    required_certifications TEXT,
+    required_skills TEXT,
+    department_affinity TEXT,
+    remote_work_eligible BOOLEAN DEFAULT False,
+    travel_frequency ENUM,
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT True,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -37,11 +48,3 @@ CREATE INDEX idx_job_level ON MST_JobType (job_level);
 CREATE INDEX idx_category_level ON MST_JobType (job_category, job_level);
 CREATE INDEX idx_remote_eligible ON MST_JobType (remote_work_eligible, is_active);
 CREATE INDEX idx_sort_order ON MST_JobType (sort_order);
-
--- その他の制約
-ALTER TABLE MST_JobType ADD CONSTRAINT uk_job_type_code UNIQUE ();
-ALTER TABLE MST_JobType ADD CONSTRAINT chk_job_category CHECK (job_category IN ('ENGINEERING', 'MANAGEMENT', 'SALES', 'SUPPORT', 'OTHER'));
-ALTER TABLE MST_JobType ADD CONSTRAINT chk_job_level CHECK (job_level IN ('JUNIOR', 'SENIOR', 'LEAD', 'MANAGER', 'DIRECTOR'));
-ALTER TABLE MST_JobType ADD CONSTRAINT chk_travel_frequency CHECK (travel_frequency IN ('NONE', 'LOW', 'MEDIUM', 'HIGH'));
-ALTER TABLE MST_JobType ADD CONSTRAINT chk_experience_years CHECK (required_experience_years IS NULL OR required_experience_years >= 0);
-ALTER TABLE MST_JobType ADD CONSTRAINT chk_salary_grade CHECK (salary_grade_min IS NULL OR salary_grade_max IS NULL OR salary_grade_min <= salary_grade_max);

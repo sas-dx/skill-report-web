@@ -7,75 +7,64 @@
 | テーブル名 | WRK_BatchJobLog |
 | 論理名 | 一括登録ジョブログ |
 | カテゴリ | ワーク系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 一括登録・更新処理のジョブ実行ログを管理するワーク系テーブル。
-
 主な目的：
 - バッチ処理の実行状況監視
 - エラー発生時の原因調査・トラブルシューティング
 - 処理結果の統計情報管理
 - 一括処理の進捗追跡
-
 このテーブルは一時的なワークテーブルとして機能し、
 処理完了後は定期的にアーカイブ・削除される。
 主に管理者画面での監視とAPI経由での状況確認に使用される。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_id | ジョブID | VARCHAR | 50 | ○ |  | 一括処理ジョブの一意識別子（UUID形式） |
-| job_name | ジョブ名 | VARCHAR | 200 | ○ |  | 実行されたジョブの名称（画面表示用） |
-| job_type | ジョブ種別 | ENUM |  | ○ | SKILL_IMPORT | ジョブの種別（SKILL_IMPORT:スキル情報一括登録、EMPLOYEE_IMPORT:社員情報一括登録、BULK_UPDATE:一括更新、BULK_DELETE:一括削除、DATA_EXPORT:データエクスポート） |
-| status | 実行ステータス | ENUM |  | ○ | PENDING | ジョブの実行状況（PENDING:待機中、RUNNING:実行中、COMPLETED:完了、FAILED:失敗、CANCELLED:キャンセル） |
-| start_time | 開始時刻 | TIMESTAMP |  | ○ |  | ジョブ実行開始日時 |
-| end_time | 終了時刻 | TIMESTAMP |  | ○ |  | ジョブ実行終了日時 |
-| total_records | 総レコード数 | INTEGER |  | ○ | 0 | 処理対象の総レコード数 |
-| processed_records | 処理済みレコード数 | INTEGER |  | ○ | 0 | 実際に処理されたレコード数 |
-| success_records | 成功レコード数 | INTEGER |  | ○ | 0 | 正常に処理されたレコード数 |
-| error_records | エラーレコード数 | INTEGER |  | ○ | 0 | エラーが発生したレコード数 |
-| error_details | エラー詳細 | TEXT |  | ○ |  | エラー内容の詳細情報（JSON形式でエラーメッセージ、行番号、カラム名等を格納） |
-| input_file_path | 入力ファイルパス | VARCHAR | 500 | ○ |  | 処理対象の入力ファイルパス（CSVファイル等） |
-| output_file_path | 出力ファイルパス | VARCHAR | 500 | ○ |  | 処理結果の出力ファイルパス（エラーレポート等） |
-| executed_by | 実行者 | VARCHAR | 50 | ○ |  | ジョブを実行したユーザーのID |
-| progress_percentage | 進捗率 | DECIMAL | 5,2 | ○ | 0.0 | ジョブの進捗率（0.00-100.00） |
-| execution_environment | 実行環境 | VARCHAR | 100 | ○ |  | ジョブが実行された環境情報（サーバー名、プロセスID等） |
-| job_parameters | ジョブパラメータ | TEXT |  | ○ |  | ジョブ実行時のパラメータ情報（JSON形式） |
-| id | ID | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| job_id |  | VARCHAR |  | ○ |  |  |
+| job_name |  | VARCHAR |  | ○ |  |  |
+| job_type |  | ENUM |  | ○ | SKILL_IMPORT |  |
+| status |  | ENUM |  | ○ | PENDING |  |
+| start_time |  | TIMESTAMP |  | ○ |  |  |
+| end_time |  | TIMESTAMP |  | ○ |  |  |
+| total_records |  | INTEGER |  | ○ | 0 |  |
+| processed_records |  | INTEGER |  | ○ | 0 |  |
+| success_records |  | INTEGER |  | ○ | 0 |  |
+| error_records |  | INTEGER |  | ○ | 0 |  |
+| error_details |  | TEXT |  | ○ |  |  |
+| input_file_path |  | VARCHAR |  | ○ |  |  |
+| output_file_path |  | VARCHAR |  | ○ |  |  |
+| executed_by |  | VARCHAR |  | ○ |  |  |
+| progress_percentage |  | DECIMAL |  | ○ | 0.0 |  |
+| execution_environment |  | VARCHAR |  | ○ |  |  |
+| job_parameters |  | TEXT |  | ○ |  |  |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_WRK_BatchJobLog_job_id | job_id | ○ | ジョブID検索用（一意） |
-| idx_WRK_BatchJobLog_status | status | × | ステータス検索用（実行中ジョブの監視等） |
-| idx_WRK_BatchJobLog_start_time | start_time | × | 開始時刻検索用（日時範囲での絞り込み） |
-| idx_WRK_BatchJobLog_executed_by | executed_by | × | 実行者検索用（ユーザー別ジョブ履歴） |
-| idx_WRK_BatchJobLog_job_type | job_type | × | ジョブ種別検索用（種別別の統計等） |
-| idx_WRK_BatchJobLog_status_start_time | status, start_time | × | ステータスと開始時刻の複合検索用（監視画面での絞り込み） |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_WRK_BatchJobLog_executed_by | executed_by | MST_UserAuth | user_id | CASCADE | RESTRICT | 実行者（ユーザー認証情報）への外部キー |
+| idx_WRK_BatchJobLog_job_id | job_id | ○ |  |
+| idx_WRK_BatchJobLog_status | status | × |  |
+| idx_WRK_BatchJobLog_start_time | start_time | × |  |
+| idx_WRK_BatchJobLog_executed_by | executed_by | × |  |
+| idx_WRK_BatchJobLog_job_type | job_type | × |  |
+| idx_WRK_BatchJobLog_status_start_time | status, start_time | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_WRK_BatchJobLog_status | CHECK | status IN ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED') | ステータス値チェック制約 |
-| chk_WRK_BatchJobLog_job_type | CHECK | job_type IN ('SKILL_IMPORT', 'EMPLOYEE_IMPORT', 'BULK_UPDATE', 'BULK_DELETE', 'DATA_EXPORT') | ジョブ種別値チェック制約 |
-| chk_WRK_BatchJobLog_records_positive | CHECK | total_records >= 0 AND processed_records >= 0 AND success_records >= 0 AND error_records >= 0 | レコード数正数チェック制約 |
-| chk_WRK_BatchJobLog_progress_range | CHECK | progress_percentage >= 0.00 AND progress_percentage <= 100.00 | 進捗率範囲チェック制約（0-100%） |
-| chk_WRK_BatchJobLog_time_consistency | CHECK | end_time IS NULL OR start_time IS NULL OR start_time <= end_time | 開始時刻と終了時刻の整合性チェック制約 |
-| chk_WRK_BatchJobLog_record_consistency | CHECK | processed_records <= total_records AND (success_records + error_records) <= processed_records | 処理件数の整合性チェック制約 |
+| pk_wrk_batchjoblog | PRIMARY KEY | id | 主キー制約 |
+| uk_job_id | UNIQUE |  | job_id一意制約 |
+| chk_job_type | CHECK | job_type IN (...) | job_type値チェック制約 |
+| chk_status | CHECK | status IN (...) | status値チェック制約 |
 
 ## サンプルデータ
 

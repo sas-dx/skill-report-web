@@ -7,70 +7,65 @@
 | テーブル名 | MST_JobType |
 | 論理名 | 職種マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基本情報を管理するマスタテーブルです。
-
 主な目的：
 - 職種の体系的な分類・管理
 - 職種別スキル要件の定義基盤
 - 人材配置・採用計画の基準
 - キャリアパス・昇進要件の管理
 - 職種別評価基準の設定
-
 このテーブルにより、社員のキャリア開発や適材適所の人材配置、
 職種別スキル要件の管理を効率的に行うことができます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_type_code | 職種コード | VARCHAR | 20 | ○ |  | 職種を一意に識別するコード（例：SE、PM、QA、BA） |
-| job_type_name | 職種名 | VARCHAR | 100 | ○ |  | 職種の正式名称 |
-| job_type_name_en | 職種名（英語） | VARCHAR | 100 | ○ |  | 英語での職種名称 |
-| job_category | 職種カテゴリ | ENUM |  | ○ |  | 職種の大分類（ENGINEERING:エンジニアリング、MANAGEMENT:マネジメント、SALES:営業、SUPPORT:サポート、OTHER:その他） |
-| job_level | 職種レベル | ENUM |  | ○ |  | 職種の階層レベル（JUNIOR:ジュニア、SENIOR:シニア、LEAD:リード、MANAGER:マネージャー、DIRECTOR:ディレクター） |
-| description | 職種説明 | TEXT |  | ○ |  | 職種の詳細説明・役割・責任範囲 |
-| required_experience_years | 必要経験年数 | INTEGER |  | ○ |  | 職種に就くために必要な経験年数（目安） |
-| salary_grade_min | 給与グレード下限 | INTEGER |  | ○ |  | 職種の給与グレード下限値 |
-| salary_grade_max | 給与グレード上限 | INTEGER |  | ○ |  | 職種の給与グレード上限値 |
-| career_path | キャリアパス | TEXT |  | ○ |  | 職種からの一般的なキャリアパス・昇進ルート |
-| required_certifications | 必要資格 | TEXT |  | ○ |  | 職種に必要または推奨される資格（JSON形式で複数格納） |
-| required_skills | 必要スキル | TEXT |  | ○ |  | 職種に必要なスキル（JSON形式で複数格納） |
-| department_affinity | 部署親和性 | TEXT |  | ○ |  | 職種が配属されやすい部署（JSON形式で複数格納） |
-| remote_work_eligible | リモートワーク可否 | BOOLEAN |  | ○ | False | リモートワークが可能な職種かどうか |
-| travel_frequency | 出張頻度 | ENUM |  | ○ |  | 出張の頻度（NONE:なし、LOW:低、MEDIUM:中、HIGH:高） |
-| sort_order | 表示順序 | INTEGER |  | ○ | 0 | 職種一覧での表示順序 |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 職種が有効かどうか |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| job_type_code |  | VARCHAR |  | ○ |  |  |
+| job_type_name |  | VARCHAR |  | ○ |  |  |
+| job_type_name_en |  | VARCHAR |  | ○ |  |  |
+| job_category |  | ENUM |  | ○ |  |  |
+| job_level |  | ENUM |  | ○ |  |  |
+| description |  | TEXT |  | ○ |  |  |
+| required_experience_years |  | INTEGER |  | ○ |  |  |
+| salary_grade_min |  | INTEGER |  | ○ |  |  |
+| salary_grade_max |  | INTEGER |  | ○ |  |  |
+| career_path |  | TEXT |  | ○ |  |  |
+| required_certifications |  | TEXT |  | ○ |  |  |
+| required_skills |  | TEXT |  | ○ |  |  |
+| department_affinity |  | TEXT |  | ○ |  |  |
+| remote_work_eligible |  | BOOLEAN |  | ○ | False |  |
+| travel_frequency |  | ENUM |  | ○ |  |  |
+| sort_order |  | INTEGER |  | ○ | 0 |  |
+| is_active |  | BOOLEAN |  | ○ | True |  |
+| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
+| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_job_type_code | job_type_code | ○ | 職種コード検索用（一意） |
-| idx_job_type_name | job_type_name | × | 職種名検索用 |
-| idx_job_category | job_category | × | 職種カテゴリ検索用 |
-| idx_job_level | job_level | × | 職種レベル検索用 |
-| idx_category_level | job_category, job_level | × | カテゴリ・レベル複合検索用 |
-| idx_remote_eligible | remote_work_eligible, is_active | × | リモートワーク可能職種検索用 |
-| idx_sort_order | sort_order | × | 表示順序検索用 |
+| idx_job_type_code | job_type_code | ○ |  |
+| idx_job_type_name | job_type_name | × |  |
+| idx_job_category | job_category | × |  |
+| idx_job_level | job_level | × |  |
+| idx_category_level | job_category, job_level | × |  |
+| idx_remote_eligible | remote_work_eligible, is_active | × |  |
+| idx_sort_order | sort_order | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_job_type_code | UNIQUE |  | 職種コード一意制約 |
-| chk_job_category | CHECK | job_category IN ('ENGINEERING', 'MANAGEMENT', 'SALES', 'SUPPORT', 'OTHER') | 職種カテゴリ値チェック制約 |
-| chk_job_level | CHECK | job_level IN ('JUNIOR', 'SENIOR', 'LEAD', 'MANAGER', 'DIRECTOR') | 職種レベル値チェック制約 |
-| chk_travel_frequency | CHECK | travel_frequency IN ('NONE', 'LOW', 'MEDIUM', 'HIGH') | 出張頻度値チェック制約 |
-| chk_experience_years | CHECK | required_experience_years IS NULL OR required_experience_years >= 0 | 必要経験年数非負数チェック制約 |
-| chk_salary_grade | CHECK | salary_grade_min IS NULL OR salary_grade_max IS NULL OR salary_grade_min <= salary_grade_max | 給与グレード範囲チェック制約 |
+| uk_job_type_code | UNIQUE |  | job_type_code一意制約 |
+| chk_job_type_code | CHECK | job_type_code IN (...) | job_type_code値チェック制約 |
+| chk_job_type_name | CHECK | job_type_name IN (...) | job_type_name値チェック制約 |
+| chk_job_type_name_en | CHECK | job_type_name_en IN (...) | job_type_name_en値チェック制約 |
 
 ## サンプルデータ
 

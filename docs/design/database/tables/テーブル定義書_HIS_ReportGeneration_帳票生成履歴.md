@@ -7,78 +7,65 @@
 | テーブル名 | HIS_ReportGeneration |
 | 論理名 | 帳票生成履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-05 23:01:00 |
+| 生成日時 | 2025-06-21 17:20:34 |
 
 ## 概要
 
 HIS_ReportGeneration（帳票生成履歴）は、システムで生成された帳票・レポートの履歴を管理するテーブルです。
-
 主な目的：
 - 帳票生成の履歴管理
 - 生成成功・失敗の記録
 - 帳票ファイルの管理
 - 生成パフォーマンスの監視
 - 帳票利用状況の分析
-
 このテーブルは、帳票・レポート機能において生成状況の把握と品質向上を支える重要な履歴データです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| template_id | テンプレートID | VARCHAR | 50 | ○ |  | 使用された帳票テンプレートのID（MST_ReportTemplateへの参照） |
-| requested_by | 要求者 | VARCHAR | 50 | ○ |  | 帳票生成を要求したユーザーID |
-| report_title | 帳票タイトル | VARCHAR | 200 | ○ |  | 生成された帳票のタイトル |
-| report_category | 帳票カテゴリ | ENUM |  | ○ |  | 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析） |
-| output_format | 出力形式 | ENUM |  | ○ |  | 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML） |
-| generation_status | 生成状態 | ENUM |  | ○ |  | 生成の状態（PENDING:待機中、PROCESSING:処理中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル） |
-| parameters | パラメータ | TEXT |  | ○ |  | 帳票生成時のパラメータ（JSON形式） |
-| file_path | ファイルパス | VARCHAR | 500 | ○ |  | 生成された帳票ファイルのパス |
-| file_size | ファイルサイズ | BIGINT |  | ○ |  | 生成された帳票ファイルのサイズ（バイト） |
-| download_count | ダウンロード回数 | INTEGER |  | ○ | 0 | 帳票がダウンロードされた回数 |
-| last_downloaded_at | 最終ダウンロード日時 | TIMESTAMP |  | ○ |  | 帳票が最後にダウンロードされた日時 |
-| requested_at | 要求日時 | TIMESTAMP |  | ○ |  | 帳票生成が要求された日時 |
-| started_at | 開始日時 | TIMESTAMP |  | ○ |  | 帳票生成処理が開始された日時 |
-| completed_at | 完了日時 | TIMESTAMP |  | ○ |  | 帳票生成処理が完了した日時 |
-| processing_time_ms | 処理時間 | INTEGER |  | ○ |  | 帳票生成にかかった時間（ミリ秒） |
-| error_message | エラーメッセージ | TEXT |  | ○ |  | 生成失敗時のエラーメッセージ |
-| error_details | エラー詳細 | TEXT |  | ○ |  | 生成失敗時のエラー詳細情報（JSON形式） |
-| expires_at | 有効期限 | TIMESTAMP |  | ○ |  | 生成された帳票ファイルの有効期限 |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| id |  | VARCHAR |  | ○ |  |  |
+| tenant_id |  | VARCHAR |  | ○ |  |  |
+| template_id |  | VARCHAR |  | ○ |  |  |
+| requested_by |  | VARCHAR |  | ○ |  |  |
+| report_title |  | VARCHAR |  | ○ |  |  |
+| report_category |  | ENUM |  | ○ |  |  |
+| output_format |  | ENUM |  | ○ |  |  |
+| generation_status |  | ENUM |  | ○ |  |  |
+| parameters |  | TEXT |  | ○ |  |  |
+| file_path |  | VARCHAR |  | ○ |  |  |
+| file_size |  | BIGINT |  | ○ |  |  |
+| download_count |  | INTEGER |  | ○ | 0 |  |
+| last_downloaded_at |  | TIMESTAMP |  | ○ |  |  |
+| requested_at |  | TIMESTAMP |  | ○ |  |  |
+| started_at |  | TIMESTAMP |  | ○ |  |  |
+| completed_at |  | TIMESTAMP |  | ○ |  |  |
+| processing_time_ms |  | INTEGER |  | ○ |  |  |
+| error_message |  | TEXT |  | ○ |  |  |
+| error_details |  | TEXT |  | ○ |  |  |
+| expires_at |  | TIMESTAMP |  | ○ |  |  |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_report_generation_template | template_id | × | テンプレートID別検索用 |
-| idx_report_generation_requester | requested_by | × | 要求者別検索用 |
-| idx_report_generation_tenant_status | tenant_id, generation_status | × | テナント別生成状態検索用 |
-| idx_report_generation_category | report_category | × | 帳票カテゴリ別検索用 |
-| idx_report_generation_format | output_format | × | 出力形式別検索用 |
-| idx_report_generation_requested | requested_at | × | 要求日時検索用 |
-| idx_report_generation_completed | completed_at | × | 完了日時検索用 |
-| idx_report_generation_expires | expires_at | × | 有効期限検索用 |
-
-## 外部キー
-
-| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
-|--------|--------|--------------|------------|--------|--------|------|
-| fk_report_generation_template | template_id | MST_ReportTemplate | id | CASCADE | RESTRICT | 帳票テンプレートへの外部キー |
+| idx_report_generation_template | template_id | × |  |
+| idx_report_generation_requester | requested_by | × |  |
+| idx_report_generation_tenant_status | tenant_id, generation_status | × |  |
+| idx_report_generation_category | report_category | × |  |
+| idx_report_generation_format | output_format | × |  |
+| idx_report_generation_requested | requested_at | × |  |
+| idx_report_generation_completed | completed_at | × |  |
+| idx_report_generation_expires | expires_at | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_report_generation_category | CHECK | report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS') | 帳票カテゴリ値チェック制約 |
-| chk_report_generation_format | CHECK | output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML') | 出力形式値チェック制約 |
-| chk_report_generation_status | CHECK | generation_status IN ('PENDING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELLED') | 生成状態値チェック制約 |
-| chk_report_generation_file_size_positive | CHECK | file_size IS NULL OR file_size >= 0 | ファイルサイズ正数チェック制約 |
-| chk_report_generation_download_count_positive | CHECK | download_count >= 0 | ダウンロード回数正数チェック制約 |
-| chk_report_generation_processing_time_positive | CHECK | processing_time_ms IS NULL OR processing_time_ms >= 0 | 処理時間正数チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_generation_status | CHECK | generation_status IN (...) | generation_status値チェック制約 |
 
 ## サンプルデータ
 
