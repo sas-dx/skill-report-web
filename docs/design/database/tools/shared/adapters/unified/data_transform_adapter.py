@@ -678,16 +678,55 @@ class UnifiedDataTransformAdapter:
         if not table_name:
             return False
         
-        # プレフィックスチェック
-        valid_prefixes = ['MST_', 'TRN_', 'HIS_', 'SYS_', 'WRK_', 'IF_']
-        if not any(table_name.startswith(prefix) for prefix in valid_prefixes):
+        # 基本的な文字チェック（英数字とアンダースコアのみ）
+        import re
+        if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', table_name):
             return False
         
-        # 大文字チェック
+        # 長さチェック（最大64文字）
+        if len(table_name) > 64:
+            return False
+        
+        # プレフィックスチェック（必須）
+        valid_prefixes = ['MST_', 'TRN_', 'HIS_', 'SYS_', 'WRK_', 'IF_']
+        has_valid_prefix = any(table_name.upper().startswith(prefix) for prefix in valid_prefixes)
+        
+        if not has_valid_prefix:
+            return False
+        
+        # プレフィックス後の部分チェック
+        for prefix in valid_prefixes:
+            if table_name.upper().startswith(prefix):
+                suffix = table_name[len(prefix):]
+                # プレフィックス後に何もない場合は無効
+                if not suffix:
+                    return False
+                # プレフィックス後の部分が有効な識別子かチェック
+                if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', suffix):
+                    return False
+                break
+        
+        # 大文字・小文字混在チェック（MST_Employee形式を想定）
+        # 完全に大文字または適切なキャメルケースのみ許可
         if table_name != table_name.upper():
+            # キャメルケースの場合、プレフィックス部分は大文字である必要がある
+            for prefix in valid_prefixes:
+                if table_name.startswith(prefix):
+                    return True
             return False
         
         return True
+    def validate_table_name(self, table_name: str) -> bool:
+        """
+        テーブル名のバリデーション（テスト用公開メソッド）
+        
+        Args:
+            table_name: テーブル名
+            
+        Returns:
+            bool: 有効なテーブル名かどうか
+        """
+        return self._validate_table_name(table_name)
     
     def _normalize_data_type(self, data_type: str) -> str:
         """

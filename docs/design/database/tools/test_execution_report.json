@@ -1,0 +1,47 @@
+{
+  "test_execution": {
+    "start_time": 1750490122.1793234,
+    "end_time": 1750490122.8248148,
+    "duration": 0.645491361618042,
+    "timestamp": "2025-06-21 16:15:22"
+  },
+  "results": {
+    "ユニットテスト - 整合性チェック": {
+      "status": "success",
+      "tests_run": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ユニットテスト - 共有コンポーネント": {
+      "status": "success",
+      "tests_run": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "統合テスト": {
+      "status": "success",
+      "tests_run": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "パフォーマンステスト": {
+      "status": "skipped",
+      "tests_run": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "reason": "psutil not available"
+    }
+  },
+  "summary": {
+    "total_tests": 46,
+    "total_failures": 0,
+    "total_errors": 0,
+    "total_skipped": 1,
+    "success_rate": 100.0,
+    "overall_status": "success"
+  }
+}

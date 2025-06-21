@@ -22,6 +22,7 @@ from pathlib import Path
 import yaml
 import time
 import json
+import pytest
 
 # テスト対象のインポート
 import sys
@@ -34,6 +35,7 @@ from shared.core.exceptions import ValidationError, ParsingError
 # from database_consistency_checker.__main__ import main as consistency_checker_main
 
 
+@pytest.mark.integration
 class TestToolIntegration(unittest.TestCase):
     """ツール統合テストのメインクラス"""
     

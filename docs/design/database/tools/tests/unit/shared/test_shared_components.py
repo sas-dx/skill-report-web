@@ -21,6 +21,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 import yaml
 import json
+import pytest
 
 # テスト対象のインポート
 import sys
@@ -41,6 +42,7 @@ from shared.adapters.unified.data_transform_adapter import UnifiedDataTransformA
 from shared.utils.file_utils import FileManager, BackupManager
 
 
+@pytest.mark.unit
 class TestDatabaseToolsConfig(unittest.TestCase):
     """設定管理のテスト"""
     
@@ -114,6 +116,7 @@ class TestDatabaseToolsConfig(unittest.TestCase):
         self.assertEqual(sample_path, expected_sample)
 
 
+@pytest.mark.unit
 class TestLogger(unittest.TestCase):
     """ログ機能のテスト"""
     
@@ -143,6 +146,7 @@ class TestLogger(unittest.TestCase):
         self.assertTrue(True)  # ログ出力自体のテスト
 
 
+@pytest.mark.unit
 class TestYAMLParserAdvanced(unittest.TestCase):
     """YAML解析機能の高度なテスト"""
     
@@ -237,6 +241,7 @@ class TestYAMLParserAdvanced(unittest.TestCase):
         self.assertEqual(fk2.on_update, 'RESTRICT')
 
 
+@pytest.mark.unit
 class TestDDLParserAdvanced(unittest.TestCase):
     """DDL解析機能の高度なテスト"""
     
@@ -340,6 +345,7 @@ CREATE TABLE MST_Test (
         self.assertIn('description', column_names)
 
 
+@pytest.mark.unit
 class TestFilesystemAdapter(unittest.TestCase):
     """ファイルシステムアダプターのテスト"""
     
@@ -381,14 +387,16 @@ class TestFilesystemAdapter(unittest.TestCase):
         for file_path in test_files:
             self.adapter.write_text_file(file_path, 'test content')
         
-        # YAML ファイル一覧取得
-        yaml_files = self.adapter.list_files('table-details', '*.yaml')
-        self.assertEqual(len(yaml_files), 2)
-        self.assertTrue(any('MST_Employee_details.yaml' in f for f in yaml_files))
+        # ファイル一覧取得（パターンマッチング）
+        yaml_files = self.adapter.list_files('*.yaml', 'table-details')
+        ddl_files = self.adapter.list_files('*.sql', 'ddl')
         
-        # DDL ファイル一覧取得
-        ddl_files = self.adapter.list_files('ddl', '*.sql')
+        self.assertEqual(len(yaml_files), 2)
         self.assertEqual(len(ddl_files), 2)
+        
+        # ファイル名の確認
+        self.assertTrue(any('MST_Employee_details.yaml' in f for f in yaml_files))
+        self.assertTrue(any('MST_Department_details.yaml' in f for f in yaml_files))
     
     def test_file_operations_with_encoding(self):
         """エンコーディングを考慮したファイル操作のテスト"""
@@ -424,6 +432,7 @@ class TestFilesystemAdapter(unittest.TestCase):
         self.assertFalse(self.adapter.directory_exists('non_existent'))
 
 
+@pytest.mark.unit
 class TestDataTransformAdapter(unittest.TestCase):
     """データ変換アダプターのテスト"""
     
@@ -515,6 +524,7 @@ class TestDataTransformAdapter(unittest.TestCase):
             self.assertFalse(result, f"Invalid name accepted: {name}")
 
 
+@pytest.mark.unit
 class TestFileManager(unittest.TestCase):
     """ファイルマネージャーのテスト"""
     
@@ -605,6 +615,7 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(len(all_files), 3)
 
 
+@pytest.mark.unit
 class TestErrorHandlingIntegration(unittest.TestCase):
     """エラーハンドリング統合テスト"""
     
