@@ -1,4 +1,4 @@
-from shared.core.config import UnifiedConfig as Config
+from shared.core.config import DatabaseToolsConfig as Config
 from .logger import ConsistencyLogger
 from shared.core.models import CheckResult, CheckStatus, ReportSummary
 from .result_processor import ResultProcessor

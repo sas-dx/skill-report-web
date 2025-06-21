@@ -1,5 +1,5 @@
 -- MST_Employee (社員基本情報)
--- 生成日時: 2025-06-11 01:49:39
+-- 生成日時: 2025-06-21 13:04:10
 -- カテゴリ: マスタ系
 -- 要求仕様ID: PRO.1-BASE.1
 
@@ -21,7 +21,7 @@ CREATE TABLE MST_Employee (
     employee_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_deleted BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id)
 );
 

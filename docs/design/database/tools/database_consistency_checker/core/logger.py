@@ -4,7 +4,7 @@
 import sys
 from datetime import datetime
 from typing import Dict, List, Optional
-from .models import CheckSeverity
+from shared.core.models import CheckStatus, CheckSeverity
 
 
 class ConsistencyLogger:
@@ -12,10 +12,10 @@ class ConsistencyLogger:
     
     # カラーコード
     COLORS = {
-        CheckSeverity.SUCCESS: '\033[92m',  # 緑
+        CheckSeverity.INFO: '\033[94m',     # 青
         CheckSeverity.WARNING: '\033[93m',  # 黄
         CheckSeverity.ERROR: '\033[91m',    # 赤
-        CheckSeverity.INFO: '\033[94m',     # 青
+        CheckSeverity.CRITICAL: '\033[91m', # 赤
         'RESET': '\033[0m',
         'BOLD': '\033[1m',
         'HEADER': '\033[95m'  # マゼンタ
@@ -23,10 +23,10 @@ class ConsistencyLogger:
     
     # 絵文字
     ICONS = {
-        CheckSeverity.SUCCESS: '✅',
+        CheckSeverity.INFO: 'ℹ️',
         CheckSeverity.WARNING: '⚠️',
         CheckSeverity.ERROR: '❌',
-        CheckSeverity.INFO: 'ℹ️'
+        CheckSeverity.CRITICAL: '🚨'
     }
     
     def __init__(self, enable_color: bool = True, verbose: bool = False):
@@ -41,10 +41,10 @@ class ConsistencyLogger:
         self.verbose = verbose
         self.log_history: List[Dict] = []
         self.stats = {
-            CheckSeverity.SUCCESS: 0,
+            CheckSeverity.INFO: 0,
             CheckSeverity.WARNING: 0,
             CheckSeverity.ERROR: 0,
-            CheckSeverity.INFO: 0
+            CheckSeverity.CRITICAL: 0
         }
     
     def _colorize(self, text: str, severity: CheckSeverity) -> str:
@@ -109,7 +109,7 @@ class ConsistencyLogger:
         
         colored_message = self._colorize(formatted_message, severity)
         
-        if self.verbose or severity in [CheckSeverity.ERROR, CheckSeverity.WARNING]:
+        if self.verbose or severity in [CheckSeverity.ERROR, CheckSeverity.WARNING, CheckSeverity.CRITICAL]:
             print(f"[{timestamp}] {colored_message}")
             
             # 詳細情報の出力
@@ -117,8 +117,8 @@ class ConsistencyLogger:
                 for key, value in details.items():
                     detail_text = f"  └─ {key}: {value}"
                     print(self._colorize(detail_text, CheckSeverity.INFO))
-        elif severity == CheckSeverity.SUCCESS and not self.verbose:
-            # 成功時は簡潔に表示
+        elif severity == CheckSeverity.INFO and not self.verbose:
+            # 情報時は簡潔に表示
             print(colored_message)
     
     def success(self, message: str, table_name: str = "", details: Optional[Dict] = None):
@@ -213,8 +213,8 @@ class ConsistencyLogger:
         """ログ履歴をクリア"""
         self.log_history.clear()
         self.stats = {
-            CheckSeverity.SUCCESS: 0,
+            CheckSeverity.INFO: 0,
             CheckSeverity.WARNING: 0,
             CheckSeverity.ERROR: 0,
-            CheckSeverity.INFO: 0
+            CheckSeverity.CRITICAL: 0
         }
