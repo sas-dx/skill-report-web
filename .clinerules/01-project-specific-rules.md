@@ -461,6 +461,80 @@ npm run deploy:production
 - [ ] パフォーマンス要件を満たしている
 - [ ] アクセシビリティ要件を満たしている
 
+## データベース設計（プロジェクト固有）
+
+### PostgreSQL + Prisma実装詳細
+
+#### テーブル命名規則（プロジェクト固有）
+- **MST_**: マスタ系テーブル（社員、部署、スキル階層等）
+- **TRN_**: トランザクション系テーブル（スキル情報、目標進捗、案件実績等）
+- **HIS_**: 履歴系テーブル（監査ログ、操作履歴等）
+- **SYS_**: システム系テーブル（検索インデックス、システムログ等）
+- **WRK_**: ワーク系テーブル（一括登録ジョブログ、バッチワーク等）
+
+#### 現在の実装状況（シングルテナント）
+- **実装済みテーブル**: 42テーブル（MST_Employee, MST_Department等）
+- **Prismaスキーマ**: `src/database/prisma/schema.prisma`で管理
+- **シードデータ**: 自動生成ツールによるテストデータ作成
+- **DDL管理**: `docs/design/database/ddl/`で自動生成
+
+#### 統合ツールエコシステム（プロジェクト固有）
+
+##### 利用可能なツール
+```bash
+# 作業ディレクトリ
+cd docs/design/database/tools
+
+# YAML検証（必須セクション検証）
+python3 yaml_validator/validate_yaml_format.py --all --verbose
+
+# テーブル生成（DDL・定義書・サンプルデータ）
+python3 -m table_generator --table MST_Employee --verbose
+
+# 整合性チェック（全ファイル間の整合性確認）
+python3 database_consistency_checker/run_check.py --verbose
+
+# サンプルデータINSERT文生成
+python3 database_consistency_checker/sample_data_generator.py --verbose
+```
+
+##### 必須セクション（🔴 絶対省略禁止）
+全YAMLファイルで以下のセクションは必須：
+- `revision_history`: 改版履歴（最低1エントリ）
+- `overview`: テーブル概要（最低50文字）
+- `notes`: 特記事項（最低3項目）
+- `business_rules`: 業務ルール（最低3項目）
+
+#### 将来のマルチテナント化対応
+- **テナントID追加**: 全テーブルにtenant_idカラム追加予定
+- **データ分離**: テナント別完全分離設計
+- **段階的移行**: 現在のシングルテナント完成後に実装
+
+### パフォーマンス要件（プロジェクト固有）
+- **API〜UI**: 1秒以内のレスポンス時間
+- **同時接続**: 100ユーザー同時利用対応
+- **データ量**: 1000ユーザー×5年分のデータ処理
+- **可用性**: 99.5%以上を維持
+
+## 関連ドキュメント
+
+### 内部ドキュメント
+- **統合開発ルール**: `00-core-rules.md`
+- **コーディング規約**: `02-coding-standards.md`
+- **フロントエンド設計**: `03-frontend-guidelines.md`
+- **バックエンド設計**: `04-backend-guidelines.md`
+- **Git・バージョン管理**: `05-git-workflow.md`
+- **マルチテナント開発**: `06-multitenant-development.md`
+- **仕様書準拠・破壊的修正防止**: `07-specification-compliance.md`
+- **データベース設計ガイドライン**: `08-database-design-guidelines.md`
+- **現在の実装状況**: `09-current-implementation-status.md`
+
+### 外部参照
+- **Next.js公式ドキュメント**: https://nextjs.org/docs
+- **TypeScript公式ドキュメント**: https://www.typescriptlang.org/docs/
+- **PostgreSQL公式ドキュメント**: https://www.postgresql.org/docs/
+- **Prisma公式ドキュメント**: https://www.prisma.io/docs/
+
 ---
 
 このプロジェクト固有ルールに従って、年間スキル報告書WEB化PJTの開発を効率的かつ高品質に進めてください。
