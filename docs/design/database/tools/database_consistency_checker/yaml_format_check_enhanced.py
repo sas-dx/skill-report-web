@@ -1,380 +1,406 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-YAMLフォーマット検証統合モジュール（改良版）
+YAML形式検証機能（統合版）
 
-database_consistency_checkerにYAMLフォーマット検証機能を統合し、
-サンプルデータINSERT文生成機能も含めた包括的な検証ツールです。
+database_consistency_checkerに統合されたYAML形式検証機能です。
+yaml_validatorから移行された機能を含みます。
 
-改良点：
-- サンプルデータ生成機能の統合
-- より詳細な検証レポート
-- 統合的なエラーハンドリング
-- 実行順序の最適化
+要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
+実装日: 2025-06-21
+実装者: AI駆動開発チーム
+
+機能：
+- YAML形式の検証
+- 必須セクションの存在確認
+- サンプルデータ生成統合
+- 整合性チェックとの連携
 """
 
-import sys
 import os
-import argparse
+import sys
 import logging
-import json
-from pathlib import Path
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from pathlib import Path
 
-# 基本パス
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
-YAML_VALIDATOR_DIR = os.path.join(BASE_DIR, 'tools/yaml_validator')
-sys.path.append(YAML_VALIDATOR_DIR)
+# プロジェクトルートディレクトリを取得
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../../../.."))
 
-# モジュールインポート
+# パスを追加
+sys.path.append(os.path.join(PROJECT_ROOT, "docs/design/database/tools"))
+
 try:
-    from validate_yaml_format import (
-        load_yaml, validate_yaml_structure, TEMPLATE_PATH, TABLE_DETAILS_DIR
-    )
-    yaml_validator_available = True
+    from shared.checkers.yaml_format_validator import YAMLFormatValidator
+    from shared.generators.sample_data_generator import SampleDataGenerator
+    from shared.core.models import TableDefinition
 except ImportError as e:
-    yaml_validator_available = False
-    print(f"警告: yaml_validatorモジュールが見つかりません。YAMLフォーマット検証は無効になります。")
-    print(f"詳細: {e}")
-    print(f"検索パス: {YAML_VALIDATOR_DIR}")
+    print(f"モジュールのインポートに失敗しました: {e}")
+    YAMLFormatValidator = None
+    SampleDataGenerator = None
+    TableDefinition = None
 
-# サンプルデータ生成モジュール
-try:
-    from sample_data_generator_enhanced import EnhancedSampleDataGenerator
-    sample_generator_available = True
-except ImportError:
-    sample_generator_available = False
-    print("警告: sample_data_generator_enhancedモジュールが見つかりません。サンプルデータ生成は無効になります。")
+import yaml
 
 
-class IntegratedValidator:
-    """統合検証クラス"""
+class YAMLFormatCheckEnhanced:
+    """YAML形式検証機能（統合版）"""
     
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
-        self.logger = self._setup_logger()
-    
-    def _setup_logger(self) -> logging.Logger:
-        """ログ設定"""
-        level = logging.DEBUG if self.verbose else logging.INFO
-        logging.basicConfig(
-            level=level,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        return logging.getLogger(__name__)
-    
-    def run_comprehensive_validation(self, tables: Optional[List[str]] = None) -> Dict[str, Any]:
-        """包括的な検証を実行"""
-        results = {
-            'timestamp': datetime.now().isoformat(),
-            'success': True,
-            'yaml_validation': {},
-            'sample_data_generation': {},
-            'summary': {},
-            'errors': [],
-            'warnings': []
-        }
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self._setup_logging()
         
-        self.logger.info("=== 包括的検証開始 ===")
-        
-        # 1. YAMLフォーマット検証
-        if yaml_validator_available:
-            self.logger.info("YAMLフォーマット検証を実行中...")
-            yaml_results = self._validate_yaml_format(tables)
-            results['yaml_validation'] = yaml_results
-            
-            if not yaml_results.get('success', False):
-                results['success'] = False
-                results['errors'].extend(yaml_results.get('errors', []))
+        # YAML検証機能
+        if YAMLFormatValidator:
+            self.yaml_validator = YAMLFormatValidator(verbose=verbose)
         else:
-            results['warnings'].append("YAMLフォーマット検証がスキップされました（モジュール不足）")
+            self.yaml_validator = None
+            self.logger.warning("YAMLFormatValidatorが利用できません")
         
-        # 2. サンプルデータ生成検証
-        if sample_generator_available:
-            self.logger.info("サンプルデータ生成検証を実行中...")
-            sample_results = self._validate_sample_data_generation(tables)
-            results['sample_data_generation'] = sample_results
-            
-            if not sample_results.get('success', False):
-                results['warnings'].extend(sample_results.get('errors', []))
+        # サンプルデータ生成機能
+        if SampleDataGenerator:
+            config = {'verbose': verbose}
+            self.sample_data_generator = SampleDataGenerator(config)
         else:
-            results['warnings'].append("サンプルデータ生成検証がスキップされました（モジュール不足）")
-        
-        # 3. 統合サマリー生成
-        results['summary'] = self._generate_summary(results)
-        
-        self.logger.info("=== 包括的検証完了 ===")
-        
-        return results
+            self.sample_data_generator = None
+            self.logger.warning("SampleDataGeneratorが利用できません")
     
-    def _validate_yaml_format(self, tables: Optional[List[str]] = None) -> Dict[str, Any]:
-        """YAMLフォーマット検証"""
-        if not yaml_validator_available:
-            return {
-                'success': False,
-                'error': 'yaml_validatorモジュールが利用できません',
-                'results': []
-            }
-        
-        # テンプレートの読み込み
-        template_data = load_yaml(TEMPLATE_PATH)
-        if not template_data:
-            return {
-                'success': False,
-                'error': 'テンプレートファイルの読み込みに失敗しました',
-                'results': []
-            }
-        
-        # 検証対象ファイルの特定
-        target_files = self._get_target_files(tables)
-        
-        # 検証実行
-        results = []
-        for file_path in target_files:
-            yaml_data = load_yaml(file_path)
-            if yaml_data:
-                result = validate_yaml_structure(yaml_data, template_data, file_path, self.verbose)
-                results.append(result)
-        
-        # 結果サマリー
-        valid_count = sum(1 for r in results if r['valid'])
-        invalid_count = len(results) - valid_count
-        warning_count = sum(1 for r in results if r['warnings'])
-        
-        return {
-            'success': invalid_count == 0,
-            'total': len(results),
-            'valid': valid_count,
-            'invalid': invalid_count,
-            'with_warnings': warning_count,
-            'results': results,
-            'errors': [f"{r['file']}: {', '.join(r['errors'])}" for r in results if not r['valid']]
-        }
+    def _setup_logging(self):
+        """ログ設定のセットアップ"""
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO if self.verbose else logging.WARNING)
     
-    def _validate_sample_data_generation(self, tables: Optional[List[str]] = None) -> Dict[str, Any]:
-        """サンプルデータ生成検証"""
-        if not sample_generator_available:
+    def is_available(self) -> bool:
+        """機能が利用可能かチェック"""
+        return self.yaml_validator is not None
+    
+    def validate_yaml_format(self, table_names: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        YAML形式検証
+        
+        Args:
+            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
+            
+        Returns:
+            Dict[str, Any]: 検証結果
+        """
+        if not self.is_available():
             return {
                 'success': False,
-                'error': 'sample_data_generator_enhancedモジュールが利用できません',
-                'results': {}
+                'error': 'YAMLFormatValidatorが利用できません',
+                'validation_available': False
             }
         
         try:
-            generator = EnhancedSampleDataGenerator(self.verbose)
-            results = generator.generate_sample_data_sql(tables)
-            return results
+            if table_names:
+                # 指定テーブルの検証
+                results = {}
+                for table_name in table_names:
+                    results[table_name] = self.yaml_validator.validate_table(table_name)
+                
+                result = {
+                    'success': all(r['success'] for r in results.values()),
+                    'total_files': len(table_names),
+                    'valid_files': sum(1 for r in results.values() if r['success']),
+                    'invalid_files': sum(1 for r in results.values() if not r['success']),
+                    'files': results,
+                    'summary_errors': [],
+                    'summary_warnings': []
+                }
+                
+                for table_name, table_result in results.items():
+                    result['summary_errors'].extend([f"{table_name}: {error}" for error in table_result['errors']])
+                    result['summary_warnings'].extend([f"{table_name}: {warning}" for warning in table_result['warnings']])
+            else:
+                # 全テーブルの検証
+                result = self.yaml_validator.validate_all_tables()
+            
+            result['validation_available'] = True
+            
+            if self.verbose:
+                self.logger.info(f"YAML形式検証完了: {result['valid_files']}/{result['total_files']}ファイル成功")
+            
+            return result
+            
         except Exception as e:
+            error_msg = f"YAML形式検証に失敗: {str(e)}"
+            self.logger.error(error_msg)
+            
             return {
                 'success': False,
-                'error': f'サンプルデータ生成中にエラーが発生しました: {str(e)}',
-                'results': {}
+                'error': error_msg,
+                'validation_available': True,
+                'total_files': 0,
+                'valid_files': 0,
+                'invalid_files': 0,
+                'summary_errors': [error_msg],
+                'summary_warnings': []
             }
     
-    def _get_target_files(self, tables: Optional[List[str]] = None) -> List[str]:
-        """検証対象ファイルを取得"""
-        target_files = []
+    def generate_sample_data(self, table_names: Optional[List[str]] = None, 
+                           output_dir: Optional[str] = None) -> Dict[str, Any]:
+        """
+        サンプルデータ生成
         
-        if tables:
-            for table in tables:
-                file_path = os.path.join(TABLE_DETAILS_DIR, f"{table}_details.yaml")
-                if os.path.exists(file_path):
-                    target_files.append(file_path)
-                else:
-                    self.logger.warning(f"{file_path} が見つかりません")
-        else:
-            for filename in os.listdir(TABLE_DETAILS_DIR):
-                if filename.endswith('_details.yaml') and filename != 'MST_TEMPLATE_details.yaml':
-                    target_files.append(os.path.join(TABLE_DETAILS_DIR, filename))
+        Args:
+            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
+            output_dir: 出力ディレクトリ（Noneの場合は保存しない）
+            
+        Returns:
+            Dict[str, Any]: 生成結果
+        """
+        if not self.sample_data_generator:
+            return {
+                'success': False,
+                'error': 'SampleDataGeneratorが利用できません',
+                'generation_available': False
+            }
         
-        return target_files
+        try:
+            # サンプルデータ生成
+            if table_names:
+                generation_result = self.sample_data_generator.generate_sample_data_sql(table_names)
+            else:
+                generation_result = self.sample_data_generator.generate_sample_data_sql()
+            
+            # ファイル保存
+            if output_dir and generation_result.get('success', False):
+                save_result = self._save_sample_data_sql(generation_result, output_dir)
+                generation_result['save_result'] = save_result
+                
+                if not save_result.get('success', False):
+                    generation_result['success'] = False
+                    generation_result.setdefault('errors', []).extend(save_result.get('errors', []))
+            
+            generation_result['generation_available'] = True
+            
+            if self.verbose:
+                self.logger.info(f"サンプルデータ生成完了: {generation_result.get('generated_tables', 0)}/{generation_result.get('total_tables', 0)}テーブル")
+            
+            return generation_result
+            
+        except Exception as e:
+            error_msg = f"サンプルデータ生成に失敗: {str(e)}"
+            self.logger.error(error_msg)
+            
+            return {
+                'success': False,
+                'error': error_msg,
+                'generation_available': True,
+                'total_tables': 0,
+                'generated_tables': 0,
+                'total_records': 0,
+                'errors': [error_msg]
+            }
     
-    def _generate_summary(self, results: Dict[str, Any]) -> Dict[str, Any]:
-        """統合サマリーを生成"""
-        summary = {
-            'overall_success': results['success'],
-            'total_errors': len(results['errors']),
-            'total_warnings': len(results['warnings']),
-            'yaml_validation_status': 'success' if results['yaml_validation'].get('success', False) else 'failed',
-            'sample_data_generation_status': 'success' if results['sample_data_generation'].get('success', False) else 'failed',
-            'recommendations': []
+    def _save_sample_data_sql(self, result: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
+        """
+        サンプルデータSQLをファイルに保存
+        
+        Args:
+            result: generate_sample_data_sqlの結果
+            output_dir: 出力ディレクトリ
+            
+        Returns:
+            Dict[str, Any]: 保存結果
+        """
+        save_result = {
+            'success': True,
+            'saved_files': [],
+            'errors': []
         }
         
-        # 推奨事項の生成
-        if results['yaml_validation'].get('invalid', 0) > 0:
-            summary['recommendations'].append("YAMLフォーマットエラーを修正してください")
+        try:
+            output_path = Path(output_dir)
+            output_path.mkdir(parents=True, exist_ok=True)
+            
+            if not result.get('success', False):
+                save_result['success'] = False
+                save_result['errors'].append('生成結果が失敗状態です')
+                return save_result
+            
+            # 統合ファイルの保存
+            try:
+                all_file_path = output_path / "all_sample_data.sql"
+                
+                sql_lines = []
+                sql_lines.append("-- 全テーブル サンプルデータ INSERT文")
+                sql_lines.append(f"-- 生成日時: {result.get('timestamp', 'unknown')}")
+                sql_lines.append(f"-- 対象テーブル数: {result.get('total_tables', 0)}")
+                sql_lines.append(f"-- 生成テーブル数: {result.get('generated_tables', 0)}")
+                sql_lines.append(f"-- 総レコード数: {result.get('total_records', 0)}")
+                sql_lines.append("")
+                sql_lines.append("-- 実行順序:")
+                for i, table_name in enumerate(result.get('execution_order', []), 1):
+                    sql_lines.append(f"-- {i:2d}. {table_name}")
+                sql_lines.append("")
+                sql_lines.append("BEGIN;")
+                sql_lines.append("")
+                
+                # 実行順序に従ってINSERT文を追加
+                for table_name in result.get('execution_order', []):
+                    if table_name in result.get('tables', {}):
+                        table_data = result['tables'][table_name]
+                        sql_lines.append(f"-- {table_name} ({table_data.get('records', 0)}件)")
+                        for stmt in table_data.get('statements', []):
+                            sql_lines.append(stmt)
+                        sql_lines.append("")
+                
+                sql_lines.append("COMMIT;")
+                sql_lines.append("")
+                sql_lines.append("-- 全テーブル サンプルデータ終了")
+                
+                # ファイルに書き込み
+                with open(all_file_path, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(sql_lines))
+                
+                save_result['saved_files'].append(str(all_file_path))
+                
+                if self.verbose:
+                    self.logger.info(f"統合サンプルデータファイル保存: {all_file_path}")
+            
+            except Exception as e:
+                error_msg = f"統合ファイルの保存に失敗: {str(e)}"
+                save_result['errors'].append(error_msg)
+                self.logger.error(error_msg)
+            
+            # エラーがある場合は失敗とする
+            if save_result['errors']:
+                save_result['success'] = False
         
-        if results['yaml_validation'].get('with_warnings', 0) > 0:
-            summary['recommendations'].append("YAML警告を確認し、必要に応じて修正してください")
+        except Exception as e:
+            save_result['success'] = False
+            save_result['errors'].append(f"ファイル保存処理に失敗: {str(e)}")
+            self.logger.error(f"ファイル保存処理に失敗: {e}")
         
-        if not results['sample_data_generation'].get('success', False):
-            summary['recommendations'].append("サンプルデータ生成エラーを確認してください")
-        
-        if results['sample_data_generation'].get('total_records', 0) == 0:
-            summary['recommendations'].append("サンプルデータが生成されていません。sample_dataセクションを確認してください")
-        
-        return summary
+        return save_result
     
-    def generate_report(self, results: Dict[str, Any], format_type: str = 'text') -> str:
-        """検証レポートを生成"""
-        if format_type == 'json':
-            return json.dumps(results, indent=2, ensure_ascii=False)
+    def validate_and_generate(self, table_names: Optional[List[str]] = None,
+                            output_dir: Optional[str] = None,
+                            generate_sample_data: bool = False) -> Dict[str, Any]:
+        """
+        検証とサンプルデータ生成の統合実行
         
-        elif format_type == 'markdown':
-            return self._generate_markdown_report(results)
+        Args:
+            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
+            output_dir: サンプルデータ出力ディレクトリ
+            generate_sample_data: サンプルデータ生成フラグ
+            
+        Returns:
+            Dict[str, Any]: 実行結果
+        """
+        result = {
+            'success': True,
+            'validation_result': {},
+            'sample_data_result': {},
+            'errors': []
+        }
         
-        else:  # text
-            return self._generate_text_report(results)
+        try:
+            # YAML検証
+            validation_result = self.validate_yaml_format(table_names)
+            result['validation_result'] = validation_result
+            
+            if not validation_result.get('success', False):
+                result['success'] = False
+                result['errors'].append('YAML検証に失敗しました')
+            
+            # サンプルデータ生成
+            if generate_sample_data:
+                sample_data_result = self.generate_sample_data(table_names, output_dir)
+                result['sample_data_result'] = sample_data_result
+                
+                if not sample_data_result.get('success', False):
+                    result['success'] = False
+                    result['errors'].extend(sample_data_result.get('errors', []))
+        
+        except Exception as e:
+            result['success'] = False
+            result['errors'].append(f"統合実行エラー: {str(e)}")
+            self.logger.error(f"統合実行エラー: {e}")
+        
+        return result
     
-    def _generate_text_report(self, results: Dict[str, Any]) -> str:
-        """テキスト形式のレポートを生成"""
-        report = []
-        report.append("=== 包括的検証レポート ===")
-        report.append(f"実行日時: {results['timestamp']}")
-        report.append(f"総合結果: {'成功' if results['success'] else '失敗'}")
-        report.append("")
+    def print_summary(self, result: Dict[str, Any]):
+        """結果サマリーの出力"""
+        print("=== YAML形式検証・サンプルデータ生成結果 ===")
         
-        # YAMLフォーマット検証結果
-        yaml_results = results.get('yaml_validation', {})
-        if yaml_results:
-            report.append("--- YAMLフォーマット検証 ---")
-            report.append(f"総ファイル数: {yaml_results.get('total', 0)}")
-            report.append(f"有効: {yaml_results.get('valid', 0)}")
-            report.append(f"無効: {yaml_results.get('invalid', 0)}")
-            report.append(f"警告あり: {yaml_results.get('with_warnings', 0)}")
-            report.append("")
+        # YAML検証結果
+        validation_result = result.get('validation_result', {})
+        if validation_result:
+            print("--- YAML形式検証 ---")
+            print(f"✅ 検証成功: {validation_result.get('success', False)}")
+            print(f"📊 対象ファイル数: {validation_result.get('total_files', 0)}")
+            print(f"📊 有効ファイル数: {validation_result.get('valid_files', 0)}")
+            print(f"📊 無効ファイル数: {validation_result.get('invalid_files', 0)}")
+            
+            summary_errors = validation_result.get('summary_errors', [])
+            if summary_errors:
+                print(f"❌ エラー数: {len(summary_errors)}")
+                for i, error in enumerate(summary_errors[:3], 1):
+                    print(f"    {i}. {error}")
+                if len(summary_errors) > 3:
+                    print(f"    ... 他 {len(summary_errors) - 3} エラー")
         
         # サンプルデータ生成結果
-        sample_results = results.get('sample_data_generation', {})
-        if sample_results:
-            report.append("--- サンプルデータ生成 ---")
-            report.append(f"対象テーブル数: {sample_results.get('total_tables', 0)}")
-            report.append(f"生成成功テーブル数: {sample_results.get('generated_tables', 0)}")
-            report.append(f"総レコード数: {sample_results.get('total_records', 0)}")
-            report.append(f"実行順序: {', '.join(sample_results.get('execution_order', []))}")
-            report.append("")
-        
-        # エラー・警告
-        if results['errors']:
-            report.append("--- エラー ---")
-            for error in results['errors']:
-                report.append(f"❌ {error}")
-            report.append("")
-        
-        if results['warnings']:
-            report.append("--- 警告 ---")
-            for warning in results['warnings']:
-                report.append(f"⚠️ {warning}")
-            report.append("")
-        
-        # 推奨事項
-        summary = results.get('summary', {})
-        if summary.get('recommendations'):
-            report.append("--- 推奨事項 ---")
-            for rec in summary['recommendations']:
-                report.append(f"💡 {rec}")
-            report.append("")
-        
-        return "\n".join(report)
-    
-    def _generate_markdown_report(self, results: Dict[str, Any]) -> str:
-        """Markdown形式のレポートを生成"""
-        report = []
-        report.append("# 包括的検証レポート")
-        report.append("")
-        report.append(f"**実行日時**: {results['timestamp']}")
-        report.append(f"**総合結果**: {'✅ 成功' if results['success'] else '❌ 失敗'}")
-        report.append("")
-        
-        # YAMLフォーマット検証結果
-        yaml_results = results.get('yaml_validation', {})
-        if yaml_results:
-            report.append("## YAMLフォーマット検証")
-            report.append("")
-            report.append("| 項目 | 値 |")
-            report.append("|------|-----|")
-            report.append(f"| 総ファイル数 | {yaml_results.get('total', 0)} |")
-            report.append(f"| 有効 | {yaml_results.get('valid', 0)} |")
-            report.append(f"| 無効 | {yaml_results.get('invalid', 0)} |")
-            report.append(f"| 警告あり | {yaml_results.get('with_warnings', 0)} |")
-            report.append("")
-        
-        # サンプルデータ生成結果
-        sample_results = results.get('sample_data_generation', {})
-        if sample_results:
-            report.append("## サンプルデータ生成")
-            report.append("")
-            report.append("| 項目 | 値 |")
-            report.append("|------|-----|")
-            report.append(f"| 対象テーブル数 | {sample_results.get('total_tables', 0)} |")
-            report.append(f"| 生成成功テーブル数 | {sample_results.get('generated_tables', 0)} |")
-            report.append(f"| 総レコード数 | {sample_results.get('total_records', 0)} |")
-            report.append(f"| 実行順序 | {', '.join(sample_results.get('execution_order', []))} |")
-            report.append("")
-        
-        # エラー・警告
-        if results['errors']:
-            report.append("## エラー")
-            report.append("")
-            for error in results['errors']:
-                report.append(f"- ❌ {error}")
-            report.append("")
-        
-        if results['warnings']:
-            report.append("## 警告")
-            report.append("")
-            for warning in results['warnings']:
-                report.append(f"- ⚠️ {warning}")
-            report.append("")
-        
-        # 推奨事項
-        summary = results.get('summary', {})
-        if summary.get('recommendations'):
-            report.append("## 推奨事項")
-            report.append("")
-            for rec in summary['recommendations']:
-                report.append(f"- 💡 {rec}")
-            report.append("")
-        
-        return "\n".join(report)
+        sample_data_result = result.get('sample_data_result', {})
+        if sample_data_result:
+            print("\n--- サンプルデータ生成 ---")
+            print(f"✅ 生成成功: {sample_data_result.get('success', False)}")
+            print(f"📊 対象テーブル数: {sample_data_result.get('total_tables', 0)}")
+            print(f"📊 生成テーブル数: {sample_data_result.get('generated_tables', 0)}")
+            print(f"📊 総レコード数: {sample_data_result.get('total_records', 0)}")
+            
+            save_result = sample_data_result.get('save_result', {})
+            if save_result:
+                saved_files = save_result.get('saved_files', [])
+                if saved_files:
+                    print(f"💾 保存ファイル数: {len(saved_files)}")
+                    for file_path in saved_files:
+                        print(f"    - {file_path}")
 
 
 def main():
     """メイン関数"""
-    parser = argparse.ArgumentParser(description='包括的YAML検証・サンプルデータ生成ツール（改良版）')
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='YAML形式検証・サンプルデータ生成（統合版）')
+    parser.add_argument('--table', help='検証対象のテーブル名')
     parser.add_argument('--tables', help='カンマ区切りのテーブル名リスト')
+    parser.add_argument('--all', action='store_true', help='全テーブルを検証')
+    parser.add_argument('--generate-sample-data', action='store_true', help='サンプルデータを生成')
+    parser.add_argument('--output-dir', help='サンプルデータ出力ディレクトリ')
     parser.add_argument('--verbose', action='store_true', help='詳細なログを出力')
-    parser.add_argument('--output-format', choices=['text', 'json', 'markdown'], default='text', help='出力形式')
-    parser.add_argument('--output-file', help='結果出力ファイル')
-    parser.add_argument('--yaml-only', action='store_true', help='YAMLフォーマット検証のみ実行')
-    parser.add_argument('--sample-only', action='store_true', help='サンプルデータ生成のみ実行')
     args = parser.parse_args()
     
-    tables = args.tables.split(',') if args.tables else None
+    # チェッカーの初期化
+    checker = YAMLFormatCheckEnhanced(verbose=args.verbose)
     
-    validator = IntegratedValidator(args.verbose)
+    # 対象テーブルの決定
+    table_names = None
+    if args.table:
+        table_names = [args.table]
+    elif args.tables:
+        table_names = [name.strip() for name in args.tables.split(',')]
+    elif not args.all:
+        # デフォルトは全テーブル
+        args.all = True
     
-    # 実行モードの決定
-    if args.yaml_only:
-        result = {'yaml_validation': validator._validate_yaml_format(tables)}
-        result['success'] = result['yaml_validation'].get('success', False)
-    elif args.sample_only:
-        result = {'sample_data_generation': validator._validate_sample_data_generation(tables)}
-        result['success'] = result['sample_data_generation'].get('success', False)
-    else:
-        result = validator.run_comprehensive_validation(tables)
+    # 統合実行
+    result = checker.validate_and_generate(
+        table_names=table_names,
+        output_dir=args.output_dir,
+        generate_sample_data=args.generate_sample_data
+    )
     
-    # 結果出力
-    output = validator.generate_report(result, args.output_format)
-    
-    if args.output_file:
-        with open(args.output_file, 'w', encoding='utf-8') as f:
-            f.write(output)
-        print(f"結果を {args.output_file} に出力しました")
-    else:
-        print(output)
+    # 結果表示
+    checker.print_summary(result)
     
     return 0 if result['success'] else 1
 

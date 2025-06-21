@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-YAML形式検証ツール（サンプルデータ生成統合版）
+YAML形式検証ツール（統合版）
 
-テーブル詳細定義YAMLファイルの形式検証を行い、
-必要に応じてサンプルデータINSERT文を生成します。
+テーブル詳細定義YAMLファイルの形式検証を行います。
+yaml_validatorから統合された機能です。
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
 実装日: 2025-06-21
@@ -12,29 +12,21 @@ YAML形式検証ツール（サンプルデータ生成統合版）
 機能：
 - YAML形式の検証
 - 必須セクションの存在確認
-- サンプルデータINSERT文の生成
 - 検証結果の詳細レポート
 """
 
 import os
 import sys
-import argparse
 import logging
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 # プロジェクトルートディレクトリを取得
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../../../.."))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../../../../.."))
 
 # パスを追加
 sys.path.append(os.path.join(PROJECT_ROOT, "docs/design/database/tools"))
-
-try:
-    from sample_data_integration import SampleDataIntegration
-except ImportError as e:
-    print(f"サンプルデータ統合モジュールのインポートに失敗: {e}")
-    SampleDataIntegration = None
 
 import yaml
 
@@ -67,12 +59,6 @@ class YAMLFormatValidator:
             'foreign_keys': '外部キー定義',
             'sample_data': 'サンプルデータ'
         }
-        
-        # サンプルデータ統合機能
-        if SampleDataIntegration:
-            self.sample_data_integration = SampleDataIntegration(verbose=verbose)
-        else:
-            self.sample_data_integration = None
     
     def _setup_logging(self):
         """ログ設定のセットアップ"""
@@ -282,100 +268,17 @@ class YAMLFormatValidator:
         
         return result
     
-    def generate_sample_data(self, table_names: Optional[List[str]] = None, 
-                           output_dir: Optional[str] = None) -> Dict[str, Any]:
-        """
-        サンプルデータ生成
-        
-        Args:
-            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
-            output_dir: 出力ディレクトリ（Noneの場合は保存しない）
-            
-        Returns:
-            Dict[str, Any]: 生成結果
-        """
-        if not self.sample_data_integration:
-            return {
-                'success': False,
-                'error': 'サンプルデータ生成機能が利用できません',
-                'generation_available': False
-            }
-        
-        return self.sample_data_integration.validate_and_generate(table_names, output_dir)
-    
-    def validate_and_generate(self, table_names: Optional[List[str]] = None,
-                            output_dir: Optional[str] = None,
-                            generate_sample_data: bool = False) -> Dict[str, Any]:
-        """
-        検証とサンプルデータ生成の統合実行
-        
-        Args:
-            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
-            output_dir: サンプルデータ出力ディレクトリ
-            generate_sample_data: サンプルデータ生成フラグ
-            
-        Returns:
-            Dict[str, Any]: 実行結果
-        """
-        result = {
-            'success': True,
-            'validation_result': {},
-            'sample_data_result': {},
-            'errors': []
-        }
-        
-        try:
-            # YAML検証
-            if table_names:
-                # 指定テーブルの検証
-                validation_results = {}
-                for table_name in table_names:
-                    validation_results[table_name] = self.validate_table(table_name)
-                
-                result['validation_result'] = {
-                    'success': all(r['success'] for r in validation_results.values()),
-                    'files': validation_results,
-                    'total_files': len(table_names),
-                    'valid_files': sum(1 for r in validation_results.values() if r['success']),
-                    'invalid_files': sum(1 for r in validation_results.values() if not r['success'])
-                }
-            else:
-                # 全テーブルの検証
-                result['validation_result'] = self.validate_all_tables()
-            
-            if not result['validation_result']['success']:
-                result['success'] = False
-                result['errors'].append('YAML検証に失敗しました')
-            
-            # サンプルデータ生成
-            if generate_sample_data:
-                sample_data_result = self.generate_sample_data(table_names, output_dir)
-                result['sample_data_result'] = sample_data_result
-                
-                if not sample_data_result.get('success', False):
-                    result['success'] = False
-                    result['errors'].extend(sample_data_result.get('errors', []))
-        
-        except Exception as e:
-            result['success'] = False
-            result['errors'].append(f"統合実行エラー: {str(e)}")
-            self.logger.error(f"統合実行エラー: {e}")
-        
-        return result
-    
     def print_validation_summary(self, result: Dict[str, Any]):
         """検証結果サマリーの出力"""
         print("=== YAML形式検証結果 ===")
         
-        validation_result = result.get('validation_result', {})
-        
-        print(f"✅ 検証成功: {validation_result.get('success', False)}")
-        print(f"📊 対象ファイル数: {validation_result.get('total_files', 0)}")
-        print(f"📊 有効ファイル数: {validation_result.get('valid_files', 0)}")
-        print(f"📊 無効ファイル数: {validation_result.get('invalid_files', 0)}")
+        print(f"✅ 検証成功: {result.get('success', False)}")
+        print(f"📊 対象ファイル数: {result.get('total_files', 0)}")
+        print(f"📊 有効ファイル数: {result.get('valid_files', 0)}")
+        print(f"📊 無効ファイル数: {result.get('invalid_files', 0)}")
         
         # エラーサマリー
-        summary_errors = validation_result.get('summary_errors', [])
+        summary_errors = result.get('summary_errors', [])
         if summary_errors:
             print(f"❌ エラー数: {len(summary_errors)}")
             for i, error in enumerate(summary_errors[:5], 1):
@@ -384,55 +287,60 @@ class YAMLFormatValidator:
                 print(f"    ... 他 {len(summary_errors) - 5} エラー")
         
         # 警告サマリー
-        summary_warnings = validation_result.get('summary_warnings', [])
+        summary_warnings = result.get('summary_warnings', [])
         if summary_warnings:
             print(f"⚠️ 警告数: {len(summary_warnings)}")
             for i, warning in enumerate(summary_warnings[:3], 1):
                 print(f"    {i}. {warning}")
             if len(summary_warnings) > 3:
                 print(f"    ... 他 {len(summary_warnings) - 3} 警告")
-        
-        # サンプルデータ生成結果
-        sample_data_result = result.get('sample_data_result', {})
-        if sample_data_result:
-            print("\n=== サンプルデータ生成結果 ===")
-            if self.sample_data_integration:
-                self.sample_data_integration.print_summary(sample_data_result)
-            else:
-                print("❌ サンプルデータ生成機能が利用できません")
 
 
 def main():
     """メイン関数"""
-    parser = argparse.ArgumentParser(description='YAML形式検証ツール（サンプルデータ生成統合版）')
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='YAML形式検証ツール（統合版）')
     parser.add_argument('--table', help='検証対象のテーブル名')
     parser.add_argument('--tables', help='カンマ区切りのテーブル名リスト')
     parser.add_argument('--all', action='store_true', help='全テーブルを検証')
-    parser.add_argument('--check-required-only', action='store_true', help='必須セクションのみチェック')
-    parser.add_argument('--generate-sample-data', action='store_true', help='サンプルデータを生成')
-    parser.add_argument('--output-dir', help='サンプルデータ出力ディレクトリ')
     parser.add_argument('--verbose', action='store_true', help='詳細なログを出力')
     args = parser.parse_args()
     
     # バリデーターの初期化
     validator = YAMLFormatValidator(verbose=args.verbose)
     
-    # 対象テーブルの決定
-    table_names = None
+    # 検証実行
     if args.table:
-        table_names = [args.table]
+        result = validator.validate_table(args.table)
+        result = {
+            'success': result['success'],
+            'total_files': 1,
+            'valid_files': 1 if result['success'] else 0,
+            'invalid_files': 0 if result['success'] else 1,
+            'summary_errors': result['errors'],
+            'summary_warnings': result['warnings']
+        }
     elif args.tables:
         table_names = [name.strip() for name in args.tables.split(',')]
-    elif not args.all:
-        # デフォルトは全テーブル
-        args.all = True
-    
-    # 統合実行
-    result = validator.validate_and_generate(
-        table_names=table_names,
-        output_dir=args.output_dir,
-        generate_sample_data=args.generate_sample_data
-    )
+        results = {}
+        for table_name in table_names:
+            results[table_name] = validator.validate_table(table_name)
+        
+        result = {
+            'success': all(r['success'] for r in results.values()),
+            'total_files': len(table_names),
+            'valid_files': sum(1 for r in results.values() if r['success']),
+            'invalid_files': sum(1 for r in results.values() if not r['success']),
+            'summary_errors': [],
+            'summary_warnings': []
+        }
+        
+        for table_name, table_result in results.items():
+            result['summary_errors'].extend([f"{table_name}: {error}" for error in table_result['errors']])
+            result['summary_warnings'].extend([f"{table_name}: {warning}" for warning in table_result['warnings']])
+    else:
+        result = validator.validate_all_tables()
     
     # 結果表示
     validator.print_validation_summary(result)

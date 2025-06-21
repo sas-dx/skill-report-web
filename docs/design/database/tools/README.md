@@ -37,16 +37,10 @@ docs/design/database/tools/
 │   ├── fixers/                   # 修正提案生成機能
 │   ├── parsers/                  # 各種パーサー
 │   ├── reporters/                # レポート出力（Console・JSON・Markdown）
-│   ├── yaml_format_check.py      # YAML検証統合モジュール（✅ 実装済み）
+│   ├── yaml_format_check_enhanced.py # YAML検証統合モジュール（✅ 実装済み）
 │   ├── sample_data_generator.py  # サンプルデータINSERT文生成（✅ 実装済み）
 │   ├── install_git_hook.sh       # Git pre-commitフック（統合版）
 │   └── utils/                    # レポート管理
-├── 📁 yaml_validator/            # YAML検証ツール（統合済み・参考用）
-│   ├── validate_yaml_format.py   # YAML検証メイン機能
-│   ├── install_git_hook.sh       # Git pre-commitフック
-│   ├── README.md                 # 使用方法ガイド
-│   ├── README_REQUIRED_SECTIONS.md # 必須セクション詳細
-│   └── INTEGRATION.md            # 統合ガイド
 ├── 📁 tests/                     # テストスイート
 │   ├── unit/                     # ユニットテスト
 │   ├── integration/              # 統合テスト
@@ -133,7 +127,7 @@ cp docs/design/database/table-details/MST_TEMPLATE_details.yaml \
 # - sample_data: サンプルデータ
 
 # Step 3: YAML検証（必須）
-python3 yaml_validator/validate_yaml_format.py --table MST_NewTable --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --tables MST_NewTable --verbose
 
 # Step 4: テーブル一覧.md更新
 # 新規テーブルをテーブル一覧に追加
