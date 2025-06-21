@@ -98,6 +98,14 @@ NTF.1-MAIL.1   → メール通知機能
 - **TypeScript厳密モード**: strict: true, noImplicitAny: true必須
 - **ファイル構成**: App Routerの規約に従った構成
 
+### TypeScript統一ルール（絶対必須）
+- **JavaScript使用禁止**: 全ての実装コードはTypeScript必須
+- **型安全性の徹底**: any型の使用は原則禁止
+- **型定義の明記**: 全ての関数・変数・プロパティに型定義必須
+- **厳密設定**: tsconfig.jsonでstrict: true, noImplicitAny: true必須
+- **例外規定**: 設定ファイル（next.config.js, tailwind.config.js等）のみJavaScript許可
+- **ドキュメント統一**: 全てのコード例はTypeScriptで記載必須
+
 #### Next.js設定詳細
 ```javascript
 // next.config.js

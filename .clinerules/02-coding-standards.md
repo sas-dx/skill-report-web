@@ -27,12 +27,12 @@
 - **ブール値**: `is`, `has`, `can`, `should`などの接頭辞を使用
 - **定数**: 大文字とアンダースコアで表現（言語に依存）
 
-```javascript
+```typescript
 // 良い例
-const userAge = 25;
-const isAuthenticated = true;
-const getUserProfile = () => { /* ... */ };
-const MAX_RETRY_COUNT = 3;
+const userAge: number = 25;
+const isAuthenticated: boolean = true;
+const getUserProfile = (): Promise<UserProfile> => { /* ... */ };
+const MAX_RETRY_COUNT: number = 3;
 
 // 悪い例
 const a = 25;
@@ -46,7 +46,7 @@ const max = 3;
 - **名詞**: クラス名は名詞で表現
 - **具体的**: 抽象的すぎない具体的な名前
 
-```javascript
+```typescript
 // 良い例
 class UserProfileManager { }
 class SkillReportValidator { }
@@ -82,7 +82,7 @@ comp/
 - **複雑なロジック**: アルゴリズムやビジネスルールの説明
 - **TODO/FIXME**: 将来の改善点や既知の問題を明記
 
-```javascript
+```typescript
 // 良い例
 // ユーザーの権限レベルに応じてアクセス可能な機能を制限
 // セキュリティ要件: 管理者のみがユーザー削除可能
@@ -106,17 +106,22 @@ if (user.role === 'admin') {
 - **戻り値**: 戻り値の型と説明
 - **例外**: 発生する可能性のある例外
 
-```javascript
+```typescript
+interface SkillData {
+  category: string;
+  level: number;
+}
+
 /**
  * ユーザーのスキル情報を検証し、不正な値をサニタイズする
  * 
- * @param {Object} skillData - 検証対象のスキルデータ
- * @param {string} skillData.category - スキルカテゴリ
- * @param {number} skillData.level - スキルレベル（1-4）
- * @returns {Object} 検証済みのスキルデータ
- * @throws {ValidationError} 必須項目が不足している場合
+ * @param skillData - 検証対象のスキルデータ
+ * @param skillData.category - スキルカテゴリ
+ * @param skillData.level - スキルレベル（1-4）
+ * @returns 検証済みのスキルデータ
+ * @throws ValidationError 必須項目が不足している場合
  */
-function validateSkillData(skillData) {
+function validateSkillData(skillData: SkillData): SkillData {
   // ...
 }
 ```
@@ -134,10 +139,10 @@ function validateSkillData(skillData) {
 - **解決策**: 可能であれば解決方法を提示
 - **セキュリティ**: 機密情報を含まない
 
-```javascript
+```typescript
 // 良い例
 throw new ValidationError(
-  'スキルレベルは1から4の範囲で入力してください。入力値: ' + level
+  `スキルレベルは1から4の範囲で入力してください。入力値: ${level}`
 );
 
 // 悪い例
@@ -165,7 +170,7 @@ throw new Error('Invalid input');
 - **コンテキスト**: ユーザーID、セッションID等
 - **メッセージ**: 構造化された情報
 
-```javascript
+```typescript
 // 良い例
 logger.info('User login successful', {
   userId: 'user123',
@@ -195,7 +200,7 @@ console.log('User logged in');
 - **ログ出力時の注意**: 機密情報をログに出力しない
 - **HTTPS通信**: すべての通信でHTTPS使用
 
-```javascript
+```typescript
 // 良い例
 const hashedPassword = await bcrypt.hash(password, 10);
 logger.info('Password updated', { userId: user.id }); // パスワードはログに出力しない
@@ -234,16 +239,20 @@ logger.info('Password updated', { userId: user.id, password: password });
 - **小さな関数**: テストしやすいサイズに分割
 - **明確な入出力**: 予測可能な動作
 
-```javascript
+```typescript
+interface Skill {
+  level: number;
+}
+
 // 良い例（テスト可能）
-function calculateSkillScore(skills, weights) {
+function calculateSkillScore(skills: Skill[], weights: number[]): number {
   return skills.reduce((total, skill, index) => {
     return total + (skill.level * weights[index]);
   }, 0);
 }
 
 // 悪い例（テスト困難）
-function updateUserSkillAndSendEmail(userId, skillData) {
+function updateUserSkillAndSendEmail(userId: string, skillData: any): void {
   // データベース更新、メール送信、ログ出力が混在
   database.updateSkill(userId, skillData);
   emailService.sendNotification(userId);
