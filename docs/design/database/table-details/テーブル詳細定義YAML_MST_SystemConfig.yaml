@@ -400,7 +400,6 @@ notes:
 - システム専用設定は管理画面に表示しない
 - 再起動要否フラグは運用時の注意喚起に使用
 - 論理削除は is_active フラグで管理
-- === 業務ルール ===
 - 設定キーは一意である必要がある
 - 暗号化設定は config_type = 'ENCRYPTED' に設定
 - システム専用設定は is_user_configurable = false に設定
@@ -408,7 +407,7 @@ notes:
 - 環境固有設定は適切な environment 値を設定
 - テナント固有設定は tenant_specific = true に設定
 - 設定変更時は last_modified_by と last_modified_reason を必須記録
-rules:
+business_rules:
 - 設定キーは一意である必要がある
 - 暗号化設定は config_type = 'ENCRYPTED' に設定
 - システム専用設定は is_user_configurable = false に設定

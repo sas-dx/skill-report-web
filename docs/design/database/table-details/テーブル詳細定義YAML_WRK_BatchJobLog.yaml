@@ -379,7 +379,6 @@ notes:
 - 外部ファイルパスは相対パスまたは論理パスで管理
 - 長時間実行ジョブは定期的にprogress_percentage更新
 - システム障害時の復旧用にexecution_environment情報を活用
-- === 業務ルール ===
 - ジョブ開始時にPENDINGステータスでレコード作成
 - 実行開始時にRUNNINGステータスに更新、start_time設定
 - 処理完了時にCOMPLETED/FAILEDステータスに更新、end_time設定
@@ -390,7 +389,7 @@ notes:
 - ファイルパスは実際のファイル存在確認後に設定
 - 処理完了後のファイルは7日間保持後に自動削除
 - エラーレコード数が総レコード数の50%を超えた場合は処理中断
-rules:
+business_rules:
 - ジョブ開始時にPENDINGステータスでレコード作成
 - 実行開始時にRUNNINGステータスに更新、start_time設定
 - 処理完了時にCOMPLETED/FAILEDステータスに更新、end_time設定
