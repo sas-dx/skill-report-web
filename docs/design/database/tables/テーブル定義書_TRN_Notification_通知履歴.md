@@ -7,7 +7,7 @@
 | テーブル名 | TRN_Notification |
 | 論理名 | 通知履歴 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,76 +26,33 @@ TRN_Notification（通知履歴）は、システムから送信された各種�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| notification_id |  | VARCHAR |  | ○ |  |  |
-| recipient_id |  | VARCHAR |  | ○ |  |  |
-| sender_id |  | VARCHAR |  | ○ |  |  |
-| notification_type |  | ENUM |  | ○ |  |  |
-| notification_category |  | ENUM |  | ○ |  |  |
-| priority_level |  | ENUM |  | ○ | NORMAL |  |
-| title |  | VARCHAR |  | ○ |  |  |
-| message |  | TEXT |  | ○ |  |  |
-| message_format |  | ENUM |  | ○ | PLAIN |  |
-| action_url |  | VARCHAR |  | ○ |  |  |
-| action_label |  | VARCHAR |  | ○ |  |  |
-| delivery_method |  | ENUM |  | ○ |  |  |
-| delivery_status |  | ENUM |  | ○ | PENDING |  |
-| sent_at |  | TIMESTAMP |  | ○ |  |  |
-| delivered_at |  | TIMESTAMP |  | ○ |  |  |
-| read_status |  | ENUM |  | ○ | UNREAD |  |
-| read_at |  | TIMESTAMP |  | ○ |  |  |
-| archived_at |  | TIMESTAMP |  | ○ |  |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| retry_count |  | INTEGER |  | ○ | 0 |  |
-| max_retry_count |  | INTEGER |  | ○ | 3 |  |
-| last_retry_at |  | TIMESTAMP |  | ○ |  |  |
-| error_message |  | TEXT |  | ○ |  |  |
-| external_message_id |  | VARCHAR |  | ○ |  |  |
-| template_id |  | VARCHAR |  | ○ |  |  |
-| template_variables |  | TEXT |  | ○ |  |  |
-| related_entity_type |  | ENUM |  | ○ |  |  |
-| related_entity_id |  | VARCHAR |  | ○ |  |  |
-| batch_id |  | VARCHAR |  | ○ |  |  |
-| user_agent |  | VARCHAR |  | ○ |  |  |
-| ip_address |  | VARCHAR |  | ○ |  |  |
-| device_type |  | ENUM |  | ○ |  |  |
-| is_bulk_notification |  | BOOLEAN |  | ○ | False |  |
-| personalization_data |  | TEXT |  | ○ |  |  |
+| notification_id | TRN_Notificationの主キー | SERIAL |  | × |  | TRN_Notificationの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_notification_id | notification_id | ○ |  |
-| idx_recipient_id | recipient_id | × |  |
-| idx_sender_id | sender_id | × |  |
-| idx_notification_type | notification_type | × |  |
-| idx_notification_category | notification_category | × |  |
-| idx_priority_level | priority_level | × |  |
-| idx_delivery_method | delivery_method | × |  |
-| idx_delivery_status | delivery_status | × |  |
-| idx_read_status | read_status | × |  |
-| idx_sent_at | sent_at | × |  |
-| idx_recipient_unread | recipient_id, read_status, expiry_date | × |  |
-| idx_batch_id | batch_id | × |  |
-| idx_related_entity | related_entity_type, related_entity_id | × |  |
+| idx_trn_notification_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_notification_recipient | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_notification_sender | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_notification | PRIMARY KEY | id | 主キー制約 |
-| uk_notification_id | UNIQUE |  | notification_id一意制約 |
-| chk_notification_type | CHECK | notification_type IN (...) | notification_type値チェック制約 |
-| chk_delivery_status | CHECK | delivery_status IN (...) | delivery_status値チェック制約 |
-| chk_read_status | CHECK | read_status IN (...) | read_status値チェック制約 |
-| chk_related_entity_type | CHECK | related_entity_type IN (...) | related_entity_type値チェック制約 |
-| chk_device_type | CHECK | device_type IN (...) | device_type値チェック制約 |
+| pk_trn_notification | PRIMARY KEY | notification_id, id | 主キー制約 |
 
 ## サンプルデータ
 

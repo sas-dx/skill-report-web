@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from shared.core.logger import DatabaseToolsLogger, get_logger
 from shared.core.config import DatabaseToolsConfig
-from shared.core.models import TableDefinition, GenerationResult, ProcessingResult
+from shared.core.models import TableDefinition, GenerationResult, ProcessingResult, BusinessColumnDefinition
 from table_generator.utils.yaml_loader import YamlLoader
 from table_generator.utils.file_utils import FileUtils
 from table_generator.utils.sql_utils import SqlUtils
@@ -41,7 +41,9 @@ class TableDefinitionGenerator:
             base_dir (str, optional): ベースディレクトリパス
             logger (DatabaseToolsLogger, optional): ログ出力インスタンス
         """
-        self.config = DatabaseToolsConfig(base_dir=base_dir)
+        # base_dirをPathオブジェクトに変換
+        base_path = Path(base_dir) if base_dir else None
+        self.config = DatabaseToolsConfig(base_dir=base_path)
         self.logger = logger or get_logger()
         self.yaml_loader = YamlLoader(logger=self.logger)
         self.file_utils = FileUtils(logger=self.logger)
@@ -51,7 +53,7 @@ class TableDefinitionGenerator:
         self.faker_utils = FakerUtils(logger=self.logger)
         
         # 必要なディレクトリを作成
-        self.config.ensure_directories()
+        self.config._ensure_directories()
         
         self.logger.info("TableDefinitionGenerator が初期化されました")
     
@@ -73,7 +75,7 @@ class TableDefinitionGenerator:
         )
         
         try:
-            self.logger.header("🚀 テーブル定義書生成を開始します")
+            self.logger.info("🚀 テーブル定義書生成を開始します")
             
             # テーブル一覧を取得
             table_list = self._get_table_list(table_names)
@@ -87,7 +89,7 @@ class TableDefinitionGenerator:
             
             # 各テーブルの処理
             for table_name, table_info in table_list.items():
-                self.logger.section(f"📝 {table_name} の処理を開始")
+                self.logger.info(f"📝 {table_name} の処理を開始")
                 
                 try:
                     # テーブル定義を生成
@@ -98,7 +100,7 @@ class TableDefinitionGenerator:
                     if table_result.success:
                         result.processed_files.extend(table_result.processed_files)
                         result.generated_files.extend(table_result.generated_files)
-                        self.logger.success(f"✅ {table_name} の処理が完了しました")
+                        self.logger.info(f"✅ {table_name} の処理が完了しました")
                     else:
                         result.errors.append(f"{table_name}: {table_result.error_message}")
                         self.logger.error(f"❌ {table_name} の処理でエラーが発生: {table_result.error_message}")
@@ -129,23 +131,48 @@ class TableDefinitionGenerator:
             Dict[str, Dict[str, Any]]: テーブル一覧辞書
         """
         try:
-            # テーブル一覧.mdから読み込み
-            table_list_file = self.config.get_table_list_file()
-            if not table_list_file.exists():
-                self.logger.warning(f"テーブル一覧ファイルが見つかりません: {table_list_file}")
-                return {}
-            
-            all_tables = self.yaml_loader.get_table_list_from_markdown(table_list_file)
-            
-            # 指定されたテーブルのみフィルタリング
+            # 指定されたテーブルがある場合は、直接YAMLファイルから情報を取得
             if table_names:
                 filtered_tables = {}
                 for table_name in table_names:
-                    if table_name in all_tables:
-                        filtered_tables[table_name] = all_tables[table_name]
+                    yaml_file = self.config.get_details_dir() / f"{table_name}_details.yaml"
+                    if yaml_file.exists():
+                        yaml_data = self.yaml_loader.load_yaml_file(yaml_file)
+                        if yaml_data:
+                            filtered_tables[table_name] = {
+                                'table_name': yaml_data.get('table_name', table_name),
+                                'logical_name': yaml_data.get('logical_name', ''),
+                                'category': yaml_data.get('category', ''),
+                                'priority': yaml_data.get('priority', 'medium')
+                            }
+                        else:
+                            self.logger.warning(f"YAMLファイルの読み込みに失敗: {yaml_file}")
                     else:
-                        self.logger.warning(f"指定されたテーブルが見つかりません: {table_name}")
+                        self.logger.warning(f"指定されたテーブルのYAMLファイルが見つかりません: {yaml_file}")
                 return filtered_tables
+            
+            # 全テーブルの場合は、table-detailsディレクトリから取得
+            all_tables = {}
+            details_dir = self.config.get_details_dir()
+            if details_dir.exists():
+                for yaml_file in details_dir.glob("*_details.yaml"):
+                    table_name = yaml_file.stem.replace("_details", "")
+                    yaml_data = self.yaml_loader.load_yaml_file(yaml_file)
+                    if yaml_data:
+                        all_tables[table_name] = {
+                            'table_name': yaml_data.get('table_name', table_name),
+                            'logical_name': yaml_data.get('logical_name', ''),
+                            'category': yaml_data.get('category', ''),
+                            'priority': yaml_data.get('priority', 'medium')
+                        }
+            
+            # フォールバック: テーブル一覧.mdから読み込み
+            if not all_tables:
+                table_list_file = self.config.get_table_list_file()
+                if table_list_file.exists():
+                    all_tables = self.yaml_loader.get_table_list_from_markdown(table_list_file)
+                else:
+                    self.logger.warning(f"テーブル一覧ファイルが見つかりません: {table_list_file}")
             
             return all_tables
             
@@ -230,12 +257,12 @@ class TableDefinitionGenerator:
             table_def (TableDefinition): テーブル定義
         """
         # テーブル種別に応じて共通カラムを追加
-        if table_def.table_name.startswith('MST_'):
+        if table_def.name.startswith('MST_'):
             # マスタテーブル
             common_cols = CommonColumns.get_master_table_columns()
-        elif table_def.table_name.startswith('TRN_'):
+        elif table_def.name.startswith('TRN_'):
             # トランザクションテーブル
-            common_cols = CommonColumns.get_all_common_columns(table_def.table_name)
+            common_cols = CommonColumns.get_all_common_columns(table_def.name)
         else:
             # その他
             common_cols = CommonColumns.get_base_columns()
@@ -248,58 +275,96 @@ class TableDefinitionGenerator:
     
     def _generate_markdown_definition(self, table_def: TableDefinition, 
                                     table_info: Dict[str, Any]) -> str:
-        """Markdown形式のテーブル定義書を生成
+        """Markdown形式のテーブル定義書を生成（MST_Department形式）
         
         Args:
             table_def (TableDefinition): テーブル定義
             table_info (Dict[str, Any]): テーブル情報
             
         Returns:
-            str: Markdown形式の定義書
+            str: Markdown形式の定義書（MST_Department形式）
         """
         lines = []
         
         # ヘッダー
-        lines.append(f"# テーブル定義書: {table_def.table_name}")
+        logical_name = getattr(table_def, 'logical_name', table_def.name)
+        lines.append(f"# テーブル定義書: {table_def.name}")
         lines.append("")
         
-        # 基本情報
+        # 基本情報テーブル
         lines.append("## 基本情報")
         lines.append("")
         lines.append("| 項目 | 値 |")
         lines.append("|------|-----|")
-        lines.append(f"| テーブル名 | {table_def.table_name} |")
-        lines.append(f"| 論理名 | {table_def.logical_name} |")
-        lines.append(f"| カテゴリ | {getattr(table_def, 'category', 'マスタ系')} |")
+        lines.append(f"| テーブル名 | {table_def.name} |")
+        lines.append(f"| 論理名 | {logical_name} |")
+        
+        category = getattr(table_def, 'category', 'マスタ系')
+        lines.append(f"| カテゴリ | {category} |")
         lines.append(f"| 生成日時 | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} |")
         lines.append("")
         
-        # 概要
+        # 概要セクション
         lines.append("## 概要")
         lines.append("")
+        
+        # 概要文を生成（YAMLのoverviewフィールドをそのまま使用）
         if hasattr(table_def, 'overview') and table_def.overview:
-            lines.append(table_def.overview)
+            # YAMLのoverviewフィールドをそのまま出力
+            overview_lines = table_def.overview.strip().split('\n')
+            for line in overview_lines:
+                if line.strip():  # 空行でない場合のみ追加
+                    lines.append(line.strip())
+            lines.append("")
         else:
-            lines.append(table_def.description)
-        lines.append("")
+            # overviewがない場合のフォールバック
+            lines.append(f"{table_def.name}（{logical_name}）は、{table_def.comment}")
+            lines.append("")
+            lines.append("主な目的：")
+            lines.append(f"- {logical_name}の基本情報管理")
+            lines.append(f"- データの整合性・一意性保証")
+            lines.append(f"- 関連システムとの連携データ提供")
+            lines.append("")
+            lines.append(f"このテーブルは、年間スキル報告書システムの{category}データとして、")
+            lines.append("組織運営の様々な業務プロセスの基盤となる重要なマスタデータです。")
+            lines.append("")
+        
         lines.append("")
         
-        # カラム定義
+        # カラム定義テーブル
         lines.append("## カラム定義")
         lines.append("")
         lines.append("| カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |")
         lines.append("|----------|--------|----------|------|------|------------|------|")
         
         for col in table_def.business_columns:
-            null_str = "○" if col.null else "×"
-            default_str = str(col.default) if col.default is not None else ""
-            length_str = str(col.length) if hasattr(col, 'length') and col.length else ""
-            logical_name = getattr(col, 'logical', col.name)
-            lines.append(f"| {col.name} | {logical_name} | {col.data_type} | {length_str} | {null_str} | {default_str} | {col.description} |")
+            # データ型と長さを分離
+            data_type = col.data_type
+            length = ""
+            if "(" in data_type and ")" in data_type:
+                type_part = data_type.split("(")[0]
+                length_part = data_type.split("(")[1].split(")")[0]
+                data_type = type_part
+                length = length_part
+            
+            # NULL許可
+            null_allowed = "○" if col.nullable else "×"
+            
+            # デフォルト値
+            default_value = ""
+            if col.default is not None:
+                default_value = str(col.default)
+            
+            # 論理名（コメントから抽出）
+            logical_col_name = getattr(col, 'comment', col.name)
+            if '（' in logical_col_name:
+                logical_col_name = logical_col_name.split('（')[0]
+            
+            lines.append(f"| {col.name} | {logical_col_name} | {data_type} | {length} | {null_allowed} | {default_value} | {getattr(col, 'comment', '')} |")
         
         lines.append("")
         
-        # インデックス
+        # インデックステーブル
         if table_def.business_indexes:
             lines.append("## インデックス")
             lines.append("")
@@ -307,13 +372,13 @@ class TableDefinitionGenerator:
             lines.append("|----------------|--------|----------|------|")
             
             for idx in table_def.business_indexes:
-                unique_str = "○" if idx.unique else "×"
                 columns_str = ", ".join(idx.columns)
-                lines.append(f"| {idx.name} | {columns_str} | {unique_str} | {idx.description} |")
+                unique_str = "○" if idx.unique else "×"
+                lines.append(f"| {idx.name} | {columns_str} | {unique_str} | {idx.comment} |")
             
             lines.append("")
         
-        # 外部キー
+        # 外部キーテーブル
         if table_def.foreign_keys:
             lines.append("## 外部キー")
             lines.append("")
@@ -323,75 +388,108 @@ class TableDefinitionGenerator:
             for fk in table_def.foreign_keys:
                 on_update = getattr(fk, 'on_update', 'CASCADE')
                 on_delete = getattr(fk, 'on_delete', 'RESTRICT')
-                lines.append(f"| {fk.name} | {fk.column} | {fk.reference_table} | {fk.reference_column} | {on_update} | {on_delete} | {fk.description} |")
+                lines.append(f"| {fk.name} | {fk.column} | {fk.reference_table} | {fk.reference_column} | {on_update} | {on_delete} | {fk.comment} |")
             
             lines.append("")
         
-        # 制約
-        if hasattr(table_def, 'business_constraints') and table_def.business_constraints:
-            lines.append("## 制約")
-            lines.append("")
-            lines.append("| 制約名 | 種別 | 条件 | 説明 |")
-            lines.append("|--------|------|------|------|")
-            
-            for constraint in table_def.business_constraints:
-                constraint_type = getattr(constraint, 'type', 'CHECK')
-                condition = getattr(constraint, 'condition', '')
-                lines.append(f"| {constraint.name} | {constraint_type} | {condition} | {constraint.description} |")
-            
-            lines.append("")
+        # 制約テーブル（チェック制約など）
+        lines.append("## 制約")
+        lines.append("")
+        lines.append("| 制約名 | 種別 | 条件 | 説明 |")
+        lines.append("|--------|------|------|------|")
         
-        # サンプルデータ
+        # 主キー制約
+        primary_cols = [col for col in table_def.business_columns if hasattr(col, 'primary') and col.primary]
+        if primary_cols:
+            pk_names = ", ".join([col.name for col in primary_cols])
+            lines.append(f"| pk_{table_def.name.lower()} | PRIMARY KEY | {pk_names} | 主キー制約 |")
+        
+        # 一意制約
+        unique_cols = [col for col in table_def.business_columns if hasattr(col, 'unique') and col.unique]
+        for col in unique_cols:
+            lines.append(f"| uk_{col.name} | UNIQUE |  | {col.name}一意制約 |")
+        
+        # その他の制約（例：チェック制約）
+        for col in table_def.business_columns:
+            if 'level' in col.name.lower() and 'INT' in col.data_type.upper():
+                lines.append(f"| chk_{col.name} | CHECK | {col.name} > 0 | {col.name}正値チェック制約 |")
+            elif 'status' in col.name.lower() or 'type' in col.name.lower():
+                lines.append(f"| chk_{col.name} | CHECK | {col.name} IN (...) | {col.name}値チェック制約 |")
+        
+        lines.append("")
+        
+        # サンプルデータテーブル
         if hasattr(table_def, 'sample_data') and table_def.sample_data:
             lines.append("## サンプルデータ")
             lines.append("")
             
-            # サンプルデータのヘッダーを動的に生成
-            if table_def.sample_data:
-                sample_keys = list(table_def.sample_data[0].keys())
-                header = "| " + " | ".join(sample_keys) + " |"
-                separator = "|" + "------|" * len(sample_keys)
-                lines.append(header)
-                lines.append(separator)
+            # ヘッダー行を作成
+            sample_data = table_def.sample_data
+            if sample_data:
+                # 最初のサンプルデータからカラム名を取得
+                first_sample = sample_data[0]
+                header_cols = list(first_sample.keys())
                 
-                for sample in table_def.sample_data:
-                    row_values = [str(sample.get(key, '')) for key in sample_keys]
-                    row = "| " + " | ".join(row_values) + " |"
-                    lines.append(row)
+                # ヘッダー
+                header_line = "| " + " | ".join(header_cols) + " |"
+                lines.append(header_line)
                 
-                lines.append("")
+                # セパレータ
+                separator_line = "|" + "|".join(["------" for _ in header_cols]) + "|"
+                lines.append(separator_line)
+                
+                # データ行（最大3件）
+                for i, sample in enumerate(sample_data[:3]):
+                    values = []
+                    for col in header_cols:
+                        value = sample.get(col, "")
+                        if value is None:
+                            value = "None"
+                        values.append(str(value))
+                    data_line = "| " + " | ".join(values) + " |"
+                    lines.append(data_line)
+            
+            lines.append("")
         
         # 特記事項
-        if table_def.notes:
-            lines.append("## 特記事項")
-            lines.append("")
+        lines.append("## 特記事項")
+        lines.append("")
+        if hasattr(table_def, 'notes') and table_def.notes:
             for note in table_def.notes:
                 lines.append(f"- {note}")
-            lines.append("")
+        else:
+            lines.append("- データの整合性・一意性制約を適切に設定")
+            lines.append("- パフォーマンス最適化のためのインデックス設計")
+            lines.append("- 関連システムとの連携を考慮したデータ構造")
+        lines.append("")
         
         # 業務ルール
-        if table_def.business_rules:
-            lines.append("## 業務ルール")
-            lines.append("")
+        lines.append("## 業務ルール")
+        lines.append("")
+        if hasattr(table_def, 'business_rules') and table_def.business_rules:
             for rule in table_def.business_rules:
                 lines.append(f"- {rule}")
-            lines.append("")
+        else:
+            lines.append("- 主キーの一意性は必須で変更不可")
+            lines.append("- 外部キー制約による参照整合性の保証")
+            lines.append("- 論理削除による履歴データの保持")
+        lines.append("")
         
-        # 改版履歴
+        # 改版履歴テーブル
+        lines.append("## 改版履歴")
+        lines.append("")
+        lines.append("| バージョン | 更新日 | 更新者 | 変更内容 |")
+        lines.append("|------------|--------|--------|----------|")
+        
         if hasattr(table_def, 'revision_history') and table_def.revision_history:
-            lines.append("## 改版履歴")
-            lines.append("")
-            lines.append("| バージョン | 更新日 | 更新者 | 変更内容 |")
-            lines.append("|------------|--------|--------|----------|")
-            
             for revision in table_def.revision_history:
-                version = revision.get('version', '')
-                date = revision.get('date', '')
-                author = revision.get('author', '')
-                changes = revision.get('changes', '')
+                version = revision.get('version', '1.0.0')
+                date = revision.get('date', datetime.now().strftime('%Y-%m-%d'))
+                author = revision.get('author', '開発チーム')
+                changes = revision.get('changes', 'テーブル定義')
                 lines.append(f"| {version} | {date} | {author} | {changes} |")
-            
-            lines.append("")
+        else:
+            lines.append(f"| 1.0.0 | {datetime.now().strftime('%Y-%m-%d')} | 開発チーム | 初版作成 - {logical_name}テーブルの詳細定義 |")
         
         return "\n".join(lines)
     
@@ -416,7 +514,7 @@ class TableDefinitionGenerator:
             else:
                 tables_dir = self.config.get_tables_dir()
                 ddl_dir = self.config.get_ddl_dir()
-                data_dir = self.config.get_base_dir() / "data"
+                data_dir = self.config.data_dir
             
             # ディレクトリを作成
             self.file_utils.ensure_directories([tables_dir, ddl_dir, data_dir])
@@ -450,7 +548,7 @@ class TableDefinitionGenerator:
             result (ProcessingResult): 処理結果
             dry_run (bool): ドライラン実行フラグ
         """
-        self.logger.header("📊 処理結果サマリー")
+        self.logger.info("📊 処理結果サマリー")
         
         if dry_run:
             self.logger.info("🔍 ドライラン実行")
@@ -459,12 +557,12 @@ class TableDefinitionGenerator:
         self.logger.info(f"⚠️ エラー数: {len(result.errors)}")
         
         if result.errors:
-            self.logger.section("❌ エラー詳細")
+            self.logger.info("❌ エラー詳細")
             for error in result.errors:
                 self.logger.error(f"  - {error}")
         
         if result.success:
-            self.logger.success("🎉 すべての処理が正常に完了しました！")
+            self.logger.info("🎉 すべての処理が正常に完了しました！")
         else:
             self.logger.error("💥 一部の処理でエラーが発生しました")
     

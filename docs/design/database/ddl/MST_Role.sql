@@ -15,39 +15,21 @@
 このテーブルは、システムセキュリティの基盤となり、
 適切なアクセス制御と権限管理を実現する重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:21:58
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Role;
 
 CREATE TABLE MST_Role (
-    role_code VARCHAR,
-    role_name VARCHAR,
-    role_name_short VARCHAR,
-    role_category ENUM,
-    role_level INT,
-    parent_role_id VARCHAR,
-    is_system_role BOOLEAN DEFAULT False,
-    is_tenant_specific BOOLEAN DEFAULT False,
-    max_users INT,
-    role_priority INT DEFAULT 999,
-    auto_assign_conditions JSON,
-    role_status ENUM DEFAULT 'ACTIVE',
-    effective_from DATE,
-    effective_to DATE,
-    sort_order INT,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    role_id SERIAL NOT NULL COMMENT 'MST_Roleの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_role_code ON MST_Role (role_code);
-CREATE INDEX idx_role_category ON MST_Role (role_category);
-CREATE INDEX idx_role_level ON MST_Role (role_level);
-CREATE INDEX idx_parent_role ON MST_Role (parent_role_id);
-CREATE INDEX idx_system_role ON MST_Role (is_system_role);
-CREATE INDEX idx_tenant_specific ON MST_Role (is_tenant_specific);
-CREATE INDEX idx_role_status ON MST_Role (role_status);
-CREATE INDEX idx_effective_period ON MST_Role (effective_from, effective_to);
-CREATE INDEX idx_sort_order ON MST_Role (sort_order);
+CREATE INDEX idx_mst_role_tenant_id ON MST_Role (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_Role ADD CONSTRAINT fk_role_parent FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

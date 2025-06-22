@@ -15,22 +15,18 @@
 このテーブルは、人材のスキル管理、キャリア開発、組織能力分析など、
 戦略的人材マネジメントの基盤となる重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_SkillItem;
 
 CREATE TABLE MST_SkillItem (
-    skill_code VARCHAR,
-    skill_name VARCHAR,
-    skill_category_id VARCHAR,
-    skill_type ENUM,
-    difficulty_level INT,
-    importance_level INT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    skillitem_id SERIAL NOT NULL COMMENT 'MST_SkillItemの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (skillitem_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_skill_code ON MST_SkillItem (skill_code);
-CREATE INDEX idx_skill_category ON MST_SkillItem (skill_category_id);
+CREATE INDEX idx_mst_skillitem_tenant_id ON MST_SkillItem (tenant_id);

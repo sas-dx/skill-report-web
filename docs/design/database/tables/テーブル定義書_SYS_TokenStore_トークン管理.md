@@ -7,7 +7,7 @@
 | テーブル名 | SYS_TokenStore |
 | 論理名 | トークン管理 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,42 +25,23 @@ SYS_TokenStore（トークン管理）は、認証・認可システムで使用
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| user_id |  | VARCHAR |  | ○ |  |  |
-| token_type |  | ENUM |  | ○ |  |  |
-| token_value |  | TEXT |  | ○ |  |  |
-| token_hash |  | VARCHAR |  | ○ |  |  |
-| expires_at |  | TIMESTAMP |  | ○ |  |  |
-| issued_at |  | TIMESTAMP |  | ○ |  |  |
-| last_used_at |  | TIMESTAMP |  | ○ |  |  |
-| client_ip |  | VARCHAR |  | ○ |  |  |
-| user_agent |  | TEXT |  | ○ |  |  |
-| device_fingerprint |  | VARCHAR |  | ○ |  |  |
-| scope |  | TEXT |  | ○ |  |  |
-| is_revoked |  | BOOLEAN |  | ○ | False |  |
-| revoked_at |  | TIMESTAMP |  | ○ |  |  |
-| revoked_reason |  | ENUM |  | ○ |  |  |
+| tokenstore_id | SYS_TokenStoreの主キー | SERIAL |  | × |  | SYS_TokenStoreの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
-## インデックス
+## 外部キー
 
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_token_store_hash | token_hash | ○ |  |
-| idx_token_store_user_type | user_id, token_type | × |  |
-| idx_token_store_expires | expires_at, is_revoked | × |  |
-| idx_token_store_tenant_user | tenant_id, user_id | × |  |
-| idx_token_store_issued | issued_at | × |  |
-| idx_token_store_last_used | last_used_at | × |  |
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_token_store_user | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| uk_token_hash | UNIQUE |  | token_hash一意制約 |
-| chk_token_type | CHECK | token_type IN (...) | token_type値チェック制約 |
+| pk_sys_tokenstore | PRIMARY KEY | tokenstore_id, id | 主キー制約 |
 
 ## サンプルデータ
 

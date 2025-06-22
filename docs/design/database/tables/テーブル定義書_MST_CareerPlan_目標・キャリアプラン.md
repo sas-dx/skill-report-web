@@ -7,7 +7,7 @@
 | テーブル名 | MST_CareerPlan |
 | 論理名 | 目標・キャリアプラン |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,73 +26,33 @@ MST_CareerPlan（目標・キャリアプラン）は、社員の中長期的な
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| career_plan_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| plan_name |  | VARCHAR |  | ○ |  |  |
-| plan_description |  | TEXT |  | ○ |  |  |
-| plan_type |  | ENUM |  | ○ |  |  |
-| target_position_id |  | VARCHAR |  | ○ |  |  |
-| target_job_type_id |  | VARCHAR |  | ○ |  |  |
-| target_department_id |  | VARCHAR |  | ○ |  |  |
-| current_level |  | ENUM |  | ○ |  |  |
-| target_level |  | ENUM |  | ○ |  |  |
-| plan_start_date |  | DATE |  | ○ |  |  |
-| plan_end_date |  | DATE |  | ○ |  |  |
-| milestone_1_date |  | DATE |  | ○ |  |  |
-| milestone_1_description |  | VARCHAR |  | ○ |  |  |
-| milestone_2_date |  | DATE |  | ○ |  |  |
-| milestone_2_description |  | VARCHAR |  | ○ |  |  |
-| milestone_3_date |  | DATE |  | ○ |  |  |
-| milestone_3_description |  | VARCHAR |  | ○ |  |  |
-| required_skills |  | TEXT |  | ○ |  |  |
-| required_certifications |  | TEXT |  | ○ |  |  |
-| required_experiences |  | TEXT |  | ○ |  |  |
-| development_actions |  | TEXT |  | ○ |  |  |
-| training_plan |  | TEXT |  | ○ |  |  |
-| mentor_id |  | VARCHAR |  | ○ |  |  |
-| supervisor_id |  | VARCHAR |  | ○ |  |  |
-| plan_status |  | ENUM |  | ○ | DRAFT |  |
-| progress_percentage |  | DECIMAL |  | ○ | 0.0 |  |
-| last_review_date |  | DATE |  | ○ |  |  |
-| next_review_date |  | DATE |  | ○ |  |  |
-| review_frequency |  | ENUM |  | ○ | QUARTERLY |  |
-| success_criteria |  | TEXT |  | ○ |  |  |
-| risk_factors |  | TEXT |  | ○ |  |  |
-| support_resources |  | TEXT |  | ○ |  |  |
-| budget_allocated |  | DECIMAL |  | ○ |  |  |
-| budget_used |  | DECIMAL |  | ○ | 0.0 |  |
-| priority_level |  | ENUM |  | ○ | NORMAL |  |
-| visibility_level |  | ENUM |  | ○ | MANAGER |  |
-| template_id |  | VARCHAR |  | ○ |  |  |
-| custom_fields |  | TEXT |  | ○ |  |  |
-| notes |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| careerplan_id | MST_CareerPlanの主キー | SERIAL |  | × |  | MST_CareerPlanの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_career_plan_id | career_plan_id | ○ |  |
-| idx_employee_id | employee_id | × |  |
-| idx_plan_type | plan_type | × |  |
-| idx_target_position | target_position_id | × |  |
-| idx_target_job_type | target_job_type_id | × |  |
-| idx_plan_status | plan_status | × |  |
-| idx_plan_period | plan_start_date, plan_end_date | × |  |
-| idx_review_date | next_review_date | × |  |
-| idx_mentor_id | mentor_id | × |  |
-| idx_supervisor_id | supervisor_id | × |  |
-| idx_priority_level | priority_level | × |  |
+| idx_mst_careerplan_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_career_plan_employee | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_career_plan_target_position | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_career_plan_target_job_type | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_career_plan_target_department | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_career_plan_mentor | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_career_plan_supervisor | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_career_plan_id | UNIQUE |  | career_plan_id一意制約 |
-| chk_plan_type | CHECK | plan_type IN (...) | plan_type値チェック制約 |
-| chk_target_job_type_id | CHECK | target_job_type_id IN (...) | target_job_type_id値チェック制約 |
-| chk_plan_status | CHECK | plan_status IN (...) | plan_status値チェック制約 |
+| pk_mst_careerplan | PRIMARY KEY | careerplan_id | 主キー制約 |
 
 ## サンプルデータ
 

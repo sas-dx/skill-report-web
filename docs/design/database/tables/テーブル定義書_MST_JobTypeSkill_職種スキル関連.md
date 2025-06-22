@@ -7,7 +7,7 @@
 | テーブル名 | MST_JobTypeSkill |
 | 論理名 | 職種スキル関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -27,44 +27,30 @@ MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_type_id |  | VARCHAR |  | ○ |  |  |
-| skill_item_id |  | VARCHAR |  | ○ |  |  |
-| required_level |  | INTEGER |  | ○ |  |  |
-| skill_priority |  | ENUM |  | ○ | MEDIUM |  |
-| skill_category |  | ENUM |  | ○ |  |  |
-| experience_years |  | DECIMAL |  | ○ |  |  |
-| certification_required |  | BOOLEAN |  | ○ | False |  |
-| skill_weight |  | DECIMAL |  | ○ |  |  |
-| evaluation_criteria |  | TEXT |  | ○ |  |  |
-| learning_path |  | TEXT |  | ○ |  |  |
-| skill_status |  | ENUM |  | ○ | ACTIVE |  |
-| effective_date |  | DATE |  | ○ |  |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| alternative_skills |  | TEXT |  | ○ |  |  |
-| prerequisite_skills |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| jobtypeskill_id | MST_JobTypeSkillの主キー | SERIAL |  | × |  | MST_JobTypeSkillの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_JobTypeSkill_job_type_id | job_type_id | × |  |
-| idx_MST_JobTypeSkill_skill_item_id | skill_item_id | × |  |
-| idx_MST_JobTypeSkill_job_skill | job_type_id, skill_item_id | ○ |  |
-| idx_MST_JobTypeSkill_required_level | required_level | × |  |
-| idx_MST_JobTypeSkill_priority | skill_priority | × |  |
-| idx_MST_JobTypeSkill_category | skill_category | × |  |
-| idx_MST_JobTypeSkill_status | skill_status | × |  |
-| idx_MST_JobTypeSkill_effective_date | effective_date | × |  |
+| idx_mst_jobtypeskill_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_MST_JobTypeSkill_job_type | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_JobTypeSkill_skill_item | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_job_type_id | CHECK | job_type_id IN (...) | job_type_id値チェック制約 |
-| chk_required_level | CHECK | required_level > 0 | required_level正値チェック制約 |
-| chk_skill_status | CHECK | skill_status IN (...) | skill_status値チェック制約 |
+| pk_mst_jobtypeskill | PRIMARY KEY | jobtypeskill_id | 主キー制約 |
+| chk_jobtypeskill_id | CHECK | jobtypeskill_id IN (...) | jobtypeskill_id値チェック制約 |
 
 ## サンプルデータ
 

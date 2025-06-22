@@ -85,7 +85,7 @@ class SqlUtils:
         col_def = f"{column.name} {col_type}"
         
         # NULL制約
-        if not column.null:
+        if not column.nullable:
             col_def += " NOT NULL"
         
         # デフォルト値

@@ -13,38 +13,20 @@
 このテーブルにより、組織全体で統一されたスキル評価基準を確立し、
 社員のスキル開発と適切な人材配置を効率的に行うことができます。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 23:19:39
 -- ============================================
 
 DROP TABLE IF EXISTS MST_SkillGrade;
 
 CREATE TABLE MST_SkillGrade (
-    grade_code VARCHAR,
-    grade_name VARCHAR,
-    grade_name_short VARCHAR,
-    grade_level INTEGER,
-    description TEXT,
-    evaluation_criteria TEXT,
-    required_experience_months INTEGER,
-    skill_indicators TEXT,
-    competency_requirements TEXT,
-    certification_requirements TEXT,
-    project_complexity ENUM,
-    mentoring_capability BOOLEAN DEFAULT False,
-    leadership_level ENUM,
-    salary_impact_factor DECIMAL,
-    promotion_eligibility BOOLEAN DEFAULT False,
-    color_code VARCHAR,
-    sort_order INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT True,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    skillgrade_id SERIAL NOT NULL COMMENT 'MST_SkillGradeの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT 'False' COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (skillgrade_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_grade_code ON MST_SkillGrade (grade_code);
-CREATE UNIQUE INDEX idx_grade_level ON MST_SkillGrade (grade_level);
-CREATE INDEX idx_grade_name ON MST_SkillGrade (grade_name);
-CREATE INDEX idx_mentoring ON MST_SkillGrade (mentoring_capability, is_active);
-CREATE INDEX idx_promotion ON MST_SkillGrade (promotion_eligibility, is_active);
-CREATE INDEX idx_sort_order ON MST_SkillGrade (sort_order);
+CREATE INDEX idx_mst_skillgrade_tenant_id ON MST_SkillGrade (tenant_id);

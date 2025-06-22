@@ -13,36 +13,27 @@
 
 このテーブルは、人事評価、キャリア開発、組織分析など、スキル管理の中核となる重要なデータです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS TRN_EmployeeSkillGrade;
 
 CREATE TABLE TRN_EmployeeSkillGrade (
-    employee_id VARCHAR,
-    job_type_id VARCHAR,
-    skill_grade VARCHAR,
-    skill_level INT,
-    effective_date DATE,
-    expiry_date DATE,
-    evaluation_date DATE,
-    evaluator_id VARCHAR,
-    evaluation_comment TEXT,
-    certification_flag BOOLEAN DEFAULT False,
-    next_evaluation_date DATE,
+    employeeskillgrade_id SERIAL NOT NULL COMMENT 'TRN_EmployeeSkillGradeの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
     id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
     is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
     created_by VARCHAR(50) NOT NULL COMMENT 'レコード作成者のユーザーID',
     updated_by VARCHAR(50) NOT NULL COMMENT 'レコード更新者のユーザーID',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時',
-    PRIMARY KEY (id)
+    PRIMARY KEY (employeeskillgrade_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE INDEX idx_employee_job_effective ON TRN_EmployeeSkillGrade (employee_id, job_type_id, effective_date);
-CREATE INDEX idx_employee_current ON TRN_EmployeeSkillGrade (employee_id, expiry_date);
-CREATE INDEX idx_job_type_grade ON TRN_EmployeeSkillGrade (job_type_id, skill_grade);
-CREATE INDEX idx_evaluation_date ON TRN_EmployeeSkillGrade (evaluation_date);
-CREATE INDEX idx_next_evaluation ON TRN_EmployeeSkillGrade (next_evaluation_date);
-CREATE INDEX idx_certification ON TRN_EmployeeSkillGrade (certification_flag);
+CREATE INDEX idx_trn_employeeskillgrade_tenant_id ON TRN_EmployeeSkillGrade (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_employee FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_job_type FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE TRN_EmployeeSkillGrade ADD CONSTRAINT fk_skill_grade_evaluator FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

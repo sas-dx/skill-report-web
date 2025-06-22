@@ -14,41 +14,21 @@
 このテーブルにより、各スキルグレードに求められる具体的な要件を明確に定義し、
 公正で透明性の高い人材評価・育成システムを構築できます。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS MST_SkillGradeRequirement;
 
 CREATE TABLE MST_SkillGradeRequirement (
-    skill_grade_id VARCHAR,
-    requirement_category ENUM,
-    requirement_name VARCHAR,
-    requirement_description TEXT,
-    evaluation_criteria TEXT,
-    proficiency_level INTEGER,
-    weight_percentage DECIMAL,
-    minimum_score DECIMAL,
-    evidence_requirements TEXT,
-    learning_resources TEXT,
-    prerequisite_requirements TEXT,
-    assessment_method ENUM,
-    assessment_frequency ENUM DEFAULT 'ANNUAL',
-    validity_period INTEGER,
-    certification_mapping TEXT,
-    requirement_status ENUM DEFAULT 'ACTIVE',
-    effective_date DATE,
-    expiry_date DATE,
-    revision_notes TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    skillgraderequirement_id SERIAL NOT NULL COMMENT 'MST_SkillGradeRequirementの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (skillgraderequirement_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE INDEX idx_MST_SkillGradeRequirement_skill_grade_id ON MST_SkillGradeRequirement (skill_grade_id);
-CREATE INDEX idx_MST_SkillGradeRequirement_category ON MST_SkillGradeRequirement (requirement_category);
-CREATE INDEX idx_MST_SkillGradeRequirement_grade_category ON MST_SkillGradeRequirement (skill_grade_id, requirement_category);
-CREATE INDEX idx_MST_SkillGradeRequirement_proficiency_level ON MST_SkillGradeRequirement (proficiency_level);
-CREATE INDEX idx_MST_SkillGradeRequirement_assessment_method ON MST_SkillGradeRequirement (assessment_method);
-CREATE INDEX idx_MST_SkillGradeRequirement_status ON MST_SkillGradeRequirement (requirement_status);
-CREATE INDEX idx_MST_SkillGradeRequirement_effective_date ON MST_SkillGradeRequirement (effective_date);
-CREATE INDEX idx_MST_SkillGradeRequirement_weight ON MST_SkillGradeRequirement (weight_percentage);
+CREATE INDEX idx_mst_skillgraderequirement_tenant_id ON MST_SkillGradeRequirement (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_SkillGradeRequirement ADD CONSTRAINT fk_MST_SkillGradeRequirement_skill_grade FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;

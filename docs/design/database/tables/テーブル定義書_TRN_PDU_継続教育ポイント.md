@@ -7,7 +7,7 @@
 | テーブル名 | TRN_PDU |
 | 論理名 | 継続教育ポイント |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,70 +26,36 @@ TRN_PDU（継続教育ポイント）は、社員が取得した継続教育ポ�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| pdu_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| certification_id |  | VARCHAR |  | ○ |  |  |
-| activity_type |  | ENUM |  | ○ |  |  |
-| activity_name |  | VARCHAR |  | ○ |  |  |
-| activity_description |  | TEXT |  | ○ |  |  |
-| provider_name |  | VARCHAR |  | ○ |  |  |
-| activity_date |  | DATE |  | ○ |  |  |
-| start_time |  | TIME |  | ○ |  |  |
-| end_time |  | TIME |  | ○ |  |  |
-| duration_hours |  | DECIMAL |  | ○ |  |  |
-| pdu_points |  | DECIMAL |  | ○ |  |  |
-| pdu_category |  | ENUM |  | ○ |  |  |
-| pdu_subcategory |  | VARCHAR |  | ○ |  |  |
-| location |  | VARCHAR |  | ○ |  |  |
-| cost |  | DECIMAL |  | ○ |  |  |
-| cost_covered_by |  | ENUM |  | ○ |  |  |
-| evidence_type |  | ENUM |  | ○ |  |  |
-| evidence_file_path |  | VARCHAR |  | ○ |  |  |
-| certificate_number |  | VARCHAR |  | ○ |  |  |
-| instructor_name |  | VARCHAR |  | ○ |  |  |
-| learning_objectives |  | TEXT |  | ○ |  |  |
-| learning_outcomes |  | TEXT |  | ○ |  |  |
-| skills_developed |  | TEXT |  | ○ |  |  |
-| approval_status |  | ENUM |  | ○ | PENDING |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approval_date |  | DATE |  | ○ |  |  |
-| approval_comment |  | TEXT |  | ○ |  |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| is_recurring |  | BOOLEAN |  | ○ | False |  |
-| recurrence_pattern |  | VARCHAR |  | ○ |  |  |
-| related_training_id |  | VARCHAR |  | ○ |  |  |
-| related_project_id |  | VARCHAR |  | ○ |  |  |
+| pdu_id | TRN_PDUの主キー | SERIAL |  | × |  | TRN_PDUの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_pdu_id | pdu_id | ○ |  |
-| idx_employee_id | employee_id | × |  |
-| idx_certification_id | certification_id | × |  |
-| idx_activity_type | activity_type | × |  |
-| idx_activity_date | activity_date | × |  |
-| idx_pdu_category | pdu_category | × |  |
-| idx_approval_status | approval_status | × |  |
-| idx_employee_period | employee_id, activity_date | × |  |
-| idx_expiry_date | expiry_date | × |  |
-| idx_certification_employee | certification_id, employee_id, approval_status | × |  |
+| idx_trn_pdu_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_pdu_employee | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_pdu_certification | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_pdu_approver | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_pdu_training | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_pdu_project | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_pdu | PRIMARY KEY | id | 主キー制約 |
-| uk_pdu_id | UNIQUE |  | pdu_id一意制約 |
-| chk_activity_type | CHECK | activity_type IN (...) | activity_type値チェック制約 |
-| chk_evidence_type | CHECK | evidence_type IN (...) | evidence_type値チェック制約 |
-| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
+| pk_trn_pdu | PRIMARY KEY | pdu_id, id | 主キー制約 |
 
 ## サンプルデータ
 

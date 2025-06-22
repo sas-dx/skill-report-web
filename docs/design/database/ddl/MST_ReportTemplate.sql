@@ -12,37 +12,18 @@
 
 このテーブルは、帳票・レポート機能において一貫性のある帳票出力を実現する重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_ReportTemplate;
 
 CREATE TABLE MST_ReportTemplate (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    template_key VARCHAR,
-    template_name VARCHAR,
-    report_category ENUM,
-    output_format ENUM,
-    language_code VARCHAR DEFAULT 'ja',
-    template_content TEXT,
-    style_sheet TEXT,
-    parameters_schema TEXT,
-    data_source_config TEXT,
-    page_settings TEXT,
-    header_template TEXT,
-    footer_template TEXT,
-    is_default BOOLEAN DEFAULT False,
-    is_active BOOLEAN DEFAULT True,
-    version VARCHAR DEFAULT '1.0.0',
-    preview_image_url VARCHAR,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    reporttemplate_id SERIAL NOT NULL COMMENT 'MST_ReportTemplateの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (reporttemplate_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_report_template_tenant_key ON MST_ReportTemplate (tenant_id, template_key, language_code);
-CREATE INDEX idx_report_template_category ON MST_ReportTemplate (report_category);
-CREATE INDEX idx_report_template_format ON MST_ReportTemplate (output_format);
-CREATE INDEX idx_report_template_language ON MST_ReportTemplate (language_code);
-CREATE INDEX idx_report_template_default ON MST_ReportTemplate (is_default, is_active);
+CREATE INDEX idx_mst_reporttemplate_tenant_id ON MST_ReportTemplate (tenant_id);

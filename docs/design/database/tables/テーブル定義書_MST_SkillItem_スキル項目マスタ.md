@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillItem |
 | 論理名 | スキル項目マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -28,30 +28,22 @@ MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| skill_code |  | VARCHAR |  | ○ |  |  |
-| skill_name |  | VARCHAR |  | ○ |  |  |
-| skill_category_id |  | VARCHAR |  | ○ |  |  |
-| skill_type |  | ENUM |  | ○ |  |  |
-| difficulty_level |  | INT |  | ○ |  |  |
-| importance_level |  | INT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| skillitem_id | MST_SkillItemの主キー | SERIAL |  | × |  | MST_SkillItemの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_skill_code | skill_code | ○ |  |
-| idx_skill_category | skill_category_id | × |  |
+| idx_mst_skillitem_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_skill_code | UNIQUE |  | skill_code一意制約 |
-| chk_skill_type | CHECK | skill_type IN (...) | skill_type値チェック制約 |
-| chk_difficulty_level | CHECK | difficulty_level > 0 | difficulty_level正値チェック制約 |
-| chk_importance_level | CHECK | importance_level > 0 | importance_level正値チェック制約 |
+| pk_mst_skillitem | PRIMARY KEY | skillitem_id | 主キー制約 |
 
 ## サンプルデータ
 
@@ -63,11 +55,13 @@ MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象�
 
 - スキル項目は階層構造で管理
 - 評価基準は標準化されたレベル定義を使用
+- スキル項目の追加・変更は承認プロセスを経て実施
 
 ## 業務ルール
 
 - スキルコードは自動採番（SKILL + 3桁連番）
 - 重要度・難易度は1-5の5段階評価
+- スキル項目の削除は論理削除で実施し、履歴を保持
 
 ## 改版履歴
 

@@ -7,7 +7,7 @@
 | テーブル名 | TRN_SkillEvidence |
 | 論理名 | スキル証跡 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,73 +26,37 @@ TRN_SkillEvidence（スキル証跡）は、社員のスキル習得・向上を
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| evidence_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| skill_id |  | VARCHAR |  | ○ |  |  |
-| evidence_type |  | ENUM |  | ○ |  |  |
-| evidence_title |  | VARCHAR |  | ○ |  |  |
-| evidence_description |  | TEXT |  | ○ |  |  |
-| skill_level_demonstrated |  | ENUM |  | ○ |  |  |
-| evidence_date |  | DATE |  | ○ |  |  |
-| validity_start_date |  | DATE |  | ○ |  |  |
-| validity_end_date |  | DATE |  | ○ |  |  |
-| file_path |  | VARCHAR |  | ○ |  |  |
-| file_type |  | ENUM |  | ○ |  |  |
-| file_size_kb |  | INTEGER |  | ○ |  |  |
-| external_url |  | VARCHAR |  | ○ |  |  |
-| issuer_name |  | VARCHAR |  | ○ |  |  |
-| issuer_type |  | ENUM |  | ○ |  |  |
-| certificate_number |  | VARCHAR |  | ○ |  |  |
-| verification_method |  | ENUM |  | ○ |  |  |
-| verification_status |  | ENUM |  | ○ | PENDING |  |
-| verified_by |  | VARCHAR |  | ○ |  |  |
-| verification_date |  | DATE |  | ○ |  |  |
-| verification_comment |  | TEXT |  | ○ |  |  |
-| related_project_id |  | VARCHAR |  | ○ |  |  |
-| related_training_id |  | VARCHAR |  | ○ |  |  |
-| related_certification_id |  | VARCHAR |  | ○ |  |  |
-| impact_score |  | DECIMAL |  | ○ |  |  |
-| complexity_level |  | ENUM |  | ○ |  |  |
-| team_size |  | INTEGER |  | ○ |  |  |
-| role_in_activity |  | VARCHAR |  | ○ |  |  |
-| technologies_used |  | TEXT |  | ○ |  |  |
-| achievements |  | TEXT |  | ○ |  |  |
-| lessons_learned |  | TEXT |  | ○ |  |  |
-| is_public |  | BOOLEAN |  | ○ | False |  |
-| is_portfolio_item |  | BOOLEAN |  | ○ | False |  |
-| tags |  | TEXT |  | ○ |  |  |
+| skillevidence_id | TRN_SkillEvidenceの主キー | SERIAL |  | × |  | TRN_SkillEvidenceの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_evidence_id | evidence_id | ○ |  |
-| idx_employee_id | employee_id | × |  |
-| idx_skill_id | skill_id | × |  |
-| idx_evidence_type | evidence_type | × |  |
-| idx_skill_level | skill_level_demonstrated | × |  |
-| idx_evidence_date | evidence_date | × |  |
-| idx_verification_status | verification_status | × |  |
-| idx_validity_period | validity_start_date, validity_end_date | × |  |
-| idx_employee_skill | employee_id, skill_id, verification_status | × |  |
-| idx_portfolio | is_portfolio_item, is_public | × |  |
+| idx_trn_skillevidence_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_evidence_employee | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_evidence_skill | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_evidence_verifier | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_evidence_project | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_evidence_training | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_evidence_certification | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_skillevidence | PRIMARY KEY | id | 主キー制約 |
-| uk_evidence_id | UNIQUE |  | evidence_id一意制約 |
-| chk_evidence_type | CHECK | evidence_type IN (...) | evidence_type値チェック制約 |
-| chk_file_type | CHECK | file_type IN (...) | file_type値チェック制約 |
-| chk_issuer_type | CHECK | issuer_type IN (...) | issuer_type値チェック制約 |
-| chk_verification_status | CHECK | verification_status IN (...) | verification_status値チェック制約 |
+| pk_trn_skillevidence | PRIMARY KEY | skillevidence_id, id | 主キー制約 |
 
 ## サンプルデータ
 

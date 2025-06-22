@@ -7,7 +7,7 @@
 | テーブル名 | TRN_EmployeeSkillGrade |
 | 論理名 | 社員スキルグレード |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,42 +26,34 @@ TRN_EmployeeSkillGrade（社員スキルグレード）は、社員が職種ご�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| job_type_id |  | VARCHAR |  | ○ |  |  |
-| skill_grade |  | VARCHAR |  | ○ |  |  |
-| skill_level |  | INT |  | ○ |  |  |
-| effective_date |  | DATE |  | ○ |  |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| evaluation_date |  | DATE |  | ○ |  |  |
-| evaluator_id |  | VARCHAR |  | ○ |  |  |
-| evaluation_comment |  | TEXT |  | ○ |  |  |
-| certification_flag |  | BOOLEAN |  | ○ | False |  |
-| next_evaluation_date |  | DATE |  | ○ |  |  |
+| employeeskillgrade_id | TRN_EmployeeSkillGradeの主キー | SERIAL |  | × |  | TRN_EmployeeSkillGradeの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_employee_job_effective | employee_id, job_type_id, effective_date | × |  |
-| idx_employee_current | employee_id, expiry_date | × |  |
-| idx_job_type_grade | job_type_id, skill_grade | × |  |
-| idx_evaluation_date | evaluation_date | × |  |
-| idx_next_evaluation | next_evaluation_date | × |  |
-| idx_certification | certification_flag | × |  |
+| idx_trn_employeeskillgrade_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_skill_grade_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_skill_grade_job_type | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_skill_grade_evaluator | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_employeeskillgrade | PRIMARY KEY | id | 主キー制約 |
-| chk_job_type_id | CHECK | job_type_id IN (...) | job_type_id値チェック制約 |
-| chk_skill_level | CHECK | skill_level > 0 | skill_level正値チェック制約 |
+| pk_trn_employeeskillgrade | PRIMARY KEY | employeeskillgrade_id, id | 主キー制約 |
 
 ## サンプルデータ
 

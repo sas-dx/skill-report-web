@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillHierarchy |
 | 論理名 | スキル階層マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,34 +26,29 @@ MST_SkillHierarchy（スキル階層マスタ）は、スキル項目間の階�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| skill_id |  | VARCHAR |  | ○ |  |  |
-| parent_skill_id |  | VARCHAR |  | ○ |  |  |
-| hierarchy_level |  | INTEGER |  | ○ |  |  |
-| skill_path |  | VARCHAR |  | ○ |  |  |
-| sort_order |  | INTEGER |  | ○ | 0 |  |
-| is_leaf |  | BOOLEAN |  | ○ | True |  |
-| skill_category |  | ENUM |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| skillhierarchy_id | MST_SkillHierarchyの主キー | SERIAL |  | × |  | MST_SkillHierarchyの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_skill_id | skill_id | × |  |
-| idx_parent_skill | parent_skill_id | × |  |
-| idx_hierarchy_level | hierarchy_level | × |  |
-| idx_skill_path | skill_path | × |  |
-| idx_category_level | skill_category, hierarchy_level | × |  |
-| idx_parent_sort | parent_skill_id, sort_order | × |  |
+| idx_mst_skillhierarchy_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_hierarchy_skill | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_hierarchy_parent | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_hierarchy_level | CHECK | hierarchy_level > 0 | hierarchy_level正値チェック制約 |
+| pk_mst_skillhierarchy | PRIMARY KEY | skillhierarchy_id | 主キー制約 |
 
 ## サンプルデータ
 

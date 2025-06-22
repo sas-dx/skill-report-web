@@ -7,7 +7,7 @@
 | テーブル名 | SYS_IntegrationConfig |
 | 論理名 | 外部連携設定 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -25,44 +25,17 @@ SYS_IntegrationConfig（外部連携設定）は、外部システムとの連�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| integration_key |  | VARCHAR |  | ○ |  |  |
-| integration_name |  | VARCHAR |  | ○ |  |  |
-| integration_type |  | ENUM |  | ○ |  |  |
-| endpoint_url |  | VARCHAR |  | ○ |  |  |
-| auth_type |  | ENUM |  | ○ |  |  |
-| auth_config |  | TEXT |  | ○ |  |  |
-| connection_config |  | TEXT |  | ○ |  |  |
-| request_headers |  | TEXT |  | ○ |  |  |
-| timeout_seconds |  | INTEGER |  | ○ | 30 |  |
-| retry_count |  | INTEGER |  | ○ | 3 |  |
-| retry_interval |  | INTEGER |  | ○ | 5 |  |
-| rate_limit_per_minute |  | INTEGER |  | ○ |  |  |
-| is_enabled |  | BOOLEAN |  | ○ | True |  |
-| health_check_url |  | VARCHAR |  | ○ |  |  |
-| last_health_check |  | TIMESTAMP |  | ○ |  |  |
-| health_status |  | ENUM |  | ○ |  |  |
+| integrationconfig_id | SYS_IntegrationConfigの主キー | SERIAL |  | × |  | SYS_IntegrationConfigの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-
-## インデックス
-
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_integration_config_tenant_key | tenant_id, integration_key | ○ |  |
-| idx_integration_config_type | integration_type | × |  |
-| idx_integration_config_enabled | is_enabled | × |  |
-| idx_integration_config_health | health_status, last_health_check | × |  |
-| idx_integration_config_auth_type | auth_type | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_integration_type | CHECK | integration_type IN (...) | integration_type値チェック制約 |
-| chk_auth_type | CHECK | auth_type IN (...) | auth_type値チェック制約 |
-| chk_health_status | CHECK | health_status IN (...) | health_status値チェック制約 |
+| pk_sys_integrationconfig | PRIMARY KEY | integrationconfig_id, id | 主キー制約 |
 
 ## サンプルデータ
 

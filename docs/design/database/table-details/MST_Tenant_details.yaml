@@ -1,383 +1,358 @@
-# MST_Tenant テーブル詳細定義
-table_name: "MST_Tenant"
-logical_name: "テナント（組織）"
-category: "マスタ系"
-priority: "最高"
-requirement_id: "TNT.1-MGMT.1"
-comment: "マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル"
-
-# 改版履歴（必須）
+table_name: MST_Tenant
+logical_name: テナント（組織）
+category: マスタ系
+priority: 最高
+requirement_id: TNT.1-MGMT.1
+comment: マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル
 revision_history:
-  - version: "1.0.0"
-    date: "2025-06-01"
-    author: "開発チーム"
-    changes: "初版作成 - MST_Tenantテーブルの詳細定義"
-  - version: "1.1.0"
-    date: "2025-06-12"
-    author: "開発チーム"
-    changes: "必須セクション追加 - revision_history, overview, notes, business_rules"
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - MST_Tenantテーブルの詳細定義
+- version: 1.1.0
+  date: '2025-06-12'
+  author: 開発チーム
+  changes: 必須セクション追加 - revision_history, overview, notes, business_rules
+overview: 'マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル。
 
-# テーブル概要・目的（必須）
-overview: |
-  マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル。
-  
+
   主な目的：
+
   - 複数の組織・会社（テナント）の基本情報管理
+
   - テナント別のシステム設定・カスタマイズ情報の管理
+
   - 階層構造による組織関係の表現（親子関係）
+
   - テナント別のブランディング設定（ロゴ、カラー）
+
   - 契約・課金情報の管理（プラン、ユーザー数制限）
+
   - マルチテナント認証・認可の基盤データ提供
-  
+
+
   このテーブルはマルチテナントシステムの中核となるマスタデータであり、
+
   全ての業務データがテナント単位で分離される基盤を提供する。
+
   現在はシングルテナント実装だが、将来のマルチテナント化に備えた設計。
 
-# カラム定義
+  '
 columns:
-  - name: "tenant_id"
-    type: "VARCHAR(50)"
-    nullable: false
-    primary_key: true
-    unique: true
-    comment: "テナントを一意に識別するID"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "tenant_code"
-    type: "VARCHAR(20)"
-    nullable: false
-    unique: true
-    comment: "テナントの識別コード（URL等で使用）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "tenant_name"
-    type: "VARCHAR(200)"
-    nullable: false
-    comment: "テナント（組織・会社）の正式名称"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "tenant_name_en"
-    type: "VARCHAR(200)"
-    nullable: true
-    comment: "テナントの英語名称"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "tenant_short_name"
-    type: "VARCHAR(50)"
-    nullable: true
-    comment: "テナントの略称・短縮名"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "tenant_type"
-    type: "VARCHAR(20)"
-    nullable: false
-    default: "ENTERPRISE"
-    comment: "テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "parent_tenant_id"
-    type: "VARCHAR(50)"
-    nullable: true
-    comment: "親テナントのID（階層構造の場合）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "tenant_level"
-    type: "INTEGER"
-    nullable: false
-    default: 1
-    comment: "テナント階層のレベル（1が最上位）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "domain_name"
-    type: "VARCHAR(100)"
-    nullable: true
-    unique: true
-    comment: "テナント専用ドメイン名"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "subdomain"
-    type: "VARCHAR(50)"
-    nullable: true
-    unique: true
-    comment: "サブドメイン名（xxx.system.com）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "logo_url"
-    type: "VARCHAR(500)"
-    nullable: true
-    comment: "テナントロゴ画像のURL"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "primary_color"
-    type: "VARCHAR(7)"
-    nullable: true
-    comment: "テナントのプライマリカラー（#RRGGBB）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "secondary_color"
-    type: "VARCHAR(7)"
-    nullable: true
-    comment: "テナントのセカンダリカラー（#RRGGBB）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "timezone"
-    type: "VARCHAR(50)"
-    nullable: false
-    default: "Asia/Tokyo"
-    comment: "テナントのデフォルトタイムゾーン"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "locale"
-    type: "VARCHAR(10)"
-    nullable: false
-    default: "ja_JP"
-    comment: "テナントのデフォルトロケール"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "currency_code"
-    type: "VARCHAR(3)"
-    nullable: false
-    default: "JPY"
-    comment: "テナントで使用する通貨コード（ISO 4217）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "admin_email"
-    type: "VARCHAR(255)"
-    nullable: false
-    comment: "テナント管理者のメールアドレス"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "contact_email"
-    type: "VARCHAR(255)"
-    nullable: true
-    comment: "テナントの一般連絡先メールアドレス"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "phone_number"
-    type: "VARCHAR(20)"
-    nullable: true
-    comment: "テナントの電話番号"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "address"
-    type: "TEXT"
-    nullable: true
-    comment: "テナントの住所"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "postal_code"
-    type: "VARCHAR(10)"
-    nullable: true
-    comment: "郵便番号"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "country_code"
-    type: "VARCHAR(2)"
-    nullable: false
-    default: "JP"
-    comment: "国コード（ISO 3166-1 alpha-2）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "subscription_plan"
-    type: "VARCHAR(20)"
-    nullable: false
-    default: "BASIC"
-    comment: "契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "max_users"
-    type: "INTEGER"
-    nullable: false
-    default: 100
-    comment: "契約上の最大ユーザー数"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "max_storage_gb"
-    type: "INTEGER"
-    nullable: false
-    default: 10
-    comment: "契約上の最大ストレージ容量（GB）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "status"
-    type: "VARCHAR(20)"
-    nullable: false
-    default: "TRIAL"
-    comment: "テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "contract_start_date"
-    type: "DATE"
-    nullable: false
-    comment: "テナント契約の開始日"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "contract_end_date"
-    type: "DATE"
-    nullable: true
-    comment: "テナント契約の終了日"
-    requirement_id: "TNT.1-MGMT.1"
-    
-  - name: "created_at"
-    type: "TIMESTAMP"
-    nullable: false
-    default: "CURRENT_TIMESTAMP"
-    comment: "作成日時"
-    requirement_id: "PLT.1-WEB.1"
-    
-  - name: "updated_at"
-    type: "TIMESTAMP"
-    nullable: false
-    default: "CURRENT_TIMESTAMP"
-    comment: "更新日時"
-    requirement_id: "PLT.1-WEB.1"
-    
-  - name: "is_deleted"
-    type: "BOOLEAN"
-    nullable: false
-    default: false
-    comment: "論理削除フラグ"
-    requirement_id: "PLT.1-WEB.1"
-
-# インデックス定義
+- name: tenant_id
+  type: VARCHAR(50)
+  nullable: false
+  primary_key: true
+  unique: true
+  comment: テナントを一意に識別するID
+  requirement_id: TNT.1-MGMT.1
+- name: tenant_code
+  type: VARCHAR(20)
+  nullable: false
+  unique: true
+  comment: テナントの識別コード（URL等で使用）
+  requirement_id: TNT.1-MGMT.1
+- name: tenant_name
+  type: VARCHAR(200)
+  nullable: false
+  comment: テナント（組織・会社）の正式名称
+  requirement_id: TNT.1-MGMT.1
+- name: tenant_name_en
+  type: VARCHAR(200)
+  nullable: true
+  comment: テナントの英語名称
+  requirement_id: TNT.1-MGMT.1
+- name: tenant_short_name
+  type: VARCHAR(50)
+  nullable: true
+  comment: テナントの略称・短縮名
+  requirement_id: TNT.1-MGMT.1
+- name: tenant_type
+  type: VARCHAR(20)
+  nullable: false
+  default: ENTERPRISE
+  comment: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
+  requirement_id: TNT.1-MGMT.1
+- name: parent_tenant_id
+  type: VARCHAR(50)
+  nullable: true
+  comment: 親テナントのID（階層構造の場合）
+  requirement_id: TNT.1-MGMT.1
+- name: tenant_level
+  type: INTEGER
+  nullable: false
+  default: 1
+  comment: テナント階層のレベル（1が最上位）
+  requirement_id: TNT.1-MGMT.1
+- name: domain_name
+  type: VARCHAR(100)
+  nullable: true
+  unique: true
+  comment: テナント専用ドメイン名
+  requirement_id: TNT.1-MGMT.1
+- name: subdomain
+  type: VARCHAR(50)
+  nullable: true
+  unique: true
+  comment: サブドメイン名（xxx.system.com）
+  requirement_id: TNT.1-MGMT.1
+- name: logo_url
+  type: VARCHAR(500)
+  nullable: true
+  comment: テナントロゴ画像のURL
+  requirement_id: TNT.1-MGMT.1
+- name: primary_color
+  type: VARCHAR(7)
+  nullable: true
+  comment: テナントのプライマリカラー（#RRGGBB）
+  requirement_id: TNT.1-MGMT.1
+- name: secondary_color
+  type: VARCHAR(7)
+  nullable: true
+  comment: テナントのセカンダリカラー（#RRGGBB）
+  requirement_id: TNT.1-MGMT.1
+- name: timezone
+  type: VARCHAR(50)
+  nullable: false
+  default: Asia/Tokyo
+  comment: テナントのデフォルトタイムゾーン
+  requirement_id: TNT.1-MGMT.1
+- name: locale
+  type: VARCHAR(10)
+  nullable: false
+  default: ja_JP
+  comment: テナントのデフォルトロケール
+  requirement_id: TNT.1-MGMT.1
+- name: currency_code
+  type: VARCHAR(3)
+  nullable: false
+  default: JPY
+  comment: テナントで使用する通貨コード（ISO 4217）
+  requirement_id: TNT.1-MGMT.1
+- name: admin_email
+  type: VARCHAR(255)
+  nullable: false
+  comment: テナント管理者のメールアドレス
+  requirement_id: TNT.1-MGMT.1
+- name: contact_email
+  type: VARCHAR(255)
+  nullable: true
+  comment: テナントの一般連絡先メールアドレス
+  requirement_id: TNT.1-MGMT.1
+- name: phone_number
+  type: VARCHAR(20)
+  nullable: true
+  comment: テナントの電話番号
+  requirement_id: TNT.1-MGMT.1
+- name: address
+  type: TEXT
+  nullable: true
+  comment: テナントの住所
+  requirement_id: TNT.1-MGMT.1
+- name: postal_code
+  type: VARCHAR(10)
+  nullable: true
+  comment: 郵便番号
+  requirement_id: TNT.1-MGMT.1
+- name: country_code
+  type: VARCHAR(2)
+  nullable: false
+  default: JP
+  comment: 国コード（ISO 3166-1 alpha-2）
+  requirement_id: TNT.1-MGMT.1
+- name: subscription_plan
+  type: VARCHAR(20)
+  nullable: false
+  default: BASIC
+  comment: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
+  requirement_id: TNT.1-MGMT.1
+- name: max_users
+  type: INTEGER
+  nullable: false
+  default: 100
+  comment: 契約上の最大ユーザー数
+  requirement_id: TNT.1-MGMT.1
+- name: max_storage_gb
+  type: INTEGER
+  nullable: false
+  default: 10
+  comment: 契約上の最大ストレージ容量（GB）
+  requirement_id: TNT.1-MGMT.1
+- name: status
+  type: VARCHAR(20)
+  nullable: false
+  default: TRIAL
+  comment: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
+  requirement_id: TNT.1-MGMT.1
+- name: contract_start_date
+  type: DATE
+  nullable: false
+  comment: テナント契約の開始日
+  requirement_id: TNT.1-MGMT.1
+- name: contract_end_date
+  type: DATE
+  nullable: true
+  comment: テナント契約の終了日
+  requirement_id: TNT.1-MGMT.1
+- name: id
+  type: VARCHAR(50)
+  nullable: false
+  primary_key: false
+  unique: true
+  default: null
+  comment: プライマリキー（UUID）
+  requirement_id: PLT.1-WEB.1
+- name: created_at
+  type: TIMESTAMP
+  nullable: false
+  default: CURRENT_TIMESTAMP
+  comment: 作成日時
+  requirement_id: PLT.1-WEB.1
+- name: updated_at
+  type: TIMESTAMP
+  nullable: false
+  default: CURRENT_TIMESTAMP
+  comment: 更新日時
+  requirement_id: PLT.1-WEB.1
+- name: is_deleted
+  type: BOOLEAN
+  nullable: false
+  default: false
+  comment: 論理削除フラグ
+  requirement_id: PLT.1-WEB.1
 indexes:
-  - name: "idx_tenant_id"
-    columns: ["tenant_id"]
-    unique: true
-    comment: "テナントID検索用（一意）"
-    
-  - name: "idx_tenant_code"
-    columns: ["tenant_code"]
-    unique: true
-    comment: "テナントコード検索用（一意）"
-    
-  - name: "idx_domain_name"
-    columns: ["domain_name"]
-    unique: true
-    comment: "ドメイン名検索用（一意）"
-    
-  - name: "idx_subdomain"
-    columns: ["subdomain"]
-    unique: true
-    comment: "サブドメイン検索用（一意）"
-    
-  - name: "idx_tenant_type"
-    columns: ["tenant_type"]
-    unique: false
-    comment: "テナント種別検索用"
-    
-  - name: "idx_parent_tenant_id"
-    columns: ["parent_tenant_id"]
-    unique: false
-    comment: "親テナント検索用"
-    
-  - name: "idx_subscription_plan"
-    columns: ["subscription_plan"]
-    unique: false
-    comment: "サブスクリプションプラン検索用"
-    
-  - name: "idx_status"
-    columns: ["status"]
-    unique: false
-    comment: "ステータス検索用"
-    
-  - name: "idx_admin_email"
-    columns: ["admin_email"]
-    unique: false
-    comment: "管理者メール検索用"
-
-# 外部キー定義
+- name: idx_tenant_id
+  columns:
+  - tenant_id
+  unique: true
+  comment: テナントID検索用（一意）
+- name: idx_tenant_code
+  columns:
+  - tenant_code
+  unique: true
+  comment: テナントコード検索用（一意）
+- name: idx_domain_name
+  columns:
+  - domain_name
+  unique: true
+  comment: ドメイン名検索用（一意）
+- name: idx_subdomain
+  columns:
+  - subdomain
+  unique: true
+  comment: サブドメイン検索用（一意）
+- name: idx_tenant_type
+  columns:
+  - tenant_type
+  unique: false
+  comment: テナント種別検索用
+- name: idx_parent_tenant_id
+  columns:
+  - parent_tenant_id
+  unique: false
+  comment: 親テナント検索用
+- name: idx_subscription_plan
+  columns:
+  - subscription_plan
+  unique: false
+  comment: サブスクリプションプラン検索用
+- name: idx_status
+  columns:
+  - status
+  unique: false
+  comment: ステータス検索用
+- name: idx_admin_email
+  columns:
+  - admin_email
+  unique: false
+  comment: 管理者メール検索用
 foreign_keys:
-  - name: "fk_tenant_parent"
-    columns: ["parent_tenant_id"]
-    references:
-      table: "MST_Tenant"
-      columns: ["tenant_id"]
-    on_update: "CASCADE"
-    on_delete: "SET NULL"
-
-# 特記事項（必須）
+- name: fk_tenant_parent
+  columns:
+  - parent_tenant_id
+  references:
+    table: MST_Tenant
+    columns:
+    - tenant_id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
 notes:
-  - "現在はシングルテナント実装のため、1レコードのみ存在"
-  - "将来のマルチテナント化に備えた完全な設計を実装"
-  - "parent_tenant_idによる自己参照で組織階層を表現"
-  - "domain_name、subdomainは一意制約でテナント分離を保証"
-  - "カラーコードは#RRGGBB形式で統一（UI表示用）"
-  - "契約情報（プラン、制限値）は課金システムとの連携を想定"
-  - "論理削除は is_deleted フラグで管理"
-  - "タイムゾーン・ロケール設定でグローバル対応"
-
-# 業務ルール（必須）
+- 現在はシングルテナント実装のため、1レコードのみ存在
+- 将来のマルチテナント化に備えた完全な設計を実装
+- parent_tenant_idによる自己参照で組織階層を表現
+- domain_name、subdomainは一意制約でテナント分離を保証
+- カラーコードは#RRGGBB形式で統一（UI表示用）
+- 契約情報（プラン、制限値）は課金システムとの連携を想定
+- 論理削除は is_deleted フラグで管理
+- タイムゾーン・ロケール設定でグローバル対応
 business_rules:
-  - "テナントID（tenant_id）は一意で変更不可"
-  - "テナントコード（tenant_code）はURL等で使用するため英数字のみ"
-  - "ドメイン名・サブドメインは重複不可（テナント分離保証）"
-  - "親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能"
-  - "契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL"
-  - "最大ユーザー数・ストレージ容量は契約プランに応じて設定"
-  - "ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可"
-  - "管理者メール（admin_email）は必須、システム通知の送信先"
-  - "論理削除時は関連する全データも論理削除対象"
-  - "階層レベル（tenant_level）は親子関係の整合性を保証"
-
-# サンプルデータ（推奨）
+- テナントID（tenant_id）は一意で変更不可
+- テナントコード（tenant_code）はURL等で使用するため英数字のみ
+- ドメイン名・サブドメインは重複不可（テナント分離保証）
+- 親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能
+- 契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL
+- 最大ユーザー数・ストレージ容量は契約プランに応じて設定
+- ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可
+- 管理者メール（admin_email）は必須、システム通知の送信先
+- 論理削除時は関連する全データも論理削除対象
+- 階層レベル（tenant_level）は親子関係の整合性を保証
 sample_data:
-  - tenant_id: "tenant_001"
-    tenant_code: "main-corp"
-    tenant_name: "メイン株式会社"
-    tenant_name_en: "Main Corporation"
-    tenant_short_name: "メイン"
-    tenant_type: "ENTERPRISE"
-    parent_tenant_id: null
-    tenant_level: 1
-    domain_name: "main-corp.com"
-    subdomain: "main"
-    logo_url: "https://cdn.example.com/logos/main-corp.png"
-    primary_color: "#0066CC"
-    secondary_color: "#FF6600"
-    timezone: "Asia/Tokyo"
-    locale: "ja_JP"
-    currency_code: "JPY"
-    admin_email: "admin@main-corp.com"
-    contact_email: "contact@main-corp.com"
-    phone_number: "03-1234-5678"
-    address: "東京都千代田区丸の内1-1-1"
-    postal_code: "100-0005"
-    country_code: "JP"
-    subscription_plan: "ENTERPRISE"
-    max_users: 1000
-    max_storage_gb: 100
-    status: "ACTIVE"
-    contract_start_date: "2025-04-01"
-    contract_end_date: null
-    is_deleted: false
-    
-  - tenant_id: "tenant_002"
-    tenant_code: "sub-division"
-    tenant_name: "サブ事業部"
-    tenant_name_en: "Sub Division"
-    tenant_short_name: "サブ"
-    tenant_type: "DEPARTMENT"
-    parent_tenant_id: "tenant_001"
-    tenant_level: 2
-    domain_name: null
-    subdomain: "sub"
-    logo_url: null
-    primary_color: "#0066CC"
-    secondary_color: "#FF6600"
-    timezone: "Asia/Tokyo"
-    locale: "ja_JP"
-    currency_code: "JPY"
-    admin_email: "admin@sub.main-corp.com"
-    contact_email: null
-    phone_number: null
-    address: null
-    postal_code: null
-    country_code: "JP"
-    subscription_plan: "STANDARD"
-    max_users: 100
-    max_storage_gb: 20
-    status: "ACTIVE"
-    contract_start_date: "2025-04-01"
-    contract_end_date: null
-    is_deleted: false
+- tenant_id: tenant_001
+  tenant_code: main-corp
+  tenant_name: メイン株式会社
+  tenant_name_en: Main Corporation
+  tenant_short_name: メイン
+  tenant_type: ENTERPRISE
+  parent_tenant_id: null
+  tenant_level: 1
+  domain_name: main-corp.com
+  subdomain: main
+  logo_url: https://cdn.example.com/logos/main-corp.png
+  primary_color: '#0066CC'
+  secondary_color: '#FF6600'
+  timezone: Asia/Tokyo
+  locale: ja_JP
+  currency_code: JPY
+  admin_email: admin@main-corp.com
+  contact_email: contact@main-corp.com
+  phone_number: 03-1234-5678
+  address: 東京都千代田区丸の内1-1-1
+  postal_code: 100-0005
+  country_code: JP
+  subscription_plan: ENTERPRISE
+  max_users: 1000
+  max_storage_gb: 100
+  status: ACTIVE
+  contract_start_date: '2025-04-01'
+  contract_end_date: null
+  is_deleted: false
+- tenant_id: tenant_002
+  tenant_code: sub-division
+  tenant_name: サブ事業部
+  tenant_name_en: Sub Division
+  tenant_short_name: サブ
+  tenant_type: DEPARTMENT
+  parent_tenant_id: tenant_001
+  tenant_level: 2
+  domain_name: null
+  subdomain: sub
+  logo_url: null
+  primary_color: '#0066CC'
+  secondary_color: '#FF6600'
+  timezone: Asia/Tokyo
+  locale: ja_JP
+  currency_code: JPY
+  admin_email: admin@sub.main-corp.com
+  contact_email: null
+  phone_number: null
+  address: null
+  postal_code: null
+  country_code: JP
+  subscription_plan: STANDARD
+  max_users: 100
+  max_storage_gb: 20
+  status: ACTIVE
+  contract_start_date: '2025-04-01'
+  contract_end_date: null
+  is_deleted: false

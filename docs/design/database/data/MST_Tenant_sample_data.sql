@@ -1,5 +1,5 @@
 -- MST_Tenant (テナント（組織）) サンプルデータ
--- 生成日時: 2025-06-21 17:20:33
+-- 生成日時: 2025-06-21 22:02:17
 
 INSERT INTO MST_Tenant (
     tenant_id, tenant_code, tenant_name, tenant_name_en,

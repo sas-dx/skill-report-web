@@ -7,7 +7,7 @@
 | テーブル名 | MST_Skill |
 | 論理名 | スキルマスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:58 |
+| 生成日時 | 2025-06-21 23:19:39 |
 
 ## 概要
 
@@ -25,50 +25,32 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| skill_name |  | VARCHAR |  | ○ |  |  |
-| skill_name_en |  | VARCHAR |  | ○ |  |  |
-| category_id |  | VARCHAR |  | ○ |  |  |
-| skill_type |  | ENUM |  | ○ | TECHNICAL |  |
-| difficulty_level |  | INTEGER |  | ○ | 3 |  |
-| description |  | TEXT |  | ○ |  |  |
-| evaluation_criteria |  | TEXT |  | ○ |  |  |
-| required_experience_months |  | INTEGER |  | ○ |  |  |
-| related_skills |  | TEXT |  | ○ |  |  |
-| prerequisite_skills |  | TEXT |  | ○ |  |  |
-| certification_info |  | TEXT |  | ○ |  |  |
-| learning_resources |  | TEXT |  | ○ |  |  |
-| market_demand |  | ENUM |  | ○ | MEDIUM |  |
-| technology_trend |  | ENUM |  | ○ | STABLE |  |
-| is_core_skill |  | BOOLEAN |  | ○ | False |  |
-| display_order |  | INTEGER |  | ○ | 0 |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| effective_from |  | DATE |  | ○ |  |  |
-| effective_to |  | DATE |  | ○ |  |  |
-| created_at |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
-| updated_at |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
-| is_deleted |  | BOOLEAN |  | ○ | False |  |
+| skill_id | MST_Skillの主キー | SERIAL |  | × |  | MST_Skillの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_Skill_id | id | ○ |  |
-| idx_MST_Skill_skill_name | skill_name | × |  |
-| idx_MST_Skill_category_id | category_id | × |  |
-| idx_MST_Skill_skill_type | skill_type | × |  |
-| idx_MST_Skill_category_order | category_id, display_order | × |  |
-| idx_MST_Skill_market_demand | market_demand | × |  |
-| idx_MST_Skill_is_active | is_active | × |  |
+| idx_mst_skill_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_MST_Skill_tenant | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_MST_Skill_category | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
+| pk_mst_skill | PRIMARY KEY | skill_id | 主キー制約 |
 | uk_id | UNIQUE |  | id一意制約 |
-| chk_skill_type | CHECK | skill_type IN (...) | skill_type値チェック制約 |
-| chk_difficulty_level | CHECK | difficulty_level > 0 | difficulty_level正値チェック制約 |
 
 ## サンプルデータ
 

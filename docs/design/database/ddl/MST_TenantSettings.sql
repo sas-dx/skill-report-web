@@ -12,38 +12,21 @@
 
 このテーブルは、マルチテナント管理機能において各テナントの個別要件に対応する重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_TenantSettings;
 
 CREATE TABLE MST_TenantSettings (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    setting_category ENUM,
-    setting_key VARCHAR,
-    setting_name VARCHAR,
-    setting_description TEXT,
-    data_type ENUM,
-    setting_value TEXT,
-    default_value TEXT,
-    validation_rules TEXT,
-    is_required BOOLEAN DEFAULT False,
-    is_encrypted BOOLEAN DEFAULT False,
-    is_system_managed BOOLEAN DEFAULT False,
-    is_user_configurable BOOLEAN DEFAULT True,
-    display_order INTEGER DEFAULT 0,
-    effective_from TIMESTAMP,
-    effective_until TIMESTAMP,
-    last_modified_by VARCHAR,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    tenantsettings_id SERIAL NOT NULL COMMENT 'MST_TenantSettingsの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (tenantsettings_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_tenant_settings_tenant_key ON MST_TenantSettings (tenant_id, setting_key);
-CREATE INDEX idx_tenant_settings_category ON MST_TenantSettings (setting_category);
-CREATE INDEX idx_tenant_settings_configurable ON MST_TenantSettings (is_user_configurable);
-CREATE INDEX idx_tenant_settings_system_managed ON MST_TenantSettings (is_system_managed);
-CREATE INDEX idx_tenant_settings_display_order ON MST_TenantSettings (tenant_id, setting_category, display_order);
-CREATE INDEX idx_tenant_settings_effective ON MST_TenantSettings (effective_from, effective_until);
+CREATE INDEX idx_mst_tenantsettings_tenant_id ON MST_TenantSettings (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_TenantSettings ADD CONSTRAINT fk_tenant_settings_tenant FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;

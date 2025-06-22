@@ -15,45 +15,23 @@
 このテーブルは、スキル管理システムの基盤となり、
 効率的なスキル管理と戦略的人材育成を支援します。
 
--- 作成日: 2025-06-21 17:21:58
+-- 作成日: 2025-06-21 23:19:39
 -- ============================================
 
 DROP TABLE IF EXISTS MST_SkillCategory;
 
 CREATE TABLE MST_SkillCategory (
-    category_code VARCHAR,
-    category_name VARCHAR,
-    category_name_short VARCHAR,
-    category_name_en VARCHAR,
-    category_type ENUM,
-    parent_category_id VARCHAR,
-    category_level INT DEFAULT 1,
-    category_path VARCHAR,
-    is_system_category BOOLEAN DEFAULT False,
-    is_leaf_category BOOLEAN DEFAULT True,
-    skill_count INT DEFAULT 0,
-    evaluation_method ENUM,
-    max_level INT,
-    icon_url VARCHAR,
-    color_code VARCHAR,
-    display_order INT DEFAULT 999,
-    is_popular BOOLEAN DEFAULT False,
-    category_status ENUM DEFAULT 'ACTIVE',
-    effective_from DATE,
-    effective_to DATE,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    skillcategory_id SERIAL NOT NULL COMMENT 'MST_SkillCategoryの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT 'False' COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (skillcategory_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_category_code ON MST_SkillCategory (category_code);
-CREATE INDEX idx_category_type ON MST_SkillCategory (category_type);
-CREATE INDEX idx_parent_category ON MST_SkillCategory (parent_category_id);
-CREATE INDEX idx_category_level ON MST_SkillCategory (category_level);
-CREATE INDEX idx_category_path ON MST_SkillCategory (category_path);
-CREATE INDEX idx_system_category ON MST_SkillCategory (is_system_category);
-CREATE INDEX idx_leaf_category ON MST_SkillCategory (is_leaf_category);
-CREATE INDEX idx_category_status ON MST_SkillCategory (category_status);
-CREATE INDEX idx_display_order ON MST_SkillCategory (parent_category_id, display_order);
-CREATE INDEX idx_popular_category ON MST_SkillCategory (is_popular);
+CREATE INDEX idx_mst_skillcategory_tenant_id ON MST_SkillCategory (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_SkillCategory ADD CONSTRAINT fk_skillcategory_parent FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

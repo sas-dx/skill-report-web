@@ -7,7 +7,7 @@
 | テーブル名 | HIS_NotificationLog |
 | 論理名 | 通知送信履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -25,51 +25,33 @@ HIS_NotificationLog（通知送信履歴）は、システムから送信され�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| notification_id |  | VARCHAR |  | ○ |  |  |
-| setting_id |  | VARCHAR |  | ○ |  |  |
-| template_id |  | VARCHAR |  | ○ |  |  |
-| notification_type |  | ENUM |  | ○ |  |  |
-| recipient_type |  | ENUM |  | ○ |  |  |
-| recipient_address |  | VARCHAR |  | ○ |  |  |
-| subject |  | VARCHAR |  | ○ |  |  |
-| message_body |  | TEXT |  | ○ |  |  |
-| message_format |  | ENUM |  | ○ |  |  |
-| send_status |  | ENUM |  | ○ |  |  |
-| send_attempts |  | INTEGER |  | ○ | 0 |  |
-| max_retry_count |  | INTEGER |  | ○ | 3 |  |
-| scheduled_at |  | TIMESTAMP |  | ○ |  |  |
-| sent_at |  | TIMESTAMP |  | ○ |  |  |
-| delivered_at |  | TIMESTAMP |  | ○ |  |  |
-| opened_at |  | TIMESTAMP |  | ○ |  |  |
-| response_code |  | VARCHAR |  | ○ |  |  |
-| response_message |  | TEXT |  | ○ |  |  |
-| error_details |  | TEXT |  | ○ |  |  |
-| integration_config_id |  | VARCHAR |  | ○ |  |  |
-| priority_level |  | ENUM |  | ○ | MEDIUM |  |
+| notificationlog_id | HIS_NotificationLogの主キー | SERIAL |  | × |  | HIS_NotificationLogの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_notification_log_notification | notification_id | × |  |
-| idx_notification_log_tenant_status | tenant_id, send_status | × |  |
-| idx_notification_log_type | notification_type | × |  |
-| idx_notification_log_scheduled | scheduled_at | × |  |
-| idx_notification_log_sent | sent_at | × |  |
-| idx_notification_log_status_attempts | send_status, send_attempts | × |  |
-| idx_notification_log_priority | priority_level, scheduled_at | × |  |
+| idx_his_notificationlog_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_notification_log_notification | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_notification_log_setting | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_notification_log_template | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_notification_log_integration | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_notification_type | CHECK | notification_type IN (...) | notification_type値チェック制約 |
-| chk_recipient_type | CHECK | recipient_type IN (...) | recipient_type値チェック制約 |
-| chk_send_status | CHECK | send_status IN (...) | send_status値チェック制約 |
+| pk_his_notificationlog | PRIMARY KEY | notificationlog_id, id | 主キー制約 |
 
 ## サンプルデータ
 

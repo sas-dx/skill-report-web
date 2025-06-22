@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: HIS_TenantBilling
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:40
 -- レコード数: 2
 
 INSERT INTO HIS_TenantBilling (id, tenant_id, billing_period_start, billing_period_end, billing_type, plan_id, plan_name, base_amount, usage_amount, additional_amount, discount_amount, subtotal_amount, tax_rate, tax_amount, total_amount, currency_code, usage_details, billing_status, invoice_number, invoice_date, due_date, paid_date, payment_method, notes, created_at, updated_at, is_deleted) VALUES ('TB001', 'TENANT001', '2025-05-01', '2025-05-31', 'MONTHLY', 'PLAN_STANDARD', 'スタンダードプラン', 50000.0, 15000.0, 5000.0, 3000.0, 67000.0, 0.1, 6700.0, 73700.0, 'JPY', '{"users": 25, "storage_gb": 150, "api_calls": 50000}', 'PAID', 'INV-2025-05-001', '2025-06-01', '2025-06-30', '2025-06-15', 'CREDIT_CARD', '5月分月額利用料金', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);

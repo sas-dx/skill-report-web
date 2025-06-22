@@ -11,31 +11,20 @@
 このテーブルは、スキル管理システムの中核となるテーブルで、
 社員のスキル可視化やスキル分析の基盤データを提供します。
 
--- 作成日: 2025-06-21 17:20:35
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS SYS_SkillMatrix;
 
 CREATE TABLE SYS_SkillMatrix (
-    employee_id VARCHAR,
-    skill_id VARCHAR,
-    skill_level INTEGER DEFAULT 1,
-    self_assessment INTEGER,
-    manager_assessment INTEGER,
-    peer_assessment INTEGER,
-    assessment_date DATE,
-    evidence_url VARCHAR,
-    notes TEXT,
-    next_target_level INTEGER,
-    target_date DATE,
+    skillmatrix_id SERIAL NOT NULL COMMENT 'SYS_SkillMatrixの主キー',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
     id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
     is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
-    PRIMARY KEY (id)
+    PRIMARY KEY (skillmatrix_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- インデックス作成
-CREATE UNIQUE INDEX idx_SYS_SkillMatrix_employee_skill ON SYS_SkillMatrix (employee_id, skill_id);
-CREATE INDEX idx_SYS_SkillMatrix_employee_id ON SYS_SkillMatrix (employee_id);
-CREATE INDEX idx_SYS_SkillMatrix_skill_id ON SYS_SkillMatrix (skill_id);
-CREATE INDEX idx_SYS_SkillMatrix_assessment_date ON SYS_SkillMatrix (assessment_date);
-CREATE INDEX idx_SYS_SkillMatrix_skill_level ON SYS_SkillMatrix (skill_level);
+-- 外部キー制約
+ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT fk_SYS_SkillMatrix_employee FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT fk_SYS_SkillMatrix_skill FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;

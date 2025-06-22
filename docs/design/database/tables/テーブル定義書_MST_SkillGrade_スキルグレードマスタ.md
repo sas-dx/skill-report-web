@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillGrade |
 | 論理名 | スキルグレードマスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 23:19:39 |
 
 ## 概要
 
@@ -26,45 +26,25 @@ MST_SkillGrade（スキルグレードマスタ）は、スキルの習熟度レ
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| grade_code |  | VARCHAR |  | ○ |  |  |
-| grade_name |  | VARCHAR |  | ○ |  |  |
-| grade_name_short |  | VARCHAR |  | ○ |  |  |
-| grade_level |  | INTEGER |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| evaluation_criteria |  | TEXT |  | ○ |  |  |
-| required_experience_months |  | INTEGER |  | ○ |  |  |
-| skill_indicators |  | TEXT |  | ○ |  |  |
-| competency_requirements |  | TEXT |  | ○ |  |  |
-| certification_requirements |  | TEXT |  | ○ |  |  |
-| project_complexity |  | ENUM |  | ○ |  |  |
-| mentoring_capability |  | BOOLEAN |  | ○ | False |  |
-| leadership_level |  | ENUM |  | ○ |  |  |
-| salary_impact_factor |  | DECIMAL |  | ○ |  |  |
-| promotion_eligibility |  | BOOLEAN |  | ○ | False |  |
-| color_code |  | VARCHAR |  | ○ |  |  |
-| sort_order |  | INTEGER |  | ○ | 0 |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| skillgrade_id | MST_SkillGradeの主キー | SERIAL |  | × |  | MST_SkillGradeの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_grade_code | grade_code | ○ |  |
-| idx_grade_level | grade_level | ○ |  |
-| idx_grade_name | grade_name | × |  |
-| idx_mentoring | mentoring_capability, is_active | × |  |
-| idx_promotion | promotion_eligibility, is_active | × |  |
-| idx_sort_order | sort_order | × |  |
+| idx_mst_skillgrade_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_grade_code | UNIQUE |  | grade_code一意制約 |
-| uk_grade_level | UNIQUE |  | grade_level一意制約 |
-| chk_grade_level | CHECK | grade_level > 0 | grade_level正値チェック制約 |
+| pk_mst_skillgrade | PRIMARY KEY | skillgrade_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 

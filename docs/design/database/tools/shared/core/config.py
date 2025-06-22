@@ -211,6 +211,24 @@ class DatabaseToolsConfig:
         """サンプルデータファイルのパスを取得"""
         return self.data_dir / f"{table_name}_sample_data.sql"
     
+    def get_table_list_file(self) -> Path:
+        """テーブル一覧ファイルのパスを取得"""
+        # データベース設計ディレクトリのテーブル一覧.mdファイル
+        db_design_dir = self.base_dir / "docs" / "design" / "database" if self.base_dir.name != "tools" else self.base_dir.parent
+        return db_design_dir / "テーブル一覧.md"
+    
+    def get_details_dir(self) -> Path:
+        """テーブル詳細定義ディレクトリのパスを取得"""
+        return self.table_details_dir
+    
+    def get_tables_dir(self) -> Path:
+        """テーブル定義書ディレクトリのパスを取得"""
+        return self.tables_dir
+    
+    def get_ddl_dir(self) -> Path:
+        """DDLディレクトリのパスを取得"""
+        return self.ddl_dir
+    
     def get_backup_path(self, original_path: Path) -> Path:
         """バックアップファイルのパスを取得"""
         timestamp = self._get_timestamp()

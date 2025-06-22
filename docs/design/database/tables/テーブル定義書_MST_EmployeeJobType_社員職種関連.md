@@ -7,7 +7,7 @@
 | テーブル名 | MST_EmployeeJobType |
 | 論理名 | 社員職種関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,75 +26,34 @@ MST_EmployeeJobType（社員職種関連）は、社員と職種の関連付け�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_job_type_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| job_type_id |  | VARCHAR |  | ○ |  |  |
-| assignment_type |  | ENUM |  | ○ |  |  |
-| assignment_ratio |  | DECIMAL |  | ○ | 100.0 |  |
-| effective_start_date |  | DATE |  | ○ |  |  |
-| effective_end_date |  | DATE |  | ○ |  |  |
-| assignment_reason |  | ENUM |  | ○ |  |  |
-| assignment_status |  | ENUM |  | ○ | ACTIVE |  |
-| proficiency_level |  | ENUM |  | ○ | NOVICE |  |
-| target_proficiency_level |  | ENUM |  | ○ |  |  |
-| target_achievement_date |  | DATE |  | ○ |  |  |
-| certification_requirements |  | TEXT |  | ○ |  |  |
-| skill_requirements |  | TEXT |  | ○ |  |  |
-| experience_requirements |  | TEXT |  | ○ |  |  |
-| development_plan |  | TEXT |  | ○ |  |  |
-| training_plan |  | TEXT |  | ○ |  |  |
-| mentor_id |  | VARCHAR |  | ○ |  |  |
-| supervisor_id |  | VARCHAR |  | ○ |  |  |
-| performance_rating |  | ENUM |  | ○ |  |  |
-| last_evaluation_date |  | DATE |  | ○ |  |  |
-| next_evaluation_date |  | DATE |  | ○ |  |  |
-| evaluation_frequency |  | ENUM |  | ○ | QUARTERLY |  |
-| career_path |  | TEXT |  | ○ |  |  |
-| strengths |  | TEXT |  | ○ |  |  |
-| improvement_areas |  | TEXT |  | ○ |  |  |
-| achievements |  | TEXT |  | ○ |  |  |
-| goals |  | TEXT |  | ○ |  |  |
-| workload_percentage |  | DECIMAL |  | ○ | 100.0 |  |
-| billable_flag |  | BOOLEAN |  | ○ | True |  |
-| cost_center |  | VARCHAR |  | ○ |  |  |
-| budget_allocation |  | DECIMAL |  | ○ |  |  |
-| hourly_rate |  | DECIMAL |  | ○ |  |  |
-| overtime_eligible |  | BOOLEAN |  | ○ | True |  |
-| remote_work_eligible |  | BOOLEAN |  | ○ | False |  |
-| travel_required |  | BOOLEAN |  | ○ | False |  |
-| security_clearance_required |  | BOOLEAN |  | ○ | False |  |
-| created_by |  | VARCHAR |  | ○ |  |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approval_date |  | DATE |  | ○ |  |  |
-| notes |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| employeejobtype_id | MST_EmployeeJobTypeの主キー | SERIAL |  | × |  | MST_EmployeeJobTypeの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_employee_job_type_id | employee_job_type_id | ○ |  |
-| idx_employee_id | employee_id | × |  |
-| idx_job_type_id | job_type_id | × |  |
-| idx_employee_job_type | employee_id, job_type_id | × |  |
-| idx_assignment_type | assignment_type | × |  |
-| idx_assignment_status | assignment_status | × |  |
-| idx_proficiency_level | proficiency_level | × |  |
-| idx_effective_period | effective_start_date, effective_end_date | × |  |
-| idx_mentor_id | mentor_id | × |  |
-| idx_supervisor_id | supervisor_id | × |  |
-| idx_performance_rating | performance_rating | × |  |
+| idx_mst_employeejobtype_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_emp_job_type_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_emp_job_type_job_type | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_emp_job_type_mentor | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_emp_job_type_supervisor | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_emp_job_type_created_by | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_emp_job_type_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_employee_job_type_id | UNIQUE |  | employee_job_type_id一意制約 |
-| chk_employee_job_type_id | CHECK | employee_job_type_id IN (...) | employee_job_type_id値チェック制約 |
-| chk_job_type_id | CHECK | job_type_id IN (...) | job_type_id値チェック制約 |
-| chk_assignment_type | CHECK | assignment_type IN (...) | assignment_type値チェック制約 |
-| chk_assignment_status | CHECK | assignment_status IN (...) | assignment_status値チェック制約 |
+| pk_mst_employeejobtype | PRIMARY KEY | employeejobtype_id | 主キー制約 |
+| chk_employeejobtype_id | CHECK | employeejobtype_id IN (...) | employeejobtype_id値チェック制約 |
 
 ## サンプルデータ
 

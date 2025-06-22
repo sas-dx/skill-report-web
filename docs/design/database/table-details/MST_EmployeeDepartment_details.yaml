@@ -1,319 +1,371 @@
-# MST_EmployeeDepartment テーブル詳細定義
-table_name: "MST_EmployeeDepartment"
-logical_name: "社員部署関連"
-category: "マスタ系"
-
-# 改版履歴
+table_name: MST_EmployeeDepartment
+logical_name: 社員部署関連
+category: マスタ系
 revision_history:
-  - version: "1.0.0"
-    date: "2025-06-01"
-    author: "開発チーム"
-    changes: "初版作成 - 社員部署関連テーブルの詳細定義"
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 社員部署関連テーブルの詳細定義
+overview: 'MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付けを管理するマスタテーブルです。
 
-# テーブル概要・目的
-overview: |
-  MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付けを管理するマスタテーブルです。
-  
+
   主な目的：
+
   - 社員の部署所属履歴の管理
+
   - 複数部署兼務の管理
+
   - 部署異動履歴の追跡
+
   - 組織変更時の影響範囲把握
+
   - 部署別人員配置の管理
+
   - 権限管理における部署ベースアクセス制御
-  
+
+
   このテーブルにより、社員の組織所属状況を詳細に管理し、
+
   人事異動や組織変更の履歴を正確に追跡できます。
 
-# 業務固有カラム定義
+  '
 business_columns:
-  - name: employee_id
-    logical: 社員ID
-    type: VARCHAR
-    length: 50
-    null: false
-    unique: false
-    encrypted: false
-    description: 社員のID（MST_Employeeへの外部キー）
-    
-  - name: department_id
-    logical: 部署ID
-    type: VARCHAR
-    length: 50
-    null: false
-    unique: false
-    encrypted: false
-    description: 部署のID（MST_Departmentへの外部キー）
-    
-  - name: assignment_type
-    logical: 配属区分
-    type: ENUM
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 配属区分（PRIMARY:主配属、SECONDARY:兼務、TEMPORARY:一時配属）
-    enum_values: ['PRIMARY', 'SECONDARY', 'TEMPORARY']
-    default: 'PRIMARY'
-    
-  - name: start_date
-    logical: 配属開始日
-    type: DATE
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 部署への配属開始日
-    
-  - name: end_date
-    logical: 配属終了日
-    type: DATE
-    length: null
-    null: true
-    unique: false
-    encrypted: false
-    description: 部署からの配属終了日（NULL:現在も配属中）
-    
-  - name: assignment_ratio
-    logical: 配属比率
-    type: DECIMAL
-    length: "5,2"
-    null: true
-    unique: false
-    encrypted: false
-    description: 配属比率（%）兼務時の工数配分用
-    
-  - name: role_in_department
-    logical: 部署内役割
-    type: VARCHAR
-    length: 100
-    null: true
-    unique: false
-    encrypted: false
-    description: 部署内での役割・職責
-    
-  - name: reporting_manager_id
-    logical: 報告先上司ID
-    type: VARCHAR
-    length: 50
-    null: true
-    unique: false
-    encrypted: false
-    description: 当該部署での報告先上司ID（MST_Employeeへの外部キー）
-    
-  - name: assignment_reason
-    logical: 配属理由
-    type: VARCHAR
-    length: 500
-    null: true
-    unique: false
-    encrypted: false
-    description: 配属・異動の理由
-    
-  - name: assignment_status
-    logical: 配属状況
-    type: ENUM
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 配属状況（ACTIVE:有効、INACTIVE:無効、PENDING:保留）
-    enum_values: ['ACTIVE', 'INACTIVE', 'PENDING']
-    default: 'ACTIVE'
-    
-  - name: approval_status
-    logical: 承認状況
-    type: ENUM
-    length: null
-    null: false
-    unique: false
-    encrypted: false
-    description: 承認状況（APPROVED:承認済、PENDING:承認待ち、REJECTED:却下）
-    enum_values: ['APPROVED', 'PENDING', 'REJECTED']
-    default: 'PENDING'
-    
-  - name: approved_by
-    logical: 承認者ID
-    type: VARCHAR
-    length: 50
-    null: true
-    unique: false
-    encrypted: false
-    description: 配属を承認した管理者のID
-    
-  - name: approved_at
-    logical: 承認日時
-    type: TIMESTAMP
-    length: null
-    null: true
-    unique: false
-    encrypted: false
-    description: 配属が承認された日時
-
-# 業務固有インデックス
+- name: employee_id
+  logical: 社員ID
+  type: VARCHAR
+  length: 50
+  null: false
+  unique: false
+  encrypted: false
+  description: 社員のID（MST_Employeeへの外部キー）
+- name: department_id
+  logical: 部署ID
+  type: VARCHAR
+  length: 50
+  null: false
+  unique: false
+  encrypted: false
+  description: 部署のID（MST_Departmentへの外部キー）
+- name: assignment_type
+  logical: 配属区分
+  type: ENUM
+  length: null
+  null: false
+  unique: false
+  encrypted: false
+  description: 配属区分（PRIMARY:主配属、SECONDARY:兼務、TEMPORARY:一時配属）
+  enum_values:
+  - PRIMARY
+  - SECONDARY
+  - TEMPORARY
+  default: PRIMARY
+- name: start_date
+  logical: 配属開始日
+  type: DATE
+  length: null
+  null: false
+  unique: false
+  encrypted: false
+  description: 部署への配属開始日
+- name: end_date
+  logical: 配属終了日
+  type: DATE
+  length: null
+  null: true
+  unique: false
+  encrypted: false
+  description: 部署からの配属終了日（NULL:現在も配属中）
+- name: assignment_ratio
+  logical: 配属比率
+  type: DECIMAL
+  length: 5,2
+  null: true
+  unique: false
+  encrypted: false
+  description: 配属比率（%）兼務時の工数配分用
+- name: role_in_department
+  logical: 部署内役割
+  type: VARCHAR
+  length: 100
+  null: true
+  unique: false
+  encrypted: false
+  description: 部署内での役割・職責
+- name: reporting_manager_id
+  logical: 報告先上司ID
+  type: VARCHAR
+  length: 50
+  null: true
+  unique: false
+  encrypted: false
+  description: 当該部署での報告先上司ID（MST_Employeeへの外部キー）
+- name: assignment_reason
+  logical: 配属理由
+  type: VARCHAR
+  length: 500
+  null: true
+  unique: false
+  encrypted: false
+  description: 配属・異動の理由
+- name: assignment_status
+  logical: 配属状況
+  type: ENUM
+  length: null
+  null: false
+  unique: false
+  encrypted: false
+  description: 配属状況（ACTIVE:有効、INACTIVE:無効、PENDING:保留）
+  enum_values:
+  - ACTIVE
+  - INACTIVE
+  - PENDING
+  default: ACTIVE
+- name: approval_status
+  logical: 承認状況
+  type: ENUM
+  length: null
+  null: false
+  unique: false
+  encrypted: false
+  description: 承認状況（APPROVED:承認済、PENDING:承認待ち、REJECTED:却下）
+  enum_values:
+  - APPROVED
+  - PENDING
+  - REJECTED
+  default: PENDING
+- name: approved_by
+  logical: 承認者ID
+  type: VARCHAR
+  length: 50
+  null: true
+  unique: false
+  encrypted: false
+  description: 配属を承認した管理者のID
+- name: approved_at
+  logical: 承認日時
+  type: TIMESTAMP
+  length: null
+  null: true
+  unique: false
+  encrypted: false
+  description: 配属が承認された日時
 business_indexes:
-  - name: idx_MST_EmployeeDepartment_employee_id
-    columns: [employee_id]
-    unique: false
-    description: 社員ID検索用
-    
-  - name: idx_MST_EmployeeDepartment_department_id
-    columns: [department_id]
-    unique: false
-    description: 部署ID検索用
-    
-  - name: idx_MST_EmployeeDepartment_employee_department
-    columns: [employee_id, department_id]
-    unique: false
-    description: 社員・部署複合検索用
-    
-  - name: idx_MST_EmployeeDepartment_assignment_type
-    columns: [assignment_type]
-    unique: false
-    description: 配属区分別検索用
-    
-  - name: idx_MST_EmployeeDepartment_start_date
-    columns: [start_date]
-    unique: false
-    description: 配属開始日検索用
-    
-  - name: idx_MST_EmployeeDepartment_end_date
-    columns: [end_date]
-    unique: false
-    description: 配属終了日検索用
-    
-  - name: idx_MST_EmployeeDepartment_status
-    columns: [assignment_status]
-    unique: false
-    description: 配属状況別検索用
-
-# 業務固有制約
+- name: idx_MST_EmployeeDepartment_employee_id
+  columns:
+  - employee_id
+  unique: false
+  description: 社員ID検索用
+- name: idx_MST_EmployeeDepartment_department_id
+  columns:
+  - department_id
+  unique: false
+  description: 部署ID検索用
+- name: idx_MST_EmployeeDepartment_employee_department
+  columns:
+  - employee_id
+  - department_id
+  unique: false
+  description: 社員・部署複合検索用
+- name: idx_MST_EmployeeDepartment_assignment_type
+  columns:
+  - assignment_type
+  unique: false
+  description: 配属区分別検索用
+- name: idx_MST_EmployeeDepartment_start_date
+  columns:
+  - start_date
+  unique: false
+  description: 配属開始日検索用
+- name: idx_MST_EmployeeDepartment_end_date
+  columns:
+  - end_date
+  unique: false
+  description: 配属終了日検索用
+- name: idx_MST_EmployeeDepartment_status
+  columns:
+  - assignment_status
+  unique: false
+  description: 配属状況別検索用
 business_constraints:
-  - name: uk_MST_EmployeeDepartment_employee_dept_primary
-    type: UNIQUE
-    columns: [employee_id, department_id, assignment_type, start_date]
-    description: 社員・部署・配属区分・開始日一意制約
-    
-  - name: chk_MST_EmployeeDepartment_assignment_type
-    type: CHECK
-    condition: "assignment_type IN ('PRIMARY', 'SECONDARY', 'TEMPORARY')"
-    description: 配属区分値チェック制約
-    
-  - name: chk_MST_EmployeeDepartment_assignment_status
-    type: CHECK
-    condition: "assignment_status IN ('ACTIVE', 'INACTIVE', 'PENDING')"
-    description: 配属状況値チェック制約
-    
-  - name: chk_MST_EmployeeDepartment_approval_status
-    type: CHECK
-    condition: "approval_status IN ('APPROVED', 'PENDING', 'REJECTED')"
-    description: 承認状況値チェック制約
-    
-  - name: chk_MST_EmployeeDepartment_date_range
-    type: CHECK
-    condition: "end_date IS NULL OR start_date <= end_date"
-    description: 日付範囲整合性チェック制約
-    
-  - name: chk_MST_EmployeeDepartment_assignment_ratio
-    type: CHECK
-    condition: "assignment_ratio IS NULL OR (assignment_ratio >= 0 AND assignment_ratio <= 100)"
-    description: 配属比率範囲チェック制約
-
-# 外部キー関係
+- name: uk_MST_EmployeeDepartment_employee_dept_primary
+  type: UNIQUE
+  columns:
+  - employee_id
+  - department_id
+  - assignment_type
+  - start_date
+  description: 社員・部署・配属区分・開始日一意制約
+- name: chk_MST_EmployeeDepartment_assignment_type
+  type: CHECK
+  condition: assignment_type IN ('PRIMARY', 'SECONDARY', 'TEMPORARY')
+  description: 配属区分値チェック制約
+- name: chk_MST_EmployeeDepartment_assignment_status
+  type: CHECK
+  condition: assignment_status IN ('ACTIVE', 'INACTIVE', 'PENDING')
+  description: 配属状況値チェック制約
+- name: chk_MST_EmployeeDepartment_approval_status
+  type: CHECK
+  condition: approval_status IN ('APPROVED', 'PENDING', 'REJECTED')
+  description: 承認状況値チェック制約
+- name: chk_MST_EmployeeDepartment_date_range
+  type: CHECK
+  condition: end_date IS NULL OR start_date <= end_date
+  description: 日付範囲整合性チェック制約
+- name: chk_MST_EmployeeDepartment_assignment_ratio
+  type: CHECK
+  condition: assignment_ratio IS NULL OR (assignment_ratio >= 0 AND assignment_ratio
+    <= 100)
+  description: 配属比率範囲チェック制約
 foreign_keys:
-  - name: fk_MST_EmployeeDepartment_employee
-    column: employee_id
-    reference_table: MST_Employee
-    reference_column: id
-    on_update: CASCADE
-    on_delete: CASCADE
-    description: 社員への外部キー
-    
-  - name: fk_MST_EmployeeDepartment_department
-    column: department_id
-    reference_table: MST_Department
-    reference_column: id
-    on_update: CASCADE
-    on_delete: CASCADE
-    description: 部署への外部キー
-    
-  - name: fk_MST_EmployeeDepartment_reporting_manager
-    column: reporting_manager_id
-    reference_table: MST_Employee
-    reference_column: id
-    on_update: CASCADE
-    on_delete: SET NULL
-    description: 報告先上司への外部キー
-    
-  - name: fk_MST_EmployeeDepartment_approved_by
-    column: approved_by
-    reference_table: MST_Employee
-    reference_column: id
-    on_update: CASCADE
-    on_delete: SET NULL
-    description: 承認者への外部キー
-
-# サンプルデータ
+- name: fk_MST_EmployeeDepartment_employee
+  columns:
+  - employee_id
+  references:
+    table: MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+- name: fk_MST_EmployeeDepartment_department
+  columns:
+  - department_id
+  references:
+    table: MST_Department
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+- name: fk_MST_EmployeeDepartment_reporting_manager
+  columns:
+  - reporting_manager_id
+  references:
+    table: MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+- name: fk_MST_EmployeeDepartment_approved_by
+  columns:
+  - approved_by
+  references:
+    table: MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
 sample_data:
-  - employee_id: "EMP000001"
-    department_id: "DEPT001"
-    assignment_type: "PRIMARY"
-    start_date: "2020-04-01"
-    end_date: null
-    assignment_ratio: 100.00
-    role_in_department: "チームリーダー"
-    reporting_manager_id: "EMP000010"
-    assignment_reason: "新卒入社時配属"
-    assignment_status: "ACTIVE"
-    approval_status: "APPROVED"
-    approved_by: "EMP000010"
-    approved_at: "2020-03-25 10:00:00"
-    
-  - employee_id: "EMP000002"
-    department_id: "DEPT002"
-    assignment_type: "PRIMARY"
-    start_date: "2021-04-01"
-    end_date: null
-    assignment_ratio: 80.00
-    role_in_department: "開発担当"
-    reporting_manager_id: "EMP000011"
-    assignment_reason: "新卒入社時配属"
-    assignment_status: "ACTIVE"
-    approval_status: "APPROVED"
-    approved_by: "EMP000011"
-    approved_at: "2021-03-25 10:00:00"
-    
-  - employee_id: "EMP000002"
-    department_id: "DEPT003"
-    assignment_type: "SECONDARY"
-    start_date: "2023-01-01"
-    end_date: null
-    assignment_ratio: 20.00
-    role_in_department: "プロジェクト支援"
-    reporting_manager_id: "EMP000012"
-    assignment_reason: "プロジェクト支援のため兼務"
-    assignment_status: "ACTIVE"
-    approval_status: "APPROVED"
-    approved_by: "EMP000012"
-    approved_at: "2022-12-20 14:00:00"
-
-# 特記事項
+- employee_id: EMP000001
+  department_id: DEPT001
+  assignment_type: PRIMARY
+  start_date: '2020-04-01'
+  end_date: null
+  assignment_ratio: 100.0
+  role_in_department: チームリーダー
+  reporting_manager_id: EMP000010
+  assignment_reason: 新卒入社時配属
+  assignment_status: ACTIVE
+  approval_status: APPROVED
+  approved_by: EMP000010
+  approved_at: '2020-03-25 10:00:00'
+- employee_id: EMP000002
+  department_id: DEPT002
+  assignment_type: PRIMARY
+  start_date: '2021-04-01'
+  end_date: null
+  assignment_ratio: 80.0
+  role_in_department: 開発担当
+  reporting_manager_id: EMP000011
+  assignment_reason: 新卒入社時配属
+  assignment_status: ACTIVE
+  approval_status: APPROVED
+  approved_by: EMP000011
+  approved_at: '2021-03-25 10:00:00'
+- employee_id: EMP000002
+  department_id: DEPT003
+  assignment_type: SECONDARY
+  start_date: '2023-01-01'
+  end_date: null
+  assignment_ratio: 20.0
+  role_in_department: プロジェクト支援
+  reporting_manager_id: EMP000012
+  assignment_reason: プロジェクト支援のため兼務
+  assignment_status: ACTIVE
+  approval_status: APPROVED
+  approved_by: EMP000012
+  approved_at: '2022-12-20 14:00:00'
 notes:
-  - "社員は複数部署に同時所属可能（兼務対応）"
-  - "PRIMARY配属は社員につき1つのみ"
-  - "配属比率の合計は100%を超えないよう運用で管理"
-  - "部署異動時は前の配属のend_dateを設定し、新しい配属レコードを作成"
-  - "承認フローにより配属変更を管理"
-  - "論理削除は is_deleted フラグで管理"
-  - "履歴管理により組織変更の追跡が可能"
-
-# 業務ルール
+- 社員は複数部署に同時所属可能（兼務対応）
+- PRIMARY配属は社員につき1つのみ
+- 配属比率の合計は100%を超えないよう運用で管理
+- 部署異動時は前の配属のend_dateを設定し、新しい配属レコードを作成
+- 承認フローにより配属変更を管理
+- 論理削除は is_deleted フラグで管理
+- 履歴管理により組織変更の追跡が可能
 business_rules:
-  - "社員は必ず1つのPRIMARY配属を持つ必要がある"
-  - "SECONDARY配属（兼務）は複数設定可能"
-  - "TEMPORARY配属は期間限定の一時配属"
-  - "配属変更は承認者の承認が必要"
-  - "配属比率の合計は100%以下とする"
-  - "部署異動時は履歴として前の配属を残す"
-  - "報告先上司は配属先部署の社員である必要がある"
-  - "配属終了日は配属開始日以降である必要がある"
+- 社員は必ず1つのPRIMARY配属を持つ必要がある
+- SECONDARY配属（兼務）は複数設定可能
+- TEMPORARY配属は期間限定の一時配属
+- 配属変更は承認者の承認が必要
+- 配属比率の合計は100%以下とする
+- 部署異動時は履歴として前の配属を残す
+- 報告先上司は配属先部署の社員である必要がある
+- 配属終了日は配属開始日以降である必要がある
+columns:
+- name: employeedepartment_id
+  type: SERIAL
+  nullable: false
+  primary_key: true
+  unique: false
+  default: null
+  comment: MST_EmployeeDepartmentの主キー
+  requirement_id: PLT.1-WEB.1
+- name: tenant_id
+  type: VARCHAR(50)
+  nullable: false
+  primary_key: false
+  unique: false
+  default: null
+  comment: テナントID（マルチテナント対応）
+  requirement_id: TNT.1-MGMT.1
+- name: id
+  type: VARCHAR(50)
+  nullable: false
+  primary_key: false
+  unique: true
+  default: null
+  comment: プライマリキー（UUID）
+  requirement_id: PLT.1-WEB.1
+- name: is_deleted
+  type: BOOLEAN
+  nullable: false
+  primary_key: false
+  unique: false
+  default: 'False'
+  comment: 論理削除フラグ
+  requirement_id: PLT.1-WEB.1
+- name: created_at
+  type: TIMESTAMP
+  nullable: false
+  primary_key: false
+  unique: false
+  default: CURRENT_TIMESTAMP
+  comment: 作成日時
+  requirement_id: PLT.1-WEB.1
+- name: updated_at
+  type: TIMESTAMP
+  nullable: false
+  primary_key: false
+  unique: false
+  default: CURRENT_TIMESTAMP
+  comment: 更新日時
+  requirement_id: PLT.1-WEB.1
+indexes:
+- name: idx_mst_employeedepartment_tenant_id
+  columns:
+  - tenant_id
+  unique: false
+  comment: テナントID検索用インデックス

@@ -6,18 +6,21 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-# 現在のディレクトリをPythonパスに追加
+# パス解決のセットアップ
 current_dir = Path(__file__).parent
-sys.path.insert(0, str(current_dir))
+tools_dir = current_dir.parent
+if str(tools_dir) not in sys.path:
+    sys.path.insert(0, str(tools_dir))
 
-from core.config import Config, create_check_config
-from core.logger import ConsistencyLogger
-from checkers.consistency_checker import ConsistencyChecker
-from reporters.console_reporter import ConsoleReporter
-from reporters.markdown_reporter import MarkdownReporter
-from reporters.json_reporter import JsonReporter
-from utils.report_manager import ReportManager
-from sample_data_generator_enhanced import SampleDataGenerator
+# 絶対インポートを使用
+from database_consistency_checker.core.config import Config, create_check_config
+from database_consistency_checker.core.logger import ConsistencyLogger
+from database_consistency_checker.checkers.consistency_checker import ConsistencyChecker
+from database_consistency_checker.reporters.console_reporter import ConsoleReporter
+from database_consistency_checker.reporters.markdown_reporter import MarkdownReporter
+from database_consistency_checker.reporters.json_reporter import JsonReporter
+from database_consistency_checker.utils.report_manager import ReportManager
+from database_consistency_checker.sample_data_generator_enhanced import EnhancedSampleDataGenerator as SampleDataGenerator
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -290,7 +293,16 @@ def main():
         sys.exit(1)
     
     # 終了コードの決定
-    error_count = report.summary.get('error', 0)
+    if hasattr(report, 'summary'):
+        if hasattr(report.summary, 'error_count'):
+            # ConsistencyReportオブジェクトの場合
+            error_count = report.summary.error_count + report.summary.critical_count
+        else:
+            # dictの場合
+            error_count = report.summary.get('error', 0) + report.summary.get('critical', 0)
+    else:
+        error_count = 0
+        
     if error_count > 0:
         sys.exit(1)  # エラーがある場合は非ゼロで終了
     else:

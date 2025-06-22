@@ -7,7 +7,7 @@
 | テーブル名 | MST_EmployeePosition |
 | 論理名 | 社員役職関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -27,45 +27,30 @@ MST_EmployeePosition（社員役職関連）は、社員と役職の関連付け
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| position_id |  | VARCHAR |  | ○ |  |  |
-| appointment_type |  | ENUM |  | ○ | PRIMARY |  |
-| start_date |  | DATE |  | ○ |  |  |
-| end_date |  | DATE |  | ○ |  |  |
-| appointment_reason |  | VARCHAR |  | ○ |  |  |
-| responsibility_scope |  | VARCHAR |  | ○ |  |  |
-| authority_level |  | INTEGER |  | ○ |  |  |
-| salary_grade |  | VARCHAR |  | ○ |  |  |
-| appointment_status |  | ENUM |  | ○ | ACTIVE |  |
-| approval_status |  | ENUM |  | ○ | PENDING |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approved_at |  | TIMESTAMP |  | ○ |  |  |
-| performance_target |  | TEXT |  | ○ |  |  |
-| delegation_authority |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| employeeposition_id | MST_EmployeePositionの主キー | SERIAL |  | × |  | MST_EmployeePositionの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_EmployeePosition_employee_id | employee_id | × |  |
-| idx_MST_EmployeePosition_position_id | position_id | × |  |
-| idx_MST_EmployeePosition_employee_position | employee_id, position_id | × |  |
-| idx_MST_EmployeePosition_appointment_type | appointment_type | × |  |
-| idx_MST_EmployeePosition_start_date | start_date | × |  |
-| idx_MST_EmployeePosition_end_date | end_date | × |  |
-| idx_MST_EmployeePosition_status | appointment_status | × |  |
-| idx_MST_EmployeePosition_authority_level | authority_level | × |  |
+| idx_mst_employeeposition_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_MST_EmployeePosition_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_EmployeePosition_position | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_EmployeePosition_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_appointment_type | CHECK | appointment_type IN (...) | appointment_type値チェック制約 |
-| chk_authority_level | CHECK | authority_level > 0 | authority_level正値チェック制約 |
-| chk_appointment_status | CHECK | appointment_status IN (...) | appointment_status値チェック制約 |
-| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
+| pk_mst_employeeposition | PRIMARY KEY | employeeposition_id | 主キー制約 |
 
 ## サンプルデータ
 

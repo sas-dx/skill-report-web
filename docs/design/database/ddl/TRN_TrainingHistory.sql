@@ -13,59 +13,27 @@
 このテーブルにより、社員の学習履歴を体系的に記録し、
 スキル開発やキャリア形成の支援を効率的に行うことができます。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS TRN_TrainingHistory;
 
 CREATE TABLE TRN_TrainingHistory (
-    training_history_id VARCHAR,
-    employee_id VARCHAR,
-    training_program_id VARCHAR,
-    training_name VARCHAR,
-    training_type ENUM,
-    training_category ENUM,
-    provider_name VARCHAR,
-    instructor_name VARCHAR,
-    start_date DATE,
-    end_date DATE,
-    duration_hours DECIMAL,
-    location VARCHAR,
-    cost DECIMAL,
-    cost_covered_by ENUM,
-    attendance_status ENUM DEFAULT 'COMPLETED',
-    completion_rate DECIMAL,
-    test_score DECIMAL,
-    grade VARCHAR,
-    certificate_obtained BOOLEAN DEFAULT False,
-    certificate_number VARCHAR,
-    pdu_earned DECIMAL,
-    skills_acquired TEXT,
-    learning_objectives TEXT,
-    learning_outcomes TEXT,
-    feedback TEXT,
-    satisfaction_score DECIMAL,
-    recommendation_score DECIMAL,
-    follow_up_required BOOLEAN DEFAULT False,
-    follow_up_date DATE,
-    manager_approval BOOLEAN DEFAULT False,
-    approved_by VARCHAR,
+    traininghistory_id SERIAL NOT NULL COMMENT 'TRN_TrainingHistoryの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
     id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
     is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
     created_by VARCHAR(50) NOT NULL COMMENT 'レコード作成者のユーザーID',
     updated_by VARCHAR(50) NOT NULL COMMENT 'レコード更新者のユーザーID',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時',
-    PRIMARY KEY (id)
+    PRIMARY KEY (traininghistory_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_training_history_id ON TRN_TrainingHistory (training_history_id);
-CREATE INDEX idx_employee_id ON TRN_TrainingHistory (employee_id);
-CREATE INDEX idx_training_program_id ON TRN_TrainingHistory (training_program_id);
-CREATE INDEX idx_training_type ON TRN_TrainingHistory (training_type);
-CREATE INDEX idx_training_category ON TRN_TrainingHistory (training_category);
-CREATE INDEX idx_date_range ON TRN_TrainingHistory (start_date, end_date);
-CREATE INDEX idx_attendance_status ON TRN_TrainingHistory (attendance_status);
-CREATE INDEX idx_employee_period ON TRN_TrainingHistory (employee_id, start_date, end_date);
-CREATE INDEX idx_certificate ON TRN_TrainingHistory (certificate_obtained, certificate_number);
+CREATE INDEX idx_trn_traininghistory_tenant_id ON TRN_TrainingHistory (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE TRN_TrainingHistory ADD CONSTRAINT fk_training_history_employee FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE TRN_TrainingHistory ADD CONSTRAINT fk_training_history_program FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE TRN_TrainingHistory ADD CONSTRAINT fk_training_history_approver FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

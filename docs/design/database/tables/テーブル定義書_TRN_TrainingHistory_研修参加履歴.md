@@ -7,7 +7,7 @@
 | テーブル名 | TRN_TrainingHistory |
 | 論理名 | 研修参加履歴 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,66 +26,34 @@ TRN_TrainingHistory（研修参加履歴）は、社員が参加した研修・�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| training_history_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| training_program_id |  | VARCHAR |  | ○ |  |  |
-| training_name |  | VARCHAR |  | ○ |  |  |
-| training_type |  | ENUM |  | ○ |  |  |
-| training_category |  | ENUM |  | ○ |  |  |
-| provider_name |  | VARCHAR |  | ○ |  |  |
-| instructor_name |  | VARCHAR |  | ○ |  |  |
-| start_date |  | DATE |  | ○ |  |  |
-| end_date |  | DATE |  | ○ |  |  |
-| duration_hours |  | DECIMAL |  | ○ |  |  |
-| location |  | VARCHAR |  | ○ |  |  |
-| cost |  | DECIMAL |  | ○ |  |  |
-| cost_covered_by |  | ENUM |  | ○ |  |  |
-| attendance_status |  | ENUM |  | ○ | COMPLETED |  |
-| completion_rate |  | DECIMAL |  | ○ |  |  |
-| test_score |  | DECIMAL |  | ○ |  |  |
-| grade |  | VARCHAR |  | ○ |  |  |
-| certificate_obtained |  | BOOLEAN |  | ○ | False |  |
-| certificate_number |  | VARCHAR |  | ○ |  |  |
-| pdu_earned |  | DECIMAL |  | ○ |  |  |
-| skills_acquired |  | TEXT |  | ○ |  |  |
-| learning_objectives |  | TEXT |  | ○ |  |  |
-| learning_outcomes |  | TEXT |  | ○ |  |  |
-| feedback |  | TEXT |  | ○ |  |  |
-| satisfaction_score |  | DECIMAL |  | ○ |  |  |
-| recommendation_score |  | DECIMAL |  | ○ |  |  |
-| follow_up_required |  | BOOLEAN |  | ○ | False |  |
-| follow_up_date |  | DATE |  | ○ |  |  |
-| manager_approval |  | BOOLEAN |  | ○ | False |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
+| traininghistory_id | TRN_TrainingHistoryの主キー | SERIAL |  | × |  | TRN_TrainingHistoryの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_training_history_id | training_history_id | ○ |  |
-| idx_employee_id | employee_id | × |  |
-| idx_training_program_id | training_program_id | × |  |
-| idx_training_type | training_type | × |  |
-| idx_training_category | training_category | × |  |
-| idx_date_range | start_date, end_date | × |  |
-| idx_attendance_status | attendance_status | × |  |
-| idx_employee_period | employee_id, start_date, end_date | × |  |
-| idx_certificate | certificate_obtained, certificate_number | × |  |
+| idx_trn_traininghistory_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_training_history_employee | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_training_history_program | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_training_history_approver | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_traininghistory | PRIMARY KEY | id | 主キー制約 |
-| uk_training_history_id | UNIQUE |  | training_history_id一意制約 |
-| chk_training_type | CHECK | training_type IN (...) | training_type値チェック制約 |
-| chk_attendance_status | CHECK | attendance_status IN (...) | attendance_status値チェック制約 |
+| pk_trn_traininghistory | PRIMARY KEY | traininghistory_id, id | 主キー制約 |
 
 ## サンプルデータ
 

@@ -7,7 +7,7 @@
 | テーブル名 | TRN_ProjectRecord |
 | 論理名 | 案件実績 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,58 +26,32 @@ TRN_ProjectRecord（案件実績）は、社員が参加したプロジェクト
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| project_record_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| project_name |  | VARCHAR |  | ○ |  |  |
-| project_code |  | VARCHAR |  | ○ |  |  |
-| client_name |  | VARCHAR |  | ○ |  |  |
-| project_type |  | ENUM |  | ○ |  |  |
-| project_scale |  | ENUM |  | ○ |  |  |
-| start_date |  | DATE |  | ○ |  |  |
-| end_date |  | DATE |  | ○ |  |  |
-| participation_rate |  | DECIMAL |  | ○ |  |  |
-| role_title |  | VARCHAR |  | ○ |  |  |
-| responsibilities |  | TEXT |  | ○ |  |  |
-| technologies_used |  | TEXT |  | ○ |  |  |
-| skills_applied |  | TEXT |  | ○ |  |  |
-| achievements |  | TEXT |  | ○ |  |  |
-| challenges_faced |  | TEXT |  | ○ |  |  |
-| lessons_learned |  | TEXT |  | ○ |  |  |
-| team_size |  | INTEGER |  | ○ |  |  |
-| budget_range |  | ENUM |  | ○ |  |  |
-| project_status |  | ENUM |  | ○ | ONGOING |  |
-| evaluation_score |  | DECIMAL |  | ○ |  |  |
-| evaluation_comment |  | TEXT |  | ○ |  |  |
-| is_confidential |  | BOOLEAN |  | ○ | False |  |
-| is_public_reference |  | BOOLEAN |  | ○ | False |  |
+| projectrecord_id | TRN_ProjectRecordの主キー | SERIAL |  | × |  | TRN_ProjectRecordの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_project_record_id | project_record_id | ○ |  |
-| idx_employee_id | employee_id | × |  |
-| idx_project_name | project_name | × |  |
-| idx_project_code | project_code | × |  |
-| idx_project_type | project_type | × |  |
-| idx_date_range | start_date, end_date | × |  |
-| idx_project_status | project_status | × |  |
-| idx_employee_period | employee_id, start_date, end_date | × |  |
+| idx_trn_projectrecord_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_project_record_employee | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_projectrecord | PRIMARY KEY | id | 主キー制約 |
-| uk_project_record_id | UNIQUE |  | project_record_id一意制約 |
-| chk_project_type | CHECK | project_type IN (...) | project_type値チェック制約 |
-| chk_project_status | CHECK | project_status IN (...) | project_status値チェック制約 |
+| pk_trn_projectrecord | PRIMARY KEY | projectrecord_id, id | 主キー制約 |
 
 ## サンプルデータ
 

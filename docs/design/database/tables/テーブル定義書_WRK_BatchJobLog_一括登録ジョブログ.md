@@ -7,7 +7,7 @@
 | テーブル名 | WRK_BatchJobLog |
 | 論理名 | 一括登録ジョブログ |
 | カテゴリ | ワーク系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,23 +26,10 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_id |  | VARCHAR |  | ○ |  |  |
-| job_name |  | VARCHAR |  | ○ |  |  |
-| job_type |  | ENUM |  | ○ | SKILL_IMPORT |  |
-| status |  | ENUM |  | ○ | PENDING |  |
-| start_time |  | TIMESTAMP |  | ○ |  |  |
-| end_time |  | TIMESTAMP |  | ○ |  |  |
-| total_records |  | INTEGER |  | ○ | 0 |  |
-| processed_records |  | INTEGER |  | ○ | 0 |  |
-| success_records |  | INTEGER |  | ○ | 0 |  |
-| error_records |  | INTEGER |  | ○ | 0 |  |
-| error_details |  | TEXT |  | ○ |  |  |
-| input_file_path |  | VARCHAR |  | ○ |  |  |
-| output_file_path |  | VARCHAR |  | ○ |  |  |
-| executed_by |  | VARCHAR |  | ○ |  |  |
-| progress_percentage |  | DECIMAL |  | ○ | 0.0 |  |
-| execution_environment |  | VARCHAR |  | ○ |  |  |
-| job_parameters |  | TEXT |  | ○ |  |  |
+| batchjoblog_id | WRK_BatchJobLogの主キー | SERIAL |  | × |  | WRK_BatchJobLogの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
@@ -50,21 +37,19 @@
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_WRK_BatchJobLog_job_id | job_id | ○ |  |
-| idx_WRK_BatchJobLog_status | status | × |  |
-| idx_WRK_BatchJobLog_start_time | start_time | × |  |
-| idx_WRK_BatchJobLog_executed_by | executed_by | × |  |
-| idx_WRK_BatchJobLog_job_type | job_type | × |  |
-| idx_WRK_BatchJobLog_status_start_time | status, start_time | × |  |
+| idx_wrk_batchjoblog_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_WRK_BatchJobLog_executed_by | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_wrk_batchjoblog | PRIMARY KEY | id | 主キー制約 |
-| uk_job_id | UNIQUE |  | job_id一意制約 |
-| chk_job_type | CHECK | job_type IN (...) | job_type値チェック制約 |
-| chk_status | CHECK | status IN (...) | status値チェック制約 |
+| pk_wrk_batchjoblog | PRIMARY KEY | batchjoblog_id, id | 主キー制約 |
 
 ## サンプルデータ
 

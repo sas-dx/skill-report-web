@@ -15,42 +15,21 @@
 このテーブルは、ロールと組み合わせてシステムセキュリティを構成し、
 適切なアクセス制御を実現する重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:21:58
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Permission;
 
 CREATE TABLE MST_Permission (
-    permission_code VARCHAR,
-    permission_name VARCHAR,
-    permission_name_short VARCHAR,
-    permission_category ENUM,
-    resource_type VARCHAR,
-    action_type ENUM,
-    scope_level ENUM,
-    parent_permission_id VARCHAR,
-    is_system_permission BOOLEAN DEFAULT False,
-    requires_conditions BOOLEAN DEFAULT False,
-    condition_expression TEXT,
-    risk_level INT DEFAULT 1,
-    requires_approval BOOLEAN DEFAULT False,
-    audit_required BOOLEAN DEFAULT False,
-    permission_status ENUM DEFAULT 'ACTIVE',
-    effective_from DATE,
-    effective_to DATE,
-    sort_order INT,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    permission_id SERIAL NOT NULL COMMENT 'MST_Permissionの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (permission_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_permission_code ON MST_Permission (permission_code);
-CREATE INDEX idx_permission_category ON MST_Permission (permission_category);
-CREATE INDEX idx_resource_action ON MST_Permission (resource_type, action_type);
-CREATE INDEX idx_scope_level ON MST_Permission (scope_level);
-CREATE INDEX idx_parent_permission ON MST_Permission (parent_permission_id);
-CREATE INDEX idx_system_permission ON MST_Permission (is_system_permission);
-CREATE INDEX idx_risk_level ON MST_Permission (risk_level);
-CREATE INDEX idx_permission_status ON MST_Permission (permission_status);
-CREATE INDEX idx_effective_period ON MST_Permission (effective_from, effective_to);
+CREATE INDEX idx_mst_permission_tenant_id ON MST_Permission (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_Permission ADD CONSTRAINT fk_permission_parent FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

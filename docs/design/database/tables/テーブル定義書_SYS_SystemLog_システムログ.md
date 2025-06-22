@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SystemLog |
 | 論理名 | システムログ |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:33 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -27,50 +27,23 @@ SYS_SystemLog（システムログ）は、アプリケーション全体で発�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| log_level |  | ENUM |  | ○ |  |  |
-| log_category |  | VARCHAR |  | ○ |  |  |
-| message |  | TEXT |  | ○ |  |  |
-| user_id |  | VARCHAR |  | ○ |  |  |
-| session_id |  | VARCHAR |  | ○ |  |  |
-| ip_address |  | VARCHAR |  | ○ |  |  |
-| user_agent |  | TEXT |  | ○ |  |  |
-| request_url |  | TEXT |  | ○ |  |  |
-| request_method |  | VARCHAR |  | ○ |  |  |
-| response_status |  | INT |  | ○ |  |  |
-| response_time |  | INT |  | ○ |  |  |
-| error_code |  | VARCHAR |  | ○ |  |  |
-| stack_trace |  | TEXT |  | ○ |  |  |
-| request_body |  | TEXT |  | ○ |  |  |
-| response_body |  | TEXT |  | ○ |  |  |
-| correlation_id |  | VARCHAR |  | ○ |  |  |
-| component_name |  | VARCHAR |  | ○ |  |  |
-| thread_name |  | VARCHAR |  | ○ |  |  |
-| server_name |  | VARCHAR |  | ○ |  |  |
+| systemlog_id | SYS_SystemLogの主キー | SERIAL |  | × |  | SYS_SystemLogの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
-## インデックス
+## 外部キー
 
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_log_level | log_level | × |  |
-| idx_log_category | log_category | × |  |
-| idx_user_id | user_id | × |  |
-| idx_session_id | session_id | × |  |
-| idx_ip_address | ip_address | × |  |
-| idx_error_code | error_code | × |  |
-| idx_correlation_id | correlation_id | × |  |
-| idx_component | component_name | × |  |
-| idx_server | server_name | × |  |
-| idx_response_time | response_time | × |  |
-| idx_created_at_level | created_at, log_level | × |  |
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_log_user | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_systemlog | PRIMARY KEY | id | 主キー制約 |
-| chk_response_status | CHECK | response_status IN (...) | response_status値チェック制約 |
+| pk_sys_systemlog | PRIMARY KEY | systemlog_id, id | 主キー制約 |
 
 ## サンプルデータ
 

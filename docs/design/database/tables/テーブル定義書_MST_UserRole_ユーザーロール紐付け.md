@@ -7,7 +7,7 @@
 | テーブル名 | MST_UserRole |
 | 論理名 | ユーザーロール紐付け |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -28,51 +28,32 @@ MST_UserRole（ユーザーロール紐付け）は、ユーザーとロール�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| user_id |  | VARCHAR |  | ○ |  |  |
-| role_id |  | VARCHAR |  | ○ |  |  |
-| assignment_type |  | ENUM |  | ○ | DIRECT |  |
-| assigned_by |  | VARCHAR |  | ○ |  |  |
-| assignment_reason |  | TEXT |  | ○ |  |  |
-| effective_from |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
-| effective_to |  | TIMESTAMP |  | ○ |  |  |
-| is_primary_role |  | BOOLEAN |  | ○ | False |  |
-| priority_order |  | INT |  | ○ | 999 |  |
-| conditions |  | JSON |  | ○ |  |  |
-| delegation_source_user_id |  | VARCHAR |  | ○ |  |  |
-| delegation_expires_at |  | TIMESTAMP |  | ○ |  |  |
-| auto_assigned |  | BOOLEAN |  | ○ | False |  |
-| requires_approval |  | BOOLEAN |  | ○ | False |  |
-| approval_status |  | ENUM |  | ○ |  |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approved_at |  | TIMESTAMP |  | ○ |  |  |
-| assignment_status |  | ENUM |  | ○ | ACTIVE |  |
-| last_used_at |  | TIMESTAMP |  | ○ |  |  |
-| usage_count |  | INT |  | ○ | 0 |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| userrole_id | MST_UserRoleの主キー | SERIAL |  | × |  | MST_UserRoleの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_user_role | user_id, role_id | ○ |  |
-| idx_user_id | user_id | × |  |
-| idx_role_id | role_id | × |  |
-| idx_assignment_type | assignment_type | × |  |
-| idx_assigned_by | assigned_by | × |  |
-| idx_effective_period | effective_from, effective_to | × |  |
-| idx_primary_role | user_id, is_primary_role | × |  |
-| idx_assignment_status | assignment_status | × |  |
-| idx_approval_status | approval_status | × |  |
-| idx_delegation_source | delegation_source_user_id | × |  |
+| idx_mst_userrole_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_userrole_user | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_userrole_role | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_userrole_assigned_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_userrole_delegation_source | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_userrole_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_assignment_type | CHECK | assignment_type IN (...) | assignment_type値チェック制約 |
-| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
-| chk_assignment_status | CHECK | assignment_status IN (...) | assignment_status値チェック制約 |
+| pk_mst_userrole | PRIMARY KEY | userrole_id | 主キー制約 |
 
 ## サンプルデータ
 

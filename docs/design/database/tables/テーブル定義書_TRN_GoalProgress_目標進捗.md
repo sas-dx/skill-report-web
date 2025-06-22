@@ -7,7 +7,7 @@
 | テーブル名 | TRN_GoalProgress |
 | 論理名 | 目標進捗 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -29,67 +29,35 @@ TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| goal_id |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| goal_title |  | VARCHAR |  | ○ |  |  |
-| goal_description |  | TEXT |  | ○ |  |  |
-| goal_category |  | ENUM |  | ○ |  |  |
-| goal_type |  | ENUM |  | ○ |  |  |
-| priority_level |  | ENUM |  | ○ | MEDIUM |  |
-| target_value |  | DECIMAL |  | ○ |  |  |
-| current_value |  | DECIMAL |  | ○ |  |  |
-| unit |  | VARCHAR |  | ○ |  |  |
-| start_date |  | DATE |  | ○ |  |  |
-| target_date |  | DATE |  | ○ |  |  |
-| progress_rate |  | DECIMAL |  | ○ | 0.0 |  |
-| achievement_status |  | ENUM |  | ○ | NOT_STARTED |  |
-| supervisor_id |  | VARCHAR |  | ○ |  |  |
-| approval_status |  | ENUM |  | ○ | DRAFT |  |
-| approved_at |  | TIMESTAMP |  | ○ |  |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| completion_date |  | DATE |  | ○ |  |  |
-| achievement_rate |  | DECIMAL |  | ○ |  |  |
-| self_evaluation |  | INTEGER |  | ○ |  |  |
-| supervisor_evaluation |  | INTEGER |  | ○ |  |  |
-| evaluation_comments |  | TEXT |  | ○ |  |  |
-| related_career_plan_id |  | VARCHAR |  | ○ |  |  |
-| related_skill_items |  | TEXT |  | ○ |  |  |
-| milestones |  | TEXT |  | ○ |  |  |
-| obstacles |  | TEXT |  | ○ |  |  |
-| support_needed |  | TEXT |  | ○ |  |  |
-| last_updated_at |  | TIMESTAMP |  | ○ |  |  |
-| next_review_date |  | DATE |  | ○ |  |  |
+| goalprogress_id | TRN_GoalProgressの主キー | SERIAL |  | × |  | TRN_GoalProgressの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
 | updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_TRN_GoalProgress_goal_id | goal_id | ○ |  |
-| idx_TRN_GoalProgress_employee_id | employee_id | × |  |
-| idx_TRN_GoalProgress_supervisor_id | supervisor_id | × |  |
-| idx_TRN_GoalProgress_category | goal_category | × |  |
-| idx_TRN_GoalProgress_status | achievement_status | × |  |
-| idx_TRN_GoalProgress_approval_status | approval_status | × |  |
-| idx_TRN_GoalProgress_target_date | target_date | × |  |
-| idx_TRN_GoalProgress_priority | priority_level | × |  |
-| idx_TRN_GoalProgress_employee_period | employee_id, start_date, target_date | × |  |
-| idx_TRN_GoalProgress_next_review | next_review_date | × |  |
+| idx_trn_goalprogress_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_TRN_GoalProgress_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_TRN_GoalProgress_supervisor | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_TRN_GoalProgress_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_TRN_GoalProgress_career_plan | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_goalprogress | PRIMARY KEY | id | 主キー制約 |
-| uk_goal_id | UNIQUE |  | goal_id一意制約 |
-| chk_goal_type | CHECK | goal_type IN (...) | goal_type値チェック制約 |
-| chk_achievement_status | CHECK | achievement_status IN (...) | achievement_status値チェック制約 |
-| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
+| pk_trn_goalprogress | PRIMARY KEY | goalprogress_id, id | 主キー制約 |
 
 ## サンプルデータ
 

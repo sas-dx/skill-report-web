@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillCategory |
 | 論理名 | スキルカテゴリマスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:58 |
+| 生成日時 | 2025-06-21 23:19:39 |
 
 ## 概要
 
@@ -28,54 +28,31 @@ MST_SkillCategory（スキルカテゴリマスタ）は、スキルの分類・
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| category_code |  | VARCHAR |  | ○ |  |  |
-| category_name |  | VARCHAR |  | ○ |  |  |
-| category_name_short |  | VARCHAR |  | ○ |  |  |
-| category_name_en |  | VARCHAR |  | ○ |  |  |
-| category_type |  | ENUM |  | ○ |  |  |
-| parent_category_id |  | VARCHAR |  | ○ |  |  |
-| category_level |  | INT |  | ○ | 1 |  |
-| category_path |  | VARCHAR |  | ○ |  |  |
-| is_system_category |  | BOOLEAN |  | ○ | False |  |
-| is_leaf_category |  | BOOLEAN |  | ○ | True |  |
-| skill_count |  | INT |  | ○ | 0 |  |
-| evaluation_method |  | ENUM |  | ○ |  |  |
-| max_level |  | INT |  | ○ |  |  |
-| icon_url |  | VARCHAR |  | ○ |  |  |
-| color_code |  | VARCHAR |  | ○ |  |  |
-| display_order |  | INT |  | ○ | 999 |  |
-| is_popular |  | BOOLEAN |  | ○ | False |  |
-| category_status |  | ENUM |  | ○ | ACTIVE |  |
-| effective_from |  | DATE |  | ○ |  |  |
-| effective_to |  | DATE |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| skillcategory_id | MST_SkillCategoryの主キー | SERIAL |  | × |  | MST_SkillCategoryの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_category_code | category_code | ○ |  |
-| idx_category_type | category_type | × |  |
-| idx_parent_category | parent_category_id | × |  |
-| idx_category_level | category_level | × |  |
-| idx_category_path | category_path | × |  |
-| idx_system_category | is_system_category | × |  |
-| idx_leaf_category | is_leaf_category | × |  |
-| idx_category_status | category_status | × |  |
-| idx_display_order | parent_category_id, display_order | × |  |
-| idx_popular_category | is_popular | × |  |
+| idx_mst_skillcategory_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_skillcategory_parent | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_category_code | UNIQUE |  | category_code一意制約 |
-| chk_category_type | CHECK | category_type IN (...) | category_type値チェック制約 |
-| chk_category_level | CHECK | category_level > 0 | category_level正値チェック制約 |
-| chk_max_level | CHECK | max_level > 0 | max_level正値チェック制約 |
-| chk_category_status | CHECK | category_status IN (...) | category_status値チェック制約 |
+| pk_mst_skillcategory | PRIMARY KEY | skillcategory_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 

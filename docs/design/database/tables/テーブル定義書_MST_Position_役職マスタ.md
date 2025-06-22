@@ -7,7 +7,7 @@
 | テーブル名 | MST_Position |
 | 論理名 | 役職マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:48 |
+| 生成日時 | 2025-06-21 23:07:48 |
 
 ## 概要
 
@@ -28,49 +28,25 @@ MST_Position（役職マスタ）は、組織内の役職・職位の階層構�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| position_code |  | VARCHAR |  | ○ |  |  |
-| position_name |  | VARCHAR |  | ○ |  |  |
-| position_name_short |  | VARCHAR |  | ○ |  |  |
-| position_level |  | INT |  | ○ |  |  |
-| position_rank |  | INT |  | ○ |  |  |
-| position_category |  | ENUM |  | ○ |  |  |
-| authority_level |  | INT |  | ○ |  |  |
-| approval_limit |  | DECIMAL |  | ○ |  |  |
-| salary_grade |  | VARCHAR |  | ○ |  |  |
-| allowance_amount |  | DECIMAL |  | ○ |  |  |
-| is_management |  | BOOLEAN |  | ○ | False |  |
-| is_executive |  | BOOLEAN |  | ○ | False |  |
-| requires_approval |  | BOOLEAN |  | ○ | False |  |
-| can_hire |  | BOOLEAN |  | ○ | False |  |
-| can_evaluate |  | BOOLEAN |  | ○ | False |  |
-| position_status |  | ENUM |  | ○ | ACTIVE |  |
-| sort_order |  | INT |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| position_id | MST_Positionの主キー | SERIAL |  | × |  | MST_Positionの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_position_code | position_code | ○ |  |
-| idx_position_level | position_level | × |  |
-| idx_position_rank | position_rank | × |  |
-| idx_position_category | position_category | × |  |
-| idx_authority_level | authority_level | × |  |
-| idx_salary_grade | salary_grade | × |  |
-| idx_status | position_status | × |  |
-| idx_management_flags | is_management, is_executive | × |  |
-| idx_sort_order | sort_order | × |  |
+| idx_mst_position_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_position_code | UNIQUE |  | position_code一意制約 |
-| chk_position_level | CHECK | position_level > 0 | position_level正値チェック制約 |
-| chk_authority_level | CHECK | authority_level > 0 | authority_level正値チェック制約 |
-| chk_position_status | CHECK | position_status IN (...) | position_status値チェック制約 |
+| pk_mst_position | PRIMARY KEY | position_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 

@@ -7,7 +7,7 @@
 | テーブル名 | MST_JobTypeSkillGrade |
 | 論理名 | 職種スキルグレード関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:33 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -27,47 +27,30 @@ MST_JobTypeSkillGrade（職種スキルグレード関連）は、職種とス�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_type_id |  | VARCHAR |  | ○ |  |  |
-| skill_grade_id |  | VARCHAR |  | ○ |  |  |
-| grade_requirement_type |  | ENUM |  | ○ | STANDARD |  |
-| required_experience_years |  | DECIMAL |  | ○ |  |  |
-| promotion_criteria |  | TEXT |  | ○ |  |  |
-| salary_range_min |  | DECIMAL |  | ○ |  |  |
-| salary_range_max |  | DECIMAL |  | ○ |  |  |
-| performance_expectations |  | TEXT |  | ○ |  |  |
-| leadership_requirements |  | TEXT |  | ○ |  |  |
-| technical_depth |  | INTEGER |  | ○ |  |  |
-| business_impact |  | INTEGER |  | ○ |  |  |
-| team_size_expectation |  | INTEGER |  | ○ |  |  |
-| certification_requirements |  | TEXT |  | ○ |  |  |
-| grade_status |  | ENUM |  | ○ | ACTIVE |  |
-| effective_date |  | DATE |  | ○ |  |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| next_grade_path |  | TEXT |  | ○ |  |  |
-| evaluation_frequency |  | ENUM |  | ○ | ANNUAL |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| jobtypeskillgrade_id | MST_JobTypeSkillGradeの主キー | SERIAL |  | × |  | MST_JobTypeSkillGradeの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_JobTypeSkillGrade_job_type_id | job_type_id | × |  |
-| idx_MST_JobTypeSkillGrade_skill_grade_id | skill_grade_id | × |  |
-| idx_MST_JobTypeSkillGrade_job_grade | job_type_id, skill_grade_id | ○ |  |
-| idx_MST_JobTypeSkillGrade_requirement_type | grade_requirement_type | × |  |
-| idx_MST_JobTypeSkillGrade_experience_years | required_experience_years | × |  |
-| idx_MST_JobTypeSkillGrade_status | grade_status | × |  |
-| idx_MST_JobTypeSkillGrade_effective_date | effective_date | × |  |
-| idx_MST_JobTypeSkillGrade_technical_depth | technical_depth | × |  |
+| idx_mst_jobtypeskillgrade_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_MST_JobTypeSkillGrade_job_type | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_JobTypeSkillGrade_skill_grade | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_job_type_id | CHECK | job_type_id IN (...) | job_type_id値チェック制約 |
-| chk_grade_requirement_type | CHECK | grade_requirement_type IN (...) | grade_requirement_type値チェック制約 |
-| chk_grade_status | CHECK | grade_status IN (...) | grade_status値チェック制約 |
+| pk_mst_jobtypeskillgrade | PRIMARY KEY | jobtypeskillgrade_id | 主キー制約 |
+| chk_jobtypeskillgrade_id | CHECK | jobtypeskillgrade_id IN (...) | jobtypeskillgrade_id値チェック制約 |
 
 ## サンプルデータ
 

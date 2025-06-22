@@ -1,352 +1,375 @@
-# MST_RolePermission テーブル詳細定義
 table_name: MST_RolePermission
 logical_name: ロール権限紐付け
 category: マスタ系
-description: |
-  ロールと権限の多対多の関係を管理するテーブル。
+description: 'ロールと権限の多対多の関係を管理するテーブル。
+
   各ロールがどの権限を持つかを定義し、権限ベースのアクセス制御を実現する。
 
-# 要求仕様ID
+  '
+revision_history:
+- version: 1.0.0
+  date: '2025-06-21'
+  author: 開発チーム
+  changes: 初版作成 - ロール権限紐付けテーブルの詳細定義
+overview: 'MST_RolePermission（ロール権限紐付け）は、ロールと権限の多対多関係を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - ロールベースアクセス制御（RBAC）の実現
+
+  - 権限付与・取消の履歴管理と監査証跡の保持
+
+  - 細粒度な権限制御による情報セキュリティの確保
+
+  - 権限変更の追跡可能性とコンプライアンス対応
+
+  - システム機能へのアクセス制御の柔軟な管理
+
+
+  このテーブルは、システムのセキュリティ基盤として重要な役割を果たし、
+
+  適切な権限管理により情報漏洩や不正アクセスを防止します。
+
+  '
 requirement_ids:
-  - REQ-AUTH-003  # ロールベースアクセス制御
-  - REQ-AUTH-004  # 権限管理
-  - REQ-SEC-001   # セキュリティ要件
-
-# 関連テーブル
+- REQ-AUTH-003
+- REQ-AUTH-004
+- REQ-SEC-001
 related_tables:
-  - MST_Role
-  - MST_Permission
-  - MST_UserRole
-
-# カラム定義
+- MST_Role
+- MST_Permission
+- MST_UserRole
 columns:
-  - name: role_permission_id
-    logical_name: ロール権限ID
-    data_type: BIGINT
-    is_primary_key: true
-    is_not_null: true
-    is_auto_increment: true
-    description: ロール権限紐付けの一意識別子
-
-  - name: role_id
-    logical_name: ロールID
-    data_type: BIGINT
-    is_not_null: true
-    foreign_key:
-      table: MST_Role
-      column: role_id
-      on_delete: CASCADE
-      on_update: CASCADE
-    description: 権限を付与するロールのID
-
-  - name: permission_id
-    logical_name: 権限ID
-    data_type: BIGINT
-    is_not_null: true
-    foreign_key:
-      table: MST_Permission
-      column: permission_id
-      on_delete: CASCADE
-      on_update: CASCADE
-    description: ロールに付与する権限のID
-
-  - name: is_active
-    logical_name: 有効フラグ
-    data_type: BOOLEAN
-    is_not_null: true
-    default_value: true
-    description: この権限付与が有効かどうか
-
-  - name: granted_at
-    logical_name: 権限付与日時
-    data_type: TIMESTAMP
-    is_not_null: true
-    default_value: CURRENT_TIMESTAMP
-    description: この権限がロールに付与された日時
-
-  - name: granted_by
-    logical_name: 権限付与者ID
-    data_type: BIGINT
-    is_not_null: true
-    foreign_key:
-      table: MST_UserAuth
-      column: user_id
-      on_delete: RESTRICT
-      on_update: CASCADE
-    description: この権限を付与したユーザーのID
-
-  - name: revoked_at
-    logical_name: 権限取消日時
-    data_type: TIMESTAMP
-    is_not_null: false
-    description: この権限が取り消された日時（NULL=未取消）
-
-  - name: revoked_by
-    logical_name: 権限取消者ID
-    data_type: BIGINT
-    is_not_null: false
-    foreign_key:
-      table: MST_UserAuth
-      column: user_id
-      on_delete: RESTRICT
-      on_update: CASCADE
-    description: この権限を取り消したユーザーのID
-
-  - name: notes
-    logical_name: 備考
-    data_type: TEXT
-    is_not_null: false
-    description: 権限付与・取消に関する備考
-
-  - name: created_at
-    logical_name: 作成日時
-    data_type: TIMESTAMP
-    is_not_null: true
-    default_value: CURRENT_TIMESTAMP
-    description: レコード作成日時
-
-  - name: updated_at
-    logical_name: 更新日時
-    data_type: TIMESTAMP
-    is_not_null: true
-    default_value: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    description: レコード最終更新日時
-
-# インデックス定義
+- name: role_permission_id
+  logical_name: ロール権限ID
+  type: BIGINT
+  nullable: false
+  primary_key: true
+  auto_increment: true
+  comment: ロール権限紐付けの一意識別子
+- name: role_id
+  logical_name: ロールID
+  type: BIGINT
+  nullable: false
+  comment: 権限を付与するロールのID
+- name: permission_id
+  logical_name: 権限ID
+  type: BIGINT
+  nullable: false
+  comment: ロールに付与する権限のID
+- name: is_active
+  logical_name: 有効フラグ
+  type: BOOLEAN
+  nullable: false
+  default: true
+  comment: この権限付与が有効かどうか
+- name: granted_at
+  logical_name: 権限付与日時
+  type: TIMESTAMP
+  nullable: false
+  default: CURRENT_TIMESTAMP
+  comment: この権限がロールに付与された日時
+- name: granted_by
+  logical_name: 権限付与者ID
+  type: BIGINT
+  nullable: false
+  comment: この権限を付与したユーザーのID
+- name: revoked_at
+  logical_name: 権限取消日時
+  type: TIMESTAMP
+  nullable: true
+  comment: この権限が取り消された日時（NULL=未取消）
+- name: revoked_by
+  logical_name: 権限取消者ID
+  type: BIGINT
+  nullable: true
+  comment: この権限を取り消したユーザーのID
+- name: notes
+  logical_name: 備考
+  type: TEXT
+  nullable: true
+  comment: 権限付与・取消に関する備考
+- name: id
+  type: VARCHAR(50)
+  nullable: false
+  primary_key: false
+  unique: true
+  default: null
+  comment: プライマリキー（UUID）
+  requirement_id: PLT.1-WEB.1
+- name: is_deleted
+  type: BOOLEAN
+  nullable: false
+  primary_key: false
+  unique: false
+  default: 'False'
+  comment: 論理削除フラグ
+  requirement_id: PLT.1-WEB.1
+- name: created_at
+  logical_name: 作成日時
+  type: TIMESTAMP
+  nullable: false
+  default: CURRENT_TIMESTAMP
+  comment: レコード作成日時
+- name: updated_at
+  logical_name: 更新日時
+  type: TIMESTAMP
+  nullable: false
+  default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  comment: レコード最終更新日時
 indexes:
-  - name: idx_mst_rolepermission_role_id
-    columns: [role_id]
-    is_unique: false
-    description: ロールIDによる検索用インデックス
-
-  - name: idx_mst_rolepermission_permission_id
-    columns: [permission_id]
-    is_unique: false
-    description: 権限IDによる検索用インデックス
-
-  - name: idx_mst_rolepermission_role_permission
-    columns: [role_id, permission_id]
-    is_unique: true
-    description: ロールと権限の組み合わせの一意性保証
-
-  - name: idx_mst_rolepermission_active
-    columns: [is_active, role_id]
-    is_unique: false
-    description: 有効な権限の検索用インデックス
-
-  - name: idx_mst_rolepermission_granted_at
-    columns: [granted_at]
-    is_unique: false
-    description: 権限付与日時による検索用インデックス
-
-# 制約定義
+- name: idx_mst_rolepermission_role_id
+  columns:
+  - role_id
+  is_unique: false
+  description: ロールIDによる検索用インデックス
+- name: idx_mst_rolepermission_permission_id
+  columns:
+  - permission_id
+  is_unique: false
+  description: 権限IDによる検索用インデックス
+- name: idx_mst_rolepermission_role_permission
+  columns:
+  - role_id
+  - permission_id
+  is_unique: true
+  description: ロールと権限の組み合わせの一意性保証
+- name: idx_mst_rolepermission_active
+  columns:
+  - is_active
+  - role_id
+  is_unique: false
+  description: 有効な権限の検索用インデックス
+- name: idx_mst_rolepermission_granted_at
+  columns:
+  - granted_at
+  is_unique: false
+  description: 権限付与日時による検索用インデックス
 constraints:
-  - name: chk_mst_rolepermission_revoked_consistency
-    type: CHECK
-    definition: "(revoked_at IS NULL AND revoked_by IS NULL) OR (revoked_at IS NOT NULL AND revoked_by IS NOT NULL)"
-    description: 取消日時と取消者の整合性チェック
-
-  - name: chk_mst_rolepermission_active_revoked
-    type: CHECK
-    definition: "(is_active = true AND revoked_at IS NULL) OR (is_active = false)"
-    description: 有効フラグと取消日時の整合性チェック
-
-# サンプルデータ
+- name: chk_mst_rolepermission_revoked_consistency
+  type: CHECK
+  definition: (revoked_at IS NULL AND revoked_by IS NULL) OR (revoked_at IS NOT NULL
+    AND revoked_by IS NOT NULL)
+  description: 取消日時と取消者の整合性チェック
+- name: chk_mst_rolepermission_active_revoked
+  type: CHECK
+  definition: (is_active = true AND revoked_at IS NULL) OR (is_active = false)
+  description: 有効フラグと取消日時の整合性チェック
 sample_data:
-  - role_permission_id: 1
-    role_id: 1  # システム管理者
-    permission_id: 1  # ユーザー管理
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "システム管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 2
-    role_id: 1  # システム管理者
-    permission_id: 2  # システム設定
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "システム管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 3
-    role_id: 1  # システム管理者
-    permission_id: 3  # 監査ログ閲覧
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "システム管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 4
-    role_id: 2  # 人事管理者
-    permission_id: 4  # 社員情報管理
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "人事管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 5
-    role_id: 2  # 人事管理者
-    permission_id: 5  # 部署管理
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "人事管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 6
-    role_id: 3  # スキル管理者
-    permission_id: 6  # スキル情報管理
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "スキル管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 7
-    role_id: 3  # スキル管理者
-    permission_id: 7  # 資格管理
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "スキル管理者の基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 8
-    role_id: 4  # 一般ユーザー
-    permission_id: 8  # プロフィール閲覧
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "一般ユーザーの基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 9
-    role_id: 4  # 一般ユーザー
-    permission_id: 9  # 自分のスキル編集
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "一般ユーザーの基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 10
-    role_id: 5  # 閲覧専用ユーザー
-    permission_id: 8  # プロフィール閲覧
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "閲覧専用ユーザーの基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 11
-    role_id: 5  # 閲覧専用ユーザー
-    permission_id: 10  # レポート閲覧
-    is_active: true
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "閲覧専用ユーザーの基本権限"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-01-01 00:00:00"
-
-  - role_permission_id: 12
-    role_id: 2  # 人事管理者
-    permission_id: 11  # 研修管理
-    is_active: true
-    granted_at: "2024-02-01 00:00:00"
-    granted_by: 1
-    revoked_at: null
-    revoked_by: null
-    notes: "研修管理権限の追加付与"
-    created_at: "2024-02-01 00:00:00"
-    updated_at: "2024-02-01 00:00:00"
-
-  - role_permission_id: 13
-    role_id: 3  # スキル管理者
-    permission_id: 12  # 目標管理
-    is_active: false
-    granted_at: "2024-01-01 00:00:00"
-    granted_by: 1
-    revoked_at: "2024-03-01 00:00:00"
-    revoked_by: 1
-    notes: "権限範囲の見直しにより取消"
-    created_at: "2024-01-01 00:00:00"
-    updated_at: "2024-03-01 00:00:00"
-
-# パフォーマンス要件
+- role_permission_id: 1
+  role_id: 1
+  permission_id: 1
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: システム管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 2
+  role_id: 1
+  permission_id: 2
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: システム管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 3
+  role_id: 1
+  permission_id: 3
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: システム管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 4
+  role_id: 2
+  permission_id: 4
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 人事管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 5
+  role_id: 2
+  permission_id: 5
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 人事管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 6
+  role_id: 3
+  permission_id: 6
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: スキル管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 7
+  role_id: 3
+  permission_id: 7
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: スキル管理者の基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 8
+  role_id: 4
+  permission_id: 8
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 一般ユーザーの基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 9
+  role_id: 4
+  permission_id: 9
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 一般ユーザーの基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 10
+  role_id: 5
+  permission_id: 8
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 閲覧専用ユーザーの基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 11
+  role_id: 5
+  permission_id: 10
+  is_active: true
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 閲覧専用ユーザーの基本権限
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-01-01 00:00:00'
+- role_permission_id: 12
+  role_id: 2
+  permission_id: 11
+  is_active: true
+  granted_at: '2024-02-01 00:00:00'
+  granted_by: 1
+  revoked_at: null
+  revoked_by: null
+  notes: 研修管理権限の追加付与
+  created_at: '2024-02-01 00:00:00'
+  updated_at: '2024-02-01 00:00:00'
+- role_permission_id: 13
+  role_id: 3
+  permission_id: 12
+  is_active: false
+  granted_at: '2024-01-01 00:00:00'
+  granted_by: 1
+  revoked_at: '2024-03-01 00:00:00'
+  revoked_by: 1
+  notes: 権限範囲の見直しにより取消
+  created_at: '2024-01-01 00:00:00'
+  updated_at: '2024-03-01 00:00:00'
 performance_requirements:
-  select_response_time: "5ms以内"
-  insert_response_time: "20ms以内"
-  update_response_time: "20ms以内"
-  delete_response_time: "50ms以内"
-
-# データ量見積もり
+  select_response_time: 5ms以内
+  insert_response_time: 20ms以内
+  update_response_time: 20ms以内
+  delete_response_time: 50ms以内
 data_volume:
   initial_records: 200
   monthly_growth: 30
   yearly_growth: 360
   estimated_5year: 2000
-
-# セキュリティ要件
 security:
   contains_personal_info: false
-  confidentiality_level: "中"
+  confidentiality_level: 中
   encryption_required: false
-
-# 運用要件
 operational:
-  backup_frequency: "日次"
-  archive_condition: "無効化から3年経過"
+  backup_frequency: 日次
+  archive_condition: 無効化から3年経過
   monitoring_required: true
-
-# 関連API
 related_apis:
-  - API-003  # ロール管理API
-  - API-004  # 権限管理API
-
-# 関連バッチ
+- API-003
+- API-004
 related_batches:
-  - BATCH-003  # 権限同期バッチ
-
-# 備考
-notes: |
-  - ロールと権限の多対多関係を管理する中間テーブル
-  - 権限の付与・取消履歴を管理し、監査証跡を保持
-  - 有効フラグにより論理削除を実現
-  - 権限変更時は新しいレコードを作成し、古いレコードを無効化
+- BATCH-003
+notes:
+- ロールと権限の多対多関係を管理する中間テーブル
+- 権限の付与・取消履歴を管理し、監査証跡を保持
+- 有効フラグにより論理削除を実現
+- 権限変更時は新しいレコードを作成し、古いレコードを無効化
+business_rules:
+- ロールと権限の組み合わせは一意である必要がある
+- 権限の取消時は論理削除を行い、履歴を保持する
+- 権限変更は必ず承認者の記録と共に実施する
+foreign_keys:
+- name: fk_mst_rolepermission_role_id
+  columns:
+  - role_id
+  references:
+    table: MST_Role
+    columns:
+    - role_id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: ロールマスタへの外部キー制約
+- name: fk_mst_rolepermission_permission_id
+  columns:
+  - permission_id
+  references:
+    table: MST_Permission
+    columns:
+    - permission_id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 権限マスタへの外部キー制約
+- name: fk_mst_rolepermission_granted_by
+  columns:
+  - granted_by
+  references:
+    table: MST_UserAuth
+    columns:
+    - user_id
+  on_update: CASCADE
+  on_delete: RESTRICT
+  comment: 権限付与者への外部キー制約
+- name: fk_mst_rolepermission_revoked_by
+  columns:
+  - revoked_by
+  references:
+    table: MST_UserAuth
+    columns:
+    - user_id
+  on_update: CASCADE
+  on_delete: RESTRICT
+  comment: 権限取消者への外部キー制約

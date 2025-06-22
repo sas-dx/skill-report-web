@@ -12,32 +12,21 @@
 
 このテーブルは、通知・連携管理機能の基盤となる重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_NotificationSettings;
 
 CREATE TABLE MST_NotificationSettings (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    setting_key VARCHAR,
-    setting_name VARCHAR,
-    notification_type ENUM,
-    target_audience ENUM,
-    trigger_event VARCHAR,
-    frequency_type ENUM DEFAULT 'IMMEDIATE',
-    frequency_value INTEGER,
-    template_id VARCHAR,
-    channel_config TEXT,
-    is_enabled BOOLEAN DEFAULT True,
-    priority_level ENUM DEFAULT 'MEDIUM',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    notificationsettings_id SERIAL NOT NULL COMMENT 'MST_NotificationSettingsの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (notificationsettings_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_notification_settings_tenant_key ON MST_NotificationSettings (tenant_id, setting_key);
-CREATE INDEX idx_notification_settings_type ON MST_NotificationSettings (notification_type);
-CREATE INDEX idx_notification_settings_event ON MST_NotificationSettings (trigger_event);
-CREATE INDEX idx_notification_settings_enabled ON MST_NotificationSettings (is_enabled);
-CREATE INDEX idx_notification_settings_template ON MST_NotificationSettings (template_id);
+CREATE INDEX idx_mst_notificationsettings_tenant_id ON MST_NotificationSettings (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_NotificationSettings ADD CONSTRAINT fk_notification_settings_template FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

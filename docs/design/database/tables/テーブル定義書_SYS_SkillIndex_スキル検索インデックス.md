@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SkillIndex |
 | 論理名 | スキル検索インデックス |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -25,41 +25,23 @@ SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| skill_id |  | VARCHAR |  | ○ |  |  |
-| index_type |  | ENUM |  | ○ |  |  |
-| search_term |  | VARCHAR |  | ○ |  |  |
-| normalized_term |  | VARCHAR |  | ○ |  |  |
-| relevance_score |  | DECIMAL |  | ○ | 1.0 |  |
-| frequency_weight |  | DECIMAL |  | ○ | 1.0 |  |
-| position_weight |  | DECIMAL |  | ○ | 1.0 |  |
-| language_code |  | VARCHAR |  | ○ | ja |  |
-| source_field |  | ENUM |  | ○ |  |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| search_count |  | INTEGER |  | ○ | 0 |  |
-| last_searched_at |  | TIMESTAMP |  | ○ |  |  |
-| index_updated_at |  | TIMESTAMP |  | ○ |  |  |
+| skillindex_id | SYS_SkillIndexの主キー | SERIAL |  | × |  | SYS_SkillIndexの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
-## インデックス
+## 外部キー
 
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_skill_index_skill | skill_id | × |  |
-| idx_skill_index_search_term | normalized_term, language_code | × |  |
-| idx_skill_index_type | index_type | × |  |
-| idx_skill_index_tenant_term | tenant_id, normalized_term | × |  |
-| idx_skill_index_relevance | relevance_score | × |  |
-| idx_skill_index_active | is_active | × |  |
-| idx_skill_index_search_stats | search_count, last_searched_at | × |  |
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_skill_index_skill | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_index_type | CHECK | index_type IN (...) | index_type値チェック制約 |
+| pk_sys_skillindex | PRIMARY KEY | skillindex_id, id | 主キー制約 |
 
 ## サンプルデータ
 

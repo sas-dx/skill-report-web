@@ -7,7 +7,7 @@
 | テーブル名 | MST_UserAuth |
 | 論理名 | ユーザー認証情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -28,48 +28,28 @@ MST_UserAuth（ユーザー認証情報）は、システムにアクセスす�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| user_id |  | VARCHAR |  | ○ |  |  |
-| login_id |  | VARCHAR |  | ○ |  |  |
-| password_hash |  | VARCHAR |  | ○ |  |  |
-| password_salt |  | VARCHAR |  | ○ |  |  |
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| account_status |  | ENUM |  | ○ | ACTIVE |  |
-| last_login_at |  | TIMESTAMP |  | ○ |  |  |
-| last_login_ip |  | VARCHAR |  | ○ |  |  |
-| failed_login_count |  | INT |  | ○ | 0 |  |
-| last_failed_login_at |  | TIMESTAMP |  | ○ |  |  |
-| password_changed_at |  | TIMESTAMP |  | ○ |  |  |
-| password_expires_at |  | TIMESTAMP |  | ○ |  |  |
-| mfa_enabled |  | BOOLEAN |  | ○ | False |  |
-| mfa_secret |  | VARCHAR |  | ○ |  |  |
-| recovery_token |  | VARCHAR |  | ○ |  |  |
-| recovery_token_expires_at |  | TIMESTAMP |  | ○ |  |  |
-| session_timeout |  | INT |  | ○ |  |  |
-| external_auth_provider |  | VARCHAR |  | ○ |  |  |
-| external_auth_id |  | VARCHAR |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| userauth_id | MST_UserAuthの主キー | SERIAL |  | × |  | MST_UserAuthの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_user_id | user_id | ○ |  |
-| idx_login_id | login_id | ○ |  |
-| idx_employee_id | employee_id | ○ |  |
-| idx_account_status | account_status | × |  |
-| idx_last_login | last_login_at | × |  |
-| idx_password_expires | password_expires_at | × |  |
-| idx_external_auth | external_auth_provider, external_auth_id | × |  |
+| idx_mst_userauth_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_userauth_employee | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_user_id | UNIQUE |  | user_id一意制約 |
-| uk_login_id | UNIQUE |  | login_id一意制約 |
-| uk_employee_id | UNIQUE |  | employee_id一意制約 |
-| chk_account_status | CHECK | account_status IN (...) | account_status値チェック制約 |
+| pk_mst_userauth | PRIMARY KEY | userauth_id | 主キー制約 |
 
 ## サンプルデータ
 

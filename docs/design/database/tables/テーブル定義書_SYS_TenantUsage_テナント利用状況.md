@@ -7,7 +7,7 @@
 | テーブル名 | SYS_TenantUsage |
 | 論理名 | テナント利用状況 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,45 +25,23 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| usage_date |  | DATE |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| active_users |  | INTEGER |  | ○ | 0 |  |
-| total_logins |  | INTEGER |  | ○ | 0 |  |
-| api_requests |  | BIGINT |  | ○ | 0 |  |
-| data_storage_mb |  | DECIMAL |  | ○ | 0.0 |  |
-| file_storage_mb |  | DECIMAL |  | ○ | 0.0 |  |
-| backup_storage_mb |  | DECIMAL |  | ○ | 0.0 |  |
-| cpu_usage_minutes |  | DECIMAL |  | ○ | 0.0 |  |
-| memory_usage_mb_hours |  | DECIMAL |  | ○ | 0.0 |  |
-| network_transfer_mb |  | DECIMAL |  | ○ | 0.0 |  |
-| report_generations |  | INTEGER |  | ○ | 0 |  |
-| skill_assessments |  | INTEGER |  | ○ | 0 |  |
-| notification_sent |  | INTEGER |  | ○ | 0 |  |
-| peak_concurrent_users |  | INTEGER |  | ○ | 0 |  |
-| peak_time |  | TIME |  | ○ |  |  |
-| error_count |  | INTEGER |  | ○ | 0 |  |
-| response_time_avg_ms |  | DECIMAL |  | ○ |  |  |
-| uptime_percentage |  | DECIMAL |  | ○ | 100.0 |  |
-| billing_amount |  | DECIMAL |  | ○ |  |  |
-| collection_timestamp |  | TIMESTAMP |  | ○ |  |  |
+| tenantusage_id | SYS_TenantUsageの主キー | SERIAL |  | × |  | SYS_TenantUsageの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
-## インデックス
+## 外部キー
 
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_SYS_TenantUsage_date_tenant | usage_date, tenant_id | ○ |  |
-| idx_SYS_TenantUsage_tenant_id | tenant_id | × |  |
-| idx_SYS_TenantUsage_usage_date | usage_date | × |  |
-| idx_SYS_TenantUsage_collection_timestamp | collection_timestamp | × |  |
-| idx_SYS_TenantUsage_billing_amount | billing_amount | × |  |
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_SYS_TenantUsage_tenant | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_tenantusage | PRIMARY KEY | id | 主キー制約 |
+| pk_sys_tenantusage | PRIMARY KEY | tenantusage_id, id | 主キー制約 |
 
 ## サンプルデータ
 

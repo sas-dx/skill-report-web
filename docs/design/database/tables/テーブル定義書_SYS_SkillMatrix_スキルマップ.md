@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SkillMatrix |
 | 論理名 | スキルマップ |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -24,37 +24,24 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| skill_id |  | VARCHAR |  | ○ |  |  |
-| skill_level |  | INTEGER |  | ○ | 1 |  |
-| self_assessment |  | INTEGER |  | ○ |  |  |
-| manager_assessment |  | INTEGER |  | ○ |  |  |
-| peer_assessment |  | INTEGER |  | ○ |  |  |
-| assessment_date |  | DATE |  | ○ |  |  |
-| evidence_url |  | VARCHAR |  | ○ |  |  |
-| notes |  | TEXT |  | ○ |  |  |
-| next_target_level |  | INTEGER |  | ○ |  |  |
-| target_date |  | DATE |  | ○ |  |  |
+| skillmatrix_id | SYS_SkillMatrixの主キー | SERIAL |  | × |  | SYS_SkillMatrixの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
-## インデックス
+## 外部キー
 
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_SYS_SkillMatrix_employee_skill | employee_id, skill_id | ○ |  |
-| idx_SYS_SkillMatrix_employee_id | employee_id | × |  |
-| idx_SYS_SkillMatrix_skill_id | skill_id | × |  |
-| idx_SYS_SkillMatrix_assessment_date | assessment_date | × |  |
-| idx_SYS_SkillMatrix_skill_level | skill_level | × |  |
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_SYS_SkillMatrix_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_SYS_SkillMatrix_skill | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_skillmatrix | PRIMARY KEY | id | 主キー制約 |
-| chk_skill_level | CHECK | skill_level > 0 | skill_level正値チェック制約 |
-| chk_next_target_level | CHECK | next_target_level > 0 | next_target_level正値チェック制約 |
+| pk_sys_skillmatrix | PRIMARY KEY | skillmatrix_id, id | 主キー制約 |
 
 ## サンプルデータ
 

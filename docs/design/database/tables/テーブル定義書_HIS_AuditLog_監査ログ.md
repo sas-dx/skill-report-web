@@ -7,7 +7,7 @@
 | テーブル名 | HIS_AuditLog |
 | 論理名 | 監査ログ |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,46 +25,31 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| user_id |  | VARCHAR |  | ○ |  |  |
-| session_id |  | VARCHAR |  | ○ |  |  |
-| action_type |  | ENUM |  | ○ |  |  |
-| target_table |  | VARCHAR |  | ○ |  |  |
-| target_id |  | VARCHAR |  | ○ |  |  |
-| old_values |  | TEXT |  | ○ |  |  |
-| new_values |  | TEXT |  | ○ |  |  |
-| ip_address |  | VARCHAR |  | ○ |  |  |
-| user_agent |  | VARCHAR |  | ○ |  |  |
-| result_status |  | ENUM |  | ○ | SUCCESS |  |
-| error_message |  | TEXT |  | ○ |  |  |
-| execution_time_ms |  | INTEGER |  | ○ |  |  |
-| is_deleted |  | BOOLEAN |  | ○ | False |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| created_at |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
-| updated_at |  | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP |  |
-| created_by |  | VARCHAR |  | ○ |  |  |
-| updated_by |  | VARCHAR |  | ○ |  |  |
+| auditlog_id | HIS_AuditLogの主キー | SERIAL |  | × |  | HIS_AuditLogの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_his_auditlog_id | id | ○ |  |
-| idx_his_auditlog_user_id | user_id | × |  |
-| idx_his_auditlog_tenant_id | tenant_id | × |  |
-| idx_his_auditlog_action_type | action_type | × |  |
-| idx_his_auditlog_target_table | target_table | × |  |
-| idx_his_auditlog_created_at | created_at | × |  |
-| idx_his_auditlog_user_created | user_id, created_at | × |  |
-| idx_his_auditlog_tenant_created | tenant_id, created_at | × |  |
+| idx_his_auditlog_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_his_auditlog_tenant | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_his_auditlog_user | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_action_type | CHECK | action_type IN (...) | action_type値チェック制約 |
-| chk_result_status | CHECK | result_status IN (...) | result_status値チェック制約 |
+| pk_his_auditlog | PRIMARY KEY | auditlog_id, id | 主キー制約 |
 
 ## サンプルデータ
 

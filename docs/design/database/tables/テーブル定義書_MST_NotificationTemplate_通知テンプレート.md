@@ -7,7 +7,7 @@
 | テーブル名 | MST_NotificationTemplate |
 | 論理名 | 通知テンプレート |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:33 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,40 +25,22 @@ MST_NotificationTemplate（通知テンプレート）は、システムで使�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| template_key |  | VARCHAR |  | ○ |  |  |
-| template_name |  | VARCHAR |  | ○ |  |  |
-| notification_type |  | ENUM |  | ○ |  |  |
-| language_code |  | VARCHAR |  | ○ | ja |  |
-| subject_template |  | VARCHAR |  | ○ |  |  |
-| body_template |  | TEXT |  | ○ |  |  |
-| format_type |  | ENUM |  | ○ | PLAIN |  |
-| parameters |  | TEXT |  | ○ |  |  |
-| sample_data |  | TEXT |  | ○ |  |  |
-| is_default |  | BOOLEAN |  | ○ | False |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| version |  | VARCHAR |  | ○ | 1.0.0 |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| notificationtemplate_id | MST_NotificationTemplateの主キー | SERIAL |  | × |  | MST_NotificationTemplateの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_notification_template_tenant_key_type | tenant_id, template_key, notification_type, language_code | ○ |  |
-| idx_notification_template_type | notification_type | × |  |
-| idx_notification_template_language | language_code | × |  |
-| idx_notification_template_default | is_default, is_active | × |  |
-| idx_notification_template_key | template_key | × |  |
+| idx_mst_notificationtemplate_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_notification_type | CHECK | notification_type IN (...) | notification_type値チェック制約 |
-| chk_format_type | CHECK | format_type IN (...) | format_type値チェック制約 |
+| pk_mst_notificationtemplate | PRIMARY KEY | notificationtemplate_id | 主キー制約 |
 
 ## サンプルデータ
 

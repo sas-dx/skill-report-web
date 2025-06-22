@@ -7,7 +7,7 @@
 | テーブル名 | MST_Department |
 | 論理名 | 部署マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:48 |
+| 生成日時 | 2025-06-21 23:07:48 |
 
 ## 概要
 
@@ -28,48 +28,33 @@ MST_Department（部署マスタ）は、組織の部署・組織単位の階層
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| department_code |  | VARCHAR |  | ○ |  |  |
-| department_name |  | VARCHAR |  | ○ |  |  |
-| department_name_short |  | VARCHAR |  | ○ |  |  |
-| parent_department_id |  | VARCHAR |  | ○ |  |  |
-| department_level |  | INT |  | ○ |  |  |
-| department_type |  | ENUM |  | ○ |  |  |
-| manager_id |  | VARCHAR |  | ○ |  |  |
-| deputy_manager_id |  | VARCHAR |  | ○ |  |  |
-| cost_center_code |  | VARCHAR |  | ○ |  |  |
-| budget_amount |  | DECIMAL |  | ○ |  |  |
-| location |  | VARCHAR |  | ○ |  |  |
-| phone_number |  | VARCHAR |  | ○ |  |  |
-| email_address |  | VARCHAR |  | ○ |  |  |
-| establishment_date |  | DATE |  | ○ |  |  |
-| abolition_date |  | DATE |  | ○ |  |  |
-| department_status |  | ENUM |  | ○ | ACTIVE |  |
-| sort_order |  | INT |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| department_id | MST_Departmentの主キー | SERIAL |  | × |  | MST_Departmentの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_department_code | department_code | ○ |  |
-| idx_parent_department | parent_department_id | × |  |
-| idx_department_level | department_level | × |  |
-| idx_department_type | department_type | × |  |
-| idx_manager | manager_id | × |  |
-| idx_status | department_status | × |  |
-| idx_cost_center | cost_center_code | × |  |
-| idx_sort_order | sort_order | × |  |
+| idx_mst_department_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_department_parent | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_department_manager | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_department_deputy | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_department_code | UNIQUE |  | department_code一意制約 |
-| chk_department_level | CHECK | department_level > 0 | department_level正値チェック制約 |
-| chk_department_type | CHECK | department_type IN (...) | department_type値チェック制約 |
-| chk_department_status | CHECK | department_status IN (...) | department_status値チェック制約 |
+| pk_mst_department | PRIMARY KEY | department_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 

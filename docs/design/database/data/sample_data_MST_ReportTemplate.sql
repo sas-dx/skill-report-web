@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: MST_ReportTemplate
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:40
 -- レコード数: 2
 
 INSERT INTO MST_ReportTemplate (id, tenant_id, template_key, template_name, report_category, output_format, language_code, template_content, style_sheet, parameters_schema, data_source_config, page_settings, header_template, footer_template, is_default, is_active, version, preview_image_url, created_at, updated_at, is_deleted) VALUES ('RT001', 'TENANT001', 'skill_summary_report', 'スキルサマリーレポート', 'SKILL', 'PDF', 'ja', '<!DOCTYPE html>

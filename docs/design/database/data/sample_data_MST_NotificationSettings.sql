@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: MST_NotificationSettings
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:40
 -- レコード数: 2
 
 INSERT INTO MST_NotificationSettings (id, tenant_id, setting_key, setting_name, notification_type, target_audience, trigger_event, frequency_type, frequency_value, template_id, channel_config, is_enabled, priority_level, created_at, updated_at, is_deleted) VALUES ('NS001', 'TENANT001', 'skill_update_notification', 'スキル更新通知', 'EMAIL', 'MANAGER', 'skill_registered', 'IMMEDIATE', NULL, 'NT001', '{"smtp_server": "smtp.company.com", "from_address": "noreply@company.com"}', TRUE, 'MEDIUM', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);

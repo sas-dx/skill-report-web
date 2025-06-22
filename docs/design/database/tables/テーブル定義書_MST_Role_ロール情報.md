@@ -7,7 +7,7 @@
 | テーブル名 | MST_Role |
 | 論理名 | ロール情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:58 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -28,46 +28,28 @@ MST_Role（ロール情報）は、システム内のロール（役割）を管
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| role_code |  | VARCHAR |  | ○ |  |  |
-| role_name |  | VARCHAR |  | ○ |  |  |
-| role_name_short |  | VARCHAR |  | ○ |  |  |
-| role_category |  | ENUM |  | ○ |  |  |
-| role_level |  | INT |  | ○ |  |  |
-| parent_role_id |  | VARCHAR |  | ○ |  |  |
-| is_system_role |  | BOOLEAN |  | ○ | False |  |
-| is_tenant_specific |  | BOOLEAN |  | ○ | False |  |
-| max_users |  | INT |  | ○ |  |  |
-| role_priority |  | INT |  | ○ | 999 |  |
-| auto_assign_conditions |  | JSON |  | ○ |  |  |
-| role_status |  | ENUM |  | ○ | ACTIVE |  |
-| effective_from |  | DATE |  | ○ |  |  |
-| effective_to |  | DATE |  | ○ |  |  |
-| sort_order |  | INT |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| role_id | MST_Roleの主キー | SERIAL |  | × |  | MST_Roleの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_role_code | role_code | ○ |  |
-| idx_role_category | role_category | × |  |
-| idx_role_level | role_level | × |  |
-| idx_parent_role | parent_role_id | × |  |
-| idx_system_role | is_system_role | × |  |
-| idx_tenant_specific | is_tenant_specific | × |  |
-| idx_role_status | role_status | × |  |
-| idx_effective_period | effective_from, effective_to | × |  |
-| idx_sort_order | sort_order | × |  |
+| idx_mst_role_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_role_parent | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_role_code | UNIQUE |  | role_code一意制約 |
-| chk_role_level | CHECK | role_level > 0 | role_level正値チェック制約 |
-| chk_role_status | CHECK | role_status IN (...) | role_status値チェック制約 |
+| pk_mst_role | PRIMARY KEY | role_id | 主キー制約 |
 
 ## サンプルデータ
 

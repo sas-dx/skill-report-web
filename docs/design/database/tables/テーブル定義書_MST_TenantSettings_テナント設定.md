@@ -7,7 +7,7 @@
 | テーブル名 | MST_TenantSettings |
 | 論理名 | テナント設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,44 +25,28 @@ MST_TenantSettings（テナント設定）は、マルチテナントシステ�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| setting_category |  | ENUM |  | ○ |  |  |
-| setting_key |  | VARCHAR |  | ○ |  |  |
-| setting_name |  | VARCHAR |  | ○ |  |  |
-| setting_description |  | TEXT |  | ○ |  |  |
-| data_type |  | ENUM |  | ○ |  |  |
-| setting_value |  | TEXT |  | ○ |  |  |
-| default_value |  | TEXT |  | ○ |  |  |
-| validation_rules |  | TEXT |  | ○ |  |  |
-| is_required |  | BOOLEAN |  | ○ | False |  |
-| is_encrypted |  | BOOLEAN |  | ○ | False |  |
-| is_system_managed |  | BOOLEAN |  | ○ | False |  |
-| is_user_configurable |  | BOOLEAN |  | ○ | True |  |
-| display_order |  | INTEGER |  | ○ | 0 |  |
-| effective_from |  | TIMESTAMP |  | ○ |  |  |
-| effective_until |  | TIMESTAMP |  | ○ |  |  |
-| last_modified_by |  | VARCHAR |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| tenantsettings_id | MST_TenantSettingsの主キー | SERIAL |  | × |  | MST_TenantSettingsの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_tenant_settings_tenant_key | tenant_id, setting_key | ○ |  |
-| idx_tenant_settings_category | setting_category | × |  |
-| idx_tenant_settings_configurable | is_user_configurable | × |  |
-| idx_tenant_settings_system_managed | is_system_managed | × |  |
-| idx_tenant_settings_display_order | tenant_id, setting_category, display_order | × |  |
-| idx_tenant_settings_effective | effective_from, effective_until | × |  |
+| idx_mst_tenantsettings_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_tenant_settings_tenant | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_data_type | CHECK | data_type IN (...) | data_type値チェック制約 |
+| pk_mst_tenantsettings | PRIMARY KEY | tenantsettings_id | 主キー制約 |
 
 ## サンプルデータ
 

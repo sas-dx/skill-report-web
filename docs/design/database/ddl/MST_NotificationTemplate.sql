@@ -12,33 +12,18 @@
 
 このテーブルは、通知・連携管理機能において一貫性のあるメッセージ配信を実現する重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:20:33
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_NotificationTemplate;
 
 CREATE TABLE MST_NotificationTemplate (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    template_key VARCHAR,
-    template_name VARCHAR,
-    notification_type ENUM,
-    language_code VARCHAR DEFAULT 'ja',
-    subject_template VARCHAR,
-    body_template TEXT,
-    format_type ENUM DEFAULT 'PLAIN',
-    parameters TEXT,
-    sample_data TEXT,
-    is_default BOOLEAN DEFAULT False,
-    is_active BOOLEAN DEFAULT True,
-    version VARCHAR DEFAULT '1.0.0',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    notificationtemplate_id SERIAL NOT NULL COMMENT 'MST_NotificationTemplateの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (notificationtemplate_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_notification_template_tenant_key_type ON MST_NotificationTemplate (tenant_id, template_key, notification_type, language_code);
-CREATE INDEX idx_notification_template_type ON MST_NotificationTemplate (notification_type);
-CREATE INDEX idx_notification_template_language ON MST_NotificationTemplate (language_code);
-CREATE INDEX idx_notification_template_default ON MST_NotificationTemplate (is_default, is_active);
-CREATE INDEX idx_notification_template_key ON MST_NotificationTemplate (template_key);
+CREATE INDEX idx_mst_notificationtemplate_tenant_id ON MST_NotificationTemplate (tenant_id);

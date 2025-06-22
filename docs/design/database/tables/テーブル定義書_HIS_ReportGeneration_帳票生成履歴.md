@@ -7,7 +7,7 @@
 | テーブル名 | HIS_ReportGeneration |
 | 論理名 | 帳票生成履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,47 +25,30 @@ HIS_ReportGeneration（帳票生成履歴）は、システムで生成された
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| template_id |  | VARCHAR |  | ○ |  |  |
-| requested_by |  | VARCHAR |  | ○ |  |  |
-| report_title |  | VARCHAR |  | ○ |  |  |
-| report_category |  | ENUM |  | ○ |  |  |
-| output_format |  | ENUM |  | ○ |  |  |
-| generation_status |  | ENUM |  | ○ |  |  |
-| parameters |  | TEXT |  | ○ |  |  |
-| file_path |  | VARCHAR |  | ○ |  |  |
-| file_size |  | BIGINT |  | ○ |  |  |
-| download_count |  | INTEGER |  | ○ | 0 |  |
-| last_downloaded_at |  | TIMESTAMP |  | ○ |  |  |
-| requested_at |  | TIMESTAMP |  | ○ |  |  |
-| started_at |  | TIMESTAMP |  | ○ |  |  |
-| completed_at |  | TIMESTAMP |  | ○ |  |  |
-| processing_time_ms |  | INTEGER |  | ○ |  |  |
-| error_message |  | TEXT |  | ○ |  |  |
-| error_details |  | TEXT |  | ○ |  |  |
-| expires_at |  | TIMESTAMP |  | ○ |  |  |
+| reportgeneration_id | HIS_ReportGenerationの主キー | SERIAL |  | × |  | HIS_ReportGenerationの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_report_generation_template | template_id | × |  |
-| idx_report_generation_requester | requested_by | × |  |
-| idx_report_generation_tenant_status | tenant_id, generation_status | × |  |
-| idx_report_generation_category | report_category | × |  |
-| idx_report_generation_format | output_format | × |  |
-| idx_report_generation_requested | requested_at | × |  |
-| idx_report_generation_completed | completed_at | × |  |
-| idx_report_generation_expires | expires_at | × |  |
+| idx_his_reportgeneration_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_report_generation_template | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_generation_status | CHECK | generation_status IN (...) | generation_status値チェック制約 |
+| pk_his_reportgeneration | PRIMARY KEY | reportgeneration_id, id | 主キー制約 |
 
 ## サンプルデータ
 

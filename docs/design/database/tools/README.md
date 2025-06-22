@@ -201,13 +201,13 @@ python3 database_consistency_checker/yaml_format_check_enhanced.py --tables {テ
 **検証方法**:
 ```bash
 # 必須セクション検証（全テーブル）
-python3 yaml_validator/validate_yaml_format.py --all --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --all --verbose
 
 # 特定テーブルの必須セクション検証
-python3 yaml_validator/validate_yaml_format.py --table MST_Employee --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --table MST_Employee --verbose
 
 # 必須セクション不備の詳細確認
-python3 yaml_validator/validate_yaml_format.py --check-required-only
+python3 database_consistency_checker/yaml_format_check_enhanced.py --check-required-only
 ```
 
 #### MST_TEMPLATE_details.yamlの構造

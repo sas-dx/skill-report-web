@@ -7,7 +7,7 @@
 | テーブル名 | SYS_BackupHistory |
 | 論理名 | バックアップ履歴 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -25,47 +25,17 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| backup_id |  | VARCHAR |  | ○ |  |  |
-| backup_type |  | ENUM |  | ○ | FULL |  |
-| backup_scope |  | ENUM |  | ○ | DATABASE |  |
-| target_objects |  | TEXT |  | ○ |  |  |
-| backup_start_time |  | TIMESTAMP |  | ○ |  |  |
-| backup_end_time |  | TIMESTAMP |  | ○ |  |  |
-| backup_status |  | ENUM |  | ○ | RUNNING |  |
-| backup_file_path |  | VARCHAR |  | ○ |  |  |
-| backup_file_size |  | BIGINT |  | ○ |  |  |
-| compression_type |  | ENUM |  | ○ |  |  |
-| encryption_enabled |  | BOOLEAN |  | ○ | False |  |
-| checksum |  | VARCHAR |  | ○ |  |  |
-| retention_period_days |  | INTEGER |  | ○ | 30 |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| backup_trigger |  | ENUM |  | ○ | SCHEDULED |  |
-| executed_by |  | VARCHAR |  | ○ |  |  |
-| error_message |  | TEXT |  | ○ |  |  |
-| recovery_tested |  | BOOLEAN |  | ○ | False |  |
-| recovery_test_date |  | DATE |  | ○ |  |  |
+| backuphistory_id | SYS_BackupHistoryの主キー | SERIAL |  | × |  | SYS_BackupHistoryの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-
-## インデックス
-
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_SYS_BackupHistory_backup_id | backup_id | ○ |  |
-| idx_SYS_BackupHistory_start_time | backup_start_time | × |  |
-| idx_SYS_BackupHistory_status | backup_status | × |  |
-| idx_SYS_BackupHistory_type_scope | backup_type, backup_scope | × |  |
-| idx_SYS_BackupHistory_expiry_date | expiry_date | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_backuphistory | PRIMARY KEY | id | 主キー制約 |
-| uk_backup_id | UNIQUE |  | backup_id一意制約 |
-| chk_backup_type | CHECK | backup_type IN (...) | backup_type値チェック制約 |
-| chk_backup_status | CHECK | backup_status IN (...) | backup_status値チェック制約 |
-| chk_compression_type | CHECK | compression_type IN (...) | compression_type値チェック制約 |
+| pk_sys_backuphistory | PRIMARY KEY | backuphistory_id, id | 主キー制約 |
 
 ## サンプルデータ
 

@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: MST_Skill
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:41
 -- レコード数: 3
 
 INSERT INTO MST_Skill (id, skill_name, skill_name_en, category_id, skill_type, difficulty_level, description, evaluation_criteria, required_experience_months, related_skills, prerequisite_skills, certification_info, learning_resources, market_demand, technology_trend, is_core_skill, display_order, is_active, effective_from, effective_to, created_at, updated_at, is_deleted) VALUES ('SKILL001', 'React', 'React', 'CAT_FRONTEND', 'TECHNICAL', 3, 'Reactライブラリを使用したフロントエンド開発スキル。コンポーネント設計、状態管理、Hooksの理解が含まれます。', '{"level1":"基本的なコンポーネント作成","level2":"状態管理とイベント処理","level3":"Hooks活用とパフォーマンス最適化","level4":"複雑なアプリケーション設計","level5":"ライブラリ開発とベストプラクティス"}', 6, '["SKILL002", "SKILL003", "SKILL004"]', '["SKILL_JS001", "SKILL_HTML001"]', '{"name":"React Developer Certification","provider":"Meta","url":"https://developers.facebook.com/certification/"}', '["https://reactjs.org/docs/","https://react.dev/learn","https://egghead.io/courses/react"]', 'HIGH', 'GROWING', TRUE, 1, TRUE, '2024-01-01', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);

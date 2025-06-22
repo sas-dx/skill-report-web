@@ -7,7 +7,7 @@
 | テーブル名 | MST_ReportTemplate |
 | 論理名 | 帳票テンプレート |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,42 +25,22 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| template_key |  | VARCHAR |  | ○ |  |  |
-| template_name |  | VARCHAR |  | ○ |  |  |
-| report_category |  | ENUM |  | ○ |  |  |
-| output_format |  | ENUM |  | ○ |  |  |
-| language_code |  | VARCHAR |  | ○ | ja |  |
-| template_content |  | TEXT |  | ○ |  |  |
-| style_sheet |  | TEXT |  | ○ |  |  |
-| parameters_schema |  | TEXT |  | ○ |  |  |
-| data_source_config |  | TEXT |  | ○ |  |  |
-| page_settings |  | TEXT |  | ○ |  |  |
-| header_template |  | TEXT |  | ○ |  |  |
-| footer_template |  | TEXT |  | ○ |  |  |
-| is_default |  | BOOLEAN |  | ○ | False |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| version |  | VARCHAR |  | ○ | 1.0.0 |  |
-| preview_image_url |  | VARCHAR |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| reporttemplate_id | MST_ReportTemplateの主キー | SERIAL |  | × |  | MST_ReportTemplateの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_report_template_tenant_key | tenant_id, template_key, language_code | ○ |  |
-| idx_report_template_category | report_category | × |  |
-| idx_report_template_format | output_format | × |  |
-| idx_report_template_language | language_code | × |  |
-| idx_report_template_default | is_default, is_active | × |  |
+| idx_mst_reporttemplate_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
+| pk_mst_reporttemplate | PRIMARY KEY | reporttemplate_id | 主キー制約 |
 
 ## サンプルデータ
 

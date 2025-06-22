@@ -7,7 +7,7 @@
 | テーブル名 | MST_TrainingProgram |
 | 論理名 | 研修プログラム |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,76 +26,29 @@ MST_TrainingProgram（研修プログラム）は、組織で提供される研�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| training_program_id |  | VARCHAR |  | ○ |  |  |
-| program_code |  | VARCHAR |  | ○ |  |  |
-| program_name |  | VARCHAR |  | ○ |  |  |
-| program_name_en |  | VARCHAR |  | ○ |  |  |
-| program_description |  | TEXT |  | ○ |  |  |
-| program_category |  | ENUM |  | ○ |  |  |
-| program_type |  | ENUM |  | ○ |  |  |
-| target_audience |  | ENUM |  | ○ |  |  |
-| difficulty_level |  | ENUM |  | ○ |  |  |
-| duration_hours |  | DECIMAL |  | ○ |  |  |
-| duration_days |  | INTEGER |  | ○ |  |  |
-| max_participants |  | INTEGER |  | ○ |  |  |
-| min_participants |  | INTEGER |  | ○ |  |  |
-| prerequisites |  | TEXT |  | ○ |  |  |
-| learning_objectives |  | TEXT |  | ○ |  |  |
-| curriculum_outline |  | TEXT |  | ○ |  |  |
-| curriculum_details |  | TEXT |  | ○ |  |  |
-| materials_required |  | TEXT |  | ○ |  |  |
-| equipment_required |  | TEXT |  | ○ |  |  |
-| instructor_requirements |  | TEXT |  | ○ |  |  |
-| assessment_method |  | ENUM |  | ○ |  |  |
-| passing_score |  | DECIMAL |  | ○ |  |  |
-| certification_provided |  | BOOLEAN |  | ○ | False |  |
-| pdu_credits |  | DECIMAL |  | ○ |  |  |
-| related_skills |  | TEXT |  | ○ |  |  |
-| related_certifications |  | TEXT |  | ○ |  |  |
-| cost_per_participant |  | DECIMAL |  | ○ |  |  |
-| external_provider |  | VARCHAR |  | ○ |  |  |
-| external_url |  | VARCHAR |  | ○ |  |  |
-| venue_type |  | ENUM |  | ○ |  |  |
-| venue_requirements |  | TEXT |  | ○ |  |  |
-| language |  | ENUM |  | ○ | JA |  |
-| repeat_interval |  | INTEGER |  | ○ |  |  |
-| mandatory_flag |  | BOOLEAN |  | ○ | False |  |
-| active_flag |  | BOOLEAN |  | ○ | True |  |
-| effective_start_date |  | DATE |  | ○ |  |  |
-| effective_end_date |  | DATE |  | ○ |  |  |
-| created_by |  | VARCHAR |  | ○ |  |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approval_date |  | DATE |  | ○ |  |  |
-| version_number |  | VARCHAR |  | ○ | 1.0 |  |
-| revision_notes |  | TEXT |  | ○ |  |  |
-| tags |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| trainingprogram_id | MST_TrainingProgramの主キー | SERIAL |  | × |  | MST_TrainingProgramの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_training_program_id | training_program_id | ○ |  |
-| idx_program_code | program_code | ○ |  |
-| idx_program_category | program_category | × |  |
-| idx_program_type | program_type | × |  |
-| idx_target_audience | target_audience | × |  |
-| idx_difficulty_level | difficulty_level | × |  |
-| idx_active_flag | active_flag | × |  |
-| idx_mandatory_flag | mandatory_flag | × |  |
-| idx_effective_period | effective_start_date, effective_end_date | × |  |
-| idx_external_provider | external_provider | × |  |
-| idx_language | language | × |  |
+| idx_mst_trainingprogram_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_training_program_created_by | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_training_program_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_training_program_id | UNIQUE |  | training_program_id一意制約 |
-| uk_program_code | UNIQUE |  | program_code一意制約 |
-| chk_program_type | CHECK | program_type IN (...) | program_type値チェック制約 |
-| chk_venue_type | CHECK | venue_type IN (...) | venue_type値チェック制約 |
+| pk_mst_trainingprogram | PRIMARY KEY | trainingprogram_id | 主キー制約 |
 
 ## サンプルデータ
 

@@ -12,35 +12,19 @@
 
 このテーブルは、認証・認可システムの基盤となる重要なシステムデータです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS SYS_TokenStore;
 
 CREATE TABLE SYS_TokenStore (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    user_id VARCHAR,
-    token_type ENUM,
-    token_value TEXT,
-    token_hash VARCHAR,
-    expires_at TIMESTAMP,
-    issued_at TIMESTAMP,
-    last_used_at TIMESTAMP,
-    client_ip VARCHAR,
-    user_agent TEXT,
-    device_fingerprint VARCHAR,
-    scope TEXT,
-    is_revoked BOOLEAN DEFAULT False,
-    revoked_at TIMESTAMP,
-    revoked_reason ENUM,
-    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ'
+    tokenstore_id SERIAL NOT NULL COMMENT 'SYS_TokenStoreの主キー',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
+    PRIMARY KEY (tokenstore_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- インデックス作成
-CREATE UNIQUE INDEX idx_token_store_hash ON SYS_TokenStore (token_hash);
-CREATE INDEX idx_token_store_user_type ON SYS_TokenStore (user_id, token_type);
-CREATE INDEX idx_token_store_expires ON SYS_TokenStore (expires_at, is_revoked);
-CREATE INDEX idx_token_store_tenant_user ON SYS_TokenStore (tenant_id, user_id);
-CREATE INDEX idx_token_store_issued ON SYS_TokenStore (issued_at);
-CREATE INDEX idx_token_store_last_used ON SYS_TokenStore (last_used_at);
+-- 外部キー制約
+ALTER TABLE SYS_TokenStore ADD CONSTRAINT fk_token_store_user FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;

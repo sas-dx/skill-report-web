@@ -15,40 +15,25 @@
 このテーブルは、人事管理、権限管理、予算管理、レポート作成など、
 組織運営の様々な業務プロセスの基盤となる重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:21:48
+-- 作成日: 2025-06-21 23:07:48
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Department;
 
 CREATE TABLE MST_Department (
-    department_code VARCHAR,
-    department_name VARCHAR,
-    department_name_short VARCHAR,
-    parent_department_id VARCHAR,
-    department_level INT,
-    department_type ENUM,
-    manager_id VARCHAR,
-    deputy_manager_id VARCHAR,
-    cost_center_code VARCHAR,
-    budget_amount DECIMAL,
-    location VARCHAR,
-    phone_number VARCHAR,
-    email_address VARCHAR,
-    establishment_date DATE,
-    abolition_date DATE,
-    department_status ENUM DEFAULT 'ACTIVE',
-    sort_order INT,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    department_id SERIAL NOT NULL COMMENT 'MST_Departmentの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT 'False' COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (department_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_department_code ON MST_Department (department_code);
-CREATE INDEX idx_parent_department ON MST_Department (parent_department_id);
-CREATE INDEX idx_department_level ON MST_Department (department_level);
-CREATE INDEX idx_department_type ON MST_Department (department_type);
-CREATE INDEX idx_manager ON MST_Department (manager_id);
-CREATE INDEX idx_status ON MST_Department (department_status);
-CREATE INDEX idx_cost_center ON MST_Department (cost_center_code);
-CREATE INDEX idx_sort_order ON MST_Department (sort_order);
+CREATE INDEX idx_mst_department_tenant_id ON MST_Department (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_parent FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_manager FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_Department ADD CONSTRAINT fk_department_deputy FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

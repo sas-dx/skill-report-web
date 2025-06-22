@@ -219,10 +219,17 @@ class BusinessColumnDefinition:
     unique: bool = False
     default: Optional[str] = None
     comment: Optional[str] = None
+    description: Optional[str] = None  # DDLGenerator互換性のため追加
     requirement_id: Optional[str] = None
     length: Optional[int] = None
     precision: Optional[int] = None
     scale: Optional[int] = None
+    
+    def __post_init__(self):
+        """初期化後の処理"""
+        # descriptionがない場合はcommentを使用
+        if self.description is None:
+            self.description = self.comment
     
     def to_column_definition(self) -> ColumnDefinition:
         """ColumnDefinitionに変換"""
@@ -280,6 +287,14 @@ class TableDefinition:
     business_columns: List[BusinessColumnDefinition] = field(default_factory=list)
     business_indexes: List[BusinessIndexDefinition] = field(default_factory=list)
     constraints: List[ConstraintDefinition] = field(default_factory=list)
+    
+    # .clinerules準拠のための追加属性
+    overview: Optional[str] = None
+    notes: List[str] = field(default_factory=list)
+    business_rules: List[str] = field(default_factory=list)
+    revision_history: List[Dict[str, str]] = field(default_factory=list)
+    sample_data: List[Dict[str, Any]] = field(default_factory=list)
+    initial_data: List[Dict[str, Any]] = field(default_factory=list)  # InsertGenerator互換性のため
     
     def __post_init__(self):
         """初期化後の処理"""

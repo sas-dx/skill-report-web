@@ -2,9 +2,19 @@
 データベース整合性チェックツール - JSONレポーター
 """
 import json
+import sys
+from pathlib import Path
 from typing import Dict, Any
-from core.models import ConsistencyReport, CheckResult, CheckSeverity, FixSuggestion
-from core.check_definitions import get_japanese_check_name
+
+# パス解決のセットアップ
+_current_dir = Path(__file__).parent
+_tools_dir = _current_dir.parent.parent
+if str(_tools_dir) not in sys.path:
+    sys.path.insert(0, str(_tools_dir))
+
+# 絶対インポートを使用
+from database_consistency_checker.core.models import ConsistencyReport, CheckResult, CheckSeverity, FixSuggestion
+from database_consistency_checker.core.check_definitions import get_japanese_check_name
 
 
 class JsonReporter:

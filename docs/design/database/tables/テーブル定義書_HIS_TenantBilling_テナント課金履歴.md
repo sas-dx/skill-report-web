@@ -7,7 +7,7 @@
 | テーブル名 | HIS_TenantBilling |
 | 論理名 | テナント課金履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,50 +25,30 @@ HIS_TenantBilling（テナント課金履歴）は、マルチテナントシス
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| billing_period_start |  | DATE |  | ○ |  |  |
-| billing_period_end |  | DATE |  | ○ |  |  |
-| billing_type |  | ENUM |  | ○ |  |  |
-| plan_id |  | VARCHAR |  | ○ |  |  |
-| plan_name |  | VARCHAR |  | ○ |  |  |
-| base_amount |  | DECIMAL |  | ○ | 0.0 |  |
-| usage_amount |  | DECIMAL |  | ○ | 0.0 |  |
-| additional_amount |  | DECIMAL |  | ○ | 0.0 |  |
-| discount_amount |  | DECIMAL |  | ○ | 0.0 |  |
-| subtotal_amount |  | DECIMAL |  | ○ |  |  |
-| tax_rate |  | DECIMAL |  | ○ |  |  |
-| tax_amount |  | DECIMAL |  | ○ |  |  |
-| total_amount |  | DECIMAL |  | ○ |  |  |
-| currency_code |  | VARCHAR |  | ○ | JPY |  |
-| usage_details |  | TEXT |  | ○ |  |  |
-| billing_status |  | ENUM |  | ○ | CALCULATED |  |
-| invoice_number |  | VARCHAR |  | ○ |  |  |
-| invoice_date |  | DATE |  | ○ |  |  |
-| due_date |  | DATE |  | ○ |  |  |
-| paid_date |  | DATE |  | ○ |  |  |
-| payment_method |  | ENUM |  | ○ |  |  |
-| notes |  | TEXT |  | ○ |  |  |
+| tenantbilling_id | HIS_TenantBillingの主キー | SERIAL |  | × |  | HIS_TenantBillingの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_tenant_billing_tenant_period | tenant_id, billing_period_start, billing_period_end | × |  |
-| idx_tenant_billing_status | billing_status | × |  |
-| idx_tenant_billing_invoice | invoice_number | ○ |  |
-| idx_tenant_billing_dates | invoice_date, due_date, paid_date | × |  |
-| idx_tenant_billing_type | billing_type | × |  |
-| idx_tenant_billing_amount | total_amount | × |  |
+| idx_his_tenantbilling_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_tenant_billing_tenant | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_billing_type | CHECK | billing_type IN (...) | billing_type値チェック制約 |
-| chk_billing_status | CHECK | billing_status IN (...) | billing_status値チェック制約 |
+| pk_his_tenantbilling | PRIMARY KEY | tenantbilling_id, id | 主キー制約 |
 
 ## サンプルデータ
 

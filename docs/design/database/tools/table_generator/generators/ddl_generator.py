@@ -94,7 +94,7 @@ class DDLGenerator:
             ddl_lines.append("")
         
         # その他の制約
-        if table_def.business_constraints:
+        if hasattr(table_def, 'business_constraints') and table_def.business_constraints:
             ddl_lines.append("-- その他の制約")
             for constraint in table_def.business_constraints:
                 constraint_sql = self._generate_constraint_ddl(table_def.table_name, constraint)
@@ -281,7 +281,7 @@ class DDLGenerator:
         """
         return (
             old_col.data_type != new_col.data_type or
-            old_col.null != new_col.null or
+            old_col.nullable != new_col.nullable or
             old_col.default != new_col.default or
             old_col.description != new_col.description
         )

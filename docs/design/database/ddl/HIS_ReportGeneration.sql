@@ -12,41 +12,23 @@
 
 このテーブルは、帳票・レポート機能において生成状況の把握と品質向上を支える重要な履歴データです。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS HIS_ReportGeneration;
 
 CREATE TABLE HIS_ReportGeneration (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    template_id VARCHAR,
-    requested_by VARCHAR,
-    report_title VARCHAR,
-    report_category ENUM,
-    output_format ENUM,
-    generation_status ENUM,
-    parameters TEXT,
-    file_path VARCHAR,
-    file_size BIGINT,
-    download_count INTEGER DEFAULT 0,
-    last_downloaded_at TIMESTAMP,
-    requested_at TIMESTAMP,
-    started_at TIMESTAMP,
-    completed_at TIMESTAMP,
-    processing_time_ms INTEGER,
-    error_message TEXT,
-    error_details TEXT,
-    expires_at TIMESTAMP,
-    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ'
+    reportgeneration_id SERIAL NOT NULL COMMENT 'HIS_ReportGenerationの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
+    PRIMARY KEY (reportgeneration_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE INDEX idx_report_generation_template ON HIS_ReportGeneration (template_id);
-CREATE INDEX idx_report_generation_requester ON HIS_ReportGeneration (requested_by);
-CREATE INDEX idx_report_generation_tenant_status ON HIS_ReportGeneration (tenant_id, generation_status);
-CREATE INDEX idx_report_generation_category ON HIS_ReportGeneration (report_category);
-CREATE INDEX idx_report_generation_format ON HIS_ReportGeneration (output_format);
-CREATE INDEX idx_report_generation_requested ON HIS_ReportGeneration (requested_at);
-CREATE INDEX idx_report_generation_completed ON HIS_ReportGeneration (completed_at);
-CREATE INDEX idx_report_generation_expires ON HIS_ReportGeneration (expires_at);
+CREATE INDEX idx_his_reportgeneration_tenant_id ON HIS_ReportGeneration (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE HIS_ReportGeneration ADD CONSTRAINT fk_report_generation_template FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE RESTRICT;

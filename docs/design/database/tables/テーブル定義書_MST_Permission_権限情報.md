@@ -7,7 +7,7 @@
 | テーブル名 | MST_Permission |
 | 論理名 | 権限情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:58 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -28,51 +28,28 @@ MST_Permission（権限情報）は、システム内の権限（許可）を管
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| permission_code |  | VARCHAR |  | ○ |  |  |
-| permission_name |  | VARCHAR |  | ○ |  |  |
-| permission_name_short |  | VARCHAR |  | ○ |  |  |
-| permission_category |  | ENUM |  | ○ |  |  |
-| resource_type |  | VARCHAR |  | ○ |  |  |
-| action_type |  | ENUM |  | ○ |  |  |
-| scope_level |  | ENUM |  | ○ |  |  |
-| parent_permission_id |  | VARCHAR |  | ○ |  |  |
-| is_system_permission |  | BOOLEAN |  | ○ | False |  |
-| requires_conditions |  | BOOLEAN |  | ○ | False |  |
-| condition_expression |  | TEXT |  | ○ |  |  |
-| risk_level |  | INT |  | ○ | 1 |  |
-| requires_approval |  | BOOLEAN |  | ○ | False |  |
-| audit_required |  | BOOLEAN |  | ○ | False |  |
-| permission_status |  | ENUM |  | ○ | ACTIVE |  |
-| effective_from |  | DATE |  | ○ |  |  |
-| effective_to |  | DATE |  | ○ |  |  |
-| sort_order |  | INT |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| permission_id | MST_Permissionの主キー | SERIAL |  | × |  | MST_Permissionの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_permission_code | permission_code | ○ |  |
-| idx_permission_category | permission_category | × |  |
-| idx_resource_action | resource_type, action_type | × |  |
-| idx_scope_level | scope_level | × |  |
-| idx_parent_permission | parent_permission_id | × |  |
-| idx_system_permission | is_system_permission | × |  |
-| idx_risk_level | risk_level | × |  |
-| idx_permission_status | permission_status | × |  |
-| idx_effective_period | effective_from, effective_to | × |  |
+| idx_mst_permission_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_permission_parent | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_permission_code | UNIQUE |  | permission_code一意制約 |
-| chk_resource_type | CHECK | resource_type IN (...) | resource_type値チェック制約 |
-| chk_action_type | CHECK | action_type IN (...) | action_type値チェック制約 |
-| chk_risk_level | CHECK | risk_level > 0 | risk_level正値チェック制約 |
-| chk_permission_status | CHECK | permission_status IN (...) | permission_status値チェック制約 |
+| pk_mst_permission | PRIMARY KEY | permission_id | 主キー制約 |
 
 ## サンプルデータ
 

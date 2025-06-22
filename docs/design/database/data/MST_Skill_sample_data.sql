@@ -1,32 +1,16 @@
 -- MST_Skill (スキルマスタ) サンプルデータ
--- 生成日時: 2025-06-21 17:21:58
+-- 生成日時: 2025-06-21 23:19:39
 
 INSERT INTO MST_Skill (
-    id, tenant_id, skill_name, skill_name_en,
-    category_id, skill_type, difficulty_level, description,
-    evaluation_criteria, required_experience_months, related_skills, prerequisite_skills,
-    certification_info, learning_resources, market_demand, technology_trend,
-    is_core_skill, display_order, is_active, effective_from,
-    effective_to, created_at, updated_at, is_deleted
+    skill_id, tenant_id, id, is_deleted,
+    created_at, updated_at
 ) VALUES
-    ('SKILL001', NULL, 'React', 'React',
-     'CAT_FRONTEND', 'TECHNICAL', 3, 'Reactライブラリを使用したフロントエンド開発スキル。コンポーネント設計、状態管理、Hooksの理解が含まれます。',
-     '{"level1":"基本的なコンポーネント作成","level2":"状態管理とイベント処理","level3":"Hooks活用とパフォーマンス最適化","level4":"複雑なアプリケーション設計","level5":"ライブラリ開発とベストプラクティス"}', 6, '["SKILL002", "SKILL003", "SKILL004"]', '["SKILL_JS001", "SKILL_HTML001"]',
-     '{"name":"React Developer Certification","provider":"Meta","url":"https://developers.facebook.com/certification/"}', '["https://reactjs.org/docs/","https://react.dev/learn","https://egghead.io/courses/react"]', 'HIGH', 'GROWING',
-     TRUE, 1, TRUE, '2024-01-01',
-     NULL, NULL, NULL, NULL),
-    ('SKILL002', NULL, 'TypeScript', 'TypeScript',
-     'CAT_FRONTEND', 'TECHNICAL', 3, 'TypeScriptを使用した型安全なJavaScript開発スキル。型定義、ジェネリクス、高度な型操作が含まれます。',
-     '{"level1":"基本的な型定義","level2":"インターフェースとクラス","level3":"ジェネリクスと高度な型","level4":"型レベルプログラミング","level5":"ライブラリ型定義作成"}', 4, '["SKILL001", "SKILL003"]', '["SKILL_JS001"]',
-     NULL, '["https://www.typescriptlang.org/docs/","https://typescript-jp.gitbook.io/deep-dive/"]', 'VERY_HIGH', 'GROWING',
-     TRUE, 2, TRUE, '2024-01-01',
-     NULL, NULL, NULL, NULL),
-    ('SKILL003', NULL, 'Node.js', 'Node.js',
-     'CAT_BACKEND', 'TECHNICAL', 3, 'Node.jsを使用したサーバーサイド開発スキル。非同期処理、API開発、パフォーマンス最適化が含まれます。',
-     '{"level1":"基本的なサーバー構築","level2":"Express.jsでのAPI開発","level3":"非同期処理とストリーム","level4":"パフォーマンス最適化","level5":"スケーラブルアーキテクチャ設計"}', 8, '["SKILL001", "SKILL002", "SKILL004"]', '["SKILL_JS001"]',
-     NULL, '["https://nodejs.org/en/docs/","https://expressjs.com/","https://nodeschool.io/"]', 'HIGH', 'STABLE',
-     TRUE, 1, TRUE, '2024-01-01',
-     NULL, NULL, NULL, NULL)
+    (NULL, NULL, 'SKILL001', NULL,
+     NULL, NULL),
+    (NULL, NULL, 'SKILL002', NULL,
+     NULL, NULL),
+    (NULL, NULL, 'SKILL003', NULL,
+     NULL, NULL)
 ;
 
 -- 実行確認用クエリ

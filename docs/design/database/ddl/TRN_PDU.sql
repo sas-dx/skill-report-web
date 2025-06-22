@@ -13,62 +13,29 @@
 このテーブルにより、社員の継続的な学習活動を体系的に記録し、
 資格維持や専門性向上の支援を効率的に行うことができます。
 
--- 作成日: 2025-06-21 17:20:35
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS TRN_PDU;
 
 CREATE TABLE TRN_PDU (
-    pdu_id VARCHAR,
-    employee_id VARCHAR,
-    certification_id VARCHAR,
-    activity_type ENUM,
-    activity_name VARCHAR,
-    activity_description TEXT,
-    provider_name VARCHAR,
-    activity_date DATE,
-    start_time TIME,
-    end_time TIME,
-    duration_hours DECIMAL,
-    pdu_points DECIMAL,
-    pdu_category ENUM,
-    pdu_subcategory VARCHAR,
-    location VARCHAR,
-    cost DECIMAL,
-    cost_covered_by ENUM,
-    evidence_type ENUM,
-    evidence_file_path VARCHAR,
-    certificate_number VARCHAR,
-    instructor_name VARCHAR,
-    learning_objectives TEXT,
-    learning_outcomes TEXT,
-    skills_developed TEXT,
-    approval_status ENUM DEFAULT 'PENDING',
-    approved_by VARCHAR,
-    approval_date DATE,
-    approval_comment TEXT,
-    expiry_date DATE,
-    is_recurring BOOLEAN DEFAULT False,
-    recurrence_pattern VARCHAR,
-    related_training_id VARCHAR,
-    related_project_id VARCHAR,
+    pdu_id SERIAL NOT NULL COMMENT 'TRN_PDUの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
     id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
     is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
     created_by VARCHAR(50) NOT NULL COMMENT 'レコード作成者のユーザーID',
     updated_by VARCHAR(50) NOT NULL COMMENT 'レコード更新者のユーザーID',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時',
-    PRIMARY KEY (id)
+    PRIMARY KEY (pdu_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_pdu_id ON TRN_PDU (pdu_id);
-CREATE INDEX idx_employee_id ON TRN_PDU (employee_id);
-CREATE INDEX idx_certification_id ON TRN_PDU (certification_id);
-CREATE INDEX idx_activity_type ON TRN_PDU (activity_type);
-CREATE INDEX idx_activity_date ON TRN_PDU (activity_date);
-CREATE INDEX idx_pdu_category ON TRN_PDU (pdu_category);
-CREATE INDEX idx_approval_status ON TRN_PDU (approval_status);
-CREATE INDEX idx_employee_period ON TRN_PDU (employee_id, activity_date);
-CREATE INDEX idx_expiry_date ON TRN_PDU (expiry_date);
-CREATE INDEX idx_certification_employee ON TRN_PDU (certification_id, employee_id, approval_status);
+CREATE INDEX idx_trn_pdu_tenant_id ON TRN_PDU (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_employee FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE RESTRICT;
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_certification FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_approver FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_training FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE TRN_PDU ADD CONSTRAINT fk_pdu_project FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

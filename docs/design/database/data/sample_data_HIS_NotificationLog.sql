@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: HIS_NotificationLog
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:41
 -- レコード数: 2
 
 INSERT INTO HIS_NotificationLog (id, tenant_id, notification_id, setting_id, template_id, notification_type, recipient_type, recipient_address, subject, message_body, message_format, send_status, send_attempts, max_retry_count, scheduled_at, sent_at, delivered_at, opened_at, response_code, response_message, error_details, integration_config_id, priority_level, created_at, updated_at, is_deleted) VALUES ('NL001', 'TENANT001', 'NOTIF001', 'NS001', 'NT001', 'EMAIL', 'USER', 'yamada.taro@company.com', '【スキル更新】山田太郎さんのスキル情報が更新されました', '山田太郎さん

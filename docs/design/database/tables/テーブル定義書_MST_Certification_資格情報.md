@@ -7,7 +7,7 @@
 | テーブル名 | MST_Certification |
 | 論理名 | 資格情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,43 +26,28 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| certification_code |  | VARCHAR |  | ○ |  |  |
-| certification_name |  | VARCHAR |  | ○ |  |  |
-| certification_name_en |  | VARCHAR |  | ○ |  |  |
-| issuer |  | VARCHAR |  | ○ |  |  |
-| issuer_country |  | VARCHAR |  | ○ |  |  |
-| certification_category |  | ENUM |  | ○ |  |  |
-| certification_level |  | ENUM |  | ○ |  |  |
-| validity_period_months |  | INTEGER |  | ○ |  |  |
-| renewal_required |  | BOOLEAN |  | ○ | False |  |
-| renewal_requirements |  | TEXT |  | ○ |  |  |
-| exam_fee |  | DECIMAL |  | ○ |  |  |
-| exam_language |  | VARCHAR |  | ○ |  |  |
-| exam_format |  | ENUM |  | ○ |  |  |
-| official_url |  | VARCHAR |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| skill_category_id |  | VARCHAR |  | ○ |  |  |
-| is_recommended |  | BOOLEAN |  | ○ | False |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| certification_id | MST_Certificationの主キー | SERIAL |  | × |  | MST_Certificationの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_certification_code | certification_code | ○ |  |
-| idx_certification_name | certification_name | × |  |
-| idx_issuer | issuer | × |  |
-| idx_category_level | certification_category, certification_level | × |  |
-| idx_recommended | is_recommended, is_active | × |  |
-| idx_skill_category | skill_category_id | × |  |
+| idx_mst_certification_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_certification_skill_category | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_certification_code | UNIQUE |  | certification_code一意制約 |
+| pk_mst_certification | PRIMARY KEY | certification_id | 主キー制約 |
 
 ## サンプルデータ
 

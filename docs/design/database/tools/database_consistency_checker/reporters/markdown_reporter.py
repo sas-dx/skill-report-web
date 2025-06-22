@@ -1,9 +1,19 @@
 """
 データベース整合性チェックツール - Markdownレポーター
 """
+import sys
+from pathlib import Path
 from typing import Dict, List
-from core.models import ConsistencyReport, CheckResult, CheckSeverity
-from core.check_definitions import get_japanese_check_name, get_all_check_definitions
+
+# パス解決のセットアップ
+_current_dir = Path(__file__).parent
+_tools_dir = _current_dir.parent.parent
+if str(_tools_dir) not in sys.path:
+    sys.path.insert(0, str(_tools_dir))
+
+# 絶対インポートを使用
+from database_consistency_checker.core.models import ConsistencyReport, CheckResult, CheckSeverity
+from database_consistency_checker.core.check_definitions import get_japanese_check_name, get_all_check_definitions
 
 
 class MarkdownReporter:
@@ -111,13 +121,13 @@ class MarkdownReporter:
         check_definitions = get_all_check_definitions()
         
         for i, (check_key, definition) in enumerate(check_definitions.items(), 1):
-            lines.append(f"### {i}. {definition.japanese_name}")
+            lines.append(f"### {i}. {definition.get('japanese_name', check_key)}")
             lines.append("")
-            lines.append(f"**目的:** {definition.purpose}")
+            lines.append(f"**目的:** {definition.get('purpose', '詳細は実装を参照')}")
             lines.append("")
-            lines.append(f"**チェック内容:** {definition.check_content}")
+            lines.append(f"**チェック内容:** {definition.get('check_content', '詳細は実装を参照')}")
             lines.append("")
-            lines.append(f"**検出する問題:** {definition.detected_issues}")
+            lines.append(f"**検出する問題:** {definition.get('detected_issues', '詳細は実装を参照')}")
             lines.append("")
         
         return lines
@@ -243,37 +253,70 @@ class MarkdownReporter:
             lines.append("")
             return lines
         
-        # 修正タイプ別にグループ化
-        suggestions_by_type = {}
+        # 重要度別にグループ化
+        suggestions_by_severity = {}
         for suggestion in report.fix_suggestions:
-            fix_type = suggestion.fix_type.value
-            if fix_type not in suggestions_by_type:
-                suggestions_by_type[fix_type] = []
-            suggestions_by_type[fix_type].append(suggestion)
+            # 辞書形式の場合の処理
+            if isinstance(suggestion, dict):
+                severity = suggestion.get('severity', 'info')
+                if severity not in suggestions_by_severity:
+                    suggestions_by_severity[severity] = []
+                suggestions_by_severity[severity].append(suggestion)
+            else:
+                # FixSuggestionオブジェクトの場合
+                fix_type = suggestion.fix_type.value
+                if fix_type not in suggestions_by_severity:
+                    suggestions_by_severity[fix_type] = []
+                suggestions_by_severity[fix_type].append(suggestion)
         
-        for fix_type, suggestions in suggestions_by_type.items():
-            lines.append(f"### {fix_type.upper()} 修正 ({len(suggestions)}件)")
+        # 重要度順に出力
+        severity_order = ['error', 'warning', 'info']
+        
+        for severity in severity_order:
+            if severity not in suggestions_by_severity:
+                continue
+                
+            suggestions = suggestions_by_severity[severity]
+            severity_icon = '❌' if severity == 'error' else '⚠️' if severity == 'warning' else 'ℹ️'
+            lines.append(f"### {severity_icon} {severity.upper()} ({len(suggestions)}件)")
             lines.append("")
             
             for i, suggestion in enumerate(suggestions, 1):
-                lines.append(f"#### {i}. {suggestion.table_name}")
-                lines.append("")
-                lines.append(f"**説明:** {suggestion.description}")
-                lines.append("")
-                
-                if suggestion.critical:
-                    lines.append("⚠️ **重要:** この修正は重要です。")
+                if isinstance(suggestion, dict):
+                    # 辞書形式の場合
+                    table = suggestion.get('table', 'N/A')
+                    issue = suggestion.get('issue', '')
+                    fix_suggestion = suggestion.get('suggestion', '')
+                    
+                    lines.append(f"#### {i}. {table}")
                     lines.append("")
-                
-                if suggestion.backup_required:
-                    lines.append("💾 **注意:** 修正前にバックアップを取得してください。")
+                    lines.append(f"**問題:** {issue}")
                     lines.append("")
-                
-                lines.append("**修正内容:**")
-                lines.append("```sql")
-                lines.append(suggestion.fix_content)
-                lines.append("```")
-                lines.append("")
+                    lines.append(f"**修正方法:**")
+                    lines.append("```bash")
+                    lines.append(fix_suggestion)
+                    lines.append("```")
+                    lines.append("")
+                else:
+                    # FixSuggestionオブジェクトの場合
+                    lines.append(f"#### {i}. {suggestion.table_name}")
+                    lines.append("")
+                    lines.append(f"**説明:** {suggestion.description}")
+                    lines.append("")
+                    
+                    if suggestion.critical:
+                        lines.append("⚠️ **重要:** この修正は重要です。")
+                        lines.append("")
+                    
+                    if suggestion.backup_required:
+                        lines.append("💾 **注意:** 修正前にバックアップを取得してください。")
+                        lines.append("")
+                    
+                    lines.append("**修正内容:**")
+                    lines.append("```sql")
+                    lines.append(suggestion.fix_content)
+                    lines.append("```")
+                    lines.append("")
         
         return lines
     

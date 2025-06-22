@@ -15,41 +15,20 @@
 このテーブルは、人事管理、権限管理、給与計算、組織運営など、
 企業の階層的組織運営の基盤となる重要なマスタデータです。
 
--- 作成日: 2025-06-21 17:21:48
+-- 作成日: 2025-06-21 23:07:48
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Position;
 
 CREATE TABLE MST_Position (
-    position_code VARCHAR,
-    position_name VARCHAR,
-    position_name_short VARCHAR,
-    position_level INT,
-    position_rank INT,
-    position_category ENUM,
-    authority_level INT,
-    approval_limit DECIMAL,
-    salary_grade VARCHAR,
-    allowance_amount DECIMAL,
-    is_management BOOLEAN DEFAULT False,
-    is_executive BOOLEAN DEFAULT False,
-    requires_approval BOOLEAN DEFAULT False,
-    can_hire BOOLEAN DEFAULT False,
-    can_evaluate BOOLEAN DEFAULT False,
-    position_status ENUM DEFAULT 'ACTIVE',
-    sort_order INT,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    position_id SERIAL NOT NULL COMMENT 'MST_Positionの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT 'False' COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (position_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_position_code ON MST_Position (position_code);
-CREATE INDEX idx_position_level ON MST_Position (position_level);
-CREATE INDEX idx_position_rank ON MST_Position (position_rank);
-CREATE INDEX idx_position_category ON MST_Position (position_category);
-CREATE INDEX idx_authority_level ON MST_Position (authority_level);
-CREATE INDEX idx_salary_grade ON MST_Position (salary_grade);
-CREATE INDEX idx_status ON MST_Position (position_status);
-CREATE INDEX idx_management_flags ON MST_Position (is_management, is_executive);
-CREATE INDEX idx_sort_order ON MST_Position (sort_order);
+CREATE INDEX idx_mst_position_tenant_id ON MST_Position (tenant_id);

@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: MST_NotificationTemplate
--- 生成日時: 2025-06-21 17:21:41
+-- 生成日時: 2025-06-21 22:54:40
 -- レコード数: 2
 
 INSERT INTO MST_NotificationTemplate (id, tenant_id, template_key, template_name, notification_type, language_code, subject_template, body_template, format_type, parameters, sample_data, is_default, is_active, version, created_at, updated_at, is_deleted) VALUES ('NT001', 'TENANT001', 'skill_update_notification', 'スキル更新通知テンプレート', 'EMAIL', 'ja', '【スキル更新】{{employee_name}}さんのスキル情報が更新されました', '{{employee_name}}さん

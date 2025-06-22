@@ -13,38 +13,21 @@
 このテーブルにより、社員の資格取得状況を体系的に管理し、
 キャリア開発や人材配置の判断材料として活用できます。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Certification;
 
 CREATE TABLE MST_Certification (
-    certification_code VARCHAR,
-    certification_name VARCHAR,
-    certification_name_en VARCHAR,
-    issuer VARCHAR,
-    issuer_country VARCHAR,
-    certification_category ENUM,
-    certification_level ENUM,
-    validity_period_months INTEGER,
-    renewal_required BOOLEAN DEFAULT False,
-    renewal_requirements TEXT,
-    exam_fee DECIMAL,
-    exam_language VARCHAR,
-    exam_format ENUM,
-    official_url VARCHAR,
-    description TEXT,
-    skill_category_id VARCHAR,
-    is_recommended BOOLEAN DEFAULT False,
-    is_active BOOLEAN DEFAULT True,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    certification_id SERIAL NOT NULL COMMENT 'MST_Certificationの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (certification_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_certification_code ON MST_Certification (certification_code);
-CREATE INDEX idx_certification_name ON MST_Certification (certification_name);
-CREATE INDEX idx_issuer ON MST_Certification (issuer);
-CREATE INDEX idx_category_level ON MST_Certification (certification_category, certification_level);
-CREATE INDEX idx_recommended ON MST_Certification (is_recommended, is_active);
-CREATE INDEX idx_skill_category ON MST_Certification (skill_category_id);
+CREATE INDEX idx_mst_certification_tenant_id ON MST_Certification (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_Certification ADD CONSTRAINT fk_certification_skill_category FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;

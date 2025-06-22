@@ -7,7 +7,7 @@
 | テーブル名 | MST_EmployeeDepartment |
 | 論理名 | 社員部署関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -27,41 +27,31 @@ MST_EmployeeDepartment（社員部署関連）は、社員と部署の関連付�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| employee_id |  | VARCHAR |  | ○ |  |  |
-| department_id |  | VARCHAR |  | ○ |  |  |
-| assignment_type |  | ENUM |  | ○ | PRIMARY |  |
-| start_date |  | DATE |  | ○ |  |  |
-| end_date |  | DATE |  | ○ |  |  |
-| assignment_ratio |  | DECIMAL |  | ○ |  |  |
-| role_in_department |  | VARCHAR |  | ○ |  |  |
-| reporting_manager_id |  | VARCHAR |  | ○ |  |  |
-| assignment_reason |  | VARCHAR |  | ○ |  |  |
-| assignment_status |  | ENUM |  | ○ | ACTIVE |  |
-| approval_status |  | ENUM |  | ○ | PENDING |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approved_at |  | TIMESTAMP |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| employeedepartment_id | MST_EmployeeDepartmentの主キー | SERIAL |  | × |  | MST_EmployeeDepartmentの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_EmployeeDepartment_employee_id | employee_id | × |  |
-| idx_MST_EmployeeDepartment_department_id | department_id | × |  |
-| idx_MST_EmployeeDepartment_employee_department | employee_id, department_id | × |  |
-| idx_MST_EmployeeDepartment_assignment_type | assignment_type | × |  |
-| idx_MST_EmployeeDepartment_start_date | start_date | × |  |
-| idx_MST_EmployeeDepartment_end_date | end_date | × |  |
-| idx_MST_EmployeeDepartment_status | assignment_status | × |  |
+| idx_mst_employeedepartment_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_MST_EmployeeDepartment_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_EmployeeDepartment_department | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_EmployeeDepartment_reporting_manager | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_MST_EmployeeDepartment_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_assignment_type | CHECK | assignment_type IN (...) | assignment_type値チェック制約 |
-| chk_assignment_status | CHECK | assignment_status IN (...) | assignment_status値チェック制約 |
-| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
+| pk_mst_employeedepartment | PRIMARY KEY | employeedepartment_id | 主キー制約 |
 
 ## サンプルデータ
 

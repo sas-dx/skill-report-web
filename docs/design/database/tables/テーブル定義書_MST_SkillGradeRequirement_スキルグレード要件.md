@@ -7,7 +7,7 @@
 | テーブル名 | MST_SkillGradeRequirement |
 | 論理名 | スキルグレード要件 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -27,47 +27,28 @@ MST_SkillGradeRequirement（スキルグレード要件）は、スキルグレ�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| skill_grade_id |  | VARCHAR |  | ○ |  |  |
-| requirement_category |  | ENUM |  | ○ |  |  |
-| requirement_name |  | VARCHAR |  | ○ |  |  |
-| requirement_description |  | TEXT |  | ○ |  |  |
-| evaluation_criteria |  | TEXT |  | ○ |  |  |
-| proficiency_level |  | INTEGER |  | ○ |  |  |
-| weight_percentage |  | DECIMAL |  | ○ |  |  |
-| minimum_score |  | DECIMAL |  | ○ |  |  |
-| evidence_requirements |  | TEXT |  | ○ |  |  |
-| learning_resources |  | TEXT |  | ○ |  |  |
-| prerequisite_requirements |  | TEXT |  | ○ |  |  |
-| assessment_method |  | ENUM |  | ○ |  |  |
-| assessment_frequency |  | ENUM |  | ○ | ANNUAL |  |
-| validity_period |  | INTEGER |  | ○ |  |  |
-| certification_mapping |  | TEXT |  | ○ |  |  |
-| requirement_status |  | ENUM |  | ○ | ACTIVE |  |
-| effective_date |  | DATE |  | ○ |  |  |
-| expiry_date |  | DATE |  | ○ |  |  |
-| revision_notes |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| skillgraderequirement_id | MST_SkillGradeRequirementの主キー | SERIAL |  | × |  | MST_SkillGradeRequirementの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_SkillGradeRequirement_skill_grade_id | skill_grade_id | × |  |
-| idx_MST_SkillGradeRequirement_category | requirement_category | × |  |
-| idx_MST_SkillGradeRequirement_grade_category | skill_grade_id, requirement_category | × |  |
-| idx_MST_SkillGradeRequirement_proficiency_level | proficiency_level | × |  |
-| idx_MST_SkillGradeRequirement_assessment_method | assessment_method | × |  |
-| idx_MST_SkillGradeRequirement_status | requirement_status | × |  |
-| idx_MST_SkillGradeRequirement_effective_date | effective_date | × |  |
-| idx_MST_SkillGradeRequirement_weight | weight_percentage | × |  |
+| idx_mst_skillgraderequirement_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_MST_SkillGradeRequirement_skill_grade | None | None | None | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_proficiency_level | CHECK | proficiency_level > 0 | proficiency_level正値チェック制約 |
-| chk_requirement_status | CHECK | requirement_status IN (...) | requirement_status値チェック制約 |
+| pk_mst_skillgraderequirement | PRIMARY KEY | skillgraderequirement_id | 主キー制約 |
 
 ## サンプルデータ
 

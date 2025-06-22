@@ -7,7 +7,7 @@
 | テーブル名 | MST_Employee |
 | 論理名 | 社員基本情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:21:48 |
+| 生成日時 | 2025-06-21 23:07:48 |
 
 ## 概要
 
@@ -59,10 +59,10 @@
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_employee_department | None | None | None | CASCADE | RESTRICT |  |
-| fk_employee_position | None | None | None | CASCADE | SET NULL |  |
-| fk_employee_job_type | None | None | None | CASCADE | SET NULL |  |
-| fk_employee_manager | None | None | None | CASCADE | SET NULL |  |
+| fk_employee_department | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_employee_position | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_employee_job_type | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_employee_manager | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 

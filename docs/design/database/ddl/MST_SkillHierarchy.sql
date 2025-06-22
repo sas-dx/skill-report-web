@@ -13,29 +13,22 @@
 このテーブルにより、技術スキル、ビジネススキル、資格等を体系的に分類し、
 社員のスキル管理を効率的に行うことができます。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS MST_SkillHierarchy;
 
 CREATE TABLE MST_SkillHierarchy (
-    skill_id VARCHAR,
-    parent_skill_id VARCHAR,
-    hierarchy_level INTEGER,
-    skill_path VARCHAR,
-    sort_order INTEGER DEFAULT 0,
-    is_leaf BOOLEAN DEFAULT True,
-    skill_category ENUM,
-    description TEXT,
-    is_active BOOLEAN DEFAULT True,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    skillhierarchy_id SERIAL NOT NULL COMMENT 'MST_SkillHierarchyの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (skillhierarchy_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE INDEX idx_skill_id ON MST_SkillHierarchy (skill_id);
-CREATE INDEX idx_parent_skill ON MST_SkillHierarchy (parent_skill_id);
-CREATE INDEX idx_hierarchy_level ON MST_SkillHierarchy (hierarchy_level);
-CREATE INDEX idx_skill_path ON MST_SkillHierarchy (skill_path);
-CREATE INDEX idx_category_level ON MST_SkillHierarchy (skill_category, hierarchy_level);
-CREATE INDEX idx_parent_sort ON MST_SkillHierarchy (parent_skill_id, sort_order);
+CREATE INDEX idx_mst_skillhierarchy_tenant_id ON MST_SkillHierarchy (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_SkillHierarchy ADD CONSTRAINT fk_hierarchy_skill FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_SkillHierarchy ADD CONSTRAINT fk_hierarchy_parent FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;

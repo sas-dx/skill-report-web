@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: SYS_SkillIndex
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:41
 -- レコード数: 3
 
 INSERT INTO SYS_SkillIndex (id, tenant_id, skill_id, index_type, search_term, normalized_term, relevance_score, frequency_weight, position_weight, language_code, source_field, is_active, search_count, last_searched_at, index_updated_at, created_at, updated_at, is_deleted) VALUES ('SI001', 'TENANT001', 'SKILL001', 'FULLTEXT', 'Java', 'java', 1.0, 1.0, 1.0, 'ja', 'NAME', TRUE, 150, '2025-06-01 18:30:00', '2025-06-01 10:00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);

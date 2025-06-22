@@ -486,7 +486,7 @@ npm run deploy:production
 cd docs/design/database/tools
 
 # YAML検証（必須セクション検証）
-python3 yaml_validator/validate_yaml_format.py --all --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --all --verbose
 
 # テーブル生成（DDL・定義書・サンプルデータ）
 python3 -m table_generator --table MST_Employee --verbose

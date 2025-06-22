@@ -7,7 +7,7 @@
 | テーブル名 | MST_CertificationRequirement |
 | 論理名 | 資格要件マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -26,74 +26,34 @@ MST_CertificationRequirement（資格要件マスタ）は、職種・役職・�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| requirement_id |  | VARCHAR |  | ○ |  |  |
-| requirement_name |  | VARCHAR |  | ○ |  |  |
-| requirement_description |  | TEXT |  | ○ |  |  |
-| requirement_type |  | ENUM |  | ○ |  |  |
-| target_job_type_id |  | VARCHAR |  | ○ |  |  |
-| target_position_id |  | VARCHAR |  | ○ |  |  |
-| target_skill_grade_id |  | VARCHAR |  | ○ |  |  |
-| target_department_id |  | VARCHAR |  | ○ |  |  |
-| certification_id |  | VARCHAR |  | ○ |  |  |
-| requirement_level |  | ENUM |  | ○ |  |  |
-| priority_order |  | INTEGER |  | ○ | 1 |  |
-| alternative_certifications |  | TEXT |  | ○ |  |  |
-| minimum_experience_years |  | INTEGER |  | ○ |  |  |
-| minimum_skill_level |  | ENUM |  | ○ |  |  |
-| grace_period_months |  | INTEGER |  | ○ |  |  |
-| renewal_required |  | BOOLEAN |  | ○ | False |  |
-| renewal_interval_months |  | INTEGER |  | ○ |  |  |
-| exemption_conditions |  | TEXT |  | ○ |  |  |
-| assessment_criteria |  | TEXT |  | ○ |  |  |
-| business_justification |  | TEXT |  | ○ |  |  |
-| compliance_requirement |  | BOOLEAN |  | ○ | False |  |
-| client_requirement |  | BOOLEAN |  | ○ | False |  |
-| internal_policy |  | BOOLEAN |  | ○ | False |  |
-| effective_start_date |  | DATE |  | ○ |  |  |
-| effective_end_date |  | DATE |  | ○ |  |  |
-| notification_timing |  | INTEGER |  | ○ |  |  |
-| escalation_timing |  | INTEGER |  | ○ |  |  |
-| cost_support_available |  | BOOLEAN |  | ○ | False |  |
-| cost_support_amount |  | DECIMAL |  | ○ |  |  |
-| cost_support_conditions |  | TEXT |  | ○ |  |  |
-| training_support_available |  | BOOLEAN |  | ○ | False |  |
-| recommended_training_programs |  | TEXT |  | ○ |  |  |
-| study_time_allocation |  | DECIMAL |  | ○ |  |  |
-| success_rate |  | DECIMAL |  | ○ |  |  |
-| average_study_hours |  | DECIMAL |  | ○ |  |  |
-| difficulty_rating |  | ENUM |  | ○ |  |  |
-| active_flag |  | BOOLEAN |  | ○ | True |  |
-| created_by |  | VARCHAR |  | ○ |  |  |
-| approved_by |  | VARCHAR |  | ○ |  |  |
-| approval_date |  | DATE |  | ○ |  |  |
-| review_date |  | DATE |  | ○ |  |  |
-| notes |  | TEXT |  | ○ |  |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| certificationrequirement_id | MST_CertificationRequirementの主キー | SERIAL |  | × |  | MST_CertificationRequirementの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_requirement_id | requirement_id | ○ |  |
-| idx_requirement_type | requirement_type | × |  |
-| idx_target_job_type | target_job_type_id | × |  |
-| idx_target_position | target_position_id | × |  |
-| idx_target_skill_grade | target_skill_grade_id | × |  |
-| idx_certification_id | certification_id | × |  |
-| idx_requirement_level | requirement_level | × |  |
-| idx_active_flag | active_flag | × |  |
-| idx_effective_period | effective_start_date, effective_end_date | × |  |
-| idx_compliance_requirement | compliance_requirement | × |  |
-| idx_priority_order | priority_order | × |  |
+| idx_mst_certificationrequirement_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_cert_req_target_job_type | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_cert_req_target_position | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_cert_req_target_skill_grade | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_cert_req_target_department | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_cert_req_certification | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_cert_req_created_by | None | None | None | CASCADE | RESTRICT | 外部キー制約 |
+| fk_cert_req_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_requirement_id | UNIQUE |  | requirement_id一意制約 |
-| chk_requirement_type | CHECK | requirement_type IN (...) | requirement_type値チェック制約 |
-| chk_target_job_type_id | CHECK | target_job_type_id IN (...) | target_job_type_id値チェック制約 |
+| pk_mst_certificationrequirement | PRIMARY KEY | certificationrequirement_id | 主キー制約 |
 
 ## サンプルデータ
 

@@ -13,39 +13,18 @@
 このテーブルにより、システムの動作を柔軟に制御し、
 運用環境に応じた設定変更を効率的に行うことができます。
 
--- 作成日: 2025-06-21 17:20:35
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS MST_SystemConfig;
 
 CREATE TABLE MST_SystemConfig (
-    config_key VARCHAR,
-    config_name VARCHAR,
-    config_value TEXT,
-    config_type ENUM,
-    config_category ENUM,
-    default_value TEXT,
-    validation_rule TEXT,
-    description TEXT,
-    is_encrypted BOOLEAN DEFAULT False,
-    is_system_only BOOLEAN DEFAULT False,
-    is_user_configurable BOOLEAN DEFAULT True,
-    requires_restart BOOLEAN DEFAULT False,
-    environment ENUM DEFAULT 'ALL',
-    tenant_specific BOOLEAN DEFAULT False,
-    last_modified_by VARCHAR,
-    last_modified_reason TEXT,
-    sort_order INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT True,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    systemconfig_id SERIAL NOT NULL COMMENT 'MST_SystemConfigの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (systemconfig_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_config_key ON MST_SystemConfig (config_key);
-CREATE INDEX idx_config_category ON MST_SystemConfig (config_category);
-CREATE INDEX idx_config_type ON MST_SystemConfig (config_type);
-CREATE INDEX idx_user_configurable ON MST_SystemConfig (is_user_configurable, is_active);
-CREATE INDEX idx_environment ON MST_SystemConfig (environment, is_active);
-CREATE INDEX idx_tenant_specific ON MST_SystemConfig (tenant_specific, is_active);
-CREATE INDEX idx_sort_order ON MST_SystemConfig (sort_order);
+CREATE INDEX idx_mst_systemconfig_tenant_id ON MST_SystemConfig (tenant_id);

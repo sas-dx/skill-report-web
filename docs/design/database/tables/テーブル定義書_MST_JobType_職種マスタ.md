@@ -7,7 +7,7 @@
 | テーブル名 | MST_JobType |
 | 論理名 | 職種マスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,46 +26,23 @@ MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_type_code |  | VARCHAR |  | ○ |  |  |
-| job_type_name |  | VARCHAR |  | ○ |  |  |
-| job_type_name_en |  | VARCHAR |  | ○ |  |  |
-| job_category |  | ENUM |  | ○ |  |  |
-| job_level |  | ENUM |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| required_experience_years |  | INTEGER |  | ○ |  |  |
-| salary_grade_min |  | INTEGER |  | ○ |  |  |
-| salary_grade_max |  | INTEGER |  | ○ |  |  |
-| career_path |  | TEXT |  | ○ |  |  |
-| required_certifications |  | TEXT |  | ○ |  |  |
-| required_skills |  | TEXT |  | ○ |  |  |
-| department_affinity |  | TEXT |  | ○ |  |  |
-| remote_work_eligible |  | BOOLEAN |  | ○ | False |  |
-| travel_frequency |  | ENUM |  | ○ |  |  |
-| sort_order |  | INTEGER |  | ○ | 0 |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| jobtype_id | MST_JobTypeの主キー | SERIAL |  | × |  | MST_JobTypeの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_job_type_code | job_type_code | ○ |  |
-| idx_job_type_name | job_type_name | × |  |
-| idx_job_category | job_category | × |  |
-| idx_job_level | job_level | × |  |
-| idx_category_level | job_category, job_level | × |  |
-| idx_remote_eligible | remote_work_eligible, is_active | × |  |
-| idx_sort_order | sort_order | × |  |
+| idx_mst_jobtype_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_job_type_code | UNIQUE |  | job_type_code一意制約 |
-| chk_job_type_code | CHECK | job_type_code IN (...) | job_type_code値チェック制約 |
-| chk_job_type_name | CHECK | job_type_name IN (...) | job_type_name値チェック制約 |
-| chk_job_type_name_en | CHECK | job_type_name_en IN (...) | job_type_name_en値チェック制約 |
+| pk_mst_jobtype | PRIMARY KEY | jobtype_id | 主キー制約 |
+| chk_jobtype_id | CHECK | jobtype_id IN (...) | jobtype_id値チェック制約 |
 
 ## サンプルデータ
 

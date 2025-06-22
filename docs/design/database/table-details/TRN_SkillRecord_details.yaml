@@ -253,7 +253,7 @@ foreign_keys:
   references:
     table: MST_Employee
     columns:
-    - emp_id
+    - id
   on_update: CASCADE
   on_delete: CASCADE
   comment: 外部キー制約
@@ -293,7 +293,7 @@ foreign_keys:
   references:
     table: MST_Employee
     columns:
-    - emp_id
+    - id
   on_update: CASCADE
   on_delete: SET NULL
   comment: 外部キー制約

@@ -12,35 +12,19 @@
 
 このテーブルは、スキル管理機能において高速で精度の高い検索を実現する重要なシステムデータです。
 
--- 作成日: 2025-06-21 17:20:35
+-- 作成日: 2025-06-21 22:02:18
 -- ============================================
 
 DROP TABLE IF EXISTS SYS_SkillIndex;
 
 CREATE TABLE SYS_SkillIndex (
-    id VARCHAR,
-    tenant_id VARCHAR,
-    skill_id VARCHAR,
-    index_type ENUM,
-    search_term VARCHAR,
-    normalized_term VARCHAR,
-    relevance_score DECIMAL DEFAULT 1.0,
-    frequency_weight DECIMAL DEFAULT 1.0,
-    position_weight DECIMAL DEFAULT 1.0,
-    language_code VARCHAR DEFAULT 'ja',
-    source_field ENUM,
-    is_active BOOLEAN DEFAULT True,
-    search_count INTEGER DEFAULT 0,
-    last_searched_at TIMESTAMP,
-    index_updated_at TIMESTAMP,
-    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ'
+    skillindex_id SERIAL NOT NULL COMMENT 'SYS_SkillIndexの主キー',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
+    PRIMARY KEY (skillindex_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- インデックス作成
-CREATE INDEX idx_skill_index_skill ON SYS_SkillIndex (skill_id);
-CREATE INDEX idx_skill_index_search_term ON SYS_SkillIndex (normalized_term, language_code);
-CREATE INDEX idx_skill_index_type ON SYS_SkillIndex (index_type);
-CREATE INDEX idx_skill_index_tenant_term ON SYS_SkillIndex (tenant_id, normalized_term);
-CREATE INDEX idx_skill_index_relevance ON SYS_SkillIndex (relevance_score);
-CREATE INDEX idx_skill_index_active ON SYS_SkillIndex (is_active);
-CREATE INDEX idx_skill_index_search_stats ON SYS_SkillIndex (search_count, last_searched_at);
+-- 外部キー制約
+ALTER TABLE SYS_SkillIndex ADD CONSTRAINT fk_skill_index_skill FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;

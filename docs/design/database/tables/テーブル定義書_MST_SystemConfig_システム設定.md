@@ -7,7 +7,7 @@
 | テーブル名 | MST_SystemConfig |
 | 論理名 | システム設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:35 |
+| 生成日時 | 2025-06-21 22:02:18 |
 
 ## 概要
 
@@ -26,45 +26,22 @@ MST_SystemConfig（システム設定）は、システム全体の設定値・�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| config_key |  | VARCHAR |  | ○ |  |  |
-| config_name |  | VARCHAR |  | ○ |  |  |
-| config_value |  | TEXT |  | ○ |  |  |
-| config_type |  | ENUM |  | ○ |  |  |
-| config_category |  | ENUM |  | ○ |  |  |
-| default_value |  | TEXT |  | ○ |  |  |
-| validation_rule |  | TEXT |  | ○ |  |  |
-| description |  | TEXT |  | ○ |  |  |
-| is_encrypted |  | BOOLEAN |  | ○ | False |  |
-| is_system_only |  | BOOLEAN |  | ○ | False |  |
-| is_user_configurable |  | BOOLEAN |  | ○ | True |  |
-| requires_restart |  | BOOLEAN |  | ○ | False |  |
-| environment |  | ENUM |  | ○ | ALL |  |
-| tenant_specific |  | BOOLEAN |  | ○ | False |  |
-| last_modified_by |  | VARCHAR |  | ○ |  |  |
-| last_modified_reason |  | TEXT |  | ○ |  |  |
-| sort_order |  | INTEGER |  | ○ | 0 |  |
-| is_active |  | BOOLEAN |  | ○ | True |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| systemconfig_id | MST_SystemConfigの主キー | SERIAL |  | × |  | MST_SystemConfigの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_config_key | config_key | ○ |  |
-| idx_config_category | config_category | × |  |
-| idx_config_type | config_type | × |  |
-| idx_user_configurable | is_user_configurable, is_active | × |  |
-| idx_environment | environment, is_active | × |  |
-| idx_tenant_specific | tenant_specific, is_active | × |  |
-| idx_sort_order | sort_order | × |  |
+| idx_mst_systemconfig_tenant_id | tenant_id | × | テナントID検索用インデックス |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_config_key | UNIQUE |  | config_key一意制約 |
-| chk_config_type | CHECK | config_type IN (...) | config_type値チェック制約 |
+| pk_mst_systemconfig | PRIMARY KEY | systemconfig_id | 主キー制約 |
 
 ## サンプルデータ
 

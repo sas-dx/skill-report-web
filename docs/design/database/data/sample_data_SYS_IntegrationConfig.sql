@@ -1,5 +1,5 @@
 -- サンプルデータ INSERT文: SYS_IntegrationConfig
--- 生成日時: 2025-06-21 17:21:42
+-- 生成日時: 2025-06-21 22:54:41
 -- レコード数: 3
 
 INSERT INTO SYS_IntegrationConfig (id, tenant_id, integration_key, integration_name, integration_type, endpoint_url, auth_type, auth_config, connection_config, request_headers, timeout_seconds, retry_count, retry_interval, rate_limit_per_minute, is_enabled, health_check_url, last_health_check, health_status, created_at, updated_at, is_deleted) VALUES ('IC001', 'TENANT001', 'slack_webhook', 'Slack通知連携', 'WEBHOOK', 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX', 'NONE', NULL, '{"channel": "#notifications", "username": "SkillBot", "icon_emoji": ":robot_face:"}', '{"Content-Type": "application/json"}', 30, 3, 5, 60, TRUE, NULL, NULL, 'UNKNOWN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE);

@@ -7,7 +7,7 @@
 | テーブル名 | SYS_MasterData |
 | 論理名 | マスターデータ管理 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,42 +25,17 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| master_key |  | VARCHAR |  | ○ |  |  |
-| master_category |  | VARCHAR |  | ○ |  |  |
-| master_name |  | VARCHAR |  | ○ |  |  |
-| master_value |  | TEXT |  | ○ |  |  |
-| data_type |  | ENUM |  | ○ | STRING |  |
-| default_value |  | TEXT |  | ○ |  |  |
-| validation_rule |  | TEXT |  | ○ |  |  |
-| is_system_managed |  | BOOLEAN |  | ○ | False |  |
-| is_editable |  | BOOLEAN |  | ○ | True |  |
-| display_order |  | INTEGER |  | ○ | 0 |  |
-| description |  | TEXT |  | ○ |  |  |
-| effective_from |  | DATE |  | ○ |  |  |
-| effective_to |  | DATE |  | ○ |  |  |
-| last_modified_by |  | VARCHAR |  | ○ |  |  |
-| last_modified_at |  | TIMESTAMP |  | ○ |  |  |
-| version |  | INTEGER |  | ○ | 1 |  |
+| masterdata_id | SYS_MasterDataの主キー | SERIAL |  | × |  | SYS_MasterDataの主キー |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-
-## インデックス
-
-| インデックス名 | カラム | ユニーク | 説明 |
-|----------------|--------|----------|------|
-| idx_SYS_MasterData_master_key | master_key | ○ |  |
-| idx_SYS_MasterData_category | master_category | × |  |
-| idx_SYS_MasterData_category_order | master_category, display_order | × |  |
-| idx_SYS_MasterData_effective_period | effective_from, effective_to | × |  |
-| idx_SYS_MasterData_system_managed | is_system_managed | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_masterdata | PRIMARY KEY | id | 主キー制約 |
-| uk_master_key | UNIQUE |  | master_key一意制約 |
-| chk_data_type | CHECK | data_type IN (...) | data_type値チェック制約 |
+| pk_sys_masterdata | PRIMARY KEY | masterdata_id, id | 主キー制約 |
 
 ## サンプルデータ
 

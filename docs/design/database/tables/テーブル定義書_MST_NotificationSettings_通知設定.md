@@ -7,7 +7,7 @@
 | テーブル名 | MST_NotificationSettings |
 | 論理名 | 通知設定 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 17:20:34 |
+| 生成日時 | 2025-06-21 22:02:17 |
 
 ## 概要
 
@@ -25,39 +25,28 @@ MST_NotificationSettings（通知設定）は、システム全体の通知機�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id |  | VARCHAR |  | ○ |  |  |
-| tenant_id |  | VARCHAR |  | ○ |  |  |
-| setting_key |  | VARCHAR |  | ○ |  |  |
-| setting_name |  | VARCHAR |  | ○ |  |  |
-| notification_type |  | ENUM |  | ○ |  |  |
-| target_audience |  | ENUM |  | ○ |  |  |
-| trigger_event |  | VARCHAR |  | ○ |  |  |
-| frequency_type |  | ENUM |  | ○ | IMMEDIATE |  |
-| frequency_value |  | INTEGER |  | ○ |  |  |
-| template_id |  | VARCHAR |  | ○ |  |  |
-| channel_config |  | TEXT |  | ○ |  |  |
-| is_enabled |  | BOOLEAN |  | ○ | True |  |
-| priority_level |  | ENUM |  | ○ | MEDIUM |  |
-| created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
-| updated_at | レコード更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード更新日時 |
+| notificationsettings_id | MST_NotificationSettingsの主キー | SERIAL |  | × |  | MST_NotificationSettingsの主キー |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_notification_settings_tenant_key | tenant_id, setting_key | ○ |  |
-| idx_notification_settings_type | notification_type | × |  |
-| idx_notification_settings_event | trigger_event | × |  |
-| idx_notification_settings_enabled | is_enabled | × |  |
-| idx_notification_settings_template | template_id | × |  |
+| idx_mst_notificationsettings_tenant_id | tenant_id | × | テナントID検索用インデックス |
+
+## 外部キー
+
+| 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
+|--------|--------|--------------|------------|--------|--------|------|
+| fk_notification_settings_template | None | None | None | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_id | UNIQUE |  | id一意制約 |
-| chk_notification_type | CHECK | notification_type IN (...) | notification_type値チェック制約 |
-| chk_frequency_type | CHECK | frequency_type IN (...) | frequency_type値チェック制約 |
+| pk_mst_notificationsettings | PRIMARY KEY | notificationsettings_id | 主キー制約 |
 
 ## サンプルデータ
 

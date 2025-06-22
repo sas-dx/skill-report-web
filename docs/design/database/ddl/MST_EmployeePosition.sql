@@ -14,37 +14,23 @@
 このテーブルにより、社員の役職変遷を詳細に管理し、
 人事評価や昇進管理の履歴を正確に追跡できます。
 
--- 作成日: 2025-06-21 17:20:34
+-- 作成日: 2025-06-21 22:02:17
 -- ============================================
 
 DROP TABLE IF EXISTS MST_EmployeePosition;
 
 CREATE TABLE MST_EmployeePosition (
-    employee_id VARCHAR,
-    position_id VARCHAR,
-    appointment_type ENUM DEFAULT 'PRIMARY',
-    start_date DATE,
-    end_date DATE,
-    appointment_reason VARCHAR,
-    responsibility_scope VARCHAR,
-    authority_level INTEGER,
-    salary_grade VARCHAR,
-    appointment_status ENUM DEFAULT 'ACTIVE',
-    approval_status ENUM DEFAULT 'PENDING',
-    approved_by VARCHAR,
-    approved_at TIMESTAMP,
-    performance_target TEXT,
-    delegation_authority TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時'
+    employeeposition_id SERIAL NOT NULL COMMENT 'MST_EmployeePositionの主キー',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時',
+    PRIMARY KEY (employeeposition_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE INDEX idx_MST_EmployeePosition_employee_id ON MST_EmployeePosition (employee_id);
-CREATE INDEX idx_MST_EmployeePosition_position_id ON MST_EmployeePosition (position_id);
-CREATE INDEX idx_MST_EmployeePosition_employee_position ON MST_EmployeePosition (employee_id, position_id);
-CREATE INDEX idx_MST_EmployeePosition_appointment_type ON MST_EmployeePosition (appointment_type);
-CREATE INDEX idx_MST_EmployeePosition_start_date ON MST_EmployeePosition (start_date);
-CREATE INDEX idx_MST_EmployeePosition_end_date ON MST_EmployeePosition (end_date);
-CREATE INDEX idx_MST_EmployeePosition_status ON MST_EmployeePosition (appointment_status);
-CREATE INDEX idx_MST_EmployeePosition_authority_level ON MST_EmployeePosition (authority_level);
+CREATE INDEX idx_mst_employeeposition_tenant_id ON MST_EmployeePosition (tenant_id);
+
+-- 外部キー制約
+ALTER TABLE MST_EmployeePosition ADD CONSTRAINT fk_MST_EmployeePosition_employee FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeePosition ADD CONSTRAINT fk_MST_EmployeePosition_position FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE MST_EmployeePosition ADD CONSTRAINT fk_MST_EmployeePosition_approved_by FOREIGN KEY (None) REFERENCES None(None) ON UPDATE CASCADE ON DELETE SET NULL;
