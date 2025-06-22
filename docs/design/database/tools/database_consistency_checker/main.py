@@ -21,6 +21,7 @@ from database_consistency_checker.reporters.markdown_reporter import MarkdownRep
 from database_consistency_checker.reporters.json_reporter import JsonReporter
 from database_consistency_checker.utils.report_manager import ReportManager
 from database_consistency_checker.sample_data_generator_enhanced import EnhancedSampleDataGenerator as SampleDataGenerator
+from database_consistency_checker.yaml_format_check_enhanced import YAMLFormatCheckEnhanced
 
 
 def create_argument_parser() -> argparse.ArgumentParser:

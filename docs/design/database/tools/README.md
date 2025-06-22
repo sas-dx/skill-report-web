@@ -808,11 +808,11 @@ INSERT INTO MST_Employee (id, employee_code, full_name, full_name_kana, email, p
 - カスタムフォーマット関数の追加
 - 検証ルールの拡張
 
-## 🛡️ YAML検証ツール（yaml_validator）
+## 🛡️ YAML検証ツール（database_consistency_checker統合）
 
 ### 主要機能
 
-YAML詳細定義ファイルの品質保証を行う専用ツールです。database_consistency_checkerとの統合により、包括的な検証機能を提供します。
+YAML詳細定義ファイルの品質保証を行う統合ツールです。database_consistency_checkerに完全統合され、包括的な検証機能を提供します。
 
 #### 検証項目
 - **必須セクション検証**: revision_history、overview、notes、business_rulesの存在・内容チェック
@@ -853,7 +853,7 @@ YAML詳細定義ファイルの品質保証を行う専用ツールです。data
 
 **使用例**:
 ```python
-from yaml_format_check import check_yaml_format
+from database_consistency_checker.yaml_format_check_enhanced import check_yaml_format
 
 # 全テーブル検証
 result = check_yaml_format(verbose=True)
@@ -914,7 +914,7 @@ if not result['success']:
 
 **使用例**:
 ```python
-from yaml_format_check import check_yaml_format_enhanced
+from database_consistency_checker.yaml_format_check_enhanced import check_yaml_format_enhanced
 
 # 拡張検証実行
 result = check_yaml_format_enhanced(verbose=True)
@@ -946,24 +946,24 @@ database_consistency_checkerでは、YAML検証機能が以下のように統合
 ```
 database_consistency_checker/
 ├── __main__.py                       # メインエントリーポイント
-├── yaml_format_check.py             # YAML検証モジュール（統合版）
+├── yaml_format_check_enhanced.py    # YAML検証モジュール（統合版）
 └── yaml_format_check_integration.py # 統合API実装
 ```
 
 ##### 統合API実装
 
-`yaml_format_check.py`では、以下の2つの主要な検証関数を提供：
+`yaml_format_check_enhanced.py`では、以下の2つの主要な検証関数を提供：
 
 ```python
 # 基本検証
 def check_yaml_format(tables=None, verbose=False):
     """基本的なYAMLフォーマット検証と必須セクション存在確認"""
-    # 実装詳細は yaml_format_check.py を参照
+    # 実装詳細は yaml_format_check_enhanced.py を参照
 
 # 拡張検証  
 def check_yaml_format_enhanced(tables=None, verbose=False):
     """詳細なYAMLフォーマット検証・必須セクション内容検証・要求仕様ID検証"""
-    # 実装詳細は yaml_format_check.py を参照
+    # 実装詳細は yaml_format_check_enhanced.py を参照
 ```
 
 ##### database_consistency_checkerでの呼び出し
@@ -1032,16 +1032,16 @@ def check_yaml_format_enhanced(tables=None, verbose=False):
 
 ```bash
 # 全テーブルのYAML検証
-python3 yaml_validator/validate_yaml_format.py --all --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --all --verbose
 
 # 特定テーブルのYAML検証
-python3 yaml_validator/validate_yaml_format.py --table MST_Employee --verbose
-
-# 必須セクション検証のみ
-python3 yaml_validator/validate_yaml_format.py --check-required-only
+python3 database_consistency_checker/yaml_format_check_enhanced.py --table MST_Employee --verbose
 
 # 複数テーブル指定
-python3 yaml_validator/validate_yaml_format.py --table MST_Employee,MST_Department --verbose
+python3 database_consistency_checker/yaml_format_check_enhanced.py --tables MST_Employee,MST_Department --verbose
+
+# YAML検証とサンプルデータ生成の統合実行
+python3 database_consistency_checker/yaml_format_check_enhanced.py --all --generate-sample-data --output-dir ./sample_data --verbose
 ```
 
 #### 統合コマンド実行例

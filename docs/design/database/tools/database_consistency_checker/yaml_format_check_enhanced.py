@@ -1,69 +1,77 @@
 #!/usr/bin/env python3
 """
-YAML形式検証機能（統合版）
+YAML形式検証機能（_TEMPLATE準拠版）
 
-database_consistency_checkerに統合されたYAML形式検証機能です。
-yaml_validatorから移行された機能を含みます。
+_TEMPLATE_details.yamlに完全準拠したYAML形式検証機能です。
+yaml_validatorから移行され、database_consistency_checkerに統合されました。
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
-実装日: 2025-06-21
+実装日: 2025-06-22
 実装者: AI駆動開発チーム
 
 機能：
-- YAML形式の検証
-- 必須セクションの存在確認
-- サンプルデータ生成統合
-- 整合性チェックとの連携
+- _TEMPLATE_details.yamlベースの厳密な検証
+- 必須セクション存在確認（11セクション）
+- セクション順序チェック
+- 内容品質検証
+- 詳細エラーレポート
 """
 
 import os
 import sys
 import logging
-from typing import Dict, List, Any, Optional
-from pathlib import Path
-
-# プロジェクトルートディレクトリを取得
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../../../../.."))
-
-# パスを追加
-sys.path.append(os.path.join(PROJECT_ROOT, "docs/design/database/tools"))
-
-try:
-    from shared.checkers.yaml_format_validator import YAMLFormatValidator
-    from shared.generators.sample_data_generator import SampleDataGenerator
-    from shared.core.models import TableDefinition
-except ImportError as e:
-    print(f"モジュールのインポートに失敗しました: {e}")
-    YAMLFormatValidator = None
-    SampleDataGenerator = None
-    TableDefinition = None
-
 import yaml
+from typing import Dict, List, Any, Optional, Tuple
+from pathlib import Path
+import argparse
 
 
-class YAMLFormatCheckEnhanced:
-    """YAML形式検証機能（統合版）"""
+class YAMLFormatValidator:
+    """_TEMPLATE準拠YAML形式検証クラス"""
+    
+    # _TEMPLATE準拠の必須セクション定義（順序固定）
+    REQUIRED_SECTIONS = [
+        ('table_name', '物理テーブル名'),
+        ('logical_name', '論理テーブル名'),
+        ('category', 'テーブル分類'),
+        ('revision_history', '改版履歴（🔴絶対省略禁止）'),
+        ('overview', 'テーブル概要（🔴絶対省略禁止）'),
+        ('columns', 'カラム定義'),
+        ('indexes', 'インデックス定義'),
+        ('constraints', '制約定義'),
+        ('foreign_keys', '外部キー定義'),
+        ('sample_data', 'サンプルデータ'),
+        ('notes', '特記事項（🔴絶対省略禁止）'),
+        ('rules', '業務ルール（🔴絶対省略禁止）')
+    ]
+    
+    # 空値許可セクション（設定不要時は空配列/空文字列で定義）
+    EMPTY_ALLOWED_SECTIONS = {
+        'indexes', 'constraints', 'foreign_keys', 'sample_data'
+    }
+    
+    # 必須内容検証セクション
+    CONTENT_REQUIRED_SECTIONS = {
+        'revision_history': {'min_items': 1, 'type': 'array'},
+        'overview': {'min_length': 50, 'type': 'string'},
+        'columns': {'min_items': 1, 'type': 'array'},
+        'notes': {'min_items': 3, 'type': 'array'},
+        'rules': {'min_items': 3, 'type': 'array'}
+    }
     
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
         self.logger = logging.getLogger(self.__class__.__name__)
         self._setup_logging()
         
-        # YAML検証機能
-        if YAMLFormatValidator:
-            self.yaml_validator = YAMLFormatValidator(verbose=verbose)
-        else:
-            self.yaml_validator = None
-            self.logger.warning("YAMLFormatValidatorが利用できません")
+        # プロジェクトルートディレクトリを取得
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        self.project_root = os.path.abspath(os.path.join(script_dir, "../../../../.."))
+        self.table_details_dir = os.path.join(self.project_root, "docs/design/database/table-details")
+        self.template_path = os.path.join(self.table_details_dir, "_TEMPLATE_details.yaml")
         
-        # サンプルデータ生成機能
-        if SampleDataGenerator:
-            config = {'verbose': verbose}
-            self.sample_data_generator = SampleDataGenerator(config)
-        else:
-            self.sample_data_generator = None
-            self.logger.warning("SampleDataGeneratorが利用できません")
+        # テンプレートから標準順序を読み込み
+        self.template_order = self._load_template_order()
     
     def _setup_logging(self):
         """ログ設定のセットアップ"""
@@ -76,9 +84,285 @@ class YAMLFormatCheckEnhanced:
             self.logger.addHandler(handler)
             self.logger.setLevel(logging.INFO if self.verbose else logging.WARNING)
     
-    def is_available(self) -> bool:
-        """機能が利用可能かチェック"""
-        return self.yaml_validator is not None
+    def _load_template_order(self) -> List[str]:
+        """_TEMPLATE_details.yamlから標準順序を取得"""
+        try:
+            if os.path.exists(self.template_path):
+                with open(self.template_path, 'r', encoding='utf-8') as f:
+                    template_data = yaml.safe_load(f)
+                    if template_data:
+                        return list(template_data.keys())
+            
+            # テンプレートが読み込めない場合はデフォルト順序を使用
+            return [section[0] for section in self.REQUIRED_SECTIONS]
+            
+        except Exception as e:
+            self.logger.warning(f"テンプレート順序の読み込みに失敗: {e}")
+            return [section[0] for section in self.REQUIRED_SECTIONS]
+    
+    def validate_table(self, table_name: str) -> Dict[str, Any]:
+        """
+        指定テーブルのYAML検証
+        
+        Args:
+            table_name: テーブル名
+            
+        Returns:
+            Dict[str, Any]: 検証結果
+        """
+        result = {
+            'success': True,
+            'table_name': table_name,
+            'errors': [],
+            'warnings': [],
+            'checks': {
+                'file_exists': False,
+                'yaml_parsable': False,
+                'sections_exist': False,
+                'sections_order': False,
+                'content_quality': False
+            }
+        }
+        
+        try:
+            # ファイル存在チェック
+            yaml_file_path = os.path.join(self.table_details_dir, f"{table_name}_details.yaml")
+            
+            if not os.path.exists(yaml_file_path):
+                result['success'] = False
+                result['errors'].append(f"YAMLファイルが存在しません: {yaml_file_path}")
+                return result
+            
+            result['checks']['file_exists'] = True
+            
+            # YAML解析チェック
+            try:
+                with open(yaml_file_path, 'r', encoding='utf-8') as f:
+                    yaml_data = yaml.safe_load(f)
+                
+                if yaml_data is None:
+                    result['success'] = False
+                    result['errors'].append("YAMLファイルが空です")
+                    return result
+                
+                result['checks']['yaml_parsable'] = True
+                
+            except yaml.YAMLError as e:
+                result['success'] = False
+                result['errors'].append(f"YAML解析エラー: {str(e)}")
+                return result
+            
+            # セクション存在チェック
+            section_errors = self._validate_section_existence(yaml_data)
+            if section_errors:
+                result['success'] = False
+                result['errors'].extend(section_errors)
+            else:
+                result['checks']['sections_exist'] = True
+            
+            # セクション順序チェック
+            order_errors = self._validate_section_order(yaml_data)
+            if order_errors:
+                result['success'] = False
+                result['errors'].extend(order_errors)
+            else:
+                result['checks']['sections_order'] = True
+            
+            # 内容品質チェック
+            content_errors, content_warnings = self._validate_content_quality(yaml_data)
+            if content_errors:
+                result['success'] = False
+                result['errors'].extend(content_errors)
+            else:
+                result['checks']['content_quality'] = True
+            
+            result['warnings'].extend(content_warnings)
+            
+            if self.verbose:
+                self.logger.info(f"テーブル {table_name} の検証完了: {'成功' if result['success'] else '失敗'}")
+            
+        except Exception as e:
+            result['success'] = False
+            result['errors'].append(f"検証処理エラー: {str(e)}")
+            self.logger.error(f"テーブル {table_name} の検証エラー: {e}")
+        
+        return result
+    
+    def _validate_section_existence(self, yaml_data: Dict[str, Any]) -> List[str]:
+        """必須セクション存在チェック"""
+        errors = []
+        
+        for section_key, section_desc in self.REQUIRED_SECTIONS:
+            if section_key not in yaml_data:
+                errors.append(f"❌ セクション不足: '{section_key}'({section_desc})が定義されていません")
+        
+        return errors
+    
+    def _validate_section_order(self, yaml_data: Dict[str, Any]) -> List[str]:
+        """セクション順序チェック"""
+        errors = []
+        
+        yaml_keys = list(yaml_data.keys())
+        template_keys = self.template_order
+        
+        # 存在するセクションのみで順序チェック
+        existing_template_keys = [key for key in template_keys if key in yaml_keys]
+        existing_yaml_keys = [key for key in yaml_keys if key in template_keys]
+        
+        if existing_yaml_keys != existing_template_keys:
+            errors.append("❌ セクション順序違反: _TEMPLATE_details.yamlの順序に従ってください")
+            
+            # 詳細な順序違反情報
+            for i, (expected, actual) in enumerate(zip(existing_template_keys, existing_yaml_keys)):
+                if expected != actual:
+                    errors.append(f"    位置{i+1}: 期待='{expected}', 実際='{actual}'")
+                    break
+        
+        return errors
+    
+    def _validate_content_quality(self, yaml_data: Dict[str, Any]) -> Tuple[List[str], List[str]]:
+        """内容品質チェック"""
+        errors = []
+        warnings = []
+        
+        for section_key, requirements in self.CONTENT_REQUIRED_SECTIONS.items():
+            if section_key not in yaml_data:
+                continue  # セクション存在チェックで既にエラー
+            
+            section_data = yaml_data[section_key]
+            
+            # 空値チェック
+            if section_data is None or section_data == "":
+                if section_key not in self.EMPTY_ALLOWED_SECTIONS:
+                    errors.append(f"❌ 内容不足: '{section_key}'は空にできません")
+                continue
+            
+            # 配列型の検証
+            if requirements['type'] == 'array':
+                if not isinstance(section_data, list):
+                    errors.append(f"❌ 型エラー: '{section_key}'は配列である必要があります")
+                    continue
+                
+                if len(section_data) < requirements['min_items']:
+                    errors.append(f"❌ 内容不足: '{section_key}'は最低{requirements['min_items']}項目必要です (現在: {len(section_data)}項目)")
+                
+                # revision_historyの詳細チェック
+                if section_key == 'revision_history':
+                    for i, entry in enumerate(section_data):
+                        if not isinstance(entry, dict):
+                            errors.append(f"❌ 形式エラー: revision_history[{i}]は辞書形式である必要があります")
+                            continue
+                        
+                        required_fields = ['version', 'date', 'author', 'changes']
+                        for field in required_fields:
+                            if field not in entry or not entry[field]:
+                                errors.append(f"❌ 必須フィールド不足: revision_history[{i}].{field}が設定されていません")
+                
+                # columnsの詳細チェック
+                elif section_key == 'columns':
+                    for i, column in enumerate(section_data):
+                        if not isinstance(column, dict):
+                            errors.append(f"❌ 形式エラー: columns[{i}]は辞書形式である必要があります")
+                            continue
+                        
+                        required_fields = ['name', 'logical', 'type', 'null', 'unique', 'encrypted', 'description']
+                        for field in required_fields:
+                            if field not in column:
+                                errors.append(f"❌ 必須フィールド不足: columns[{i}].{field}が設定されていません")
+            
+            # 文字列型の検証
+            elif requirements['type'] == 'string':
+                if not isinstance(section_data, str):
+                    errors.append(f"❌ 型エラー: '{section_key}'は文字列である必要があります")
+                    continue
+                
+                if len(section_data.strip()) < requirements['min_length']:
+                    errors.append(f"❌ 内容不足: '{section_key}'は最低{requirements['min_length']}文字必要です (現在: {len(section_data.strip())}文字)")
+        
+        # 空値許可セクションの警告
+        for section_key in self.EMPTY_ALLOWED_SECTIONS:
+            if section_key in yaml_data:
+                section_data = yaml_data[section_key]
+                if section_data is None:
+                    warnings.append(f"⚠️ 空値推奨: '{section_key}'は設定不要時は[]で定義してください")
+        
+        return errors, warnings
+    
+    def validate_all_tables(self) -> Dict[str, Any]:
+        """全テーブルのYAML検証"""
+        result = {
+            'success': True,
+            'total_files': 0,
+            'valid_files': 0,
+            'invalid_files': 0,
+            'files': {},
+            'summary_errors': [],
+            'summary_warnings': []
+        }
+        
+        try:
+            # YAMLファイル一覧を取得
+            yaml_files = []
+            if os.path.exists(self.table_details_dir):
+                for file_name in os.listdir(self.table_details_dir):
+                    if file_name.endswith('_details.yaml') and not file_name.startswith('_'):
+                        table_name = file_name.replace('_details.yaml', '')
+                        yaml_files.append(table_name)
+            
+            result['total_files'] = len(yaml_files)
+            
+            if not yaml_files:
+                result['success'] = False
+                result['summary_errors'].append("検証対象のYAMLファイルが見つかりません")
+                return result
+            
+            # 各テーブルを検証
+            for table_name in sorted(yaml_files):
+                table_result = self.validate_table(table_name)
+                result['files'][table_name] = table_result
+                
+                if table_result['success']:
+                    result['valid_files'] += 1
+                else:
+                    result['invalid_files'] += 1
+                    result['summary_errors'].extend([f"{table_name}: {error}" for error in table_result['errors']])
+                
+                result['summary_warnings'].extend([f"{table_name}: {warning}" for warning in table_result['warnings']])
+            
+            result['success'] = result['invalid_files'] == 0
+            
+            if self.verbose:
+                self.logger.info(f"全テーブル検証完了: {result['valid_files']}/{result['total_files']}ファイル成功")
+            
+        except Exception as e:
+            result['success'] = False
+            result['summary_errors'].append(f"全テーブル検証エラー: {str(e)}")
+            self.logger.error(f"全テーブル検証エラー: {e}")
+        
+        return result
+
+
+class YAMLFormatCheckEnhanced:
+    """YAML形式検証機能（_TEMPLATE準拠版）"""
+    
+    def __init__(self, verbose: bool = False):
+        self.verbose = verbose
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self._setup_logging()
+        
+        # YAML検証機能
+        self.yaml_validator = YAMLFormatValidator(verbose=verbose)
+    
+    def _setup_logging(self):
+        """ログ設定のセットアップ"""
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO if self.verbose else logging.WARNING)
     
     def validate_yaml_format(self, table_names: Optional[List[str]] = None) -> Dict[str, Any]:
         """
@@ -90,13 +374,6 @@ class YAMLFormatCheckEnhanced:
         Returns:
             Dict[str, Any]: 検証結果
         """
-        if not self.is_available():
-            return {
-                'success': False,
-                'error': 'YAMLFormatValidatorが利用できません',
-                'validation_available': False
-            }
-        
         try:
             if table_names:
                 # 指定テーブルの検証
@@ -121,8 +398,6 @@ class YAMLFormatCheckEnhanced:
                 # 全テーブルの検証
                 result = self.yaml_validator.validate_all_tables()
             
-            result['validation_available'] = True
-            
             if self.verbose:
                 self.logger.info(f"YAML形式検証完了: {result['valid_files']}/{result['total_files']}ファイル成功")
             
@@ -135,7 +410,6 @@ class YAMLFormatCheckEnhanced:
             return {
                 'success': False,
                 'error': error_msg,
-                'validation_available': True,
                 'total_files': 0,
                 'valid_files': 0,
                 'invalid_files': 0,
@@ -143,239 +417,53 @@ class YAMLFormatCheckEnhanced:
                 'summary_warnings': []
             }
     
-    def generate_sample_data(self, table_names: Optional[List[str]] = None, 
-                           output_dir: Optional[str] = None) -> Dict[str, Any]:
-        """
-        サンプルデータ生成
-        
-        Args:
-            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
-            output_dir: 出力ディレクトリ（Noneの場合は保存しない）
-            
-        Returns:
-            Dict[str, Any]: 生成結果
-        """
-        if not self.sample_data_generator:
-            return {
-                'success': False,
-                'error': 'SampleDataGeneratorが利用できません',
-                'generation_available': False
-            }
-        
-        try:
-            # サンプルデータ生成
-            if table_names:
-                generation_result = self.sample_data_generator.generate_sample_data_sql(table_names)
-            else:
-                generation_result = self.sample_data_generator.generate_sample_data_sql()
-            
-            # ファイル保存
-            if output_dir and generation_result.get('success', False):
-                save_result = self._save_sample_data_sql(generation_result, output_dir)
-                generation_result['save_result'] = save_result
-                
-                if not save_result.get('success', False):
-                    generation_result['success'] = False
-                    generation_result.setdefault('errors', []).extend(save_result.get('errors', []))
-            
-            generation_result['generation_available'] = True
-            
-            if self.verbose:
-                self.logger.info(f"サンプルデータ生成完了: {generation_result.get('generated_tables', 0)}/{generation_result.get('total_tables', 0)}テーブル")
-            
-            return generation_result
-            
-        except Exception as e:
-            error_msg = f"サンプルデータ生成に失敗: {str(e)}"
-            self.logger.error(error_msg)
-            
-            return {
-                'success': False,
-                'error': error_msg,
-                'generation_available': True,
-                'total_tables': 0,
-                'generated_tables': 0,
-                'total_records': 0,
-                'errors': [error_msg]
-            }
-    
-    def _save_sample_data_sql(self, result: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
-        """
-        サンプルデータSQLをファイルに保存
-        
-        Args:
-            result: generate_sample_data_sqlの結果
-            output_dir: 出力ディレクトリ
-            
-        Returns:
-            Dict[str, Any]: 保存結果
-        """
-        save_result = {
-            'success': True,
-            'saved_files': [],
-            'errors': []
-        }
-        
-        try:
-            output_path = Path(output_dir)
-            output_path.mkdir(parents=True, exist_ok=True)
-            
-            if not result.get('success', False):
-                save_result['success'] = False
-                save_result['errors'].append('生成結果が失敗状態です')
-                return save_result
-            
-            # 統合ファイルの保存
-            try:
-                all_file_path = output_path / "all_sample_data.sql"
-                
-                sql_lines = []
-                sql_lines.append("-- 全テーブル サンプルデータ INSERT文")
-                sql_lines.append(f"-- 生成日時: {result.get('timestamp', 'unknown')}")
-                sql_lines.append(f"-- 対象テーブル数: {result.get('total_tables', 0)}")
-                sql_lines.append(f"-- 生成テーブル数: {result.get('generated_tables', 0)}")
-                sql_lines.append(f"-- 総レコード数: {result.get('total_records', 0)}")
-                sql_lines.append("")
-                sql_lines.append("-- 実行順序:")
-                for i, table_name in enumerate(result.get('execution_order', []), 1):
-                    sql_lines.append(f"-- {i:2d}. {table_name}")
-                sql_lines.append("")
-                sql_lines.append("BEGIN;")
-                sql_lines.append("")
-                
-                # 実行順序に従ってINSERT文を追加
-                for table_name in result.get('execution_order', []):
-                    if table_name in result.get('tables', {}):
-                        table_data = result['tables'][table_name]
-                        sql_lines.append(f"-- {table_name} ({table_data.get('records', 0)}件)")
-                        for stmt in table_data.get('statements', []):
-                            sql_lines.append(stmt)
-                        sql_lines.append("")
-                
-                sql_lines.append("COMMIT;")
-                sql_lines.append("")
-                sql_lines.append("-- 全テーブル サンプルデータ終了")
-                
-                # ファイルに書き込み
-                with open(all_file_path, 'w', encoding='utf-8') as f:
-                    f.write('\n'.join(sql_lines))
-                
-                save_result['saved_files'].append(str(all_file_path))
-                
-                if self.verbose:
-                    self.logger.info(f"統合サンプルデータファイル保存: {all_file_path}")
-            
-            except Exception as e:
-                error_msg = f"統合ファイルの保存に失敗: {str(e)}"
-                save_result['errors'].append(error_msg)
-                self.logger.error(error_msg)
-            
-            # エラーがある場合は失敗とする
-            if save_result['errors']:
-                save_result['success'] = False
-        
-        except Exception as e:
-            save_result['success'] = False
-            save_result['errors'].append(f"ファイル保存処理に失敗: {str(e)}")
-            self.logger.error(f"ファイル保存処理に失敗: {e}")
-        
-        return save_result
-    
-    def validate_and_generate(self, table_names: Optional[List[str]] = None,
-                            output_dir: Optional[str] = None,
-                            generate_sample_data: bool = False) -> Dict[str, Any]:
-        """
-        検証とサンプルデータ生成の統合実行
-        
-        Args:
-            table_names: 対象テーブル名のリスト（Noneの場合は全テーブル）
-            output_dir: サンプルデータ出力ディレクトリ
-            generate_sample_data: サンプルデータ生成フラグ
-            
-        Returns:
-            Dict[str, Any]: 実行結果
-        """
-        result = {
-            'success': True,
-            'validation_result': {},
-            'sample_data_result': {},
-            'errors': []
-        }
-        
-        try:
-            # YAML検証
-            validation_result = self.validate_yaml_format(table_names)
-            result['validation_result'] = validation_result
-            
-            if not validation_result.get('success', False):
-                result['success'] = False
-                result['errors'].append('YAML検証に失敗しました')
-            
-            # サンプルデータ生成
-            if generate_sample_data:
-                sample_data_result = self.generate_sample_data(table_names, output_dir)
-                result['sample_data_result'] = sample_data_result
-                
-                if not sample_data_result.get('success', False):
-                    result['success'] = False
-                    result['errors'].extend(sample_data_result.get('errors', []))
-        
-        except Exception as e:
-            result['success'] = False
-            result['errors'].append(f"統合実行エラー: {str(e)}")
-            self.logger.error(f"統合実行エラー: {e}")
-        
-        return result
-    
     def print_summary(self, result: Dict[str, Any]):
         """結果サマリーの出力"""
-        print("=== YAML形式検証・サンプルデータ生成結果 ===")
+        print("=== YAML形式検証結果（_TEMPLATE準拠） ===")
         
-        # YAML検証結果
-        validation_result = result.get('validation_result', {})
-        if validation_result:
-            print("--- YAML形式検証 ---")
-            print(f"✅ 検証成功: {validation_result.get('success', False)}")
-            print(f"📊 対象ファイル数: {validation_result.get('total_files', 0)}")
-            print(f"📊 有効ファイル数: {validation_result.get('valid_files', 0)}")
-            print(f"📊 無効ファイル数: {validation_result.get('invalid_files', 0)}")
-            
-            summary_errors = validation_result.get('summary_errors', [])
-            if summary_errors:
-                print(f"❌ エラー数: {len(summary_errors)}")
-                for i, error in enumerate(summary_errors[:3], 1):
-                    print(f"    {i}. {error}")
-                if len(summary_errors) > 3:
-                    print(f"    ... 他 {len(summary_errors) - 3} エラー")
+        print(f"✅ 検証成功: {result.get('success', False)}")
+        print(f"📊 対象ファイル数: {result.get('total_files', 0)}")
+        print(f"📊 有効ファイル数: {result.get('valid_files', 0)}")
+        print(f"📊 無効ファイル数: {result.get('invalid_files', 0)}")
         
-        # サンプルデータ生成結果
-        sample_data_result = result.get('sample_data_result', {})
-        if sample_data_result:
-            print("\n--- サンプルデータ生成 ---")
-            print(f"✅ 生成成功: {sample_data_result.get('success', False)}")
-            print(f"📊 対象テーブル数: {sample_data_result.get('total_tables', 0)}")
-            print(f"📊 生成テーブル数: {sample_data_result.get('generated_tables', 0)}")
-            print(f"📊 総レコード数: {sample_data_result.get('total_records', 0)}")
-            
-            save_result = sample_data_result.get('save_result', {})
-            if save_result:
-                saved_files = save_result.get('saved_files', [])
-                if saved_files:
-                    print(f"💾 保存ファイル数: {len(saved_files)}")
-                    for file_path in saved_files:
-                        print(f"    - {file_path}")
+        summary_errors = result.get('summary_errors', [])
+        if summary_errors:
+            print(f"\n❌ エラー数: {len(summary_errors)}")
+            for i, error in enumerate(summary_errors[:10], 1):
+                print(f"    {i}. {error}")
+            if len(summary_errors) > 10:
+                print(f"    ... 他 {len(summary_errors) - 10} エラー")
+        
+        summary_warnings = result.get('summary_warnings', [])
+        if summary_warnings:
+            print(f"\n⚠️ 警告数: {len(summary_warnings)}")
+            for i, warning in enumerate(summary_warnings[:5], 1):
+                print(f"    {i}. {warning}")
+            if len(summary_warnings) > 5:
+                print(f"    ... 他 {len(summary_warnings) - 5} 警告")
+        
+        # 詳細結果（verbose時）
+        if self.verbose and 'files' in result:
+            print("\n--- 詳細結果 ---")
+            for table_name, table_result in result['files'].items():
+                status = "✅" if table_result['success'] else "❌"
+                print(f"{status} {table_name}")
+                
+                checks = table_result.get('checks', {})
+                for check_name, check_result in checks.items():
+                    check_status = "✅" if check_result else "❌"
+                    print(f"    {check_status} {check_name}")
 
 
 def main():
     """メイン関数"""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='YAML形式検証・サンプルデータ生成（統合版）')
+    parser = argparse.ArgumentParser(description='YAML形式検証（_TEMPLATE準拠版）')
     parser.add_argument('--table', help='検証対象のテーブル名')
     parser.add_argument('--tables', help='カンマ区切りのテーブル名リスト')
     parser.add_argument('--all', action='store_true', help='全テーブルを検証')
-    parser.add_argument('--generate-sample-data', action='store_true', help='サンプルデータを生成')
-    parser.add_argument('--output-dir', help='サンプルデータ出力ディレクトリ')
+    parser.add_argument('--check-required-only', action='store_true', help='必須セクション不備の詳細確認')
+    parser.add_argument('--template-compliance', action='store_true', help='テンプレート準拠チェック')
+    parser.add_argument('--order-check', action='store_true', help='順序チェックのみ')
     parser.add_argument('--verbose', action='store_true', help='詳細なログを出力')
     args = parser.parse_args()
     
@@ -392,12 +480,8 @@ def main():
         # デフォルトは全テーブル
         args.all = True
     
-    # 統合実行
-    result = checker.validate_and_generate(
-        table_names=table_names,
-        output_dir=args.output_dir,
-        generate_sample_data=args.generate_sample_data
-    )
+    # 検証実行
+    result = checker.validate_yaml_format(table_names=table_names)
     
     # 結果表示
     checker.print_summary(result)

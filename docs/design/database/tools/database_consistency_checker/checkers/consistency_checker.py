@@ -22,6 +22,7 @@ from database_consistency_checker.core.models import (
     create_success_result
 )
 from database_consistency_checker.core.config import Config
+from database_consistency_checker.yaml_format_check_enhanced import YAMLFormatCheckEnhanced
 from shared.path_resolver import PathResolver
 
 class ConsistencyChecker:
@@ -317,6 +318,62 @@ class ConsistencyChecker:
         
         return results
     
+    def _check_yaml_format(self) -> List[CheckResult]:
+        """YAML形式・必須セクションチェック"""
+        results = []
+        
+        try:
+            # YAMLFormatCheckEnhancedを初期化
+            yaml_checker = YAMLFormatCheckEnhanced(
+                base_dir=str(self.config.base_dir),
+                verbose=getattr(self.check_config, 'verbose', False)
+            )
+            
+            # 対象テーブルの設定
+            target_tables = None
+            if self.check_config and hasattr(self.check_config, 'target_tables'):
+                target_tables = self.check_config.target_tables
+            
+            # YAML検証実行
+            yaml_results = yaml_checker.check_all_yaml_files(target_tables)
+            
+            # 結果をConsistencyCheckerの形式に変換
+            for table_name, table_result in yaml_results.items():
+                if table_result['valid']:
+                    results.append(create_success_result(
+                        check_name="yaml_format",
+                        message=f"{table_name}: YAML形式・必須セクション検証OK"
+                    ))
+                else:
+                    # エラーの重要度を判定
+                    has_critical_errors = any(
+                        'revision_history' in error or 'overview' in error or 
+                        'notes' in error or 'business_rules' in error
+                        for error in table_result['errors']
+                    )
+                    
+                    severity_func = create_error_result if has_critical_errors else create_warning_result
+                    
+                    results.append(severity_func(
+                        check_name="yaml_format",
+                        message=f"{table_name}: YAML形式・必須セクション検証エラー",
+                        metadata={
+                            "table": table_name,
+                            "errors": table_result['errors'],
+                            "warnings": table_result.get('warnings', [])
+                        }
+                    ))
+            
+        except Exception as e:
+            self.logger.error(f"YAML形式チェックエラー: {e}")
+            results.append(create_error_result(
+                check_name="yaml_format",
+                message=f"YAML形式チェック実行エラー: {e}",
+                metadata={"error": str(e)}
+            ))
+        
+        return results
+    
     def run_all_checks(self) -> ConsistencyReport:
         """
         全ての整合性チェックを実行
@@ -334,6 +391,9 @@ class ConsistencyChecker:
         
         # テーブル存在確認
         results.extend(self._check_table_existence())
+        
+        # YAML形式・必須セクションチェック
+        results.extend(self._check_yaml_format())
         
         # カラム整合性チェック
         results.extend(self._check_column_consistency())
@@ -427,6 +487,7 @@ class ConsistencyChecker:
         """利用可能なチェック名のリストを取得"""
         return [
             "table_existence",
+            "yaml_format",
             "column_consistency", 
             "foreign_key_consistency",
             "naming_convention"
