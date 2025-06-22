@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 外部連携設定システムテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'SYS_IntegrationConfig（外部連携設定）は、外部システムとの連携に必要な設定情報を管理するシステムテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'SYS_IntegrationConfig（外部連携設定）は、外部システム
   このテーブルは、通知・連携管理機能において外部システムとの安全で効率的な連携を実現する重要なシステムデータです。
 
   '
-business_columns:
+columns:
 - name: id
   logical: ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: マルチテナント識別子
@@ -46,7 +50,7 @@ business_columns:
   logical: 連携キー
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 連携設定の識別キー（例：slack_webhook、teams_connector等）
@@ -54,7 +58,7 @@ business_columns:
   logical: 連携名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 連携設定の表示名
@@ -62,7 +66,7 @@ business_columns:
   logical: 連携タイプ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 連携の種類（WEBHOOK:Webhook、API:REST API、OAUTH:OAuth認証、SMTP:メール送信）
@@ -75,7 +79,7 @@ business_columns:
   logical: エンドポイントURL
   type: VARCHAR
   length: 500
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 連携先のエンドポイントURL
@@ -83,7 +87,7 @@ business_columns:
   logical: 認証タイプ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 認証方式（NONE:認証なし、BASIC:Basic認証、BEARER:Bearer Token、OAUTH2:OAuth2.0、API_KEY:APIキー）
@@ -97,7 +101,7 @@ business_columns:
   logical: 認証設定
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: 認証に必要な設定情報（JSON形式、暗号化必須）
@@ -105,7 +109,7 @@ business_columns:
   logical: 接続設定
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 接続に関する設定情報（JSON形式）
@@ -113,7 +117,7 @@ business_columns:
   logical: リクエストヘッダー
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: デフォルトリクエストヘッダー（JSON形式）
@@ -121,7 +125,7 @@ business_columns:
   logical: タイムアウト秒数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 接続タイムアウト時間（秒）
@@ -130,7 +134,7 @@ business_columns:
   logical: リトライ回数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 失敗時のリトライ回数
@@ -139,7 +143,7 @@ business_columns:
   logical: リトライ間隔
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: リトライ間隔（秒）
@@ -148,7 +152,7 @@ business_columns:
   logical: 分間レート制限
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 1分間あたりのリクエスト制限数
@@ -156,7 +160,7 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 連携設定が有効かどうか
@@ -165,7 +169,7 @@ business_columns:
   logical: ヘルスチェックURL
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 連携先の死活監視用URL
@@ -173,7 +177,7 @@ business_columns:
   logical: 最終ヘルスチェック
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最終ヘルスチェック実行日時
@@ -181,7 +185,7 @@ business_columns:
   logical: ヘルス状態
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 連携先の状態（HEALTHY:正常、UNHEALTHY:異常、UNKNOWN:不明）
@@ -189,61 +193,97 @@ business_columns:
   - HEALTHY
   - UNHEALTHY
   - UNKNOWN
-business_indexes:
+- name: integrationconfig_id
+  logical: SYS_IntegrationConfigの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_IntegrationConfigの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_integration_config_tenant_key
   columns:
-  - tenant_id
-  - integration_key
+  - - tenant_id
+  - - integration_key
   unique: true
   description: テナント別連携キー検索用（一意）
 - name: idx_integration_config_type
   columns:
-  - integration_type
+  - - integration_type
   unique: false
   description: 連携タイプ別検索用
 - name: idx_integration_config_enabled
   columns:
-  - is_enabled
+  - - is_enabled
   unique: false
   description: 有効設定検索用
 - name: idx_integration_config_health
   columns:
-  - health_status
-  - last_health_check
+  - - health_status
+  - - last_health_check
   unique: false
   description: ヘルス状態検索用
 - name: idx_integration_config_auth_type
   columns:
-  - auth_type
+  - - auth_type
   unique: false
   description: 認証タイプ別検索用
-business_constraints:
+constraints:
 - name: uk_integration_config_tenant_key
   type: UNIQUE
-  columns:
-  - tenant_id
-  - integration_key
   description: テナント内連携キー一意制約
+  columns:
+  - - tenant_id
+  - - integration_key
 - name: chk_integration_config_type
   type: CHECK
-  condition: integration_type IN ('WEBHOOK', 'API', 'OAUTH', 'SMTP')
   description: 連携タイプ値チェック制約
+  condition: integration_type IN ('WEBHOOK', 'API', 'OAUTH', 'SMTP')
 - name: chk_integration_config_auth_type
   type: CHECK
-  condition: auth_type IN ('NONE', 'BASIC', 'BEARER', 'OAUTH2', 'API_KEY')
   description: 認証タイプ値チェック制約
+  condition: auth_type IN ('NONE', 'BASIC', 'BEARER', 'OAUTH2', 'API_KEY')
 - name: chk_integration_config_health_status
   type: CHECK
-  condition: health_status IS NULL OR health_status IN ('HEALTHY', 'UNHEALTHY', 'UNKNOWN')
   description: ヘルス状態値チェック制約
+  condition: health_status IS NULL OR health_status IN ('HEALTHY', 'UNHEALTHY', 'UNKNOWN')
 - name: chk_integration_config_timeout_positive
   type: CHECK
-  condition: timeout_seconds > 0
   description: タイムアウト秒数正数チェック制約
+  condition: timeout_seconds > 0
 - name: chk_integration_config_retry_positive
   type: CHECK
-  condition: retry_count >= 0 AND retry_interval >= 0
   description: リトライ設定正数チェック制約
+  condition: retry_count >= 0 AND retry_interval >= 0
 foreign_keys: []
 sample_data:
 - id: IC001
@@ -310,7 +350,7 @@ notes:
 - リトライ機能により一時的な障害に対応
 - テナント別設定により個別カスタマイズに対応
 - 無効化された設定は連携処理から除外される
-business_rules:
+- === 業務ルール ===
 - 同一テナント内で連携キーは重複不可
 - 無効化された設定は連携処理から除外される
 - 認証情報は暗号化して保存する
@@ -319,45 +359,12 @@ business_rules:
 - ヘルスチェックは定期的に実行し状態を更新
 - OAuth2認証の場合はトークン更新処理が必要
 - SMTP設定の場合は送信テストを実行して確認
-columns:
-- name: integrationconfig_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: SYS_IntegrationConfigの主キー
-  requirement_id: PLT.1-WEB.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes: []
+rules:
+- 同一テナント内で連携キーは重複不可
+- 無効化された設定は連携処理から除外される
+- 認証情報は暗号化して保存する
+- タイムアウト・リトライ設定は正数である必要がある
+- レート制限は外部システムの制約に応じて設定
+- ヘルスチェックは定期的に実行し状態を更新
+- OAuth2認証の場合はトークン更新処理が必要
+- SMTP設定の場合は送信テストを実行して確認

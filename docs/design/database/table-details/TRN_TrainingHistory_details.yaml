@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 研修参加履歴テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'TRN_TrainingHistory（研修参加履歴）は、社員が参加した研修・教育プログラムの履歴を管理するトランザクションテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'TRN_TrainingHistory（研修参加履歴）は、社員が参加し�
   スキル開発やキャリア形成の支援を効率的に行うことができます。
 
   '
-business_columns:
+columns:
 - name: training_history_id
   logical: 研修履歴ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 研修参加履歴を一意に識別するID
@@ -40,7 +44,7 @@ business_columns:
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 参加した社員のID（MST_Employeeへの外部キー）
@@ -48,7 +52,7 @@ business_columns:
   logical: 研修プログラムID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修プログラムのID（MST_TrainingProgramへの外部キー）
@@ -56,7 +60,7 @@ business_columns:
   logical: 研修名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 研修・教育プログラムの名称
@@ -64,7 +68,7 @@ business_columns:
   logical: 研修種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 研修の種別（INTERNAL:社内研修、EXTERNAL:社外研修、ONLINE:オンライン、CERTIFICATION:資格取得、CONFERENCE:カンファレンス）
@@ -78,7 +82,7 @@ business_columns:
   logical: 研修カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 研修の分野（TECHNICAL:技術、BUSINESS:ビジネス、MANAGEMENT:マネジメント、SOFT_SKILL:ソフトスキル、COMPLIANCE:コンプライアンス）
@@ -92,7 +96,7 @@ business_columns:
   logical: 提供機関名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修を提供する機関・会社名
@@ -100,7 +104,7 @@ business_columns:
   logical: 講師名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修講師の名前
@@ -108,7 +112,7 @@ business_columns:
   logical: 開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 研修開始日
@@ -116,7 +120,7 @@ business_columns:
   logical: 終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修終了日（単日の場合は開始日と同じ）
@@ -124,7 +128,7 @@ business_columns:
   logical: 研修時間
   type: DECIMAL
   length: 5,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修の総時間数
@@ -132,7 +136,7 @@ business_columns:
   logical: 開催場所
   type: VARCHAR
   length: 200
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修開催場所（オンラインの場合は「オンライン」）
@@ -140,7 +144,7 @@ business_columns:
   logical: 費用
   type: DECIMAL
   length: 10,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修参加費用（円）
@@ -148,7 +152,7 @@ business_columns:
   logical: 費用負担者
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 費用の負担者（COMPANY:会社、EMPLOYEE:個人、SHARED:折半）
@@ -160,7 +164,7 @@ business_columns:
   logical: 出席状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 出席状況（COMPLETED:完了、PARTIAL:部分参加、ABSENT:欠席、CANCELLED:中止）
@@ -174,7 +178,7 @@ business_columns:
   logical: 完了率
   type: DECIMAL
   length: 5,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修の完了率（%）
@@ -182,7 +186,7 @@ business_columns:
   logical: テスト点数
   type: DECIMAL
   length: 5,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修テストの点数
@@ -190,7 +194,7 @@ business_columns:
   logical: 成績
   type: VARCHAR
   length: 10
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修の成績（A、B、C、合格、不合格等）
@@ -198,7 +202,7 @@ business_columns:
   logical: 修了証取得
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 修了証・認定証を取得したかどうか
@@ -207,7 +211,7 @@ business_columns:
   logical: 証明書番号
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 修了証・認定証の番号
@@ -215,7 +219,7 @@ business_columns:
   logical: 獲得PDU
   type: DECIMAL
   length: 5,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修で獲得した継続教育ポイント（PDU）
@@ -223,7 +227,7 @@ business_columns:
   logical: 習得スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修で習得したスキル（JSON形式）
@@ -231,7 +235,7 @@ business_columns:
   logical: 学習目標
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修の学習目標・目的
@@ -239,7 +243,7 @@ business_columns:
   logical: 学習成果
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 実際の学習成果・習得内容
@@ -247,7 +251,7 @@ business_columns:
   logical: フィードバック
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修に対するフィードバック・感想
@@ -255,7 +259,7 @@ business_columns:
   logical: 満足度
   type: DECIMAL
   length: 3,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修に対する満足度（1.0-5.0）
@@ -263,7 +267,7 @@ business_columns:
   logical: 推奨度
   type: DECIMAL
   length: 3,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 他者への推奨度（1.0-5.0）
@@ -271,7 +275,7 @@ business_columns:
   logical: フォローアップ要否
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 追加のフォローアップが必要かどうか
@@ -280,7 +284,7 @@ business_columns:
   logical: フォローアップ予定日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: フォローアップの予定日
@@ -288,7 +292,7 @@ business_columns:
   logical: 上司承認
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 上司による参加承認があったかどうか
@@ -297,125 +301,185 @@ business_columns:
   logical: 承認者
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 研修参加を承認した上司のID
-business_indexes:
+- name: traininghistory_id
+  logical: TRN_TrainingHistoryの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: TRN_TrainingHistoryの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_training_history_id
   columns:
-  - training_history_id
+  - - training_history_id
   unique: true
   description: 研修履歴ID検索用（一意）
 - name: idx_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_training_program_id
   columns:
-  - training_program_id
+  - - training_program_id
   unique: false
   description: 研修プログラムID検索用
 - name: idx_training_type
   columns:
-  - training_type
+  - - training_type
   unique: false
   description: 研修種別検索用
 - name: idx_training_category
   columns:
-  - training_category
+  - - training_category
   unique: false
   description: 研修カテゴリ検索用
 - name: idx_date_range
   columns:
-  - start_date
-  - end_date
+  - - start_date
+  - - end_date
   unique: false
   description: 期間検索用
 - name: idx_attendance_status
   columns:
-  - attendance_status
+  - - attendance_status
   unique: false
   description: 出席状況検索用
 - name: idx_employee_period
   columns:
-  - employee_id
-  - start_date
-  - end_date
+  - - employee_id
+  - - start_date
+  - - end_date
   unique: false
   description: 社員別期間検索用
 - name: idx_certificate
   columns:
-  - certificate_obtained
-  - certificate_number
+  - - certificate_obtained
+  - - certificate_number
   unique: false
   description: 修了証検索用
-business_constraints:
+- name: idx_trn_traininghistory_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_training_history_id
   type: UNIQUE
-  columns:
-  - training_history_id
   description: 研修履歴ID一意制約
+  columns:
+  - - training_history_id
 - name: chk_training_type
   type: CHECK
+  description: 研修種別値チェック制約
   condition: training_type IN ('INTERNAL', 'EXTERNAL', 'ONLINE', 'CERTIFICATION',
     'CONFERENCE')
-  description: 研修種別値チェック制約
 - name: chk_training_category
   type: CHECK
+  description: 研修カテゴリ値チェック制約
   condition: training_category IN ('TECHNICAL', 'BUSINESS', 'MANAGEMENT', 'SOFT_SKILL',
     'COMPLIANCE')
-  description: 研修カテゴリ値チェック制約
 - name: chk_cost_covered_by
   type: CHECK
-  condition: cost_covered_by IN ('COMPANY', 'EMPLOYEE', 'SHARED')
   description: 費用負担者値チェック制約
+  condition: cost_covered_by IN ('COMPANY', 'EMPLOYEE', 'SHARED')
 - name: chk_attendance_status
   type: CHECK
-  condition: attendance_status IN ('COMPLETED', 'PARTIAL', 'ABSENT', 'CANCELLED')
   description: 出席状況値チェック制約
+  condition: attendance_status IN ('COMPLETED', 'PARTIAL', 'ABSENT', 'CANCELLED')
 - name: chk_date_range
   type: CHECK
-  condition: end_date IS NULL OR start_date <= end_date
   description: 開始日・終了日の整合性チェック制約
+  condition: end_date IS NULL OR start_date <= end_date
 - name: chk_duration_hours
   type: CHECK
-  condition: duration_hours IS NULL OR duration_hours > 0
   description: 研修時間正数チェック制約
+  condition: duration_hours IS NULL OR duration_hours > 0
 - name: chk_completion_rate
   type: CHECK
+  description: 完了率範囲チェック制約
   condition: completion_rate IS NULL OR (completion_rate >= 0 AND completion_rate
     <= 100)
-  description: 完了率範囲チェック制約
 - name: chk_test_score
   type: CHECK
-  condition: test_score IS NULL OR test_score >= 0
   description: テスト点数非負数チェック制約
+  condition: test_score IS NULL OR test_score >= 0
 - name: chk_satisfaction_score
   type: CHECK
+  description: 満足度範囲チェック制約
   condition: satisfaction_score IS NULL OR (satisfaction_score >= 1.0 AND satisfaction_score
     <= 5.0)
-  description: 満足度範囲チェック制約
 - name: chk_recommendation_score
   type: CHECK
+  description: 推奨度範囲チェック制約
   condition: recommendation_score IS NULL OR (recommendation_score >= 1.0 AND recommendation_score
     <= 5.0)
-  description: 推奨度範囲チェック制約
 - name: chk_cost
   type: CHECK
-  condition: cost IS NULL OR cost >= 0
   description: 費用非負数チェック制約
+  condition: cost IS NULL OR cost >= 0
 - name: chk_pdu_earned
   type: CHECK
-  condition: pdu_earned IS NULL OR pdu_earned >= 0
   description: 獲得PDU非負数チェック制約
+  condition: pdu_earned IS NULL OR pdu_earned >= 0
 foreign_keys:
 - name: fk_training_history_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -423,9 +487,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_training_history_program
   columns:
-  - training_program_id
+  - - training_program_id
   references:
-    table: MST_TrainingProgram
+    table:
+    - MST_TrainingProgram
     columns:
     - id
   on_update: CASCADE
@@ -433,9 +498,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_training_history_approver
   columns:
-  - approved_by
+  - - approved_by
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -511,7 +577,7 @@ notes:
 - 満足度・推奨度は研修品質向上に活用
 - フォローアップは学習効果の定着に重要
 - 上司承認は研修参加の正当性を担保
-business_rules:
+- === 業務ルール ===
 - 研修履歴IDは一意である必要がある
 - 開始日は終了日以前である必要がある
 - 完了率は0-100%の範囲で設定
@@ -520,58 +586,12 @@ business_rules:
 - PDU対象研修は獲得ポイントを必須記録
 - 費用が発生する研修は上司承認必須
 - フォローアップ要否に応じて予定日を設定
-columns:
-- name: traininghistory_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: TRN_TrainingHistoryの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_trn_traininghistory_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 研修履歴IDは一意である必要がある
+- 開始日は終了日以前である必要がある
+- 完了率は0-100%の範囲で設定
+- 満足度・推奨度は1.0-5.0の範囲で設定
+- 修了証取得時は証明書番号を記録
+- PDU対象研修は獲得ポイントを必須記録
+- 費用が発生する研修は上司承認必須
+- フォローアップ要否に応じて予定日を設定

@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 通知履歴テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'TRN_Notification（通知履歴）は、システムから送信された各種通知の履歴を管理するトランザクションテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'TRN_Notification（通知履歴）は、システムから送信さ�
   重要な情報の確実な配信と適切なコミュニケーションを支援できます。
 
   '
-business_columns:
+columns:
 - name: notification_id
   logical: 通知ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 通知を一意に識別するID
@@ -40,7 +44,7 @@ business_columns:
   logical: 受信者ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知受信者の社員ID（MST_Employeeへの外部キー）
@@ -48,7 +52,7 @@ business_columns:
   logical: 送信者ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知送信者の社員ID（システム送信の場合はNULL）
@@ -56,7 +60,7 @@ business_columns:
   logical: 通知種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知の種別（SYSTEM:システム、REMINDER:リマインダー、APPROVAL:承認、ALERT:アラート、INFO:情報、URGENT:緊急）
@@ -71,7 +75,7 @@ business_columns:
   logical: 通知カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知の分類（SKILL:スキル関連、TRAINING:研修関連、PROJECT:プロジェクト関連、CERTIFICATION:資格関連、SYSTEM:システム関連、HR:人事関連）
@@ -86,7 +90,7 @@ business_columns:
   logical: 優先度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知の優先度（LOW:低、NORMAL:通常、HIGH:高、CRITICAL:緊急）
@@ -100,7 +104,7 @@ business_columns:
   logical: タイトル
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知のタイトル・件名
@@ -108,7 +112,7 @@ business_columns:
   logical: メッセージ
   type: TEXT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知の本文メッセージ
@@ -116,7 +120,7 @@ business_columns:
   logical: メッセージ形式
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: メッセージの形式（PLAIN:プレーンテキスト、HTML:HTML、MARKDOWN:Markdown）
@@ -129,7 +133,7 @@ business_columns:
   logical: アクションURL
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知に関連するアクションのURL
@@ -137,7 +141,7 @@ business_columns:
   logical: アクションラベル
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: アクションボタンのラベル
@@ -145,7 +149,7 @@ business_columns:
   logical: 配信方法
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通知の配信方法（IN_APP:アプリ内、EMAIL:メール、SLACK:Slack、TEAMS:Teams、LINE_WORKS:LINE
@@ -161,7 +165,7 @@ business_columns:
   logical: 配信状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 配信状況（PENDING:配信待ち、SENT:送信済み、DELIVERED:配信完了、FAILED:配信失敗、BOUNCED:バウンス）
@@ -176,7 +180,7 @@ business_columns:
   logical: 送信日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知が送信された日時
@@ -184,7 +188,7 @@ business_columns:
   logical: 配信日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知が配信された日時
@@ -192,7 +196,7 @@ business_columns:
   logical: 既読状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 既読状況（UNREAD:未読、READ:既読、ARCHIVED:アーカイブ済み）
@@ -205,7 +209,7 @@ business_columns:
   logical: 既読日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知が既読になった日時
@@ -213,7 +217,7 @@ business_columns:
   logical: アーカイブ日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知がアーカイブされた日時
@@ -221,7 +225,7 @@ business_columns:
   logical: 有効期限
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 通知の有効期限
@@ -229,7 +233,7 @@ business_columns:
   logical: 再送回数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 配信失敗時の再送回数
@@ -238,7 +242,7 @@ business_columns:
   logical: 最大再送回数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 最大再送回数
@@ -247,7 +251,7 @@ business_columns:
   logical: 最終再送日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最後に再送を試行した日時
@@ -255,7 +259,7 @@ business_columns:
   logical: エラーメッセージ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 配信失敗時のエラーメッセージ
@@ -263,7 +267,7 @@ business_columns:
   logical: 外部メッセージID
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 外部サービス（メール、Slack等）のメッセージID
@@ -271,7 +275,7 @@ business_columns:
   logical: テンプレートID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 使用した通知テンプレートのID
@@ -279,7 +283,7 @@ business_columns:
   logical: テンプレート変数
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートに渡した変数（JSON形式）
@@ -287,7 +291,7 @@ business_columns:
   logical: 関連エンティティ種別
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連するエンティティの種別（PROJECT:プロジェクト、TRAINING:研修、CERTIFICATION:資格、SKILL:スキル、EMPLOYEE:社員）
@@ -301,7 +305,7 @@ business_columns:
   logical: 関連エンティティID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連するエンティティのID
@@ -309,7 +313,7 @@ business_columns:
   logical: バッチID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 一括送信時のバッチID
@@ -317,7 +321,7 @@ business_columns:
   logical: ユーザーエージェント
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 既読時のユーザーエージェント情報
@@ -325,7 +329,7 @@ business_columns:
   logical: IPアドレス
   type: VARCHAR
   length: 45
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 既読時のIPアドレス
@@ -333,7 +337,7 @@ business_columns:
   logical: デバイス種別
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 既読時のデバイス種別（PC:PC、MOBILE:モバイル、TABLET:タブレット）
@@ -345,7 +349,7 @@ business_columns:
   logical: 一括通知フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 一括送信された通知かどうか
@@ -354,139 +358,190 @@ business_columns:
   logical: パーソナライゼーションデータ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 個人向けカスタマイズデータ（JSON形式）
-business_indexes:
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_notification_id
   columns:
-  - notification_id
+  - - notification_id
   unique: true
   description: 通知ID検索用（一意）
 - name: idx_recipient_id
   columns:
-  - recipient_id
+  - - recipient_id
   unique: false
   description: 受信者ID検索用
 - name: idx_sender_id
   columns:
-  - sender_id
+  - - sender_id
   unique: false
   description: 送信者ID検索用
 - name: idx_notification_type
   columns:
-  - notification_type
+  - - notification_type
   unique: false
   description: 通知種別検索用
 - name: idx_notification_category
   columns:
-  - notification_category
+  - - notification_category
   unique: false
   description: 通知カテゴリ検索用
 - name: idx_priority_level
   columns:
-  - priority_level
+  - - priority_level
   unique: false
   description: 優先度検索用
 - name: idx_delivery_method
   columns:
-  - delivery_method
+  - - delivery_method
   unique: false
   description: 配信方法検索用
 - name: idx_delivery_status
   columns:
-  - delivery_status
+  - - delivery_status
   unique: false
   description: 配信状況検索用
 - name: idx_read_status
   columns:
-  - read_status
+  - - read_status
   unique: false
   description: 既読状況検索用
 - name: idx_sent_at
   columns:
-  - sent_at
+  - - sent_at
   unique: false
   description: 送信日時検索用
 - name: idx_recipient_unread
   columns:
-  - recipient_id
-  - read_status
-  - expiry_date
+  - - recipient_id
+  - - read_status
+  - - expiry_date
   unique: false
   description: 受信者別未読通知検索用
 - name: idx_batch_id
   columns:
-  - batch_id
+  - - batch_id
   unique: false
   description: バッチID検索用
 - name: idx_related_entity
   columns:
-  - related_entity_type
-  - related_entity_id
+  - - related_entity_type
+  - - related_entity_id
   unique: false
   description: 関連エンティティ検索用
-business_constraints:
+- name: idx_trn_notification_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_notification_id
   type: UNIQUE
-  columns:
-  - notification_id
   description: 通知ID一意制約
+  columns:
+  - - notification_id
 - name: chk_notification_type
   type: CHECK
+  description: 通知種別値チェック制約
   condition: notification_type IN ('SYSTEM', 'REMINDER', 'APPROVAL', 'ALERT', 'INFO',
     'URGENT')
-  description: 通知種別値チェック制約
 - name: chk_notification_category
   type: CHECK
+  description: 通知カテゴリ値チェック制約
   condition: notification_category IN ('SKILL', 'TRAINING', 'PROJECT', 'CERTIFICATION',
     'SYSTEM', 'HR')
-  description: 通知カテゴリ値チェック制約
 - name: chk_priority_level
   type: CHECK
-  condition: priority_level IN ('LOW', 'NORMAL', 'HIGH', 'CRITICAL')
   description: 優先度値チェック制約
+  condition: priority_level IN ('LOW', 'NORMAL', 'HIGH', 'CRITICAL')
 - name: chk_message_format
   type: CHECK
-  condition: message_format IN ('PLAIN', 'HTML', 'MARKDOWN')
   description: メッセージ形式値チェック制約
+  condition: message_format IN ('PLAIN', 'HTML', 'MARKDOWN')
 - name: chk_delivery_method
   type: CHECK
+  description: 配信方法値チェック制約
   condition: delivery_method IN ('IN_APP', 'EMAIL', 'SLACK', 'TEAMS', 'LINE_WORKS',
     'SMS')
-  description: 配信方法値チェック制約
 - name: chk_delivery_status
   type: CHECK
-  condition: delivery_status IN ('PENDING', 'SENT', 'DELIVERED', 'FAILED', 'BOUNCED')
   description: 配信状況値チェック制約
+  condition: delivery_status IN ('PENDING', 'SENT', 'DELIVERED', 'FAILED', 'BOUNCED')
 - name: chk_read_status
   type: CHECK
-  condition: read_status IN ('UNREAD', 'READ', 'ARCHIVED')
   description: 既読状況値チェック制約
+  condition: read_status IN ('UNREAD', 'READ', 'ARCHIVED')
 - name: chk_related_entity_type
   type: CHECK
+  description: 関連エンティティ種別値チェック制約
   condition: related_entity_type IN ('PROJECT', 'TRAINING', 'CERTIFICATION', 'SKILL',
     'EMPLOYEE')
-  description: 関連エンティティ種別値チェック制約
 - name: chk_device_type
   type: CHECK
-  condition: device_type IN ('PC', 'MOBILE', 'TABLET')
   description: デバイス種別値チェック制約
+  condition: device_type IN ('PC', 'MOBILE', 'TABLET')
 - name: chk_retry_count
   type: CHECK
-  condition: retry_count >= 0 AND retry_count <= max_retry_count
   description: 再送回数範囲チェック制約
+  condition: retry_count >= 0 AND retry_count <= max_retry_count
 - name: chk_max_retry_count
   type: CHECK
-  condition: max_retry_count >= 0
   description: 最大再送回数非負数チェック制約
+  condition: max_retry_count >= 0
 foreign_keys:
 - name: fk_notification_recipient
   columns:
-  - recipient_id
+  - - recipient_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -494,9 +549,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_notification_sender
   columns:
-  - sender_id
+  - - sender_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -579,7 +635,7 @@ notes:
 - テンプレート機能により一貫した通知フォーマットを維持
 - バッチ送信により大量通知の効率的な配信が可能
 - パーソナライゼーション機能により個人に最適化された通知を提供
-business_rules:
+- === 業務ルール ===
 - 通知IDは一意である必要がある
 - 再送回数は最大再送回数以下である必要がある
 - 既読日時は送信日時以降である必要がある
@@ -588,58 +644,12 @@ business_rules:
 - 有効期限切れの通知は自動的に非表示
 - 配信失敗時は設定された回数まで自動再送
 - 一括通知はバッチIDで管理
-columns:
-- name: notification_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: TRN_Notificationの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_trn_notification_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 通知IDは一意である必要がある
+- 再送回数は最大再送回数以下である必要がある
+- 既読日時は送信日時以降である必要がある
+- アーカイブ日時は既読日時以降である必要がある
+- 緊急通知は即座に配信される必要がある
+- 有効期限切れの通知は自動的に非表示
+- 配信失敗時は設定された回数まで自動再送
+- 一括通知はバッチIDで管理

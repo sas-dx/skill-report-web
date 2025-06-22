@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 案件実績テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'TRN_ProjectRecord（案件実績）は、社員が参加したプロジェクト・案件の実績情報を管理するトランザクションテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'TRN_ProjectRecord（案件実績）は、社員が参加したプロ�
   スキル評価やキャリア開発の判断材料として活用できます。
 
   '
-business_columns:
+columns:
 - name: project_record_id
   logical: 案件実績ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 案件実績を一意に識別するID
@@ -40,7 +44,7 @@ business_columns:
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 参加した社員のID（MST_Employeeへの外部キー）
@@ -48,7 +52,7 @@ business_columns:
   logical: プロジェクト名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクト・案件の名称
@@ -56,7 +60,7 @@ business_columns:
   logical: プロジェクトコード
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 社内プロジェクト管理コード
@@ -64,7 +68,7 @@ business_columns:
   logical: 顧客名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: 顧客・クライアント名（機密情報のため暗号化）
@@ -72,7 +76,7 @@ business_columns:
   logical: プロジェクト種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトの種別（DEVELOPMENT:開発、MAINTENANCE:保守、CONSULTING:コンサル、RESEARCH:研究、OTHER:その他）
@@ -86,7 +90,7 @@ business_columns:
   logical: プロジェクト規模
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトの規模（SMALL:小規模、MEDIUM:中規模、LARGE:大規模、ENTERPRISE:エンタープライズ）
@@ -99,7 +103,7 @@ business_columns:
   logical: 開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクト参加開始日
@@ -107,7 +111,7 @@ business_columns:
   logical: 終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクト参加終了日（進行中の場合はNULL）
@@ -115,7 +119,7 @@ business_columns:
   logical: 参画率
   type: DECIMAL
   length: 5,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトへの参画率（%）
@@ -123,7 +127,7 @@ business_columns:
   logical: 担当役職
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクト内での役職・ポジション
@@ -131,7 +135,7 @@ business_columns:
   logical: 担当業務
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 具体的な担当業務・責任範囲
@@ -139,7 +143,7 @@ business_columns:
   logical: 使用技術
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトで使用した技術・ツール（JSON形式）
@@ -147,7 +151,7 @@ business_columns:
   logical: 適用スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトで活用したスキル（JSON形式）
@@ -155,7 +159,7 @@ business_columns:
   logical: 成果・実績
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトでの具体的な成果・実績
@@ -163,7 +167,7 @@ business_columns:
   logical: 課題・困難
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 直面した課題や困難とその対応
@@ -171,7 +175,7 @@ business_columns:
   logical: 学んだこと
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトから学んだ知識・経験
@@ -179,7 +183,7 @@ business_columns:
   logical: チーム規模
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトチームの人数
@@ -187,7 +191,7 @@ business_columns:
   logical: 予算規模
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトの予算規模（UNDER_1M:100万円未満、UNDER_10M:1000万円未満、UNDER_100M:1億円未満、OVER_100M:1億円以上）
@@ -200,7 +204,7 @@ business_columns:
   logical: プロジェクト状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトの状況（ONGOING:進行中、COMPLETED:完了、SUSPENDED:中断、CANCELLED:中止）
@@ -214,7 +218,7 @@ business_columns:
   logical: 評価点数
   type: DECIMAL
   length: 3,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プロジェクトでの評価点数（1.0-5.0）
@@ -222,7 +226,7 @@ business_columns:
   logical: 評価コメント
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 上司・PMからの評価コメント
@@ -230,7 +234,7 @@ business_columns:
   logical: 機密フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 機密プロジェクトかどうか
@@ -239,102 +243,162 @@ business_columns:
   logical: 公開参照可能フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 社外への参照情報として公開可能か
   default: false
-business_indexes:
+- name: projectrecord_id
+  logical: TRN_ProjectRecordの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: TRN_ProjectRecordの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_project_record_id
   columns:
-  - project_record_id
+  - - project_record_id
   unique: true
   description: 案件実績ID検索用（一意）
 - name: idx_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_project_name
   columns:
-  - project_name
+  - - project_name
   unique: false
   description: プロジェクト名検索用
 - name: idx_project_code
   columns:
-  - project_code
+  - - project_code
   unique: false
   description: プロジェクトコード検索用
 - name: idx_project_type
   columns:
-  - project_type
+  - - project_type
   unique: false
   description: プロジェクト種別検索用
 - name: idx_date_range
   columns:
-  - start_date
-  - end_date
+  - - start_date
+  - - end_date
   unique: false
   description: 期間検索用
 - name: idx_project_status
   columns:
-  - project_status
+  - - project_status
   unique: false
   description: プロジェクト状況検索用
 - name: idx_employee_period
   columns:
-  - employee_id
-  - start_date
-  - end_date
+  - - employee_id
+  - - start_date
+  - - end_date
   unique: false
   description: 社員別期間検索用
-business_constraints:
+- name: idx_trn_projectrecord_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_project_record_id
   type: UNIQUE
-  columns:
-  - project_record_id
   description: 案件実績ID一意制約
+  columns:
+  - - project_record_id
 - name: chk_project_type
   type: CHECK
+  description: プロジェクト種別値チェック制約
   condition: project_type IN ('DEVELOPMENT', 'MAINTENANCE', 'CONSULTING', 'RESEARCH',
     'OTHER')
-  description: プロジェクト種別値チェック制約
 - name: chk_project_scale
   type: CHECK
-  condition: project_scale IN ('SMALL', 'MEDIUM', 'LARGE', 'ENTERPRISE')
   description: プロジェクト規模値チェック制約
+  condition: project_scale IN ('SMALL', 'MEDIUM', 'LARGE', 'ENTERPRISE')
 - name: chk_budget_range
   type: CHECK
-  condition: budget_range IN ('UNDER_1M', 'UNDER_10M', 'UNDER_100M', 'OVER_100M')
   description: 予算規模値チェック制約
+  condition: budget_range IN ('UNDER_1M', 'UNDER_10M', 'UNDER_100M', 'OVER_100M')
 - name: chk_project_status
   type: CHECK
-  condition: project_status IN ('ONGOING', 'COMPLETED', 'SUSPENDED', 'CANCELLED')
   description: プロジェクト状況値チェック制約
+  condition: project_status IN ('ONGOING', 'COMPLETED', 'SUSPENDED', 'CANCELLED')
 - name: chk_date_range
   type: CHECK
-  condition: end_date IS NULL OR start_date <= end_date
   description: 開始日・終了日の整合性チェック制約
+  condition: end_date IS NULL OR start_date <= end_date
 - name: chk_participation_rate
   type: CHECK
+  description: 参画率範囲チェック制約
   condition: participation_rate IS NULL OR (participation_rate >= 0 AND participation_rate
     <= 100)
-  description: 参画率範囲チェック制約
 - name: chk_evaluation_score
   type: CHECK
+  description: 評価点数範囲チェック制約
   condition: evaluation_score IS NULL OR (evaluation_score >= 1.0 AND evaluation_score
     <= 5.0)
-  description: 評価点数範囲チェック制約
 - name: chk_team_size
   type: CHECK
-  condition: team_size IS NULL OR team_size > 0
   description: チーム規模正数チェック制約
+  condition: team_size IS NULL OR team_size > 0
 foreign_keys:
 - name: fk_project_record_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -396,7 +460,7 @@ notes:
 - 機密プロジェクトは is_confidential = true で管理
 - 評価は完了後に記録（進行中は NULL）
 - 参画率は工数ベースでの参加割合
-business_rules:
+- === 業務ルール ===
 - 案件実績IDは一意である必要がある
 - 開始日は終了日以前である必要がある
 - 進行中プロジェクトは終了日をNULLに設定
@@ -405,58 +469,12 @@ business_rules:
 - 機密プロジェクトは公開参照不可
 - 使用技術・スキルはスキルマスタとの整合性を保つ
 - チーム規模は1人以上で設定
-columns:
-- name: projectrecord_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: TRN_ProjectRecordの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_trn_projectrecord_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 案件実績IDは一意である必要がある
+- 開始日は終了日以前である必要がある
+- 進行中プロジェクトは終了日をNULLに設定
+- 参画率は0-100%の範囲で設定
+- 評価点数は1.0-5.0の範囲で設定
+- 機密プロジェクトは公開参照不可
+- 使用技術・スキルはスキルマスタとの整合性を保つ
+- チーム規模は1人以上で設定

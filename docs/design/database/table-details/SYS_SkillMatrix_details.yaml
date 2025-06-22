@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: システム
   changes: 初版作成 - SYS_SkillMatrixの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'スキルマップテーブルは、社員のスキル評価とスキル項目の関連を管理するシステムテーブルです。
 
 
@@ -23,12 +27,12 @@ overview: 'スキルマップテーブルは、社員のスキル評価とスキ
   社員のスキル可視化やスキル分析の基盤データを提供します。
 
   '
-business_columns:
+columns:
 - name: employee_id
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 評価対象の社員ID（MST_Employeeへの外部キー）
@@ -36,7 +40,7 @@ business_columns:
   logical: スキルID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル項目ID（MST_Skillへの外部キー）
@@ -44,7 +48,7 @@ business_columns:
   logical: スキルレベル
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル評価レベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター）
@@ -53,7 +57,7 @@ business_columns:
   logical: 自己評価
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 本人による自己評価レベル（1-5）
@@ -61,7 +65,7 @@ business_columns:
   logical: 上司評価
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 上司による評価レベル（1-5）
@@ -69,7 +73,7 @@ business_columns:
   logical: 同僚評価
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 同僚による評価レベル（1-5）
@@ -77,7 +81,7 @@ business_columns:
   logical: 評価日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル評価を実施した日付
@@ -85,7 +89,7 @@ business_columns:
   logical: 根拠URL
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキル評価の根拠となる資料やプロジェクトのURL
@@ -93,7 +97,7 @@ business_columns:
   logical: 備考
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキル評価に関する詳細な備考やコメント
@@ -101,7 +105,7 @@ business_columns:
   logical: 次回目標レベル
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 次回評価での目標レベル（1-5）
@@ -109,74 +113,120 @@ business_columns:
   logical: 目標達成日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標レベル達成予定日
-business_indexes:
+- name: skillmatrix_id
+  logical: SYS_SkillMatrixの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_SkillMatrixの主キー
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_SYS_SkillMatrix_employee_skill
   columns:
-  - employee_id
-  - skill_id
+  - - employee_id
+  - - skill_id
   unique: true
   description: 社員とスキルの組み合わせ検索用（一意）
 - name: idx_SYS_SkillMatrix_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_SYS_SkillMatrix_skill_id
   columns:
-  - skill_id
+  - - skill_id
   unique: false
   description: スキルID検索用
 - name: idx_SYS_SkillMatrix_assessment_date
   columns:
-  - assessment_date
+  - - assessment_date
   unique: false
   description: 評価日検索用
 - name: idx_SYS_SkillMatrix_skill_level
   columns:
-  - skill_level
+  - - skill_level
   unique: false
   description: スキルレベル検索用
-business_constraints:
+constraints:
 - name: uk_SYS_SkillMatrix_employee_skill
   type: UNIQUE
-  columns:
-  - employee_id
-  - skill_id
   description: 社員とスキルの組み合わせ一意制約
+  columns:
+  - - employee_id
+  - - skill_id
 - name: chk_SYS_SkillMatrix_skill_level
   type: CHECK
-  condition: skill_level BETWEEN 1 AND 5
   description: スキルレベル値チェック制約（1-5）
+  condition: skill_level BETWEEN 1 AND 5
 - name: chk_SYS_SkillMatrix_self_assessment
   type: CHECK
-  condition: self_assessment IS NULL OR self_assessment BETWEEN 1 AND 5
   description: 自己評価値チェック制約（1-5またはNULL）
+  condition: self_assessment IS NULL OR self_assessment BETWEEN 1 AND 5
 - name: chk_SYS_SkillMatrix_manager_assessment
   type: CHECK
-  condition: manager_assessment IS NULL OR manager_assessment BETWEEN 1 AND 5
   description: 上司評価値チェック制約（1-5またはNULL）
+  condition: manager_assessment IS NULL OR manager_assessment BETWEEN 1 AND 5
 - name: chk_SYS_SkillMatrix_peer_assessment
   type: CHECK
-  condition: peer_assessment IS NULL OR peer_assessment BETWEEN 1 AND 5
   description: 同僚評価値チェック制約（1-5またはNULL）
+  condition: peer_assessment IS NULL OR peer_assessment BETWEEN 1 AND 5
 - name: chk_SYS_SkillMatrix_next_target_level
   type: CHECK
-  condition: next_target_level IS NULL OR next_target_level BETWEEN 1 AND 5
   description: 次回目標レベル値チェック制約（1-5またはNULL）
+  condition: next_target_level IS NULL OR next_target_level BETWEEN 1 AND 5
 - name: chk_SYS_SkillMatrix_target_date
   type: CHECK
-  condition: target_date IS NULL OR target_date >= assessment_date
   description: 目標達成日は評価日以降チェック制約
+  condition: target_date IS NULL OR target_date >= assessment_date
 foreign_keys:
 - name: fk_SYS_SkillMatrix_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -184,9 +234,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_SYS_SkillMatrix_skill
   columns:
-  - skill_id
+  - - skill_id
   references:
-    table: MST_Skill
+    table:
+    - MST_Skill
     columns:
     - id
   on_update: CASCADE
@@ -222,52 +273,17 @@ notes:
 - 評価の根拠となる資料やプロジェクトのURLを記録可能
 - 次回の目標レベルと達成予定日を設定可能
 - 論理削除は is_deleted フラグで管理
-business_rules:
+- === 業務ルール ===
 - 同一社員・同一スキルの組み合わせは1レコードのみ
 - スキルレベルは必須、その他の評価は任意
 - 評価日は必須項目
 - 目標達成日は評価日以降の日付のみ設定可能
 - スキル評価の更新時は履歴として別テーブルに保存
 - 削除時は論理削除を使用し、物理削除は行わない
-columns:
-- name: skillmatrix_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: SYS_SkillMatrixの主キー
-  requirement_id: PLT.1-WEB.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes: []
+rules:
+- 同一社員・同一スキルの組み合わせは1レコードのみ
+- スキルレベルは必須、その他の評価は任意
+- 評価日は必須項目
+- 目標達成日は評価日以降の日付のみ設定可能
+- スキル評価の更新時は履歴として別テーブルに保存
+- 削除時は論理削除を使用し、物理削除は行わない

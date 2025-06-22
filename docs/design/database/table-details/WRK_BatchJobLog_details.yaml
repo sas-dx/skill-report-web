@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - WRK_BatchJobLogの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: '一括登録・更新処理のジョブ実行ログを管理するワーク系テーブル。
 
 
@@ -27,12 +31,12 @@ overview: '一括登録・更新処理のジョブ実行ログを管理するワ
   主に管理者画面での監視とAPI経由での状況確認に使用される。
 
   '
-business_columns:
+columns:
 - name: job_id
   logical: ジョブID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 一括処理ジョブの一意識別子（UUID形式）
@@ -40,7 +44,7 @@ business_columns:
   logical: ジョブ名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 実行されたジョブの名称（画面表示用）
@@ -48,7 +52,7 @@ business_columns:
   logical: ジョブ種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ジョブの種別（SKILL_IMPORT:スキル情報一括登録、EMPLOYEE_IMPORT:社員情報一括登録、BULK_UPDATE:一括更新、BULK_DELETE:一括削除、DATA_EXPORT:データエクスポート）
@@ -63,7 +67,7 @@ business_columns:
   logical: 実行ステータス
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ジョブの実行状況（PENDING:待機中、RUNNING:実行中、COMPLETED:完了、FAILED:失敗、CANCELLED:キャンセル）
@@ -78,7 +82,7 @@ business_columns:
   logical: 開始時刻
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ジョブ実行開始日時
@@ -86,7 +90,7 @@ business_columns:
   logical: 終了時刻
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ジョブ実行終了日時
@@ -94,7 +98,7 @@ business_columns:
   logical: 総レコード数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 処理対象の総レコード数
@@ -103,7 +107,7 @@ business_columns:
   logical: 処理済みレコード数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 実際に処理されたレコード数
@@ -112,7 +116,7 @@ business_columns:
   logical: 成功レコード数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 正常に処理されたレコード数
@@ -121,7 +125,7 @@ business_columns:
   logical: エラーレコード数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: エラーが発生したレコード数
@@ -130,7 +134,7 @@ business_columns:
   logical: エラー詳細
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: エラー内容の詳細情報（JSON形式でエラーメッセージ、行番号、カラム名等を格納）
@@ -138,7 +142,7 @@ business_columns:
   logical: 入力ファイルパス
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 処理対象の入力ファイルパス（CSVファイル等）
@@ -146,7 +150,7 @@ business_columns:
   logical: 出力ファイルパス
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 処理結果の出力ファイルパス（エラーレポート等）
@@ -154,7 +158,7 @@ business_columns:
   logical: 実行者
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ジョブを実行したユーザーのID
@@ -162,7 +166,7 @@ business_columns:
   logical: 進捗率
   type: DECIMAL
   length: 5,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ジョブの進捗率（0.00-100.00）
@@ -171,7 +175,7 @@ business_columns:
   logical: 実行環境
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ジョブが実行された環境情報（サーバー名、プロセスID等）
@@ -179,76 +183,136 @@ business_columns:
   logical: ジョブパラメータ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ジョブ実行時のパラメータ情報（JSON形式）
-business_indexes:
+- name: batchjoblog_id
+  logical: WRK_BatchJobLogの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: WRK_BatchJobLogの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_WRK_BatchJobLog_job_id
   columns:
-  - job_id
+  - - job_id
   unique: true
   description: ジョブID検索用（一意）
 - name: idx_WRK_BatchJobLog_status
   columns:
-  - status
+  - - status
   unique: false
   description: ステータス検索用（実行中ジョブの監視等）
 - name: idx_WRK_BatchJobLog_start_time
   columns:
-  - start_time
+  - - start_time
   unique: false
   description: 開始時刻検索用（日時範囲での絞り込み）
 - name: idx_WRK_BatchJobLog_executed_by
   columns:
-  - executed_by
+  - - executed_by
   unique: false
   description: 実行者検索用（ユーザー別ジョブ履歴）
 - name: idx_WRK_BatchJobLog_job_type
   columns:
-  - job_type
+  - - job_type
   unique: false
   description: ジョブ種別検索用（種別別の統計等）
 - name: idx_WRK_BatchJobLog_status_start_time
   columns:
-  - status
-  - start_time
+  - - status
+  - - start_time
   unique: false
   description: ステータスと開始時刻の複合検索用（監視画面での絞り込み）
-business_constraints:
+- name: idx_wrk_batchjoblog_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: chk_WRK_BatchJobLog_status
   type: CHECK
-  condition: status IN ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED')
   description: ステータス値チェック制約
+  condition: status IN ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED')
 - name: chk_WRK_BatchJobLog_job_type
   type: CHECK
+  description: ジョブ種別値チェック制約
   condition: job_type IN ('SKILL_IMPORT', 'EMPLOYEE_IMPORT', 'BULK_UPDATE', 'BULK_DELETE',
     'DATA_EXPORT')
-  description: ジョブ種別値チェック制約
 - name: chk_WRK_BatchJobLog_records_positive
   type: CHECK
+  description: レコード数正数チェック制約
   condition: total_records >= 0 AND processed_records >= 0 AND success_records >=
     0 AND error_records >= 0
-  description: レコード数正数チェック制約
 - name: chk_WRK_BatchJobLog_progress_range
   type: CHECK
-  condition: progress_percentage >= 0.00 AND progress_percentage <= 100.00
   description: 進捗率範囲チェック制約（0-100%）
+  condition: progress_percentage >= 0.00 AND progress_percentage <= 100.00
 - name: chk_WRK_BatchJobLog_time_consistency
   type: CHECK
-  condition: end_time IS NULL OR start_time IS NULL OR start_time <= end_time
   description: 開始時刻と終了時刻の整合性チェック制約
+  condition: end_time IS NULL OR start_time IS NULL OR start_time <= end_time
 - name: chk_WRK_BatchJobLog_record_consistency
   type: CHECK
+  description: 処理件数の整合性チェック制約
   condition: processed_records <= total_records AND (success_records + error_records)
     <= processed_records
-  description: 処理件数の整合性チェック制約
 foreign_keys:
 - name: fk_WRK_BatchJobLog_executed_by
   columns:
-  - executed_by
+  - - executed_by
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - id
   on_update: CASCADE
@@ -315,7 +379,7 @@ notes:
 - 外部ファイルパスは相対パスまたは論理パスで管理
 - 長時間実行ジョブは定期的にprogress_percentage更新
 - システム障害時の復旧用にexecution_environment情報を活用
-business_rules:
+- === 業務ルール ===
 - ジョブ開始時にPENDINGステータスでレコード作成
 - 実行開始時にRUNNINGステータスに更新、start_time設定
 - 処理完了時にCOMPLETED/FAILEDステータスに更新、end_time設定
@@ -326,58 +390,14 @@ business_rules:
 - ファイルパスは実際のファイル存在確認後に設定
 - 処理完了後のファイルは7日間保持後に自動削除
 - エラーレコード数が総レコード数の50%を超えた場合は処理中断
-columns:
-- name: batchjoblog_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: WRK_BatchJobLogの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_wrk_batchjoblog_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- ジョブ開始時にPENDINGステータスでレコード作成
+- 実行開始時にRUNNINGステータスに更新、start_time設定
+- 処理完了時にCOMPLETED/FAILEDステータスに更新、end_time設定
+- エラー発生時は即座にerror_detailsに詳細情報記録
+- 進捗率は処理済みレコード数/総レコード数で自動計算
+- 同一ユーザーの同時実行ジョブ数は最大3個まで制限
+- RUNNING状態で24時間経過したジョブは自動的にFAILEDに変更
+- ファイルパスは実際のファイル存在確認後に設定
+- 処理完了後のファイルは7日間保持後に自動削除
+- エラーレコード数が総レコード数の50%を超えた場合は処理中断

@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 役職マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_Position（役職マスタ）は、組織内の役職・職位の階層構造と基本情報を管理するマスタテーブルです。
 
 
@@ -31,12 +35,12 @@ overview: 'MST_Position（役職マスタ）は、組織内の役職・職位の
   企業の階層的組織運営の基盤となる重要なマスタデータです。
 
   '
-business_columns:
+columns:
 - name: position_code
   logical: 役職コード
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 役職を一意に識別するコード（例：POS001）
@@ -45,7 +49,7 @@ business_columns:
   logical: 役職名
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 役職の正式名称
@@ -53,7 +57,7 @@ business_columns:
   logical: 役職名略称
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 役職の略称・短縮名
@@ -61,7 +65,7 @@ business_columns:
   logical: 役職レベル
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 役職の階層レベル（1:最上位、数値が大きいほど下位）
@@ -69,7 +73,7 @@ business_columns:
   logical: 役職ランク
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 同レベル内での序列・ランク
@@ -77,7 +81,7 @@ business_columns:
   logical: 役職カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 役職のカテゴリ（EXECUTIVE:役員、MANAGER:管理職、SUPERVISOR:監督職、STAFF:一般職）
@@ -90,7 +94,7 @@ business_columns:
   logical: 権限レベル
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: システム権限レベル（1-10、数値が大きいほど高権限）
@@ -98,7 +102,7 @@ business_columns:
   logical: 承認限度額
   type: DECIMAL
   length: 15,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 承認可能な金額の上限（円）
@@ -106,7 +110,7 @@ business_columns:
   logical: 給与等級
   type: VARCHAR
   length: 10
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 給与計算用の等級コード
@@ -114,7 +118,7 @@ business_columns:
   logical: 役職手当額
   type: DECIMAL
   length: 10,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 月額役職手当（円）
@@ -122,7 +126,7 @@ business_columns:
   logical: 管理職フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 管理職かどうか（労働基準法上の管理監督者判定）
@@ -131,7 +135,7 @@ business_columns:
   logical: 役員フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 役員かどうか
@@ -140,7 +144,7 @@ business_columns:
   logical: 承認権限フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 承認権限を持つかどうか
@@ -149,7 +153,7 @@ business_columns:
   logical: 採用権限フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 採用権限を持つかどうか
@@ -158,7 +162,7 @@ business_columns:
   logical: 評価権限フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 人事評価権限を持つかどうか
@@ -167,7 +171,7 @@ business_columns:
   logical: 役職状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 役職の状態（ACTIVE:有効、INACTIVE:無効、ABOLISHED:廃止）
@@ -180,7 +184,7 @@ business_columns:
   logical: 表示順序
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 組織図等での表示順序
@@ -188,95 +192,155 @@ business_columns:
   logical: 役職説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 役職の責任・権限・業務内容の説明
-business_indexes:
+- name: position_id
+  logical: MST_Positionの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Positionの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_position_code
   columns:
-  - position_code
+  - - position_code
   unique: true
   description: 役職コード検索用（一意）
 - name: idx_position_level
   columns:
-  - position_level
+  - - position_level
   unique: false
   description: 役職レベル別検索用
 - name: idx_position_rank
   columns:
-  - position_rank
+  - - position_rank
   unique: false
   description: 役職ランク別検索用
 - name: idx_position_category
   columns:
-  - position_category
+  - - position_category
   unique: false
   description: 役職カテゴリ別検索用
 - name: idx_authority_level
   columns:
-  - authority_level
+  - - authority_level
   unique: false
   description: 権限レベル別検索用
 - name: idx_salary_grade
   columns:
-  - salary_grade
+  - - salary_grade
   unique: false
   description: 給与等級別検索用
 - name: idx_status
   columns:
-  - position_status
+  - - position_status
   unique: false
   description: 役職状態別検索用
 - name: idx_management_flags
   columns:
-  - is_management
-  - is_executive
+  - - is_management
+  - - is_executive
   unique: false
   description: 管理職・役員フラグ検索用
 - name: idx_sort_order
   columns:
-  - sort_order
+  - - sort_order
   unique: false
   description: 表示順序検索用
-business_constraints:
+- name: idx_mst_position_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_position_code
   type: UNIQUE
-  columns:
-  - position_code
   description: 役職コード一意制約
+  columns:
+  - - position_code
 - name: chk_position_level
   type: CHECK
-  condition: position_level > 0
   description: 役職レベル正値チェック制約
+  condition: position_level > 0
 - name: chk_position_rank
   type: CHECK
-  condition: position_rank > 0
   description: 役職ランク正値チェック制約
+  condition: position_rank > 0
 - name: chk_authority_level
   type: CHECK
-  condition: authority_level BETWEEN 1 AND 10
   description: 権限レベル範囲チェック制約
+  condition: authority_level BETWEEN 1 AND 10
 - name: chk_position_category
   type: CHECK
-  condition: position_category IN ('EXECUTIVE', 'MANAGER', 'SUPERVISOR', 'STAFF')
   description: 役職カテゴリ値チェック制約
+  condition: position_category IN ('EXECUTIVE', 'MANAGER', 'SUPERVISOR', 'STAFF')
 - name: chk_position_status
   type: CHECK
-  condition: position_status IN ('ACTIVE', 'INACTIVE', 'ABOLISHED')
   description: 役職状態値チェック制約
+  condition: position_status IN ('ACTIVE', 'INACTIVE', 'ABOLISHED')
 - name: chk_approval_limit
   type: CHECK
-  condition: approval_limit IS NULL OR approval_limit >= 0
   description: 承認限度額非負値チェック制約
+  condition: approval_limit IS NULL OR approval_limit >= 0
 - name: chk_allowance_amount
   type: CHECK
-  condition: allowance_amount IS NULL OR allowance_amount >= 0
   description: 役職手当額非負値チェック制約
+  condition: allowance_amount IS NULL OR allowance_amount >= 0
 - name: chk_sort_order
   type: CHECK
-  condition: sort_order IS NULL OR sort_order >= 0
   description: 表示順序非負値チェック制約
+  condition: sort_order IS NULL OR sort_order >= 0
+foreign_keys: []
 sample_data:
 - position_code: POS001
   position_name: 代表取締役社長
@@ -339,7 +403,7 @@ notes:
 - 承認限度額は稟議・決裁システムと連携
 - 管理職フラグは労働基準法上の管理監督者判定に使用
 - 給与等級は給与計算システムと連携
-business_rules:
+- === 業務ルール ===
 - 役職コードは新設時に自動採番（POS + 3桁連番）
 - 役員は必ず管理職フラグがtrueである必要がある
 - 承認権限を持つ役職は承認限度額の設定が必要
@@ -347,59 +411,11 @@ business_rules:
 - 役職レベルと権限レベルは原則として対応関係にある
 - 管理職は評価権限を持つことを原則とする
 - 役職手当は月額で設定し、給与計算時に使用
-columns:
-- name: position_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_Positionの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_position_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
-foreign_keys: []
+rules:
+- 役職コードは新設時に自動採番（POS + 3桁連番）
+- 役員は必ず管理職フラグがtrueである必要がある
+- 承認権限を持つ役職は承認限度額の設定が必要
+- 廃止時は position_status を ABOLISHED に変更
+- 役職レベルと権限レベルは原則として対応関係にある
+- 管理職は評価権限を持つことを原則とする
+- 役職手当は月額で設定し、給与計算時に使用

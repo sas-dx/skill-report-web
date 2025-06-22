@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 職種マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_JobType（職種マスタ）は、組織内の職種分類と各職種の基本情報を管理するマスタテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'MST_JobType（職種マスタ）は、組織内の職種分類と各�
   職種別スキル要件の管理を効率的に行うことができます。
 
   '
-business_columns:
+columns:
 - name: job_type_code
   logical: 職種コード
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 職種を一意に識別するコード（例：SE、PM、QA、BA）
@@ -41,7 +45,7 @@ business_columns:
   logical: 職種名
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種の正式名称
@@ -49,7 +53,7 @@ business_columns:
   logical: 職種名（英語）
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 英語での職種名称
@@ -57,7 +61,7 @@ business_columns:
   logical: 職種カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種の大分類（ENGINEERING:エンジニアリング、MANAGEMENT:マネジメント、SALES:営業、SUPPORT:サポート、OTHER:その他）
@@ -71,7 +75,7 @@ business_columns:
   logical: 職種レベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種の階層レベル（JUNIOR:ジュニア、SENIOR:シニア、LEAD:リード、MANAGER:マネージャー、DIRECTOR:ディレクター）
@@ -85,7 +89,7 @@ business_columns:
   logical: 職種説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種の詳細説明・役割・責任範囲
@@ -93,7 +97,7 @@ business_columns:
   logical: 必要経験年数
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に就くために必要な経験年数（目安）
@@ -101,7 +105,7 @@ business_columns:
   logical: 給与グレード下限
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種の給与グレード下限値
@@ -109,7 +113,7 @@ business_columns:
   logical: 給与グレード上限
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種の給与グレード上限値
@@ -117,7 +121,7 @@ business_columns:
   logical: キャリアパス
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種からの一般的なキャリアパス・昇進ルート
@@ -125,7 +129,7 @@ business_columns:
   logical: 必要資格
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に必要または推奨される資格（JSON形式で複数格納）
@@ -133,7 +137,7 @@ business_columns:
   logical: 必要スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に必要なスキル（JSON形式で複数格納）
@@ -141,7 +145,7 @@ business_columns:
   logical: 部署親和性
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種が配属されやすい部署（JSON形式で複数格納）
@@ -149,7 +153,7 @@ business_columns:
   logical: リモートワーク可否
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: リモートワークが可能な職種かどうか
@@ -158,7 +162,7 @@ business_columns:
   logical: 出張頻度
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 出張の頻度（NONE:なし、LOW:低、MEDIUM:中、HIGH:高）
@@ -171,7 +175,7 @@ business_columns:
   logical: 表示順序
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種一覧での表示順序
@@ -180,76 +184,135 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種が有効かどうか
   default: true
-business_indexes:
+- name: jobtype_id
+  logical: MST_JobTypeの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_JobTypeの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_job_type_code
   columns:
-  - job_type_code
+  - - job_type_code
   unique: true
   description: 職種コード検索用（一意）
 - name: idx_job_type_name
   columns:
-  - job_type_name
+  - - job_type_name
   unique: false
   description: 職種名検索用
 - name: idx_job_category
   columns:
-  - job_category
+  - - job_category
   unique: false
   description: 職種カテゴリ検索用
 - name: idx_job_level
   columns:
-  - job_level
+  - - job_level
   unique: false
   description: 職種レベル検索用
 - name: idx_category_level
   columns:
-  - job_category
-  - job_level
+  - - job_category
+  - - job_level
   unique: false
   description: カテゴリ・レベル複合検索用
 - name: idx_remote_eligible
   columns:
-  - remote_work_eligible
-  - is_active
+  - - remote_work_eligible
+  - - is_active
   unique: false
   description: リモートワーク可能職種検索用
 - name: idx_sort_order
   columns:
-  - sort_order
+  - - sort_order
   unique: false
   description: 表示順序検索用
-business_constraints:
+- name: idx_mst_jobtype_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_job_type_code
   type: UNIQUE
-  columns:
-  - job_type_code
   description: 職種コード一意制約
+  columns:
+  - - job_type_code
 - name: chk_job_category
   type: CHECK
-  condition: job_category IN ('ENGINEERING', 'MANAGEMENT', 'SALES', 'SUPPORT', 'OTHER')
   description: 職種カテゴリ値チェック制約
+  condition: job_category IN ('ENGINEERING', 'MANAGEMENT', 'SALES', 'SUPPORT', 'OTHER')
 - name: chk_job_level
   type: CHECK
-  condition: job_level IN ('JUNIOR', 'SENIOR', 'LEAD', 'MANAGER', 'DIRECTOR')
   description: 職種レベル値チェック制約
+  condition: job_level IN ('JUNIOR', 'SENIOR', 'LEAD', 'MANAGER', 'DIRECTOR')
 - name: chk_travel_frequency
   type: CHECK
-  condition: travel_frequency IN ('NONE', 'LOW', 'MEDIUM', 'HIGH')
   description: 出張頻度値チェック制約
+  condition: travel_frequency IN ('NONE', 'LOW', 'MEDIUM', 'HIGH')
 - name: chk_experience_years
   type: CHECK
-  condition: required_experience_years IS NULL OR required_experience_years >= 0
   description: 必要経験年数非負数チェック制約
+  condition: required_experience_years IS NULL OR required_experience_years >= 0
 - name: chk_salary_grade
   type: CHECK
+  description: 給与グレード範囲チェック制約
   condition: salary_grade_min IS NULL OR salary_grade_max IS NULL OR salary_grade_min
     <= salary_grade_max
-  description: 給与グレード範囲チェック制約
 foreign_keys: []
 sample_data:
 - job_type_code: SE
@@ -310,7 +373,7 @@ notes:
 - キャリアパスは社員のキャリア開発指針として活用
 - リモートワーク可否は働き方改革・採用要件で参照
 - 論理削除は is_active フラグで管理
-business_rules:
+- === 業務ルール ===
 - 職種コードは英数字・アンダースコアのみ使用可能
 - 職種レベルは組織の階層構造と整合性を保つ
 - 給与グレードは下限 ≤ 上限の関係を維持
@@ -318,58 +381,11 @@ business_rules:
 - リモートワーク可否は業務特性を考慮して設定
 - 出張頻度は職種の業務内容に応じて適切に設定
 - 表示順序は職種の重要度・階層に応じて設定
-columns:
-- name: jobtype_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_JobTypeの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_jobtype_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 職種コードは英数字・アンダースコアのみ使用可能
+- 職種レベルは組織の階層構造と整合性を保つ
+- 給与グレードは下限 ≤ 上限の関係を維持
+- 必要経験年数は職種レベルと整合性を保つ
+- リモートワーク可否は業務特性を考慮して設定
+- 出張頻度は職種の業務内容に応じて適切に設定
+- 表示順序は職種の重要度・階層に応じて設定

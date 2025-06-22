@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - システム設定マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_SystemConfig（システム設定）は、システム全体の設定値・パラメータを管理するマスタテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'MST_SystemConfig（システム設定）は、システム全体の�
   運用環境に応じた設定変更を効率的に行うことができます。
 
   '
-business_columns:
+columns:
 - name: config_key
   logical: 設定キー
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 設定項目を一意に識別するキー（例：MAX_LOGIN_ATTEMPTS、SESSION_TIMEOUT）
@@ -41,7 +45,7 @@ business_columns:
   logical: 設定名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定項目の表示名・説明
@@ -49,7 +53,7 @@ business_columns:
   logical: 設定値
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定の値（文字列、数値、JSON等）
@@ -57,7 +61,7 @@ business_columns:
   logical: 設定タイプ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定値のデータタイプ（STRING:文字列、INTEGER:整数、DECIMAL:小数、BOOLEAN:真偽値、JSON:JSON、ENCRYPTED:暗号化）
@@ -72,7 +76,7 @@ business_columns:
   logical: 設定カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定の分類（SECURITY:セキュリティ、SYSTEM:システム、BUSINESS:業務、UI:ユーザーインターフェース、INTEGRATION:連携）
@@ -86,7 +90,7 @@ business_columns:
   logical: デフォルト値
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定のデフォルト値
@@ -94,7 +98,7 @@ business_columns:
   logical: 検証ルール
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定値の検証ルール（正規表現、範囲等）
@@ -102,7 +106,7 @@ business_columns:
   logical: 説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定項目の詳細説明・用途
@@ -110,7 +114,7 @@ business_columns:
   logical: 暗号化フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定値が暗号化されているかどうか
@@ -119,7 +123,7 @@ business_columns:
   logical: システム専用フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: システム内部でのみ使用される設定かどうか
@@ -128,7 +132,7 @@ business_columns:
   logical: ユーザー設定可能フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 管理者がUI経由で変更可能かどうか
@@ -137,7 +141,7 @@ business_columns:
   logical: 再起動要否
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定変更時にシステム再起動が必要かどうか
@@ -146,7 +150,7 @@ business_columns:
   logical: 環境
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定が適用される環境（DEV:開発、TEST:テスト、PROD:本番、ALL:全環境）
@@ -160,7 +164,7 @@ business_columns:
   logical: テナント固有フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テナントごとに異なる値を持つ設定かどうか
@@ -169,7 +173,7 @@ business_columns:
   logical: 最終更新者
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定を最後に更新したユーザーID
@@ -177,7 +181,7 @@ business_columns:
   logical: 更新理由
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 設定変更の理由・目的
@@ -185,7 +189,7 @@ business_columns:
   logical: 表示順序
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定一覧での表示順序
@@ -194,68 +198,127 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 設定が有効かどうか
   default: true
-business_indexes:
+- name: systemconfig_id
+  logical: MST_SystemConfigの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_SystemConfigの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_config_key
   columns:
-  - config_key
+  - - config_key
   unique: true
   description: 設定キー検索用（一意）
 - name: idx_config_category
   columns:
-  - config_category
+  - - config_category
   unique: false
   description: 設定カテゴリ検索用
 - name: idx_config_type
   columns:
-  - config_type
+  - - config_type
   unique: false
   description: 設定タイプ検索用
 - name: idx_user_configurable
   columns:
-  - is_user_configurable
-  - is_active
+  - - is_user_configurable
+  - - is_active
   unique: false
   description: ユーザー設定可能項目検索用
 - name: idx_environment
   columns:
-  - environment
-  - is_active
+  - - environment
+  - - is_active
   unique: false
   description: 環境別設定検索用
 - name: idx_tenant_specific
   columns:
-  - tenant_specific
-  - is_active
+  - - tenant_specific
+  - - is_active
   unique: false
   description: テナント固有設定検索用
 - name: idx_sort_order
   columns:
-  - sort_order
+  - - sort_order
   unique: false
   description: 表示順序検索用
-business_constraints:
+- name: idx_mst_systemconfig_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_config_key
   type: UNIQUE
-  columns:
-  - config_key
   description: 設定キー一意制約
+  columns:
+  - - config_key
 - name: chk_config_type
   type: CHECK
-  condition: config_type IN ('STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON', 'ENCRYPTED')
   description: 設定タイプ値チェック制約
+  condition: config_type IN ('STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON', 'ENCRYPTED')
 - name: chk_config_category
   type: CHECK
-  condition: config_category IN ('SECURITY', 'SYSTEM', 'BUSINESS', 'UI', 'INTEGRATION')
   description: 設定カテゴリ値チェック制約
+  condition: config_category IN ('SECURITY', 'SYSTEM', 'BUSINESS', 'UI', 'INTEGRATION')
 - name: chk_environment
   type: CHECK
-  condition: environment IN ('DEV', 'TEST', 'PROD', 'ALL')
   description: 環境値チェック制約
+  condition: environment IN ('DEV', 'TEST', 'PROD', 'ALL')
 foreign_keys: []
 sample_data:
 - config_key: MAX_LOGIN_ATTEMPTS
@@ -337,7 +400,7 @@ notes:
 - システム専用設定は管理画面に表示しない
 - 再起動要否フラグは運用時の注意喚起に使用
 - 論理削除は is_active フラグで管理
-business_rules:
+- === 業務ルール ===
 - 設定キーは一意である必要がある
 - 暗号化設定は config_type = 'ENCRYPTED' に設定
 - システム専用設定は is_user_configurable = false に設定
@@ -345,58 +408,11 @@ business_rules:
 - 環境固有設定は適切な environment 値を設定
 - テナント固有設定は tenant_specific = true に設定
 - 設定変更時は last_modified_by と last_modified_reason を必須記録
-columns:
-- name: systemconfig_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_SystemConfigの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_systemconfig_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 設定キーは一意である必要がある
+- 暗号化設定は config_type = 'ENCRYPTED' に設定
+- システム専用設定は is_user_configurable = false に設定
+- 検証ルールは設定値の妥当性チェックに使用
+- 環境固有設定は適切な environment 値を設定
+- テナント固有設定は tenant_specific = true に設定
+- 設定変更時は last_modified_by と last_modified_reason を必須記録

@@ -10,6 +10,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 改版履歴管理機能追加、ロール階層・権限継承機能強化
+- version: 3.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_Role（ロール情報）は、システム内のロール（役割）を管理するマスタテーブルです。
 
 
@@ -35,12 +39,12 @@ overview: 'MST_Role（ロール情報）は、システム内のロール（役�
   適切なアクセス制御と権限管理を実現する重要なマスタデータです。
 
   '
-business_columns:
+columns:
 - name: role_code
   logical: ロールコード
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: ロールを一意に識別するコード（例：ROLE001）
@@ -49,7 +53,7 @@ business_columns:
   logical: ロール名
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロールの正式名称
@@ -57,7 +61,7 @@ business_columns:
   logical: ロール名略称
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロールの略称・短縮名
@@ -65,7 +69,7 @@ business_columns:
   logical: ロールカテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム）
@@ -78,7 +82,7 @@ business_columns:
   logical: ロールレベル
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロールの階層レベル（1:最上位、数値が大きいほど下位）
@@ -86,7 +90,7 @@ business_columns:
   logical: 親ロールID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 上位ロールのID（MST_Roleへの自己参照外部キー）
@@ -94,7 +98,7 @@ business_columns:
   logical: システムロールフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: システム標準ロールかどうか（削除・変更不可）
@@ -103,7 +107,7 @@ business_columns:
   logical: テナント固有フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テナント固有のロールかどうか
@@ -112,7 +116,7 @@ business_columns:
   logical: 最大ユーザー数
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: このロールに割り当て可能な最大ユーザー数
@@ -120,7 +124,7 @@ business_columns:
   logical: ロール優先度
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 複数ロール保持時の優先度（数値が小さいほど高優先）
@@ -129,7 +133,7 @@ business_columns:
   logical: 自動割り当て条件
   type: JSON
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 自動ロール割り当ての条件（JSON形式）
@@ -137,7 +141,7 @@ business_columns:
   logical: ロール状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロールの状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨）
@@ -150,7 +154,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロールの有効開始日
@@ -158,7 +162,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロールの有効終了日
@@ -166,7 +170,7 @@ business_columns:
   logical: 表示順序
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 画面表示時の順序
@@ -174,97 +178,157 @@ business_columns:
   logical: ロール説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロールの詳細説明・用途
-business_indexes:
+- name: role_id
+  logical: MST_Roleの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Roleの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_role_code
   columns:
-  - role_code
+  - - role_code
   unique: true
   description: ロールコード検索用（一意）
 - name: idx_role_category
   columns:
-  - role_category
+  - - role_category
   unique: false
   description: ロールカテゴリ別検索用
 - name: idx_role_level
   columns:
-  - role_level
+  - - role_level
   unique: false
   description: ロールレベル別検索用
 - name: idx_parent_role
   columns:
-  - parent_role_id
+  - - parent_role_id
   unique: false
   description: 親ロール別検索用
 - name: idx_system_role
   columns:
-  - is_system_role
+  - - is_system_role
   unique: false
   description: システムロール検索用
 - name: idx_tenant_specific
   columns:
-  - is_tenant_specific
+  - - is_tenant_specific
   unique: false
   description: テナント固有ロール検索用
 - name: idx_role_status
   columns:
-  - role_status
+  - - role_status
   unique: false
   description: ロール状態別検索用
 - name: idx_effective_period
   columns:
-  - effective_from
-  - effective_to
+  - - effective_from
+  - - effective_to
   unique: false
   description: 有効期間検索用
 - name: idx_sort_order
   columns:
-  - sort_order
+  - - sort_order
   unique: false
   description: 表示順序検索用
-business_constraints:
+- name: idx_mst_role_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_role_code
   type: UNIQUE
-  columns:
-  - role_code
   description: ロールコード一意制約
+  columns:
+  - - role_code
 - name: chk_role_level
   type: CHECK
-  condition: role_level > 0
   description: ロールレベル正値チェック制約
+  condition: role_level > 0
 - name: chk_role_category
   type: CHECK
-  condition: role_category IN ('SYSTEM', 'BUSINESS', 'TENANT', 'CUSTOM')
   description: ロールカテゴリ値チェック制約
+  condition: role_category IN ('SYSTEM', 'BUSINESS', 'TENANT', 'CUSTOM')
 - name: chk_role_status
   type: CHECK
-  condition: role_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED')
   description: ロール状態値チェック制約
+  condition: role_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED')
 - name: chk_max_users
   type: CHECK
-  condition: max_users IS NULL OR max_users > 0
   description: 最大ユーザー数正値チェック制約
+  condition: max_users IS NULL OR max_users > 0
 - name: chk_role_priority
   type: CHECK
-  condition: role_priority > 0
   description: ロール優先度正値チェック制約
+  condition: role_priority > 0
 - name: chk_effective_period
   type: CHECK
-  condition: effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to
   description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to
 - name: chk_sort_order
   type: CHECK
-  condition: sort_order IS NULL OR sort_order >= 0
   description: 表示順序非負値チェック制約
+  condition: sort_order IS NULL OR sort_order >= 0
 foreign_keys:
 - name: fk_role_parent
   columns:
-  - parent_role_id
+  - - parent_role_id
   references:
-    table: MST_Role
+    table:
+    - MST_Role
     columns:
     - id
   on_update: CASCADE
@@ -326,7 +390,7 @@ notes:
 - 複数ロール保持時は優先度で権限を決定
 - 自動割り当て条件はJSON形式で柔軟に設定
 - 有効期間による時限ロール設定が可能
-business_rules:
+- === 業務ルール ===
 - ロールコードは新設時に自動採番（ROLE + 3桁連番）
 - システムロールは is_system_role = true で保護
 - 親ロールが無効化される場合は子ロールも無効化
@@ -334,58 +398,11 @@ business_rules:
 - 有効期間外のロールは自動的に無効化
 - ロール削除時は関連するユーザーロール紐付けも削除
 - テナント固有ロールは該当テナント内でのみ使用可能
-columns:
-- name: role_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_Roleの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_role_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- ロールコードは新設時に自動採番（ROLE + 3桁連番）
+- システムロールは is_system_role = true で保護
+- 親ロールが無効化される場合は子ロールも無効化
+- 最大ユーザー数を超える割り当ては不可
+- 有効期間外のロールは自動的に無効化
+- ロール削除時は関連するユーザーロール紐付けも削除
+- テナント固有ロールは該当テナント内でのみ使用可能

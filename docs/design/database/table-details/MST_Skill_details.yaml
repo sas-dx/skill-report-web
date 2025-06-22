@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - MST_Skillの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'スキルマスタテーブルは、システムで管理するスキル項目の基本情報を管理するマスタテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'スキルマスタテーブルは、システムで管理するスキ
   統一されたスキル評価基準と効率的なスキル管理を実現します。
 
   '
-business_columns:
+columns:
 - name: id
   logical: スキルID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: スキルの一意識別子
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テナントID（マルチテナント対応）
@@ -46,7 +50,7 @@ business_columns:
   logical: スキル名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルの名称
@@ -54,7 +58,7 @@ business_columns:
   logical: スキル名英語
   type: VARCHAR
   length: 200
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルの英語名称
@@ -62,7 +66,7 @@ business_columns:
   logical: カテゴリID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルカテゴリのID（MST_SkillCategoryへの外部キー）
@@ -70,7 +74,7 @@ business_columns:
   logical: スキル種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルの種別（TECHNICAL:技術スキル、BUSINESS:ビジネススキル、SOFT:ソフトスキル、LANGUAGE:言語スキル）
@@ -84,7 +88,7 @@ business_columns:
   logical: 難易度レベル
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルの習得難易度（1:易、2:普通、3:難、4:非常に難、5:最高難度）
@@ -93,7 +97,7 @@ business_columns:
   logical: 説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルの詳細説明
@@ -101,7 +105,7 @@ business_columns:
   logical: 評価基準
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキル評価の基準や指標（JSON形式）
@@ -109,7 +113,7 @@ business_columns:
   logical: 必要経験月数
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキル習得に必要な経験期間（月数）
@@ -117,7 +121,7 @@ business_columns:
   logical: 関連スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連するスキルのID一覧（JSON配列形式）
@@ -125,7 +129,7 @@ business_columns:
   logical: 前提スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 習得前提となるスキルのID一覧（JSON配列形式）
@@ -133,7 +137,7 @@ business_columns:
   logical: 資格情報
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連する資格や認定情報（JSON形式）
@@ -141,7 +145,7 @@ business_columns:
   logical: 学習リソース
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 学習に役立つリソースのURL一覧（JSON配列形式）
@@ -149,7 +153,7 @@ business_columns:
   logical: 市場需要
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 市場での需要レベル（LOW:低、MEDIUM:中、HIGH:高、VERY_HIGH:非常に高）
@@ -163,7 +167,7 @@ business_columns:
   logical: 技術トレンド
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 技術トレンド（EMERGING:新興、GROWING:成長中、STABLE:安定、DECLINING:衰退）
@@ -177,7 +181,7 @@ business_columns:
   logical: コアスキルフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 組織のコアスキルかどうか
@@ -186,7 +190,7 @@ business_columns:
   logical: 表示順序
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 同一カテゴリ内での表示順序
@@ -195,7 +199,7 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルが有効かどうか
@@ -204,7 +208,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルの有効開始日
@@ -212,7 +216,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルの有効終了日
@@ -220,7 +224,7 @@ business_columns:
   logical: 作成日時
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: レコード作成日時
@@ -229,7 +233,7 @@ business_columns:
   logical: 更新日時
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: レコード更新日時
@@ -238,88 +242,103 @@ business_columns:
   logical: 削除フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 論理削除フラグ
   default: false
-business_indexes:
+- name: skill_id
+  logical: MST_Skillの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Skillの主キー
+  default: null
+indexes:
 - name: idx_MST_Skill_id
   columns:
-  - id
+  - - id
   unique: true
   description: スキルID検索用（一意）
 - name: idx_MST_Skill_skill_name
   columns:
-  - skill_name
+  - - skill_name
   unique: false
   description: スキル名検索用
 - name: idx_MST_Skill_category_id
   columns:
-  - category_id
+  - - category_id
   unique: false
   description: カテゴリID検索用
 - name: idx_MST_Skill_skill_type
   columns:
-  - skill_type
+  - - skill_type
   unique: false
   description: スキル種別検索用
 - name: idx_MST_Skill_category_order
   columns:
-  - category_id
-  - display_order
+  - - category_id
+  - - display_order
   unique: false
   description: カテゴリ別表示順序検索用
 - name: idx_MST_Skill_market_demand
   columns:
-  - market_demand
+  - - market_demand
   unique: false
   description: 市場需要検索用
 - name: idx_MST_Skill_is_active
   columns:
-  - is_active
+  - - is_active
   unique: false
   description: 有効フラグ検索用
-business_constraints:
+- name: idx_mst_skill_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_MST_Skill_id
   type: UNIQUE
-  columns:
-  - id
   description: スキルID一意制約
+  columns:
+  - - id
 - name: chk_MST_Skill_skill_type
   type: CHECK
-  condition: skill_type IN ('TECHNICAL', 'BUSINESS', 'SOFT', 'LANGUAGE')
   description: スキル種別値チェック制約
+  condition: skill_type IN ('TECHNICAL', 'BUSINESS', 'SOFT', 'LANGUAGE')
 - name: chk_MST_Skill_difficulty_level
   type: CHECK
-  condition: difficulty_level BETWEEN 1 AND 5
   description: 難易度レベル値チェック制約（1-5）
+  condition: difficulty_level BETWEEN 1 AND 5
 - name: chk_MST_Skill_required_experience
   type: CHECK
-  condition: required_experience_months IS NULL OR required_experience_months >= 0
   description: 必要経験月数非負数チェック制約
+  condition: required_experience_months IS NULL OR required_experience_months >= 0
 - name: chk_MST_Skill_market_demand
   type: CHECK
-  condition: market_demand IN ('LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH')
   description: 市場需要値チェック制約
+  condition: market_demand IN ('LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH')
 - name: chk_MST_Skill_technology_trend
   type: CHECK
-  condition: technology_trend IN ('EMERGING', 'GROWING', 'STABLE', 'DECLINING')
   description: 技術トレンド値チェック制約
+  condition: technology_trend IN ('EMERGING', 'GROWING', 'STABLE', 'DECLINING')
 - name: chk_MST_Skill_display_order
   type: CHECK
-  condition: display_order >= 0
   description: 表示順序非負数チェック制約
+  condition: display_order >= 0
 - name: chk_MST_Skill_effective_period
   type: CHECK
-  condition: effective_to IS NULL OR effective_from IS NULL OR effective_to >= effective_from
   description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from IS NULL OR effective_to >= effective_from
 foreign_keys:
 - name: fk_MST_Skill_tenant
   columns:
-  - tenant_id
+  - - tenant_id
   references:
-    table: MST_Tenant
+    table:
+    - MST_Tenant
     columns:
     - id
   on_update: CASCADE
@@ -327,9 +346,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_MST_Skill_category
   columns:
-  - category_id
+  - - category_id
   references:
-    table: MST_SkillCategory
+    table:
+    - MST_SkillCategory
     columns:
     - id
   on_update: CASCADE
@@ -404,7 +424,7 @@ notes:
 - 学習リソースはURL一覧をJSON配列で管理
 - 有効期間を設定することで、廃止予定スキルの管理が可能
 - 論理削除は is_active フラグで管理
-business_rules:
+- === 業務ルール ===
 - スキルIDは「SKILL + 連番」形式で生成する
 - 新しいスキル追加時は適切なカテゴリに分類する
 - 評価基準は5段階で定義し、各レベルの説明を含める
@@ -413,58 +433,12 @@ business_rules:
 - コアスキルは組織戦略に基づいて設定する
 - 廃止予定のスキルは有効終了日を設定し、段階的に無効化する
 - 関連スキルの設定により、スキルマップの可視化を支援する
-columns:
-- name: skill_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_Skillの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_skill_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- スキルIDは「SKILL + 連番」形式で生成する
+- 新しいスキル追加時は適切なカテゴリに分類する
+- 評価基準は5段階で定義し、各レベルの説明を含める
+- 前提スキルは循環参照しないよう注意する
+- 市場需要と技術トレンドは定期的に見直しを行う
+- コアスキルは組織戦略に基づいて設定する
+- 廃止予定のスキルは有効終了日を設定し、段階的に無効化する
+- 関連スキルの設定により、スキルマップの可視化を支援する

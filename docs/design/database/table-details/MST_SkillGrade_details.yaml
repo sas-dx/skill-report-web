@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - スキルグレードマスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_SkillGrade（スキルグレードマスタ）は、スキルの習熟度レベルを定義・管理するマスタテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'MST_SkillGrade（スキルグレードマスタ）は、スキルの�
   社員のスキル開発と適切な人材配置を効率的に行うことができます。
 
   '
-business_columns:
+columns:
 - name: grade_code
   logical: グレードコード
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: スキルグレードを一意に識別するコード（例：BEGINNER、INTERMEDIATE、ADVANCED、EXPERT）
@@ -41,7 +45,7 @@ business_columns:
   logical: グレード名
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルグレードの名称
@@ -49,7 +53,7 @@ business_columns:
   logical: グレード名（短縮）
   type: VARCHAR
   length: 10
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 表示用の短縮名称（例：初級、中級、上級、専門）
@@ -57,7 +61,7 @@ business_columns:
   logical: グレードレベル
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: グレードの数値レベル（1:初級、2:中級、3:上級、4:専門、5:エキスパート）
@@ -66,7 +70,7 @@ business_columns:
   logical: グレード説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルグレードの詳細説明・到達基準
@@ -74,7 +78,7 @@ business_columns:
   logical: 評価基準
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: グレード判定のための具体的な評価基準
@@ -82,7 +86,7 @@ business_columns:
   logical: 必要経験期間（月）
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: グレード到達に必要な経験期間の目安（月数）
@@ -90,7 +94,7 @@ business_columns:
   logical: スキル指標
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: グレード判定のためのスキル指標（JSON形式）
@@ -98,7 +102,7 @@ business_columns:
   logical: 能力要件
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: グレードに求められる能力・知識要件（JSON形式）
@@ -106,7 +110,7 @@ business_columns:
   logical: 資格要件
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: グレード認定に必要な資格（JSON形式）
@@ -114,7 +118,7 @@ business_columns:
   logical: プロジェクト複雑度
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 担当可能なプロジェクトの複雑度（SIMPLE:単純、MODERATE:中程度、COMPLEX:複雑、CRITICAL:重要）
@@ -127,7 +131,7 @@ business_columns:
   logical: 指導能力
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 他者への指導・メンタリング能力があるか
@@ -136,7 +140,7 @@ business_columns:
   logical: リーダーシップレベル
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 発揮できるリーダーシップレベル（NONE:なし、TEAM:チーム、PROJECT:プロジェクト、ORGANIZATION:組織）
@@ -149,7 +153,7 @@ business_columns:
   logical: 給与影響係数
   type: DECIMAL
   length: 3,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 給与計算への影響係数（1.0を基準とした倍率）
@@ -157,7 +161,7 @@ business_columns:
   logical: 昇進資格
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 昇進要件として考慮されるグレードか
@@ -166,7 +170,7 @@ business_columns:
   logical: 表示色コード
   type: VARCHAR
   length: 7
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: UI表示用の色コード（例：#FF0000）
@@ -175,7 +179,7 @@ business_columns:
   logical: 表示順序
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: グレード一覧での表示順序
@@ -184,75 +188,134 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: グレードが有効かどうか
   default: true
-business_indexes:
+- name: skillgrade_id
+  logical: MST_SkillGradeの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_SkillGradeの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_grade_code
   columns:
-  - grade_code
+  - - grade_code
   unique: true
   description: グレードコード検索用（一意）
 - name: idx_grade_level
   columns:
-  - grade_level
+  - - grade_level
   unique: true
   description: グレードレベル検索用（一意）
 - name: idx_grade_name
   columns:
-  - grade_name
+  - - grade_name
   unique: false
   description: グレード名検索用
 - name: idx_mentoring
   columns:
-  - mentoring_capability
-  - is_active
+  - - mentoring_capability
+  - - is_active
   unique: false
   description: 指導能力検索用
 - name: idx_promotion
   columns:
-  - promotion_eligibility
-  - is_active
+  - - promotion_eligibility
+  - - is_active
   unique: false
   description: 昇進資格検索用
 - name: idx_sort_order
   columns:
-  - sort_order
+  - - sort_order
   unique: false
   description: 表示順序検索用
-business_constraints:
+- name: idx_mst_skillgrade_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_grade_code
   type: UNIQUE
-  columns:
-  - grade_code
   description: グレードコード一意制約
+  columns:
+  - - grade_code
 - name: uk_grade_level
   type: UNIQUE
-  columns:
-  - grade_level
   description: グレードレベル一意制約
+  columns:
+  - - grade_level
 - name: chk_grade_level
   type: CHECK
-  condition: grade_level >= 1 AND grade_level <= 5
   description: グレードレベル範囲チェック制約
+  condition: grade_level >= 1 AND grade_level <= 5
 - name: chk_project_complexity
   type: CHECK
-  condition: project_complexity IN ('SIMPLE', 'MODERATE', 'COMPLEX', 'CRITICAL')
   description: プロジェクト複雑度値チェック制約
+  condition: project_complexity IN ('SIMPLE', 'MODERATE', 'COMPLEX', 'CRITICAL')
 - name: chk_leadership_level
   type: CHECK
-  condition: leadership_level IN ('NONE', 'TEAM', 'PROJECT', 'ORGANIZATION')
   description: リーダーシップレベル値チェック制約
+  condition: leadership_level IN ('NONE', 'TEAM', 'PROJECT', 'ORGANIZATION')
 - name: chk_experience_months
   type: CHECK
-  condition: required_experience_months IS NULL OR required_experience_months >= 0
   description: 必要経験期間非負数チェック制約
+  condition: required_experience_months IS NULL OR required_experience_months >= 0
 - name: chk_salary_factor
   type: CHECK
-  condition: salary_impact_factor IS NULL OR salary_impact_factor > 0
   description: 給与影響係数正数チェック制約
+  condition: salary_impact_factor IS NULL OR salary_impact_factor > 0
 foreign_keys: []
 sample_data:
 - grade_code: BEGINNER
@@ -334,7 +397,7 @@ notes:
 - 色コードはUI表示でのグレード識別に使用
 - 昇進資格フラグは人事評価との連携で使用
 - 論理削除は is_active フラグで管理
-business_rules:
+- === 業務ルール ===
 - グレードコードは英大文字・アンダースコアのみ使用可能
 - グレードレベルは昇順で連続した値を設定
 - 必要経験期間はグレードレベルに比例して設定
@@ -342,58 +405,11 @@ business_rules:
 - リーダーシップレベルはグレードレベルと整合性を保つ
 - 給与影響係数はグレードレベルに応じて段階的に設定
 - 昇進資格は中級以上で考慮対象とする
-columns:
-- name: skillgrade_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_SkillGradeの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_skillgrade_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- グレードコードは英大文字・アンダースコアのみ使用可能
+- グレードレベルは昇順で連続した値を設定
+- 必要経験期間はグレードレベルに比例して設定
+- 指導能力は中級以上で true に設定
+- リーダーシップレベルはグレードレベルと整合性を保つ
+- 給与影響係数はグレードレベルに応じて段階的に設定
+- 昇進資格は中級以上で考慮対象とする

@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 帳票テンプレートマスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_ReportTemplate（帳票テンプレート）は、システムで生成する各種帳票のテンプレート情報を管理するマスタテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'MST_ReportTemplate（帳票テンプレート）は、システムで
   このテーブルは、帳票・レポート機能において一貫性のある帳票出力を実現する重要なマスタデータです。
 
   '
-business_columns:
+columns:
 - name: id
   logical: ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: マルチテナント識別子
@@ -46,7 +50,7 @@ business_columns:
   logical: テンプレートキー
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートの識別キー（例：skill_report、goal_summary等）
@@ -54,7 +58,7 @@ business_columns:
   logical: テンプレート名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートの表示名
@@ -62,7 +66,7 @@ business_columns:
   logical: 帳票カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析）
@@ -76,7 +80,7 @@ business_columns:
   logical: 出力形式
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML）
@@ -89,7 +93,7 @@ business_columns:
   logical: 言語コード
   type: VARCHAR
   length: 10
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートの言語（ja:日本語、en:英語等）
@@ -98,7 +102,7 @@ business_columns:
   logical: テンプレート内容
   type: TEXT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票テンプレートの内容（HTML、XML等の形式）
@@ -106,7 +110,7 @@ business_columns:
   logical: スタイルシート
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票のスタイル定義（CSS等）
@@ -114,7 +118,7 @@ business_columns:
   logical: パラメータスキーマ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成に必要なパラメータの定義（JSON Schema形式）
@@ -122,7 +126,7 @@ business_columns:
   logical: データソース設定
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: データ取得に関する設定（JSON形式）
@@ -130,7 +134,7 @@ business_columns:
   logical: ページ設定
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ページサイズ・余白等の設定（JSON形式）
@@ -138,7 +142,7 @@ business_columns:
   logical: ヘッダーテンプレート
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票ヘッダー部分のテンプレート
@@ -146,7 +150,7 @@ business_columns:
   logical: フッターテンプレート
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票フッター部分のテンプレート
@@ -154,7 +158,7 @@ business_columns:
   logical: デフォルトフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 同一キー・カテゴリでのデフォルトテンプレートかどうか
@@ -163,7 +167,7 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートが有効かどうか
@@ -172,7 +176,7 @@ business_columns:
   logical: バージョン
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートのバージョン番号
@@ -181,59 +185,100 @@ business_columns:
   logical: プレビュー画像URL
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: テンプレートのプレビュー画像URL
-business_indexes:
+- name: reporttemplate_id
+  logical: MST_ReportTemplateの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_ReportTemplateの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_report_template_tenant_key
   columns:
-  - tenant_id
-  - template_key
-  - language_code
+  - - tenant_id
+  - - template_key
+  - - language_code
   unique: true
   description: テナント別テンプレートキー検索用（一意）
 - name: idx_report_template_category
   columns:
-  - report_category
+  - - report_category
   unique: false
   description: 帳票カテゴリ別検索用
 - name: idx_report_template_format
   columns:
-  - output_format
+  - - output_format
   unique: false
   description: 出力形式別検索用
 - name: idx_report_template_language
   columns:
-  - language_code
+  - - language_code
   unique: false
   description: 言語別検索用
 - name: idx_report_template_default
   columns:
-  - is_default
-  - is_active
+  - - is_default
+  - - is_active
   unique: false
   description: デフォルト・有効テンプレート検索用
-business_constraints:
+- name: idx_mst_reporttemplate_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_report_template_tenant_key_lang
   type: UNIQUE
-  columns:
-  - tenant_id
-  - template_key
-  - language_code
   description: テナント内テンプレート一意制約
+  columns:
+  - - tenant_id
+  - - template_key
+  - - language_code
 - name: chk_report_template_category
   type: CHECK
-  condition: report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS')
   description: 帳票カテゴリ値チェック制約
+  condition: report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS')
 - name: chk_report_template_format
   type: CHECK
-  condition: output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML')
   description: 出力形式値チェック制約
+  condition: output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML')
 - name: chk_report_template_language
   type: CHECK
-  condition: language_code IN ('ja', 'en')
   description: 言語コード値チェック制約
+  condition: language_code IN ('ja', 'en')
 foreign_keys: []
 sample_data:
 - id: RT001
@@ -306,7 +351,7 @@ notes:
 - 多言語対応により国際化に対応
 - 出力形式により異なるテンプレート記法に対応
 - プレビュー画像によりテンプレート選択時の視認性を向上
-business_rules:
+- === 業務ルール ===
 - 同一テナント・キー・言語の組み合わせは重複不可
 - 無効化されたテンプレートは帳票生成から除外される
 - デフォルトテンプレートは同一条件で1つのみ設定可能
@@ -315,58 +360,12 @@ business_rules:
 - 出力形式に応じたテンプレート記法を使用
 - テンプレートバージョンは変更時に更新が必要
 - プレビュー画像は管理画面での選択性向上のため推奨
-columns:
-- name: reporttemplate_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_ReportTemplateの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_reporttemplate_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 同一テナント・キー・言語の組み合わせは重複不可
+- 無効化されたテンプレートは帳票生成から除外される
+- デフォルトテンプレートは同一条件で1つのみ設定可能
+- パラメータはparameters_schemaで定義されたもののみ使用可能
+- データソース設定は実際のテーブル構造と整合性が必要
+- 出力形式に応じたテンプレート記法を使用
+- テンプレートバージョンは変更時に更新が必要
+- プレビュー画像は管理画面での選択性向上のため推奨

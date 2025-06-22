@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 職種スキル関連テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関連付けを管理するマスタテーブルです。
 
 
@@ -29,12 +33,12 @@ overview: 'MST_JobTypeSkill（職種スキル関連）は、職種と必要ス�
   人材育成や配置転換の判断基準として活用できます。
 
   '
-business_columns:
+columns:
 - name: job_type_id
   logical: 職種ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種のID（MST_JobTypeへの外部キー）
@@ -42,7 +46,7 @@ business_columns:
   logical: スキル項目ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル項目のID（MST_SkillItemへの外部キー）
@@ -50,7 +54,7 @@ business_columns:
   logical: 必要レベル
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 当該職種で必要なスキルレベル（1-5、5が最高レベル）
@@ -58,7 +62,7 @@ business_columns:
   logical: スキル優先度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル優先度（CRITICAL:必須、HIGH:重要、MEDIUM:推奨、LOW:あれば良い）
@@ -72,7 +76,7 @@ business_columns:
   logical: スキル分類
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル分類（TECHNICAL:技術、BUSINESS:業務、MANAGEMENT:管理、COMMUNICATION:コミュニケーション）
@@ -85,7 +89,7 @@ business_columns:
   logical: 必要経験年数
   type: DECIMAL
   length: 4,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該スキルの必要経験年数
@@ -93,7 +97,7 @@ business_columns:
   logical: 資格必須
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 関連資格の取得が必須かどうか
@@ -102,7 +106,7 @@ business_columns:
   logical: スキル重み
   type: DECIMAL
   length: 5,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種内でのスキル重み（%、合計100%）
@@ -110,7 +114,7 @@ business_columns:
   logical: 評価基準
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルレベルの評価基準・判定方法
@@ -118,7 +122,7 @@ business_columns:
   logical: 学習パス
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキル習得のための推奨学習パス
@@ -126,7 +130,7 @@ business_columns:
   logical: スキル状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル状況（ACTIVE:有効、DEPRECATED:非推奨、OBSOLETE:廃止）
@@ -139,7 +143,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル要件の有効開始日
@@ -147,7 +151,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキル要件の有効終了日（NULL:無期限）
@@ -155,7 +159,7 @@ business_columns:
   logical: 代替スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 代替可能なスキルのリスト（JSON形式）
@@ -163,93 +167,153 @@ business_columns:
   logical: 前提スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 前提となるスキルのリスト（JSON形式）
-business_indexes:
+- name: jobtypeskill_id
+  logical: MST_JobTypeSkillの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_JobTypeSkillの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_MST_JobTypeSkill_job_type_id
   columns:
-  - job_type_id
+  - - job_type_id
   unique: false
   description: 職種ID検索用
 - name: idx_MST_JobTypeSkill_skill_item_id
   columns:
-  - skill_item_id
+  - - skill_item_id
   unique: false
   description: スキル項目ID検索用
 - name: idx_MST_JobTypeSkill_job_skill
   columns:
-  - job_type_id
-  - skill_item_id
+  - - job_type_id
+  - - skill_item_id
   unique: true
   description: 職種・スキル複合検索用（一意）
 - name: idx_MST_JobTypeSkill_required_level
   columns:
-  - required_level
+  - - required_level
   unique: false
   description: 必要レベル別検索用
 - name: idx_MST_JobTypeSkill_priority
   columns:
-  - skill_priority
+  - - skill_priority
   unique: false
   description: 優先度別検索用
 - name: idx_MST_JobTypeSkill_category
   columns:
-  - skill_category
+  - - skill_category
   unique: false
   description: スキル分類別検索用
 - name: idx_MST_JobTypeSkill_status
   columns:
-  - skill_status
+  - - skill_status
   unique: false
   description: スキル状況別検索用
 - name: idx_MST_JobTypeSkill_effective_date
   columns:
-  - effective_date
+  - - effective_date
   unique: false
   description: 有効開始日検索用
-business_constraints:
+- name: idx_mst_jobtypeskill_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_MST_JobTypeSkill_job_skill
   type: UNIQUE
-  columns:
-  - job_type_id
-  - skill_item_id
   description: 職種・スキル項目一意制約
+  columns:
+  - - job_type_id
+  - - skill_item_id
 - name: chk_MST_JobTypeSkill_required_level
   type: CHECK
-  condition: required_level >= 1 AND required_level <= 5
   description: 必要レベル範囲チェック制約
+  condition: required_level >= 1 AND required_level <= 5
 - name: chk_MST_JobTypeSkill_priority
   type: CHECK
-  condition: skill_priority IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')
   description: スキル優先度値チェック制約
+  condition: skill_priority IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')
 - name: chk_MST_JobTypeSkill_category
   type: CHECK
-  condition: skill_category IN ('TECHNICAL', 'BUSINESS', 'MANAGEMENT', 'COMMUNICATION')
   description: スキル分類値チェック制約
+  condition: skill_category IN ('TECHNICAL', 'BUSINESS', 'MANAGEMENT', 'COMMUNICATION')
 - name: chk_MST_JobTypeSkill_status
   type: CHECK
-  condition: skill_status IN ('ACTIVE', 'DEPRECATED', 'OBSOLETE')
   description: スキル状況値チェック制約
+  condition: skill_status IN ('ACTIVE', 'DEPRECATED', 'OBSOLETE')
 - name: chk_MST_JobTypeSkill_experience_years
   type: CHECK
-  condition: experience_years IS NULL OR experience_years >= 0
   description: 必要経験年数非負値チェック制約
+  condition: experience_years IS NULL OR experience_years >= 0
 - name: chk_MST_JobTypeSkill_skill_weight
   type: CHECK
-  condition: skill_weight IS NULL OR (skill_weight >= 0 AND skill_weight <= 100)
   description: スキル重み範囲チェック制約
+  condition: skill_weight IS NULL OR (skill_weight >= 0 AND skill_weight <= 100)
 - name: chk_MST_JobTypeSkill_date_range
   type: CHECK
-  condition: expiry_date IS NULL OR effective_date <= expiry_date
   description: 日付範囲整合性チェック制約
+  condition: expiry_date IS NULL OR effective_date <= expiry_date
 foreign_keys:
 - name: fk_MST_JobTypeSkill_job_type
   columns:
-  - job_type_id
+  - - job_type_id
   references:
-    table: MST_JobType
+    table:
+    - MST_JobType
     columns:
     - id
   on_update: CASCADE
@@ -257,9 +321,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_MST_JobTypeSkill_skill_item
   columns:
-  - skill_item_id
+  - - skill_item_id
   references:
-    table: MST_SkillItem
+    table:
+    - MST_SkillItem
     columns:
     - id
   on_update: CASCADE
@@ -319,7 +384,7 @@ notes:
 - 有効期限により時期に応じたスキル要件変更に対応
 - 論理削除は is_deleted フラグで管理
 - 資格必須フラグにより採用・昇進要件を明確化
-business_rules:
+- === 業務ルール ===
 - CRITICAL優先度のスキルは必須要件
 - HIGH優先度のスキルは重要要件（推奨）
 - MEDIUM/LOW優先度のスキルは付加価値要件
@@ -330,58 +395,14 @@ business_rules:
 - 前提スキルを満たさない場合は当該スキルの習得不可
 - 代替スキルは同等の価値を持つスキルとして扱う
 - 有効期限切れのスキル要件は自動的に無効化
-columns:
-- name: jobtypeskill_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_JobTypeSkillの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_jobtypeskill_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- CRITICAL優先度のスキルは必須要件
+- HIGH優先度のスキルは重要要件（推奨）
+- MEDIUM/LOW優先度のスキルは付加価値要件
+- 必要レベル4以上は上級者レベル
+- 必要レベル3は中級者レベル
+- 必要レベル1-2は初級者レベル
+- 資格必須スキルは昇進・配置転換の条件
+- 前提スキルを満たさない場合は当該スキルの習得不可
+- 代替スキルは同等の価値を持つスキルとして扱う
+- 有効期限切れのスキル要件は自動的に無効化

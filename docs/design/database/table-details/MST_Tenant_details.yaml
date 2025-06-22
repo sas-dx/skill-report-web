@@ -1,9 +1,6 @@
 table_name: MST_Tenant
 logical_name: テナント（組織）
 category: マスタ系
-priority: 最高
-requirement_id: TNT.1-MGMT.1
-comment: マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル
 revision_history:
 - version: 1.0.0
   date: '2025-06-01'
@@ -13,6 +10,10 @@ revision_history:
   date: '2025-06-12'
   author: 開発チーム
   changes: 必須セクション追加 - revision_history, overview, notes, business_rules
+- version: 3.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル。
 
 
@@ -40,263 +41,334 @@ overview: 'マルチテナント対応システムにおける組織・会社情
   '
 columns:
 - name: tenant_id
+  logical: テナントを一意に識別するID
   type: VARCHAR(50)
-  nullable: false
-  primary_key: true
+  length: null
+  'null': false
   unique: true
-  comment: テナントを一意に識別するID
-  requirement_id: TNT.1-MGMT.1
+  encrypted: false
+  description: テナントを一意に識別するID
 - name: tenant_code
+  logical: テナントの識別コード（URL等で使用）
   type: VARCHAR(20)
-  nullable: false
+  length: null
+  'null': false
   unique: true
-  comment: テナントの識別コード（URL等で使用）
-  requirement_id: TNT.1-MGMT.1
+  encrypted: false
+  description: テナントの識別コード（URL等で使用）
 - name: tenant_name
+  logical: テナント（組織・会社）の正式名称
   type: VARCHAR(200)
-  nullable: false
-  comment: テナント（組織・会社）の正式名称
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント（組織・会社）の正式名称
 - name: tenant_name_en
+  logical: テナントの英語名称
   type: VARCHAR(200)
-  nullable: true
-  comment: テナントの英語名称
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの英語名称
 - name: tenant_short_name
+  logical: テナントの略称・短縮名
   type: VARCHAR(50)
-  nullable: true
-  comment: テナントの略称・短縮名
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの略称・短縮名
 - name: tenant_type
+  logical: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
   type: VARCHAR(20)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
   default: ENTERPRISE
-  comment: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
-  requirement_id: TNT.1-MGMT.1
 - name: parent_tenant_id
+  logical: 親テナントのID（階層構造の場合）
   type: VARCHAR(50)
-  nullable: true
-  comment: 親テナントのID（階層構造の場合）
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 親テナントのID（階層構造の場合）
 - name: tenant_level
+  logical: テナント階層のレベル（1が最上位）
   type: INTEGER
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント階層のレベル（1が最上位）
   default: 1
-  comment: テナント階層のレベル（1が最上位）
-  requirement_id: TNT.1-MGMT.1
 - name: domain_name
+  logical: テナント専用ドメイン名
   type: VARCHAR(100)
-  nullable: true
+  length: null
+  'null': true
   unique: true
-  comment: テナント専用ドメイン名
-  requirement_id: TNT.1-MGMT.1
+  encrypted: false
+  description: テナント専用ドメイン名
 - name: subdomain
+  logical: サブドメイン名（xxx.system.com）
   type: VARCHAR(50)
-  nullable: true
+  length: null
+  'null': true
   unique: true
-  comment: サブドメイン名（xxx.system.com）
-  requirement_id: TNT.1-MGMT.1
+  encrypted: false
+  description: サブドメイン名（xxx.system.com）
 - name: logo_url
+  logical: テナントロゴ画像のURL
   type: VARCHAR(500)
-  nullable: true
-  comment: テナントロゴ画像のURL
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントロゴ画像のURL
 - name: primary_color
+  logical: テナントのプライマリカラー（#RRGGBB）
   type: VARCHAR(7)
-  nullable: true
-  comment: テナントのプライマリカラー（#RRGGBB）
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントのプライマリカラー（#RRGGBB）
 - name: secondary_color
+  logical: テナントのセカンダリカラー（#RRGGBB）
   type: VARCHAR(7)
-  nullable: true
-  comment: テナントのセカンダリカラー（#RRGGBB）
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントのセカンダリカラー（#RRGGBB）
 - name: timezone
+  logical: テナントのデフォルトタイムゾーン
   type: VARCHAR(50)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントのデフォルトタイムゾーン
   default: Asia/Tokyo
-  comment: テナントのデフォルトタイムゾーン
-  requirement_id: TNT.1-MGMT.1
 - name: locale
+  logical: テナントのデフォルトロケール
   type: VARCHAR(10)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントのデフォルトロケール
   default: ja_JP
-  comment: テナントのデフォルトロケール
-  requirement_id: TNT.1-MGMT.1
 - name: currency_code
+  logical: テナントで使用する通貨コード（ISO 4217）
   type: VARCHAR(3)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントで使用する通貨コード（ISO 4217）
   default: JPY
-  comment: テナントで使用する通貨コード（ISO 4217）
-  requirement_id: TNT.1-MGMT.1
 - name: admin_email
+  logical: テナント管理者のメールアドレス
   type: VARCHAR(255)
-  nullable: false
-  comment: テナント管理者のメールアドレス
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント管理者のメールアドレス
 - name: contact_email
+  logical: テナントの一般連絡先メールアドレス
   type: VARCHAR(255)
-  nullable: true
-  comment: テナントの一般連絡先メールアドレス
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの一般連絡先メールアドレス
 - name: phone_number
+  logical: テナントの電話番号
   type: VARCHAR(20)
-  nullable: true
-  comment: テナントの電話番号
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの電話番号
 - name: address
+  logical: テナントの住所
   type: TEXT
-  nullable: true
-  comment: テナントの住所
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの住所
 - name: postal_code
+  logical: 郵便番号
   type: VARCHAR(10)
-  nullable: true
-  comment: 郵便番号
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 郵便番号
 - name: country_code
+  logical: 国コード（ISO 3166-1 alpha-2）
   type: VARCHAR(2)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 国コード（ISO 3166-1 alpha-2）
   default: JP
-  comment: 国コード（ISO 3166-1 alpha-2）
-  requirement_id: TNT.1-MGMT.1
 - name: subscription_plan
+  logical: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
   type: VARCHAR(20)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
   default: BASIC
-  comment: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
-  requirement_id: TNT.1-MGMT.1
 - name: max_users
+  logical: 契約上の最大ユーザー数
   type: INTEGER
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 契約上の最大ユーザー数
   default: 100
-  comment: 契約上の最大ユーザー数
-  requirement_id: TNT.1-MGMT.1
 - name: max_storage_gb
+  logical: 契約上の最大ストレージ容量（GB）
   type: INTEGER
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 契約上の最大ストレージ容量（GB）
   default: 10
-  comment: 契約上の最大ストレージ容量（GB）
-  requirement_id: TNT.1-MGMT.1
 - name: status
+  logical: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
   type: VARCHAR(20)
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
   default: TRIAL
-  comment: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
-  requirement_id: TNT.1-MGMT.1
 - name: contract_start_date
+  logical: テナント契約の開始日
   type: DATE
-  nullable: false
-  comment: テナント契約の開始日
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント契約の開始日
 - name: contract_end_date
+  logical: テナント契約の終了日
   type: DATE
-  nullable: true
-  comment: テナント契約の終了日
-  requirement_id: TNT.1-MGMT.1
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナント契約の終了日
 - name: id
+  logical: プライマリキー（UUID）
   type: VARCHAR(50)
-  nullable: false
-  primary_key: false
+  length: null
+  'null': false
   unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
   default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
 - name: created_at
+  logical: 作成日時
   type: TIMESTAMP
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
   default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
 - name: updated_at
+  logical: 更新日時
   type: TIMESTAMP
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
   default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
 - name: is_deleted
+  logical: 論理削除フラグ
   type: BOOLEAN
-  nullable: false
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
   default: false
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
 indexes:
 - name: idx_tenant_id
   columns:
-  - tenant_id
+  - - tenant_id
   unique: true
-  comment: テナントID検索用（一意）
+  description: テナントID検索用（一意）
 - name: idx_tenant_code
   columns:
-  - tenant_code
+  - - tenant_code
   unique: true
-  comment: テナントコード検索用（一意）
+  description: テナントコード検索用（一意）
 - name: idx_domain_name
   columns:
-  - domain_name
+  - - domain_name
   unique: true
-  comment: ドメイン名検索用（一意）
+  description: ドメイン名検索用（一意）
 - name: idx_subdomain
   columns:
-  - subdomain
+  - - subdomain
   unique: true
-  comment: サブドメイン検索用（一意）
+  description: サブドメイン検索用（一意）
 - name: idx_tenant_type
   columns:
-  - tenant_type
+  - - tenant_type
   unique: false
-  comment: テナント種別検索用
+  description: テナント種別検索用
 - name: idx_parent_tenant_id
   columns:
-  - parent_tenant_id
+  - - parent_tenant_id
   unique: false
-  comment: 親テナント検索用
+  description: 親テナント検索用
 - name: idx_subscription_plan
   columns:
-  - subscription_plan
+  - - subscription_plan
   unique: false
-  comment: サブスクリプションプラン検索用
+  description: サブスクリプションプラン検索用
 - name: idx_status
   columns:
-  - status
+  - - status
   unique: false
-  comment: ステータス検索用
+  description: ステータス検索用
 - name: idx_admin_email
   columns:
-  - admin_email
+  - - admin_email
   unique: false
-  comment: 管理者メール検索用
+  description: 管理者メール検索用
+constraints: []
 foreign_keys:
 - name: fk_tenant_parent
   columns:
-  - parent_tenant_id
+  - - parent_tenant_id
   references:
-    table: MST_Tenant
+    table:
+    - MST_Tenant
     columns:
     - tenant_id
   on_update: CASCADE
   on_delete: SET NULL
   comment: 外部キー制約
-notes:
-- 現在はシングルテナント実装のため、1レコードのみ存在
-- 将来のマルチテナント化に備えた完全な設計を実装
-- parent_tenant_idによる自己参照で組織階層を表現
-- domain_name、subdomainは一意制約でテナント分離を保証
-- カラーコードは#RRGGBB形式で統一（UI表示用）
-- 契約情報（プラン、制限値）は課金システムとの連携を想定
-- 論理削除は is_deleted フラグで管理
-- タイムゾーン・ロケール設定でグローバル対応
-business_rules:
-- テナントID（tenant_id）は一意で変更不可
-- テナントコード（tenant_code）はURL等で使用するため英数字のみ
-- ドメイン名・サブドメインは重複不可（テナント分離保証）
-- 親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能
-- 契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL
-- 最大ユーザー数・ストレージ容量は契約プランに応じて設定
-- ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可
-- 管理者メール（admin_email）は必須、システム通知の送信先
-- 論理削除時は関連する全データも論理削除対象
-- 階層レベル（tenant_level）は親子関係の整合性を保証
 sample_data:
 - tenant_id: tenant_001
   tenant_code: main-corp
@@ -356,3 +428,34 @@ sample_data:
   contract_start_date: '2025-04-01'
   contract_end_date: null
   is_deleted: false
+notes:
+- 現在はシングルテナント実装のため、1レコードのみ存在
+- 将来のマルチテナント化に備えた完全な設計を実装
+- parent_tenant_idによる自己参照で組織階層を表現
+- domain_name、subdomainは一意制約でテナント分離を保証
+- カラーコードは#RRGGBB形式で統一（UI表示用）
+- 契約情報（プラン、制限値）は課金システムとの連携を想定
+- 論理削除は is_deleted フラグで管理
+- タイムゾーン・ロケール設定でグローバル対応
+- === 業務ルール ===
+- テナントID（tenant_id）は一意で変更不可
+- テナントコード（tenant_code）はURL等で使用するため英数字のみ
+- ドメイン名・サブドメインは重複不可（テナント分離保証）
+- 親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能
+- 契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL
+- 最大ユーザー数・ストレージ容量は契約プランに応じて設定
+- ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可
+- 管理者メール（admin_email）は必須、システム通知の送信先
+- 論理削除時は関連する全データも論理削除対象
+- 階層レベル（tenant_level）は親子関係の整合性を保証
+rules:
+- テナントID（tenant_id）は一意で変更不可
+- テナントコード（tenant_code）はURL等で使用するため英数字のみ
+- ドメイン名・サブドメインは重複不可（テナント分離保証）
+- 親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能
+- 契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL
+- 最大ユーザー数・ストレージ容量は契約プランに応じて設定
+- ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可
+- 管理者メール（admin_email）は必須、システム通知の送信先
+- 論理削除時は関連する全データも論理削除対象
+- 階層レベル（tenant_level）は親子関係の整合性を保証

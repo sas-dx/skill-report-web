@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 権限マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_Permission（権限情報）は、システム内の権限（許可）を管理するマスタテーブルです。
 
 
@@ -31,12 +35,12 @@ overview: 'MST_Permission（権限情報）は、システム内の権限（許�
   適切なアクセス制御を実現する重要なマスタデータです。
 
   '
-business_columns:
+columns:
 - name: permission_code
   logical: 権限コード
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 権限を一意に識別するコード（例：PERM_USER_READ）
@@ -45,7 +49,7 @@ business_columns:
   logical: 権限名
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限の正式名称
@@ -53,7 +57,7 @@ business_columns:
   logical: 権限名略称
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 権限の略称・短縮名
@@ -61,7 +65,7 @@ business_columns:
   logical: 権限カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限のカテゴリ（SYSTEM:システム、SCREEN:画面、API:API、DATA:データ、FUNCTION:機能）
@@ -75,7 +79,7 @@ business_columns:
   logical: リソース種別
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限対象のリソース種別（USER、SKILL、REPORT等）
@@ -83,7 +87,7 @@ business_columns:
   logical: アクション種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 許可するアクション（CREATE:作成、READ:参照、UPDATE:更新、DELETE:削除、EXECUTE:実行）
@@ -97,7 +101,7 @@ business_columns:
   logical: スコープレベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限のスコープ（GLOBAL:全体、TENANT:テナント、DEPARTMENT:部署、SELF:自分のみ）
@@ -110,7 +114,7 @@ business_columns:
   logical: 親権限ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 上位権限のID（MST_Permissionへの自己参照外部キー）
@@ -118,7 +122,7 @@ business_columns:
   logical: システム権限フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: システム標準権限かどうか（削除・変更不可）
@@ -127,7 +131,7 @@ business_columns:
   logical: 条件要求フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限行使に条件が必要かどうか
@@ -136,7 +140,7 @@ business_columns:
   logical: 条件式
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 権限行使の条件式（SQL WHERE句形式等）
@@ -144,7 +148,7 @@ business_columns:
   logical: リスクレベル
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限のリスクレベル（1:低、2:中、3:高、4:最高）
@@ -153,7 +157,7 @@ business_columns:
   logical: 承認要求フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限行使に承認が必要かどうか
@@ -162,7 +166,7 @@ business_columns:
   logical: 監査要求フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限行使時の監査ログ記録が必要かどうか
@@ -171,7 +175,7 @@ business_columns:
   logical: 権限状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 権限の状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨）
@@ -184,7 +188,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 権限の有効開始日
@@ -192,7 +196,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 権限の有効終了日
@@ -200,7 +204,7 @@ business_columns:
   logical: 表示順序
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 画面表示時の順序
@@ -208,98 +212,158 @@ business_columns:
   logical: 権限説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 権限の詳細説明・用途
-business_indexes:
+- name: permission_id
+  logical: MST_Permissionの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Permissionの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_permission_code
   columns:
-  - permission_code
+  - - permission_code
   unique: true
   description: 権限コード検索用（一意）
 - name: idx_permission_category
   columns:
-  - permission_category
+  - - permission_category
   unique: false
   description: 権限カテゴリ別検索用
 - name: idx_resource_action
   columns:
-  - resource_type
-  - action_type
+  - - resource_type
+  - - action_type
   unique: false
   description: リソース・アクション別検索用
 - name: idx_scope_level
   columns:
-  - scope_level
+  - - scope_level
   unique: false
   description: スコープレベル別検索用
 - name: idx_parent_permission
   columns:
-  - parent_permission_id
+  - - parent_permission_id
   unique: false
   description: 親権限別検索用
 - name: idx_system_permission
   columns:
-  - is_system_permission
+  - - is_system_permission
   unique: false
   description: システム権限検索用
 - name: idx_risk_level
   columns:
-  - risk_level
+  - - risk_level
   unique: false
   description: リスクレベル別検索用
 - name: idx_permission_status
   columns:
-  - permission_status
+  - - permission_status
   unique: false
   description: 権限状態別検索用
 - name: idx_effective_period
   columns:
-  - effective_from
-  - effective_to
+  - - effective_from
+  - - effective_to
   unique: false
   description: 有効期間検索用
-business_constraints:
+- name: idx_mst_permission_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_permission_code
   type: UNIQUE
-  columns:
-  - permission_code
   description: 権限コード一意制約
+  columns:
+  - - permission_code
 - name: chk_permission_category
   type: CHECK
-  condition: permission_category IN ('SYSTEM', 'SCREEN', 'API', 'DATA', 'FUNCTION')
   description: 権限カテゴリ値チェック制約
+  condition: permission_category IN ('SYSTEM', 'SCREEN', 'API', 'DATA', 'FUNCTION')
 - name: chk_action_type
   type: CHECK
-  condition: action_type IN ('CREATE', 'READ', 'UPDATE', 'DELETE', 'EXECUTE')
   description: アクション種別値チェック制約
+  condition: action_type IN ('CREATE', 'READ', 'UPDATE', 'DELETE', 'EXECUTE')
 - name: chk_scope_level
   type: CHECK
-  condition: scope_level IN ('GLOBAL', 'TENANT', 'DEPARTMENT', 'SELF')
   description: スコープレベル値チェック制約
+  condition: scope_level IN ('GLOBAL', 'TENANT', 'DEPARTMENT', 'SELF')
 - name: chk_permission_status
   type: CHECK
-  condition: permission_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED')
   description: 権限状態値チェック制約
+  condition: permission_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED')
 - name: chk_risk_level
   type: CHECK
-  condition: risk_level BETWEEN 1 AND 4
   description: リスクレベル範囲チェック制約
+  condition: risk_level BETWEEN 1 AND 4
 - name: chk_effective_period
   type: CHECK
-  condition: effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to
   description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to
 - name: chk_sort_order
   type: CHECK
-  condition: sort_order IS NULL OR sort_order >= 0
   description: 表示順序非負値チェック制約
+  condition: sort_order IS NULL OR sort_order >= 0
 foreign_keys:
 - name: fk_permission_parent
   columns:
-  - parent_permission_id
+  - - parent_permission_id
   references:
-    table: MST_Permission
+    table:
+    - MST_Permission
     columns:
     - id
   on_update: CASCADE
@@ -370,7 +434,7 @@ notes:
 - リスクレベルに応じた承認・監査要件
 - スコープレベルによる権限範囲制限
 - 有効期間による時限権限設定が可能
-business_rules:
+- === 業務ルール ===
 - 権限コードは PERM_ + リソース + アクション 形式
 - システム権限は is_system_permission = true で保護
 - リスクレベル3以上は承認要求を推奨
@@ -378,58 +442,11 @@ business_rules:
 - 条件付き権限は condition_expression で制御
 - 親権限が無効化される場合は子権限も無効化
 - 有効期間外の権限は自動的に無効化
-columns:
-- name: permission_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_Permissionの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_permission_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 権限コードは PERM_ + リソース + アクション 形式
+- システム権限は is_system_permission = true で保護
+- リスクレベル3以上は承認要求を推奨
+- 全ての権限行使は監査ログに記録
+- 条件付き権限は condition_expression で制御
+- 親権限が無効化される場合は子権限も無効化
+- 有効期間外の権限は自動的に無効化

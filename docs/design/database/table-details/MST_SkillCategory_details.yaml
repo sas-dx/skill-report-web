@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - スキルカテゴリマスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_SkillCategory（スキルカテゴリマスタ）は、スキルの分類・カテゴリを管理するマスタテーブルです。
 
 
@@ -31,12 +35,12 @@ overview: 'MST_SkillCategory（スキルカテゴリマスタ）は、スキル�
   効率的なスキル管理と戦略的人材育成を支援します。
 
   '
-business_columns:
+columns:
 - name: category_code
   logical: カテゴリコード
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: スキルカテゴリを一意に識別するコード（例：CAT001）
@@ -45,7 +49,7 @@ business_columns:
   logical: カテゴリ名
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルカテゴリの正式名称
@@ -53,7 +57,7 @@ business_columns:
   logical: カテゴリ名略称
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルカテゴリの略称・短縮名
@@ -61,7 +65,7 @@ business_columns:
   logical: カテゴリ名英語
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: スキルカテゴリの英語名称
@@ -69,7 +73,7 @@ business_columns:
   logical: カテゴリ種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリの種別（TECHNICAL:技術、BUSINESS:ビジネス、SOFT:ソフト、CERTIFICATION:資格、LANGUAGE:言語）
@@ -83,7 +87,7 @@ business_columns:
   logical: 親カテゴリID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 上位カテゴリのID（MST_SkillCategoryへの自己参照外部キー）
@@ -91,7 +95,7 @@ business_columns:
   logical: カテゴリレベル
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリの階層レベル（1:最上位、数値が大きいほど下位）
@@ -100,7 +104,7 @@ business_columns:
   logical: カテゴリパス
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ルートからのカテゴリパス（例：/技術/プログラミング/Java）
@@ -108,7 +112,7 @@ business_columns:
   logical: システムカテゴリフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: システム標準カテゴリかどうか（削除・変更不可）
@@ -117,7 +121,7 @@ business_columns:
   logical: 末端カテゴリフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 末端カテゴリ（子カテゴリを持たない）かどうか
@@ -126,7 +130,7 @@ business_columns:
   logical: スキル数
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: このカテゴリに属するスキル数
@@ -135,7 +139,7 @@ business_columns:
   logical: 評価方法
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: このカテゴリのスキル評価方法（LEVEL:レベル、SCORE:スコア、BINARY:有無、CERTIFICATION:資格）
@@ -148,7 +152,7 @@ business_columns:
   logical: 最大レベル
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: レベル評価時の最大レベル数
@@ -156,7 +160,7 @@ business_columns:
   logical: アイコンURL
   type: VARCHAR
   length: 255
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリ表示用アイコンのURL
@@ -164,7 +168,7 @@ business_columns:
   logical: カラーコード
   type: VARCHAR
   length: 7
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリ表示用カラーコード（#RRGGBB形式）
@@ -173,7 +177,7 @@ business_columns:
   logical: 表示順序
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 同階層内での表示順序
@@ -182,7 +186,7 @@ business_columns:
   logical: 人気カテゴリフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 人気・注目カテゴリかどうか
@@ -191,7 +195,7 @@ business_columns:
   logical: カテゴリ状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリの状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨）
@@ -204,7 +208,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリの有効開始日
@@ -212,7 +216,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリの有効終了日
@@ -220,107 +224,167 @@ business_columns:
   logical: カテゴリ説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: カテゴリの詳細説明・用途
-business_indexes:
+- name: skillcategory_id
+  logical: MST_SkillCategoryの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_SkillCategoryの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_category_code
   columns:
-  - category_code
+  - - category_code
   unique: true
   description: カテゴリコード検索用（一意）
 - name: idx_category_type
   columns:
-  - category_type
+  - - category_type
   unique: false
   description: カテゴリ種別検索用
 - name: idx_parent_category
   columns:
-  - parent_category_id
+  - - parent_category_id
   unique: false
   description: 親カテゴリ別検索用
 - name: idx_category_level
   columns:
-  - category_level
+  - - category_level
   unique: false
   description: カテゴリレベル別検索用
 - name: idx_category_path
   columns:
-  - category_path
+  - - category_path
   unique: false
   description: カテゴリパス検索用
 - name: idx_system_category
   columns:
-  - is_system_category
+  - - is_system_category
   unique: false
   description: システムカテゴリ検索用
 - name: idx_leaf_category
   columns:
-  - is_leaf_category
+  - - is_leaf_category
   unique: false
   description: 末端カテゴリ検索用
 - name: idx_category_status
   columns:
-  - category_status
+  - - category_status
   unique: false
   description: カテゴリ状態別検索用
 - name: idx_display_order
   columns:
-  - parent_category_id
-  - display_order
+  - - parent_category_id
+  - - display_order
   unique: false
   description: 表示順序検索用
 - name: idx_popular_category
   columns:
-  - is_popular
+  - - is_popular
   unique: false
   description: 人気カテゴリ検索用
-business_constraints:
+- name: idx_mst_skillcategory_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_category_code
   type: UNIQUE
-  columns:
-  - category_code
   description: カテゴリコード一意制約
+  columns:
+  - - category_code
 - name: chk_category_type
   type: CHECK
-  condition: category_type IN ('TECHNICAL', 'BUSINESS', 'SOFT', 'CERTIFICATION', 'LANGUAGE')
   description: カテゴリ種別値チェック制約
+  condition: category_type IN ('TECHNICAL', 'BUSINESS', 'SOFT', 'CERTIFICATION', 'LANGUAGE')
 - name: chk_category_status
   type: CHECK
-  condition: category_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED')
   description: カテゴリ状態値チェック制約
+  condition: category_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED')
 - name: chk_evaluation_method
   type: CHECK
+  description: 評価方法値チェック制約
   condition: evaluation_method IS NULL OR evaluation_method IN ('LEVEL', 'SCORE',
     'BINARY', 'CERTIFICATION')
-  description: 評価方法値チェック制約
 - name: chk_category_level
   type: CHECK
-  condition: category_level > 0
   description: カテゴリレベル正値チェック制約
+  condition: category_level > 0
 - name: chk_max_level
   type: CHECK
-  condition: max_level IS NULL OR max_level > 0
   description: 最大レベル正値チェック制約
+  condition: max_level IS NULL OR max_level > 0
 - name: chk_skill_count
   type: CHECK
-  condition: skill_count >= 0
   description: スキル数非負値チェック制約
+  condition: skill_count >= 0
 - name: chk_display_order
   type: CHECK
-  condition: display_order >= 0
   description: 表示順序非負値チェック制約
+  condition: display_order >= 0
 - name: chk_effective_period
   type: CHECK
-  condition: effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to
   description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from IS NULL OR effective_from <= effective_to
 foreign_keys:
 - name: fk_skillcategory_parent
   columns:
-  - parent_category_id
+  - - parent_category_id
   references:
-    table: MST_SkillCategory
+    table:
+    - MST_SkillCategory
     columns:
     - id
   on_update: CASCADE
@@ -397,7 +461,7 @@ notes:
 - 評価方法はカテゴリ単位で設定可能
 - アイコン・カラーコードで視覚的識別
 - 人気カテゴリフラグで注目度管理
-business_rules:
+- === 業務ルール ===
 - カテゴリコードは新設時に自動採番（CAT + 3桁連番）
 - システムカテゴリは is_system_category = true で保護
 - 親カテゴリが無効化される場合は子カテゴリも無効化
@@ -405,58 +469,11 @@ business_rules:
 - カテゴリパスは親カテゴリ変更時に自動更新
 - スキル数は関連スキルの増減時に自動更新
 - 有効期間外のカテゴリは自動的に無効化
-columns:
-- name: skillcategory_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_SkillCategoryの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_skillcategory_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- カテゴリコードは新設時に自動採番（CAT + 3桁連番）
+- システムカテゴリは is_system_category = true で保護
+- 親カテゴリが無効化される場合は子カテゴリも無効化
+- 末端カテゴリのみにスキルを直接紐付け可能
+- カテゴリパスは親カテゴリ変更時に自動更新
+- スキル数は関連スキルの増減時に自動更新
+- 有効期間外のカテゴリは自動的に無効化

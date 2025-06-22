@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 目標・キャリアプランマスタの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_CareerPlan（目標・キャリアプラン）は、社員の中長期的なキャリア目標と成長計画を管理するマスタテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'MST_CareerPlan（目標・キャリアプラン）は、社員の中�
   効果的なキャリア開発と人材育成を実現できます。
 
   '
-business_columns:
+columns:
 - name: career_plan_id
   logical: キャリアプランID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: キャリアプランを一意に識別するID
@@ -40,7 +44,7 @@ business_columns:
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 対象社員のID（MST_Employeeへの外部キー）
@@ -48,7 +52,7 @@ business_columns:
   logical: プラン名
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: キャリアプランの名称
@@ -56,7 +60,7 @@ business_columns:
   logical: プラン説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: キャリアプランの詳細説明
@@ -64,7 +68,7 @@ business_columns:
   logical: プラン種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プランの種別（SHORT_TERM:短期、MEDIUM_TERM:中期、LONG_TERM:長期、SPECIALIZED:専門特化、MANAGEMENT:管理職、TECHNICAL:技術職）
@@ -79,7 +83,7 @@ business_columns:
   logical: 目標役職ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標とする役職のID（MST_Positionへの外部キー）
@@ -87,7 +91,7 @@ business_columns:
   logical: 目標職種ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標とする職種のID（MST_JobTypeへの外部キー）
@@ -95,7 +99,7 @@ business_columns:
   logical: 目標部署ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標とする部署のID（MST_Departmentへの外部キー）
@@ -103,7 +107,7 @@ business_columns:
   logical: 現在レベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 現在のキャリアレベル（ENTRY:新人、JUNIOR:初級、INTERMEDIATE:中級、SENIOR:上級、EXPERT:エキスパート、MANAGER:管理職、EXECUTIVE:役員）
@@ -119,7 +123,7 @@ business_columns:
   logical: 目標レベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 目標とするキャリアレベル（ENTRY:新人、JUNIOR:初級、INTERMEDIATE:中級、SENIOR:上級、EXPERT:エキスパート、MANAGER:管理職、EXECUTIVE:役員）
@@ -135,7 +139,7 @@ business_columns:
   logical: プラン開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: キャリアプランの開始日
@@ -143,7 +147,7 @@ business_columns:
   logical: プラン終了日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: キャリアプランの目標達成予定日
@@ -151,7 +155,7 @@ business_columns:
   logical: マイルストーン1日付
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 第1マイルストーンの目標日
@@ -159,7 +163,7 @@ business_columns:
   logical: マイルストーン1説明
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 第1マイルストーンの内容説明
@@ -167,7 +171,7 @@ business_columns:
   logical: マイルストーン2日付
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 第2マイルストーンの目標日
@@ -175,7 +179,7 @@ business_columns:
   logical: マイルストーン2説明
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 第2マイルストーンの内容説明
@@ -183,7 +187,7 @@ business_columns:
   logical: マイルストーン3日付
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 第3マイルストーンの目標日
@@ -191,7 +195,7 @@ business_columns:
   logical: マイルストーン3説明
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 第3マイルストーンの内容説明
@@ -199,7 +203,7 @@ business_columns:
   logical: 必要スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標達成に必要なスキル一覧（JSON形式）
@@ -207,7 +211,7 @@ business_columns:
   logical: 必要資格
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標達成に必要な資格一覧（JSON形式）
@@ -215,7 +219,7 @@ business_columns:
   logical: 必要経験
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標達成に必要な経験・実績（JSON形式）
@@ -223,7 +227,7 @@ business_columns:
   logical: 育成アクション
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 具体的な育成・開発アクション（JSON形式）
@@ -231,7 +235,7 @@ business_columns:
   logical: 研修計画
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 推奨研修・教育プログラム（JSON形式）
@@ -239,7 +243,7 @@ business_columns:
   logical: メンターID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 指導担当者のID（MST_Employeeへの外部キー）
@@ -247,7 +251,7 @@ business_columns:
   logical: 上司ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 直属上司のID（MST_Employeeへの外部キー）
@@ -255,7 +259,7 @@ business_columns:
   logical: プラン状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プランの進捗状況（DRAFT:下書き、ACTIVE:実行中、ON_HOLD:保留、COMPLETED:完了、CANCELLED:中止、REVISED:改訂）
@@ -271,7 +275,7 @@ business_columns:
   logical: 進捗率
   type: DECIMAL
   length: 5,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プランの進捗率（0.00-100.00）
@@ -280,7 +284,7 @@ business_columns:
   logical: 最終レビュー日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最後にレビューを実施した日付
@@ -288,7 +292,7 @@ business_columns:
   logical: 次回レビュー日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 次回レビュー予定日
@@ -296,7 +300,7 @@ business_columns:
   logical: レビュー頻度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: レビューの実施頻度（MONTHLY:月次、QUARTERLY:四半期、SEMI_ANNUAL:半年、ANNUAL:年次）
@@ -310,7 +314,7 @@ business_columns:
   logical: 成功基準
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プラン成功の判定基準
@@ -318,7 +322,7 @@ business_columns:
   logical: リスク要因
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標達成のリスク要因・課題
@@ -326,7 +330,7 @@ business_columns:
   logical: 支援リソース
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 利用可能な支援・リソース情報
@@ -334,7 +338,7 @@ business_columns:
   logical: 割当予算
   type: DECIMAL
   length: 10,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: プラン実行のための割当予算
@@ -342,7 +346,7 @@ business_columns:
   logical: 使用予算
   type: DECIMAL
   length: 10,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 実際に使用した予算
@@ -351,7 +355,7 @@ business_columns:
   logical: 優先度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プランの優先度（LOW:低、NORMAL:通常、HIGH:高、CRITICAL:最重要）
@@ -365,7 +369,7 @@ business_columns:
   logical: 公開レベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: プランの公開範囲（PRIVATE:本人のみ、MANAGER:上司まで、DEPARTMENT:部署内、COMPANY:全社）
@@ -379,7 +383,7 @@ business_columns:
   logical: テンプレートID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 使用したプランテンプレートのID
@@ -387,7 +391,7 @@ business_columns:
   logical: カスタムフィールド
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 組織固有の追加項目（JSON形式）
@@ -395,127 +399,187 @@ business_columns:
   logical: 備考
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: その他の備考・メモ
-business_indexes:
+- name: careerplan_id
+  logical: MST_CareerPlanの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_CareerPlanの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_career_plan_id
   columns:
-  - career_plan_id
+  - - career_plan_id
   unique: true
   description: キャリアプランID検索用（一意）
 - name: idx_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_plan_type
   columns:
-  - plan_type
+  - - plan_type
   unique: false
   description: プラン種別検索用
 - name: idx_target_position
   columns:
-  - target_position_id
+  - - target_position_id
   unique: false
   description: 目標役職検索用
 - name: idx_target_job_type
   columns:
-  - target_job_type_id
+  - - target_job_type_id
   unique: false
   description: 目標職種検索用
 - name: idx_plan_status
   columns:
-  - plan_status
+  - - plan_status
   unique: false
   description: プラン状況検索用
 - name: idx_plan_period
   columns:
-  - plan_start_date
-  - plan_end_date
+  - - plan_start_date
+  - - plan_end_date
   unique: false
   description: プラン期間検索用
 - name: idx_review_date
   columns:
-  - next_review_date
+  - - next_review_date
   unique: false
   description: レビュー日検索用
 - name: idx_mentor_id
   columns:
-  - mentor_id
+  - - mentor_id
   unique: false
   description: メンター検索用
 - name: idx_supervisor_id
   columns:
-  - supervisor_id
+  - - supervisor_id
   unique: false
   description: 上司検索用
 - name: idx_priority_level
   columns:
-  - priority_level
+  - - priority_level
   unique: false
   description: 優先度検索用
-business_constraints:
+- name: idx_mst_careerplan_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_career_plan_id
   type: UNIQUE
-  columns:
-  - career_plan_id
   description: キャリアプランID一意制約
+  columns:
+  - - career_plan_id
 - name: chk_plan_type
   type: CHECK
+  description: プラン種別値チェック制約
   condition: plan_type IN ('SHORT_TERM', 'MEDIUM_TERM', 'LONG_TERM', 'SPECIALIZED',
     'MANAGEMENT', 'TECHNICAL')
-  description: プラン種別値チェック制約
 - name: chk_current_level
   type: CHECK
+  description: 現在レベル値チェック制約
   condition: current_level IN ('ENTRY', 'JUNIOR', 'INTERMEDIATE', 'SENIOR', 'EXPERT',
     'MANAGER', 'EXECUTIVE')
-  description: 現在レベル値チェック制約
 - name: chk_target_level
   type: CHECK
+  description: 目標レベル値チェック制約
   condition: target_level IN ('ENTRY', 'JUNIOR', 'INTERMEDIATE', 'SENIOR', 'EXPERT',
     'MANAGER', 'EXECUTIVE')
-  description: 目標レベル値チェック制約
 - name: chk_plan_status
   type: CHECK
+  description: プラン状況値チェック制約
   condition: plan_status IN ('DRAFT', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED',
     'REVISED')
-  description: プラン状況値チェック制約
 - name: chk_review_frequency
   type: CHECK
-  condition: review_frequency IN ('MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL')
   description: レビュー頻度値チェック制約
+  condition: review_frequency IN ('MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL')
 - name: chk_priority_level
   type: CHECK
-  condition: priority_level IN ('LOW', 'NORMAL', 'HIGH', 'CRITICAL')
   description: 優先度値チェック制約
+  condition: priority_level IN ('LOW', 'NORMAL', 'HIGH', 'CRITICAL')
 - name: chk_visibility_level
   type: CHECK
-  condition: visibility_level IN ('PRIVATE', 'MANAGER', 'DEPARTMENT', 'COMPANY')
   description: 公開レベル値チェック制約
+  condition: visibility_level IN ('PRIVATE', 'MANAGER', 'DEPARTMENT', 'COMPANY')
 - name: chk_plan_period
   type: CHECK
-  condition: plan_start_date <= plan_end_date
   description: プラン期間整合性チェック制約
+  condition: plan_start_date <= plan_end_date
 - name: chk_progress_percentage
   type: CHECK
-  condition: progress_percentage >= 0.00 AND progress_percentage <= 100.00
   description: 進捗率範囲チェック制約
+  condition: progress_percentage >= 0.00 AND progress_percentage <= 100.00
 - name: chk_budget_positive
   type: CHECK
-  condition: budget_allocated IS NULL OR budget_allocated >= 0
   description: 割当予算非負数チェック制約
+  condition: budget_allocated IS NULL OR budget_allocated >= 0
 - name: chk_budget_used_positive
   type: CHECK
-  condition: budget_used >= 0
   description: 使用予算非負数チェック制約
+  condition: budget_used >= 0
 foreign_keys:
 - name: fk_career_plan_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -523,9 +587,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_career_plan_target_position
   columns:
-  - target_position_id
+  - - target_position_id
   references:
-    table: MST_Position
+    table:
+    - MST_Position
     columns:
     - id
   on_update: CASCADE
@@ -533,9 +598,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_career_plan_target_job_type
   columns:
-  - target_job_type_id
+  - - target_job_type_id
   references:
-    table: MST_JobType
+    table:
+    - MST_JobType
     columns:
     - id
   on_update: CASCADE
@@ -543,9 +609,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_career_plan_target_department
   columns:
-  - target_department_id
+  - - target_department_id
   references:
-    table: MST_Department
+    table:
+    - MST_Department
     columns:
     - id
   on_update: CASCADE
@@ -553,9 +620,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_career_plan_mentor
   columns:
-  - mentor_id
+  - - mentor_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -563,9 +631,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_career_plan_supervisor
   columns:
-  - supervisor_id
+  - - supervisor_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -659,7 +728,7 @@ notes:
 - メンター制度との連携で効果的な指導を実現
 - レビュー頻度により継続的な改善を促進
 - 公開レベルによりプライバシーと透明性を両立
-business_rules:
+- === 業務ルール ===
 - キャリアプランIDは一意である必要がある
 - プラン開始日は終了日以前である必要がある
 - 進捗率は0-100%の範囲で設定
@@ -668,58 +737,12 @@ business_rules:
 - レビュー日は定期的に更新される必要がある
 - 完了したプランは変更不可
 - メンターと上司は異なる人物である必要がある
-columns:
-- name: careerplan_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_CareerPlanの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_careerplan_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- キャリアプランIDは一意である必要がある
+- プラン開始日は終了日以前である必要がある
+- 進捗率は0-100%の範囲で設定
+- 使用予算は割当予算以下である必要がある
+- 目標レベルは現在レベル以上である必要がある
+- レビュー日は定期的に更新される必要がある
+- 完了したプランは変更不可
+- メンターと上司は異なる人物である必要がある

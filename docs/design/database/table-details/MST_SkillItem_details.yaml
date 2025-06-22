@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - スキル項目マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。
 
 
@@ -31,12 +35,12 @@ overview: 'MST_SkillItem（スキル項目マスタ）は、組織で管理・�
   戦略的人材マネジメントの基盤となる重要なマスタデータです。
 
   '
-business_columns:
+columns:
 - name: skill_code
   logical: スキルコード
   type: VARCHAR
   length: 20
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: スキル項目を一意に識別するコード（例：SKILL001）
@@ -44,7 +48,7 @@ business_columns:
   logical: スキル名
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル項目の正式名称
@@ -52,7 +56,7 @@ business_columns:
   logical: スキルカテゴリID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルカテゴリのID
@@ -60,7 +64,7 @@ business_columns:
   logical: スキル種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格）
@@ -72,7 +76,7 @@ business_columns:
   logical: 習得難易度
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキル習得の難易度（1-5段階）
@@ -80,27 +84,87 @@ business_columns:
   logical: 重要度
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 組織における重要度（1-5段階）
-business_indexes:
+- name: skillitem_id
+  logical: MST_SkillItemの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_SkillItemの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_skill_code
   columns:
-  - skill_code
+  - - skill_code
   unique: true
   description: スキルコード検索用
 - name: idx_skill_category
   columns:
-  - skill_category_id
+  - - skill_category_id
   unique: false
   description: スキルカテゴリ別検索用
-business_constraints:
+- name: idx_mst_skillitem_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_skill_code
   type: UNIQUE
-  columns:
-  - skill_code
   description: スキルコード一意制約
+  columns:
+  - - skill_code
+foreign_keys: []
 sample_data:
 - skill_code: SKILL001
   skill_name: Java
@@ -112,63 +176,11 @@ notes:
 - スキル項目は階層構造で管理
 - 評価基準は標準化されたレベル定義を使用
 - スキル項目の追加・変更は承認プロセスを経て実施
-business_rules:
+- === 業務ルール ===
 - スキルコードは自動採番（SKILL + 3桁連番）
 - 重要度・難易度は1-5の5段階評価
 - スキル項目の削除は論理削除で実施し、履歴を保持
-columns:
-- name: skillitem_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_SkillItemの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_skillitem_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
-foreign_keys: []
+rules:
+- スキルコードは自動採番（SKILL + 3桁連番）
+- 重要度・難易度は1-5の5段階評価
+- スキル項目の削除は論理削除で実施し、履歴を保持

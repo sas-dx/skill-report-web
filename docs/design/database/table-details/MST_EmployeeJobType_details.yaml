@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 社員職種関連マスタの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_EmployeeJobType（社員職種関連）は、社員と職種の関連付けを管理するマスタテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'MST_EmployeeJobType（社員職種関連）は、社員と職種の�
   適切な人材配置とキャリア開発を支援できます。
 
   '
-business_columns:
+columns:
 - name: employee_job_type_id
   logical: 社員職種関連ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: 社員職種関連を一意に識別するID
@@ -40,7 +44,7 @@ business_columns:
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 対象社員のID（MST_Employeeへの外部キー）
@@ -48,7 +52,7 @@ business_columns:
   logical: 職種ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種のID（MST_JobTypeへの外部キー）
@@ -56,7 +60,7 @@ business_columns:
   logical: 配属種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種への配属種別（PRIMARY:主職種、SECONDARY:副職種、TEMPORARY:一時的、TRAINING:研修中、CANDIDATE:候補）
@@ -70,7 +74,7 @@ business_columns:
   logical: 配属比率
   type: DECIMAL
   length: 5,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種への配属比率（%）
@@ -79,7 +83,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種配属の開始日
@@ -87,7 +91,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種配属の終了日
@@ -95,7 +99,7 @@ business_columns:
   logical: 配属理由
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種配属の理由（NEW_HIRE:新規採用、PROMOTION:昇進、TRANSFER:異動、SKILL_DEVELOPMENT:スキル開発、PROJECT_NEED:プロジェクト要請、REORGANIZATION:組織再編）
@@ -110,7 +114,7 @@ business_columns:
   logical: 配属状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 現在の配属状況（ACTIVE:有効、INACTIVE:無効、PENDING:保留中、SUSPENDED:一時停止）
@@ -124,7 +128,7 @@ business_columns:
   logical: 習熟度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種における習熟度（NOVICE:初心者、BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
@@ -139,7 +143,7 @@ business_columns:
   logical: 目標習熟度
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標とする習熟度（NOVICE:初心者、BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
@@ -153,7 +157,7 @@ business_columns:
   logical: 目標達成日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 目標習熟度の達成予定日
@@ -161,7 +165,7 @@ business_columns:
   logical: 必要資格
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に必要な資格一覧（JSON形式）
@@ -169,7 +173,7 @@ business_columns:
   logical: 必要スキル
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に必要なスキル一覧（JSON形式）
@@ -177,7 +181,7 @@ business_columns:
   logical: 必要経験
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に必要な経験・実績（JSON形式）
@@ -185,7 +189,7 @@ business_columns:
   logical: 育成計画
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種における育成計画（JSON形式）
@@ -193,7 +197,7 @@ business_columns:
   logical: 研修計画
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 推奨研修プログラム（JSON形式）
@@ -201,7 +205,7 @@ business_columns:
   logical: メンターID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種指導担当者のID（MST_Employeeへの外部キー）
@@ -209,7 +213,7 @@ business_columns:
   logical: 上司ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種における直属上司のID（MST_Employeeへの外部キー）
@@ -217,7 +221,7 @@ business_columns:
   logical: パフォーマンス評価
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種でのパフォーマンス評価（EXCELLENT:優秀、GOOD:良好、SATISFACTORY:普通、NEEDS_IMPROVEMENT:要改善、UNSATISFACTORY:不満足）
@@ -231,7 +235,7 @@ business_columns:
   logical: 最終評価日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最後に評価を実施した日付
@@ -239,7 +243,7 @@ business_columns:
   logical: 次回評価日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 次回評価予定日
@@ -247,7 +251,7 @@ business_columns:
   logical: 評価頻度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 評価の実施頻度（MONTHLY:月次、QUARTERLY:四半期、SEMI_ANNUAL:半年、ANNUAL:年次）
@@ -261,7 +265,7 @@ business_columns:
   logical: キャリアパス
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種でのキャリアパス・将来展望
@@ -269,7 +273,7 @@ business_columns:
   logical: 強み
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種における強み・得意分野
@@ -277,7 +281,7 @@ business_columns:
   logical: 改善領域
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 改善が必要な領域・課題
@@ -285,7 +289,7 @@ business_columns:
   logical: 実績
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種での主要な実績・成果
@@ -293,7 +297,7 @@ business_columns:
   logical: 目標
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種での短期・中期目標
@@ -301,7 +305,7 @@ business_columns:
   logical: 業務負荷率
   type: DECIMAL
   length: 5,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 全業務に占める職種業務の割合（%）
@@ -310,7 +314,7 @@ business_columns:
   logical: 請求対象フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 顧客請求対象の職種かどうか
@@ -319,7 +323,7 @@ business_columns:
   logical: コストセンター
   type: VARCHAR
   length: 20
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に関連するコストセンター
@@ -327,7 +331,7 @@ business_columns:
   logical: 予算配分
   type: DECIMAL
   length: 10,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種に配分された予算
@@ -335,7 +339,7 @@ business_columns:
   logical: 時間単価
   type: DECIMAL
   length: 8,2
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 職種での時間単価
@@ -343,7 +347,7 @@ business_columns:
   logical: 残業対象フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 残業代支給対象かどうか
@@ -352,7 +356,7 @@ business_columns:
   logical: リモートワーク可否
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: リモートワーク可能な職種かどうか
@@ -361,7 +365,7 @@ business_columns:
   logical: 出張要否
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 出張が必要な職種かどうか
@@ -370,7 +374,7 @@ business_columns:
   logical: セキュリティクリアランス要否
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: セキュリティクリアランスが必要かどうか
@@ -379,7 +383,7 @@ business_columns:
   logical: 作成者
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 関連付けを作成した担当者ID
@@ -387,7 +391,7 @@ business_columns:
   logical: 承認者
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連付けを承認した責任者ID
@@ -395,7 +399,7 @@ business_columns:
   logical: 承認日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連付けが承認された日付
@@ -403,133 +407,193 @@ business_columns:
   logical: 備考
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: その他の備考・特記事項
-business_indexes:
+- name: employeejobtype_id
+  logical: MST_EmployeeJobTypeの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_EmployeeJobTypeの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_employee_job_type_id
   columns:
-  - employee_job_type_id
+  - - employee_job_type_id
   unique: true
   description: 社員職種関連ID検索用（一意）
 - name: idx_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_job_type_id
   columns:
-  - job_type_id
+  - - job_type_id
   unique: false
   description: 職種ID検索用
 - name: idx_employee_job_type
   columns:
-  - employee_id
-  - job_type_id
+  - - employee_id
+  - - job_type_id
   unique: false
   description: 社員・職種組み合わせ検索用
 - name: idx_assignment_type
   columns:
-  - assignment_type
+  - - assignment_type
   unique: false
   description: 配属種別検索用
 - name: idx_assignment_status
   columns:
-  - assignment_status
+  - - assignment_status
   unique: false
   description: 配属状況検索用
 - name: idx_proficiency_level
   columns:
-  - proficiency_level
+  - - proficiency_level
   unique: false
   description: 習熟度検索用
 - name: idx_effective_period
   columns:
-  - effective_start_date
-  - effective_end_date
+  - - effective_start_date
+  - - effective_end_date
   unique: false
   description: 有効期間検索用
 - name: idx_mentor_id
   columns:
-  - mentor_id
+  - - mentor_id
   unique: false
   description: メンター検索用
 - name: idx_supervisor_id
   columns:
-  - supervisor_id
+  - - supervisor_id
   unique: false
   description: 上司検索用
 - name: idx_performance_rating
   columns:
-  - performance_rating
+  - - performance_rating
   unique: false
   description: パフォーマンス評価検索用
-business_constraints:
+- name: idx_mst_employeejobtype_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_employee_job_type_id
   type: UNIQUE
-  columns:
-  - employee_job_type_id
   description: 社員職種関連ID一意制約
+  columns:
+  - - employee_job_type_id
 - name: chk_assignment_type
   type: CHECK
+  description: 配属種別値チェック制約
   condition: assignment_type IN ('PRIMARY', 'SECONDARY', 'TEMPORARY', 'TRAINING',
     'CANDIDATE')
-  description: 配属種別値チェック制約
 - name: chk_assignment_status
   type: CHECK
-  condition: assignment_status IN ('ACTIVE', 'INACTIVE', 'PENDING', 'SUSPENDED')
   description: 配属状況値チェック制約
+  condition: assignment_status IN ('ACTIVE', 'INACTIVE', 'PENDING', 'SUSPENDED')
 - name: chk_proficiency_level
   type: CHECK
+  description: 習熟度値チェック制約
   condition: proficiency_level IN ('NOVICE', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED',
     'EXPERT')
-  description: 習熟度値チェック制約
 - name: chk_target_proficiency_level
   type: CHECK
+  description: 目標習熟度値チェック制約
   condition: target_proficiency_level IN ('NOVICE', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED',
     'EXPERT')
-  description: 目標習熟度値チェック制約
 - name: chk_assignment_reason
   type: CHECK
+  description: 配属理由値チェック制約
   condition: assignment_reason IN ('NEW_HIRE', 'PROMOTION', 'TRANSFER', 'SKILL_DEVELOPMENT',
     'PROJECT_NEED', 'REORGANIZATION')
-  description: 配属理由値チェック制約
 - name: chk_performance_rating
   type: CHECK
+  description: パフォーマンス評価値チェック制約
   condition: performance_rating IN ('EXCELLENT', 'GOOD', 'SATISFACTORY', 'NEEDS_IMPROVEMENT',
     'UNSATISFACTORY')
-  description: パフォーマンス評価値チェック制約
 - name: chk_evaluation_frequency
   type: CHECK
-  condition: evaluation_frequency IN ('MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL')
   description: 評価頻度値チェック制約
+  condition: evaluation_frequency IN ('MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL')
 - name: chk_assignment_ratio_range
   type: CHECK
-  condition: assignment_ratio >= 0 AND assignment_ratio <= 100
   description: 配属比率範囲チェック制約
+  condition: assignment_ratio >= 0 AND assignment_ratio <= 100
 - name: chk_workload_percentage_range
   type: CHECK
-  condition: workload_percentage >= 0 AND workload_percentage <= 100
   description: 業務負荷率範囲チェック制約
+  condition: workload_percentage >= 0 AND workload_percentage <= 100
 - name: chk_effective_period
   type: CHECK
-  condition: effective_end_date IS NULL OR effective_start_date <= effective_end_date
   description: 有効期間整合性チェック制約
+  condition: effective_end_date IS NULL OR effective_start_date <= effective_end_date
 - name: chk_budget_allocation_positive
   type: CHECK
-  condition: budget_allocation IS NULL OR budget_allocation >= 0
   description: 予算配分非負数チェック制約
+  condition: budget_allocation IS NULL OR budget_allocation >= 0
 - name: chk_hourly_rate_positive
   type: CHECK
-  condition: hourly_rate IS NULL OR hourly_rate >= 0
   description: 時間単価非負数チェック制約
+  condition: hourly_rate IS NULL OR hourly_rate >= 0
 foreign_keys:
 - name: fk_emp_job_type_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -537,9 +601,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_emp_job_type_job_type
   columns:
-  - job_type_id
+  - - job_type_id
   references:
-    table: MST_JobType
+    table:
+    - MST_JobType
     columns:
     - id
   on_update: CASCADE
@@ -547,9 +612,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_emp_job_type_mentor
   columns:
-  - mentor_id
+  - - mentor_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -557,9 +623,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_emp_job_type_supervisor
   columns:
-  - supervisor_id
+  - - supervisor_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -567,9 +634,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_emp_job_type_created_by
   columns:
-  - created_by
+  - - created_by
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -577,9 +645,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_emp_job_type_approved_by
   columns:
-  - approved_by
+  - - approved_by
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -677,7 +746,7 @@ notes:
 - メンター制度との連携で効果的な指導
 - パフォーマンス評価で適性を判定
 - コスト管理・請求管理との連携
-business_rules:
+- === 業務ルール ===
 - 社員職種関連IDは一意である必要がある
 - 配属比率の合計は100%以下である必要がある
 - 有効開始日は有効終了日以前である必要がある
@@ -686,58 +755,12 @@ business_rules:
 - 評価日は定期的に更新される必要がある
 - 承認済み関連付けのみ有効
 - メンターと上司は異なる人物である必要がある
-columns:
-- name: employeejobtype_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_EmployeeJobTypeの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_employeejobtype_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 社員職種関連IDは一意である必要がある
+- 配属比率の合計は100%以下である必要がある
+- 有効開始日は有効終了日以前である必要がある
+- 主職種（PRIMARY）は1つのみ設定可能
+- 目標習熟度は現在の習熟度以上である必要がある
+- 評価日は定期的に更新される必要がある
+- 承認済み関連付けのみ有効
+- メンターと上司は異なる人物である必要がある

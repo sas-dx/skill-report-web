@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 帳票生成履歴テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'HIS_ReportGeneration（帳票生成履歴）は、システムで生成された帳票・レポートの履歴を管理するテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'HIS_ReportGeneration（帳票生成履歴）は、システムで生�
   このテーブルは、帳票・レポート機能において生成状況の把握と品質向上を支える重要な履歴データです。
 
   '
-business_columns:
+columns:
 - name: id
   logical: ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: マルチテナント識別子
@@ -46,7 +50,7 @@ business_columns:
   logical: テンプレートID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 使用された帳票テンプレートのID（MST_ReportTemplateへの参照）
@@ -54,7 +58,7 @@ business_columns:
   logical: 要求者
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成を要求したユーザーID
@@ -62,7 +66,7 @@ business_columns:
   logical: 帳票タイトル
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 生成された帳票のタイトル
@@ -70,7 +74,7 @@ business_columns:
   logical: 帳票カテゴリ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析）
@@ -84,7 +88,7 @@ business_columns:
   logical: 出力形式
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML）
@@ -97,7 +101,7 @@ business_columns:
   logical: 生成状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 生成の状態（PENDING:待機中、PROCESSING:処理中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル）
@@ -111,7 +115,7 @@ business_columns:
   logical: パラメータ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成時のパラメータ（JSON形式）
@@ -119,7 +123,7 @@ business_columns:
   logical: ファイルパス
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 生成された帳票ファイルのパス
@@ -127,7 +131,7 @@ business_columns:
   logical: ファイルサイズ
   type: BIGINT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 生成された帳票ファイルのサイズ（バイト）
@@ -135,7 +139,7 @@ business_columns:
   logical: ダウンロード回数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票がダウンロードされた回数
@@ -144,7 +148,7 @@ business_columns:
   logical: 最終ダウンロード日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票が最後にダウンロードされた日時
@@ -152,7 +156,7 @@ business_columns:
   logical: 要求日時
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成が要求された日時
@@ -160,7 +164,7 @@ business_columns:
   logical: 開始日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成処理が開始された日時
@@ -168,7 +172,7 @@ business_columns:
   logical: 完了日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成処理が完了した日時
@@ -176,7 +180,7 @@ business_columns:
   logical: 処理時間
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 帳票生成にかかった時間（ミリ秒）
@@ -184,7 +188,7 @@ business_columns:
   logical: エラーメッセージ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 生成失敗時のエラーメッセージ
@@ -192,7 +196,7 @@ business_columns:
   logical: エラー詳細
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 生成失敗時のエラー詳細情報（JSON形式）
@@ -200,83 +204,125 @@ business_columns:
   logical: 有効期限
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 生成された帳票ファイルの有効期限
-business_indexes:
+- name: reportgeneration_id
+  logical: HIS_ReportGenerationの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: HIS_ReportGenerationの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_report_generation_template
   columns:
-  - template_id
+  - - template_id
   unique: false
   description: テンプレートID別検索用
 - name: idx_report_generation_requester
   columns:
-  - requested_by
+  - - requested_by
   unique: false
   description: 要求者別検索用
 - name: idx_report_generation_tenant_status
   columns:
-  - tenant_id
-  - generation_status
+  - - tenant_id
+  - - generation_status
   unique: false
   description: テナント別生成状態検索用
 - name: idx_report_generation_category
   columns:
-  - report_category
+  - - report_category
   unique: false
   description: 帳票カテゴリ別検索用
 - name: idx_report_generation_format
   columns:
-  - output_format
+  - - output_format
   unique: false
   description: 出力形式別検索用
 - name: idx_report_generation_requested
   columns:
-  - requested_at
+  - - requested_at
   unique: false
   description: 要求日時検索用
 - name: idx_report_generation_completed
   columns:
-  - completed_at
+  - - completed_at
   unique: false
   description: 完了日時検索用
 - name: idx_report_generation_expires
   columns:
-  - expires_at
+  - - expires_at
   unique: false
   description: 有効期限検索用
-business_constraints:
+- name: idx_his_reportgeneration_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: chk_report_generation_category
   type: CHECK
-  condition: report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS')
   description: 帳票カテゴリ値チェック制約
+  condition: report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS')
 - name: chk_report_generation_format
   type: CHECK
-  condition: output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML')
   description: 出力形式値チェック制約
+  condition: output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML')
 - name: chk_report_generation_status
   type: CHECK
-  condition: generation_status IN ('PENDING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELLED')
   description: 生成状態値チェック制約
+  condition: generation_status IN ('PENDING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELLED')
 - name: chk_report_generation_file_size_positive
   type: CHECK
-  condition: file_size IS NULL OR file_size >= 0
   description: ファイルサイズ正数チェック制約
+  condition: file_size IS NULL OR file_size >= 0
 - name: chk_report_generation_download_count_positive
   type: CHECK
-  condition: download_count >= 0
   description: ダウンロード回数正数チェック制約
+  condition: download_count >= 0
 - name: chk_report_generation_processing_time_positive
   type: CHECK
-  condition: processing_time_ms IS NULL OR processing_time_ms >= 0
   description: 処理時間正数チェック制約
+  condition: processing_time_ms IS NULL OR processing_time_ms >= 0
 foreign_keys:
 - name: fk_report_generation_template
   columns:
-  - template_id
+  - - template_id
   references:
-    table: MST_ReportTemplate
+    table:
+    - MST_ReportTemplate
     columns:
     - id
   on_update: CASCADE
@@ -333,7 +379,7 @@ notes:
 - ダウンロード統計は利用状況分析に活用
 - 大容量ファイルは外部ストレージに保存
 - パラメータ情報は再生成時の参考に使用
-business_rules:
+- === 業務ルール ===
 - 生成成功時はファイルパス・サイズを必須記録
 - 生成失敗時はエラー情報を詳細に記録
 - 有効期限切れファイルは自動削除対象
@@ -342,58 +388,12 @@ business_rules:
 - ダウンロード時は統計情報を更新
 - キャンセルされた生成は中間ファイルを削除
 - テンプレート削除時は関連履歴を保持
-columns:
-- name: reportgeneration_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: HIS_ReportGenerationの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_his_reportgeneration_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 生成成功時はファイルパス・サイズを必須記録
+- 生成失敗時はエラー情報を詳細に記録
+- 有効期限切れファイルは自動削除対象
+- 同一パラメータでの重複生成は制限
+- 処理時間が閾値を超える場合は警告
+- ダウンロード時は統計情報を更新
+- キャンセルされた生成は中間ファイルを削除
+- テンプレート削除時は関連履歴を保持

@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - 職種スキルグレード関連テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_JobTypeSkillGrade（職種スキルグレード関連）は、職種とスキルグレードの関連付けを管理するマスタテーブルです。
 
 
@@ -29,12 +33,12 @@ overview: 'MST_JobTypeSkillGrade（職種スキルグレード関連）は、職
   人材育成や昇進管理の判断基準として活用できます。
 
   '
-business_columns:
+columns:
 - name: job_type_id
   logical: 職種ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 職種のID（MST_JobTypeへの外部キー）
@@ -42,7 +46,7 @@ business_columns:
   logical: スキルグレードID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: スキルグレードのID（MST_SkillGradeへの外部キー）
@@ -50,7 +54,7 @@ business_columns:
   logical: グレード要件区分
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: グレード要件区分（MINIMUM:最低要件、STANDARD:標準要件、ADVANCED:上級要件）
@@ -63,7 +67,7 @@ business_columns:
   logical: 必要経験年数
   type: DECIMAL
   length: 4,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該グレード到達に必要な経験年数
@@ -71,7 +75,7 @@ business_columns:
   logical: 昇進基準
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該グレードへの昇進基準・評価項目
@@ -79,7 +83,7 @@ business_columns:
   logical: 給与範囲下限
   type: DECIMAL
   length: 10,0
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該グレードの給与範囲下限
@@ -87,7 +91,7 @@ business_columns:
   logical: 給与範囲上限
   type: DECIMAL
   length: 10,0
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該グレードの給与範囲上限
@@ -95,7 +99,7 @@ business_columns:
   logical: 成果期待値
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該グレードでの期待される成果・パフォーマンス
@@ -103,7 +107,7 @@ business_columns:
   logical: リーダーシップ要件
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 当該グレードで求められるリーダーシップ能力
@@ -111,7 +115,7 @@ business_columns:
   logical: 技術深度
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 技術的深度レベル（1-10、10が最高）
@@ -119,7 +123,7 @@ business_columns:
   logical: 事業影響度
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 事業への影響度レベル（1-10、10が最高）
@@ -127,7 +131,7 @@ business_columns:
   logical: 期待チームサイズ
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 管理が期待されるチームサイズ
@@ -135,7 +139,7 @@ business_columns:
   logical: 資格要件
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 必要な資格・認定のリスト（JSON形式）
@@ -143,7 +147,7 @@ business_columns:
   logical: グレード状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: グレード状況（ACTIVE:有効、DEPRECATED:非推奨、OBSOLETE:廃止）
@@ -156,7 +160,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: グレード要件の有効開始日
@@ -164,7 +168,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: グレード要件の有効終了日（NULL:無期限）
@@ -172,7 +176,7 @@ business_columns:
   logical: 次グレードパス
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 次のグレードへの昇進パス（JSON形式）
@@ -180,7 +184,7 @@ business_columns:
   logical: 評価頻度
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 評価頻度（ANNUAL:年次、SEMI_ANNUAL:半年、QUARTERLY:四半期）
@@ -189,100 +193,160 @@ business_columns:
   - SEMI_ANNUAL
   - QUARTERLY
   default: ANNUAL
-business_indexes:
+- name: jobtypeskillgrade_id
+  logical: MST_JobTypeSkillGradeの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_JobTypeSkillGradeの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_MST_JobTypeSkillGrade_job_type_id
   columns:
-  - job_type_id
+  - - job_type_id
   unique: false
   description: 職種ID検索用
 - name: idx_MST_JobTypeSkillGrade_skill_grade_id
   columns:
-  - skill_grade_id
+  - - skill_grade_id
   unique: false
   description: スキルグレードID検索用
 - name: idx_MST_JobTypeSkillGrade_job_grade
   columns:
-  - job_type_id
-  - skill_grade_id
+  - - job_type_id
+  - - skill_grade_id
   unique: true
   description: 職種・スキルグレード複合検索用（一意）
 - name: idx_MST_JobTypeSkillGrade_requirement_type
   columns:
-  - grade_requirement_type
+  - - grade_requirement_type
   unique: false
   description: グレード要件区分別検索用
 - name: idx_MST_JobTypeSkillGrade_experience_years
   columns:
-  - required_experience_years
+  - - required_experience_years
   unique: false
   description: 必要経験年数別検索用
 - name: idx_MST_JobTypeSkillGrade_status
   columns:
-  - grade_status
+  - - grade_status
   unique: false
   description: グレード状況別検索用
 - name: idx_MST_JobTypeSkillGrade_effective_date
   columns:
-  - effective_date
+  - - effective_date
   unique: false
   description: 有効開始日検索用
 - name: idx_MST_JobTypeSkillGrade_technical_depth
   columns:
-  - technical_depth
+  - - technical_depth
   unique: false
   description: 技術深度別検索用
-business_constraints:
+- name: idx_mst_jobtypeskillgrade_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_MST_JobTypeSkillGrade_job_grade
   type: UNIQUE
-  columns:
-  - job_type_id
-  - skill_grade_id
   description: 職種・スキルグレード一意制約
+  columns:
+  - - job_type_id
+  - - skill_grade_id
 - name: chk_MST_JobTypeSkillGrade_requirement_type
   type: CHECK
-  condition: grade_requirement_type IN ('MINIMUM', 'STANDARD', 'ADVANCED')
   description: グレード要件区分値チェック制約
+  condition: grade_requirement_type IN ('MINIMUM', 'STANDARD', 'ADVANCED')
 - name: chk_MST_JobTypeSkillGrade_status
   type: CHECK
-  condition: grade_status IN ('ACTIVE', 'DEPRECATED', 'OBSOLETE')
   description: グレード状況値チェック制約
+  condition: grade_status IN ('ACTIVE', 'DEPRECATED', 'OBSOLETE')
 - name: chk_MST_JobTypeSkillGrade_evaluation_frequency
   type: CHECK
-  condition: evaluation_frequency IN ('ANNUAL', 'SEMI_ANNUAL', 'QUARTERLY')
   description: 評価頻度値チェック制約
+  condition: evaluation_frequency IN ('ANNUAL', 'SEMI_ANNUAL', 'QUARTERLY')
 - name: chk_MST_JobTypeSkillGrade_experience_years
   type: CHECK
-  condition: required_experience_years IS NULL OR required_experience_years >= 0
   description: 必要経験年数非負値チェック制約
+  condition: required_experience_years IS NULL OR required_experience_years >= 0
 - name: chk_MST_JobTypeSkillGrade_technical_depth
   type: CHECK
+  description: 技術深度範囲チェック制約
   condition: technical_depth IS NULL OR (technical_depth >= 1 AND technical_depth
     <= 10)
-  description: 技術深度範囲チェック制約
 - name: chk_MST_JobTypeSkillGrade_business_impact
   type: CHECK
+  description: 事業影響度範囲チェック制約
   condition: business_impact IS NULL OR (business_impact >= 1 AND business_impact
     <= 10)
-  description: 事業影響度範囲チェック制約
 - name: chk_MST_JobTypeSkillGrade_team_size
   type: CHECK
-  condition: team_size_expectation IS NULL OR team_size_expectation >= 0
   description: 期待チームサイズ非負値チェック制約
+  condition: team_size_expectation IS NULL OR team_size_expectation >= 0
 - name: chk_MST_JobTypeSkillGrade_salary_range
   type: CHECK
+  description: 給与範囲整合性チェック制約
   condition: salary_range_min IS NULL OR salary_range_max IS NULL OR salary_range_min
     <= salary_range_max
-  description: 給与範囲整合性チェック制約
 - name: chk_MST_JobTypeSkillGrade_date_range
   type: CHECK
-  condition: expiry_date IS NULL OR effective_date <= expiry_date
   description: 日付範囲整合性チェック制約
+  condition: expiry_date IS NULL OR effective_date <= expiry_date
 foreign_keys:
 - name: fk_MST_JobTypeSkillGrade_job_type
   columns:
-  - job_type_id
+  - - job_type_id
   references:
-    table: MST_JobType
+    table:
+    - MST_JobType
     columns:
     - id
   on_update: CASCADE
@@ -290,9 +354,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_MST_JobTypeSkillGrade_skill_grade
   columns:
-  - skill_grade_id
+  - - skill_grade_id
   references:
-    table: MST_SkillGrade
+    table:
+    - MST_SkillGrade
     columns:
     - id
   on_update: CASCADE
@@ -361,7 +426,7 @@ notes:
 - 有効期限により時期に応じたグレード要件変更に対応
 - 論理削除は is_deleted フラグで管理
 - 評価頻度により昇進評価のタイミングを管理
-business_rules:
+- === 業務ルール ===
 - MINIMUM要件は最低限の昇進条件
 - STANDARD要件は一般的な昇進条件
 - ADVANCED要件は優秀者向けの昇進条件
@@ -372,58 +437,14 @@ business_rules:
 - 資格要件は昇進の必要条件
 - 次グレードパスは複数の昇進ルートを定義可能
 - 有効期限切れのグレード要件は自動的に無効化
-columns:
-- name: jobtypeskillgrade_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_JobTypeSkillGradeの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_jobtypeskillgrade_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- MINIMUM要件は最低限の昇進条件
+- STANDARD要件は一般的な昇進条件
+- ADVANCED要件は優秀者向けの昇進条件
+- 必要経験年数は最短期間を示す
+- 技術深度7以上は技術エキスパートレベル
+- 事業影響度7以上は事業リーダーレベル
+- チームサイズ期待値は管理職適性の指標
+- 資格要件は昇進の必要条件
+- 次グレードパスは複数の昇進ルートを定義可能
+- 有効期限切れのグレード要件は自動的に無効化

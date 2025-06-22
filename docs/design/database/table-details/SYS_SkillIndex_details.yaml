@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - スキル検索インデックスシステムテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能の高速化のための検索インデックス情報を管理するシステムテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'SYS_SkillIndex（スキル検索インデックス）は、スキル�
   このテーブルは、スキル管理機能において高速で精度の高い検索を実現する重要なシステムデータです。
 
   '
-business_columns:
+columns:
 - name: id
   logical: ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: マルチテナント識別子
@@ -46,7 +50,7 @@ business_columns:
   logical: スキルID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: インデックス対象のスキルID（MST_Skillへの参照）
@@ -54,7 +58,7 @@ business_columns:
   logical: インデックスタイプ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: インデックスの種類（FULLTEXT:全文検索、KEYWORD:キーワード、CATEGORY:カテゴリ、SYNONYM:同義語）
@@ -67,7 +71,7 @@ business_columns:
   logical: 検索語
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 検索対象となる語句・キーワード
@@ -75,7 +79,7 @@ business_columns:
   logical: 正規化語
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 検索最適化のため正規化された語句
@@ -83,7 +87,7 @@ business_columns:
   logical: 関連度スコア
   type: DECIMAL
   length: 5,3
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 検索結果の関連度スコア（0.000-1.000）
@@ -92,7 +96,7 @@ business_columns:
   logical: 頻度重み
   type: DECIMAL
   length: 5,3
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 語句の出現頻度による重み（0.000-1.000）
@@ -101,7 +105,7 @@ business_columns:
   logical: 位置重み
   type: DECIMAL
   length: 5,3
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 語句の出現位置による重み（0.000-1.000）
@@ -110,7 +114,7 @@ business_columns:
   logical: 言語コード
   type: VARCHAR
   length: 10
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 検索語の言語（ja:日本語、en:英語等）
@@ -119,7 +123,7 @@ business_columns:
   logical: ソースフィールド
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: インデックス元のフィールド（NAME:スキル名、DESCRIPTION:説明、KEYWORD:キーワード、CATEGORY:カテゴリ）
@@ -132,7 +136,7 @@ business_columns:
   logical: 有効フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: インデックスが有効かどうか
@@ -141,7 +145,7 @@ business_columns:
   logical: 検索回数
   type: INTEGER
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: この語句での検索実行回数
@@ -150,7 +154,7 @@ business_columns:
   logical: 最終検索日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: この語句で最後に検索された日時
@@ -158,80 +162,117 @@ business_columns:
   logical: インデックス更新日時
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: インデックスが最後に更新された日時
-business_indexes:
+- name: skillindex_id
+  logical: SYS_SkillIndexの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_SkillIndexの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_skill_index_skill
   columns:
-  - skill_id
+  - - skill_id
   unique: false
   description: スキルID別検索用
 - name: idx_skill_index_search_term
   columns:
-  - normalized_term
-  - language_code
+  - - normalized_term
+  - - language_code
   unique: false
   description: 正規化語・言語別検索用
 - name: idx_skill_index_type
   columns:
-  - index_type
+  - - index_type
   unique: false
   description: インデックスタイプ別検索用
 - name: idx_skill_index_tenant_term
   columns:
-  - tenant_id
-  - normalized_term
+  - - tenant_id
+  - - normalized_term
   unique: false
   description: テナント別検索語検索用
 - name: idx_skill_index_relevance
   columns:
-  - relevance_score
+  - - relevance_score
   unique: false
   description: 関連度スコア別検索用
 - name: idx_skill_index_active
   columns:
-  - is_active
+  - - is_active
   unique: false
   description: 有効フラグ検索用
 - name: idx_skill_index_search_stats
   columns:
-  - search_count
-  - last_searched_at
+  - - search_count
+  - - last_searched_at
   unique: false
   description: 検索統計検索用
-business_constraints:
+constraints:
 - name: chk_skill_index_type
   type: CHECK
-  condition: index_type IN ('FULLTEXT', 'KEYWORD', 'CATEGORY', 'SYNONYM')
   description: インデックスタイプ値チェック制約
+  condition: index_type IN ('FULLTEXT', 'KEYWORD', 'CATEGORY', 'SYNONYM')
 - name: chk_skill_index_source_field
   type: CHECK
-  condition: source_field IN ('NAME', 'DESCRIPTION', 'KEYWORD', 'CATEGORY')
   description: ソースフィールド値チェック制約
+  condition: source_field IN ('NAME', 'DESCRIPTION', 'KEYWORD', 'CATEGORY')
 - name: chk_skill_index_relevance_range
   type: CHECK
-  condition: relevance_score >= 0.000 AND relevance_score <= 1.000
   description: 関連度スコア範囲チェック制約
+  condition: relevance_score >= 0.000 AND relevance_score <= 1.000
 - name: chk_skill_index_frequency_range
   type: CHECK
-  condition: frequency_weight >= 0.000 AND frequency_weight <= 1.000
   description: 頻度重み範囲チェック制約
+  condition: frequency_weight >= 0.000 AND frequency_weight <= 1.000
 - name: chk_skill_index_position_range
   type: CHECK
-  condition: position_weight >= 0.000 AND position_weight <= 1.000
   description: 位置重み範囲チェック制約
+  condition: position_weight >= 0.000 AND position_weight <= 1.000
 - name: chk_skill_index_search_count_positive
   type: CHECK
-  condition: search_count >= 0
   description: 検索回数正数チェック制約
+  condition: search_count >= 0
 foreign_keys:
 - name: fk_skill_index_skill
   columns:
-  - skill_id
+  - - skill_id
   references:
-    table: MST_Skill
+    table:
+    - MST_Skill
     columns:
     - id
   on_update: CASCADE
@@ -291,7 +332,7 @@ notes:
 - 無効化されたインデックスは検索対象から除外
 - 多言語対応により国際化に対応
 - 同義語インデックスにより検索の網羅性を向上
-business_rules:
+- === 業務ルール ===
 - スキル削除時は関連インデックスも自動削除
 - インデックス更新は元データ変更時に自動実行
 - 検索実行時は統計情報を更新
@@ -300,45 +341,12 @@ business_rules:
 - 正規化語は検索時の表記ゆれ対応に使用
 - 検索頻度の高い語句は優先的にインデックス化
 - 定期的な統計分析によりインデックス最適化を実施
-columns:
-- name: skillindex_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: SYS_SkillIndexの主キー
-  requirement_id: PLT.1-WEB.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes: []
+rules:
+- スキル削除時は関連インデックスも自動削除
+- インデックス更新は元データ変更時に自動実行
+- 検索実行時は統計情報を更新
+- 関連度スコアは0.000-1.000の範囲で管理
+- 無効インデックスは検索結果から除外
+- 正規化語は検索時の表記ゆれ対応に使用
+- 検索頻度の高い語句は優先的にインデックス化
+- 定期的な統計分析によりインデックス最適化を実施

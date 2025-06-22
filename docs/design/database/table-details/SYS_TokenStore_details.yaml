@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - トークン管理システムテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'SYS_TokenStore（トークン管理）は、認証・認可システムで使用するトークン情報を管理するシステムテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'SYS_TokenStore（トークン管理）は、認証・認可システ�
   このテーブルは、認証・認可システムの基盤となる重要なシステムデータです。
 
   '
-business_columns:
+columns:
 - name: id
   logical: ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: マルチテナント識別子
@@ -46,7 +50,7 @@ business_columns:
   logical: ユーザーID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: トークンの所有者ユーザーID（MST_UserAuthへの参照）
@@ -54,7 +58,7 @@ business_columns:
   logical: トークンタイプ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: トークンの種類（ACCESS:アクセストークン、REFRESH:リフレッシュトークン、SESSION:セッション）
@@ -66,7 +70,7 @@ business_columns:
   logical: トークン値
   type: TEXT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: true
   description: トークンの値（暗号化必須）
@@ -74,7 +78,7 @@ business_columns:
   logical: トークンハッシュ
   type: VARCHAR
   length: 255
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: トークン値のハッシュ値（検索用）
@@ -82,7 +86,7 @@ business_columns:
   logical: 有効期限
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: トークンの有効期限
@@ -90,7 +94,7 @@ business_columns:
   logical: 発行日時
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: トークンの発行日時
@@ -98,7 +102,7 @@ business_columns:
   logical: 最終使用日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: トークンの最終使用日時
@@ -106,7 +110,7 @@ business_columns:
   logical: クライアントIP
   type: VARCHAR
   length: 45
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: トークン発行時のクライアントIPアドレス（IPv6対応）
@@ -114,7 +118,7 @@ business_columns:
   logical: ユーザーエージェント
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: トークン発行時のユーザーエージェント情報
@@ -122,7 +126,7 @@ business_columns:
   logical: デバイスフィンガープリント
   type: VARCHAR
   length: 255
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: デバイス識別用フィンガープリント
@@ -130,7 +134,7 @@ business_columns:
   logical: スコープ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: トークンのアクセススコープ（JSON形式）
@@ -138,7 +142,7 @@ business_columns:
   logical: 無効化フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: トークンが無効化されているかどうか
@@ -147,7 +151,7 @@ business_columns:
   logical: 無効化日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: トークンが無効化された日時
@@ -155,7 +159,7 @@ business_columns:
   logical: 無効化理由
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 無効化の理由（LOGOUT:ログアウト、EXPIRED:期限切れ、SECURITY:セキュリティ、ADMIN:管理者操作）
@@ -164,70 +168,107 @@ business_columns:
   - EXPIRED
   - SECURITY
   - ADMIN
-business_indexes:
+- name: tokenstore_id
+  logical: SYS_TokenStoreの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_TokenStoreの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_token_store_hash
   columns:
-  - token_hash
+  - - token_hash
   unique: true
   description: トークンハッシュ検索用（一意）
 - name: idx_token_store_user_type
   columns:
-  - user_id
-  - token_type
+  - - user_id
+  - - token_type
   unique: false
   description: ユーザー別トークンタイプ検索用
 - name: idx_token_store_expires
   columns:
-  - expires_at
-  - is_revoked
+  - - expires_at
+  - - is_revoked
   unique: false
   description: 有効期限・無効化状態検索用
 - name: idx_token_store_tenant_user
   columns:
-  - tenant_id
-  - user_id
+  - - tenant_id
+  - - user_id
   unique: false
   description: テナント別ユーザー検索用
 - name: idx_token_store_issued
   columns:
-  - issued_at
+  - - issued_at
   unique: false
   description: 発行日時検索用
 - name: idx_token_store_last_used
   columns:
-  - last_used_at
+  - - last_used_at
   unique: false
   description: 最終使用日時検索用
-business_constraints:
+constraints:
 - name: uk_token_store_hash
   type: UNIQUE
-  columns:
-  - token_hash
   description: トークンハッシュ一意制約
+  columns:
+  - - token_hash
 - name: chk_token_store_type
   type: CHECK
-  condition: token_type IN ('ACCESS', 'REFRESH', 'SESSION')
   description: トークンタイプ値チェック制約
+  condition: token_type IN ('ACCESS', 'REFRESH', 'SESSION')
 - name: chk_token_store_revoked_reason
   type: CHECK
+  description: 無効化理由値チェック制約
   condition: revoked_reason IS NULL OR revoked_reason IN ('LOGOUT', 'EXPIRED', 'SECURITY',
     'ADMIN')
-  description: 無効化理由値チェック制約
 - name: chk_token_store_expires_after_issued
   type: CHECK
-  condition: expires_at > issued_at
   description: 有効期限が発行日時より後であることをチェック
+  condition: expires_at > issued_at
 - name: chk_token_store_revoked_consistency
   type: CHECK
+  description: 無効化フラグと無効化日時の整合性チェック
   condition: (is_revoked = false AND revoked_at IS NULL AND revoked_reason IS NULL)
     OR (is_revoked = true AND revoked_at IS NOT NULL)
-  description: 無効化フラグと無効化日時の整合性チェック
 foreign_keys:
 - name: fk_token_store_user
   columns:
-  - user_id
+  - - user_id
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - user_id
   on_update: CASCADE
@@ -274,7 +315,7 @@ notes:
 - スコープ情報はJSON形式で柔軟な権限管理に対応
 - 無効化されたトークンも監査のため一定期間保持
 - IPv6アドレスに対応したクライアントIP管理
-business_rules:
+- === 業務ルール ===
 - トークンハッシュは全システムで一意である必要がある
 - 有効期限切れのトークンは自動的に無効化される
 - 無効化されたトークンは再利用不可
@@ -283,45 +324,12 @@ business_rules:
 - セッショントークンはブラウザセッション管理用
 - トークン使用時は最終使用日時を更新
 - セキュリティ上の理由で無効化されたトークンは即座に削除対象
-columns:
-- name: tokenstore_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: SYS_TokenStoreの主キー
-  requirement_id: PLT.1-WEB.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes: []
+rules:
+- トークンハッシュは全システムで一意である必要がある
+- 有効期限切れのトークンは自動的に無効化される
+- 無効化されたトークンは再利用不可
+- 同一ユーザーの同一タイプトークンは複数発行可能
+- リフレッシュトークンの有効期限はアクセストークンより長期
+- セッショントークンはブラウザセッション管理用
+- トークン使用時は最終使用日時を更新
+- セキュリティ上の理由で無効化されたトークンは即座に削除対象

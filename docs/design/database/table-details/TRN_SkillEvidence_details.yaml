@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - スキル証跡テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'TRN_SkillEvidence（スキル証跡）は、社員のスキル習得・向上を証明する具体的な証跡情報を管理するトランザクションテーブルです。
 
 
@@ -27,12 +31,12 @@ overview: 'TRN_SkillEvidence（スキル証跡）は、社員のスキル習得�
   適切な人材配置や能力開発の判断を支援できます。
 
   '
-business_columns:
+columns:
 - name: evidence_id
   logical: 証跡ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: スキル証跡を一意に識別するID
@@ -40,7 +44,7 @@ business_columns:
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の対象社員ID（MST_Employeeへの外部キー）
@@ -48,7 +52,7 @@ business_columns:
   logical: スキルID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証明対象のスキルID（MST_SkillItemへの外部キー）
@@ -56,7 +60,7 @@ business_columns:
   logical: 証跡種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の種別（CERTIFICATION:資格、PROJECT:プロジェクト成果、TRAINING:研修修了、PORTFOLIO:ポートフォリオ、PEER_REVIEW:同僚評価、SELF_ASSESSMENT:自己評価、OTHER:その他）
@@ -72,7 +76,7 @@ business_columns:
   logical: 証跡タイトル
   type: VARCHAR
   length: 200
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の名称・タイトル
@@ -80,7 +84,7 @@ business_columns:
   logical: 証跡説明
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の詳細説明・内容
@@ -88,7 +92,7 @@ business_columns:
   logical: 実証スキルレベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡により実証されるスキルレベル（BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
@@ -101,7 +105,7 @@ business_columns:
   logical: 証跡日付
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡が作成・取得された日付
@@ -109,7 +113,7 @@ business_columns:
   logical: 有効開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の有効期間開始日
@@ -117,7 +121,7 @@ business_columns:
   logical: 有効終了日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の有効期間終了日（無期限の場合はNULL）
@@ -125,7 +129,7 @@ business_columns:
   logical: ファイルパス
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡ファイルの保存パス
@@ -133,7 +137,7 @@ business_columns:
   logical: ファイル種別
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡ファイルの種別（PDF:PDF、IMAGE:画像、VIDEO:動画、DOCUMENT:文書、URL:URL、OTHER:その他）
@@ -148,7 +152,7 @@ business_columns:
   logical: ファイルサイズ
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ファイルサイズ（KB）
@@ -156,7 +160,7 @@ business_columns:
   logical: 外部URL
   type: VARCHAR
   length: 500
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 外部サイトの証跡URL（GitHub、Qiita等）
@@ -164,7 +168,7 @@ business_columns:
   logical: 発行者名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡を発行した機関・組織名
@@ -172,7 +176,7 @@ business_columns:
   logical: 発行者種別
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 発行者の種別（COMPANY:会社、EDUCATIONAL:教育機関、CERTIFICATION_BODY:認定機関、GOVERNMENT:政府機関、COMMUNITY:コミュニティ、OTHER:その他）
@@ -187,7 +191,7 @@ business_columns:
   logical: 証明書番号
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 資格証明書・修了証の番号
@@ -195,7 +199,7 @@ business_columns:
   logical: 検証方法
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の検証方法（AUTOMATIC:自動、MANUAL:手動、PEER:同僚、MANAGER:上司、EXTERNAL:外部機関）
@@ -209,7 +213,7 @@ business_columns:
   logical: 検証状況
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の検証状況（PENDING:検証待ち、VERIFIED:検証済み、REJECTED:却下、EXPIRED:期限切れ）
@@ -223,7 +227,7 @@ business_columns:
   logical: 検証者
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡を検証した担当者のID
@@ -231,7 +235,7 @@ business_columns:
   logical: 検証日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡が検証された日付
@@ -239,7 +243,7 @@ business_columns:
   logical: 検証コメント
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 検証時のコメント・備考
@@ -247,7 +251,7 @@ business_columns:
   logical: 関連案件ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連するプロジェクトのID（TRN_ProjectRecordへの外部キー）
@@ -255,7 +259,7 @@ business_columns:
   logical: 関連研修ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連する研修のID（TRN_TrainingHistoryへの外部キー）
@@ -263,7 +267,7 @@ business_columns:
   logical: 関連資格ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連する資格のID（MST_Certificationへの外部キー）
@@ -271,7 +275,7 @@ business_columns:
   logical: 影響度スコア
   type: DECIMAL
   length: 3,1
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡の影響度・重要度スコア（1.0-5.0）
@@ -279,7 +283,7 @@ business_columns:
   logical: 複雑度レベル
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡が示す作業の複雑度（LOW:低、MEDIUM:中、HIGH:高、VERY_HIGH:非常に高い）
@@ -292,7 +296,7 @@ business_columns:
   logical: チーム規模
   type: INTEGER
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 関連プロジェクトのチーム規模
@@ -300,7 +304,7 @@ business_columns:
   logical: 活動での役割
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡となる活動での担当役割
@@ -308,7 +312,7 @@ business_columns:
   logical: 使用技術
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 証跡に関連する使用技術（JSON形式）
@@ -316,7 +320,7 @@ business_columns:
   logical: 成果・実績
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 具体的な成果・実績
@@ -324,7 +328,7 @@ business_columns:
   logical: 学んだこと
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 活動から学んだ知識・経験
@@ -332,7 +336,7 @@ business_columns:
   logical: 公開フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 証跡を社外に公開可能かどうか
@@ -341,7 +345,7 @@ business_columns:
   logical: ポートフォリオ項目フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ポートフォリオに含める項目かどうか
@@ -350,124 +354,184 @@ business_columns:
   logical: タグ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 検索・分類用のタグ（JSON形式）
-business_indexes:
+- name: skillevidence_id
+  logical: TRN_SkillEvidenceの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: TRN_SkillEvidenceの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_evidence_id
   columns:
-  - evidence_id
+  - - evidence_id
   unique: true
   description: 証跡ID検索用（一意）
 - name: idx_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_skill_id
   columns:
-  - skill_id
+  - - skill_id
   unique: false
   description: スキルID検索用
 - name: idx_evidence_type
   columns:
-  - evidence_type
+  - - evidence_type
   unique: false
   description: 証跡種別検索用
 - name: idx_skill_level
   columns:
-  - skill_level_demonstrated
+  - - skill_level_demonstrated
   unique: false
   description: スキルレベル検索用
 - name: idx_evidence_date
   columns:
-  - evidence_date
+  - - evidence_date
   unique: false
   description: 証跡日付検索用
 - name: idx_verification_status
   columns:
-  - verification_status
+  - - verification_status
   unique: false
   description: 検証状況検索用
 - name: idx_validity_period
   columns:
-  - validity_start_date
-  - validity_end_date
+  - - validity_start_date
+  - - validity_end_date
   unique: false
   description: 有効期間検索用
 - name: idx_employee_skill
   columns:
-  - employee_id
-  - skill_id
-  - verification_status
+  - - employee_id
+  - - skill_id
+  - - verification_status
   unique: false
   description: 社員別スキル証跡検索用
 - name: idx_portfolio
   columns:
-  - is_portfolio_item
-  - is_public
+  - - is_portfolio_item
+  - - is_public
   unique: false
   description: ポートフォリオ項目検索用
-business_constraints:
+- name: idx_trn_skillevidence_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_evidence_id
   type: UNIQUE
-  columns:
-  - evidence_id
   description: 証跡ID一意制約
+  columns:
+  - - evidence_id
 - name: chk_evidence_type
   type: CHECK
+  description: 証跡種別値チェック制約
   condition: evidence_type IN ('CERTIFICATION', 'PROJECT', 'TRAINING', 'PORTFOLIO',
     'PEER_REVIEW', 'SELF_ASSESSMENT', 'OTHER')
-  description: 証跡種別値チェック制約
 - name: chk_skill_level
   type: CHECK
+  description: スキルレベル値チェック制約
   condition: skill_level_demonstrated IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED',
     'EXPERT')
-  description: スキルレベル値チェック制約
 - name: chk_file_type
   type: CHECK
-  condition: file_type IN ('PDF', 'IMAGE', 'VIDEO', 'DOCUMENT', 'URL', 'OTHER')
   description: ファイル種別値チェック制約
+  condition: file_type IN ('PDF', 'IMAGE', 'VIDEO', 'DOCUMENT', 'URL', 'OTHER')
 - name: chk_issuer_type
   type: CHECK
+  description: 発行者種別値チェック制約
   condition: issuer_type IN ('COMPANY', 'EDUCATIONAL', 'CERTIFICATION_BODY', 'GOVERNMENT',
     'COMMUNITY', 'OTHER')
-  description: 発行者種別値チェック制約
 - name: chk_verification_method
   type: CHECK
-  condition: verification_method IN ('AUTOMATIC', 'MANUAL', 'PEER', 'MANAGER', 'EXTERNAL')
   description: 検証方法値チェック制約
+  condition: verification_method IN ('AUTOMATIC', 'MANUAL', 'PEER', 'MANAGER', 'EXTERNAL')
 - name: chk_verification_status
   type: CHECK
-  condition: verification_status IN ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED')
   description: 検証状況値チェック制約
+  condition: verification_status IN ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED')
 - name: chk_complexity_level
   type: CHECK
-  condition: complexity_level IN ('LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH')
   description: 複雑度レベル値チェック制約
+  condition: complexity_level IN ('LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH')
 - name: chk_validity_period
   type: CHECK
-  condition: validity_end_date IS NULL OR validity_start_date <= validity_end_date
   description: 有効期間の整合性チェック制約
+  condition: validity_end_date IS NULL OR validity_start_date <= validity_end_date
 - name: chk_impact_score
   type: CHECK
-  condition: impact_score IS NULL OR (impact_score >= 1.0 AND impact_score <= 5.0)
   description: 影響度スコア範囲チェック制約
+  condition: impact_score IS NULL OR (impact_score >= 1.0 AND impact_score <= 5.0)
 - name: chk_file_size
   type: CHECK
-  condition: file_size_kb IS NULL OR file_size_kb > 0
   description: ファイルサイズ正数チェック制約
+  condition: file_size_kb IS NULL OR file_size_kb > 0
 - name: chk_team_size
   type: CHECK
-  condition: team_size IS NULL OR team_size > 0
   description: チーム規模正数チェック制約
+  condition: team_size IS NULL OR team_size > 0
 foreign_keys:
 - name: fk_evidence_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -475,9 +539,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_evidence_skill
   columns:
-  - skill_id
+  - - skill_id
   references:
-    table: MST_SkillItem
+    table:
+    - MST_SkillItem
     columns:
     - id
   on_update: CASCADE
@@ -485,9 +550,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_evidence_verifier
   columns:
-  - verified_by
+  - - verified_by
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -495,9 +561,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_evidence_project
   columns:
-  - related_project_id
+  - - related_project_id
   references:
-    table: TRN_ProjectRecord
+    table:
+    - TRN_ProjectRecord
     columns:
     - id
   on_update: CASCADE
@@ -505,9 +572,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_evidence_training
   columns:
-  - related_training_id
+  - - related_training_id
   references:
-    table: TRN_TrainingHistory
+    table:
+    - TRN_TrainingHistory
     columns:
     - id
   on_update: CASCADE
@@ -515,9 +583,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_evidence_certification
   columns:
-  - related_certification_id
+  - - related_certification_id
   references:
-    table: MST_Certification
+    table:
+    - MST_Certification
     columns:
     - id
   on_update: CASCADE
@@ -601,7 +670,7 @@ notes:
 - ポートフォリオ項目は採用・評価活動に活用
 - タグ機能により柔軟な検索・分類が可能
 - 有効期限管理により証跡の鮮度を維持
-business_rules:
+- === 業務ルール ===
 - 証跡IDは一意である必要がある
 - 有効開始日は有効終了日以前である必要がある
 - 検証済み証跡のみがスキル評価に使用可能
@@ -610,58 +679,12 @@ business_rules:
 - 外部URLは定期的な有効性確認が必要
 - ポートフォリオ項目は検証済みである必要がある
 - 影響度スコアは1.0-5.0の範囲で設定
-columns:
-- name: skillevidence_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: TRN_SkillEvidenceの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_trn_skillevidence_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 証跡IDは一意である必要がある
+- 有効開始日は有効終了日以前である必要がある
+- 検証済み証跡のみがスキル評価に使用可能
+- 機密プロジェクトの証跡は公開不可
+- ファイルサイズは10MB以下に制限
+- 外部URLは定期的な有効性確認が必要
+- ポートフォリオ項目は検証済みである必要がある
+- 影響度スコアは1.0-5.0の範囲で設定

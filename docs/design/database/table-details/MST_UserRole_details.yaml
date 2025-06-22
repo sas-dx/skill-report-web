@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - ユーザロール関連マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_UserRole（ユーザーロール紐付け）は、ユーザーとロールの関連付けを管理するマスタテーブルです。
 
 
@@ -31,12 +35,12 @@ overview: 'MST_UserRole（ユーザーロール紐付け）は、ユーザーと
   システムセキュリティの実装において中核的な役割を果たします。
 
   '
-business_columns:
+columns:
 - name: user_id
   logical: ユーザーID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ユーザーのID（MST_UserAuthへの外部キー）
@@ -44,7 +48,7 @@ business_columns:
   logical: ロールID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロールのID（MST_Roleへの外部キー）
@@ -52,7 +56,7 @@ business_columns:
   logical: 割り当て種別
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロール割り当ての種別（DIRECT:直接、INHERITED:継承、DELEGATED:委譲、TEMPORARY:一時的）
@@ -66,7 +70,7 @@ business_columns:
   logical: 割り当て者ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロールを割り当てた管理者のID（MST_UserAuthへの外部キー）
@@ -74,7 +78,7 @@ business_columns:
   logical: 割り当て理由
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロール割り当ての理由・根拠
@@ -82,7 +86,7 @@ business_columns:
   logical: 有効開始日時
   type: TIMESTAMP
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロール割り当ての有効開始日時
@@ -91,7 +95,7 @@ business_columns:
   logical: 有効終了日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロール割り当ての有効終了日時
@@ -99,7 +103,7 @@ business_columns:
   logical: 主ロールフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ユーザーの主要ロールかどうか
@@ -108,7 +112,7 @@ business_columns:
   logical: 優先順序
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 複数ロール保持時の優先順序（数値が小さいほど高優先）
@@ -117,7 +121,7 @@ business_columns:
   logical: 適用条件
   type: JSON
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロール適用の条件（時間帯、場所、状況等をJSON形式）
@@ -125,7 +129,7 @@ business_columns:
   logical: 委譲元ユーザーID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 委譲ロールの場合の委譲元ユーザーID
@@ -133,7 +137,7 @@ business_columns:
   logical: 委譲期限
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 委譲ロールの期限
@@ -141,7 +145,7 @@ business_columns:
   logical: 自動割り当てフラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: システムによる自動割り当てかどうか
@@ -150,7 +154,7 @@ business_columns:
   logical: 承認要求フラグ
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ロール行使に承認が必要かどうか
@@ -159,7 +163,7 @@ business_columns:
   logical: 承認状態
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 承認の状態（PENDING:承認待ち、APPROVED:承認済み、REJECTED:却下）
@@ -171,7 +175,7 @@ business_columns:
   logical: 承認者ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロール割り当てを承認した管理者のID
@@ -179,7 +183,7 @@ business_columns:
   logical: 承認日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ロール割り当てが承認された日時
@@ -187,7 +191,7 @@ business_columns:
   logical: 割り当て状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 割り当ての状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、EXPIRED:期限切れ）
@@ -201,7 +205,7 @@ business_columns:
   logical: 最終使用日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: このロールが最後に使用された日時
@@ -209,108 +213,168 @@ business_columns:
   logical: 使用回数
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: このロールが使用された回数
   default: 0
-business_indexes:
+- name: userrole_id
+  logical: MST_UserRoleの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_UserRoleの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_user_role
   columns:
-  - user_id
-  - role_id
+  - - user_id
+  - - role_id
   unique: true
   description: ユーザー・ロール組み合わせ検索用（一意）
 - name: idx_user_id
   columns:
-  - user_id
+  - - user_id
   unique: false
   description: ユーザー別検索用
 - name: idx_role_id
   columns:
-  - role_id
+  - - role_id
   unique: false
   description: ロール別検索用
 - name: idx_assignment_type
   columns:
-  - assignment_type
+  - - assignment_type
   unique: false
   description: 割り当て種別検索用
 - name: idx_assigned_by
   columns:
-  - assigned_by
+  - - assigned_by
   unique: false
   description: 割り当て者別検索用
 - name: idx_effective_period
   columns:
-  - effective_from
-  - effective_to
+  - - effective_from
+  - - effective_to
   unique: false
   description: 有効期間検索用
 - name: idx_primary_role
   columns:
-  - user_id
-  - is_primary_role
+  - - user_id
+  - - is_primary_role
   unique: false
   description: 主ロール検索用
 - name: idx_assignment_status
   columns:
-  - assignment_status
+  - - assignment_status
   unique: false
   description: 割り当て状態別検索用
 - name: idx_approval_status
   columns:
-  - approval_status
+  - - approval_status
   unique: false
   description: 承認状態別検索用
 - name: idx_delegation_source
   columns:
-  - delegation_source_user_id
+  - - delegation_source_user_id
   unique: false
   description: 委譲元ユーザー検索用
-business_constraints:
+- name: idx_mst_userrole_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_user_role_active
   type: UNIQUE
-  columns:
-  - user_id
-  - role_id
-  - assignment_status
   description: アクティブなユーザー・ロール組み合わせ一意制約
+  columns:
+  - - user_id
+  - - role_id
+  - - assignment_status
 - name: chk_assignment_type
   type: CHECK
-  condition: assignment_type IN ('DIRECT', 'INHERITED', 'DELEGATED', 'TEMPORARY')
   description: 割り当て種別値チェック制約
+  condition: assignment_type IN ('DIRECT', 'INHERITED', 'DELEGATED', 'TEMPORARY')
 - name: chk_assignment_status
   type: CHECK
-  condition: assignment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED')
   description: 割り当て状態値チェック制約
+  condition: assignment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED')
 - name: chk_approval_status
   type: CHECK
+  description: 承認状態値チェック制約
   condition: approval_status IS NULL OR approval_status IN ('PENDING', 'APPROVED',
     'REJECTED')
-  description: 承認状態値チェック制約
 - name: chk_effective_period
   type: CHECK
-  condition: effective_to IS NULL OR effective_from <= effective_to
   description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from <= effective_to
 - name: chk_delegation_period
   type: CHECK
-  condition: delegation_expires_at IS NULL OR effective_from <= delegation_expires_at
   description: 委譲期間整合性チェック制約
+  condition: delegation_expires_at IS NULL OR effective_from <= delegation_expires_at
 - name: chk_priority_order
   type: CHECK
-  condition: priority_order > 0
   description: 優先順序正値チェック制約
+  condition: priority_order > 0
 - name: chk_usage_count
   type: CHECK
-  condition: usage_count >= 0
   description: 使用回数非負値チェック制約
+  condition: usage_count >= 0
 foreign_keys:
 - name: fk_userrole_user
   columns:
-  - user_id
+  - - user_id
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - user_id
   on_update: CASCADE
@@ -318,9 +382,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_userrole_role
   columns:
-  - role_id
+  - - role_id
   references:
-    table: MST_Role
+    table:
+    - MST_Role
     columns:
     - id
   on_update: CASCADE
@@ -328,9 +393,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_userrole_assigned_by
   columns:
-  - assigned_by
+  - - assigned_by
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - id
   on_update: CASCADE
@@ -338,9 +404,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_userrole_delegation_source
   columns:
-  - delegation_source_user_id
+  - - delegation_source_user_id
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - id
   on_update: CASCADE
@@ -348,9 +415,10 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_userrole_approved_by
   columns:
-  - approved_by
+  - - approved_by
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - id
   on_update: CASCADE
@@ -404,7 +472,7 @@ notes:
 - 承認フローによる権限昇格制御
 - 使用状況の追跡・監査が可能
 - 主ロールによる基本権限の明確化
-business_rules:
+- === 業務ルール ===
 - 1ユーザーにつき1つの主ロール（is_primary_role=true）のみ
 - 有効期間外のロール割り当ては自動的に EXPIRED 状態に変更
 - 委譲ロールは委譲期限で自動失効
@@ -412,58 +480,11 @@ business_rules:
 - ロール使用時は last_used_at と usage_count を更新
 - 同一ユーザー・ロールの重複割り当ては不可
 - 委譲元ユーザーが無効化された場合は委譲ロールも無効化
-columns:
-- name: userrole_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_UserRoleの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_userrole_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 1ユーザーにつき1つの主ロール（is_primary_role=true）のみ
+- 有効期間外のロール割り当ては自動的に EXPIRED 状態に変更
+- 委譲ロールは委譲期限で自動失効
+- 承認要求ロールは承認完了まで使用不可
+- ロール使用時は last_used_at と usage_count を更新
+- 同一ユーザー・ロールの重複割り当ては不可
+- 委譲元ユーザーが無効化された場合は委譲ロールも無効化

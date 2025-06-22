@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - ユーザ認証マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'MST_UserAuth（ユーザー認証情報）は、システムにアクセスする全ユーザーの認証・認可情報を管理するマスタテーブルです。
 
 
@@ -31,12 +35,12 @@ overview: 'MST_UserAuth（ユーザー認証情報）は、システムにアク
   個人情報保護、コンプライアンス対応において重要な役割を果たします。
 
   '
-business_columns:
+columns:
 - name: user_id
   logical: ユーザーID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: ユーザーを一意に識別するID（例：USER000001）
@@ -45,7 +49,7 @@ business_columns:
   logical: ログインID
   type: VARCHAR
   length: 100
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: ログイン時に使用するID（通常はメールアドレス）
@@ -53,7 +57,7 @@ business_columns:
   logical: パスワードハッシュ
   type: VARCHAR
   length: 255
-  null: false
+  'null': true
   unique: false
   encrypted: true
   description: ハッシュ化されたパスワード（bcrypt等）
@@ -61,7 +65,7 @@ business_columns:
   logical: パスワードソルト
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: パスワードハッシュ化用のソルト値
@@ -69,7 +73,7 @@ business_columns:
   logical: 社員ID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: true
   encrypted: false
   description: 関連する社員のID（MST_Employeeへの外部キー）
@@ -77,7 +81,7 @@ business_columns:
   logical: アカウント状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: アカウントの状態（ACTIVE:有効、INACTIVE:無効、LOCKED:ロック、SUSPENDED:停止）
@@ -91,7 +95,7 @@ business_columns:
   logical: 最終ログイン日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最後にログインした日時
@@ -99,7 +103,7 @@ business_columns:
   logical: 最終ログインIP
   type: VARCHAR
   length: 45
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最後にログインしたIPアドレス（IPv4/IPv6対応）
@@ -107,7 +111,7 @@ business_columns:
   logical: ログイン失敗回数
   type: INT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 連続ログイン失敗回数（アカウントロック判定用）
@@ -116,7 +120,7 @@ business_columns:
   logical: 最終ログイン失敗日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 最後にログインに失敗した日時
@@ -124,7 +128,7 @@ business_columns:
   logical: パスワード変更日時
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: パスワードを最後に変更した日時
@@ -132,7 +136,7 @@ business_columns:
   logical: パスワード有効期限
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: パスワードの有効期限
@@ -140,7 +144,7 @@ business_columns:
   logical: 多要素認証有効
   type: BOOLEAN
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 多要素認証が有効かどうか
@@ -149,7 +153,7 @@ business_columns:
   logical: 多要素認証シークレット
   type: VARCHAR
   length: 255
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: TOTP等の多要素認証用シークレットキー
@@ -157,7 +161,7 @@ business_columns:
   logical: 復旧トークン
   type: VARCHAR
   length: 255
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: パスワードリセット等の復旧用トークン
@@ -165,7 +169,7 @@ business_columns:
   logical: 復旧トークン有効期限
   type: TIMESTAMP
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 復旧トークンの有効期限
@@ -173,7 +177,7 @@ business_columns:
   logical: セッションタイムアウト
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: セッションタイムアウト時間（分）
@@ -181,7 +185,7 @@ business_columns:
   logical: 外部認証プロバイダ
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 外部認証プロバイダ（LDAP、SAML、OAuth等）
@@ -189,81 +193,141 @@ business_columns:
   logical: 外部認証ID
   type: VARCHAR
   length: 255
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 外部認証システムでのユーザーID
-business_indexes:
+- name: userauth_id
+  logical: MST_UserAuthの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_UserAuthの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_user_id
   columns:
-  - user_id
+  - - user_id
   unique: true
   description: ユーザーID検索用（一意）
 - name: idx_login_id
   columns:
-  - login_id
+  - - login_id
   unique: true
   description: ログインID検索用（一意）
 - name: idx_employee_id
   columns:
-  - employee_id
+  - - employee_id
   unique: true
   description: 社員ID検索用（一意）
 - name: idx_account_status
   columns:
-  - account_status
+  - - account_status
   unique: false
   description: アカウント状態別検索用
 - name: idx_last_login
   columns:
-  - last_login_at
+  - - last_login_at
   unique: false
   description: 最終ログイン日時検索用
 - name: idx_password_expires
   columns:
-  - password_expires_at
+  - - password_expires_at
   unique: false
   description: パスワード有効期限検索用
 - name: idx_external_auth
   columns:
-  - external_auth_provider
-  - external_auth_id
+  - - external_auth_provider
+  - - external_auth_id
   unique: false
   description: 外部認証検索用
-business_constraints:
+- name: idx_mst_userauth_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_user_id
   type: UNIQUE
-  columns:
-  - user_id
   description: ユーザーID一意制約
+  columns:
+  - - user_id
 - name: uk_login_id
   type: UNIQUE
-  columns:
-  - login_id
   description: ログインID一意制約
+  columns:
+  - - login_id
 - name: uk_employee_id
   type: UNIQUE
-  columns:
-  - employee_id
   description: 社員ID一意制約
+  columns:
+  - - employee_id
 - name: chk_account_status
   type: CHECK
-  condition: account_status IN ('ACTIVE', 'INACTIVE', 'LOCKED', 'SUSPENDED')
   description: アカウント状態値チェック制約
+  condition: account_status IN ('ACTIVE', 'INACTIVE', 'LOCKED', 'SUSPENDED')
 - name: chk_failed_login_count
   type: CHECK
-  condition: failed_login_count >= 0
   description: ログイン失敗回数非負値チェック制約
+  condition: failed_login_count >= 0
 - name: chk_session_timeout
   type: CHECK
-  condition: session_timeout IS NULL OR session_timeout > 0
   description: セッションタイムアウト正値チェック制約
+  condition: session_timeout IS NULL OR session_timeout > 0
 foreign_keys:
 - name: fk_userauth_employee
   columns:
-  - employee_id
+  - - employee_id
   references:
-    table: MST_Employee
+    table:
+    - MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -316,7 +380,7 @@ notes:
 - 外部認証システム連携対応
 - パスワード有効期限管理
 - セッションタイムアウト個別設定可能
-business_rules:
+- === 業務ルール ===
 - ログイン失敗5回でアカウント自動ロック
 - パスワードは90日で有効期限切れ
 - パスワードは過去3回分と同じものは使用不可
@@ -325,58 +389,12 @@ business_rules:
 - アカウントロック解除は管理者のみ可能
 - 復旧トークンの有効期限は24時間
 - セッションタイムアウトのデフォルトは8時間
-columns:
-- name: userauth_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: MST_UserAuthの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_mst_userauth_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- ログイン失敗5回でアカウント自動ロック
+- パスワードは90日で有効期限切れ
+- パスワードは過去3回分と同じものは使用不可
+- 管理者権限ユーザーは多要素認証必須
+- 外部認証ユーザーはパスワード管理不要
+- アカウントロック解除は管理者のみ可能
+- 復旧トークンの有効期限は24時間
+- セッションタイムアウトのデフォルトは8時間

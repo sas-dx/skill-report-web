@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - テナント課金履歴テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'HIS_TenantBilling（テナント課金履歴）は、マルチテナントシステムにおける各テナントの課金情報を履歴として管理するテーブルです。
 
 
@@ -25,12 +29,12 @@ overview: 'HIS_TenantBilling（テナント課金履歴）は、マルチテナ�
   このテーブルは、マルチテナント管理機能において課金・請求業務を支える重要な履歴データです。
 
   '
-business_columns:
+columns:
 - name: id
   logical: ID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
@@ -38,7 +42,7 @@ business_columns:
   logical: テナントID
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 課金対象のテナントID（MST_Tenantへの参照）
@@ -46,7 +50,7 @@ business_columns:
   logical: 課金期間開始日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 課金期間の開始日
@@ -54,7 +58,7 @@ business_columns:
   logical: 課金期間終了日
   type: DATE
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 課金期間の終了日
@@ -62,7 +66,7 @@ business_columns:
   logical: 課金タイプ
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 課金の種類（MONTHLY:月額、USAGE:従量、SETUP:初期費用、ADDITIONAL:追加費用）
@@ -75,7 +79,7 @@ business_columns:
   logical: プランID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 適用されたプランのID
@@ -83,7 +87,7 @@ business_columns:
   logical: プラン名
   type: VARCHAR
   length: 200
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 適用されたプランの名称
@@ -91,7 +95,7 @@ business_columns:
   logical: 基本料金
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 基本料金（税抜）
@@ -100,7 +104,7 @@ business_columns:
   logical: 従量料金
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 使用量に基づく従量料金（税抜）
@@ -109,7 +113,7 @@ business_columns:
   logical: 追加料金
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 追加サービス等の料金（税抜）
@@ -118,7 +122,7 @@ business_columns:
   logical: 割引金額
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 適用された割引金額（税抜）
@@ -127,7 +131,7 @@ business_columns:
   logical: 小計金額
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 税抜小計金額
@@ -135,7 +139,7 @@ business_columns:
   logical: 税率
   type: DECIMAL
   length: 5,3
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 適用された税率（例：0.100 = 10%）
@@ -143,7 +147,7 @@ business_columns:
   logical: 税額
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 消費税額
@@ -151,7 +155,7 @@ business_columns:
   logical: 合計金額
   type: DECIMAL
   length: 12,2
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 税込合計金額
@@ -159,7 +163,7 @@ business_columns:
   logical: 通貨コード
   type: VARCHAR
   length: 3
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 通貨コード（ISO 4217準拠、例：JPY、USD）
@@ -168,7 +172,7 @@ business_columns:
   logical: 使用量詳細
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 使用量の詳細情報（JSON形式）
@@ -176,7 +180,7 @@ business_columns:
   logical: 課金状態
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: 課金の状態（CALCULATED:計算済み、INVOICED:請求済み、PAID:支払済み、CANCELLED:キャンセル）
@@ -190,7 +194,7 @@ business_columns:
   logical: 請求書番号
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 発行された請求書の番号
@@ -198,7 +202,7 @@ business_columns:
   logical: 請求日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 請求書の発行日
@@ -206,7 +210,7 @@ business_columns:
   logical: 支払期限
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 支払期限日
@@ -214,7 +218,7 @@ business_columns:
   logical: 支払日
   type: DATE
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 実際の支払日
@@ -222,7 +226,7 @@ business_columns:
   logical: 支払方法
   type: ENUM
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 支払方法（CREDIT_CARD:クレジットカード、BANK_TRANSFER:銀行振込、AUTO_DEBIT:自動引落）
@@ -234,83 +238,125 @@ business_columns:
   logical: 備考
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 課金に関する備考・特記事項
-business_indexes:
+- name: tenantbilling_id
+  logical: HIS_TenantBillingの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: HIS_TenantBillingの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_tenant_billing_tenant_period
   columns:
-  - tenant_id
-  - billing_period_start
-  - billing_period_end
+  - - tenant_id
+  - - billing_period_start
+  - - billing_period_end
   unique: false
   description: テナント別課金期間検索用
 - name: idx_tenant_billing_status
   columns:
-  - billing_status
+  - - billing_status
   unique: false
   description: 課金状態別検索用
 - name: idx_tenant_billing_invoice
   columns:
-  - invoice_number
+  - - invoice_number
   unique: true
   description: 請求書番号検索用（一意）
 - name: idx_tenant_billing_dates
   columns:
-  - invoice_date
-  - due_date
-  - paid_date
+  - - invoice_date
+  - - due_date
+  - - paid_date
   unique: false
   description: 日付別検索用
 - name: idx_tenant_billing_type
   columns:
-  - billing_type
+  - - billing_type
   unique: false
   description: 課金タイプ別検索用
 - name: idx_tenant_billing_amount
   columns:
-  - total_amount
+  - - total_amount
   unique: false
   description: 金額別検索用
-business_constraints:
+- name: idx_his_tenantbilling_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
 - name: uk_tenant_billing_invoice
   type: UNIQUE
-  columns:
-  - invoice_number
   description: 請求書番号一意制約
+  columns:
+  - - invoice_number
 - name: chk_tenant_billing_type
   type: CHECK
-  condition: billing_type IN ('MONTHLY', 'USAGE', 'SETUP', 'ADDITIONAL')
   description: 課金タイプ値チェック制約
+  condition: billing_type IN ('MONTHLY', 'USAGE', 'SETUP', 'ADDITIONAL')
 - name: chk_tenant_billing_status
   type: CHECK
-  condition: billing_status IN ('CALCULATED', 'INVOICED', 'PAID', 'CANCELLED')
   description: 課金状態値チェック制約
+  condition: billing_status IN ('CALCULATED', 'INVOICED', 'PAID', 'CANCELLED')
 - name: chk_tenant_billing_payment_method
   type: CHECK
+  description: 支払方法値チェック制約
   condition: payment_method IS NULL OR payment_method IN ('CREDIT_CARD', 'BANK_TRANSFER',
     'AUTO_DEBIT')
-  description: 支払方法値チェック制約
 - name: chk_tenant_billing_period
   type: CHECK
-  condition: billing_period_end >= billing_period_start
   description: 課金期間整合性チェック制約
+  condition: billing_period_end >= billing_period_start
 - name: chk_tenant_billing_amounts_positive
   type: CHECK
+  description: 金額正数チェック制約
   condition: base_amount >= 0 AND usage_amount >= 0 AND additional_amount >= 0 AND
     discount_amount >= 0 AND tax_amount >= 0 AND total_amount >= 0
-  description: 金額正数チェック制約
 - name: chk_tenant_billing_tax_rate
   type: CHECK
-  condition: tax_rate >= 0 AND tax_rate <= 1
   description: 税率範囲チェック制約
+  condition: tax_rate >= 0 AND tax_rate <= 1
 foreign_keys:
 - name: fk_tenant_billing_tenant
   columns:
-  - tenant_id
+  - - tenant_id
   references:
-    table: MST_Tenant
+    table:
+    - MST_Tenant
     columns:
     - id
   on_update: CASCADE
@@ -374,7 +420,7 @@ notes:
 - 支払状況は外部決済システムとの連携により更新
 - 通貨コードはISO 4217準拠で国際化に対応
 - 個人情報含有のため暗号化必須（テーブル一覧参照）
-business_rules:
+- === 業務ルール ===
 - 課金期間は重複しない連続した期間である必要がある
 - 請求書番号は発行後変更不可
 - 支払済み状態の課金情報は変更不可
@@ -383,58 +429,12 @@ business_rules:
 - 使用量ベース課金は実際の使用量データに基づく
 - 割引は契約条件に基づき自動適用
 - 支払期限は請求日から30日後が標準
-columns:
-- name: tenantbilling_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: HIS_TenantBillingの主キー
-  requirement_id: PLT.1-WEB.1
-- name: tenant_id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: false
-  default: null
-  comment: テナントID（マルチテナント対応）
-  requirement_id: TNT.1-MGMT.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes:
-- name: idx_his_tenantbilling_tenant_id
-  columns:
-  - tenant_id
-  unique: false
-  comment: テナントID検索用インデックス
+rules:
+- 課金期間は重複しない連続した期間である必要がある
+- 請求書番号は発行後変更不可
+- 支払済み状態の課金情報は変更不可
+- キャンセルされた課金は金額を0に調整
+- 税率は課金期間の法定税率を適用
+- 使用量ベース課金は実際の使用量データに基づく
+- 割引は契約条件に基づき自動適用
+- 支払期限は請求日から30日後が標準

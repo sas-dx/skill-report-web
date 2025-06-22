@@ -6,6 +6,10 @@ revision_history:
   date: '2025-06-01'
   author: 開発チーム
   changes: 初版作成 - システムログテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
 overview: 'SYS_SystemLog（システムログ）は、アプリケーション全体で発生するあらゆるシステムイベントを記録・管理するログテーブルです。
 
 
@@ -29,12 +33,12 @@ overview: 'SYS_SystemLog（システムログ）は、アプリケーション�
   大量データの効率的な管理のため、月次パーティション分割と自動アーカイブ機能を実装しています。
 
   '
-business_columns:
+columns:
 - name: log_level
   logical: ログレベル
   type: ENUM
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ログレベル（ERROR:エラー、WARN:警告、INFO:情報、DEBUG:デバッグ）
@@ -47,7 +51,7 @@ business_columns:
   logical: ログカテゴリ
   type: VARCHAR
   length: 50
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ログのカテゴリ（AUTH:認証、API:API、BATCH:バッチ、SYSTEM:システム）
@@ -55,7 +59,7 @@ business_columns:
   logical: ログメッセージ
   type: TEXT
   length: null
-  null: false
+  'null': true
   unique: false
   encrypted: false
   description: ログメッセージの内容
@@ -63,7 +67,7 @@ business_columns:
   logical: 実行ユーザーID
   type: VARCHAR
   length: 50
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ログを発生させたユーザーのID（MST_UserAuthへの外部キー）
@@ -71,7 +75,7 @@ business_columns:
   logical: セッションID
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: セッションID（ユーザーセッションの識別）
@@ -79,7 +83,7 @@ business_columns:
   logical: IPアドレス
   type: VARCHAR
   length: 45
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: クライアントのIPアドレス（IPv4/IPv6対応）
@@ -87,7 +91,7 @@ business_columns:
   logical: ユーザーエージェント
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: クライアントのユーザーエージェント情報
@@ -95,7 +99,7 @@ business_columns:
   logical: リクエストURL
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: リクエストされたURL
@@ -103,7 +107,7 @@ business_columns:
   logical: HTTPメソッド
   type: VARCHAR
   length: 10
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: HTTPメソッド（GET、POST、PUT、DELETE等）
@@ -111,7 +115,7 @@ business_columns:
   logical: レスポンスステータス
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: HTTPレスポンスステータスコード
@@ -119,7 +123,7 @@ business_columns:
   logical: レスポンス時間
   type: INT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: レスポンス時間（ミリ秒）
@@ -127,7 +131,7 @@ business_columns:
   logical: エラーコード
   type: VARCHAR
   length: 20
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: アプリケーション固有のエラーコード
@@ -135,7 +139,7 @@ business_columns:
   logical: スタックトレース
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: エラー発生時のスタックトレース
@@ -143,7 +147,7 @@ business_columns:
   logical: リクエストボディ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: リクエストボディ（個人情報含む可能性があるため暗号化）
@@ -151,7 +155,7 @@ business_columns:
   logical: レスポンスボディ
   type: TEXT
   length: null
-  null: true
+  'null': true
   unique: false
   encrypted: true
   description: レスポンスボディ（個人情報含む可能性があるため暗号化）
@@ -159,7 +163,7 @@ business_columns:
   logical: 相関ID
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: 分散システムでのトレーシング用相関ID
@@ -167,7 +171,7 @@ business_columns:
   logical: コンポーネント名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ログを出力したコンポーネント名
@@ -175,7 +179,7 @@ business_columns:
   logical: スレッド名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ログを出力したスレッド名
@@ -183,87 +187,133 @@ business_columns:
   logical: サーバー名
   type: VARCHAR
   length: 100
-  null: true
+  'null': true
   unique: false
   encrypted: false
   description: ログを出力したサーバー名
-business_indexes:
+- name: systemlog_id
+  logical: SYS_SystemLogの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_SystemLogの主キー
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
 - name: idx_log_level
   columns:
-  - log_level
+  - - log_level
   unique: false
   description: ログレベル別検索用
 - name: idx_log_category
   columns:
-  - log_category
+  - - log_category
   unique: false
   description: ログカテゴリ別検索用
 - name: idx_user_id
   columns:
-  - user_id
+  - - user_id
   unique: false
   description: ユーザー別検索用
 - name: idx_session_id
   columns:
-  - session_id
+  - - session_id
   unique: false
   description: セッション別検索用
 - name: idx_ip_address
   columns:
-  - ip_address
+  - - ip_address
   unique: false
   description: IPアドレス別検索用
 - name: idx_error_code
   columns:
-  - error_code
+  - - error_code
   unique: false
   description: エラーコード別検索用
 - name: idx_correlation_id
   columns:
-  - correlation_id
+  - - correlation_id
   unique: false
   description: 相関ID別検索用
 - name: idx_component
   columns:
-  - component_name
+  - - component_name
   unique: false
   description: コンポーネント別検索用
 - name: idx_server
   columns:
-  - server_name
+  - - server_name
   unique: false
   description: サーバー別検索用
 - name: idx_response_time
   columns:
-  - response_time
+  - - response_time
   unique: false
   description: レスポンス時間検索用（パフォーマンス分析）
 - name: idx_created_at_level
   columns:
-  - created_at
-  - log_level
+  - - created_at
+  - - log_level
   unique: false
   description: 日時・レベル複合検索用
-business_constraints:
+constraints:
 - name: chk_log_level
   type: CHECK
-  condition: log_level IN ('ERROR', 'WARN', 'INFO', 'DEBUG')
   description: ログレベル値チェック制約
+  condition: log_level IN ('ERROR', 'WARN', 'INFO', 'DEBUG')
 - name: chk_response_status
   type: CHECK
+  description: HTTPステータスコード値チェック制約
   condition: response_status IS NULL OR (response_status >= 100 AND response_status
     <= 599)
-  description: HTTPステータスコード値チェック制約
 - name: chk_response_time
   type: CHECK
-  condition: response_time IS NULL OR response_time >= 0
   description: レスポンス時間非負値チェック制約
+  condition: response_time IS NULL OR response_time >= 0
 foreign_keys:
 - name: fk_log_user
   columns:
-  - user_id
+  - - user_id
   references:
-    table: MST_UserAuth
+    table:
+    - MST_UserAuth
     columns:
     - id
   on_update: CASCADE
@@ -311,7 +361,7 @@ notes:
 - 分散システムでのトレーシングのため相関IDを使用
 - ログレベルによる検索頻度が高いためインデックス最適化
 - 古いログは自動的にアーカイブ（6ヶ月経過後）
-business_rules:
+- === 業務ルール ===
 - ERRORレベルのログは即座にアラート通知
 - WARNレベルのログは日次で監視・分析
 - レスポンス時間が5秒を超える場合は自動的にWARNログ出力
@@ -319,51 +369,11 @@ business_rules:
 - ログ保持期間は6ヶ月（法的要件に応じて調整）
 - システム障害時の調査のため詳細ログを保持
 - 相関IDによりリクエストの全体フローを追跡可能
-partition_info:
-  type: RANGE
-  column: created_at
-  strategy: MONTHLY
-  description: 月次パーティションによる性能最適化
-  retention_months: 6
-columns:
-- name: systemlog_id
-  type: SERIAL
-  nullable: false
-  primary_key: true
-  unique: false
-  default: null
-  comment: SYS_SystemLogの主キー
-  requirement_id: PLT.1-WEB.1
-- name: id
-  type: VARCHAR(50)
-  nullable: false
-  primary_key: false
-  unique: true
-  default: null
-  comment: プライマリキー（UUID）
-  requirement_id: PLT.1-WEB.1
-- name: is_deleted
-  type: BOOLEAN
-  nullable: false
-  primary_key: false
-  unique: false
-  default: 'False'
-  comment: 論理削除フラグ
-  requirement_id: PLT.1-WEB.1
-- name: created_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 作成日時
-  requirement_id: PLT.1-WEB.1
-- name: updated_at
-  type: TIMESTAMP
-  nullable: false
-  primary_key: false
-  unique: false
-  default: CURRENT_TIMESTAMP
-  comment: 更新日時
-  requirement_id: PLT.1-WEB.1
-indexes: []
+rules:
+- ERRORレベルのログは即座にアラート通知
+- WARNレベルのログは日次で監視・分析
+- レスポンス時間が5秒を超える場合は自動的にWARNログ出力
+- 個人情報を含むログは暗号化して保存
+- ログ保持期間は6ヶ月（法的要件に応じて調整）
+- システム障害時の調査のため詳細ログを保持
+- 相関IDによりリクエストの全体フローを追跡可能
