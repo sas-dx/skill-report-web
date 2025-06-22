@@ -1,0 +1,371 @@
+table_name: MST_ReportTemplate
+logical_name: 帳票テンプレート
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 帳票テンプレートマスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+overview: 'MST_ReportTemplate（帳票テンプレート）は、システムで生成する各種帳票のテンプレート情報を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - 帳票レイアウト・フォーマットの管理
+
+  - 帳票生成パラメータの管理
+
+  - 多言語対応の帳票テンプレート管理
+
+  - テナント別カスタマイズ対応
+
+  - 帳票出力形式の管理
+
+
+  このテーブルは、帳票・レポート機能において一貫性のある帳票出力を実現する重要なマスタデータです。
+
+  '
+columns:
+- name: id
+  logical: ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: マルチテナント識別子
+- name: template_key
+  logical: テンプレートキー
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの識別キー（例：skill_report、goal_summary等）
+- name: template_name
+  logical: テンプレート名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの表示名
+- name: report_category
+  logical: 帳票カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析）
+  enum_values:
+  - SKILL
+  - GOAL
+  - EVALUATION
+  - SUMMARY
+  - ANALYTICS
+- name: output_format
+  logical: 出力形式
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML）
+  enum_values:
+  - PDF
+  - EXCEL
+  - CSV
+  - HTML
+- name: language_code
+  logical: 言語コード
+  type: VARCHAR
+  length: 10
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの言語（ja:日本語、en:英語等）
+  default: ja
+- name: template_content
+  logical: テンプレート内容
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票テンプレートの内容（HTML、XML等の形式）
+- name: style_sheet
+  logical: スタイルシート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票のスタイル定義（CSS等）
+- name: parameters_schema
+  logical: パラメータスキーマ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成に必要なパラメータの定義（JSON Schema形式）
+- name: data_source_config
+  logical: データソース設定
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: データ取得に関する設定（JSON形式）
+- name: page_settings
+  logical: ページ設定
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: ページサイズ・余白等の設定（JSON形式）
+- name: header_template
+  logical: ヘッダーテンプレート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票ヘッダー部分のテンプレート
+- name: footer_template
+  logical: フッターテンプレート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票フッター部分のテンプレート
+- name: is_default
+  logical: デフォルトフラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同一キー・カテゴリでのデフォルトテンプレートかどうか
+  default: false
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートが有効かどうか
+  default: true
+- name: version
+  logical: バージョン
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートのバージョン番号
+  default: 1.0.0
+- name: preview_image_url
+  logical: プレビュー画像URL
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートのプレビュー画像URL
+- name: reporttemplate_id
+  logical: MST_ReportTemplateの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_ReportTemplateの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_report_template_tenant_key
+  columns:
+  - - tenant_id
+  - - template_key
+  - - language_code
+  unique: true
+  description: テナント別テンプレートキー検索用（一意）
+- name: idx_report_template_category
+  columns:
+  - - report_category
+  unique: false
+  description: 帳票カテゴリ別検索用
+- name: idx_report_template_format
+  columns:
+  - - output_format
+  unique: false
+  description: 出力形式別検索用
+- name: idx_report_template_language
+  columns:
+  - - language_code
+  unique: false
+  description: 言語別検索用
+- name: idx_report_template_default
+  columns:
+  - - is_default
+  - - is_active
+  unique: false
+  description: デフォルト・有効テンプレート検索用
+- name: idx_mst_reporttemplate_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_report_template_tenant_key_lang
+  type: UNIQUE
+  description: テナント内テンプレート一意制約
+  columns:
+  - - tenant_id
+  - - template_key
+  - - language_code
+- name: chk_report_template_category
+  type: CHECK
+  description: 帳票カテゴリ値チェック制約
+  condition: report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS')
+- name: chk_report_template_format
+  type: CHECK
+  description: 出力形式値チェック制約
+  condition: output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML')
+- name: chk_report_template_language
+  type: CHECK
+  description: 言語コード値チェック制約
+  condition: language_code IN ('ja', 'en')
+foreign_keys: []
+sample_data:
+- id: RT001
+  tenant_id: TENANT001
+  template_key: skill_summary_report
+  template_name: スキルサマリーレポート
+  report_category: SKILL
+  output_format: PDF
+  language_code: ja
+  template_content: "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\"\
+    >\n    <title>{{report_title}}</title>\n</head>\n<body>\n    <h1>{{employee_name}}さんのスキルサマリー</h1>\n\
+    \    <div class=\"summary-section\">\n        <h2>保有スキル一覧</h2>\n        {{#skills}}\n\
+    \        <div class=\"skill-item\">\n            <span class=\"skill-name\">{{skill_name}}</span>\n\
+    \            <span class=\"skill-level\">レベル: {{skill_level}}</span>\n       \
+    \ </div>\n        {{/skills}}\n    </div>\n</body>\n</html>\n"
+  style_sheet: 'body { font-family: ''Noto Sans JP'', sans-serif; }
+
+    .skill-item { margin: 10px 0; padding: 5px; border-bottom: 1px solid #ccc; }
+
+    .skill-name { font-weight: bold; }
+
+    .skill-level { color: #666; }
+
+    '
+  parameters_schema: '{"type": "object", "properties": {"employee_id": {"type": "string"},
+    "report_date": {"type": "string", "format": "date"}}}'
+  data_source_config: '{"tables": ["MST_Employee", "TRN_EmployeeSkill", "MST_Skill"],
+    "joins": ["employee_skills", "skill_details"]}'
+  page_settings: '{"size": "A4", "orientation": "portrait", "margin": {"top": "20mm",
+    "bottom": "20mm", "left": "15mm", "right": "15mm"}}'
+  header_template: '<div style="text-align: center; font-size: 12px;">{{company_name}}
+    - スキル管理システム</div>'
+  footer_template: '<div style="text-align: center; font-size: 10px;">出力日時: {{generated_at}}
+    - ページ {{page_number}}</div>'
+  is_default: true
+  is_active: true
+  version: 1.0.0
+  preview_image_url: /assets/templates/skill_summary_preview.png
+- id: RT002
+  tenant_id: TENANT001
+  template_key: goal_progress_report
+  template_name: 目標進捗レポート
+  report_category: GOAL
+  output_format: EXCEL
+  language_code: ja
+  template_content: "<workbook>\n    <worksheet name=\"目標進捗\">\n        <row>\n  \
+    \          <cell>社員名</cell>\n            <cell>目標タイトル</cell>\n            <cell>進捗率</cell>\n\
+    \            <cell>期限</cell>\n            <cell>状態</cell>\n        </row>\n  \
+    \      {{#goals}}\n        <row>\n            <cell>{{employee_name}}</cell>\n\
+    \            <cell>{{goal_title}}</cell>\n            <cell>{{progress_rate}}%</cell>\n\
+    \            <cell>{{deadline}}</cell>\n            <cell>{{status}}</cell>\n\
+    \        </row>\n        {{/goals}}\n    </worksheet>\n</workbook>\n"
+  style_sheet: null
+  parameters_schema: '{"type": "object", "properties": {"department_id": {"type":
+    "string"}, "period_start": {"type": "string", "format": "date"}, "period_end":
+    {"type": "string", "format": "date"}}}'
+  data_source_config: '{"tables": ["MST_Employee", "TRN_Goal"], "joins": ["employee_goals"]}'
+  page_settings: '{"orientation": "landscape"}'
+  header_template: null
+  footer_template: null
+  is_default: true
+  is_active: true
+  version: 1.0.0
+  preview_image_url: /assets/templates/goal_progress_preview.png
+notes:
+- テンプレートはテナント・キー・言語の組み合わせで一意
+- template_contentにはMustache等のテンプレートエンジン記法を使用
+- parameters_schemaでテンプレートで使用可能なパラメータを定義
+- data_source_configで必要なデータの取得方法を定義
+- 多言語対応により国際化に対応
+- 出力形式により異なるテンプレート記法に対応
+- プレビュー画像によりテンプレート選択時の視認性を向上
+- === 業務ルール ===
+- 同一テナント・キー・言語の組み合わせは重複不可
+- 無効化されたテンプレートは帳票生成から除外される
+- デフォルトテンプレートは同一条件で1つのみ設定可能
+- パラメータはparameters_schemaで定義されたもののみ使用可能
+- データソース設定は実際のテーブル構造と整合性が必要
+- 出力形式に応じたテンプレート記法を使用
+- テンプレートバージョンは変更時に更新が必要
+- プレビュー画像は管理画面での選択性向上のため推奨
+rules:
+- 同一テナント・キー・言語の組み合わせは重複不可
+- 無効化されたテンプレートは帳票生成から除外される
+- デフォルトテンプレートは同一条件で1つのみ設定可能
+- パラメータはparameters_schemaで定義されたもののみ使用可能
+- データソース設定は実際のテーブル構造と整合性が必要
+- 出力形式に応じたテンプレート記法を使用
+- テンプレートバージョンは変更時に更新が必要
+- プレビュー画像は管理画面での選択性向上のため推奨
