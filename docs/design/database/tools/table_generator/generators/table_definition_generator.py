@@ -135,7 +135,7 @@ class TableDefinitionGenerator:
             if table_names:
                 filtered_tables = {}
                 for table_name in table_names:
-                    yaml_file = self.config.get_details_dir() / f"{table_name}_details.yaml"
+                    yaml_file = self.config.get_details_dir() / f"テーブル詳細定義YAML_{table_name}.yaml"
                     if yaml_file.exists():
                         yaml_data = self.yaml_loader.load_yaml_file(yaml_file)
                         if yaml_data:
@@ -155,8 +155,10 @@ class TableDefinitionGenerator:
             all_tables = {}
             details_dir = self.config.get_details_dir()
             if details_dir.exists():
-                for yaml_file in details_dir.glob("*_details.yaml"):
-                    table_name = yaml_file.stem.replace("_details", "")
+                for yaml_file in details_dir.glob("テーブル詳細定義YAML_*.yaml"):
+                    if yaml_file.name.endswith("_TEMPLATE.yaml"):
+                        continue  # テンプレートファイルはスキップ
+                    table_name = yaml_file.stem.replace("テーブル詳細定義YAML_", "")
                     yaml_data = self.yaml_loader.load_yaml_file(yaml_file)
                     if yaml_data:
                         all_tables[table_name] = {
@@ -202,7 +204,7 @@ class TableDefinitionGenerator:
         
         try:
             # YAML定義ファイルを読み込み
-            yaml_file = self.config.get_details_dir() / f"{table_name}_details.yaml"
+            yaml_file = self.config.get_details_dir() / f"テーブル詳細定義YAML_{table_name}.yaml"
             if not yaml_file.exists():
                 result.success = False
                 result.error_message = f"YAML定義ファイルが見つかりません: {yaml_file}"
