@@ -7,7 +7,7 @@
 | テーブル名 | MST_Certification |
 | 論理名 | 資格情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 22:02:17 |
+| 生成日時 | 2025-06-24 20:30:44 |
 
 ## 概要
 
@@ -28,6 +28,26 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 |----------|--------|----------|------|------|------------|------|
 | certification_id | MST_Certificationの主キー | SERIAL |  | × |  | MST_Certificationの主キー |
 | tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| certification_code | 資格コード | VARCHAR | 50 | ○ |  | 資格コード |
+| certification_name | 資格名 | VARCHAR | 200 | ○ |  | 資格名 |
+| certification_name_en | 資格名 | VARCHAR | 200 | ○ |  | 資格名（英語） |
+| issuer | 発行機関 | VARCHAR | 100 | ○ |  | 発行機関 |
+| issuer_country | 発行国 | VARCHAR | 10 | ○ |  | 発行国 |
+| certification_category | 資格カテゴリ | ENUM |  | ○ |  | 資格カテゴリ |
+| certification_level | 資格レベル | ENUM |  | ○ |  | 資格レベル |
+| validity_period_months | 有効期間 | INTEGER |  | ○ |  | 有効期間（月） |
+| renewal_required | 更新要否 | BOOLEAN |  | ○ | False | 更新要否 |
+| renewal_requirements | 更新要件 | TEXT |  | ○ |  | 更新要件 |
+| exam_fee | 受験料 | DECIMAL | 10,2 | ○ |  | 受験料 |
+| exam_language | 試験言語 | VARCHAR | 50 | ○ |  | 試験言語 |
+| exam_format | 試験形式 | ENUM |  | ○ |  | 試験形式 |
+| official_url | 公式URL | VARCHAR | 500 | ○ |  | 公式URL |
+| description | 説明 | TEXT |  | ○ |  | 説明 |
+| skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリID |
+| is_recommended | 推奨資格フラグ | BOOLEAN |  | ○ | False | 推奨資格フラグ |
+| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
@@ -35,19 +55,27 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_mst_certification_tenant_id | tenant_id | × | テナントID検索用インデックス |
+| idx_certification_code | certification_code | ○ |  |
+| idx_certification_name | certification_name | × |  |
+| idx_issuer | issuer | × |  |
+| idx_category_level | certification_category, certification_level | × |  |
+| idx_recommended | is_recommended, is_active | × |  |
+| idx_skill_category | skill_category_id | × |  |
+| idx_mst_certification_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_certification_skill_category | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_certification_skill_category | skill_category_id | MST_SkillCategory | id | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
 | pk_mst_certification | PRIMARY KEY | certification_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| uk_certification_code | UNIQUE |  | certification_code一意制約 |
 
 ## サンプルデータ
 
@@ -67,16 +95,13 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 
 ## 業務ルール
 
-- 資格コードは一意である必要がある
-- 推奨資格は定期的に見直しを行う
-- 有効期限のある資格は更新要件を必須記載
-- 受験料は税込み価格で記録
-- 公式URLは資格詳細情報の参照先として使用
-- スキルカテゴリとの関連付けにより、関連スキル推薦機能で活用
-- 資格レベルは社内スキルグレードとの対応付けに使用
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
 
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 資格情報マスタテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
