@@ -93,10 +93,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // JWTトークン生成（login_idのみ）
+    // JWTトークン生成（login_idとemployee_idを含める）
     const token = jwt.sign(
       {
         loginId: userAuth.login_id,
+        employeeId: userAuth.employee_id,
+        userId: userAuth.user_id,
       },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '8h' }
@@ -114,7 +116,7 @@ export async function POST(request: NextRequest) {
             id: userAuth.user_id,
             loginId: userAuth.login_id,
             employeeId: userAuth.employee_id,
-            name: userAuth.name || userAuth.login_id, // nameがない場合はlogin_idを使用
+            name: userAuth.login_id, // UserAuthテーブルにはnameフィールドがないためlogin_idを使用
             lastLoginAt: userAuth.last_login_at,
           },
         },
