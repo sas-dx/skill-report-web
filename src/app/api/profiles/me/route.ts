@@ -109,6 +109,27 @@ export async function GET(request: NextRequest) {
     const lastNameKana = kanaNameParts[0] || '';
     const firstNameKana = kanaNameParts[1] || '';
 
+    // 表示名の生成（アイコン表示用）
+    const generateDisplayName = (fullName: string, employeeCode: string) => {
+      if (!fullName || fullName.trim() === '') {
+        // フルネームがない場合は社員コードから表示名を生成
+        return `社員${employeeCode}`;
+      }
+      
+      const parts = fullName.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        // 姓名がある場合は「姓 名」形式
+        return `${parts[0]} ${parts[1]}`;
+      } else if (parts.length === 1) {
+        // 姓のみの場合はそのまま
+        return parts[0];
+      }
+      
+      return `社員${employeeCode}`; // フォールバック
+    };
+
+    const displayName = generateDisplayName(fullName, user.employee_code);
+
     // レスポンスデータの構築
     const profile = {
       id: user.employee_code,
@@ -119,7 +140,7 @@ export async function GET(request: NextRequest) {
         firstName: firstName,
         lastNameKana: lastNameKana,
         firstNameKana: firstNameKana,
-        displayName: fullName,
+        displayName: displayName,
         phoneNumber: user.phone || '',
         emergencyContact: {
           name: '',

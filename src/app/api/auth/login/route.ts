@@ -93,6 +93,35 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // 実際のユーザー情報を取得（Employeeテーブルから）
+    let employeeInfo = null;
+    let departmentInfo = null;
+    let positionInfo = null;
+    
+    if (userAuth.employee_id) {
+      try {
+        employeeInfo = await prisma.employee.findUnique({
+          where: { employee_code: userAuth.employee_id }
+        });
+        
+        // 部署情報を取得
+        if (employeeInfo?.department_id) {
+          departmentInfo = await prisma.department.findUnique({
+            where: { department_code: employeeInfo.department_id }
+          });
+        }
+        
+        // 役職情報を取得
+        if (employeeInfo?.position_id) {
+          positionInfo = await prisma.position.findUnique({
+            where: { position_code: employeeInfo.position_id }
+          });
+        }
+      } catch (error) {
+        console.log('Employee info fetch failed:', error);
+      }
+    }
+
     // JWTトークン生成（login_idとemployee_idを含める）
     const token = jwt.sign(
       {
@@ -106,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Login successful for:', userAuth.login_id);
 
-    // レスポンス（UserAuthテーブルの情報のみ）
+    // レスポンス（実際のユーザー情報を含める）
     return NextResponse.json(
       {
         success: true,
@@ -116,7 +145,11 @@ export async function POST(request: NextRequest) {
             id: userAuth.user_id,
             loginId: userAuth.login_id,
             employeeId: userAuth.employee_id,
-            name: userAuth.login_id, // UserAuthテーブルにはnameフィールドがないためlogin_idを使用
+            name: employeeInfo?.full_name || userAuth.login_id,
+            nameKana: employeeInfo?.full_name_kana || '',
+            email: employeeInfo?.email || '',
+            department: departmentInfo?.department_name || '',
+            position: positionInfo?.position_name || '',
             lastLoginAt: userAuth.last_login_at,
           },
         },
