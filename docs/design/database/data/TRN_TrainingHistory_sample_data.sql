@@ -1,5 +1,5 @@
 -- TRN_TrainingHistory (研修参加履歴) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO TRN_TrainingHistory (
     id, tenant_id, training_name, approved_by,

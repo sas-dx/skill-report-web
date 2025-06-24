@@ -1,5 +1,5 @@
 -- MST_SkillItem (スキル項目マスタ) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_SkillItem (
     id, tenant_id, skill_code, skill_name,

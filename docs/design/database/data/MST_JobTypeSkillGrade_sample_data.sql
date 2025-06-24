@@ -1,5 +1,5 @@
 -- MST_JobTypeSkillGrade (職種スキルグレード関連) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_JobTypeSkillGrade (
     id, tenant_id, business_impact, certification_requirements,

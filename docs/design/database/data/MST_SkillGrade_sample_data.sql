@@ -1,5 +1,5 @@
 -- MST_SkillGrade (スキルグレードマスタ) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_SkillGrade (
     id, tenant_id, grade_code, grade_name,

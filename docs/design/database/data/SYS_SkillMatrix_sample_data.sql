@@ -1,5 +1,5 @@
 -- SYS_SkillMatrix (スキルマップ) サンプルデータ
--- 生成日時: 2025-06-24 22:56:16
+-- 生成日時: 2025-06-24 23:02:19
 
 INSERT INTO SYS_SkillMatrix (
     id, assessment_date, employee_id, evidence_url,

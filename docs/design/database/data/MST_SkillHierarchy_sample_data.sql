@@ -1,5 +1,5 @@
 -- MST_SkillHierarchy (スキル階層マスタ) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_SkillHierarchy (
     id, tenant_id, description, hierarchy_level,

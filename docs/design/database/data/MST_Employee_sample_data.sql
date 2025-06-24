@@ -1,5 +1,5 @@
 -- MST_Employee (社員基本情報) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_Employee (
     id, tenant_id, employee_code, full_name,

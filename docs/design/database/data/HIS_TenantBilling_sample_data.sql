@@ -1,5 +1,5 @@
 -- HIS_TenantBilling (テナント課金履歴) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO HIS_TenantBilling (
     id, tenant_id, plan_name, additional_amount,

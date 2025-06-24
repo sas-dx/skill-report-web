@@ -1,5 +1,5 @@
 -- SYS_TokenStore (トークン管理) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO SYS_TokenStore (
     id, tenant_id, client_ip, device_fingerprint,

@@ -1,5 +1,5 @@
 -- MST_UserRole (ユーザーロール紐付け) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_UserRole (
     id, tenant_id, approval_status, approved_at,

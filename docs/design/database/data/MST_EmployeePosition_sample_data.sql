@@ -1,5 +1,5 @@
 -- MST_EmployeePosition (社員役職関連) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_EmployeePosition (
     id, tenant_id, appointment_reason, appointment_status,

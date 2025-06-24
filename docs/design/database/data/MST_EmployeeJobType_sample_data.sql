@@ -1,5 +1,5 @@
 -- MST_EmployeeJobType (社員職種関連) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_EmployeeJobType (
     id, tenant_id, achievements, approval_date,

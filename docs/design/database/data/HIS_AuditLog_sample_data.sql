@@ -1,5 +1,5 @@
 -- HIS_AuditLog (監査ログ) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO HIS_AuditLog (
     id, tenant_id, action_type, auditlog_id,

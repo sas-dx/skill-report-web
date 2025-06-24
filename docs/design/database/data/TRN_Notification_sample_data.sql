@@ -1,5 +1,5 @@
 -- TRN_Notification (通知履歴) サンプルデータ
--- 生成日時: 2025-06-24 22:56:14
+-- 生成日時: 2025-06-24 23:02:17
 
 INSERT INTO TRN_Notification (
     id, tenant_id, batch_id, notification_id,

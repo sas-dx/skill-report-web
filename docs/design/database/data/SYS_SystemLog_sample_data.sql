@@ -1,5 +1,5 @@
 -- SYS_SystemLog (システムログ) サンプルデータ
--- 生成日時: 2025-06-24 22:56:16
+-- 生成日時: 2025-06-24 23:02:19
 
 INSERT INTO SYS_SystemLog (
     id, tenant_id, log_level, message,

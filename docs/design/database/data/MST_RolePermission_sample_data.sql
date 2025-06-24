@@ -1,5 +1,5 @@
 -- MST_RolePermission (ロール権限紐付け) サンプルデータ
--- 生成日時: 2025-06-24 22:56:15
+-- 生成日時: 2025-06-24 23:02:18
 
 INSERT INTO MST_RolePermission (
     id, granted_at, granted_by, is_active,
