@@ -55,7 +55,10 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         headers['x-user-id'] = userId;
       }
 
-      const response = await fetch(`/api/career-goals/${userId || 'current'}`, {
+      // ユーザーIDが指定されていない場合はデフォルト値を使用
+      const targetUserId = userId || 'user_001';
+      
+      const response = await fetch(`/api/career-goals/${targetUserId}`, {
         method: 'POST',
         headers,
         body: JSON.stringify(request),
@@ -80,52 +83,188 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
   }, [userId]);
 
   /**
-   * キャリア目標を追加する
+   * キャリア目標を追加する（POSTメソッド使用）
    */
   const addCareerGoal = useCallback(async (
     goal: CareerGoal,
     year: number
   ): Promise<CareerGoalUpdateResponse | null> => {
-    const request: CareerGoalUpdateRequest = {
-      year,
-      operation_type: 'add',
-      career_goals: [goal],
-    };
+    try {
+      setIsLoading(true);
+      setError(null);
+      setIsSuccess(false);
 
-    return updateCareerGoals(request);
-  }, [updateCareerGoals]);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer dummy-token', // 実際の実装では適切なトークンを使用
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      const targetUserId = userId || 'user_001';
+      
+      // POSTメソッドで直接CareerGoalオブジェクトを送信
+      // CareerGoal型からCareerGoalApiData型に変換
+      const requestBody = {
+        title: goal.title,
+        description: goal.description,
+        target_date: goal.target_date,
+        status: goal.status,
+        priority: goal.priority,
+        year,
+        goal_type: 'short_term' as const, // デフォルト値
+      };
+
+      const response = await fetch(`/api/career-goals/${targetUserId}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CareerGoalUpdateResponse = await response.json();
+      setIsSuccess(true);
+      return data;
+
+    } catch (err) {
+      console.error('キャリア目標追加エラー:', err);
+      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
   /**
-   * キャリア目標を更新する
+   * キャリア目標を更新する（PUTメソッド使用）
    */
   const updateCareerGoal = useCallback(async (
     goal: CareerGoal,
     year: number
   ): Promise<CareerGoalUpdateResponse | null> => {
+    // CareerGoal型からCareerGoalApiData型に変換
+    const apiGoal: any = {
+      goal_id: goal.id,
+      title: goal.title,
+      status: goal.status,
+      priority: goal.priority,
+      goal_type: 'short_term' as const, // デフォルト値
+    };
+
+    // オプショナルフィールドは値が存在する場合のみ追加
+    if (goal.description) {
+      apiGoal.description = goal.description;
+    }
+    if (goal.target_date) {
+      apiGoal.target_date = goal.target_date;
+    }
+
     const request: CareerGoalUpdateRequest = {
       year,
       operation_type: 'update',
-      career_goals: [goal],
+      career_goals: [apiGoal],
     };
 
-    return updateCareerGoals(request);
-  }, [updateCareerGoals]);
+    try {
+      setIsLoading(true);
+      setError(null);
+      setIsSuccess(false);
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer dummy-token',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      const targetUserId = userId || 'user_001';
+      
+      const response = await fetch(`/api/career-goals/${targetUserId}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CareerGoalUpdateResponse = await response.json();
+      setIsSuccess(true);
+      return data;
+
+    } catch (err) {
+      console.error('キャリア目標更新エラー:', err);
+      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
   /**
-   * キャリア目標を削除する
+   * キャリア目標を削除する（PUTメソッド使用）
    */
   const deleteCareerGoal = useCallback(async (
     goal: CareerGoal,
     year: number
   ): Promise<CareerGoalUpdateResponse | null> => {
+    // CareerGoal型からCareerGoalApiData型に変換（削除時は最小限の情報のみ）
+    const apiGoal = {
+      goal_id: goal.id,
+    };
+
     const request: CareerGoalUpdateRequest = {
       year,
       operation_type: 'delete',
-      career_goals: [goal],
+      career_goals: [apiGoal],
     };
 
-    return updateCareerGoals(request);
-  }, [updateCareerGoals]);
+    try {
+      setIsLoading(true);
+      setError(null);
+      setIsSuccess(false);
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer dummy-token',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      const targetUserId = userId || 'user_001';
+      
+      const response = await fetch(`/api/career-goals/${targetUserId}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CareerGoalUpdateResponse = await response.json();
+      setIsSuccess(true);
+      return data;
+
+    } catch (err) {
+      console.error('キャリア目標削除エラー:', err);
+      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
   return {
     isLoading,
