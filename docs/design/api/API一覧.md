@@ -44,6 +44,7 @@
 
 | API ID | API名称 | エンドポイント | HTTPメソッド | 概要 | 利用画面 | API仕様書リンク |
 |--------|--------|---------------|------------|------|---------|---------------|
+| [API-700](specs/API定義書_API-700_キャリア初期データ取得API.md) | キャリア初期データ取得API | /api/career/init | GET | キャリアプラン画面の初期表示データ取得 | SCR-CAR-Plan | [詳細仕様書](specs/API定義書_API-700_キャリア初期データ取得API.md) |
 | [API-041](specs/API仕様書_API-041.md) | キャリア目標取得API | /api/career-goals/{user_id} | GET | キャリア目標情報取得 | SCR-CAREER | [詳細仕様書](specs/API仕様書_API-041.md) |
 | [API-042](specs/API仕様書_API-042.md) | キャリア目標更新API | /api/career-goals/{user_id} | PUT | キャリア目標情報更新 | SCR-CAREER | [詳細仕様書](specs/API仕様書_API-042.md) |
 | [API-043](specs/API仕様書_API-043.md) | 目標進捗取得API | /api/goal-progress/{user_id} | GET | 目標進捗情報取得 | SCR-CAREER | [詳細仕様書](specs/API仕様書_API-043.md) |
