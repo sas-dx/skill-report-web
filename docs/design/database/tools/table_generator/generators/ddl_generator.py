@@ -94,17 +94,18 @@ class DDLGenerator:
             ddl_lines.append("")
         
         # その他の制約
+        constraints_to_process = []
         if hasattr(table_def, 'constraints') and table_def.constraints:
-            ddl_lines.append("-- その他の制約")
-            for constraint in table_def.constraints:
-                constraint_sql = self._generate_constraint_ddl(table_def.table_name, constraint)
-                ddl_lines.append(constraint_sql)
-            ddl_lines.append("")
+            constraints_to_process.extend(table_def.constraints)
         elif hasattr(table_def, 'business_constraints') and table_def.business_constraints:
+            constraints_to_process.extend(table_def.business_constraints)
+        
+        if constraints_to_process:
             ddl_lines.append("-- その他の制約")
-            for constraint in table_def.business_constraints:
+            for constraint in constraints_to_process:
                 constraint_sql = self._generate_constraint_ddl(table_def.table_name, constraint)
-                ddl_lines.append(constraint_sql)
+                if constraint_sql and not constraint_sql.startswith("-- 未対応"):
+                    ddl_lines.append(constraint_sql)
             ddl_lines.append("")
         
         # 初期データ挿入
@@ -172,14 +173,29 @@ class DDLGenerator:
         Returns:
             str: 制約DDL
         """
-        # 制約の種類に応じてDDLを生成
-        if constraint.type.upper() == 'CHECK':
-            return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} CHECK ({constraint.condition});"
-        elif constraint.type.upper() == 'UNIQUE':
-            columns = ', '.join(constraint.columns) if hasattr(constraint, 'columns') else constraint.condition
-            return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({columns});"
-        else:
-            return f"-- 未対応の制約タイプ: {constraint.type}"
+        try:
+            # 制約の種類に応じてDDLを生成
+            if constraint.type.upper() == 'CHECK':
+                if hasattr(constraint, 'condition') and constraint.condition:
+                    return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} CHECK ({constraint.condition});"
+                else:
+                    self.logger.warning(f"CHECK制約 {constraint.name} に条件が設定されていません")
+                    return f"-- CHECK制約 {constraint.name} に条件が設定されていません"
+            elif constraint.type.upper() == 'UNIQUE':
+                if hasattr(constraint, 'columns') and constraint.columns:
+                    columns = ', '.join(constraint.columns)
+                    return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({columns});"
+                elif hasattr(constraint, 'condition') and constraint.condition:
+                    return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({constraint.condition});"
+                else:
+                    self.logger.warning(f"UNIQUE制約 {constraint.name} にカラムが設定されていません")
+                    return f"-- UNIQUE制約 {constraint.name} にカラムが設定されていません"
+            else:
+                self.logger.warning(f"未対応の制約タイプ: {constraint.type}")
+                return f"-- 未対応の制約タイプ: {constraint.type}"
+        except Exception as e:
+            self.logger.error(f"制約DDL生成エラー ({constraint.name}): {e}")
+            return f"-- 制約DDL生成エラー: {constraint.name}"
     
     def _generate_initial_data_ddl(self, table_name: str, initial_data: List[Dict[str, Any]]) -> List[str]:
         """初期データ挿入DDLを生成

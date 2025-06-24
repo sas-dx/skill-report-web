@@ -12,7 +12,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from shared.core.logger import DatabaseToolsLogger
-from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition, BusinessColumnDefinition
+from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition, BusinessColumnDefinition, ConstraintDefinition
 
 
 class YamlLoader:
@@ -111,9 +111,11 @@ class YamlLoader:
             if 'foreign_keys' in yaml_data:
                 table_def.foreign_keys = self._parse_foreign_keys(yaml_data['foreign_keys'])
             
-            # 制約定義（コメントアウト - ConstraintDefinitionクラスが存在しないため）
-            # if 'business_constraints' in yaml_data:
-            #     table_def.business_constraints = self._parse_constraints(yaml_data['business_constraints'])
+            # 制約定義
+            if 'constraints' in yaml_data:
+                table_def.constraints = self._parse_constraints(yaml_data['constraints'])
+            elif 'business_constraints' in yaml_data:
+                table_def.business_constraints = self._parse_constraints(yaml_data['business_constraints'])
             
             # サンプルデータ
             if 'sample_data' in yaml_data:
@@ -275,33 +277,34 @@ class YamlLoader:
         
         return foreign_keys
     
-    # def _parse_constraints(self, constraints_data: List[Dict[str, Any]]) -> List[ConstraintDefinition]:
-    #     """制約定義を解析（ConstraintDefinitionクラスが存在しないためコメントアウト）
-    #     
-    #     Args:
-    #         constraints_data (List[Dict[str, Any]]): 制約定義データ
-    #         
-    #     Returns:
-    #         List[ConstraintDefinition]: 制約定義リスト
-    #     """
-    #     constraints = []
-    #     
-    #     for const_data in constraints_data:
-    #         try:
-    #             constraint = ConstraintDefinition(
-    #                 name=const_data['name'],
-    #                 type=const_data['type'],
-    #                 condition=const_data.get('condition', ''),
-    #                 description=const_data.get('description', '')
-    #             )
-    #             constraints.append(constraint)
-    #             
-    #         except KeyError as e:
-    #             self.logger.error(f"制約定義に必須フィールドがありません: {e}")
-    #         except Exception as e:
-    #             self.logger.error(f"制約定義解析エラー: {e}")
-    #     
-    #     return constraints
+    def _parse_constraints(self, constraints_data: List[Dict[str, Any]]) -> List[ConstraintDefinition]:
+        """制約定義を解析
+        
+        Args:
+            constraints_data (List[Dict[str, Any]]): 制約定義データ
+            
+        Returns:
+            List[ConstraintDefinition]: 制約定義リスト
+        """
+        constraints = []
+        
+        for const_data in constraints_data:
+            try:
+                constraint = ConstraintDefinition(
+                    name=const_data['name'],
+                    type=const_data['type'],
+                    columns=const_data.get('columns', []),
+                    condition=const_data.get('condition', ''),
+                    comment=const_data.get('comment', const_data.get('description', ''))
+                )
+                constraints.append(constraint)
+                
+            except KeyError as e:
+                self.logger.error(f"制約定義に必須フィールドがありません: {e}")
+            except Exception as e:
+                self.logger.error(f"制約定義解析エラー: {e}")
+        
+        return constraints
     
     def validate_yaml_structure(self, yaml_data: Dict[str, Any]) -> bool:
         """YAML構造の妥当性をチェック

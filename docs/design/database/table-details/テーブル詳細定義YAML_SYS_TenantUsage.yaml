@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215001
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'テナント利用状況テーブルは、マルチテナント環境における各テナントのシステム利用状況を管理するシステムテーブルです。
 
 
@@ -30,14 +62,15 @@ overview: 'テナント利用状況テーブルは、マルチテナント環境
 
   '
 columns:
-- name: usage_date
-  logical: 利用日
-  type: DATE
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
   length: null
-  'null': true
-  unique: false
+  'null': false
+  unique: true
   encrypted: false
-  description: 利用状況を記録した日付
+  description: プライマリキー（UUID）
+  default: null
 - name: tenant_id
   logical: テナントID
   type: VARCHAR
@@ -55,15 +88,6 @@ columns:
   encrypted: false
   description: 当日にログインしたユーザー数
   default: 0
-- name: total_logins
-  logical: 総ログイン回数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日の総ログイン回数
-  default: 0
 - name: api_requests
   logical: API リクエスト数
   type: BIGINT
@@ -73,24 +97,6 @@ columns:
   encrypted: false
   description: 当日のAPIリクエスト総数
   default: 0
-- name: data_storage_mb
-  logical: データ使用量MB
-  type: DECIMAL
-  length: 15,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日時点でのデータストレージ使用量（MB）
-  default: 0.0
-- name: file_storage_mb
-  logical: ファイル使用量MB
-  type: DECIMAL
-  length: 15,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日時点でのファイルストレージ使用量（MB）
-  default: 0.0
 - name: backup_storage_mb
   logical: バックアップ使用量MB
   type: DECIMAL
@@ -100,6 +106,22 @@ columns:
   encrypted: false
   description: 当日時点でのバックアップストレージ使用量（MB）
   default: 0.0
+- name: billing_amount
+  logical: 課金額
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日の利用に基づく課金額
+- name: collection_timestamp
+  logical: 収集日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 利用状況データを収集した日時
 - name: cpu_usage_minutes
   logical: CPU使用時間分
   type: DECIMAL
@@ -108,6 +130,33 @@ columns:
   unique: false
   encrypted: false
   description: 当日のCPU使用時間（分）
+  default: 0.0
+- name: data_storage_mb
+  logical: データ使用量MB
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日時点でのデータストレージ使用量（MB）
+  default: 0.0
+- name: error_count
+  logical: エラー発生回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のシステムエラー発生回数
+  default: 0
+- name: file_storage_mb
+  logical: ファイル使用量MB
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日時点でのファイルストレージ使用量（MB）
   default: 0.0
 - name: memory_usage_mb_hours
   logical: メモリ使用量MB時
@@ -127,24 +176,6 @@ columns:
   encrypted: false
   description: 当日のネットワーク転送量（MB）
   default: 0.0
-- name: report_generations
-  logical: レポート生成回数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日のレポート生成回数
-  default: 0
-- name: skill_assessments
-  logical: スキル評価回数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日のスキル評価実行回数
-  default: 0
 - name: notification_sent
   logical: 通知送信回数
   type: INTEGER
@@ -171,14 +202,14 @@ columns:
   unique: false
   encrypted: false
   description: 最大同時接続を記録した時刻
-- name: error_count
-  logical: エラー発生回数
+- name: report_generations
+  logical: レポート生成回数
   type: INTEGER
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 当日のシステムエラー発生回数
+  description: 当日のレポート生成回数
   default: 0
 - name: response_time_avg_ms
   logical: 平均応答時間ms
@@ -188,31 +219,15 @@ columns:
   unique: false
   encrypted: false
   description: 当日のAPI平均応答時間（ミリ秒）
-- name: uptime_percentage
-  logical: 稼働率
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日のシステム稼働率（%）
-  default: 100.0
-- name: billing_amount
-  logical: 課金額
-  type: DECIMAL
-  length: 10,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当日の利用に基づく課金額
-- name: collection_timestamp
-  logical: 収集日時
-  type: TIMESTAMP
+- name: skill_assessments
+  logical: スキル評価回数
+  type: INTEGER
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 利用状況データを収集した日時
+  description: 当日のスキル評価実行回数
+  default: 0
 - name: tenantusage_id
   logical: SYS_TenantUsageの主キー
   type: SERIAL
@@ -222,15 +237,32 @@ columns:
   encrypted: false
   description: SYS_TenantUsageの主キー
   default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
+- name: total_logins
+  logical: 総ログイン回数
+  type: INTEGER
   length: null
-  'null': false
-  unique: true
+  'null': true
+  unique: false
   encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: 当日の総ログイン回数
+  default: 0
+- name: uptime_percentage
+  logical: 稼働率
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のシステム稼働率（%）
+  default: 100.0
+- name: usage_date
+  logical: 利用日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 利用状況を記録した日付
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -261,28 +293,28 @@ columns:
 indexes:
 - name: idx_SYS_TenantUsage_date_tenant
   columns:
-  - - usage_date
-  - - tenant_id
+  - usage_date
+  - tenant_id
   unique: true
   description: 利用日とテナントIDの複合検索用（一意）
 - name: idx_SYS_TenantUsage_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用
 - name: idx_SYS_TenantUsage_usage_date
   columns:
-  - - usage_date
+  - usage_date
   unique: false
   description: 利用日検索用
 - name: idx_SYS_TenantUsage_collection_timestamp
   columns:
-  - - collection_timestamp
+  - collection_timestamp
   unique: false
   description: 収集日時検索用
 - name: idx_SYS_TenantUsage_billing_amount
   columns:
-  - - billing_amount
+  - billing_amount
   unique: false
   description: 課金額検索用
 constraints:
@@ -342,10 +374,9 @@ constraints:
 foreign_keys:
 - name: fk_SYS_TenantUsage_tenant
   columns:
-  - - tenant_id
+  - tenant_id
   references:
-    table:
-    - MST_Tenant
+    table: MST_Tenant
     columns:
     - id
   on_update: CASCADE
@@ -410,7 +441,7 @@ notes:
 - エラー発生時は詳細ログを別途記録する
 - 稼働率が95%を下回った場合はアラート通知を送信する
 - データ保持期間は2年間とし、それ以降は月次集計データのみ保持する
-business_rules:
+rules:
 - 利用状況データは毎日深夜2:00に自動収集する
 - 同一テナント・同一日付のレコードは1つのみ
 - 課金額は利用量とプラン料金に基づいて自動計算する

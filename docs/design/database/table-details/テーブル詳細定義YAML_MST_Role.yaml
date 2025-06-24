@@ -14,6 +14,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_Role（ロール情報）は、システム内のロール（役割）を管理するマスタテーブルです。
 
 
@@ -40,60 +72,56 @@ overview: 'MST_Role（ロール情報）は、システム内のロール（役�
 
   '
 columns:
-- name: role_code
-  logical: ロールコード
-  type: VARCHAR
-  length: 20
-  'null': true
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
   unique: true
   encrypted: false
-  description: ロールを一意に識別するコード（例：ROLE001）
-  validation: ^ROLE[0-9]{3}$
-- name: role_name
-  logical: ロール名
-  type: VARCHAR
-  length: 100
-  'null': true
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
   unique: false
   encrypted: false
-  description: ロールの正式名称
-- name: role_name_short
-  logical: ロール名略称
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: ロールの略称・短縮名
-- name: role_category
-  logical: ロールカテゴリ
-  type: ENUM
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: auto_assign_conditions
+  logical: 自動割り当て条件
+  type: JSON
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム）
-  enum_values:
-  - SYSTEM
-  - BUSINESS
-  - TENANT
-  - CUSTOM
-- name: role_level
-  logical: ロールレベル
-  type: INT
+  description: 自動ロール割り当ての条件（JSON形式）
+- name: description
+  logical: ロール説明
+  type: TEXT
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: ロールの階層レベル（1:最上位、数値が大きいほど下位）
-- name: parent_role_id
-  logical: 親ロールID
-  type: VARCHAR
-  length: 50
+  description: ロールの詳細説明・用途
+- name: effective_from
+  logical: 有効開始日
+  type: DATE
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 上位ロールのID（MST_Roleへの自己参照外部キー）
+  description: ロールの有効開始日
+- name: effective_to
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: ロールの有効終了日
 - name: is_system_role
   logical: システムロールフラグ
   type: BOOLEAN
@@ -120,6 +148,69 @@ columns:
   unique: false
   encrypted: false
   description: このロールに割り当て可能な最大ユーザー数
+- name: parent_role_id
+  logical: 親ロールID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 上位ロールのID（MST_Roleへの自己参照外部キー）
+- name: role_category
+  logical: ロールカテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム）
+  enum_values:
+  - SYSTEM
+  - BUSINESS
+  - TENANT
+  - CUSTOM
+- name: role_code
+  logical: ロールコード
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: true
+  encrypted: false
+  description: ロールを一意に識別するコード（例：ROLE001）
+  validation: ^ROLE[0-9]{3}$
+- name: role_id
+  logical: MST_Roleの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Roleの主キー
+  default: null
+- name: role_level
+  logical: ロールレベル
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: ロールの階層レベル（1:最上位、数値が大きいほど下位）
+- name: role_name
+  logical: ロール名
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: ロールの正式名称
+- name: role_name_short
+  logical: ロール名略称
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: ロールの略称・短縮名
 - name: role_priority
   logical: ロール優先度
   type: INT
@@ -129,14 +220,6 @@ columns:
   encrypted: false
   description: 複数ロール保持時の優先度（数値が小さいほど高優先）
   default: 999
-- name: auto_assign_conditions
-  logical: 自動割り当て条件
-  type: JSON
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 自動ロール割り当ての条件（JSON形式）
 - name: role_status
   logical: ロール状態
   type: ENUM
@@ -150,22 +233,6 @@ columns:
   - INACTIVE
   - DEPRECATED
   default: ACTIVE
-- name: effective_from
-  logical: 有効開始日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: ロールの有効開始日
-- name: effective_to
-  logical: 有効終了日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: ロールの有効終了日
 - name: sort_order
   logical: 表示順序
   type: INT
@@ -174,41 +241,6 @@ columns:
   unique: false
   encrypted: false
   description: 画面表示時の順序
-- name: description
-  logical: ロール説明
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: ロールの詳細説明・用途
-- name: role_id
-  logical: MST_Roleの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: MST_Roleの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -239,53 +271,53 @@ columns:
 indexes:
 - name: idx_role_code
   columns:
-  - - role_code
+  - role_code
   unique: true
   description: ロールコード検索用（一意）
 - name: idx_role_category
   columns:
-  - - role_category
+  - role_category
   unique: false
   description: ロールカテゴリ別検索用
 - name: idx_role_level
   columns:
-  - - role_level
+  - role_level
   unique: false
   description: ロールレベル別検索用
 - name: idx_parent_role
   columns:
-  - - parent_role_id
+  - parent_role_id
   unique: false
   description: 親ロール別検索用
 - name: idx_system_role
   columns:
-  - - is_system_role
+  - is_system_role
   unique: false
   description: システムロール検索用
 - name: idx_tenant_specific
   columns:
-  - - is_tenant_specific
+  - is_tenant_specific
   unique: false
   description: テナント固有ロール検索用
 - name: idx_role_status
   columns:
-  - - role_status
+  - role_status
   unique: false
   description: ロール状態別検索用
 - name: idx_effective_period
   columns:
-  - - effective_from
-  - - effective_to
+  - effective_from
+  - effective_to
   unique: false
   description: 有効期間検索用
 - name: idx_sort_order
   columns:
-  - - sort_order
+  - sort_order
   unique: false
   description: 表示順序検索用
 - name: idx_mst_role_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -325,10 +357,9 @@ constraints:
 foreign_keys:
 - name: fk_role_parent
   columns:
-  - - parent_role_id
+  - parent_role_id
   references:
-    table:
-    - MST_Role
+    table: MST_Role
     columns:
     - id
   on_update: CASCADE
@@ -397,7 +428,7 @@ notes:
 - 有効期間外のロールは自動的に無効化
 - ロール削除時は関連するユーザーロール紐付けも削除
 - テナント固有ロールは該当テナント内でのみ使用可能
-business_rules:
+rules:
 - ロールコードは新設時に自動採番（ROLE + 3桁連番）
 - システムロールは is_system_role = true で保護
 - 親ロールが無効化される場合は子ロールも無効化

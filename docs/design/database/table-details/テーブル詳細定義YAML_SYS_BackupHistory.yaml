@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'バックアップ履歴テーブルは、システムのデータバックアップ実行履歴を管理するシステムテーブルです。
 
 
@@ -30,56 +62,15 @@ overview: 'バックアップ履歴テーブルは、システムのデータバ
 
   '
 columns:
-- name: backup_id
-  logical: バックアップID
-  type: VARCHAR
-  length: 50
-  'null': true
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
   unique: true
   encrypted: false
-  description: バックアップの一意識別子
-- name: backup_type
-  logical: バックアップ種別
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップの種別（FULL:フルバックアップ、INCREMENTAL:増分バックアップ、DIFFERENTIAL:差分バックアップ）
-  enum_values:
-  - FULL
-  - INCREMENTAL
-  - DIFFERENTIAL
-  default: FULL
-- name: backup_scope
-  logical: バックアップ範囲
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップ対象範囲（DATABASE:データベース全体、TABLE:特定テーブル、SCHEMA:特定スキーマ）
-  enum_values:
-  - DATABASE
-  - TABLE
-  - SCHEMA
-  default: DATABASE
-- name: target_objects
-  logical: 対象オブジェクト
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップ対象のテーブル名やスキーマ名（JSON配列形式）
-- name: backup_start_time
-  logical: バックアップ開始時刻
-  type: TIMESTAMP
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップ処理の開始日時
+  description: プライマリキー（UUID）
+  default: null
 - name: backup_end_time
   logical: バックアップ終了時刻
   type: TIMESTAMP
@@ -88,20 +79,6 @@ columns:
   unique: false
   encrypted: false
   description: バックアップ処理の終了日時
-- name: backup_status
-  logical: バックアップ状況
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップの実行状況（RUNNING:実行中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル）
-  enum_values:
-  - RUNNING
-  - SUCCESS
-  - FAILED
-  - CANCELLED
-  default: RUNNING
 - name: backup_file_path
   logical: バックアップファイルパス
   type: VARCHAR
@@ -118,6 +95,92 @@ columns:
   unique: false
   encrypted: false
   description: バックアップファイルのサイズ（バイト）
+- name: backup_id
+  logical: バックアップID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: バックアップの一意識別子
+- name: backup_scope
+  logical: バックアップ範囲
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップ対象範囲（DATABASE:データベース全体、TABLE:特定テーブル、SCHEMA:特定スキーマ）
+  enum_values:
+  - DATABASE
+  - TABLE
+  - SCHEMA
+  default: DATABASE
+- name: backup_start_time
+  logical: バックアップ開始時刻
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップ処理の開始日時
+- name: backup_status
+  logical: バックアップ状況
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップの実行状況（RUNNING:実行中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル）
+  enum_values:
+  - RUNNING
+  - SUCCESS
+  - FAILED
+  - CANCELLED
+  default: RUNNING
+- name: backup_trigger
+  logical: バックアップ契機
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップ実行の契機（SCHEDULED:スケジュール、MANUAL:手動、EMERGENCY:緊急）
+  enum_values:
+  - SCHEDULED
+  - MANUAL
+  - EMERGENCY
+  default: SCHEDULED
+- name: backup_type
+  logical: バックアップ種別
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップの種別（FULL:フルバックアップ、INCREMENTAL:増分バックアップ、DIFFERENTIAL:差分バックアップ）
+  enum_values:
+  - FULL
+  - INCREMENTAL
+  - DIFFERENTIAL
+  default: FULL
+- name: backuphistory_id
+  logical: SYS_BackupHistoryの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_BackupHistoryの主キー
+  default: null
+- name: checksum
+  logical: チェックサム
+  type: VARCHAR
+  length: 128
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップファイルの整合性チェック用ハッシュ値
 - name: compression_type
   logical: 圧縮形式
   type: ENUM
@@ -139,52 +202,6 @@ columns:
   encrypted: false
   description: バックアップファイルの暗号化有無
   default: false
-- name: checksum
-  logical: チェックサム
-  type: VARCHAR
-  length: 128
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップファイルの整合性チェック用ハッシュ値
-- name: retention_period_days
-  logical: 保持期間日数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップファイルの保持期間（日数）
-  default: 30
-- name: expiry_date
-  logical: 有効期限
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップファイルの有効期限日
-- name: backup_trigger
-  logical: バックアップ契機
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップ実行の契機（SCHEDULED:スケジュール、MANUAL:手動、EMERGENCY:緊急）
-  enum_values:
-  - SCHEDULED
-  - MANUAL
-  - EMERGENCY
-  default: SCHEDULED
-- name: executed_by
-  logical: 実行者
-  type: VARCHAR
-  length: 100
-  'null': true
-  unique: false
-  encrypted: false
-  description: バックアップを実行したユーザーまたはシステム
 - name: error_message
   logical: エラーメッセージ
   type: TEXT
@@ -193,6 +210,30 @@ columns:
   unique: false
   encrypted: false
   description: バックアップ失敗時のエラーメッセージ
+- name: executed_by
+  logical: 実行者
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップを実行したユーザーまたはシステム
+- name: expiry_date
+  logical: 有効期限
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バックアップファイルの有効期限日
+- name: recovery_test_date
+  logical: 復旧テスト日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 復旧テストを実施した日付
 - name: recovery_tested
   logical: 復旧テスト済み
   type: BOOLEAN
@@ -202,32 +243,23 @@ columns:
   encrypted: false
   description: このバックアップからの復旧テストが実施済みかどうか
   default: false
-- name: recovery_test_date
-  logical: 復旧テスト日
-  type: DATE
+- name: retention_period_days
+  logical: 保持期間日数
+  type: INTEGER
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 復旧テストを実施した日付
-- name: backuphistory_id
-  logical: SYS_BackupHistoryの主キー
-  type: SERIAL
+  description: バックアップファイルの保持期間（日数）
+  default: 30
+- name: target_objects
+  logical: 対象オブジェクト
+  type: TEXT
   length: null
-  'null': false
+  'null': true
   unique: false
   encrypted: false
-  description: SYS_BackupHistoryの主キー
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: バックアップ対象のテーブル名やスキーマ名（JSON配列形式）
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -258,28 +290,28 @@ columns:
 indexes:
 - name: idx_SYS_BackupHistory_backup_id
   columns:
-  - - backup_id
+  - backup_id
   unique: true
   description: バックアップID検索用（一意）
 - name: idx_SYS_BackupHistory_start_time
   columns:
-  - - backup_start_time
+  - backup_start_time
   unique: false
   description: バックアップ開始時刻検索用
 - name: idx_SYS_BackupHistory_status
   columns:
-  - - backup_status
+  - backup_status
   unique: false
   description: バックアップ状況検索用
 - name: idx_SYS_BackupHistory_type_scope
   columns:
-  - - backup_type
-  - - backup_scope
+  - backup_type
+  - backup_scope
   unique: false
   description: バックアップ種別と範囲の複合検索用
 - name: idx_SYS_BackupHistory_expiry_date
   columns:
-  - - expiry_date
+  - expiry_date
   unique: false
   description: 有効期限検索用（期限切れバックアップの削除処理用）
 constraints:
@@ -376,7 +408,7 @@ notes:
 - バックアップ失敗時は管理者にアラート通知を送信する
 - 月次で復旧テストを実施し、結果を記録する
 - 緊急時のマニュアルバックアップも履歴として記録する
-business_rules:
+rules:
 - バックアップIDは「BKP_YYYYMMDD_NNN」形式で生成する
 - フルバックアップは毎週日曜日2:00に実行する
 - 増分バックアップは毎日14:00に実行する（日曜日を除く）

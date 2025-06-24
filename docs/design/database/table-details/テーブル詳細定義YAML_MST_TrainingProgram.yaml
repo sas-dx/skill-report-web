@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_TrainingProgram（研修プログラム）は、組織で提供される研修・教育プログラムの詳細情報を管理するマスタテーブルです。
 
 
@@ -32,46 +64,260 @@ overview: 'MST_TrainingProgram（研修プログラム）は、組織で提供�
 
   '
 columns:
-- name: training_program_id
-  logical: 研修プログラムID
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: active_flag
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 現在提供中の研修かどうか
+  default: true
+- name: approval_date
+  logical: 承認日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: プログラムが承認された日付
+- name: approved_by
+  logical: 承認者
   type: VARCHAR
   length: 50
   'null': true
-  unique: true
+  unique: false
   encrypted: false
-  description: 研修プログラムを一意に識別するID
-- name: program_code
-  logical: プログラムコード
-  type: VARCHAR
-  length: 20
-  'null': true
-  unique: true
-  encrypted: false
-  description: 研修プログラムの識別コード
-- name: program_name
-  logical: プログラム名
-  type: VARCHAR
-  length: 200
+  description: プログラムを承認した責任者ID
+- name: assessment_method
+  logical: 評価方法
+  type: ENUM
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 研修プログラムの名称
-- name: program_name_en
-  logical: プログラム名（英語）
-  type: VARCHAR
-  length: 200
+  description: 研修の評価方法（NONE:なし、TEST:テスト、ASSIGNMENT:課題、PRESENTATION:発表、PRACTICAL:実技、COMPREHENSIVE:総合評価）
+  enum_values:
+  - NONE
+  - TEST
+  - ASSIGNMENT
+  - PRESENTATION
+  - PRACTICAL
+  - COMPREHENSIVE
+- name: certification_provided
+  logical: 認定証発行
+  type: BOOLEAN
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 研修プログラムの英語名称
-- name: program_description
-  logical: プログラム説明
+  description: 修了時に認定証を発行するかどうか
+  default: false
+- name: cost_per_participant
+  logical: 参加者単価
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 参加者1人あたりの研修費用
+- name: created_by
+  logical: 作成者
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: プログラムを作成した担当者ID
+- name: curriculum_details
+  logical: カリキュラム詳細
   type: TEXT
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 研修プログラムの詳細説明
+  description: 詳細なカリキュラム内容（JSON形式）
+- name: curriculum_outline
+  logical: カリキュラム概要
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修のカリキュラム・内容概要
+- name: difficulty_level
+  logical: 難易度
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修の難易度（BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
+  enum_values:
+  - BEGINNER
+  - INTERMEDIATE
+  - ADVANCED
+  - EXPERT
+- name: duration_days
+  logical: 研修日数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修の実施日数
+- name: duration_hours
+  logical: 研修時間
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修の総時間数
+- name: effective_end_date
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修プログラムの提供終了日
+- name: effective_start_date
+  logical: 有効開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修プログラムの提供開始日
+- name: equipment_required
+  logical: 必要機材
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修に必要な機材・設備（JSON形式）
+- name: external_provider
+  logical: 外部提供者
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 外部研修の場合の提供会社・機関名
+- name: external_url
+  logical: 外部URL
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 外部研修の詳細情報URL
+- name: instructor_requirements
+  logical: 講師要件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 講師に求められる要件・資格
+- name: language
+  logical: 実施言語
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修の実施言語（JA:日本語、EN:英語、BILINGUAL:バイリンガル）
+  enum_values:
+  - JA
+  - EN
+  - BILINGUAL
+  default: JA
+- name: learning_objectives
+  logical: 学習目標
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修の学習目標・到達目標
+- name: mandatory_flag
+  logical: 必須研修フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 必須研修かどうか
+  default: false
+- name: materials_required
+  logical: 必要教材
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修に必要な教材・資料（JSON形式）
+- name: max_participants
+  logical: 最大参加者数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 1回の研修での最大参加者数
+- name: min_participants
+  logical: 最小参加者数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 開催に必要な最小参加者数
+- name: passing_score
+  logical: 合格点
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修合格に必要な点数
+- name: pdu_credits
+  logical: PDUクレジット
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 取得可能なPDUクレジット数
+- name: prerequisites
+  logical: 前提条件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 受講に必要な前提知識・条件
 - name: program_category
   logical: プログラムカテゴリ
   type: ENUM
@@ -88,6 +334,38 @@ columns:
   - SOFT_SKILL
   - CERTIFICATION
   - ORIENTATION
+- name: program_code
+  logical: プログラムコード
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: true
+  encrypted: false
+  description: 研修プログラムの識別コード
+- name: program_description
+  logical: プログラム説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修プログラムの詳細説明
+- name: program_name
+  logical: プログラム名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修プログラムの名称
+- name: program_name_en
+  logical: プログラム名（英語）
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修プログラムの英語名称
 - name: program_type
   logical: プログラム種別
   type: ENUM
@@ -103,6 +381,46 @@ columns:
   - OJT
   - SELF_STUDY
   - EXTERNAL
+- name: related_certifications
+  logical: 関連資格
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修に関連する資格（JSON形式）
+- name: related_skills
+  logical: 関連スキル
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 研修で習得・向上するスキル（JSON形式）
+- name: repeat_interval
+  logical: 再受講間隔
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 再受講可能な間隔（月数）
+- name: revision_notes
+  logical: 改訂メモ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: バージョン改訂時のメモ・変更内容
+- name: tags
+  logical: タグ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 検索・分類用のタグ（JSON形式）
 - name: target_audience
   logical: 対象者
   type: ENUM
@@ -120,187 +438,31 @@ columns:
   - MANAGER
   - EXECUTIVE
   - SPECIALIST
-- name: difficulty_level
-  logical: 難易度
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修の難易度（BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
-  enum_values:
-  - BEGINNER
-  - INTERMEDIATE
-  - ADVANCED
-  - EXPERT
-- name: duration_hours
-  logical: 研修時間
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修の総時間数
-- name: duration_days
-  logical: 研修日数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修の実施日数
-- name: max_participants
-  logical: 最大参加者数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 1回の研修での最大参加者数
-- name: min_participants
-  logical: 最小参加者数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 開催に必要な最小参加者数
-- name: prerequisites
-  logical: 前提条件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 受講に必要な前提知識・条件
-- name: learning_objectives
-  logical: 学習目標
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修の学習目標・到達目標
-- name: curriculum_outline
-  logical: カリキュラム概要
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修のカリキュラム・内容概要
-- name: curriculum_details
-  logical: カリキュラム詳細
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 詳細なカリキュラム内容（JSON形式）
-- name: materials_required
-  logical: 必要教材
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修に必要な教材・資料（JSON形式）
-- name: equipment_required
-  logical: 必要機材
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修に必要な機材・設備（JSON形式）
-- name: instructor_requirements
-  logical: 講師要件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 講師に求められる要件・資格
-- name: assessment_method
-  logical: 評価方法
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修の評価方法（NONE:なし、TEST:テスト、ASSIGNMENT:課題、PRESENTATION:発表、PRACTICAL:実技、COMPREHENSIVE:総合評価）
-  enum_values:
-  - NONE
-  - TEST
-  - ASSIGNMENT
-  - PRESENTATION
-  - PRACTICAL
-  - COMPREHENSIVE
-- name: passing_score
-  logical: 合格点
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修合格に必要な点数
-- name: certification_provided
-  logical: 認定証発行
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 修了時に認定証を発行するかどうか
-  default: false
-- name: pdu_credits
-  logical: PDUクレジット
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 取得可能なPDUクレジット数
-- name: related_skills
-  logical: 関連スキル
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修で習得・向上するスキル（JSON形式）
-- name: related_certifications
-  logical: 関連資格
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修に関連する資格（JSON形式）
-- name: cost_per_participant
-  logical: 参加者単価
-  type: DECIMAL
-  length: 10,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 参加者1人あたりの研修費用
-- name: external_provider
-  logical: 外部提供者
+- name: training_program_id
+  logical: 研修プログラムID
   type: VARCHAR
-  length: 200
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: 研修プログラムを一意に識別するID
+- name: trainingprogram_id
+  logical: MST_TrainingProgramの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_TrainingProgramの主キー
+  default: null
+- name: venue_requirements
+  logical: 会場要件
+  type: TEXT
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 外部研修の場合の提供会社・機関名
-- name: external_url
-  logical: 外部URL
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: 外部研修の詳細情報URL
+  description: 研修会場に必要な設備・条件
 - name: venue_type
   logical: 会場種別
   type: ENUM
@@ -314,93 +476,6 @@ columns:
   - EXTERNAL
   - ONLINE
   - HYBRID
-- name: venue_requirements
-  logical: 会場要件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修会場に必要な設備・条件
-- name: language
-  logical: 実施言語
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修の実施言語（JA:日本語、EN:英語、BILINGUAL:バイリンガル）
-  enum_values:
-  - JA
-  - EN
-  - BILINGUAL
-  default: JA
-- name: repeat_interval
-  logical: 再受講間隔
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 再受講可能な間隔（月数）
-- name: mandatory_flag
-  logical: 必須研修フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 必須研修かどうか
-  default: false
-- name: active_flag
-  logical: 有効フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 現在提供中の研修かどうか
-  default: true
-- name: effective_start_date
-  logical: 有効開始日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修プログラムの提供開始日
-- name: effective_end_date
-  logical: 有効終了日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 研修プログラムの提供終了日
-- name: created_by
-  logical: 作成者
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: プログラムを作成した担当者ID
-- name: approved_by
-  logical: 承認者
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: プログラムを承認した責任者ID
-- name: approval_date
-  logical: 承認日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: プログラムが承認された日付
 - name: version_number
   logical: バージョン番号
   type: VARCHAR
@@ -410,49 +485,6 @@ columns:
   encrypted: false
   description: プログラムのバージョン番号
   default: '1.0'
-- name: revision_notes
-  logical: 改訂メモ
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: バージョン改訂時のメモ・変更内容
-- name: tags
-  logical: タグ
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 検索・分類用のタグ（JSON形式）
-- name: trainingprogram_id
-  logical: MST_TrainingProgramの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: MST_TrainingProgramの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -483,63 +515,63 @@ columns:
 indexes:
 - name: idx_training_program_id
   columns:
-  - - training_program_id
+  - training_program_id
   unique: true
   description: 研修プログラムID検索用（一意）
 - name: idx_program_code
   columns:
-  - - program_code
+  - program_code
   unique: true
   description: プログラムコード検索用（一意）
 - name: idx_program_category
   columns:
-  - - program_category
+  - program_category
   unique: false
   description: プログラムカテゴリ検索用
 - name: idx_program_type
   columns:
-  - - program_type
+  - program_type
   unique: false
   description: プログラム種別検索用
 - name: idx_target_audience
   columns:
-  - - target_audience
+  - target_audience
   unique: false
   description: 対象者検索用
 - name: idx_difficulty_level
   columns:
-  - - difficulty_level
+  - difficulty_level
   unique: false
   description: 難易度検索用
 - name: idx_active_flag
   columns:
-  - - active_flag
+  - active_flag
   unique: false
   description: 有効フラグ検索用
 - name: idx_mandatory_flag
   columns:
-  - - mandatory_flag
+  - mandatory_flag
   unique: false
   description: 必須研修フラグ検索用
 - name: idx_effective_period
   columns:
-  - - effective_start_date
-  - - effective_end_date
+  - effective_start_date
+  - effective_end_date
   unique: false
   description: 有効期間検索用
 - name: idx_external_provider
   columns:
-  - - external_provider
+  - external_provider
   unique: false
   description: 外部提供者検索用
 - name: idx_language
   columns:
-  - - language
+  - language
   unique: false
   description: 実施言語検索用
 - name: idx_mst_trainingprogram_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -605,10 +637,9 @@ constraints:
 foreign_keys:
 - name: fk_training_program_created_by
   columns:
-  - - created_by
+  - created_by
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -616,10 +647,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_training_program_approved_by
   columns:
-  - - approved_by
+  - approved_by
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -729,7 +759,7 @@ notes:
 - 必須研修は有効期間内である必要がある
 - 外部研修の場合は提供者情報が必要
 - 承認済みプログラムのみ実施可能
-business_rules:
+rules:
 - 研修プログラムIDとプログラムコードは一意である必要がある
 - 研修時間と日数は正数である必要がある
 - 最小参加者数は最大参加者数以下である必要がある

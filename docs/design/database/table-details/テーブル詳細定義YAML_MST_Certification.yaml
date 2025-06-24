@@ -10,6 +10,50 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 3.2.20250624
+  date: '2025-06-24'
+  author: 主キー修正ツール
+  changes: certification_id カラム削除、id を正しい主キーに設定
+- version: 4.0.20250624
+  date: '2025-06-24'
+  author: カラム順序統一ツール
+  changes: certification_id を主キーとして復活、指定されたカラム順序に統一
+- version: 4.1.20250624
+  date: '2025-06-24'
+  author: 制約修正ツール
+  changes: デフォルト値の型修正、制約処理の有効化
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222630
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223431
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_Certification（資格情報）は、各種資格・認定・免許の基本情報を管理するマスタテーブルです。
 
 
@@ -32,6 +76,25 @@ overview: 'MST_Certification（資格情報）は、各種資格・認定・免�
 
   '
 columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+  primary_key: false
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
 - name: certification_code
   logical: 資格コード
   type: VARCHAR
@@ -49,6 +112,44 @@ columns:
   unique: false
   encrypted: false
   description: 正式な資格名称
+- name: certification_category
+  logical: 資格カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の分類（IT:IT関連、BUSINESS:ビジネス、NATIONAL:国家資格、LANGUAGE:語学、OTHER:その他）
+  enum_values:
+  - IT
+  - BUSINESS
+  - NATIONAL
+  - LANGUAGE
+  - OTHER
+- name: certification_id
+  logical: 資格ID
+  type: INTEGER
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 資格ID（主キー、AUTO_INCREMENT）
+  default: null
+  primary_key: true
+  auto_increment: true
+- name: certification_level
+  logical: 資格レベル
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の難易度レベル（BASIC:基礎、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
+  enum_values:
+  - BASIC
+  - INTERMEDIATE
+  - ADVANCED
+  - EXPERT
 - name: certification_name_en
   logical: 資格名（英語）
   type: VARCHAR
@@ -57,6 +158,60 @@ columns:
   unique: false
   encrypted: false
   description: 英語での資格名称
+- name: description
+  logical: 説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の詳細説明・概要
+- name: exam_fee
+  logical: 受験料
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 受験料（円）
+- name: exam_format
+  logical: 試験形式
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 試験の実施形式（ONLINE:オンライン、OFFLINE:会場、BOTH:両方）
+  enum_values:
+  - ONLINE
+  - OFFLINE
+  - BOTH
+- name: exam_language
+  logical: 試験言語
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 試験で使用される言語
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格が有効かどうか
+  default: true
+- name: is_recommended
+  logical: 推奨資格フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 会社として取得を推奨する資格かどうか
+  default: false
 - name: issuer
   logical: 発行機関
   type: VARCHAR
@@ -73,41 +228,14 @@ columns:
   unique: false
   encrypted: false
   description: 資格発行国（ISO 3166-1 alpha-2コード）
-- name: certification_category
-  logical: 資格カテゴリ
-  type: ENUM
-  length: null
+- name: official_url
+  logical: 公式URL
+  type: VARCHAR
+  length: 500
   'null': true
   unique: false
   encrypted: false
-  description: 資格の分類（IT:IT関連、BUSINESS:ビジネス、NATIONAL:国家資格、LANGUAGE:語学、OTHER:その他）
-  enum_values:
-  - IT
-  - BUSINESS
-  - NATIONAL
-  - LANGUAGE
-  - OTHER
-- name: certification_level
-  logical: 資格レベル
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格の難易度レベル（BASIC:基礎、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
-  enum_values:
-  - BASIC
-  - INTERMEDIATE
-  - ADVANCED
-  - EXPERT
-- name: validity_period_months
-  logical: 有効期間（月）
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格の有効期間（月数、NULLの場合は無期限）
+  description: 資格の公式サイトURL
 - name: renewal_required
   logical: 更新要否
   type: BOOLEAN
@@ -125,50 +253,6 @@ columns:
   unique: false
   encrypted: false
   description: 資格更新に必要な要件・条件
-- name: exam_fee
-  logical: 受験料
-  type: DECIMAL
-  length: 10,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 受験料（円）
-- name: exam_language
-  logical: 試験言語
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 試験で使用される言語
-- name: exam_format
-  logical: 試験形式
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 試験の実施形式（ONLINE:オンライン、OFFLINE:会場、BOTH:両方）
-  enum_values:
-  - ONLINE
-  - OFFLINE
-  - BOTH
-- name: official_url
-  logical: 公式URL
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格の公式サイトURL
-- name: description
-  logical: 説明
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格の詳細説明・概要
 - name: skill_category_id
   logical: スキルカテゴリID
   type: VARCHAR
@@ -177,51 +261,14 @@ columns:
   unique: false
   encrypted: false
   description: 関連するスキルカテゴリのID
-- name: is_recommended
-  logical: 推奨資格フラグ
-  type: BOOLEAN
+- name: validity_period_months
+  logical: 有効期間（月）
+  type: INTEGER
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 会社として取得を推奨する資格かどうか
-  default: false
-- name: is_active
-  logical: 有効フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格が有効かどうか
-  default: true
-- name: certification_id
-  logical: MST_Certificationの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: MST_Certificationの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: 資格の有効期間（月数、NULLの場合は無期限）
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -230,7 +277,7 @@ columns:
   unique: false
   encrypted: false
   description: 論理削除フラグ
-  default: 'False'
+  default: false
 - name: created_at
   logical: 作成日時
   type: TIMESTAMP
@@ -252,39 +299,39 @@ columns:
 indexes:
 - name: idx_certification_code
   columns:
-  - - certification_code
+  - certification_code
   unique: true
   description: 資格コード検索用（一意）
 - name: idx_certification_name
   columns:
-  - - certification_name
+  - certification_name
   unique: false
   description: 資格名検索用
 - name: idx_issuer
   columns:
-  - - issuer
+  - issuer
   unique: false
   description: 発行機関検索用
 - name: idx_category_level
   columns:
-  - - certification_category
-  - - certification_level
+  - certification_category
+  - certification_level
   unique: false
   description: カテゴリ・レベル別検索用
 - name: idx_recommended
   columns:
-  - - is_recommended
-  - - is_active
+  - is_recommended
+  - is_active
   unique: false
   description: 推奨資格検索用
 - name: idx_skill_category
   columns:
-  - - skill_category_id
+  - skill_category_id
   unique: false
   description: スキルカテゴリ別検索用
 - name: idx_mst_certification_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -292,7 +339,7 @@ constraints:
   type: UNIQUE
   description: 資格コード一意制約
   columns:
-  - - certification_code
+  - certification_code
 - name: chk_certification_category
   type: CHECK
   description: 資格カテゴリ値チェック制約
@@ -317,10 +364,9 @@ constraints:
 foreign_keys:
 - name: fk_certification_skill_category
   columns:
-  - - skill_category_id
+  - skill_category_id
   references:
-    table:
-    - MST_SkillCategory
+    table: MST_SkillCategory
     columns:
     - id
   on_update: CASCADE
@@ -370,14 +416,7 @@ notes:
 - 受験料は円建てで統一（外貨の場合は取得時レートで換算）
 - 推奨資格は人事評価・昇進要件との連携で使用
 - 論理削除は is_active フラグで管理
-- 資格コードは一意である必要がある
-- 推奨資格は定期的に見直しを行う
-- 有効期限のある資格は更新要件を必須記載
-- 受験料は税込み価格で記録
-- 公式URLは資格詳細情報の参照先として使用
-- スキルカテゴリとの関連付けにより、関連スキル推薦機能で活用
-- 資格レベルは社内スキルグレードとの対応付けに使用
-business_rules:
+rules:
 - 資格コードは一意である必要がある
 - 推奨資格は定期的に見直しを行う
 - 有効期限のある資格は更新要件を必須記載

@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_ReportTemplate（帳票テンプレート）は、システムで生成する各種帳票のテンプレート情報を管理するマスタテーブルです。
 
 
@@ -46,6 +78,133 @@ columns:
   unique: false
   encrypted: false
   description: マルチテナント識別子
+- name: data_source_config
+  logical: データソース設定
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: データ取得に関する設定（JSON形式）
+- name: footer_template
+  logical: フッターテンプレート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票フッター部分のテンプレート
+- name: header_template
+  logical: ヘッダーテンプレート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票ヘッダー部分のテンプレート
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートが有効かどうか
+  default: true
+- name: is_default
+  logical: デフォルトフラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同一キー・カテゴリでのデフォルトテンプレートかどうか
+  default: false
+- name: language_code
+  logical: 言語コード
+  type: VARCHAR
+  length: 10
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの言語（ja:日本語、en:英語等）
+  default: ja
+- name: output_format
+  logical: 出力形式
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML）
+  enum_values:
+  - PDF
+  - EXCEL
+  - CSV
+  - HTML
+- name: page_settings
+  logical: ページ設定
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: ページサイズ・余白等の設定（JSON形式）
+- name: parameters_schema
+  logical: パラメータスキーマ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成に必要なパラメータの定義（JSON Schema形式）
+- name: preview_image_url
+  logical: プレビュー画像URL
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートのプレビュー画像URL
+- name: report_category
+  logical: 帳票カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析）
+  enum_values:
+  - SKILL
+  - GOAL
+  - EVALUATION
+  - SUMMARY
+  - ANALYTICS
+- name: reporttemplate_id
+  logical: MST_ReportTemplateの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_ReportTemplateの主キー
+  default: null
+- name: style_sheet
+  logical: スタイルシート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票のスタイル定義（CSS等）
+- name: template_content
+  logical: テンプレート内容
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票テンプレートの内容（HTML、XML等の形式）
 - name: template_key
   logical: テンプレートキー
   type: VARCHAR
@@ -62,116 +221,6 @@ columns:
   unique: false
   encrypted: false
   description: テンプレートの表示名
-- name: report_category
-  logical: 帳票カテゴリ
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析）
-  enum_values:
-  - SKILL
-  - GOAL
-  - EVALUATION
-  - SUMMARY
-  - ANALYTICS
-- name: output_format
-  logical: 出力形式
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML）
-  enum_values:
-  - PDF
-  - EXCEL
-  - CSV
-  - HTML
-- name: language_code
-  logical: 言語コード
-  type: VARCHAR
-  length: 10
-  'null': true
-  unique: false
-  encrypted: false
-  description: テンプレートの言語（ja:日本語、en:英語等）
-  default: ja
-- name: template_content
-  logical: テンプレート内容
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票テンプレートの内容（HTML、XML等の形式）
-- name: style_sheet
-  logical: スタイルシート
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票のスタイル定義（CSS等）
-- name: parameters_schema
-  logical: パラメータスキーマ
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票生成に必要なパラメータの定義（JSON Schema形式）
-- name: data_source_config
-  logical: データソース設定
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: データ取得に関する設定（JSON形式）
-- name: page_settings
-  logical: ページ設定
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: ページサイズ・余白等の設定（JSON形式）
-- name: header_template
-  logical: ヘッダーテンプレート
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票ヘッダー部分のテンプレート
-- name: footer_template
-  logical: フッターテンプレート
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 帳票フッター部分のテンプレート
-- name: is_default
-  logical: デフォルトフラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 同一キー・カテゴリでのデフォルトテンプレートかどうか
-  default: false
-- name: is_active
-  logical: 有効フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: テンプレートが有効かどうか
-  default: true
 - name: version
   logical: バージョン
   type: VARCHAR
@@ -181,23 +230,6 @@ columns:
   encrypted: false
   description: テンプレートのバージョン番号
   default: 1.0.0
-- name: preview_image_url
-  logical: プレビュー画像URL
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: テンプレートのプレビュー画像URL
-- name: reporttemplate_id
-  logical: MST_ReportTemplateの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: MST_ReportTemplateの主キー
-  default: null
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -228,35 +260,35 @@ columns:
 indexes:
 - name: idx_report_template_tenant_key
   columns:
-  - - tenant_id
-  - - template_key
-  - - language_code
+  - tenant_id
+  - template_key
+  - language_code
   unique: true
   description: テナント別テンプレートキー検索用（一意）
 - name: idx_report_template_category
   columns:
-  - - report_category
+  - report_category
   unique: false
   description: 帳票カテゴリ別検索用
 - name: idx_report_template_format
   columns:
-  - - output_format
+  - output_format
   unique: false
   description: 出力形式別検索用
 - name: idx_report_template_language
   columns:
-  - - language_code
+  - language_code
   unique: false
   description: 言語別検索用
 - name: idx_report_template_default
   columns:
-  - - is_default
-  - - is_active
+  - is_default
+  - is_active
   unique: false
   description: デフォルト・有効テンプレート検索用
 - name: idx_mst_reporttemplate_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -359,7 +391,7 @@ notes:
 - 出力形式に応じたテンプレート記法を使用
 - テンプレートバージョンは変更時に更新が必要
 - プレビュー画像は管理画面での選択性向上のため推奨
-business_rules:
+rules:
 - 同一テナント・キー・言語の組み合わせは重複不可
 - 無効化されたテンプレートは帳票生成から除外される
 - デフォルトテンプレートは同一条件で1つのみ設定可能

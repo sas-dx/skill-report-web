@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222630
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_CertificationRequirement（資格要件マスタ）は、職種・役職・スキルレベルに応じた資格要件を管理するマスタテーブルです。
 
 
@@ -32,22 +64,282 @@ overview: 'MST_CertificationRequirement（資格要件マスタ）は、職種�
 
   '
 columns:
-- name: requirement_id
-  logical: 要件ID
-  type: VARCHAR
-  length: 50
-  'null': true
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
   unique: true
   encrypted: false
-  description: 資格要件を一意に識別するID
-- name: requirement_name
-  logical: 要件名
-  type: VARCHAR
-  length: 200
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: active_flag
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 資格要件の名称
+  description: 現在有効な要件かどうか
+  default: true
+- name: alternative_certifications
+  logical: 代替資格
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 代替可能な資格のリスト（JSON形式）
+- name: approval_date
+  logical: 承認日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件が承認された日付
+- name: approved_by
+  logical: 承認者
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件を承認した責任者ID
+- name: assessment_criteria
+  logical: 評価基準
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件充足の評価基準・判定方法
+- name: average_study_hours
+  logical: 平均学習時間
+  type: DECIMAL
+  length: 6,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格取得に必要な平均学習時間
+- name: business_justification
+  logical: 業務上の根拠
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格要件設定の業務上の根拠・理由
+- name: certification_id
+  logical: 資格ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 必要な資格のID（MST_Certificationへの外部キー）
+- name: certificationrequirement_id
+  logical: MST_CertificationRequirementの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_CertificationRequirementの主キー
+  default: null
+- name: client_requirement
+  logical: 顧客要件
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 顧客要求による要件かどうか
+  default: false
+- name: compliance_requirement
+  logical: コンプライアンス要件
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 法的・規制上の要件かどうか
+  default: false
+- name: cost_support_amount
+  logical: 支援金額
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格取得費用の支援金額
+- name: cost_support_available
+  logical: 費用支援有無
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格取得費用の支援があるかどうか
+  default: false
+- name: cost_support_conditions
+  logical: 支援条件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 費用支援の条件・制約
+- name: created_by
+  logical: 作成者
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件を作成した担当者ID
+- name: difficulty_rating
+  logical: 難易度評価
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 社内での難易度評価（EASY:易、MEDIUM:中、HARD:難、VERY_HARD:非常に難）
+  enum_values:
+  - EASY
+  - MEDIUM
+  - HARD
+  - VERY_HARD
+- name: effective_end_date
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の適用終了日
+- name: effective_start_date
+  logical: 有効開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の適用開始日
+- name: escalation_timing
+  logical: エスカレーション期限
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 未充足時のエスカレーション期限（日数）
+- name: exemption_conditions
+  logical: 免除条件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格要件の免除条件
+- name: grace_period_months
+  logical: 猶予期間
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格取得までの猶予期間（月数）
+- name: internal_policy
+  logical: 社内方針
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 社内方針による要件かどうか
+  default: false
+- name: minimum_experience_years
+  logical: 最低経験年数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格取得に加えて必要な実務経験年数
+- name: minimum_skill_level
+  logical: 最低スキルレベル
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 併せて必要な最低スキルレベル（BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
+  enum_values:
+  - BEGINNER
+  - INTERMEDIATE
+  - ADVANCED
+  - EXPERT
+- name: notes
+  logical: 備考
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: その他の備考・補足情報
+- name: notification_timing
+  logical: 通知タイミング
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件充足期限前の通知タイミング（日数）
+- name: priority_order
+  logical: 優先順位
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 複数資格がある場合の優先順位（1が最高）
+  default: 1
+- name: recommended_training_programs
+  logical: 推奨研修プログラム
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格取得に推奨される研修プログラム（JSON形式）
+- name: renewal_interval_months
+  logical: 更新間隔
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格更新の間隔（月数）
+- name: renewal_required
+  logical: 更新必要フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の定期更新が必要かどうか
+  default: false
 - name: requirement_description
   logical: 要件説明
   type: TEXT
@@ -56,6 +348,35 @@ columns:
   unique: false
   encrypted: false
   description: 資格要件の詳細説明
+- name: requirement_id
+  logical: 要件ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: 資格要件を一意に識別するID
+- name: requirement_level
+  logical: 要件レベル
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の必要度（MANDATORY:必須、PREFERRED:推奨、OPTIONAL:任意、DISQUALIFYING:除外条件）
+  enum_values:
+  - MANDATORY
+  - PREFERRED
+  - OPTIONAL
+  - DISQUALIFYING
+- name: requirement_name
+  logical: 要件名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格要件の名称
 - name: requirement_type
   logical: 要件種別
   type: ENUM
@@ -70,6 +391,38 @@ columns:
   - SKILL_GRADE
   - PROJECT
   - PROMOTION
+- name: review_date
+  logical: 見直し日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 次回要件見直し予定日
+- name: study_time_allocation
+  logical: 学習時間配分
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 業務時間内での学習時間配分（時間/週）
+- name: success_rate
+  logical: 合格率
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 社内での資格取得成功率（%）
+- name: target_department_id
+  logical: 対象部署ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件が適用される部署のID（MST_Departmentへの外部キー）
 - name: target_job_type_id
   logical: 対象職種ID
   type: VARCHAR
@@ -94,206 +447,6 @@ columns:
   unique: false
   encrypted: false
   description: 要件が適用されるスキルグレードのID（MST_SkillGradeへの外部キー）
-- name: target_department_id
-  logical: 対象部署ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件が適用される部署のID（MST_Departmentへの外部キー）
-- name: certification_id
-  logical: 資格ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 必要な資格のID（MST_Certificationへの外部キー）
-- name: requirement_level
-  logical: 要件レベル
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件の必要度（MANDATORY:必須、PREFERRED:推奨、OPTIONAL:任意、DISQUALIFYING:除外条件）
-  enum_values:
-  - MANDATORY
-  - PREFERRED
-  - OPTIONAL
-  - DISQUALIFYING
-- name: priority_order
-  logical: 優先順位
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 複数資格がある場合の優先順位（1が最高）
-  default: 1
-- name: alternative_certifications
-  logical: 代替資格
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 代替可能な資格のリスト（JSON形式）
-- name: minimum_experience_years
-  logical: 最低経験年数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格取得に加えて必要な実務経験年数
-- name: minimum_skill_level
-  logical: 最低スキルレベル
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 併せて必要な最低スキルレベル（BEGINNER:初級、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
-  enum_values:
-  - BEGINNER
-  - INTERMEDIATE
-  - ADVANCED
-  - EXPERT
-- name: grace_period_months
-  logical: 猶予期間
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格取得までの猶予期間（月数）
-- name: renewal_required
-  logical: 更新必要フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格の定期更新が必要かどうか
-  default: false
-- name: renewal_interval_months
-  logical: 更新間隔
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格更新の間隔（月数）
-- name: exemption_conditions
-  logical: 免除条件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格要件の免除条件
-- name: assessment_criteria
-  logical: 評価基準
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件充足の評価基準・判定方法
-- name: business_justification
-  logical: 業務上の根拠
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格要件設定の業務上の根拠・理由
-- name: compliance_requirement
-  logical: コンプライアンス要件
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 法的・規制上の要件かどうか
-  default: false
-- name: client_requirement
-  logical: 顧客要件
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 顧客要求による要件かどうか
-  default: false
-- name: internal_policy
-  logical: 社内方針
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 社内方針による要件かどうか
-  default: false
-- name: effective_start_date
-  logical: 有効開始日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件の適用開始日
-- name: effective_end_date
-  logical: 有効終了日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件の適用終了日
-- name: notification_timing
-  logical: 通知タイミング
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件充足期限前の通知タイミング（日数）
-- name: escalation_timing
-  logical: エスカレーション期限
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 未充足時のエスカレーション期限（日数）
-- name: cost_support_available
-  logical: 費用支援有無
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格取得費用の支援があるかどうか
-  default: false
-- name: cost_support_amount
-  logical: 支援金額
-  type: DECIMAL
-  length: 10,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格取得費用の支援金額
-- name: cost_support_conditions
-  logical: 支援条件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 費用支援の条件・制約
 - name: training_support_available
   logical: 研修支援有無
   type: BOOLEAN
@@ -303,127 +456,6 @@ columns:
   encrypted: false
   description: 資格取得のための研修支援があるかどうか
   default: false
-- name: recommended_training_programs
-  logical: 推奨研修プログラム
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格取得に推奨される研修プログラム（JSON形式）
-- name: study_time_allocation
-  logical: 学習時間配分
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 業務時間内での学習時間配分（時間/週）
-- name: success_rate
-  logical: 合格率
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 社内での資格取得成功率（%）
-- name: average_study_hours
-  logical: 平均学習時間
-  type: DECIMAL
-  length: 6,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 資格取得に必要な平均学習時間
-- name: difficulty_rating
-  logical: 難易度評価
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 社内での難易度評価（EASY:易、MEDIUM:中、HARD:難、VERY_HARD:非常に難）
-  enum_values:
-  - EASY
-  - MEDIUM
-  - HARD
-  - VERY_HARD
-- name: active_flag
-  logical: 有効フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 現在有効な要件かどうか
-  default: true
-- name: created_by
-  logical: 作成者
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件を作成した担当者ID
-- name: approved_by
-  logical: 承認者
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件を承認した責任者ID
-- name: approval_date
-  logical: 承認日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件が承認された日付
-- name: review_date
-  logical: 見直し日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 次回要件見直し予定日
-- name: notes
-  logical: 備考
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: その他の備考・補足情報
-- name: certificationrequirement_id
-  logical: MST_CertificationRequirementの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: MST_CertificationRequirementの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -454,63 +486,63 @@ columns:
 indexes:
 - name: idx_requirement_id
   columns:
-  - - requirement_id
+  - requirement_id
   unique: true
   description: 要件ID検索用（一意）
 - name: idx_requirement_type
   columns:
-  - - requirement_type
+  - requirement_type
   unique: false
   description: 要件種別検索用
 - name: idx_target_job_type
   columns:
-  - - target_job_type_id
+  - target_job_type_id
   unique: false
   description: 対象職種検索用
 - name: idx_target_position
   columns:
-  - - target_position_id
+  - target_position_id
   unique: false
   description: 対象役職検索用
 - name: idx_target_skill_grade
   columns:
-  - - target_skill_grade_id
+  - target_skill_grade_id
   unique: false
   description: 対象スキルグレード検索用
 - name: idx_certification_id
   columns:
-  - - certification_id
+  - certification_id
   unique: false
   description: 資格ID検索用
 - name: idx_requirement_level
   columns:
-  - - requirement_level
+  - requirement_level
   unique: false
   description: 要件レベル検索用
 - name: idx_active_flag
   columns:
-  - - active_flag
+  - active_flag
   unique: false
   description: 有効フラグ検索用
 - name: idx_effective_period
   columns:
-  - - effective_start_date
-  - - effective_end_date
+  - effective_start_date
+  - effective_end_date
   unique: false
   description: 有効期間検索用
 - name: idx_compliance_requirement
   columns:
-  - - compliance_requirement
+  - compliance_requirement
   unique: false
   description: コンプライアンス要件検索用
 - name: idx_priority_order
   columns:
-  - - priority_order
+  - priority_order
   unique: false
   description: 優先順位検索用
 - name: idx_mst_certificationrequirement_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -567,10 +599,9 @@ constraints:
 foreign_keys:
 - name: fk_cert_req_target_job_type
   columns:
-  - - target_job_type_id
+  - target_job_type_id
   references:
-    table:
-    - MST_JobType
+    table: MST_JobType
     columns:
     - id
   on_update: CASCADE
@@ -578,10 +609,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_cert_req_target_position
   columns:
-  - - target_position_id
+  - target_position_id
   references:
-    table:
-    - MST_Position
+    table: MST_Position
     columns:
     - id
   on_update: CASCADE
@@ -589,10 +619,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_cert_req_target_skill_grade
   columns:
-  - - target_skill_grade_id
+  - target_skill_grade_id
   references:
-    table:
-    - MST_SkillGrade
+    table: MST_SkillGrade
     columns:
     - id
   on_update: CASCADE
@@ -600,10 +629,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_cert_req_target_department
   columns:
-  - - target_department_id
+  - target_department_id
   references:
-    table:
-    - MST_Department
+    table: MST_Department
     columns:
     - id
   on_update: CASCADE
@@ -611,10 +639,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_cert_req_certification
   columns:
-  - - certification_id
+  - certification_id
   references:
-    table:
-    - MST_Certification
+    table: MST_Certification
     columns:
     - id
   on_update: CASCADE
@@ -622,10 +649,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_cert_req_created_by
   columns:
-  - - created_by
+  - created_by
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -633,10 +659,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_cert_req_approved_by
   columns:
-  - - approved_by
+  - approved_by
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -742,7 +767,7 @@ notes:
 - 費用支援がある場合は支援条件が明記される必要がある
 - コンプライアンス要件は除外・変更不可
 - 承認済み要件のみ適用可能
-business_rules:
+rules:
 - 要件IDは一意である必要がある
 - 優先順位は正数である必要がある
 - 有効開始日は有効終了日以前である必要がある

@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_SkillGradeRequirement（スキルグレード要件）は、スキルグレードごとの詳細要件を管理するマスタテーブルです。
 
 
@@ -34,113 +66,24 @@ overview: 'MST_SkillGradeRequirement（スキルグレード要件）は、ス�
 
   '
 columns:
-- name: skill_grade_id
-  logical: スキルグレードID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルグレードのID（MST_SkillGradeへの外部キー）
-- name: requirement_category
-  logical: 要件カテゴリ
-  type: ENUM
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
   length: null
-  'null': true
-  unique: false
+  'null': false
+  unique: true
   encrypted: false
-  description: 要件カテゴリ（TECHNICAL:技術、BUSINESS:業務、LEADERSHIP:リーダーシップ、COMMUNICATION:コミュニケーション）
-  enum_values:
-  - TECHNICAL
-  - BUSINESS
-  - LEADERSHIP
-  - COMMUNICATION
-- name: requirement_name
-  logical: 要件名
-  type: VARCHAR
-  length: 200
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件の名称
-- name: requirement_description
-  logical: 要件説明
-  type: TEXT
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
   length: null
-  'null': true
+  'null': false
   unique: false
   encrypted: false
-  description: 要件の詳細説明
-- name: evaluation_criteria
-  logical: 評価基準
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 具体的な評価基準・判定方法
-- name: proficiency_level
-  logical: 習熟度レベル
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要求される習熟度レベル（1-5、5が最高）
-- name: weight_percentage
-  logical: 重み比率
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: グレード内での重み比率（%）
-- name: minimum_score
-  logical: 最低スコア
-  type: DECIMAL
-  length: 5,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 合格に必要な最低スコア
-- name: evidence_requirements
-  logical: エビデンス要件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 評価に必要なエビデンス・証拠
-- name: learning_resources
-  logical: 学習リソース
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 推奨学習リソース・教材（JSON形式）
-- name: prerequisite_requirements
-  logical: 前提要件
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 前提となる要件のリスト（JSON形式）
-- name: assessment_method
-  logical: 評価方法
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 評価方法（EXAM:試験、PORTFOLIO:ポートフォリオ、INTERVIEW:面接、PROJECT:プロジェクト、PEER_REVIEW:同僚評価）
-  enum_values:
-  - EXAM
-  - PORTFOLIO
-  - INTERVIEW
-  - PROJECT
-  - PEER_REVIEW
+  description: テナントID（マルチテナント対応）
+  default: null
 - name: assessment_frequency
   logical: 評価頻度
   type: ENUM
@@ -155,14 +98,20 @@ columns:
   - QUARTERLY
   - ON_DEMAND
   default: ANNUAL
-- name: validity_period
-  logical: 有効期間
-  type: INTEGER
+- name: assessment_method
+  logical: 評価方法
+  type: ENUM
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 評価結果の有効期間（月数）
+  description: 評価方法（EXAM:試験、PORTFOLIO:ポートフォリオ、INTERVIEW:面接、PROJECT:プロジェクト、PEER_REVIEW:同僚評価）
+  enum_values:
+  - EXAM
+  - PORTFOLIO
+  - INTERVIEW
+  - PROJECT
+  - PEER_REVIEW
 - name: certification_mapping
   logical: 資格マッピング
   type: TEXT
@@ -171,6 +120,99 @@ columns:
   unique: false
   encrypted: false
   description: 関連する外部資格・認定のマッピング（JSON形式）
+- name: effective_date
+  logical: 有効開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の有効開始日
+- name: evaluation_criteria
+  logical: 評価基準
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 具体的な評価基準・判定方法
+- name: evidence_requirements
+  logical: エビデンス要件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 評価に必要なエビデンス・証拠
+- name: expiry_date
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の有効終了日（NULL:無期限）
+- name: learning_resources
+  logical: 学習リソース
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 推奨学習リソース・教材（JSON形式）
+- name: minimum_score
+  logical: 最低スコア
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 合格に必要な最低スコア
+- name: prerequisite_requirements
+  logical: 前提要件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 前提となる要件のリスト（JSON形式）
+- name: proficiency_level
+  logical: 習熟度レベル
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要求される習熟度レベル（1-5、5が最高）
+- name: requirement_category
+  logical: 要件カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件カテゴリ（TECHNICAL:技術、BUSINESS:業務、LEADERSHIP:リーダーシップ、COMMUNICATION:コミュニケーション）
+  enum_values:
+  - TECHNICAL
+  - BUSINESS
+  - LEADERSHIP
+  - COMMUNICATION
+- name: requirement_description
+  logical: 要件説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の詳細説明
+- name: requirement_name
+  logical: 要件名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 要件の名称
 - name: requirement_status
   logical: 要件状況
   type: ENUM
@@ -184,22 +226,6 @@ columns:
   - DEPRECATED
   - OBSOLETE
   default: ACTIVE
-- name: effective_date
-  logical: 有効開始日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件の有効開始日
-- name: expiry_date
-  logical: 有効終了日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 要件の有効終了日（NULL:無期限）
 - name: revision_notes
   logical: 改版備考
   type: TEXT
@@ -208,6 +234,14 @@ columns:
   unique: false
   encrypted: false
   description: 要件変更時の備考・理由
+- name: skill_grade_id
+  logical: スキルグレードID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルグレードのID（MST_SkillGradeへの外部キー）
 - name: skillgraderequirement_id
   logical: MST_SkillGradeRequirementの主キー
   type: SERIAL
@@ -217,24 +251,22 @@ columns:
   encrypted: false
   description: MST_SkillGradeRequirementの主キー
   default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
+- name: validity_period
+  logical: 有効期間
+  type: INTEGER
   length: null
-  'null': false
+  'null': true
   unique: false
   encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
+  description: 評価結果の有効期間（月数）
+- name: weight_percentage
+  logical: 重み比率
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
   encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: グレード内での重み比率（%）
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -265,48 +297,48 @@ columns:
 indexes:
 - name: idx_MST_SkillGradeRequirement_skill_grade_id
   columns:
-  - - skill_grade_id
+  - skill_grade_id
   unique: false
   description: スキルグレードID検索用
 - name: idx_MST_SkillGradeRequirement_category
   columns:
-  - - requirement_category
+  - requirement_category
   unique: false
   description: 要件カテゴリ別検索用
 - name: idx_MST_SkillGradeRequirement_grade_category
   columns:
-  - - skill_grade_id
-  - - requirement_category
+  - skill_grade_id
+  - requirement_category
   unique: false
   description: グレード・カテゴリ複合検索用
 - name: idx_MST_SkillGradeRequirement_proficiency_level
   columns:
-  - - proficiency_level
+  - proficiency_level
   unique: false
   description: 習熟度レベル別検索用
 - name: idx_MST_SkillGradeRequirement_assessment_method
   columns:
-  - - assessment_method
+  - assessment_method
   unique: false
   description: 評価方法別検索用
 - name: idx_MST_SkillGradeRequirement_status
   columns:
-  - - requirement_status
+  - requirement_status
   unique: false
   description: 要件状況別検索用
 - name: idx_MST_SkillGradeRequirement_effective_date
   columns:
-  - - effective_date
+  - effective_date
   unique: false
   description: 有効開始日検索用
 - name: idx_MST_SkillGradeRequirement_weight
   columns:
-  - - weight_percentage
+  - weight_percentage
   unique: false
   description: 重み比率別検索用
 - name: idx_mst_skillgraderequirement_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -355,10 +387,9 @@ constraints:
 foreign_keys:
 - name: fk_MST_SkillGradeRequirement_skill_grade
   columns:
-  - - skill_grade_id
+  - skill_grade_id
   references:
-    table:
-    - MST_SkillGrade
+    table: MST_SkillGrade
     columns:
     - id
   on_update: CASCADE
@@ -441,7 +472,7 @@ notes:
 - 前提要件を満たさない場合は評価対象外
 - 有効期限切れの要件は自動的に無効化
 - 評価結果は有効期間内で有効
-business_rules:
+rules:
 - TECHNICAL要件は技術的能力を評価
 - BUSINESS要件は業務遂行能力を評価
 - LEADERSHIP要件は指導・管理能力を評価

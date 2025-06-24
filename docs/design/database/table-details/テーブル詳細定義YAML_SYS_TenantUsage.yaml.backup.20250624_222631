@@ -1,0 +1,445 @@
+table_name: SYS_TenantUsage
+logical_name: テナント利用状況
+category: システム系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: システム
+  changes: 初版作成 - SYS_TenantUsageの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215001
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+overview: 'テナント利用状況テーブルは、マルチテナント環境における各テナントのシステム利用状況を管理するシステムテーブルです。
+
+
+  主な目的：
+
+  - テナント別のリソース使用量監視
+
+  - 課金情報の基礎データ収集
+
+  - システム負荷分析とキャパシティプランニング
+
+  - SLA監視とパフォーマンス分析
+
+
+  このテーブルは、マルチテナントシステムの運用管理と課金処理を支える重要なテーブルで、
+
+  テナント毎の公平なリソース配分と適切な課金を実現します。
+
+  '
+columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 利用状況を記録するテナントのID
+- name: tenantusage_id
+  logical: SYS_TenantUsageの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_TenantUsageの主キー
+  default: null
+- name: active_users
+  logical: アクティブユーザー数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日にログインしたユーザー数
+  default: 0
+- name: api_requests
+  logical: API リクエスト数
+  type: BIGINT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のAPIリクエスト総数
+  default: 0
+- name: backup_storage_mb
+  logical: バックアップ使用量MB
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日時点でのバックアップストレージ使用量（MB）
+  default: 0.0
+- name: billing_amount
+  logical: 課金額
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日の利用に基づく課金額
+- name: collection_timestamp
+  logical: 収集日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 利用状況データを収集した日時
+- name: cpu_usage_minutes
+  logical: CPU使用時間分
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のCPU使用時間（分）
+  default: 0.0
+- name: data_storage_mb
+  logical: データ使用量MB
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日時点でのデータストレージ使用量（MB）
+  default: 0.0
+- name: error_count
+  logical: エラー発生回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のシステムエラー発生回数
+  default: 0
+- name: file_storage_mb
+  logical: ファイル使用量MB
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日時点でのファイルストレージ使用量（MB）
+  default: 0.0
+- name: memory_usage_mb_hours
+  logical: メモリ使用量MB時
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のメモリ使用量（MB×時間）
+  default: 0.0
+- name: network_transfer_mb
+  logical: ネットワーク転送量MB
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のネットワーク転送量（MB）
+  default: 0.0
+- name: notification_sent
+  logical: 通知送信回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日の通知送信回数
+  default: 0
+- name: peak_concurrent_users
+  logical: 最大同時接続ユーザー数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日の最大同時接続ユーザー数
+  default: 0
+- name: peak_time
+  logical: ピーク時刻
+  type: TIME
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 最大同時接続を記録した時刻
+- name: report_generations
+  logical: レポート生成回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のレポート生成回数
+  default: 0
+- name: response_time_avg_ms
+  logical: 平均応答時間ms
+  type: DECIMAL
+  length: 8,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のAPI平均応答時間（ミリ秒）
+- name: skill_assessments
+  logical: スキル評価回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のスキル評価実行回数
+  default: 0
+- name: total_logins
+  logical: 総ログイン回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日の総ログイン回数
+  default: 0
+- name: uptime_percentage
+  logical: 稼働率
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当日のシステム稼働率（%）
+  default: 100.0
+- name: usage_date
+  logical: 利用日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 利用状況を記録した日付
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_SYS_TenantUsage_date_tenant
+  columns:
+  - - usage_date
+  - - tenant_id
+  unique: true
+  description: 利用日とテナントIDの複合検索用（一意）
+- name: idx_SYS_TenantUsage_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用
+- name: idx_SYS_TenantUsage_usage_date
+  columns:
+  - - usage_date
+  unique: false
+  description: 利用日検索用
+- name: idx_SYS_TenantUsage_collection_timestamp
+  columns:
+  - - collection_timestamp
+  unique: false
+  description: 収集日時検索用
+- name: idx_SYS_TenantUsage_billing_amount
+  columns:
+  - - billing_amount
+  unique: false
+  description: 課金額検索用
+constraints:
+- name: uk_SYS_TenantUsage_date_tenant
+  type: UNIQUE
+  description: 利用日とテナントIDの組み合わせ一意制約
+  columns:
+  - - usage_date
+  - - tenant_id
+- name: chk_SYS_TenantUsage_active_users
+  type: CHECK
+  description: アクティブユーザー数非負数チェック制約
+  condition: active_users >= 0
+- name: chk_SYS_TenantUsage_total_logins
+  type: CHECK
+  description: 総ログイン回数非負数チェック制約
+  condition: total_logins >= 0
+- name: chk_SYS_TenantUsage_api_requests
+  type: CHECK
+  description: APIリクエスト数非負数チェック制約
+  condition: api_requests >= 0
+- name: chk_SYS_TenantUsage_storage_usage
+  type: CHECK
+  description: ストレージ使用量非負数チェック制約
+  condition: data_storage_mb >= 0 AND file_storage_mb >= 0 AND backup_storage_mb >=
+    0
+- name: chk_SYS_TenantUsage_resource_usage
+  type: CHECK
+  description: リソース使用量非負数チェック制約
+  condition: cpu_usage_minutes >= 0 AND memory_usage_mb_hours >= 0 AND network_transfer_mb
+    >= 0
+- name: chk_SYS_TenantUsage_counts
+  type: CHECK
+  description: 各種実行回数非負数チェック制約
+  condition: report_generations >= 0 AND skill_assessments >= 0 AND notification_sent
+    >= 0
+- name: chk_SYS_TenantUsage_peak_concurrent_users
+  type: CHECK
+  description: 最大同時接続ユーザー数非負数チェック制約
+  condition: peak_concurrent_users >= 0
+- name: chk_SYS_TenantUsage_error_count
+  type: CHECK
+  description: エラー発生回数非負数チェック制約
+  condition: error_count >= 0
+- name: chk_SYS_TenantUsage_response_time
+  type: CHECK
+  description: 平均応答時間非負数チェック制約
+  condition: response_time_avg_ms IS NULL OR response_time_avg_ms >= 0
+- name: chk_SYS_TenantUsage_uptime_percentage
+  type: CHECK
+  description: 稼働率範囲チェック制約（0-100%）
+  condition: uptime_percentage >= 0 AND uptime_percentage <= 100
+- name: chk_SYS_TenantUsage_billing_amount
+  type: CHECK
+  description: 課金額非負数チェック制約
+  condition: billing_amount IS NULL OR billing_amount >= 0
+foreign_keys:
+- name: fk_SYS_TenantUsage_tenant
+  columns:
+  - - tenant_id
+  references:
+    table:
+    - MST_Tenant
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+sample_data:
+- usage_date: '2024-01-15'
+  tenant_id: TENANT001
+  active_users: 25
+  total_logins: 47
+  api_requests: 15420
+  data_storage_mb: 1024.5
+  file_storage_mb: 512.25
+  backup_storage_mb: 256.75
+  cpu_usage_minutes: 180.5
+  memory_usage_mb_hours: 2048.0
+  network_transfer_mb: 128.3
+  report_generations: 12
+  skill_assessments: 35
+  notification_sent: 8
+  peak_concurrent_users: 18
+  peak_time: '14:30:00'
+  error_count: 2
+  response_time_avg_ms: 245.5
+  uptime_percentage: 99.95
+  billing_amount: 1250.0
+  collection_timestamp: '2024-01-16 02:00:00'
+- usage_date: '2024-01-15'
+  tenant_id: TENANT002
+  active_users: 8
+  total_logins: 12
+  api_requests: 3240
+  data_storage_mb: 256.25
+  file_storage_mb: 128.5
+  backup_storage_mb: 64.25
+  cpu_usage_minutes: 45.25
+  memory_usage_mb_hours: 512.0
+  network_transfer_mb: 32.1
+  report_generations: 3
+  skill_assessments: 8
+  notification_sent: 2
+  peak_concurrent_users: 6
+  peak_time: '10:15:00'
+  error_count: 0
+  response_time_avg_ms: 198.25
+  uptime_percentage: 100.0
+  billing_amount: 320.0
+  collection_timestamp: '2024-01-16 02:00:00'
+notes:
+- 利用日とテナントIDの組み合わせは一意である必要がある
+- 利用状況データは日次で収集・集計される
+- 課金額は利用量に基づいて自動計算される
+- ストレージ使用量は日次スナップショットで記録
+- CPU・メモリ使用量は累積値で記録
+- 稼働率は0-100%の範囲で管理
+- 論理削除は is_deleted フラグで管理
+- 利用状況データは毎日深夜2:00に自動収集する
+- 同一テナント・同一日付のレコードは1つのみ
+- 課金額は利用量とプラン料金に基づいて自動計算する
+- ストレージ使用量は日次で最新値を記録する
+- CPU・メモリ使用量は24時間の累積値を記録する
+- エラー発生時は詳細ログを別途記録する
+- 稼働率が95%を下回った場合はアラート通知を送信する
+- データ保持期間は2年間とし、それ以降は月次集計データのみ保持する
+rules:
+- 利用状況データは毎日深夜2:00に自動収集する
+- 同一テナント・同一日付のレコードは1つのみ
+- 課金額は利用量とプラン料金に基づいて自動計算する
+- ストレージ使用量は日次で最新値を記録する
+- CPU・メモリ使用量は24時間の累積値を記録する
+- エラー発生時は詳細ログを別途記録する
+- 稼働率が95%を下回った場合はアラート通知を送信する
+- データ保持期間は2年間とし、それ以降は月次集計データのみ保持する

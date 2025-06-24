@@ -1,0 +1,418 @@
+table_name: MST_Certification
+logical_name: 資格情報
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 資格情報マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 3.2.20250624
+  date: '2025-06-24'
+  author: 主キー修正ツール
+  changes: certification_id カラム削除、id を正しい主キーに設定
+- version: 4.0.20250624
+  date: '2025-06-24'
+  author: カラム順序統一ツール
+  changes: certification_id を主キーとして復活、指定されたカラム順序に統一
+- version: 4.1.20250624
+  date: '2025-06-24'
+  author: 制約修正ツール
+  changes: デフォルト値の型修正、制約処理の有効化
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+overview: 'MST_Certification（資格情報）は、各種資格・認定・免許の基本情報を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - IT資格、業務資格、国家資格等の統一管理
+
+  - 資格の有効期限・更新要件の管理
+
+  - 資格とスキルの関連付け
+
+  - 資格取得推奨・必須要件の管理
+
+  - 資格取得状況の追跡・分析基盤
+
+
+  このテーブルにより、社員の資格取得状況を体系的に管理し、
+
+  キャリア開発や人材配置の判断材料として活用できます。
+
+  '
+columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+  primary_key: false
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: certification_code
+  logical: 資格コード
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: 資格を一意に識別するコード（例：CERT_AWS_SAA、CERT_PMP）
+  validation: ^CERT_[A-Z0-9_]+$
+- name: description
+  logical: 説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の詳細説明・概要
+- name: certification_id
+  logical: 資格ID
+  type: INTEGER
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 資格ID（主キー、AUTO_INCREMENT）
+  default: null
+  primary_key: true
+  auto_increment: true
+- name: certification_name
+  logical: 資格名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 正式な資格名称
+- name: certification_name_en
+  logical: 資格名（英語）
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 英語での資格名称
+- name: certification_category
+  logical: 資格カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の分類（IT:IT関連、BUSINESS:ビジネス、NATIONAL:国家資格、LANGUAGE:語学、OTHER:その他）
+  enum_values:
+  - IT
+  - BUSINESS
+  - NATIONAL
+  - LANGUAGE
+  - OTHER
+- name: certification_level
+  logical: 資格レベル
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の難易度レベル（BASIC:基礎、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート）
+  enum_values:
+  - BASIC
+  - INTERMEDIATE
+  - ADVANCED
+  - EXPERT
+- name: exam_fee
+  logical: 受験料
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 受験料（円）
+- name: exam_format
+  logical: 試験形式
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 試験の実施形式（ONLINE:オンライン、OFFLINE:会場、BOTH:両方）
+  enum_values:
+  - ONLINE
+  - OFFLINE
+  - BOTH
+- name: exam_language
+  logical: 試験言語
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 試験で使用される言語
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格が有効かどうか
+  default: true
+- name: is_recommended
+  logical: 推奨資格フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 会社として取得を推奨する資格かどうか
+  default: false
+- name: issuer
+  logical: 発行機関
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格を発行する機関・団体名
+- name: issuer_country
+  logical: 発行国
+  type: VARCHAR
+  length: 10
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格発行国（ISO 3166-1 alpha-2コード）
+- name: official_url
+  logical: 公式URL
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の公式サイトURL
+- name: renewal_required
+  logical: 更新要否
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 定期的な更新が必要かどうか
+  default: false
+- name: renewal_requirements
+  logical: 更新要件
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格更新に必要な要件・条件
+- name: skill_category_id
+  logical: スキルカテゴリID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連するスキルカテゴリのID
+- name: validity_period_months
+  logical: 有効期間（月）
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 資格の有効期間（月数、NULLの場合は無期限）
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: false
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_certification_code
+  columns:
+  - certification_code
+  unique: true
+  description: 資格コード検索用（一意）
+- name: idx_certification_name
+  columns:
+  - certification_name
+  unique: false
+  description: 資格名検索用
+- name: idx_issuer
+  columns:
+  - issuer
+  unique: false
+  description: 発行機関検索用
+- name: idx_category_level
+  columns:
+  - certification_category
+  - certification_level
+  unique: false
+  description: カテゴリ・レベル別検索用
+- name: idx_recommended
+  columns:
+  - is_recommended
+  - is_active
+  unique: false
+  description: 推奨資格検索用
+- name: idx_skill_category
+  columns:
+  - skill_category_id
+  unique: false
+  description: スキルカテゴリ別検索用
+- name: idx_mst_certification_tenant_id
+  columns:
+  - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_certification_code
+  type: UNIQUE
+  description: 資格コード一意制約
+  columns:
+  - certification_code
+- name: chk_certification_category
+  type: CHECK
+  description: 資格カテゴリ値チェック制約
+  condition: certification_category IN ('IT', 'BUSINESS', 'NATIONAL', 'LANGUAGE',
+    'OTHER')
+- name: chk_certification_level
+  type: CHECK
+  description: 資格レベル値チェック制約
+  condition: certification_level IN ('BASIC', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')
+- name: chk_exam_format
+  type: CHECK
+  description: 試験形式値チェック制約
+  condition: exam_format IN ('ONLINE', 'OFFLINE', 'BOTH')
+- name: chk_validity_period
+  type: CHECK
+  description: 有効期間正数チェック制約
+  condition: validity_period_months IS NULL OR validity_period_months > 0
+- name: chk_exam_fee
+  type: CHECK
+  description: 受験料非負数チェック制約
+  condition: exam_fee IS NULL OR exam_fee >= 0
+foreign_keys:
+- name: fk_certification_skill_category
+  columns:
+  - skill_category_id
+  references:
+    table: MST_SkillCategory
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+sample_data:
+- certification_code: CERT_AWS_SAA
+  certification_name: AWS Certified Solutions Architect - Associate
+  certification_name_en: AWS Certified Solutions Architect - Associate
+  issuer: Amazon Web Services
+  issuer_country: US
+  certification_category: IT
+  certification_level: INTERMEDIATE
+  validity_period_months: 36
+  renewal_required: true
+  renewal_requirements: 再認定試験の受験または上位資格の取得
+  exam_fee: 15000
+  exam_language: 日本語/英語
+  exam_format: ONLINE
+  official_url: https://aws.amazon.com/jp/certification/certified-solutions-architect-associate/
+  description: AWSクラウドでのソリューション設計・実装スキルを証明する資格
+  skill_category_id: SKILL_CAT_CLOUD
+  is_recommended: true
+  is_active: true
+- certification_code: CERT_PMP
+  certification_name: Project Management Professional
+  certification_name_en: Project Management Professional
+  issuer: Project Management Institute
+  issuer_country: US
+  certification_category: BUSINESS
+  certification_level: ADVANCED
+  validity_period_months: 36
+  renewal_required: true
+  renewal_requirements: 60 PDU（Professional Development Units）の取得
+  exam_fee: 55500
+  exam_language: 日本語/英語
+  exam_format: BOTH
+  official_url: https://www.pmi.org/certifications/project-management-pmp
+  description: プロジェクトマネジメントの国際的な資格
+  skill_category_id: SKILL_CAT_PM
+  is_recommended: true
+  is_active: true
+notes:
+- 資格コードは「CERT_」プレフィックス + 発行機関略称 + 資格略称で構成
+- 有効期間がNULLの場合は無期限有効
+- 更新要件は資格ごとに異なるため、テキスト形式で柔軟に記録
+- 受験料は円建てで統一（外貨の場合は取得時レートで換算）
+- 推奨資格は人事評価・昇進要件との連携で使用
+- 論理削除は is_active フラグで管理
+rules:
+- 資格コードは一意である必要がある
+- 推奨資格は定期的に見直しを行う
+- 有効期限のある資格は更新要件を必須記載
+- 受験料は税込み価格で記録
+- 公式URLは資格詳細情報の参照先として使用
+- スキルカテゴリとの関連付けにより、関連スキル推薦機能で活用
+- 資格レベルは社内スキルグレードとの対応付けに使用

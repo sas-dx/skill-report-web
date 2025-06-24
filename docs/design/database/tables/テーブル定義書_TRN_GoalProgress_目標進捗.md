@@ -7,7 +7,7 @@
 | テーブル名 | TRN_GoalProgress |
 | 論理名 | 目標進捗 |
 | カテゴリ | トランザクション系 |
-| 生成日時 | 2025-06-21 22:02:18 |
+| 生成日時 | 2025-06-24 22:56:16 |
 
 ## 概要
 
@@ -29,35 +29,79 @@ TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| goalprogress_id | TRN_GoalProgressの主キー | SERIAL |  | × |  | TRN_GoalProgressの主キー |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
-| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
-| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| achievement_rate | 達成率 | DECIMAL | 5,2 | ○ |  | 達成率 |
+| achievement_status | 達成状況 | ENUM |  | ○ | NOT_STARTED | 達成状況 |
+| approval_status | 承認状況 | ENUM |  | ○ | DRAFT | 承認状況 |
+| approved_at | 承認日時 | TIMESTAMP |  | ○ |  | 承認日時 |
+| approved_by | 承認者ID | VARCHAR | 50 | ○ |  | 承認者ID |
+| completion_date | 完了日 | DATE |  | ○ |  | 完了日 |
+| current_value | 現在値 | DECIMAL | 15,2 | ○ |  | 現在値 |
+| employee_id | 社員ID | VARCHAR | 50 | ○ |  | 社員ID |
+| evaluation_comments | 評価コメント | TEXT |  | ○ |  | 評価コメント |
+| goal_category | 目標カテゴリ | ENUM |  | ○ |  | 目標カテゴリ |
+| goal_description | 目標詳細 | TEXT |  | ○ |  | 目標詳細 |
+| goal_id | 目標ID | VARCHAR | 50 | ○ |  | 目標ID |
+| goal_title | 目標タイトル | VARCHAR | 200 | ○ |  | 目標タイトル |
+| goal_type | 目標種別 | ENUM |  | ○ |  | 目標種別 |
+| goalprogress_id | TRN_GoalProgressの主キー | SERIAL |  | × |  | TRN_GoalProgressの主キー |
+| last_updated_at | 最終更新日時 | TIMESTAMP |  | ○ |  | 最終更新日時 |
+| milestones | マイルストーン | TEXT |  | ○ |  | マイルストーン |
+| next_review_date | 次回レビュー日 | DATE |  | ○ |  | 次回レビュー日 |
+| obstacles | 障害・課題 | TEXT |  | ○ |  | 障害・課題 |
+| priority_level | 優先度 | ENUM |  | ○ | MEDIUM | 優先度 |
+| progress_rate | 進捗率 | DECIMAL | 5,2 | ○ | 0.0 | 進捗率 |
+| related_career_plan_id | 関連キャリアプランID | VARCHAR | 50 | ○ |  | 関連キャリアプランID |
+| related_skill_items | 関連スキル項目 | TEXT |  | ○ |  | 関連スキル項目 |
+| self_evaluation | 自己評価 | INTEGER |  | ○ |  | 自己評価 |
+| start_date | 開始日 | DATE |  | ○ |  | 開始日 |
+| supervisor_evaluation | 上司評価 | INTEGER |  | ○ |  | 上司評価 |
+| supervisor_id | 上司ID | VARCHAR | 50 | ○ |  | 上司ID |
+| support_needed | 必要サポート | TEXT |  | ○ |  | 必要サポート |
+| target_date | 目標期限 | DATE |  | ○ |  | 目標期限 |
+| target_value | 目標値 | DECIMAL | 15,2 | ○ |  | 目標値 |
+| unit | 単位 | VARCHAR | 50 | ○ |  | 単位 |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
-| created_by | レコード作成者のユーザーID | VARCHAR | 50 | × |  | レコード作成者のユーザーID |
-| updated_by | レコード更新者のユーザーID | VARCHAR | 50 | × |  | レコード更新者のユーザーID |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| created_by | 作成者ID | VARCHAR | 50 | ○ |  | 作成者ID |
+| updated_by | 更新者ID | VARCHAR | 50 | ○ |  | 更新者ID |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_trn_goalprogress_tenant_id | tenant_id | × | テナントID検索用インデックス |
+| idx_TRN_GoalProgress_goal_id | goal_id | ○ |  |
+| idx_TRN_GoalProgress_employee_id | employee_id | × |  |
+| idx_TRN_GoalProgress_supervisor_id | supervisor_id | × |  |
+| idx_TRN_GoalProgress_category | goal_category | × |  |
+| idx_TRN_GoalProgress_status | achievement_status | × |  |
+| idx_TRN_GoalProgress_approval_status | approval_status | × |  |
+| idx_TRN_GoalProgress_target_date | target_date | × |  |
+| idx_TRN_GoalProgress_priority | priority_level | × |  |
+| idx_TRN_GoalProgress_employee_period | employee_id, start_date, target_date | × |  |
+| idx_TRN_GoalProgress_next_review | next_review_date | × |  |
+| idx_trn_goalprogress_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_TRN_GoalProgress_employee | None | None | None | CASCADE | CASCADE | 外部キー制約 |
-| fk_TRN_GoalProgress_supervisor | None | None | None | CASCADE | SET NULL | 外部キー制約 |
-| fk_TRN_GoalProgress_approved_by | None | None | None | CASCADE | SET NULL | 外部キー制約 |
-| fk_TRN_GoalProgress_career_plan | None | None | None | CASCADE | SET NULL | 外部キー制約 |
+| fk_TRN_GoalProgress_employee | employee_id | MST_Employee | id | CASCADE | CASCADE | 外部キー制約 |
+| fk_TRN_GoalProgress_supervisor | supervisor_id | MST_Employee | id | CASCADE | SET NULL | 外部キー制約 |
+| fk_TRN_GoalProgress_approved_by | approved_by | MST_Employee | id | CASCADE | SET NULL | 外部キー制約 |
+| fk_TRN_GoalProgress_career_plan | related_career_plan_id | MST_CareerPlan | id | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_trn_goalprogress | PRIMARY KEY | goalprogress_id, id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| uk_goal_id | UNIQUE |  | goal_id一意制約 |
+| chk_achievement_status | CHECK | achievement_status IN (...) | achievement_status値チェック制約 |
+| chk_approval_status | CHECK | approval_status IN (...) | approval_status値チェック制約 |
+| chk_goal_type | CHECK | goal_type IN (...) | goal_type値チェック制約 |
 
 ## サンプルデータ
 
@@ -77,9 +121,6 @@ TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状�
 - マイルストーン目標は段階的な達成管理
 - 関連スキル・キャリアプランとの連携
 - 論理削除は is_deleted フラグで管理
-
-## 業務ルール
-
 - 進捗率は0-100%の範囲で設定
 - 目標期限は開始日より未来の日付
 - 承認済み目標のみ進捗管理対象
@@ -91,8 +132,23 @@ TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状�
 - キャリア目標は年次評価と連動
 - 目標変更時は承認フロー再実行
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 目標進捗トランザクションテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214007 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214908 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_215001 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215054 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223433 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_TenantSettings（テナント設定）は、マルチテナントシステムにおける各テナント固有の設定情報を管理するマスタテーブルです。
 
 
@@ -46,44 +78,6 @@ columns:
   unique: false
   encrypted: false
   description: 設定対象のテナントID（MST_Tenantへの参照）
-- name: setting_category
-  logical: 設定カテゴリ
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定の分類（SYSTEM:システム、UI:ユーザーインターフェース、BUSINESS:業務、SECURITY:セキュリティ、INTEGRATION:連携）
-  enum_values:
-  - SYSTEM
-  - UI
-  - BUSINESS
-  - SECURITY
-  - INTEGRATION
-- name: setting_key
-  logical: 設定キー
-  type: VARCHAR
-  length: 100
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定項目の識別キー（例：max_users、theme_color、skill_approval_required等）
-- name: setting_name
-  logical: 設定名
-  type: VARCHAR
-  length: 200
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定項目の表示名
-- name: setting_description
-  logical: 設定説明
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定項目の詳細説明
 - name: data_type
   logical: データ型
   type: ENUM
@@ -98,14 +92,6 @@ columns:
   - BOOLEAN
   - JSON
   - DECIMAL
-- name: setting_value
-  logical: 設定値
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 実際の設定値（文字列として格納、data_typeに応じて解釈）
 - name: default_value
   logical: デフォルト値
   type: TEXT
@@ -114,50 +100,6 @@ columns:
   unique: false
   encrypted: false
   description: 設定のデフォルト値
-- name: validation_rules
-  logical: バリデーションルール
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定値のバリデーションルール（JSON形式）
-- name: is_required
-  logical: 必須フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定が必須かどうか
-  default: false
-- name: is_encrypted
-  logical: 暗号化フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定値を暗号化するかどうか
-  default: false
-- name: is_system_managed
-  logical: システム管理フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: システムが自動管理する設定かどうか
-  default: false
-- name: is_user_configurable
-  logical: ユーザー設定可能フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: テナント管理者が変更可能かどうか
-  default: true
 - name: display_order
   logical: 表示順序
   type: INTEGER
@@ -183,6 +125,42 @@ columns:
   unique: false
   encrypted: false
   description: 設定が無効になる日時
+- name: is_encrypted
+  logical: 暗号化フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定値を暗号化するかどうか
+  default: false
+- name: is_required
+  logical: 必須フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定が必須かどうか
+  default: false
+- name: is_system_managed
+  logical: システム管理フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: システムが自動管理する設定かどうか
+  default: false
+- name: is_user_configurable
+  logical: ユーザー設定可能フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナント管理者が変更可能かどうか
+  default: true
 - name: last_modified_by
   logical: 最終更新者
   type: VARCHAR
@@ -191,6 +169,52 @@ columns:
   unique: false
   encrypted: false
   description: 設定を最後に更新したユーザーID
+- name: setting_category
+  logical: 設定カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定の分類（SYSTEM:システム、UI:ユーザーインターフェース、BUSINESS:業務、SECURITY:セキュリティ、INTEGRATION:連携）
+  enum_values:
+  - SYSTEM
+  - UI
+  - BUSINESS
+  - SECURITY
+  - INTEGRATION
+- name: setting_description
+  logical: 設定説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定項目の詳細説明
+- name: setting_key
+  logical: 設定キー
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定項目の識別キー（例：max_users、theme_color、skill_approval_required等）
+- name: setting_name
+  logical: 設定名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定項目の表示名
+- name: setting_value
+  logical: 設定値
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 実際の設定値（文字列として格納、data_typeに応じて解釈）
 - name: tenantsettings_id
   logical: MST_TenantSettingsの主キー
   type: SERIAL
@@ -200,6 +224,14 @@ columns:
   encrypted: false
   description: MST_TenantSettingsの主キー
   default: null
+- name: validation_rules
+  logical: バリデーションルール
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定値のバリデーションルール（JSON形式）
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -230,41 +262,41 @@ columns:
 indexes:
 - name: idx_tenant_settings_tenant_key
   columns:
-  - - tenant_id
-  - - setting_key
+  - tenant_id
+  - setting_key
   unique: true
   description: テナント別設定キー検索用（一意）
 - name: idx_tenant_settings_category
   columns:
-  - - setting_category
+  - setting_category
   unique: false
   description: 設定カテゴリ別検索用
 - name: idx_tenant_settings_configurable
   columns:
-  - - is_user_configurable
+  - is_user_configurable
   unique: false
   description: ユーザー設定可能フラグ検索用
 - name: idx_tenant_settings_system_managed
   columns:
-  - - is_system_managed
+  - is_system_managed
   unique: false
   description: システム管理フラグ検索用
 - name: idx_tenant_settings_display_order
   columns:
-  - - tenant_id
-  - - setting_category
-  - - display_order
+  - tenant_id
+  - setting_category
+  - display_order
   unique: false
   description: 表示順序検索用
 - name: idx_tenant_settings_effective
   columns:
-  - - effective_from
-  - - effective_until
+  - effective_from
+  - effective_until
   unique: false
   description: 有効期間検索用
 - name: idx_mst_tenantsettings_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -294,10 +326,9 @@ constraints:
 foreign_keys:
 - name: fk_tenant_settings_tenant
   columns:
-  - - tenant_id
+  - tenant_id
   references:
-    table:
-    - MST_Tenant
+    table: MST_Tenant
     columns:
     - id
   on_update: CASCADE
@@ -395,7 +426,7 @@ notes:
 - バリデーションルールに違反する設定値は保存不可
 - デフォルト値は設定値が未設定の場合に使用
 - 設定変更時は最終更新者を記録
-business_rules:
+rules:
 - 同一テナント内で設定キーは重複不可
 - 必須設定は削除不可
 - システム管理設定はユーザーによる変更不可

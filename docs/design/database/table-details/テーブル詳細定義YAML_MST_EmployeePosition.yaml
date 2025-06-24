@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214906
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_EmployeePosition（社員役職関連）は、社員と役職の関連付けを管理するマスタテーブルです。
 
 
@@ -34,51 +66,24 @@ overview: 'MST_EmployeePosition（社員役職関連）は、社員と役職の�
 
   '
 columns:
-- name: employee_id
-  logical: 社員ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 社員のID（MST_Employeeへの外部キー）
-- name: position_id
-  logical: 役職ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 役職のID（MST_Positionへの外部キー）
-- name: appointment_type
-  logical: 任命区分
-  type: ENUM
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
   length: null
-  'null': true
-  unique: false
+  'null': false
+  unique: true
   encrypted: false
-  description: 任命区分（PRIMARY:主役職、ACTING:代理、CONCURRENT:兼任）
-  enum_values:
-  - PRIMARY
-  - ACTING
-  - CONCURRENT
-  default: PRIMARY
-- name: start_date
-  logical: 任命開始日
-  type: DATE
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
   length: null
-  'null': true
+  'null': false
   unique: false
   encrypted: false
-  description: 役職への任命開始日
-- name: end_date
-  logical: 任命終了日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 役職からの任命終了日（NULL:現在も任命中）
+  description: テナントID（マルチテナント対応）
+  default: null
 - name: appointment_reason
   logical: 任命理由
   type: VARCHAR
@@ -87,30 +92,6 @@ columns:
   unique: false
   encrypted: false
   description: 任命・昇進・降格の理由
-- name: responsibility_scope
-  logical: 責任範囲
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: 当該役職での責任範囲・職務内容
-- name: authority_level
-  logical: 権限レベル
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 権限レベル（1-10、数値が大きいほど高権限）
-- name: salary_grade
-  logical: 給与等級
-  type: VARCHAR
-  length: 20
-  'null': true
-  unique: false
-  encrypted: false
-  description: 役職に対応する給与等級
 - name: appointment_status
   logical: 任命状況
   type: ENUM
@@ -124,6 +105,19 @@ columns:
   - INACTIVE
   - SUSPENDED
   default: ACTIVE
+- name: appointment_type
+  logical: 任命区分
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 任命区分（PRIMARY:主役職、ACTING:代理、CONCURRENT:兼任）
+  enum_values:
+  - PRIMARY
+  - ACTING
+  - CONCURRENT
+  default: PRIMARY
 - name: approval_status
   logical: 承認状況
   type: ENUM
@@ -137,14 +131,6 @@ columns:
   - PENDING
   - REJECTED
   default: PENDING
-- name: approved_by
-  logical: 承認者ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 任命を承認した管理者のID
 - name: approved_at
   logical: 承認日時
   type: TIMESTAMP
@@ -153,14 +139,22 @@ columns:
   unique: false
   encrypted: false
   description: 任命が承認された日時
-- name: performance_target
-  logical: 成果目標
-  type: TEXT
+- name: approved_by
+  logical: 承認者ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 任命を承認した管理者のID
+- name: authority_level
+  logical: 権限レベル
+  type: INTEGER
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 当該役職での成果目標・KPI
+  description: 権限レベル（1-10、数値が大きいほど高権限）
 - name: delegation_authority
   logical: 委譲権限
   type: TEXT
@@ -169,6 +163,14 @@ columns:
   unique: false
   encrypted: false
   description: 委譲された権限の詳細（JSON形式）
+- name: employee_id
+  logical: 社員ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 社員のID（MST_Employeeへの外部キー）
 - name: employeeposition_id
   logical: MST_EmployeePositionの主キー
   type: SERIAL
@@ -178,24 +180,54 @@ columns:
   encrypted: false
   description: MST_EmployeePositionの主キー
   default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
+- name: end_date
+  logical: 任命終了日
+  type: DATE
   length: null
-  'null': false
+  'null': true
   unique: false
   encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
+  description: 役職からの任命終了日（NULL:現在も任命中）
+- name: performance_target
+  logical: 成果目標
+  type: TEXT
   length: null
-  'null': false
-  unique: true
+  'null': true
+  unique: false
   encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: 当該役職での成果目標・KPI
+- name: position_id
+  logical: 役職ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 役職のID（MST_Positionへの外部キー）
+- name: responsibility_scope
+  logical: 責任範囲
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 当該役職での責任範囲・職務内容
+- name: salary_grade
+  logical: 給与等級
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: false
+  encrypted: false
+  description: 役職に対応する給与等級
+- name: start_date
+  logical: 任命開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 役職への任命開始日
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -226,48 +258,48 @@ columns:
 indexes:
 - name: idx_MST_EmployeePosition_employee_id
   columns:
-  - - employee_id
+  - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_MST_EmployeePosition_position_id
   columns:
-  - - position_id
+  - position_id
   unique: false
   description: 役職ID検索用
 - name: idx_MST_EmployeePosition_employee_position
   columns:
-  - - employee_id
-  - - position_id
+  - employee_id
+  - position_id
   unique: false
   description: 社員・役職複合検索用
 - name: idx_MST_EmployeePosition_appointment_type
   columns:
-  - - appointment_type
+  - appointment_type
   unique: false
   description: 任命区分別検索用
 - name: idx_MST_EmployeePosition_start_date
   columns:
-  - - start_date
+  - start_date
   unique: false
   description: 任命開始日検索用
 - name: idx_MST_EmployeePosition_end_date
   columns:
-  - - end_date
+  - end_date
   unique: false
   description: 任命終了日検索用
 - name: idx_MST_EmployeePosition_status
   columns:
-  - - appointment_status
+  - appointment_status
   unique: false
   description: 任命状況別検索用
 - name: idx_MST_EmployeePosition_authority_level
   columns:
-  - - authority_level
+  - authority_level
   unique: false
   description: 権限レベル別検索用
 - name: idx_mst_employeeposition_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -303,10 +335,9 @@ constraints:
 foreign_keys:
 - name: fk_MST_EmployeePosition_employee
   columns:
-  - - employee_id
+  - employee_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -314,10 +345,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_MST_EmployeePosition_position
   columns:
-  - - position_id
+  - position_id
   references:
-    table:
-    - MST_Position
+    table: MST_Position
     columns:
     - id
   on_update: CASCADE
@@ -325,10 +355,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_MST_EmployeePosition_approved_by
   columns:
-  - - approved_by
+  - approved_by
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -399,7 +428,7 @@ notes:
 - 給与等級は役職と連動して管理
 - 任命終了日は任命開始日以降である必要がある
 - 委譲権限はJSON形式で詳細な権限設定を管理
-business_rules:
+rules:
 - 社員は必ず1つのPRIMARY役職を持つ必要がある
 - ACTING任命は期間限定の代理職務
 - CONCURRENT任命は複数役職の兼任

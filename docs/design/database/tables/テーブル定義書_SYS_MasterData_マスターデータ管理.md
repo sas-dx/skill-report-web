@@ -7,7 +7,7 @@
 | テーブル名 | SYS_MasterData |
 | 論理名 | マスターデータ管理 |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 22:02:17 |
+| 生成日時 | 2025-06-24 22:56:15 |
 
 ## 概要
 
@@ -25,17 +25,45 @@
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| data_type | データ型 | ENUM |  | ○ | STRING | データ型 |
+| default_value | デフォルト値 | TEXT |  | ○ |  | デフォルト値 |
+| description | 説明 | TEXT |  | ○ |  | 説明 |
+| display_order | 表示順序 | INTEGER |  | ○ | 0 | 表示順序 |
+| effective_from | 有効開始日 | DATE |  | ○ |  | 有効開始日 |
+| effective_to | 有効終了日 | DATE |  | ○ |  | 有効終了日 |
+| is_editable | 編集可能フラグ | BOOLEAN |  | ○ | True | 編集可能フラグ |
+| is_system_managed | システム管理フラグ | BOOLEAN |  | ○ | False | システム管理フラグ |
+| last_modified_at | 最終更新日時 | TIMESTAMP |  | ○ |  | 最終更新日時 |
+| last_modified_by | 最終更新者 | VARCHAR | 100 | ○ |  | 最終更新者 |
+| master_category | マスターカテゴリ | VARCHAR | 50 | ○ |  | マスターカテゴリ |
+| master_key | マスターキー | VARCHAR | 100 | ○ |  | マスターキー |
+| master_name | マスター名 | VARCHAR | 200 | ○ |  | マスター名 |
+| master_value | マスター値 | TEXT |  | ○ |  | マスター値 |
 | masterdata_id | SYS_MasterDataの主キー | SERIAL |  | × |  | SYS_MasterDataの主キー |
+| validation_rule | バリデーションルール | TEXT |  | ○ |  | バリデーションルール |
+| version | バージョン | INTEGER |  | ○ | 1 | バージョン |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
-| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+
+## インデックス
+
+| インデックス名 | カラム | ユニーク | 説明 |
+|----------------|--------|----------|------|
+| idx_SYS_MasterData_master_key | master_key | ○ |  |
+| idx_SYS_MasterData_category | master_category | × |  |
+| idx_SYS_MasterData_category_order | master_category, display_order | × |  |
+| idx_SYS_MasterData_effective_period | effective_from, effective_to | × |  |
+| idx_SYS_MasterData_system_managed | is_system_managed | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_masterdata | PRIMARY KEY | masterdata_id, id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| uk_master_key | UNIQUE |  | master_key一意制約 |
+| chk_data_type | CHECK | data_type IN (...) | data_type値チェック制約 |
 
 ## サンプルデータ
 
@@ -54,9 +82,6 @@
 - バージョン管理により楽観的排他制御を実現
 - 変更履歴は別テーブルで管理する
 - 論理削除は is_deleted フラグで管理
-
-## 業務ルール
-
 - マスターキーは「カテゴリ.項目名」形式で命名する
 - システム管理のマスターデータ変更時は管理者承認が必要
 - JSON形式の値は構文チェックを行う
@@ -66,8 +91,23 @@
 - デフォルト値は必ず設定し、システム障害時の代替値として使用する
 - バリデーションルールに違反する値は登録・更新を拒否する
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | システム | 初版作成 - SYS_MasterDataの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214007 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214907 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_215000 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215054 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223433 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

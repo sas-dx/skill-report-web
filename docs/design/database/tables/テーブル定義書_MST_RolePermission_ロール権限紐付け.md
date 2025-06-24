@@ -7,7 +7,7 @@
 | テーブル名 | MST_RolePermission |
 | 論理名 | ロール権限紐付け |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 22:37:20 |
+| 生成日時 | 2025-06-24 22:56:15 |
 
 ## 概要
 
@@ -26,15 +26,17 @@ MST_RolePermission（ロール権限紐付け）は、ロールと権限の多�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| role_permission_id | ロール権限紐付けの一意識別子 | BIGINT |  | × |  | ロール権限紐付けの一意識別子 |
-| role_id | 権限を付与するロールのID | BIGINT |  | × |  | 権限を付与するロールのID |
-| permission_id | ロールに付与する権限のID | BIGINT |  | × |  | ロールに付与する権限のID |
-| is_active | この権限付与が有効かどうか | BOOLEAN |  | × | True | この権限付与が有効かどうか |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
 | granted_at | この権限がロールに付与された日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | この権限がロールに付与された日時 |
 | granted_by | この権限を付与したユーザーのID | BIGINT |  | × |  | この権限を付与したユーザーのID |
+| is_active | この権限付与が有効かどうか | BOOLEAN |  | × | True | この権限付与が有効かどうか |
+| notes | 権限付与・取消に関する備考 | TEXT |  | ○ |  | 権限付与・取消に関する備考 |
+| permission_id | ロールに付与する権限のID | BIGINT |  | × |  | ロールに付与する権限のID |
 | revoked_at | この権限が取り消された日時 | TIMESTAMP |  | ○ |  | この権限が取り消された日時（NULL=未取消） |
 | revoked_by | この権限を取り消したユーザーのID | BIGINT |  | ○ |  | この権限を取り消したユーザーのID |
-| notes | 権限付与・取消に関する備考 | TEXT |  | ○ |  | 権限付与・取消に関する備考 |
+| role_id | 権限を付与するロールのID | BIGINT |  | × |  | 権限を付与するロールのID |
+| role_permission_id | ロール権限紐付けの一意識別子 | BIGINT |  | × |  | ロール権限紐付けの一意識別子 |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_at | レコード作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | レコード作成日時 |
 | updated_at | レコード最終更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | レコード最終更新日時 |
 
@@ -52,16 +54,16 @@ MST_RolePermission（ロール権限紐付け）は、ロールと権限の多�
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_mst_rolepermission_role_id | None | None | None | CASCADE | CASCADE | ロールマスタへの外部キー制約 |
-| fk_mst_rolepermission_permission_id | None | None | None | CASCADE | CASCADE | 権限マスタへの外部キー制約 |
-| fk_mst_rolepermission_granted_by | None | None | None | CASCADE | RESTRICT | 権限付与者への外部キー制約 |
-| fk_mst_rolepermission_revoked_by | None | None | None | CASCADE | RESTRICT | 権限取消者への外部キー制約 |
+| fk_mst_rolepermission_role_id | role_id | MST_Role | role_id | CASCADE | CASCADE | ロールマスタへの外部キー制約 |
+| fk_mst_rolepermission_permission_id | permission_id | MST_Permission | permission_id | CASCADE | CASCADE | 権限マスタへの外部キー制約 |
+| fk_mst_rolepermission_granted_by | granted_by | MST_UserAuth | user_id | CASCADE | RESTRICT | 権限付与者への外部キー制約 |
+| fk_mst_rolepermission_revoked_by | revoked_by | MST_UserAuth | user_id | CASCADE | RESTRICT | 権限取消者への外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_mst_rolepermission | PRIMARY KEY | role_permission_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 
@@ -77,15 +79,28 @@ MST_RolePermission（ロール権限紐付け）は、ロールと権限の多�
 - 権限の付与・取消履歴を管理し、監査証跡を保持
 - 有効フラグにより論理削除を実現
 - 権限変更時は新しいレコードを作成し、古いレコードを無効化
-
-## 業務ルール
-
 - ロールと権限の組み合わせは一意である必要がある
 - 権限の取消時は論理削除を行い、履歴を保持する
 - 権限変更は必ず承認者の記録と共に実施する
+
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
 
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-21 | 開発チーム | 初版作成 - ロール権限紐付けテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 6.1.20250624_214209 | 2025-06-24 | カラム順序修正ツール | 主キー（role_permission_id）を先頭に移動し、推奨カラム順序に修正 |
+| 10.0.20250624_214907 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_215000 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215053 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223432 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214908
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215001
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222632
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'TRN_PDU（継続教育ポイント）は、社員が取得した継続教育ポイント（Professional Development Units）を管理するトランザクションテーブルです。
 
 
@@ -32,30 +64,48 @@ overview: 'TRN_PDU（継続教育ポイント）は、社員が取得した継�
 
   '
 columns:
-- name: pdu_id
-  logical: PDU ID
-  type: VARCHAR
-  length: 50
-  'null': true
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
   unique: true
   encrypted: false
-  description: PDU記録を一意に識別するID
-- name: employee_id
-  logical: 社員ID
-  type: VARCHAR
-  length: 50
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: activity_date
+  logical: 活動日
+  type: DATE
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: PDUを取得した社員のID（MST_Employeeへの外部キー）
-- name: certification_id
-  logical: 資格ID
-  type: VARCHAR
-  length: 50
+  description: PDU取得活動を実施した日
+- name: activity_description
+  logical: 活動説明
+  type: TEXT
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 関連する資格のID（MST_Certificationへの外部キー）
+  description: 活動の詳細説明・内容
+- name: activity_name
+  logical: 活動名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: PDU取得活動の名称
 - name: activity_type
   logical: 活動種別
   type: ENUM
@@ -72,181 +122,22 @@ columns:
   - TEACHING
   - VOLUNTEER
   - OTHER
-- name: activity_name
-  logical: 活動名
-  type: VARCHAR
-  length: 200
-  'null': true
-  unique: false
-  encrypted: false
-  description: PDU取得活動の名称
-- name: activity_description
-  logical: 活動説明
+- name: approval_comment
+  logical: 承認コメント
   type: TEXT
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 活動の詳細説明・内容
-- name: provider_name
-  logical: 提供機関名
-  type: VARCHAR
-  length: 100
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動を提供する機関・組織名
-- name: activity_date
-  logical: 活動日
+  description: 承認・却下時のコメント
+- name: approval_date
+  logical: 承認日
   type: DATE
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: PDU取得活動を実施した日
-- name: start_time
-  logical: 開始時刻
-  type: TIME
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動開始時刻
-- name: end_time
-  logical: 終了時刻
-  type: TIME
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動終了時刻
-- name: duration_hours
-  logical: 活動時間
-  type: DECIMAL
-  length: 5,1
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動の総時間数
-- name: pdu_points
-  logical: PDUポイント
-  type: DECIMAL
-  length: 5,1
-  'null': true
-  unique: false
-  encrypted: false
-  description: 取得したPDUポイント数
-- name: pdu_category
-  logical: PDUカテゴリ
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: PDUのカテゴリ（TECHNICAL:技術、LEADERSHIP:リーダーシップ、STRATEGIC:戦略、BUSINESS:ビジネス）
-  enum_values:
-  - TECHNICAL
-  - LEADERSHIP
-  - STRATEGIC
-  - BUSINESS
-- name: pdu_subcategory
-  logical: PDUサブカテゴリ
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: PDUの詳細カテゴリ
-- name: location
-  logical: 開催場所
-  type: VARCHAR
-  length: 200
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動実施場所
-- name: cost
-  logical: 費用
-  type: DECIMAL
-  length: 10,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動参加費用（円）
-- name: cost_covered_by
-  logical: 費用負担者
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 費用の負担者（COMPANY:会社、EMPLOYEE:個人、SHARED:折半）
-  enum_values:
-  - COMPANY
-  - EMPLOYEE
-  - SHARED
-- name: evidence_type
-  logical: 証跡種別
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: PDU取得の証跡種別（CERTIFICATE:修了証、ATTENDANCE:出席証明、RECEIPT:領収書、REPORT:レポート、OTHER:その他）
-  enum_values:
-  - CERTIFICATE
-  - ATTENDANCE
-  - RECEIPT
-  - REPORT
-  - OTHER
-- name: evidence_file_path
-  logical: 証跡ファイルパス
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: 証跡ファイルの保存パス
-- name: certificate_number
-  logical: 証明書番号
-  type: VARCHAR
-  length: 100
-  'null': true
-  unique: false
-  encrypted: false
-  description: 修了証・認定証の番号
-- name: instructor_name
-  logical: 講師名
-  type: VARCHAR
-  length: 100
-  'null': true
-  unique: false
-  encrypted: false
-  description: 講師・指導者の名前
-- name: learning_objectives
-  logical: 学習目標
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動の学習目標・目的
-- name: learning_outcomes
-  logical: 学習成果
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 実際の学習成果・習得内容
-- name: skills_developed
-  logical: 向上スキル
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 活動により向上したスキル（JSON形式）
+  description: PDU承認日
 - name: approval_status
   logical: 承認状況
   type: ENUM
@@ -269,22 +160,88 @@ columns:
   unique: false
   encrypted: false
   description: PDUを承認した担当者のID
-- name: approval_date
-  logical: 承認日
-  type: DATE
+- name: certificate_number
+  logical: 証明書番号
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 修了証・認定証の番号
+- name: certification_id
+  logical: 資格ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連する資格のID（MST_Certificationへの外部キー）
+- name: cost
+  logical: 費用
+  type: DECIMAL
+  length: 10,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 活動参加費用（円）
+- name: cost_covered_by
+  logical: 費用負担者
+  type: ENUM
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: PDU承認日
-- name: approval_comment
-  logical: 承認コメント
-  type: TEXT
+  description: 費用の負担者（COMPANY:会社、EMPLOYEE:個人、SHARED:折半）
+  enum_values:
+  - COMPANY
+  - EMPLOYEE
+  - SHARED
+- name: duration_hours
+  logical: 活動時間
+  type: DECIMAL
+  length: 5,1
+  'null': true
+  unique: false
+  encrypted: false
+  description: 活動の総時間数
+- name: employee_id
+  logical: 社員ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: PDUを取得した社員のID（MST_Employeeへの外部キー）
+- name: end_time
+  logical: 終了時刻
+  type: TIME
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 承認・却下時のコメント
+  description: 活動終了時刻
+- name: evidence_file_path
+  logical: 証跡ファイルパス
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 証跡ファイルの保存パス
+- name: evidence_type
+  logical: 証跡種別
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: PDU取得の証跡種別（CERTIFICATE:修了証、ATTENDANCE:出席証明、RECEIPT:領収書、REPORT:レポート、OTHER:その他）
+  enum_values:
+  - CERTIFICATE
+  - ATTENDANCE
+  - RECEIPT
+  - REPORT
+  - OTHER
 - name: expiry_date
   logical: 有効期限
   type: DATE
@@ -293,6 +250,14 @@ columns:
   unique: false
   encrypted: false
   description: PDUの有効期限
+- name: instructor_name
+  logical: 講師名
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 講師・指導者の名前
 - name: is_recurring
   logical: 定期活動フラグ
   type: BOOLEAN
@@ -302,6 +267,75 @@ columns:
   encrypted: false
   description: 定期的に実施される活動かどうか
   default: false
+- name: learning_objectives
+  logical: 学習目標
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 活動の学習目標・目的
+- name: learning_outcomes
+  logical: 学習成果
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 実際の学習成果・習得内容
+- name: location
+  logical: 開催場所
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 活動実施場所
+- name: pdu_category
+  logical: PDUカテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: PDUのカテゴリ（TECHNICAL:技術、LEADERSHIP:リーダーシップ、STRATEGIC:戦略、BUSINESS:ビジネス）
+  enum_values:
+  - TECHNICAL
+  - LEADERSHIP
+  - STRATEGIC
+  - BUSINESS
+- name: pdu_id
+  logical: PDU ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: PDU記録を一意に識別するID
+- name: pdu_points
+  logical: PDUポイント
+  type: DECIMAL
+  length: 5,1
+  'null': true
+  unique: false
+  encrypted: false
+  description: 取得したPDUポイント数
+- name: pdu_subcategory
+  logical: PDUサブカテゴリ
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: PDUの詳細カテゴリ
+- name: provider_name
+  logical: 提供機関名
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 活動を提供する機関・組織名
 - name: recurrence_pattern
   logical: 繰り返しパターン
   type: VARCHAR
@@ -310,14 +344,6 @@ columns:
   unique: false
   encrypted: false
   description: 定期活動の繰り返しパターン（WEEKLY、MONTHLY等）
-- name: related_training_id
-  logical: 関連研修ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 関連する研修履歴のID（TRN_TrainingHistoryへの外部キー）
 - name: related_project_id
   logical: 関連案件ID
   type: VARCHAR
@@ -326,24 +352,30 @@ columns:
   unique: false
   encrypted: false
   description: 関連するプロジェクトのID（TRN_ProjectRecordへの外部キー）
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
+- name: related_training_id
+  logical: 関連研修ID
+  type: VARCHAR
+  length: 50
+  'null': true
   unique: false
   encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
+  description: 関連する研修履歴のID（TRN_TrainingHistoryへの外部キー）
+- name: skills_developed
+  logical: 向上スキル
+  type: TEXT
   length: null
-  'null': false
-  unique: true
+  'null': true
+  unique: false
   encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: 活動により向上したスキル（JSON形式）
+- name: start_time
+  logical: 開始時刻
+  type: TIME
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 活動開始時刻
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -362,6 +394,22 @@ columns:
   encrypted: false
   description: 作成日時
   default: CURRENT_TIMESTAMP
+- name: created_by
+  type: VARCHAR(50)
+  nullable: true
+  primary_key: false
+  unique: false
+  default: null
+  comment: 作成者ID
+  requirement_id: SYS.1-AUDIT.1
+- name: updated_by
+  type: VARCHAR(50)
+  nullable: true
+  primary_key: false
+  unique: false
+  default: null
+  comment: 更新者ID
+  requirement_id: SYS.1-AUDIT.1
 - name: updated_at
   logical: 更新日時
   type: TIMESTAMP
@@ -374,60 +422,60 @@ columns:
 indexes:
 - name: idx_pdu_id
   columns:
-  - - pdu_id
+  - pdu_id
   unique: true
   description: PDU ID検索用（一意）
 - name: idx_employee_id
   columns:
-  - - employee_id
+  - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_certification_id
   columns:
-  - - certification_id
+  - certification_id
   unique: false
   description: 資格ID検索用
 - name: idx_activity_type
   columns:
-  - - activity_type
+  - activity_type
   unique: false
   description: 活動種別検索用
 - name: idx_activity_date
   columns:
-  - - activity_date
+  - activity_date
   unique: false
   description: 活動日検索用
 - name: idx_pdu_category
   columns:
-  - - pdu_category
+  - pdu_category
   unique: false
   description: PDUカテゴリ検索用
 - name: idx_approval_status
   columns:
-  - - approval_status
+  - approval_status
   unique: false
   description: 承認状況検索用
 - name: idx_employee_period
   columns:
-  - - employee_id
-  - - activity_date
+  - employee_id
+  - activity_date
   unique: false
   description: 社員別期間検索用
 - name: idx_expiry_date
   columns:
-  - - expiry_date
+  - expiry_date
   unique: false
   description: 有効期限検索用
 - name: idx_certification_employee
   columns:
-  - - certification_id
-  - - employee_id
-  - - approval_status
+  - certification_id
+  - employee_id
+  - approval_status
   unique: false
   description: 資格別社員PDU検索用
 - name: idx_trn_pdu_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -476,10 +524,9 @@ constraints:
 foreign_keys:
 - name: fk_pdu_employee
   columns:
-  - - employee_id
+  - employee_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -487,10 +534,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_pdu_certification
   columns:
-  - - certification_id
+  - certification_id
   references:
-    table:
-    - MST_Certification
+    table: MST_Certification
     columns:
     - id
   on_update: CASCADE
@@ -498,10 +544,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_pdu_approver
   columns:
-  - - approved_by
+  - approved_by
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -509,10 +554,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_pdu_training
   columns:
-  - - related_training_id
+  - related_training_id
   references:
-    table:
-    - TRN_TrainingHistory
+    table: TRN_TrainingHistory
     columns:
     - id
   on_update: CASCADE
@@ -520,10 +564,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_pdu_project
   columns:
-  - - related_project_id
+  - related_project_id
   references:
-    table:
-    - TRN_ProjectRecord
+    table: TRN_ProjectRecord
     columns:
     - id
   on_update: CASCADE
@@ -611,7 +654,7 @@ notes:
 - 同一活動での重複PDU取得は不可
 - 費用が発生する活動は事前承認推奨
 - 定期活動は繰り返しパターンを明確に設定
-business_rules:
+rules:
 - PDU IDは一意である必要がある
 - 活動時間とPDUポイントは正数である必要がある
 - 承認済みPDUのみが資格維持に有効

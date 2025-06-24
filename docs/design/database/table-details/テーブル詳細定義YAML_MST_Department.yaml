@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222630
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'MST_Department（部署マスタ）は、組織の部署・組織単位の階層構造と基本情報を管理するマスタテーブルです。
 
 
@@ -36,6 +68,48 @@ overview: 'MST_Department（部署マスタ）は、組織の部署・組織単�
 
   '
 columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: abolition_date
+  logical: 廃止日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 部署の廃止・統合日
+- name: budget_amount
+  logical: 予算額
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 年間予算額（円）
+- name: cost_center_code
+  logical: コストセンターコード
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: false
+  encrypted: false
+  description: 予算管理用のコストセンターコード
 - name: department_code
   logical: 部署コード
   type: VARCHAR
@@ -45,6 +119,23 @@ columns:
   encrypted: false
   description: 部署を一意に識別するコード（例：DEPT001）
   validation: ^DEPT[0-9]{3}$
+- name: department_id
+  logical: MST_Departmentの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Departmentの主キー
+  default: null
+- name: department_level
+  logical: 部署レベル
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 組織階層のレベル（1:本部、2:部、3:課、4:チーム等）
 - name: department_name
   logical: 部署名
   type: VARCHAR
@@ -61,22 +152,20 @@ columns:
   unique: false
   encrypted: false
   description: 部署の略称・短縮名
-- name: parent_department_id
-  logical: 親部署ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 上位部署のID（MST_Departmentへの自己参照外部キー）
-- name: department_level
-  logical: 部署レベル
-  type: INT
+- name: department_status
+  logical: 部署状態
+  type: ENUM
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 組織階層のレベル（1:本部、2:部、3:課、4:チーム等）
+  description: 部署の状態（ACTIVE:有効、INACTIVE:無効、MERGED:統合、ABOLISHED:廃止）
+  enum_values:
+  - ACTIVE
+  - INACTIVE
+  - MERGED
+  - ABOLISHED
+  default: ACTIVE
 - name: department_type
   logical: 部署種別
   type: ENUM
@@ -91,14 +180,6 @@ columns:
   - DEPARTMENT
   - SECTION
   - TEAM
-- name: manager_id
-  logical: 部署長ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 部署長の社員ID（MST_Employeeへの外部キー）
 - name: deputy_manager_id
   logical: 副部署長ID
   type: VARCHAR
@@ -107,38 +188,14 @@ columns:
   unique: false
   encrypted: false
   description: 副部署長の社員ID（MST_Employeeへの外部キー）
-- name: cost_center_code
-  logical: コストセンターコード
-  type: VARCHAR
-  length: 20
+- name: description
+  logical: 部署説明
+  type: TEXT
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 予算管理用のコストセンターコード
-- name: budget_amount
-  logical: 予算額
-  type: DECIMAL
-  length: 15,2
-  'null': true
-  unique: false
-  encrypted: false
-  description: 年間予算額（円）
-- name: location
-  logical: 所在地
-  type: VARCHAR
-  length: 200
-  'null': true
-  unique: false
-  encrypted: false
-  description: 部署の物理的な所在地・フロア等
-- name: phone_number
-  logical: 代表電話番号
-  type: VARCHAR
-  length: 20
-  'null': true
-  unique: false
-  encrypted: false
-  description: 部署の代表電話番号
+  description: 部署の役割・業務内容の説明
 - name: email_address
   logical: 代表メールアドレス
   type: VARCHAR
@@ -155,28 +212,38 @@ columns:
   unique: false
   encrypted: false
   description: 部署の設立・新設日
-- name: abolition_date
-  logical: 廃止日
-  type: DATE
-  length: null
+- name: location
+  logical: 所在地
+  type: VARCHAR
+  length: 200
   'null': true
   unique: false
   encrypted: false
-  description: 部署の廃止・統合日
-- name: department_status
-  logical: 部署状態
-  type: ENUM
-  length: null
+  description: 部署の物理的な所在地・フロア等
+- name: manager_id
+  logical: 部署長ID
+  type: VARCHAR
+  length: 50
   'null': true
   unique: false
   encrypted: false
-  description: 部署の状態（ACTIVE:有効、INACTIVE:無効、MERGED:統合、ABOLISHED:廃止）
-  enum_values:
-  - ACTIVE
-  - INACTIVE
-  - MERGED
-  - ABOLISHED
-  default: ACTIVE
+  description: 部署長の社員ID（MST_Employeeへの外部キー）
+- name: parent_department_id
+  logical: 親部署ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 上位部署のID（MST_Departmentへの自己参照外部キー）
+- name: phone_number
+  logical: 代表電話番号
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: false
+  encrypted: false
+  description: 部署の代表電話番号
 - name: sort_order
   logical: 表示順序
   type: INT
@@ -185,41 +252,6 @@ columns:
   unique: false
   encrypted: false
   description: 組織図等での表示順序
-- name: description
-  logical: 部署説明
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 部署の役割・業務内容の説明
-- name: department_id
-  logical: MST_Departmentの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: MST_Departmentの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -250,47 +282,47 @@ columns:
 indexes:
 - name: idx_department_code
   columns:
-  - - department_code
+  - department_code
   unique: true
   description: 部署コード検索用（一意）
 - name: idx_parent_department
   columns:
-  - - parent_department_id
+  - parent_department_id
   unique: false
   description: 親部署別検索用
 - name: idx_department_level
   columns:
-  - - department_level
+  - department_level
   unique: false
   description: 部署レベル別検索用
 - name: idx_department_type
   columns:
-  - - department_type
+  - department_type
   unique: false
   description: 部署種別検索用
 - name: idx_manager
   columns:
-  - - manager_id
+  - manager_id
   unique: false
   description: 部署長別検索用
 - name: idx_status
   columns:
-  - - department_status
+  - department_status
   unique: false
   description: 部署状態別検索用
 - name: idx_cost_center
   columns:
-  - - cost_center_code
+  - cost_center_code
   unique: false
   description: コストセンター別検索用
 - name: idx_sort_order
   columns:
-  - - sort_order
+  - sort_order
   unique: false
   description: 表示順序検索用
 - name: idx_mst_department_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -323,10 +355,9 @@ constraints:
 foreign_keys:
 - name: fk_department_parent
   columns:
-  - - parent_department_id
+  - parent_department_id
   references:
-    table:
-    - MST_Department
+    table: MST_Department
     columns:
     - id
   on_update: CASCADE
@@ -334,10 +365,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_department_manager
   columns:
-  - - manager_id
+  - manager_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -345,10 +375,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_department_deputy
   columns:
-  - - deputy_manager_id
+  - deputy_manager_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -405,7 +434,7 @@ notes:
 - 統合時は department_status を MERGED に変更
 - 予算額は年度初めに設定・更新
 - 組織変更は月初めに実施することを原則とする
-business_rules:
+rules:
 - 部署コードは設立時に自動採番（DEPT + 3桁連番）
 - 親部署が廃止される場合は子部署の再配置が必要
 - 部署長は当該部署または上位部署の社員のみ設定可能

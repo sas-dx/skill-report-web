@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222630
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223431
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'システム内で発生する全ての重要な操作を記録する監査ログテーブルです。
 
 
@@ -38,22 +70,14 @@ columns:
   unique: true
   encrypted: false
   description: プライマリキー（UUID）
-- name: user_id
-  logical: ユーザーID
+- name: tenant_id
+  logical: テナントID
   type: VARCHAR
   length: 50
   'null': true
   unique: false
   encrypted: false
-  description: 操作を実行したユーザーのID
-- name: session_id
-  logical: セッションID
-  type: VARCHAR
-  length: 100
-  'null': true
-  unique: false
-  encrypted: false
-  description: 操作時のセッション識別子
+  description: マルチテナント識別子
 - name: action_type
   logical: アクション種別
   type: ENUM
@@ -69,67 +93,23 @@ columns:
   - DELETE
   - LOGIN
   - LOGOUT
-- name: target_table
-  logical: 対象テーブル
-  type: VARCHAR
-  length: 100
-  'null': true
+- name: auditlog_id
+  logical: HIS_AuditLogの主キー
+  type: SERIAL
+  length: null
+  'null': false
   unique: false
   encrypted: false
-  description: 操作対象のテーブル名
-- name: target_id
-  logical: 対象レコードID
+  description: HIS_AuditLogの主キー
+  default: null
+- name: created_by
+  logical: 作成者
   type: VARCHAR
   length: 50
   'null': true
   unique: false
   encrypted: false
-  description: 操作対象のレコードID
-- name: old_values
-  logical: 変更前値
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: true
-  description: 更新・削除前のデータ（JSON形式）
-- name: new_values
-  logical: 変更後値
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: true
-  description: 作成・更新後のデータ（JSON形式）
-- name: ip_address
-  logical: IPアドレス
-  type: VARCHAR
-  length: 45
-  'null': true
-  unique: false
-  encrypted: false
-  description: 操作元のIPアドレス（IPv6対応）
-- name: user_agent
-  logical: ユーザーエージェント
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: 操作時のブラウザ・アプリケーション情報
-- name: result_status
-  logical: 実行結果
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 操作の実行結果（SUCCESS:成功、FAILURE:失敗、ERROR:エラー）
-  enum_values:
-  - SUCCESS
-  - FAILURE
-  - ERROR
-  default: SUCCESS
+  description: レコード作成者のユーザーID
 - name: error_message
   logical: エラーメッセージ
   type: TEXT
@@ -146,6 +126,91 @@ columns:
   unique: false
   encrypted: false
   description: 操作の実行時間（ミリ秒）
+- name: ip_address
+  logical: IPアドレス
+  type: VARCHAR
+  length: 45
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作元のIPアドレス（IPv6対応）
+- name: new_values
+  logical: 変更後値
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: true
+  description: 作成・更新後のデータ（JSON形式）
+- name: old_values
+  logical: 変更前値
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: true
+  description: 更新・削除前のデータ（JSON形式）
+- name: result_status
+  logical: 実行結果
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作の実行結果（SUCCESS:成功、FAILURE:失敗、ERROR:エラー）
+  enum_values:
+  - SUCCESS
+  - FAILURE
+  - ERROR
+  default: SUCCESS
+- name: session_id
+  logical: セッションID
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作時のセッション識別子
+- name: target_id
+  logical: 対象レコードID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作対象のレコードID
+- name: target_table
+  logical: 対象テーブル
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作対象のテーブル名
+- name: updated_by
+  logical: 更新者
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: レコード更新者のユーザーID
+- name: user_agent
+  logical: ユーザーエージェント
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作時のブラウザ・アプリケーション情報
+- name: user_id
+  logical: ユーザーID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 操作を実行したユーザーのID
 - name: is_deleted
   logical: 削除フラグ
   type: BOOLEAN
@@ -155,14 +220,6 @@ columns:
   encrypted: false
   description: 論理削除フラグ（監査ログは物理削除禁止）
   default: false
-- name: tenant_id
-  logical: テナントID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: マルチテナント識別子
 - name: created_at
   logical: 作成日時
   type: TIMESTAMP
@@ -181,72 +238,47 @@ columns:
   encrypted: false
   description: レコード更新日時
   default: CURRENT_TIMESTAMP
-- name: created_by
-  logical: 作成者
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: レコード作成者のユーザーID
-- name: updated_by
-  logical: 更新者
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: レコード更新者のユーザーID
-- name: auditlog_id
-  logical: HIS_AuditLogの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: HIS_AuditLogの主キー
-  default: null
 indexes:
 - name: idx_his_auditlog_id
   columns:
-  - - id
+  - id
   unique: true
   description: プライマリキー検索用（一意）
 - name: idx_his_auditlog_user_id
   columns:
-  - - user_id
+  - user_id
   unique: false
   description: ユーザーID検索用
 - name: idx_his_auditlog_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用
 - name: idx_his_auditlog_action_type
   columns:
-  - - action_type
+  - action_type
   unique: false
   description: アクション種別検索用
 - name: idx_his_auditlog_target_table
   columns:
-  - - target_table
+  - target_table
   unique: false
   description: 対象テーブル検索用
 - name: idx_his_auditlog_created_at
   columns:
-  - - created_at
+  - created_at
   unique: false
   description: 作成日時検索用（時系列検索）
 - name: idx_his_auditlog_user_created
   columns:
-  - - user_id
-  - - created_at
+  - user_id
+  - created_at
   unique: false
   description: ユーザー別時系列検索用
 - name: idx_his_auditlog_tenant_created
   columns:
-  - - tenant_id
-  - - created_at
+  - tenant_id
+  - created_at
   unique: false
   description: テナント別時系列検索用
 constraints:
@@ -265,10 +297,9 @@ constraints:
 foreign_keys:
 - name: fk_his_auditlog_tenant
   columns:
-  - - tenant_id
+  - tenant_id
   references:
-    table:
-    - MST_Tenant
+    table: MST_Tenant
     columns:
     - id
   on_update: CASCADE
@@ -276,10 +307,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_his_auditlog_user
   columns:
-  - - user_id
+  - user_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -333,7 +363,7 @@ notes:
 - システム管理者のみがログを参照可能
 - ログ保持期間は90日間、期間経過後は自動削除
 - 異常なアクセスパターンの検知に活用
-business_rules:
+rules:
 - 全ての重要な操作（CRUD、認証）を記録する
 - ログの改ざん防止のため、作成後の更新は原則禁止
 - 個人情報を含む場合は暗号化して保存

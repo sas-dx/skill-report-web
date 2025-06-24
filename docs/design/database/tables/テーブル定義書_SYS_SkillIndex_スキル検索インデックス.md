@@ -7,7 +7,7 @@
 | テーブル名 | SYS_SkillIndex |
 | 論理名 | スキル検索インデックス |
 | カテゴリ | システム系 |
-| 生成日時 | 2025-06-21 22:02:18 |
+| 生成日時 | 2025-06-24 22:56:15 |
 
 ## 概要
 
@@ -25,23 +25,50 @@ SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
+| id | ID | VARCHAR | 50 | ○ |  | ID |
+| tenant_id | テナントID | VARCHAR | 50 | ○ |  | テナントID |
+| frequency_weight | 頻度重み | DECIMAL | 5,3 | ○ | 1.0 | 頻度重み |
+| index_type | インデックスタイプ | ENUM |  | ○ |  | インデックスタイプ |
+| index_updated_at | インデックス更新日時 | TIMESTAMP |  | ○ |  | インデックス更新日時 |
+| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| language_code | 言語コード | VARCHAR | 10 | ○ | ja | 言語コード |
+| last_searched_at | 最終検索日時 | TIMESTAMP |  | ○ |  | 最終検索日時 |
+| normalized_term | 正規化語 | VARCHAR | 200 | ○ |  | 正規化語 |
+| position_weight | 位置重み | DECIMAL | 5,3 | ○ | 1.0 | 位置重み |
+| relevance_score | 関連度スコア | DECIMAL | 5,3 | ○ | 1.0 | 関連度スコア |
+| search_count | 検索回数 | INTEGER |  | ○ | 0 | 検索回数 |
+| search_term | 検索語 | VARCHAR | 200 | ○ |  | 検索語 |
+| skill_id | スキルID | VARCHAR | 50 | ○ |  | スキルID |
 | skillindex_id | SYS_SkillIndexの主キー | SERIAL |  | × |  | SYS_SkillIndexの主キー |
+| source_field | ソースフィールド | ENUM |  | ○ |  | ソースフィールド |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
-| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
-| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+
+## インデックス
+
+| インデックス名 | カラム | ユニーク | 説明 |
+|----------------|--------|----------|------|
+| idx_skill_index_skill | skill_id | × |  |
+| idx_skill_index_search_term | normalized_term, language_code | × |  |
+| idx_skill_index_type | index_type | × |  |
+| idx_skill_index_tenant_term | tenant_id, normalized_term | × |  |
+| idx_skill_index_relevance | relevance_score | × |  |
+| idx_skill_index_active | is_active | × |  |
+| idx_skill_index_search_stats | search_count, last_searched_at | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_skill_index_skill | None | None | None | CASCADE | CASCADE | 外部キー制約 |
+| fk_skill_index_skill | skill_id | MST_Skill | id | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_sys_skillindex | PRIMARY KEY | skillindex_id, id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_index_type | CHECK | index_type IN (...) | index_type値チェック制約 |
 
 ## サンプルデータ
 
@@ -60,9 +87,6 @@ SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能
 - 無効化されたインデックスは検索対象から除外
 - 多言語対応により国際化に対応
 - 同義語インデックスにより検索の網羅性を向上
-
-## 業務ルール
-
 - スキル削除時は関連インデックスも自動削除
 - インデックス更新は元データ変更時に自動実行
 - 検索実行時は統計情報を更新
@@ -72,8 +96,23 @@ SYS_SkillIndex（スキル検索インデックス）は、スキル検索機能
 - 検索頻度の高い語句は優先的にインデックス化
 - 定期的な統計分析によりインデックス最適化を実施
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - スキル検索インデックスシステムテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214007 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214907 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_215000 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215054 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223433 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

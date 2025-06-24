@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'スキルマップテーブルは、社員のスキル評価とスキル項目の関連を管理するシステムテーブルです。
 
 
@@ -28,6 +60,23 @@ overview: 'スキルマップテーブルは、社員のスキル評価とスキ
 
   '
 columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: assessment_date
+  logical: 評価日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル評価を実施した日付
 - name: employee_id
   logical: 社員ID
   type: VARCHAR
@@ -36,6 +85,54 @@ columns:
   unique: false
   encrypted: false
   description: 評価対象の社員ID（MST_Employeeへの外部キー）
+- name: evidence_url
+  logical: 根拠URL
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル評価の根拠となる資料やプロジェクトのURL
+- name: manager_assessment
+  logical: 上司評価
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 上司による評価レベル（1-5）
+- name: next_target_level
+  logical: 次回目標レベル
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 次回評価での目標レベル（1-5）
+- name: notes
+  logical: 備考
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル評価に関する詳細な備考やコメント
+- name: peer_assessment
+  logical: 同僚評価
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同僚による評価レベル（1-5）
+- name: self_assessment
+  logical: 自己評価
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 本人による自己評価レベル（1-5）
 - name: skill_id
   logical: スキルID
   type: VARCHAR
@@ -53,70 +150,6 @@ columns:
   encrypted: false
   description: スキル評価レベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター）
   default: 1
-- name: self_assessment
-  logical: 自己評価
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 本人による自己評価レベル（1-5）
-- name: manager_assessment
-  logical: 上司評価
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 上司による評価レベル（1-5）
-- name: peer_assessment
-  logical: 同僚評価
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 同僚による評価レベル（1-5）
-- name: assessment_date
-  logical: 評価日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキル評価を実施した日付
-- name: evidence_url
-  logical: 根拠URL
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキル評価の根拠となる資料やプロジェクトのURL
-- name: notes
-  logical: 備考
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキル評価に関する詳細な備考やコメント
-- name: next_target_level
-  logical: 次回目標レベル
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 次回評価での目標レベル（1-5）
-- name: target_date
-  logical: 目標達成日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 目標レベル達成予定日
 - name: skillmatrix_id
   logical: SYS_SkillMatrixの主キー
   type: SERIAL
@@ -126,15 +159,14 @@ columns:
   encrypted: false
   description: SYS_SkillMatrixの主キー
   default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
+- name: target_date
+  logical: 目標達成日
+  type: DATE
   length: null
-  'null': false
-  unique: true
+  'null': true
+  unique: false
   encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: 目標レベル達成予定日
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -165,28 +197,28 @@ columns:
 indexes:
 - name: idx_SYS_SkillMatrix_employee_skill
   columns:
-  - - employee_id
-  - - skill_id
+  - employee_id
+  - skill_id
   unique: true
   description: 社員とスキルの組み合わせ検索用（一意）
 - name: idx_SYS_SkillMatrix_employee_id
   columns:
-  - - employee_id
+  - employee_id
   unique: false
   description: 社員ID検索用
 - name: idx_SYS_SkillMatrix_skill_id
   columns:
-  - - skill_id
+  - skill_id
   unique: false
   description: スキルID検索用
 - name: idx_SYS_SkillMatrix_assessment_date
   columns:
-  - - assessment_date
+  - assessment_date
   unique: false
   description: 評価日検索用
 - name: idx_SYS_SkillMatrix_skill_level
   columns:
-  - - skill_level
+  - skill_level
   unique: false
   description: スキルレベル検索用
 constraints:
@@ -223,10 +255,9 @@ constraints:
 foreign_keys:
 - name: fk_SYS_SkillMatrix_employee
   columns:
-  - - employee_id
+  - employee_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -234,10 +265,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_SYS_SkillMatrix_skill
   columns:
-  - - skill_id
+  - skill_id
   references:
-    table:
-    - MST_Skill
+    table: MST_Skill
     columns:
     - id
   on_update: CASCADE
@@ -279,7 +309,7 @@ notes:
 - 目標達成日は評価日以降の日付のみ設定可能
 - スキル評価の更新時は履歴として別テーブルに保存
 - 削除時は論理削除を使用し、物理削除は行わない
-business_rules:
+rules:
 - 同一社員・同一スキルの組み合わせは1レコードのみ
 - スキルレベルは必須、その他の評価は任意
 - 評価日は必須項目

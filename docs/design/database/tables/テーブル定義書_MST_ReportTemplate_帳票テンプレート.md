@@ -7,7 +7,7 @@
 | テーブル名 | MST_ReportTemplate |
 | 論理名 | 帳票テンプレート |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-21 22:02:17 |
+| 生成日時 | 2025-06-24 22:56:15 |
 
 ## 概要
 
@@ -25,8 +25,26 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
+| id | ID | VARCHAR | 50 | ○ |  | ID |
+| tenant_id | テナントID | VARCHAR | 50 | ○ |  | テナントID |
+| data_source_config | データソース設定 | TEXT |  | ○ |  | データソース設定 |
+| footer_template | フッターテンプレート | TEXT |  | ○ |  | フッターテンプレート |
+| header_template | ヘッダーテンプレート | TEXT |  | ○ |  | ヘッダーテンプレート |
+| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| is_default | デフォルトフラグ | BOOLEAN |  | ○ | False | デフォルトフラグ |
+| language_code | 言語コード | VARCHAR | 10 | ○ | ja | 言語コード |
+| output_format | 出力形式 | ENUM |  | ○ |  | 出力形式 |
+| page_settings | ページ設定 | TEXT |  | ○ |  | ページ設定 |
+| parameters_schema | パラメータスキーマ | TEXT |  | ○ |  | パラメータスキーマ |
+| preview_image_url | プレビュー画像URL | VARCHAR | 500 | ○ |  | プレビュー画像URL |
+| report_category | 帳票カテゴリ | ENUM |  | ○ |  | 帳票カテゴリ |
 | reporttemplate_id | MST_ReportTemplateの主キー | SERIAL |  | × |  | MST_ReportTemplateの主キー |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| style_sheet | スタイルシート | TEXT |  | ○ |  | スタイルシート |
+| template_content | テンプレート内容 | TEXT |  | ○ |  | テンプレート内容 |
+| template_key | テンプレートキー | VARCHAR | 100 | ○ |  | テンプレートキー |
+| template_name | テンプレート名 | VARCHAR | 200 | ○ |  | テンプレート名 |
+| version | バージョン | VARCHAR | 20 | ○ | 1.0.0 | バージョン |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
@@ -34,13 +52,18 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_mst_reporttemplate_tenant_id | tenant_id | × | テナントID検索用インデックス |
+| idx_report_template_tenant_key | tenant_id, template_key, language_code | ○ |  |
+| idx_report_template_category | report_category | × |  |
+| idx_report_template_format | output_format | × |  |
+| idx_report_template_language | language_code | × |  |
+| idx_report_template_default | is_default, is_active | × |  |
+| idx_mst_reporttemplate_tenant_id | tenant_id | × |  |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| pk_mst_reporttemplate | PRIMARY KEY | reporttemplate_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
 
 ## サンプルデータ
 
@@ -101,9 +124,6 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 - 多言語対応により国際化に対応
 - 出力形式により異なるテンプレート記法に対応
 - プレビュー画像によりテンプレート選択時の視認性を向上
-
-## 業務ルール
-
 - 同一テナント・キー・言語の組み合わせは重複不可
 - 無効化されたテンプレートは帳票生成から除外される
 - デフォルトテンプレートは同一条件で1つのみ設定可能
@@ -113,8 +133,23 @@ MST_ReportTemplate（帳票テンプレート）は、システムで生成す�
 - テンプレートバージョンは変更時に更新が必要
 - プレビュー画像は管理画面での選択性向上のため推奨
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 帳票テンプレートマスタテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214907 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_215000 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215053 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223432 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

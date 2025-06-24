@@ -7,7 +7,7 @@
 | テーブル名 | MST_Certification |
 | 論理名 | 資格情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-24 20:30:44 |
+| 生成日時 | 2025-06-24 22:56:14 |
 
 ## 概要
 
@@ -26,27 +26,27 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| certification_id | MST_Certificationの主キー | SERIAL |  | × |  | MST_Certificationの主キー |
-| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
 | id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
 | certification_code | 資格コード | VARCHAR | 50 | ○ |  | 資格コード |
 | certification_name | 資格名 | VARCHAR | 200 | ○ |  | 資格名 |
+| certification_category | 資格カテゴリ | ENUM |  | ○ |  | 資格カテゴリ |
+| certification_id | 資格ID | INTEGER |  | × |  | 資格ID |
+| certification_level | 資格レベル | ENUM |  | ○ |  | 資格レベル |
 | certification_name_en | 資格名 | VARCHAR | 200 | ○ |  | 資格名（英語） |
+| description | 説明 | TEXT |  | ○ |  | 説明 |
+| exam_fee | 受験料 | DECIMAL | 10,2 | ○ |  | 受験料 |
+| exam_format | 試験形式 | ENUM |  | ○ |  | 試験形式 |
+| exam_language | 試験言語 | VARCHAR | 50 | ○ |  | 試験言語 |
+| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| is_recommended | 推奨資格フラグ | BOOLEAN |  | ○ | False | 推奨資格フラグ |
 | issuer | 発行機関 | VARCHAR | 100 | ○ |  | 発行機関 |
 | issuer_country | 発行国 | VARCHAR | 10 | ○ |  | 発行国 |
-| certification_category | 資格カテゴリ | ENUM |  | ○ |  | 資格カテゴリ |
-| certification_level | 資格レベル | ENUM |  | ○ |  | 資格レベル |
-| validity_period_months | 有効期間 | INTEGER |  | ○ |  | 有効期間（月） |
+| official_url | 公式URL | VARCHAR | 500 | ○ |  | 公式URL |
 | renewal_required | 更新要否 | BOOLEAN |  | ○ | False | 更新要否 |
 | renewal_requirements | 更新要件 | TEXT |  | ○ |  | 更新要件 |
-| exam_fee | 受験料 | DECIMAL | 10,2 | ○ |  | 受験料 |
-| exam_language | 試験言語 | VARCHAR | 50 | ○ |  | 試験言語 |
-| exam_format | 試験形式 | ENUM |  | ○ |  | 試験形式 |
-| official_url | 公式URL | VARCHAR | 500 | ○ |  | 公式URL |
-| description | 説明 | TEXT |  | ○ |  | 説明 |
 | skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリID |
-| is_recommended | 推奨資格フラグ | BOOLEAN |  | ○ | False | 推奨資格フラグ |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| validity_period_months | 有効期間 | INTEGER |  | ○ |  | 有効期間（月） |
 | is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
 | created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
 | updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
@@ -105,3 +105,14 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 資格情報マスタテーブルの詳細定義 |
 | 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 3.2.20250624 | 2025-06-24 | 主キー修正ツール | certification_id カラム削除、id を正しい主キーに設定 |
+| 4.0.20250624 | 2025-06-24 | カラム順序統一ツール | certification_id を主キーとして復活、指定されたカラム順序に統一 |
+| 4.1.20250624 | 2025-06-24 | 制約修正ツール | デフォルト値の型修正、制約処理の有効化 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214905 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_214959 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215052 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222630 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223431 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

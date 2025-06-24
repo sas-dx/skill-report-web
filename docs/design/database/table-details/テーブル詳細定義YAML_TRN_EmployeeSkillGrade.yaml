@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214908
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215001
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'TRN_EmployeeSkillGrade（社員スキルグレード）は、社員が職種ごとに持つスキルグレード情報を管理するトランザクションテーブルです。
 
 
@@ -32,6 +64,41 @@ overview: 'TRN_EmployeeSkillGrade（社員スキルグレード）は、社員�
 
   '
 columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: certification_flag
+  logical: 認定フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 公式認定されたスキルグレードかどうか
+  default: false
+- name: effective_date
+  logical: 有効開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルグレードの有効開始日
 - name: employee_id
   logical: 社員ID
   type: VARCHAR
@@ -40,6 +107,47 @@ columns:
   unique: false
   encrypted: false
   description: 対象社員のID（MST_Employeeへの外部キー）
+- name: employeeskillgrade_id
+  logical: TRN_EmployeeSkillGradeの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: TRN_EmployeeSkillGradeの主キー
+  default: null
+- name: evaluation_comment
+  logical: 評価コメント
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 評価に関するコメント・備考
+- name: evaluation_date
+  logical: 評価日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルグレードが評価・決定された日
+- name: evaluator_id
+  logical: 評価者ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 評価を行った社員のID（MST_Employeeへの外部キー）
+- name: expiry_date
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルグレードの有効終了日（NULL=現在有効）
 - name: job_type_id
   logical: 職種ID
   type: VARCHAR
@@ -48,6 +156,14 @@ columns:
   unique: false
   encrypted: false
   description: 対象職種のID（MST_JobTypeへの外部キー）
+- name: next_evaluation_date
+  logical: 次回評価予定日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 次回スキル評価の予定日
 - name: skill_grade
   logical: スキルグレード
   type: VARCHAR
@@ -66,90 +182,6 @@ columns:
   encrypted: false
   description: スキルレベル（数値表現、1-5の範囲）
   validation: skill_level BETWEEN 1 AND 5
-- name: effective_date
-  logical: 有効開始日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルグレードの有効開始日
-- name: expiry_date
-  logical: 有効終了日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルグレードの有効終了日（NULL=現在有効）
-- name: evaluation_date
-  logical: 評価日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルグレードが評価・決定された日
-- name: evaluator_id
-  logical: 評価者ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 評価を行った社員のID（MST_Employeeへの外部キー）
-- name: evaluation_comment
-  logical: 評価コメント
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 評価に関するコメント・備考
-- name: certification_flag
-  logical: 認定フラグ
-  type: BOOLEAN
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 公式認定されたスキルグレードかどうか
-  default: false
-- name: next_evaluation_date
-  logical: 次回評価予定日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 次回スキル評価の予定日
-- name: employeeskillgrade_id
-  logical: TRN_EmployeeSkillGradeの主キー
-  type: SERIAL
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: TRN_EmployeeSkillGradeの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -168,6 +200,22 @@ columns:
   encrypted: false
   description: 作成日時
   default: CURRENT_TIMESTAMP
+- name: created_by
+  type: VARCHAR(50)
+  nullable: true
+  primary_key: false
+  unique: false
+  default: null
+  comment: 作成者ID
+  requirement_id: SYS.1-AUDIT.1
+- name: updated_by
+  type: VARCHAR(50)
+  nullable: true
+  primary_key: false
+  unique: false
+  default: null
+  comment: 更新者ID
+  requirement_id: SYS.1-AUDIT.1
 - name: updated_at
   logical: 更新日時
   type: TIMESTAMP
@@ -180,41 +228,41 @@ columns:
 indexes:
 - name: idx_employee_job_effective
   columns:
-  - - employee_id
-  - - job_type_id
-  - - effective_date
+  - employee_id
+  - job_type_id
+  - effective_date
   unique: false
   description: 社員・職種・有効日検索用
 - name: idx_employee_current
   columns:
-  - - employee_id
-  - - expiry_date
+  - employee_id
+  - expiry_date
   unique: false
   description: 社員の現在有効なスキルグレード検索用
 - name: idx_job_type_grade
   columns:
-  - - job_type_id
-  - - skill_grade
+  - job_type_id
+  - skill_grade
   unique: false
   description: 職種別スキルグレード検索用
 - name: idx_evaluation_date
   columns:
-  - - evaluation_date
+  - evaluation_date
   unique: false
   description: 評価日検索用
 - name: idx_next_evaluation
   columns:
-  - - next_evaluation_date
+  - next_evaluation_date
   unique: false
   description: 次回評価予定日検索用
 - name: idx_certification
   columns:
-  - - certification_flag
+  - certification_flag
   unique: false
   description: 認定フラグ検索用
 - name: idx_trn_employeeskillgrade_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -245,10 +293,9 @@ constraints:
 foreign_keys:
 - name: fk_skill_grade_employee
   columns:
-  - - employee_id
+  - employee_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -256,10 +303,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_skill_grade_job_type
   columns:
-  - - job_type_id
+  - job_type_id
   references:
-    table:
-    - MST_JobType
+    table: MST_JobType
     columns:
     - id
   on_update: CASCADE
@@ -267,10 +313,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_skill_grade_evaluator
   columns:
-  - - evaluator_id
+  - evaluator_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -325,7 +370,7 @@ notes:
 - 次回評価予定日は通常1年後に設定
 - スキルグレード S > A > B > C > D の順で上位
 - スキルレベル 5 > 4 > 3 > 2 > 1 の順で上位
-business_rules:
+rules:
 - 同一社員・同一職種で有効期間の重複は禁止
 - 新しいスキルグレード設定時は前のレコードの expiry_date を自動更新
 - スキルグレード変更は評価者の承認が必要

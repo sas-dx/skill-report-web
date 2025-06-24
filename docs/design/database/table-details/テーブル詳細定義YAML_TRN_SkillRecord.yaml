@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214908
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215001
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222632
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'TRN_SkillRecord（スキル情報）は、組織内の全社員が保有するスキル・技術・資格等の詳細情報を管理するトランザクションテーブルです。
 
 
@@ -36,6 +68,56 @@ overview: 'TRN_SkillRecord（スキル情報）は、組織内の全社員が保
 
   '
 columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: acquisition_date
+  logical: 習得日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルを習得した日付
+- name: assessment_date
+  logical: 評価日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 最後に評価を行った日付
+- name: assessor_id
+  logical: 評価者ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 評価を行った人のID（MST_Employeeへの外部キー）
+- name: certification_id
+  logical: 関連資格ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連する資格のID（MST_Certificationへの外部キー）
 - name: employee_id
   logical: 社員ID
   type: VARCHAR
@@ -44,6 +126,72 @@ columns:
   unique: false
   encrypted: false
   description: スキルを保有する社員のID（MST_Employeeへの外部キー）
+- name: evidence_description
+  logical: 証跡説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル習得の証跡や根拠の説明
+- name: expiry_date
+  logical: 有効期限
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの有効期限（資格等の場合）
+- name: last_used_date
+  logical: 最終使用日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルを最後に使用した日付
+- name: learning_hours
+  logical: 学習時間
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル習得にかけた学習時間（時間）
+- name: manager_assessment
+  logical: 上司評価
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 上司による評価（1-5段階）
+  validation: manager_assessment BETWEEN 1 AND 5
+- name: project_experience_count
+  logical: プロジェクト経験回数
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: このスキルを使用したプロジェクトの回数
+- name: self_assessment
+  logical: 自己評価
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 自己評価（1-5段階）
+  validation: self_assessment BETWEEN 1 AND 5
+- name: skill_category_id
+  logical: スキルカテゴリID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルカテゴリのID（MST_SkillCategoryへの外部キー）
 - name: skill_item_id
   logical: スキル項目ID
   type: VARCHAR
@@ -61,88 +209,6 @@ columns:
   encrypted: false
   description: スキルレベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター）
   validation: skill_level BETWEEN 1 AND 5
-- name: self_assessment
-  logical: 自己評価
-  type: INT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 自己評価（1-5段階）
-  validation: self_assessment BETWEEN 1 AND 5
-- name: manager_assessment
-  logical: 上司評価
-  type: INT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 上司による評価（1-5段階）
-  validation: manager_assessment BETWEEN 1 AND 5
-- name: evidence_description
-  logical: 証跡説明
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキル習得の証跡や根拠の説明
-- name: acquisition_date
-  logical: 習得日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルを習得した日付
-- name: last_used_date
-  logical: 最終使用日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルを最後に使用した日付
-- name: expiry_date
-  logical: 有効期限
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルの有効期限（資格等の場合）
-- name: certification_id
-  logical: 関連資格ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 関連する資格のID（MST_Certificationへの外部キー）
-- name: skill_category_id
-  logical: スキルカテゴリID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキルカテゴリのID（MST_SkillCategoryへの外部キー）
-- name: assessment_date
-  logical: 評価日
-  type: DATE
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 最後に評価を行った日付
-- name: assessor_id
-  logical: 評価者ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 評価を行った人のID（MST_Employeeへの外部キー）
 - name: skill_status
   logical: スキル状況
   type: ENUM
@@ -156,22 +222,6 @@ columns:
   - EXPIRED
   - SUSPENDED
   default: ACTIVE
-- name: learning_hours
-  logical: 学習時間
-  type: INT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: スキル習得にかけた学習時間（時間）
-- name: project_experience_count
-  logical: プロジェクト経験回数
-  type: INT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: このスキルを使用したプロジェクトの回数
 - name: skillrecord_id
   logical: TRN_SkillRecordの主キー
   type: SERIAL
@@ -180,24 +230,6 @@ columns:
   unique: false
   encrypted: false
   description: TRN_SkillRecordの主キー
-  default: null
-- name: tenant_id
-  logical: テナントID（マルチテナント対応）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: false
-  encrypted: false
-  description: テナントID（マルチテナント対応）
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
   default: null
 - name: is_deleted
   logical: 論理削除フラグ
@@ -217,6 +249,22 @@ columns:
   encrypted: false
   description: 作成日時
   default: CURRENT_TIMESTAMP
+- name: created_by
+  type: VARCHAR(50)
+  nullable: true
+  primary_key: false
+  unique: false
+  default: null
+  comment: 作成者ID
+  requirement_id: SYS.1-AUDIT.1
+- name: updated_by
+  type: VARCHAR(50)
+  nullable: true
+  primary_key: false
+  unique: false
+  default: null
+  comment: 更新者ID
+  requirement_id: SYS.1-AUDIT.1
 - name: updated_at
   logical: 更新日時
   type: TIMESTAMP
@@ -229,53 +277,53 @@ columns:
 indexes:
 - name: idx_employee_skill
   columns:
-  - - employee_id
-  - - skill_item_id
+  - employee_id
+  - skill_item_id
   unique: true
   description: 社員・スキル項目の組み合わせ（一意）
 - name: idx_employee
   columns:
-  - - employee_id
+  - employee_id
   unique: false
   description: 社員別検索用
 - name: idx_skill_item
   columns:
-  - - skill_item_id
+  - skill_item_id
   unique: false
   description: スキル項目別検索用
 - name: idx_skill_level
   columns:
-  - - skill_level
+  - skill_level
   unique: false
   description: スキルレベル別検索用
 - name: idx_skill_category
   columns:
-  - - skill_category_id
+  - skill_category_id
   unique: false
   description: スキルカテゴリ別検索用
 - name: idx_certification
   columns:
-  - - certification_id
+  - certification_id
   unique: false
   description: 資格別検索用
 - name: idx_status
   columns:
-  - - skill_status
+  - skill_status
   unique: false
   description: スキル状況別検索用
 - name: idx_expiry_date
   columns:
-  - - expiry_date
+  - expiry_date
   unique: false
   description: 有効期限検索用
 - name: idx_assessment_date
   columns:
-  - - assessment_date
+  - assessment_date
   unique: false
   description: 評価日検索用
 - name: idx_trn_skillrecord_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -312,10 +360,9 @@ constraints:
 foreign_keys:
 - name: fk_skill_employee
   columns:
-  - - employee_id
+  - employee_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -323,10 +370,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_skill_item
   columns:
-  - - skill_item_id
+  - skill_item_id
   references:
-    table:
-    - MST_SkillItem
+    table: MST_SkillItem
     columns:
     - id
   on_update: CASCADE
@@ -334,10 +380,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_skill_certification
   columns:
-  - - certification_id
+  - certification_id
   references:
-    table:
-    - MST_Certification
+    table: MST_Certification
     columns:
     - id
   on_update: CASCADE
@@ -345,10 +390,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_skill_category
   columns:
-  - - skill_category_id
+  - skill_category_id
   references:
-    table:
-    - MST_SkillCategory
+    table: MST_SkillCategory
     columns:
     - id
   on_update: CASCADE
@@ -356,10 +400,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_skill_assessor
   columns:
-  - - assessor_id
+  - assessor_id
   references:
-    table:
-    - MST_Employee
+    table: MST_Employee
     columns:
     - id
   on_update: CASCADE
@@ -411,7 +454,7 @@ notes:
 - 期限切れスキルは skill_status を EXPIRED に変更
 - 評価は年1回以上実施することを推奨
 - プロジェクト経験回数は実績管理システムと連携
-business_rules:
+rules:
 - スキルレベルは客観的な基準に基づいて設定
 - 自己評価と上司評価の乖離が大きい場合は再評価を実施
 - 有効期限が近づいた資格は自動的に通知

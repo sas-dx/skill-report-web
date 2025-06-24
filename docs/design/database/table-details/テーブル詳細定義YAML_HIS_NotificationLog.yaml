@@ -10,6 +10,38 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222630
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223431
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
 overview: 'HIS_NotificationLog（通知送信履歴）は、システムから送信された全ての通知の履歴を管理するテーブルです。
 
 
@@ -54,56 +86,6 @@ columns:
   unique: false
   encrypted: false
   description: 送信された通知のID（TRN_Notificationへの参照）
-- name: setting_id
-  logical: 設定ID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 使用された通知設定のID（MST_NotificationSettingsへの参照）
-- name: template_id
-  logical: テンプレートID
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: 使用された通知テンプレートのID（MST_NotificationTemplateへの参照）
-- name: notification_type
-  logical: 通知タイプ
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 送信された通知の種類（EMAIL:メール、SLACK:Slack、TEAMS:Teams、WEBHOOK:Webhook）
-  enum_values:
-  - EMAIL
-  - SLACK
-  - TEAMS
-  - WEBHOOK
-- name: recipient_type
-  logical: 受信者タイプ
-  type: ENUM
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 受信者の種類（USER:個人、GROUP:グループ、CHANNEL:チャネル、WEBHOOK:Webhook）
-  enum_values:
-  - USER
-  - GROUP
-  - CHANNEL
-  - WEBHOOK
-- name: recipient_address
-  logical: 受信者アドレス
-  type: VARCHAR
-  length: 500
-  'null': true
-  unique: false
-  encrypted: true
-  description: 送信先アドレス（メールアドレス、Slack チャネル等、暗号化必須）
 - name: subject
   logical: 件名
   type: VARCHAR
@@ -112,6 +94,39 @@ columns:
   unique: false
   encrypted: false
   description: 送信された通知の件名
+- name: delivered_at
+  logical: 配信確認日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 配信が確認された日時（対応している場合）
+- name: error_details
+  logical: エラー詳細
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 送信失敗時のエラー詳細情報（JSON形式）
+- name: integration_config_id
+  logical: 連携設定ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 使用された外部連携設定のID（SYS_IntegrationConfigへの参照）
+- name: max_retry_count
+  logical: 最大リトライ回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 設定された最大リトライ回数
+  default: 3
 - name: message_body
   logical: メッセージ本文
   type: TEXT
@@ -132,62 +147,28 @@ columns:
   - PLAIN
   - HTML
   - MARKDOWN
-- name: send_status
-  logical: 送信状態
+- name: notification_type
+  logical: 通知タイプ
   type: ENUM
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 送信の状態（PENDING:送信待ち、SENDING:送信中、SUCCESS:成功、FAILED:失敗、RETRY:リトライ中）
+  description: 送信された通知の種類（EMAIL:メール、SLACK:Slack、TEAMS:Teams、WEBHOOK:Webhook）
   enum_values:
-  - PENDING
-  - SENDING
-  - SUCCESS
-  - FAILED
-  - RETRY
-- name: send_attempts
-  logical: 送信試行回数
-  type: INTEGER
+  - EMAIL
+  - SLACK
+  - TEAMS
+  - WEBHOOK
+- name: notificationlog_id
+  logical: HIS_NotificationLogの主キー
+  type: SERIAL
   length: null
-  'null': true
+  'null': false
   unique: false
   encrypted: false
-  description: 送信を試行した回数
-  default: 0
-- name: max_retry_count
-  logical: 最大リトライ回数
-  type: INTEGER
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 設定された最大リトライ回数
-  default: 3
-- name: scheduled_at
-  logical: 送信予定日時
-  type: TIMESTAMP
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 送信が予定された日時
-- name: sent_at
-  logical: 送信日時
-  type: TIMESTAMP
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 実際に送信された日時
-- name: delivered_at
-  logical: 配信確認日時
-  type: TIMESTAMP
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: 配信が確認された日時（対応している場合）
+  description: HIS_NotificationLogの主キー
+  default: null
 - name: opened_at
   logical: 開封日時
   type: TIMESTAMP
@@ -196,6 +177,40 @@ columns:
   unique: false
   encrypted: false
   description: 開封が確認された日時（メール等で対応している場合）
+- name: priority_level
+  logical: 優先度レベル
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知の優先度（HIGH:高、MEDIUM:中、LOW:低）
+  enum_values:
+  - HIGH
+  - MEDIUM
+  - LOW
+  default: MEDIUM
+- name: recipient_address
+  logical: 受信者アドレス
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: true
+  description: 送信先アドレス（メールアドレス、Slack チャネル等、暗号化必須）
+- name: recipient_type
+  logical: 受信者タイプ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 受信者の種類（USER:個人、GROUP:グループ、CHANNEL:チャネル、WEBHOOK:Webhook）
+  enum_values:
+  - USER
+  - GROUP
+  - CHANNEL
+  - WEBHOOK
 - name: response_code
   logical: レスポンスコード
   type: VARCHAR
@@ -212,44 +227,61 @@ columns:
   unique: false
   encrypted: false
   description: 送信先システムからのレスポンスメッセージ
-- name: error_details
-  logical: エラー詳細
-  type: TEXT
+- name: scheduled_at
+  logical: 送信予定日時
+  type: TIMESTAMP
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 送信失敗時のエラー詳細情報（JSON形式）
-- name: integration_config_id
-  logical: 連携設定ID
-  type: VARCHAR
-  length: 50
+  description: 送信が予定された日時
+- name: send_attempts
+  logical: 送信試行回数
+  type: INTEGER
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 使用された外部連携設定のID（SYS_IntegrationConfigへの参照）
-- name: priority_level
-  logical: 優先度レベル
+  description: 送信を試行した回数
+  default: 0
+- name: send_status
+  logical: 送信状態
   type: ENUM
   length: null
   'null': true
   unique: false
   encrypted: false
-  description: 通知の優先度（HIGH:高、MEDIUM:中、LOW:低）
+  description: 送信の状態（PENDING:送信待ち、SENDING:送信中、SUCCESS:成功、FAILED:失敗、RETRY:リトライ中）
   enum_values:
-  - HIGH
-  - MEDIUM
-  - LOW
-  default: MEDIUM
-- name: notificationlog_id
-  logical: HIS_NotificationLogの主キー
-  type: SERIAL
+  - PENDING
+  - SENDING
+  - SUCCESS
+  - FAILED
+  - RETRY
+- name: sent_at
+  logical: 送信日時
+  type: TIMESTAMP
   length: null
-  'null': false
+  'null': true
   unique: false
   encrypted: false
-  description: HIS_NotificationLogの主キー
-  default: null
+  description: 実際に送信された日時
+- name: setting_id
+  logical: 設定ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 使用された通知設定のID（MST_NotificationSettingsへの参照）
+- name: template_id
+  logical: テンプレートID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 使用された通知テンプレートのID（MST_NotificationTemplateへの参照）
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -280,45 +312,45 @@ columns:
 indexes:
 - name: idx_notification_log_notification
   columns:
-  - - notification_id
+  - notification_id
   unique: false
   description: 通知ID別検索用
 - name: idx_notification_log_tenant_status
   columns:
-  - - tenant_id
-  - - send_status
+  - tenant_id
+  - send_status
   unique: false
   description: テナント別送信状態検索用
 - name: idx_notification_log_type
   columns:
-  - - notification_type
+  - notification_type
   unique: false
   description: 通知タイプ別検索用
 - name: idx_notification_log_scheduled
   columns:
-  - - scheduled_at
+  - scheduled_at
   unique: false
   description: 送信予定日時検索用
 - name: idx_notification_log_sent
   columns:
-  - - sent_at
+  - sent_at
   unique: false
   description: 送信日時検索用
 - name: idx_notification_log_status_attempts
   columns:
-  - - send_status
-  - - send_attempts
+  - send_status
+  - send_attempts
   unique: false
   description: 送信状態・試行回数検索用
 - name: idx_notification_log_priority
   columns:
-  - - priority_level
-  - - scheduled_at
+  - priority_level
+  - scheduled_at
   unique: false
   description: 優先度別送信予定検索用
 - name: idx_his_notificationlog_tenant_id
   columns:
-  - - tenant_id
+  - tenant_id
   unique: false
   description: テナントID検索用インデックス
 constraints:
@@ -353,10 +385,9 @@ constraints:
 foreign_keys:
 - name: fk_notification_log_notification
   columns:
-  - - notification_id
+  - notification_id
   references:
-    table:
-    - TRN_Notification
+    table: TRN_Notification
     columns:
     - id
   on_update: CASCADE
@@ -364,10 +395,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_notification_log_setting
   columns:
-  - - setting_id
+  - setting_id
   references:
-    table:
-    - MST_NotificationSettings
+    table: MST_NotificationSettings
     columns:
     - id
   on_update: CASCADE
@@ -375,10 +405,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_notification_log_template
   columns:
-  - - template_id
+  - template_id
   references:
-    table:
-    - MST_NotificationTemplate
+    table: MST_NotificationTemplate
     columns:
     - id
   on_update: CASCADE
@@ -386,10 +415,9 @@ foreign_keys:
   comment: 外部キー制約
 - name: fk_notification_log_integration
   columns:
-  - - integration_config_id
+  - integration_config_id
   references:
-    table:
-    - SYS_IntegrationConfig
+    table: SYS_IntegrationConfig
     columns:
     - id
   on_update: CASCADE
@@ -490,7 +518,7 @@ notes:
 - 受信者アドレスは送信時に暗号化して保存
 - エラー詳細は障害分析のため詳細に記録
 - 配信確認機能は通知チャネルの対応状況に依存
-business_rules:
+rules:
 - 送信試行回数は最大リトライ回数+1を超えない
 - 成功した通知は再送不可
 - 失敗した通知は設定された回数までリトライ

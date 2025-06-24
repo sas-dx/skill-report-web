@@ -10,6 +10,46 @@ revision_history:
   date: '2025-06-22'
   author: 自動変換ツール
   changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215001
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215054
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223433
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
+- version: SPECIAL.20250624_223559
+  date: '2025-06-24'
+  author: 特殊ケース修正ツール
+  changes: tenant_idカラム追加とカラム順序の最終調整
+- version: FINAL.20250624_223648
+  date: '2025-06-24'
+  author: SYS_SystemLog最終修正ツール
+  changes: 重複主キーカラム除去とカラム順序の最終修正
 overview: 'SYS_SystemLog（システムログ）は、アプリケーション全体で発生するあらゆるシステムイベントを記録・管理するログテーブルです。
 
 
@@ -34,6 +74,23 @@ overview: 'SYS_SystemLog（システムログ）は、アプリケーション�
 
   '
 columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応、システム全体ログの場合はNULL）
 - name: log_level
   logical: ログレベル
   type: ENUM
@@ -47,14 +104,6 @@ columns:
   - WARN
   - INFO
   - DEBUG
-- name: log_category
-  logical: ログカテゴリ
-  type: VARCHAR
-  length: 50
-  'null': true
-  unique: false
-  encrypted: false
-  description: ログのカテゴリ（AUTH:認証、API:API、BATCH:バッチ、SYSTEM:システム）
 - name: message
   logical: ログメッセージ
   type: TEXT
@@ -63,6 +112,14 @@ columns:
   unique: false
   encrypted: false
   description: ログメッセージの内容
+- name: component_name
+  logical: コンポーネント名
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: ログを出力したコンポーネント名
 - name: user_id
   logical: 実行ユーザーID
   type: VARCHAR
@@ -79,54 +136,14 @@ columns:
   unique: false
   encrypted: false
   description: セッションID（ユーザーセッションの識別）
-- name: ip_address
-  logical: IPアドレス
+- name: correlation_id
+  logical: 相関ID
   type: VARCHAR
-  length: 45
+  length: 100
   'null': true
   unique: false
   encrypted: false
-  description: クライアントのIPアドレス（IPv4/IPv6対応）
-- name: user_agent
-  logical: ユーザーエージェント
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: クライアントのユーザーエージェント情報
-- name: request_url
-  logical: リクエストURL
-  type: TEXT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: リクエストされたURL
-- name: request_method
-  logical: HTTPメソッド
-  type: VARCHAR
-  length: 10
-  'null': true
-  unique: false
-  encrypted: false
-  description: HTTPメソッド（GET、POST、PUT、DELETE等）
-- name: response_status
-  logical: レスポンスステータス
-  type: INT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: HTTPレスポンスステータスコード
-- name: response_time
-  logical: レスポンス時間
-  type: INT
-  length: null
-  'null': true
-  unique: false
-  encrypted: false
-  description: レスポンス時間（ミリ秒）
+  description: 分散システムでのトレーシング用相関ID
 - name: error_code
   logical: エラーコード
   type: VARCHAR
@@ -143,6 +160,22 @@ columns:
   unique: false
   encrypted: false
   description: エラー発生時のスタックトレース
+- name: request_url
+  logical: リクエストURL
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: リクエストされたURL
+- name: request_method
+  logical: HTTPメソッド
+  type: VARCHAR
+  length: 10
+  'null': true
+  unique: false
+  encrypted: false
+  description: HTTPメソッド（GET、POST、PUT、DELETE等）
 - name: request_body
   logical: リクエストボディ
   type: TEXT
@@ -151,6 +184,14 @@ columns:
   unique: false
   encrypted: true
   description: リクエストボディ（個人情報含む可能性があるため暗号化）
+- name: response_status
+  logical: レスポンスステータス
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: HTTPレスポンスステータスコード
 - name: response_body
   logical: レスポンスボディ
   type: TEXT
@@ -159,30 +200,38 @@ columns:
   unique: false
   encrypted: true
   description: レスポンスボディ（個人情報含む可能性があるため暗号化）
-- name: correlation_id
-  logical: 相関ID
-  type: VARCHAR
-  length: 100
+- name: user_agent
+  logical: ユーザーエージェント
+  type: TEXT
+  length: null
   'null': true
   unique: false
   encrypted: false
-  description: 分散システムでのトレーシング用相関ID
-- name: component_name
-  logical: コンポーネント名
+  description: クライアントのユーザーエージェント情報
+- name: ip_address
+  logical: IPアドレス
   type: VARCHAR
-  length: 100
+  length: 45
   'null': true
   unique: false
   encrypted: false
-  description: ログを出力したコンポーネント名
-- name: thread_name
-  logical: スレッド名
+  description: クライアントのIPアドレス（IPv4/IPv6対応）
+- name: log_category
+  logical: ログカテゴリ
   type: VARCHAR
-  length: 100
+  length: 50
   'null': true
   unique: false
   encrypted: false
-  description: ログを出力したスレッド名
+  description: ログのカテゴリ（AUTH:認証、API:API、BATCH:バッチ、SYSTEM:システム）
+- name: response_time
+  logical: レスポンス時間
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: レスポンス時間（ミリ秒）
 - name: server_name
   logical: サーバー名
   type: VARCHAR
@@ -191,24 +240,14 @@ columns:
   unique: false
   encrypted: false
   description: ログを出力したサーバー名
-- name: systemlog_id
-  logical: SYS_SystemLogの主キー
-  type: SERIAL
-  length: null
-  'null': false
+- name: thread_name
+  logical: スレッド名
+  type: VARCHAR
+  length: 100
+  'null': true
   unique: false
   encrypted: false
-  description: SYS_SystemLogの主キー
-  default: null
-- name: id
-  logical: プライマリキー（UUID）
-  type: VARCHAR(50)
-  length: null
-  'null': false
-  unique: true
-  encrypted: false
-  description: プライマリキー（UUID）
-  default: null
+  description: ログを出力したスレッド名
 - name: is_deleted
   logical: 論理削除フラグ
   type: BOOLEAN
@@ -239,58 +278,58 @@ columns:
 indexes:
 - name: idx_log_level
   columns:
-  - - log_level
+  - log_level
   unique: false
   description: ログレベル別検索用
 - name: idx_log_category
   columns:
-  - - log_category
+  - log_category
   unique: false
   description: ログカテゴリ別検索用
 - name: idx_user_id
   columns:
-  - - user_id
+  - user_id
   unique: false
   description: ユーザー別検索用
 - name: idx_session_id
   columns:
-  - - session_id
+  - session_id
   unique: false
   description: セッション別検索用
 - name: idx_ip_address
   columns:
-  - - ip_address
+  - ip_address
   unique: false
   description: IPアドレス別検索用
 - name: idx_error_code
   columns:
-  - - error_code
+  - error_code
   unique: false
   description: エラーコード別検索用
 - name: idx_correlation_id
   columns:
-  - - correlation_id
+  - correlation_id
   unique: false
   description: 相関ID別検索用
 - name: idx_component
   columns:
-  - - component_name
+  - component_name
   unique: false
   description: コンポーネント別検索用
 - name: idx_server
   columns:
-  - - server_name
+  - server_name
   unique: false
   description: サーバー別検索用
 - name: idx_response_time
   columns:
-  - - response_time
+  - response_time
   unique: false
   description: レスポンス時間検索用（パフォーマンス分析）
 - name: idx_created_at_level
   columns:
-  - - created_at
-  - - log_level
+  - created_at
+  - log_level
   unique: false
   description: 日時・レベル複合検索用
 constraints:
@@ -310,10 +349,9 @@ constraints:
 foreign_keys:
 - name: fk_log_user
   columns:
-  - - user_id
+  - user_id
   references:
-    table:
-    - MST_UserAuth
+    table: MST_UserAuth
     columns:
     - id
   on_update: CASCADE
@@ -368,7 +406,7 @@ notes:
 - ログ保持期間は6ヶ月（法的要件に応じて調整）
 - システム障害時の調査のため詳細ログを保持
 - 相関IDによりリクエストの全体フローを追跡可能
-business_rules:
+rules:
 - ERRORレベルのログは即座にアラート通知
 - WARNレベルのログは日次で監視・分析
 - レスポンス時間が5秒を超える場合は自動的にWARNログ出力
