@@ -20,6 +20,7 @@ interface EditableProfile {
   firstNameKana: string;
   lastNameKana: string;
   displayName: string;
+  email: string;
   phoneNumber: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
@@ -65,6 +66,7 @@ export default function ProfilePage() {
             firstNameKana: response.data.profile.personalInfo.firstNameKana,
             lastNameKana: response.data.profile.personalInfo.lastNameKana,
             displayName: response.data.profile.personalInfo.displayName,
+            email: response.data.profile.email,
             phoneNumber: response.data.profile.personalInfo.phoneNumber,
             emergencyContactName: response.data.profile.personalInfo.emergencyContact.name,
             emergencyContactPhone: response.data.profile.personalInfo.emergencyContact.phoneNumber,
@@ -96,6 +98,7 @@ export default function ProfilePage() {
         firstNameKana: profile.personalInfo.firstNameKana,
         lastNameKana: profile.personalInfo.lastNameKana,
         displayName: profile.personalInfo.displayName,
+        email: profile.email,
         phoneNumber: profile.personalInfo.phoneNumber,
         emergencyContactName: profile.personalInfo.emergencyContact.name,
         emergencyContactPhone: profile.personalInfo.emergencyContact.phoneNumber,
@@ -120,6 +123,18 @@ export default function ProfilePage() {
       errors.displayName = '表示名は必須です';
     }
     
+    // メールアドレスのバリデーション
+    if (!editedProfile?.email?.trim()) {
+      errors.email = 'メールアドレスは必須です';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editedProfile.email)) {
+        errors.email = '有効なメールアドレスを入力してください';
+      } else if (editedProfile.email.length > 255) {
+        errors.email = 'メールアドレスは255文字以内で入力してください';
+      }
+    }
+    
     if (editedProfile?.phoneNumber && !/^[\d-+()]+$/.test(editedProfile.phoneNumber)) {
       errors.phoneNumber = '電話番号の形式が正しくありません';
     }
@@ -139,6 +154,7 @@ export default function ProfilePage() {
         first_name_kana: editedProfile.firstNameKana,
         last_name_kana: editedProfile.lastNameKana,
         display_name: editedProfile.displayName,
+        email: editedProfile.email,
         contact_info: {
           phone: editedProfile.phoneNumber
         }
@@ -147,15 +163,52 @@ export default function ProfilePage() {
       const response = await updateProfile('me', updateData);
       
       if (response.success) {
-        // プロフィール情報を再読み込み
-        const updatedProfile = await getProfile('me');
-        if (updatedProfile.success && updatedProfile.data) {
-          setProfile(updatedProfile.data.profile);
+        // プロフィール状態を編集内容で更新（再読み込みではなく）
+        if (profile) {
+          const updatedProfile = {
+            ...profile,
+            email: editedProfile.email,
+            personalInfo: {
+              ...profile.personalInfo,
+              firstName: editedProfile.firstName,
+              lastName: editedProfile.lastName,
+              firstNameKana: editedProfile.firstNameKana,
+              lastNameKana: editedProfile.lastNameKana,
+              displayName: editedProfile.displayName,
+              phoneNumber: editedProfile.phoneNumber,
+              emergencyContact: {
+                ...profile.personalInfo.emergencyContact,
+                name: editedProfile.emergencyContactName,
+                phoneNumber: editedProfile.emergencyContactPhone,
+              }
+            }
+          };
+          setProfile(updatedProfile);
         }
         setIsEditing(false);
         setError(null);
+        setValidationErrors({});
       } else {
-        setError(response.error?.message || 'プロフィール更新に失敗しました');
+        // APIエラーの詳細処理
+        if (response.error?.code === 'EMAIL_ALREADY_EXISTS') {
+          // メールアドレス重複エラーの場合、フィールド固有のエラーとして表示
+          setValidationErrors({
+            email: 'このメールアドレスは既に他のユーザーによって使用されています'
+          });
+          setError(null);
+        } else if (response.error?.invalid_fields) {
+          // バリデーションエラーの場合、フィールド固有のエラーを設定
+          const fieldErrors: Record<string, string> = {};
+          response.error.invalid_fields.forEach((fieldError: any) => {
+            fieldErrors[fieldError.field] = fieldError.reason;
+          });
+          setValidationErrors(fieldErrors);
+          setError(null);
+        } else {
+          // その他のエラーの場合、一般的なエラーメッセージを表示
+          setError(response.error?.message || 'プロフィール更新に失敗しました');
+          setValidationErrors({});
+        }
       }
     } catch (error) {
       console.error('プロフィール保存エラー:', error);
@@ -363,14 +416,19 @@ export default function ProfilePage() {
                     {/* メールアドレス */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        メールアドレス
+                        メールアドレス <span className="text-red-500">*</span>
                       </label>
                       <Input
                         type="email"
-                        value={profile.email}
-                        disabled={true}
-                        className="bg-gray-50"
+                        value={isEditing ? editedProfile?.email || '' : profile.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        disabled={!isEditing}
+                        className={!isEditing ? 'bg-gray-50' : ''}
+                        placeholder="example@company.com"
                       />
+                      {validationErrors.email && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                      )}
                     </div>
 
                     {/* 部署 */}

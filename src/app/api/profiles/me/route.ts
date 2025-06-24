@@ -405,6 +405,32 @@ export async function PUT(request: NextRequest) {
       errors.push({ field: 'display_name', reason: '表示名は1-50文字で入力してください' });
     }
 
+    // メールアドレスの検証
+    if (body.email !== undefined) {
+      if (!body.email || body.email.trim() === '') {
+        errors.push({ field: 'email', reason: 'メールアドレスは必須です' });
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(body.email)) {
+          errors.push({ field: 'email', reason: '有効なメールアドレスを入力してください' });
+        } else if (body.email.length > 255) {
+          errors.push({ field: 'email', reason: 'メールアドレスは255文字以内で入力してください' });
+        } else {
+          // メールアドレス重複チェック
+          const existingUser = await prisma.employee.findFirst({
+            where: {
+              email: body.email,
+              employee_code: { not: currentEmployeeId }
+            }
+          });
+          
+          if (existingUser) {
+            errors.push({ field: 'email', reason: 'このメールアドレスは既に他のユーザーによって使用されています' });
+          }
+        }
+      }
+    }
+
     // エラーがある場合は400を返す
     if (errors.length > 0) {
       return NextResponse.json(
@@ -448,6 +474,12 @@ export async function PUT(request: NextRequest) {
     if (body.contact_info?.phone !== undefined) {
       updateData.phone = body.contact_info.phone;
       updatedFields.push('contact_info.phone');
+    }
+
+    // メールアドレスの更新
+    if (body.email !== undefined) {
+      updateData.email = body.email;
+      updatedFields.push('email');
     }
 
     // 更新日時を追加

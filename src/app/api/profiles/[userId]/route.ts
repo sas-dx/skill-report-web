@@ -452,6 +452,20 @@ export async function PUT(
       errors.push({ field: 'display_name', reason: '表示名は1-50文字で入力してください' });
     }
 
+    // メールアドレスの検証
+    if (body.email !== undefined) {
+      if (!body.email || body.email.trim() === '') {
+        errors.push({ field: 'email', reason: 'メールアドレスは必須です' });
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(body.email)) {
+          errors.push({ field: 'email', reason: '有効なメールアドレスを入力してください' });
+        } else if (body.email.length > 255) {
+          errors.push({ field: 'email', reason: 'メールアドレスは255文字以内で入力してください' });
+        }
+      }
+    }
+
     // エラーがある場合は400を返す
     if (errors.length > 0) {
       return NextResponse.json(
@@ -497,6 +511,45 @@ export async function PUT(
       updatedFields.push('contact_info.phone');
     }
 
+    // メールアドレスの更新（重複チェック付き）
+    if (body.email !== undefined) {
+      const trimmedEmail = body.email.trim();
+      
+      // 現在のユーザーのメールアドレスと異なる場合のみ重複チェック
+      const currentUser = await prisma.employee.findUnique({
+        where: { employee_code: targetUserId }
+      });
+      
+      if (currentUser && currentUser.email !== trimmedEmail) {
+        // 他のユーザーが同じメールアドレスを使用していないかチェック
+        const existingUser = await prisma.employee.findFirst({
+          where: {
+            email: trimmedEmail,
+            employee_code: { not: targetUserId },
+            is_deleted: false
+          }
+        });
+        
+        if (existingUser) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: 'EMAIL_ALREADY_EXISTS',
+                message: 'このメールアドレスは既に他のユーザーによって使用されています',
+                details: 'メールアドレスを変更してください',
+                invalid_fields: [{ field: 'email', reason: 'このメールアドレスは既に使用されています' }]
+              }
+            },
+            { status: 409 }
+          );
+        }
+      }
+      
+      updateData.email = trimmedEmail;
+      updatedFields.push('email');
+    }
+
     // 更新日時を追加
     updateData.updated_at = new Date();
 
@@ -514,10 +567,16 @@ export async function PUT(
       );
     }
 
+    // デバッグログを追加
+    console.log('Update data:', updateData);
+    console.log('Target user ID:', targetUserId);
+
     const updatedUser = await prisma.employee.update({
       where: { employee_code: targetUserId },
       data: updateData
     });
+
+    console.log('Updated user:', updatedUser);
 
     // 部署情報の取得
     let department = null;
