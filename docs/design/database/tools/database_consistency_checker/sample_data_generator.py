@@ -241,7 +241,7 @@ def generate_sample_data_sql(tables: Optional[List[str]] = None, verbose: bool =
             }
             
             # 個別ファイルに出力
-            output_file = os.path.join(OUTPUT_DIR, f"sample_data_{table_name}.sql")
+            output_file = os.path.join(OUTPUT_DIR, f"{table_name}_sample_data.sql")
             try:
                 with open(output_file, 'w', encoding='utf-8') as f:
                     f.write(f"-- サンプルデータ INSERT文: {table_name}\n")

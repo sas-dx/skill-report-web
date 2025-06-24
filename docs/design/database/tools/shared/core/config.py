@@ -119,10 +119,16 @@ class DatabaseToolsConfig:
     def __post_init__(self):
         """初期化後の設定"""
         # 実行時のディレクトリを考慮してパスを設定
-        if self.base_dir.name == "tools":
-            # toolsディレクトリから実行されている場合
-            db_dir = self.base_dir.parent
-            self.tools_dir = self.base_dir
+        if self.base_dir.name == "tools" or (self.base_dir / "tools").exists():
+            # toolsディレクトリから実行されている場合、またはdatabase/ディレクトリの場合
+            if self.base_dir.name == "tools":
+                db_dir = self.base_dir.parent
+                self.tools_dir = self.base_dir
+            else:
+                # database/ディレクトリの場合
+                db_dir = self.base_dir
+                self.tools_dir = self.base_dir / "tools"
+            
             self.table_details_dir = db_dir / "table-details"
             self.ddl_dir = db_dir / "ddl"
             self.tables_dir = db_dir / "tables"

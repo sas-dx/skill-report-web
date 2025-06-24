@@ -94,7 +94,13 @@ class DDLGenerator:
             ddl_lines.append("")
         
         # その他の制約
-        if hasattr(table_def, 'business_constraints') and table_def.business_constraints:
+        if hasattr(table_def, 'constraints') and table_def.constraints:
+            ddl_lines.append("-- その他の制約")
+            for constraint in table_def.constraints:
+                constraint_sql = self._generate_constraint_ddl(table_def.table_name, constraint)
+                ddl_lines.append(constraint_sql)
+            ddl_lines.append("")
+        elif hasattr(table_def, 'business_constraints') and table_def.business_constraints:
             ddl_lines.append("-- その他の制約")
             for constraint in table_def.business_constraints:
                 constraint_sql = self._generate_constraint_ddl(table_def.table_name, constraint)
@@ -137,12 +143,21 @@ class DDLGenerator:
         Returns:
             str: 外部キーDDL
         """
+        # 旧形式の属性を優先的に使用
+        column = fk.column if fk.column else (fk.columns[0] if fk.columns else None)
+        reference_table = fk.reference_table if fk.reference_table else fk.references.get('table')
+        reference_column = fk.reference_column if fk.reference_column else (fk.references.get('columns', [None])[0] if fk.references else None)
+        
+        if not column or not reference_table or not reference_column:
+            self.logger.error(f"外部キー定義が不完全です: {fk.name}")
+            return f"-- ERROR: 外部キー定義が不完全: {fk.name}"
+        
         return self.sql_utils.generate_add_foreign_key_sql(
             table_name=table_name,
             constraint_name=fk.name,
-            column=fk.column,
-            reference_table=fk.reference_table,
-            reference_column=fk.reference_column,
+            column=column,
+            reference_table=reference_table,
+            reference_column=reference_column,
             on_delete=getattr(fk, 'on_delete', 'RESTRICT'),
             on_update=getattr(fk, 'on_update', 'RESTRICT')
         )

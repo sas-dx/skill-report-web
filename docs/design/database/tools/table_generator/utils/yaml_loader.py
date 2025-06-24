@@ -149,16 +149,34 @@ class YamlLoader:
         
         for col_data in columns_data:
             try:
+                # データ型の処理（lengthがある場合は結合）
+                data_type = col_data['type']
+                if 'length' in col_data and col_data['length'] is not None:
+                    if ',' in str(col_data['length']):  # DECIMAL(10,2)のような場合
+                        data_type = f"{data_type}({col_data['length']})"
+                    else:
+                        data_type = f"{data_type}({col_data['length']})"
+                
+                # nullable の処理（'null'フィールドを使用）
+                nullable = col_data.get('null', col_data.get('nullable', True))
+                
+                # コメントの処理（'logical'フィールドを優先、なければ'description'）
+                comment = col_data.get('logical', col_data.get('description', col_data.get('comment', '')))
+                
                 column = BusinessColumnDefinition(
                     name=col_data['name'],
-                    data_type=col_data['type'],
-                    nullable=col_data.get('nullable', True),
+                    data_type=data_type,
+                    nullable=nullable,
                     primary=col_data.get('primary_key', False),
                     unique=col_data.get('unique', False),
                     default=col_data.get('default'),
-                    comment=col_data.get('comment', ''),
+                    comment=comment,
                     requirement_id=col_data.get('requirement_id')
                 )
+                
+                # ENUM値の処理
+                if 'enum_values' in col_data:
+                    column.enum_values = col_data['enum_values']
                 columns.append(column)
                 
             except KeyError as e:
@@ -217,15 +235,29 @@ class YamlLoader:
                     self.logger.error(f"外部キー定義に必須フィールドがありません: columns または references")
                     continue
                 
-                # 最初のカラムを使用（複数カラム外部キーは現在未対応）
-                column = columns[0] if columns else ''
-                reference_table = references.get('table', '')
+                # カラム名の取得（ネストした配列に対応）
+                if isinstance(columns[0], list):
+                    column = columns[0][0] if columns[0] else ''
+                else:
+                    column = columns[0] if columns else ''
+                
+                # 参照テーブル名の取得（ネストした配列に対応）
+                reference_table_data = references.get('table', '')
+                if isinstance(reference_table_data, list):
+                    reference_table = reference_table_data[0] if reference_table_data else ''
+                else:
+                    reference_table = reference_table_data
+                
+                # 参照カラム名の取得
                 reference_columns = references.get('columns', [])
                 reference_column = reference_columns[0] if reference_columns else ''
                 
                 fk = ForeignKeyDefinition(
                     name=fk_data['name'],
                     columns=[column],
+                    column=column,  # 旧形式との互換性
+                    reference_table=reference_table,  # 旧形式との互換性
+                    reference_column=reference_column,  # 旧形式との互換性
                     references={
                         'table': reference_table,
                         'columns': [reference_column]

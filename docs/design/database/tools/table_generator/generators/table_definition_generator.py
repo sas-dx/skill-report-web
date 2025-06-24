@@ -388,9 +388,23 @@ class TableDefinitionGenerator:
             lines.append("|--------|--------|--------------|------------|--------|--------|------|")
             
             for fk in table_def.foreign_keys:
+                # 外部キー情報の取得（旧形式の属性を優先的に使用）
+                column = fk.column if hasattr(fk, 'column') and fk.column else (fk.columns[0] if fk.columns else "")
+                reference_table = fk.reference_table if hasattr(fk, 'reference_table') and fk.reference_table else ""
+                reference_column = fk.reference_column if hasattr(fk, 'reference_column') and fk.reference_column else ""
+                
+                # referencesフィールドからの取得も試行
+                if not reference_table and hasattr(fk, 'references') and fk.references:
+                    reference_table = fk.references.get('table', '')
+                    if not reference_column:
+                        ref_columns = fk.references.get('columns', [])
+                        reference_column = ref_columns[0] if ref_columns else ""
+                
                 on_update = getattr(fk, 'on_update', 'CASCADE')
                 on_delete = getattr(fk, 'on_delete', 'RESTRICT')
-                lines.append(f"| {fk.name} | {fk.column} | {fk.reference_table} | {fk.reference_column} | {on_update} | {on_delete} | {fk.comment} |")
+                comment = getattr(fk, 'comment', '')
+                
+                lines.append(f"| {fk.name} | {column} | {reference_table} | {reference_column} | {on_update} | {on_delete} | {comment} |")
             
             lines.append("")
         

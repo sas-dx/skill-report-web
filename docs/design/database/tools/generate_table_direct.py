@@ -29,8 +29,8 @@ def main():
     args = parser.parse_args()
     
     try:
-        # ベースディレクトリを設定（toolsディレクトリの親の親）
-        base_dir = tools_dir.parent.parent.parent
+        # ベースディレクトリを設定（toolsディレクトリの親）
+        base_dir = tools_dir.parent
         
         # テーブル生成器を初期化
         generator = TableDefinitionGenerator(base_dir=str(base_dir))

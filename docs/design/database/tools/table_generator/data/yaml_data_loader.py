@@ -202,31 +202,36 @@ class YamlDataLoader:
         """
         try:
             # 必須フィールドのチェック
-            required_fields = ['table_name', 'logical_name', 'description']
+            required_fields = ['table_name', 'logical_name']
             for field in required_fields:
                 if field not in yaml_data:
                     self.logger.error(f"必須フィールドが不足: {field} in {table_name}")
                     return False
             
+            # 説明フィールドのチェック（commentまたはdescription）
+            if 'comment' not in yaml_data and 'description' not in yaml_data:
+                self.logger.warning(f"commentまたはdescriptionフィールドがありません: {table_name}")
+            
             # テーブル名の一致チェック
             if yaml_data['table_name'] != table_name:
                 self.logger.warning(f"ファイル名とテーブル名が不一致: {table_name} != {yaml_data['table_name']}")
             
-            # business_columnsの存在チェック
-            if 'business_columns' not in yaml_data:
-                self.logger.error(f"business_columnsが定義されていません: {table_name}")
+            # columnsの存在チェック（business_columnsまたはcolumns）
+            columns_data = yaml_data.get('columns') or yaml_data.get('business_columns')
+            if not columns_data:
+                self.logger.error(f"columnsまたはbusiness_columnsが定義されていません: {table_name}")
                 return False
             
-            if not isinstance(yaml_data['business_columns'], list):
-                self.logger.error(f"business_columnsがリスト形式ではありません: {table_name}")
+            if not isinstance(columns_data, list):
+                self.logger.error(f"columnsがリスト形式ではありません: {table_name}")
                 return False
             
-            if len(yaml_data['business_columns']) == 0:
-                self.logger.error(f"business_columnsが空です: {table_name}")
+            if len(columns_data) == 0:
+                self.logger.error(f"columnsが空です: {table_name}")
                 return False
             
             # カラム定義の基本チェック
-            for i, column in enumerate(yaml_data['business_columns']):
+            for i, column in enumerate(columns_data):
                 if not self._validate_column_structure(column, table_name, i):
                     return False
             
@@ -248,12 +253,17 @@ class YamlDataLoader:
             bool: 妥当性チェック結果
         """
         try:
-            # 必須フィールドのチェック
-            required_fields = ['name', 'data_type']
+            # 必須フィールドのチェック（typeまたはdata_type）
+            required_fields = ['name']
             for field in required_fields:
                 if field not in column:
                     self.logger.error(f"カラム{index}に必須フィールドが不足: {field} in {table_name}")
                     return False
+            
+            # データ型フィールドの存在チェック
+            if 'type' not in column and 'data_type' not in column:
+                self.logger.error(f"カラム{index}にtypeまたはdata_typeフィールドが不足: {table_name}")
+                return False
             
             # カラム名の形式チェック
             column_name = column['name']
@@ -262,7 +272,7 @@ class YamlDataLoader:
                 return False
             
             # データ型の形式チェック
-            data_type = column['data_type']
+            data_type = column.get('type') or column.get('data_type')
             if not isinstance(data_type, str) or len(data_type.strip()) == 0:
                 self.logger.error(f"データ型が不正: {data_type} in {table_name}.{column_name}")
                 return False
