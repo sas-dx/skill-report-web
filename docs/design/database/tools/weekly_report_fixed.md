@@ -1,6 +1,6 @@
 # データベース整合性チェックレポート
 
-**チェック日時:** 2025-06-22 13:56:35
+**チェック日時:** 2025-06-22 11:46:22
 **対象テーブル数:** 52
 **総チェック数:** 262
 
@@ -16,15 +16,7 @@
 
 **検出する問題:** 定義漏れ、ファイル不足、不整合
 
-### 2. YAMLフォーマット検証
-
-**目的:** YAML詳細定義ファイルの形式と必須セクションを確認
-
-**チェック内容:** _TEMPLATE準拠の形式チェック、必須セクション存在確認、内容品質検証
-
-**検出する問題:** 必須セクション不足、フォーマット違反、内容不備（revision_history、overview、notes、rulesの不足）
-
-### 3. カラム整合性
+### 2. カラム整合性
 
 **目的:** カラム定義の一貫性を確認
 
@@ -32,7 +24,7 @@
 
 **検出する問題:** カラム名不一致、データ型不一致、制約不一致
 
-### 4. 外部キー整合性
+### 3. 外部キー整合性
 
 **目的:** 外部キー制約の妥当性を確認
 
@@ -40,13 +32,13 @@
 
 **検出する問題:** 参照先不在、循環参照、制約違反
 
-### 5. 命名規則チェック
+### 4. 命名規則チェック
 
-**目的:** テーブル名・カラム名が命名規則に準拠しているかを確認
+**目的:** 命名規則の準拠を確認
 
-**チェック内容:** テーブル名のプレフィックス（MST/TRN/HIS/SYS/WRK）、カラム名のsnake_case形式を検証
+**チェック内容:** テーブル名、カラム名の命名規則チェック
 
-**検出する問題:** 命名規則違反、一貫性のない命名パターン
+**検出する問題:** 命名規則違反、不適切な名前
 
 ## 📊 結果サマリー
 
@@ -279,55 +271,6 @@
 ---
 
 #### 52. ⚠️ MST_UserAuth: 不足ファイル - テーブル定義書
-
-
-### 🔍 YAMLフォーマット検証 (0件)
-
-#### ⚠️ YAMLファイルが存在しません
-
-**検証対象ファイル**
-- **対象ディレクトリ**: `table-details/`
-- **検索パターン**: `*_details.yaml`
-- **発見ファイル数**: 0件
-
-#### 🔴 重要な問題
-**YAMLファイルが存在しません**
-
-- 全52テーブルのYAML詳細定義ファイルが不足
-- 必須セクション検証が実行できない状態
-- データベース設計の品質保証に重大な影響
-
-#### 🔍 必須セクション検証（実行不可）
-
-以下の必須セクションの検証ができませんでした：
-
-- 🔴 **revision_history**: 改版履歴（検証対象なし）
-- 🔴 **overview**: テーブル概要・目的（検証対象なし）
-- 🔴 **notes**: 特記事項・考慮点（検証対象なし）
-- 🔴 **rules**: 業務ルール・制約（検証対象なし）
-
-#### 💡 対応方法
-
-以下のコマンドでYAML詳細定義ファイルを生成してください：
-
-```bash
-# 重要なテーブルから順次生成
-python3 -m table_generator --table MST_Employee --generate definition
-python3 -m table_generator --table MST_Department --generate definition
-python3 -m table_generator --table MST_SkillCategory --generate definition
-
-# 全テーブル一括生成（時間がかかる場合があります）
-python3 -m table_generator --all --generate definition
-```
-
-#### 📊 影響範囲
-
-YAMLファイル不足により以下の品質チェックが実行できません：
-
-- **必須セクション検証**: 設計書の品質基準チェック
-- **カラム定義整合性**: YAML ↔ DDL間の整合性確認
-- **業務ルール検証**: ビジネスロジックの妥当性チェック
-- **運用・保守情報**: 特記事項・注意点の確認
 
 
 ### 🔍 カラム整合性 (51件)
@@ -958,224 +901,6 @@ YAMLファイル不足により以下の品質チェックが実行できませ�
 ---
 
 #### 106. ✅ MST_UserAuth: 外部キー 'fk_userauth_employee' OK
-
-
-### 🔍 データ型整合性 (0件)
-
-該当する結果がありません。
-
-
-### 🔍 命名規則チェック (53件)
-
-#### 1. ⚠️ _TEMPLATE: テーブル名が命名規則に準拠していません
-
----
-
-#### 2. ⚠️ _TEMPLATE: カラム名が命名規則に準拠していません
-
----
-
-#### 3. ✅ MST_JobTypeSkillGrade: テーブル名命名規則OK
-
----
-
-#### 4. ✅ MST_Tenant: テーブル名命名規則OK
-
----
-
-#### 5. ✅ MST_NotificationTemplate: テーブル名命名規則OK
-
----
-
-#### 6. ✅ SYS_SystemLog: テーブル名命名規則OK
-
----
-
-#### 7. ✅ SYS_TenantUsage: テーブル名命名規則OK
-
----
-
-#### 8. ✅ TRN_Notification: テーブル名命名規則OK
-
----
-
-#### 9. ✅ TRN_SkillEvidence: テーブル名命名規則OK
-
----
-
-#### 10. ✅ HIS_TenantBilling: テーブル名命名規則OK
-
----
-
-#### 11. ✅ MST_SkillGrade: テーブル名命名規則OK
-
----
-
-#### 12. ✅ MST_CertificationRequirement: テーブル名命名規則OK
-
----
-
-#### 13. ✅ MST_TenantSettings: テーブル名命名規則OK
-
----
-
-#### 14. ✅ TRN_EmployeeSkillGrade: テーブル名命名規則OK
-
----
-
-#### 15. ✅ MST_ReportTemplate: テーブル名命名規則OK
-
----
-
-#### 16. ✅ SYS_MasterData: テーブル名命名規則OK
-
----
-
-#### 17. ✅ HIS_AuditLog: テーブル名命名規則OK
-
----
-
-#### 18. ✅ MST_Certification: テーブル名命名規則OK
-
----
-
-#### 19. ✅ MST_NotificationSettings: テーブル名命名規則OK
-
----
-
-#### 20. ✅ MST_SkillCategory: テーブル名命名規則OK
-
----
-
-#### 21. ✅ TRN_TrainingHistory: テーブル名命名規則OK
-
----
-
-#### 22. ✅ WRK_BatchJobLog: テーブル名命名規則OK
-
----
-
-#### 23. ✅ HIS_ReportGeneration: テーブル名命名規則OK
-
----
-
-#### 24. ✅ MST_Role: テーブル名命名規則OK
-
----
-
-#### 25. ✅ SYS_TokenStore: テーブル名命名規則OK
-
----
-
-#### 26. ✅ MST_Position: テーブル名命名規則OK
-
----
-
-#### 27. ✅ TRN_ProjectRecord: テーブル名命名規則OK
-
----
-
-#### 28. ✅ MST_Employee: テーブル名命名規則OK
-
----
-
-#### 29. ✅ TRN_SkillRecord: テーブル名命名規則OK
-
----
-
-#### 30. ✅ MST_EmployeePosition: テーブル名命名規則OK
-
----
-
-#### 31. ✅ MST_Department: テーブル名命名規則OK
-
----
-
-#### 32. ✅ MST_SkillItem: テーブル名命名規則OK
-
----
-
-#### 33. ✅ MST_SkillGradeRequirement: テーブル名命名規則OK
-
----
-
-#### 34. ✅ MST_SkillHierarchy: テーブル名命名規則OK
-
----
-
-#### 35. ✅ MST_JobTypeSkill: テーブル名命名規則OK
-
----
-
-#### 36. ✅ MST_JobType: テーブル名命名規則OK
-
----
-
-#### 37. ✅ MST_UserRole: テーブル名命名規則OK
-
----
-
-#### 38. ✅ TRN_GoalProgress: テーブル名命名規則OK
-
----
-
-#### 39. ✅ MST_EmployeeDepartment: テーブル名命名規則OK
-
----
-
-#### 40. ✅ MST_Skill: テーブル名命名規則OK
-
----
-
-#### 41. ✅ MST_TrainingProgram: テーブル名命名規則OK
-
----
-
-#### 42. ✅ MST_Permission: テーブル名命名規則OK
-
----
-
-#### 43. ✅ HIS_NotificationLog: テーブル名命名規則OK
-
----
-
-#### 44. ✅ SYS_SkillMatrix: テーブル名命名規則OK
-
----
-
-#### 45. ✅ TRN_PDU: テーブル名命名規則OK
-
----
-
-#### 46. ✅ MST_RolePermission: テーブル名命名規則OK
-
----
-
-#### 47. ✅ MST_CareerPlan: テーブル名命名規則OK
-
----
-
-#### 48. ✅ MST_EmployeeJobType: テーブル名命名規則OK
-
----
-
-#### 49. ✅ SYS_IntegrationConfig: テーブル名命名規則OK
-
----
-
-#### 50. ✅ SYS_BackupHistory: テーブル名命名規則OK
-
----
-
-#### 51. ✅ MST_SystemConfig: テーブル名命名規則OK
-
----
-
-#### 52. ✅ SYS_SkillIndex: テーブル名命名規則OK
-
----
-
-#### 53. ✅ MST_UserAuth: テーブル名命名規則OK
 
 
 ## 🔧 修正提案

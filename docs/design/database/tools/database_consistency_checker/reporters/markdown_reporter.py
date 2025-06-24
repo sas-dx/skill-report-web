@@ -184,58 +184,67 @@ class MarkdownReporter:
                 results_by_check[check_name] = []
             results_by_check[check_name].append(result)
         
-        # チェック種別順に出力
-        check_order = ['table_existence', 'orphaned_files', 'column_consistency', 'foreign_key_consistency', 'data_type_consistency']
+        # チェック種別順に出力（yaml_formatを追加）
+        check_order = ['table_existence', 'yaml_format', 'column_consistency', 'foreign_key_consistency', 'data_type_consistency', 'naming_convention']
         
         for check_name in check_order:
-            if check_name not in results_by_check:
-                continue
-            
-            results = results_by_check[check_name]
+            results = results_by_check.get(check_name, [])
             japanese_name = get_japanese_check_name(check_name)
             
             lines.append(f"### 🔍 {japanese_name} ({len(results)}件)")
             lines.append("")
             
-            # 重要度別にソート
-            severity_order = {
-                CheckSeverity.ERROR: 0,
-                CheckSeverity.WARNING: 1,
-                CheckSeverity.INFO: 2,
-                CheckSeverity.SUCCESS: 3
-            }
-            
-            sorted_results = sorted(results, key=lambda r: (severity_order.get(r.severity, 4), r.table_name or ""))
-            
-            for i, result in enumerate(sorted_results, 1):
-                icon = self.icons.get(result.severity, '')
-                
-                lines.append(f"#### {i}. {icon} {result.message}")
-                lines.append("")
-                
-                # テーブル名
-                if result.table_name:
-                    lines.append(f"**テーブル:** {result.table_name}")
+            # YAMLフォーマットチェックの特別処理
+            if check_name == 'yaml_format':
+                if not results:
+                    # YAMLファイルが存在しない場合の詳細説明
+                    lines.extend(self._generate_yaml_format_no_files_section(report))
+                else:
+                    lines.extend(self._generate_yaml_format_details(results))
+            else:
+                if not results:
+                    lines.append("該当する結果がありません。")
                     lines.append("")
-                
-                # ファイル情報
-                if result.file_path:
-                    file_info = f"**ファイル:** `{result.file_path}`"
-                    if result.line_number:
-                        file_info += f" (行 {result.line_number})"
-                    lines.append(file_info)
-                    lines.append("")
-                
-                # 詳細情報
-                if result.details:
-                    lines.append("**詳細情報:**")
-                    lines.extend(self._format_detailed_info(result.details))
-                    lines.append("")
-                
-                # 区切り線（最後の項目以外）
-                if i < len(sorted_results):
-                    lines.append("---")
-                    lines.append("")
+                else:
+                    # 重要度別にソート
+                    severity_order = {
+                        CheckSeverity.ERROR: 0,
+                        CheckSeverity.WARNING: 1,
+                        CheckSeverity.INFO: 2,
+                        CheckSeverity.SUCCESS: 3
+                    }
+                    
+                    sorted_results = sorted(results, key=lambda r: (severity_order.get(r.severity, 4), r.table_name or ""))
+                    
+                    for i, result in enumerate(sorted_results, 1):
+                        icon = self.icons.get(result.severity, '')
+                        
+                        lines.append(f"#### {i}. {icon} {result.message}")
+                        lines.append("")
+                        
+                        # テーブル名
+                        if result.table_name:
+                            lines.append(f"**テーブル:** {result.table_name}")
+                            lines.append("")
+                        
+                        # ファイル情報
+                        if result.file_path:
+                            file_info = f"**ファイル:** `{result.file_path}`"
+                            if result.line_number:
+                                file_info += f" (行 {result.line_number})"
+                            lines.append(file_info)
+                            lines.append("")
+                        
+                        # 詳細情報
+                        if result.details:
+                            lines.append("**詳細情報:**")
+                            lines.extend(self._format_detailed_info(result.details))
+                            lines.append("")
+                        
+                        # 区切り線（最後の項目以外）
+                        if i < len(sorted_results):
+                            lines.append("---")
+                            lines.append("")
             
             lines.append("")
         
@@ -406,6 +415,129 @@ class MarkdownReporter:
         result = " | ".join(parts)
         return self._escape_markdown(result)
     
+    def _generate_yaml_format_details(self, results: List[CheckResult]) -> List[str]:
+        """YAMLフォーマットチェックの詳細結果を生成"""
+        lines = []
+        
+        # 成功・失敗でグループ化
+        success_results = [r for r in results if r.severity == CheckSeverity.SUCCESS]
+        error_results = [r for r in results if r.severity in [CheckSeverity.ERROR, CheckSeverity.WARNING]]
+        
+        # 成功したテーブル
+        if success_results:
+            lines.append("#### ✅ YAML形式検証成功")
+            lines.append("")
+            lines.append("以下のテーブルはYAML形式・必須セクション検証に合格しました：")
+            lines.append("")
+            
+            for result in sorted(success_results, key=lambda r: r.table_name or ""):
+                lines.append(f"- **{result.table_name}**: {result.message}")
+            
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+        
+        # エラー・警告があるテーブル
+        if error_results:
+            lines.append("#### ❌ YAML形式検証エラー・警告")
+            lines.append("")
+            
+            for i, result in enumerate(sorted(error_results, key=lambda r: r.table_name or ""), 1):
+                icon = self.icons.get(result.severity, '')
+                lines.append(f"##### {i}. {icon} {result.table_name}")
+                lines.append("")
+                lines.append(f"**メッセージ:** {result.message}")
+                lines.append("")
+                
+                # YAMLチェック固有の詳細情報
+                if result.metadata:
+                    metadata = result.metadata
+                    
+                    # エラー詳細
+                    if 'errors' in metadata and metadata['errors']:
+                        lines.append("**🔴 検出されたエラー:**")
+                        lines.append("")
+                        for error in metadata['errors']:
+                            lines.append(f"- {error}")
+                        lines.append("")
+                    
+                    # 警告詳細
+                    if 'warnings' in metadata and metadata['warnings']:
+                        lines.append("**⚠️ 検出された警告:**")
+                        lines.append("")
+                        for warning in metadata['warnings']:
+                            lines.append(f"- {warning}")
+                        lines.append("")
+                    
+                    # テーブル情報
+                    if 'table' in metadata:
+                        lines.append(f"**対象テーブル:** {metadata['table']}")
+                        lines.append("")
+                
+                # 区切り線（最後の項目以外）
+                if i < len(error_results):
+                    lines.append("---")
+                    lines.append("")
+        
+        return lines
+    
+    def _generate_yaml_format_no_files_section(self, report: ConsistencyReport) -> List[str]:
+        """YAMLファイルが存在しない場合の詳細セクションを生成"""
+        lines = []
+        
+        lines.append("#### ⚠️ YAMLファイルが存在しません")
+        lines.append("")
+        lines.append("**検証対象ファイル**")
+        lines.append("- **対象ディレクトリ**: `table-details/`")
+        lines.append("- **検索パターン**: `*_details.yaml`")
+        lines.append("- **発見ファイル数**: 0件")
+        lines.append("")
+        
+        lines.append("#### 🔴 重要な問題")
+        lines.append("**YAMLファイルが存在しません**")
+        lines.append("")
+        lines.append(f"- 全{report.total_tables}テーブルのYAML詳細定義ファイルが不足")
+        lines.append("- 必須セクション検証が実行できない状態")
+        lines.append("- データベース設計の品質保証に重大な影響")
+        lines.append("")
+        
+        lines.append("#### 🔍 必須セクション検証（実行不可）")
+        lines.append("")
+        lines.append("以下の必須セクションの検証ができませんでした：")
+        lines.append("")
+        lines.append("- 🔴 **revision_history**: 改版履歴（検証対象なし）")
+        lines.append("- 🔴 **overview**: テーブル概要・目的（検証対象なし）")
+        lines.append("- 🔴 **notes**: 特記事項・考慮点（検証対象なし）")
+        lines.append("- 🔴 **rules**: 業務ルール・制約（検証対象なし）")
+        lines.append("")
+        
+        lines.append("#### 💡 対応方法")
+        lines.append("")
+        lines.append("以下のコマンドでYAML詳細定義ファイルを生成してください：")
+        lines.append("")
+        lines.append("```bash")
+        lines.append("# 重要なテーブルから順次生成")
+        lines.append("python3 -m table_generator --table MST_Employee --generate definition")
+        lines.append("python3 -m table_generator --table MST_Department --generate definition")
+        lines.append("python3 -m table_generator --table MST_SkillCategory --generate definition")
+        lines.append("")
+        lines.append("# 全テーブル一括生成（時間がかかる場合があります）")
+        lines.append("python3 -m table_generator --all --generate definition")
+        lines.append("```")
+        lines.append("")
+        
+        lines.append("#### 📊 影響範囲")
+        lines.append("")
+        lines.append("YAMLファイル不足により以下の品質チェックが実行できません：")
+        lines.append("")
+        lines.append("- **必須セクション検証**: 設計書の品質基準チェック")
+        lines.append("- **カラム定義整合性**: YAML ↔ DDL間の整合性確認")
+        lines.append("- **業務ルール検証**: ビジネスロジックの妥当性チェック")
+        lines.append("- **運用・保守情報**: 特記事項・注意点の確認")
+        lines.append("")
+        
+        return lines
+    
     def _format_detailed_info(self, details: Dict) -> List[str]:
         """詳細情報を複数行でフォーマット"""
         lines = []
@@ -417,6 +549,9 @@ class MarkdownReporter:
         # テーブル存在チェックの詳細情報
         if 'existence_pattern' in details:
             lines.extend(self._format_existence_detailed_info(details))
+        # YAMLフォーマットチェックの詳細情報
+        elif 'errors' in details or 'warnings' in details:
+            lines.extend(self._format_yaml_detailed_info(details))
         else:
             # その他の詳細情報
             for key, value in details.items():
@@ -436,6 +571,31 @@ class MarkdownReporter:
                         lines.append(f"- **{key}:** なし")
                 else:
                     lines.append(f"- **{key}:** {value}")
+        
+        return lines
+    
+    def _format_yaml_detailed_info(self, details: Dict) -> List[str]:
+        """YAMLフォーマットチェックの詳細情報を複数行でフォーマット"""
+        lines = []
+        
+        # エラー詳細
+        if 'errors' in details and details['errors']:
+            lines.append("- **🔴 エラー詳細:**")
+            for error in details['errors']:
+                lines.append(f"  - {error}")
+            lines.append("")
+        
+        # 警告詳細
+        if 'warnings' in details and details['warnings']:
+            lines.append("- **⚠️ 警告詳細:**")
+            for warning in details['warnings']:
+                lines.append(f"  - {warning}")
+            lines.append("")
+        
+        # テーブル情報
+        if 'table' in details:
+            lines.append(f"- **対象テーブル:** {details['table']}")
+            lines.append("")
         
         return lines
     

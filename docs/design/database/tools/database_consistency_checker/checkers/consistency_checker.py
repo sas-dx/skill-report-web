@@ -39,7 +39,7 @@ class ConsistencyChecker:
         self.config = config
         self.check_config = check_config
         self.logger = logging.getLogger(__name__)
-        self.path_resolver = PathResolver()
+        # PathResolverは静的メソッドのみなのでインスタンス化不要
         
         # テーブル情報を格納
         self.tables: Dict[str, Dict[str, Any]] = {}
@@ -57,7 +57,7 @@ class ConsistencyChecker:
         self.logger.info("テーブルデータの読み込みを開始")
         
         # YAMLファイルの読み込み
-        yaml_dir = self.path_resolver.get_table_details_dir()
+        yaml_dir = PathResolver.get_table_details_dir()
         if yaml_dir.exists():
             for yaml_file in yaml_dir.glob("*.yaml"):
                 table_name = yaml_file.stem.replace("_details", "")
@@ -75,7 +75,7 @@ class ConsistencyChecker:
                     self.logger.error(f"YAMLファイル読み込みエラー {yaml_file}: {e}")
         
         # DDLファイルの読み込み
-        ddl_dir = self.path_resolver.get_ddl_dir()
+        ddl_dir = PathResolver.get_ddl_dir()
         if ddl_dir.exists():
             for ddl_file in ddl_dir.glob("*.sql"):
                 if ddl_file.name == "all_tables.sql":
@@ -98,7 +98,7 @@ class ConsistencyChecker:
                     self.logger.error(f"DDLファイル読み込みエラー {ddl_file}: {e}")
         
         # 定義書ファイルの読み込み
-        definition_dir = self.path_resolver.get_tables_dir()
+        definition_dir = PathResolver.get_tables_dir()
         if definition_dir.exists():
             for def_file in definition_dir.glob("テーブル定義書_*.md"):
                 # ファイル名からテーブル名を抽出
@@ -323,7 +323,7 @@ class ConsistencyChecker:
         results = []
         
         try:
-            # YAMLFormatCheckEnhancedを初期化
+            # YAMLFormatCheckEnhancedを初期化（configのベースディレクトリを使用）
             yaml_checker = YAMLFormatCheckEnhanced(
                 base_dir=str(self.config.base_dir),
                 verbose=getattr(self.check_config, 'verbose', False)
@@ -334,35 +334,51 @@ class ConsistencyChecker:
             if self.check_config and hasattr(self.check_config, 'target_tables'):
                 target_tables = self.check_config.target_tables
             
+            # デバッグ情報を出力
+            if getattr(self.check_config, 'verbose', False):
+                self.logger.info(f"YAML検証ベースディレクトリ: {self.config.base_dir}")
+                self.logger.info(f"テーブル詳細ディレクトリ: {PathResolver.get_table_details_dir()}")
+                self.logger.info(f"対象テーブル: {target_tables}")
+            
             # YAML検証実行
-            yaml_results = yaml_checker.check_all_yaml_files(target_tables)
+            yaml_results = yaml_checker.validate_yaml_format(target_tables)
             
             # 結果をConsistencyCheckerの形式に変換
-            for table_name, table_result in yaml_results.items():
-                if table_result['valid']:
-                    results.append(create_success_result(
-                        check_name="yaml_format",
-                        message=f"{table_name}: YAML形式・必須セクション検証OK"
-                    ))
-                else:
-                    # エラーの重要度を判定
-                    has_critical_errors = any(
-                        'revision_history' in error or 'overview' in error or 
-                        'notes' in error or 'business_rules' in error
-                        for error in table_result['errors']
-                    )
-                    
-                    severity_func = create_error_result if has_critical_errors else create_warning_result
-                    
-                    results.append(severity_func(
-                        check_name="yaml_format",
-                        message=f"{table_name}: YAML形式・必須セクション検証エラー",
-                        metadata={
-                            "table": table_name,
-                            "errors": table_result['errors'],
-                            "warnings": table_result.get('warnings', [])
-                        }
-                    ))
+            if isinstance(yaml_results, dict) and 'files' in yaml_results:
+                # 正常な結果の場合
+                for table_name, table_result in yaml_results['files'].items():
+                    if table_result['success']:
+                        results.append(create_success_result(
+                            check_name="yaml_format",
+                            message=f"{table_name}: YAML形式・必須セクション検証OK"
+                        ))
+                    else:
+                        # エラーの重要度を判定
+                        has_critical_errors = any(
+                            'revision_history' in error or 'overview' in error or 
+                            'notes' in error or 'rules' in error
+                            for error in table_result['errors']
+                        )
+                        
+                        severity_func = create_error_result if has_critical_errors else create_warning_result
+                        
+                        results.append(severity_func(
+                            check_name="yaml_format",
+                            message=f"{table_name}: YAML形式・必須セクション検証エラー",
+                            metadata={
+                                "table": table_name,
+                                "errors": table_result['errors'],
+                                "warnings": table_result.get('warnings', [])
+                            }
+                        ))
+            else:
+                # エラーが発生した場合
+                error_msg = yaml_results.get('error', 'YAML検証で不明なエラーが発生しました') if isinstance(yaml_results, dict) else str(yaml_results)
+                results.append(create_error_result(
+                    check_name="yaml_format",
+                    message=f"YAML検証エラー: {error_msg}",
+                    metadata={"error": error_msg}
+                ))
             
         except Exception as e:
             self.logger.error(f"YAML形式チェックエラー: {e}")

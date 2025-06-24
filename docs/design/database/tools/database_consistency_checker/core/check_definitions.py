@@ -48,6 +48,12 @@ def get_all_check_definitions() -> Dict[str, Dict[str, str]]:
             'check_content': 'テーブル一覧、エンティティ関連図、DDL、詳細YAMLの存在確認',
             'detected_issues': '定義漏れ、ファイル不足、不整合'
         },
+        'yaml_format': {
+            'japanese_name': 'YAMLフォーマット検証',
+            'purpose': 'YAML詳細定義ファイルの形式と必須セクションを確認',
+            'check_content': '_TEMPLATE準拠の形式チェック、必須セクション存在確認、内容品質検証',
+            'detected_issues': '必須セクション不足、フォーマット違反、内容不備（revision_history、overview、notes、rulesの不足）'
+        },
         'column_consistency': {
             'japanese_name': 'カラム整合性',
             'purpose': 'カラム定義の一貫性を確認',
@@ -62,8 +68,8 @@ def get_all_check_definitions() -> Dict[str, Dict[str, str]]:
         },
         'naming_convention': {
             'japanese_name': '命名規則チェック',
-            'purpose': '命名規則の準拠を確認',
-            'check_content': 'テーブル名、カラム名の命名規則チェック',
-            'detected_issues': '命名規則違反、不適切な名前'
+            'purpose': 'テーブル名・カラム名が命名規則に準拠しているかを確認',
+            'check_content': 'テーブル名のプレフィックス（MST/TRN/HIS/SYS/WRK）、カラム名のsnake_case形式を検証',
+            'detected_issues': '命名規則違反、一貫性のない命名パターン'
         }
     }

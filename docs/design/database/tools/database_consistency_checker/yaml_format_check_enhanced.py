@@ -59,16 +59,27 @@ class YAMLFormatValidator:
         'rules': {'min_items': 3, 'type': 'array'}
     }
     
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, base_dir: str = ""):
         self.verbose = verbose
         self.logger = logging.getLogger(self.__class__.__name__)
         self._setup_logging()
         
         # プロジェクトルートディレクトリを取得
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        self.project_root = os.path.abspath(os.path.join(script_dir, "../../../../.."))
+        if base_dir:
+            # base_dirがtoolsディレクトリの場合、プロジェクトルートを計算
+            if base_dir.endswith('/docs/design/database/tools'):
+                self.project_root = base_dir.replace('/docs/design/database/tools', '')
+            elif base_dir.endswith('docs/design/database/tools'):
+                self.project_root = base_dir.replace('docs/design/database/tools', '').rstrip('/')
+            else:
+                # base_dirがプロジェクトルートと仮定
+                self.project_root = base_dir
+        else:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            self.project_root = os.path.abspath(os.path.join(script_dir, "../../../../.."))
+        
         self.table_details_dir = os.path.join(self.project_root, "docs/design/database/table-details")
-        self.template_path = os.path.join(self.table_details_dir, "_TEMPLATE_details.yaml")
+        self.template_path = os.path.join(self.table_details_dir, "テーブル詳細定義YAML_TEMPLATE.yaml")
         
         # テンプレートから標準順序を読み込み
         self.template_order = self._load_template_order()
@@ -126,7 +137,7 @@ class YAMLFormatValidator:
         
         try:
             # ファイル存在チェック
-            yaml_file_path = os.path.join(self.table_details_dir, f"{table_name}_details.yaml")
+            yaml_file_path = os.path.join(self.table_details_dir, f"テーブル詳細定義YAML_{table_name}.yaml")
             
             if not os.path.exists(yaml_file_path):
                 result['success'] = False
@@ -305,8 +316,8 @@ class YAMLFormatValidator:
             yaml_files = []
             if os.path.exists(self.table_details_dir):
                 for file_name in os.listdir(self.table_details_dir):
-                    if file_name.endswith('_details.yaml') and not file_name.startswith('_'):
-                        table_name = file_name.replace('_details.yaml', '')
+                    if file_name.startswith('テーブル詳細定義YAML_') and file_name.endswith('.yaml') and not file_name.endswith('_TEMPLATE.yaml'):
+                        table_name = file_name.replace('テーブル詳細定義YAML_', '').replace('.yaml', '')
                         yaml_files.append(table_name)
             
             result['total_files'] = len(yaml_files)
@@ -345,13 +356,40 @@ class YAMLFormatValidator:
 class YAMLFormatCheckEnhanced:
     """YAML形式検証機能（_TEMPLATE準拠版）"""
     
-    def __init__(self, verbose: bool = False):
+    def __init__(self, base_dir: str = "", verbose: bool = False):
         self.verbose = verbose
+        self.base_dir = base_dir
         self.logger = logging.getLogger(self.__class__.__name__)
         self._setup_logging()
         
-        # YAML検証機能
-        self.yaml_validator = YAMLFormatValidator(verbose=verbose)
+        # PathResolverを使用してパス解決を統一
+        try:
+            # パス解決のセットアップ
+            current_dir = Path(__file__).parent
+            tools_dir = current_dir.parent
+            if str(tools_dir) not in sys.path:
+                sys.path.insert(0, str(tools_dir))
+            
+            from shared.path_resolver import PathResolver
+            
+            if base_dir:
+                # base_dirが指定された場合はそれを使用
+                resolved_base_dir = base_dir
+            else:
+                # PathResolverでプロジェクトルートを取得
+                project_root = PathResolver.get_project_root()
+                resolved_base_dir = str(project_root) if project_root else ""
+            
+            # YAML検証機能
+            self.yaml_validator = YAMLFormatValidator(
+                verbose=verbose, 
+                base_dir=resolved_base_dir
+            )
+            
+        except Exception as e:
+            self.logger.error(f"PathResolver初期化エラー: {e}")
+            # フォールバック: 従来の方式
+            self.yaml_validator = YAMLFormatValidator(verbose=verbose, base_dir=base_dir)
     
     def _setup_logging(self):
         """ログ設定のセットアップ"""
@@ -417,6 +455,15 @@ class YAMLFormatCheckEnhanced:
                 'summary_warnings': []
             }
     
+    def check_all_yaml_files(self) -> Dict[str, Any]:
+        """
+        全YAMLファイルのチェック（後方互換性のため）
+        
+        Returns:
+            Dict[str, Any]: 検証結果
+        """
+        return self.validate_yaml_format()
+    
     def print_summary(self, result: Dict[str, Any]):
         """結果サマリーの出力"""
         print("=== YAML形式検証結果（_TEMPLATE準拠） ===")
@@ -468,7 +515,7 @@ def main():
     args = parser.parse_args()
     
     # チェッカーの初期化
-    checker = YAMLFormatCheckEnhanced(verbose=args.verbose)
+    checker = YAMLFormatCheckEnhanced(base_dir="", verbose=args.verbose)
     
     # 対象テーブルの決定
     table_names = None

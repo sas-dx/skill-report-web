@@ -60,7 +60,7 @@ cp docs/design/database/table-details/テーブル詳細定義YAML_TEMPLATE.yaml
 # - 🔴 revision_history: 改版履歴（絶対省略禁止）
 # - 🔴 overview: テーブルの概要（最低50文字・絶対省略禁止）
 # - 🔴 notes: 特記事項（最低3項目・絶対省略禁止）
-# - 🔴 business_rules: 業務ルール（最低3項目・絶対省略禁止）
+# - 🔴 rules: 業務ルール（最低3項目・絶対省略禁止）
 
 # Step 3: YAML検証
 python3 database_consistency_checker/yaml_format_check_enhanced.py --tables MST_NewTable --verbose
@@ -331,7 +331,7 @@ cp docs/design/database/table-details/テーブル詳細定義YAML_TEMPLATE.yaml
 
 # 2. コピーしたファイルを編集
 # - [テンプレート項目]を実際の値に置き換え
-# - 🔴 必須セクション（revision_history、overview、notes、business_rules）は絶対省略禁止
+# - 🔴 必須セクション（revision_history、overview、notes、rules）は絶対省略禁止
 # - 業務要件に応じてカラムやインデックスを追加
 
 # 3. YAML検証実行（必須）
@@ -399,7 +399,7 @@ notes:
   - "パフォーマンス・最適化に関する考慮事項3"
 
 # 🔴 業務ルール（絶対省略禁止・最低3項目）
-business_rules:
+rules:
   - "データの一意性・整合性に関するルール1"
   - "業務制約・ビジネスロジックに関するルール2"
   - "運用ルール・メンテナンス要件に関するルール3"
@@ -466,7 +466,7 @@ sample_data:
 ### YAML検証ツール（database_consistency_checker統合）
 
 #### 検証項目
-- **必須セクション検証**: revision_history、overview、notes、business_rulesの存在・内容チェック
+- **必須セクション検証**: revision_history、overview、notes、rulesの存在・内容チェック
 - **フォーマット検証**: YAML構文・構造の妥当性チェック
 - **データ型検証**: カラム定義のデータ型・制約の妥当性チェック
 - **命名規則検証**: テーブル名・カラム名の命名規則準拠チェック
@@ -498,7 +498,7 @@ cp docs/design/database/table-details/テーブル詳細定義YAML_TEMPLATE.yaml
 # - revision_history: 初版エントリ追加
 # - overview: テーブルの目的・概要記述（50文字以上）
 # - notes: 運用・保守の特記事項（3項目以上）
-# - business_rules: 業務ルール・制約（3項目以上）
+# - rules: 業務ルール・制約（3項目以上）
 
 # 3. YAML検証実行
 python3 database_consistency_checker/yaml_format_check_enhanced.py --tables NEW_TABLE --verbose
