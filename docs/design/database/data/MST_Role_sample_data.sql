@@ -1,5 +1,5 @@
 -- MST_Role (ロール情報) サンプルデータ
--- 生成日時: 2025-06-24 23:02:19
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO MST_Role (
     id, tenant_id, auto_assign_conditions, description,

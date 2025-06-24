@@ -1,5 +1,5 @@
 -- SYS_IntegrationConfig (外部連携設定) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO SYS_IntegrationConfig (
     id, tenant_id, auth_config, auth_type,

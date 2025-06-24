@@ -1,5 +1,5 @@
 -- MST_EmployeeDepartment (社員部署関連) サンプルデータ
--- 生成日時: 2025-06-24 23:02:19
+-- 生成日時: 2025-06-24 23:05:58
 
 INSERT INTO MST_EmployeeDepartment (
     id, tenant_id, approval_status, approved_at,

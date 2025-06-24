@@ -1,5 +1,5 @@
 -- MST_CertificationRequirement (資格要件マスタ) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO MST_CertificationRequirement (
     id, tenant_id, active_flag, alternative_certifications,

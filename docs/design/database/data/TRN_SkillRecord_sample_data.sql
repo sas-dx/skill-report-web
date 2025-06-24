@@ -1,5 +1,5 @@
 -- TRN_SkillRecord (スキル情報) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO TRN_SkillRecord (
     id, tenant_id, acquisition_date, assessment_date,

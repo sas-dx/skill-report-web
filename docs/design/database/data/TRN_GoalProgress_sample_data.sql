@@ -1,5 +1,5 @@
 -- TRN_GoalProgress (目標進捗) サンプルデータ
--- 生成日時: 2025-06-24 23:02:19
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO TRN_GoalProgress (
     id, tenant_id, achievement_rate, achievement_status,

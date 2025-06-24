@@ -1,5 +1,5 @@
 -- SYS_TenantUsage (テナント利用状況) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO SYS_TenantUsage (
     id, tenant_id, active_users, api_requests,

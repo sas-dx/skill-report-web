@@ -1,5 +1,5 @@
 -- HIS_ReportGeneration (帳票生成履歴) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO HIS_ReportGeneration (
     id, tenant_id, completed_at, download_count,

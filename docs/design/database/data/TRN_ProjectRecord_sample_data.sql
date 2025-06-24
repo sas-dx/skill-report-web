@@ -1,5 +1,5 @@
 -- TRN_ProjectRecord (案件実績) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO TRN_ProjectRecord (
     id, tenant_id, project_code, project_name,

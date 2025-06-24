@@ -1,5 +1,5 @@
 -- MST_UserAuth (ユーザー認証情報) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:56
 
 INSERT INTO MST_UserAuth (
     id, tenant_id, account_status, employee_id,

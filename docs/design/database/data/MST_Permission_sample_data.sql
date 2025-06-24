@@ -1,5 +1,5 @@
 -- MST_Permission (権限情報) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO MST_Permission (
     id, tenant_id, action_type, audit_required,

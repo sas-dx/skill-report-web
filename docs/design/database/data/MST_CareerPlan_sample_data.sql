@@ -1,5 +1,5 @@
 -- MST_CareerPlan (目標・キャリアプラン) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:56
 
 INSERT INTO MST_CareerPlan (
     id, tenant_id, plan_name, budget_allocated,

@@ -1,5 +1,5 @@
 -- MST_JobType (職種マスタ) サンプルデータ
--- 生成日時: 2025-06-24 23:02:19
+-- 生成日時: 2025-06-24 23:05:58
 
 INSERT INTO MST_JobType (
     id, tenant_id, career_path, department_affinity,

@@ -1,5 +1,5 @@
 -- TRN_PDU (継続教育ポイント) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO TRN_PDU (
     id, tenant_id, activity_date, activity_description,

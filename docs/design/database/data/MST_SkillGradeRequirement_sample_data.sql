@@ -1,5 +1,5 @@
 -- MST_SkillGradeRequirement (スキルグレード要件) サンプルデータ
--- 生成日時: 2025-06-24 23:02:18
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO MST_SkillGradeRequirement (
     id, tenant_id, assessment_frequency, assessment_method,

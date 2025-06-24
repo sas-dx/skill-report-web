@@ -1,5 +1,5 @@
 -- MST_Department (部署マスタ) サンプルデータ
--- 生成日時: 2025-06-24 23:02:19
+-- 生成日時: 2025-06-24 23:05:57
 
 INSERT INTO MST_Department (
     id, tenant_id, abolition_date, budget_amount,

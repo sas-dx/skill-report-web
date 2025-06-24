@@ -1,5 +1,5 @@
 -- MST_NotificationSettings (通知設定) サンプルデータ
--- 生成日時: 2025-06-24 23:02:17
+-- 生成日時: 2025-06-24 23:05:56
 
 INSERT INTO MST_NotificationSettings (
     id, tenant_id, channel_config, frequency_type,

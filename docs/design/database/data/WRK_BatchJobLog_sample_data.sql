@@ -1,5 +1,5 @@
 -- WRK_BatchJobLog (一括登録ジョブログ) サンプルデータ
--- 生成日時: 2025-06-24 23:02:17
+-- 生成日時: 2025-06-24 23:05:56
 
 INSERT INTO WRK_BatchJobLog (
     id, tenant_id, job_id, batchjoblog_id,
