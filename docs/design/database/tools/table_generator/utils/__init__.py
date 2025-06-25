@@ -3,7 +3,7 @@
 """
 
 from .yaml_loader import YamlLoader as YAMLLoader
-from .file_utils import FileUtils
+from shared.utils.file_utils import FileManager as FileUtils
 from .sql_utils import SqlUtils as SQLUtils
 
 __all__ = [

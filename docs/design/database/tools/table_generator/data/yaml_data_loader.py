@@ -21,7 +21,7 @@ from shared.core.models import (
     ForeignKeyDefinition, ConstraintDefinition, ProcessingResult
 )
 from table_generator.utils.yaml_loader import YamlLoader
-from table_generator.utils.file_utils import FileUtils
+from shared.utils.file_utils import FileManager as FileUtils
 
 
 class YamlDataLoader:

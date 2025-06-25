@@ -1,297 +1,353 @@
 """
-統合設定管理システム
-両ツール（table_generator, database_consistency_checker）の設定を統合管理
+統合設定管理
+全ツールで使用する共通設定機能
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
-実装日: 2025-06-08
+実装日: 2025-06-25
 実装者: AI駆動開発チーム
 """
 
 import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Optional, Dict, Any, List
 from dataclasses import dataclass, field
-from enum import Enum
-
-
-class LogLevel(Enum):
-    """ログレベル定義"""
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    CRITICAL = "CRITICAL"
-
-
-class ReportFormat(Enum):
-    """レポート形式定義"""
-    CONSOLE = "console"
-    MARKDOWN = "markdown"
-    JSON = "json"
-    HTML = "html"
-
-
-class CheckType(Enum):
-    """チェック種別定義"""
-    TABLE_EXISTENCE = "table_existence"
-    COLUMN_CONSISTENCY = "column_consistency"
-    FOREIGN_KEY_CONSISTENCY = "foreign_key_consistency"
-    DATA_TYPE_CONSISTENCY = "data_type_consistency"
-    YAML_FORMAT_CONSISTENCY = "yaml_format_consistency"
-    CONSTRAINT_CONSISTENCY = "constraint_consistency"
-    ORPHANED_FILES = "orphaned_files"
-    NAMING_CONVENTION = "naming_convention"
-    MULTITENANT_COMPLIANCE = "multitenant_compliance"
+from datetime import datetime
+import yaml
+import json
 
 
 @dataclass
-class DatabaseToolsConfig:
-    """統合設定管理クラス - 両ツールの設定を統合"""
-    
-    # 基本設定
+class DatabaseConfig:
+    """データベース設定"""
+    host: str = "localhost"
+    port: int = 5432
+    database: str = "skill_report"
+    username: str = "postgres"
+    password: str = ""
+    schema: str = "public"
+    connection_timeout: int = 30
+    query_timeout: int = 300
+
+
+@dataclass
+class PathConfig:
+    """パス設定"""
     base_dir: Path = field(default_factory=lambda: Path.cwd())
-    encoding: str = "utf-8"
-    line_ending: str = "\n"
-    backup_enabled: bool = True
-    log_level: LogLevel = LogLevel.INFO
-    
-    # ディレクトリ設定
-    tools_dir: Path = field(init=False)
-    table_details_dir: Path = field(init=False)
-    ddl_dir: Path = field(init=False)
-    tables_dir: Path = field(init=False)
-    data_dir: Path = field(init=False)
-    reports_dir: Path = field(init=False)
-    backup_dir: Path = field(init=False)
-    
-    # テーブル生成ツール設定
-    default_sample_count: int = 10
-    max_sample_count: int = 10000
-    default_seed: int = 12345
-    faker_locale: str = "ja_JP"
-    faker_seed: Optional[int] = None
-    batch_insert_size: int = 1000
-    ddl_template_dir: str = "templates/ddl"
-    output_encoding: str = "utf-8"
-    
-    # データベース設定
-    default_charset: str = "utf8mb4"
-    default_collation: str = "utf8mb4_unicode_ci"
-    
-    # 業務固有設定
-    company_domain: str = "company.com"
-    default_department_prefix: str = "DEPT_"
-    default_employee_prefix: str = "EMP"
-    default_skill_prefix: str = "SKL_"
-    
-    # データ生成ルール
-    skill_levels: List[int] = field(default_factory=lambda: [1, 2, 3, 4])
-    skill_level_weights: List[int] = field(default_factory=lambda: [10, 30, 40, 20])
-    department_distribution: Dict[str, int] = field(default_factory=lambda: {
-        'DEPT_DEV': 40,    # 開発部40%
-        'DEPT_SYS': 20,    # システム部20%
-        'DEPT_BIZ': 30,    # 業務部30%
-        'DEPT_MGT': 10     # 管理部10%
-    })
-    
-    # 整合性チェックツール設定
-    report_formats: List[ReportFormat] = field(default_factory=lambda: [
-        ReportFormat.CONSOLE, ReportFormat.MARKDOWN
-    ])
-    keep_reports: int = 30
-    max_reports: int = 100
-    check_types: List[CheckType] = field(default_factory=lambda: [
-        CheckType.TABLE_EXISTENCE,
-        CheckType.COLUMN_CONSISTENCY,
-        CheckType.FOREIGN_KEY_CONSISTENCY,
-        CheckType.DATA_TYPE_CONSISTENCY,
-        CheckType.YAML_FORMAT_CONSISTENCY,
-        CheckType.CONSTRAINT_CONSISTENCY
-    ])
-    auto_fix_enabled: bool = False
-    
-    # 新機能設定
-    parallel_processing: bool = True
-    max_workers: int = 4
-    cache_enabled: bool = True
-    cache_ttl: int = 3600  # 1時間
+    table_details_dir: Path = field(default_factory=Path)
+    ddl_dir: Path = field(default_factory=Path)
+    tables_dir: Path = field(default_factory=Path)
+    reports_dir: Path = field(default_factory=Path)
+    backup_dir: Path = field(default_factory=Path)
+    temp_dir: Path = field(default_factory=Path)
     
     def __post_init__(self):
-        """初期化後の設定"""
-        # 実行時のディレクトリを考慮してパスを設定
-        if self.base_dir.name == "tools" or (self.base_dir / "tools").exists():
-            # toolsディレクトリから実行されている場合、またはdatabase/ディレクトリの場合
-            if self.base_dir.name == "tools":
-                db_dir = self.base_dir.parent
-                self.tools_dir = self.base_dir
-            else:
-                # database/ディレクトリの場合
-                db_dir = self.base_dir
-                self.tools_dir = self.base_dir / "tools"
-            
-            self.table_details_dir = db_dir / "table-details"
-            self.ddl_dir = db_dir / "ddl"
-            self.tables_dir = db_dir / "tables"
-            self.data_dir = db_dir / "data"
-            self.reports_dir = db_dir / "reports"
-            self.backup_dir = db_dir / "backups"
-        else:
-            # プロジェクトルートから実行されている場合
-            self.tools_dir = self.base_dir / "docs" / "design" / "database" / "tools"
-            self.table_details_dir = self.base_dir / "docs" / "design" / "database" / "table-details"
-            self.ddl_dir = self.base_dir / "docs" / "design" / "database" / "ddl"
-            self.tables_dir = self.base_dir / "docs" / "design" / "database" / "tables"
-            self.data_dir = self.base_dir / "docs" / "design" / "database" / "data"
-            self.reports_dir = self.base_dir / "docs" / "design" / "database" / "reports"
-            self.backup_dir = self.base_dir / "docs" / "design" / "database" / "backups"
+        """パスの初期化"""
+        if not self.table_details_dir:
+            self.table_details_dir = self.base_dir / "docs/design/database/table-details"
+        if not self.ddl_dir:
+            self.ddl_dir = self.base_dir / "docs/design/database/ddl"
+        if not self.tables_dir:
+            self.tables_dir = self.base_dir / "docs/design/database/tables"
+        if not self.reports_dir:
+            self.reports_dir = self.base_dir / "docs/design/database/reports"
+        if not self.backup_dir:
+            self.backup_dir = self.base_dir / "docs/design/database/backups"
+        if not self.temp_dir:
+            self.temp_dir = self.base_dir / "temp"
+
+
+@dataclass
+class LogConfig:
+    """ログ設定"""
+    level: str = "INFO"
+    format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file_enabled: bool = True
+    console_enabled: bool = True
+    log_dir: Path = field(default_factory=lambda: Path("logs"))
+    max_file_size: int = 10 * 1024 * 1024  # 10MB
+    backup_count: int = 5
+    encoding: str = "utf-8"
+
+
+@dataclass
+class ToolConfig:
+    """ツール設定"""
+    encoding: str = "utf-8"
+    backup_enabled: bool = True
+    auto_cleanup: bool = True
+    keep_reports: int = 30
+    max_reports: int = 100
+    parallel_processing: bool = False
+    max_workers: int = 4
+    timeout: int = 300
+    retry_count: int = 3
+    retry_delay: float = 1.0
+
+
+@dataclass
+class ValidationConfig:
+    """検証設定"""
+    strict_mode: bool = False
+    required_sections: List[str] = field(default_factory=lambda: [
+        "revision_history", "overview", "notes", "business_rules"
+    ])
+    min_overview_length: int = 50
+    min_notes_count: int = 3
+    min_rules_count: int = 3
+    allow_empty_tables: bool = False
+    validate_foreign_keys: bool = True
+    validate_data_types: bool = True
+
+
+class Config:
+    """統合設定クラス"""
+    
+    def __init__(self, base_dir: Optional[str] = None, config_file: Optional[str] = None):
+        """設定初期化"""
+        self.base_dir = Path(base_dir) if base_dir else self._detect_base_dir()
         
-        # ディレクトリ作成
+        # デフォルト設定
+        self.database = DatabaseConfig()
+        self.paths = PathConfig(base_dir=self.base_dir)
+        self.logging = LogConfig()
+        self.tool = ToolConfig()
+        self.validation = ValidationConfig()
+        
+        # 設定ファイルから読み込み
+        if config_file:
+            self.load_from_file(config_file)
+        else:
+            self._load_default_config()
+        
+        # 環境変数から上書き
+        self._load_from_env()
+        
+        # パスの確保
         self._ensure_directories()
+    
+    def _detect_base_dir(self) -> Path:
+        """ベースディレクトリの自動検出"""
+        current = Path.cwd()
+        
+        # skill-report-webディレクトリを探す
+        for parent in [current] + list(current.parents):
+            if (parent / "docs/design/database").exists():
+                return parent
+        
+        # 見つからない場合は現在のディレクトリ
+        return current
+    
+    def _load_default_config(self):
+        """デフォルト設定ファイルの読み込み"""
+        config_files = [
+            self.base_dir / "config/database_tools.yaml",
+            self.base_dir / "config/database_tools.yml",
+            self.base_dir / ".database_tools.yaml",
+            Path.home() / ".database_tools.yaml"
+        ]
+        
+        for config_file in config_files:
+            if config_file.exists():
+                try:
+                    self.load_from_file(config_file)
+                    break
+                except Exception:
+                    continue
+    
+    def load_from_file(self, config_file: Path):
+        """設定ファイルから読み込み"""
+        config_file = Path(config_file)
+        
+        if not config_file.exists():
+            raise FileNotFoundError(f"設定ファイルが見つかりません: {config_file}")
+        
+        try:
+            with open(config_file, 'r', encoding='utf-8') as f:
+                if config_file.suffix.lower() in ['.yaml', '.yml']:
+                    data = yaml.safe_load(f)
+                elif config_file.suffix.lower() == '.json':
+                    data = json.load(f)
+                else:
+                    raise ValueError(f"サポートされていない設定ファイル形式: {config_file.suffix}")
+            
+            self._update_from_dict(data)
+            
+        except Exception as e:
+            raise RuntimeError(f"設定ファイル読み込みエラー: {e}")
+    
+    def _update_from_dict(self, data: Dict[str, Any]):
+        """辞書から設定を更新"""
+        if 'database' in data:
+            self._update_dataclass(self.database, data['database'])
+        
+        if 'paths' in data:
+            paths_data = data['paths']
+            # パスをPathオブジェクトに変換
+            for key, value in paths_data.items():
+                if hasattr(self.paths, key) and value:
+                    setattr(self.paths, key, Path(value))
+        
+        if 'logging' in data:
+            self._update_dataclass(self.logging, data['logging'])
+        
+        if 'tool' in data:
+            self._update_dataclass(self.tool, data['tool'])
+        
+        if 'validation' in data:
+            self._update_dataclass(self.validation, data['validation'])
+    
+    def _update_dataclass(self, obj, data: Dict[str, Any]):
+        """データクラスを辞書で更新"""
+        for key, value in data.items():
+            if hasattr(obj, key):
+                setattr(obj, key, value)
+    
+    def _load_from_env(self):
+        """環境変数から設定を読み込み"""
+        # データベース設定
+        if os.getenv('DB_HOST'):
+            self.database.host = os.getenv('DB_HOST')
+        if os.getenv('DB_PORT'):
+            self.database.port = int(os.getenv('DB_PORT'))
+        if os.getenv('DB_NAME'):
+            self.database.database = os.getenv('DB_NAME')
+        if os.getenv('DB_USER'):
+            self.database.username = os.getenv('DB_USER')
+        if os.getenv('DB_PASSWORD'):
+            self.database.password = os.getenv('DB_PASSWORD')
+        
+        # ログレベル
+        if os.getenv('LOG_LEVEL'):
+            self.logging.level = os.getenv('LOG_LEVEL')
+        
+        # ツール設定
+        if os.getenv('TOOL_ENCODING'):
+            self.tool.encoding = os.getenv('TOOL_ENCODING')
+        if os.getenv('BACKUP_ENABLED'):
+            self.tool.backup_enabled = os.getenv('BACKUP_ENABLED').lower() == 'true'
     
     def _ensure_directories(self):
         """必要なディレクトリを作成"""
         directories = [
-            self.table_details_dir,
-            self.ddl_dir,
-            self.tables_dir,
-            self.data_dir,
-            self.reports_dir,
-            self.backup_dir
+            self.paths.reports_dir,
+            self.paths.backup_dir,
+            self.paths.temp_dir,
+            self.logging.log_dir
         ]
         
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
     
-    @classmethod
-    def from_env(cls) -> 'DatabaseToolsConfig':
-        """環境変数から設定を読み込み"""
-        config = cls()
-        
-        # 環境変数の読み込み
-        if base_dir := os.getenv('DB_TOOLS_BASE_DIR'):
-            config.base_dir = Path(base_dir)
-        
-        if log_level := os.getenv('DB_TOOLS_LOG_LEVEL'):
-            try:
-                config.log_level = LogLevel(log_level.upper())
-            except ValueError:
-                pass
-        
-        if sample_count := os.getenv('DB_TOOLS_SAMPLE_COUNT'):
-            try:
-                config.default_sample_count = int(sample_count)
-            except ValueError:
-                pass
-        
-        if backup_enabled := os.getenv('DB_TOOLS_BACKUP_ENABLED'):
-            config.backup_enabled = backup_enabled.lower() in ('true', '1', 'yes')
-        
-        # table_generator固有の環境変数
-        if seed := os.getenv('TABLE_GEN_SEED'):
-            try:
-                config.default_seed = int(seed)
-            except ValueError:
-                pass
-        
-        if faker_locale := os.getenv('TABLE_GEN_FAKER_LOCALE'):
-            config.faker_locale = faker_locale
-        
-        if company_domain := os.getenv('TABLE_GEN_COMPANY_DOMAIN'):
-            config.company_domain = company_domain
-        
-        return config
+    def get_backup_path(self, original_file: Path) -> Path:
+        """バックアップファイルパスを生成"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_name = f"{original_file.stem}.backup.{timestamp}{original_file.suffix}"
+        return self.paths.backup_dir / backup_name
     
-    def get_table_detail_path(self, table_name: str) -> Path:
-        """テーブル詳細定義ファイルのパスを取得"""
-        return self.table_details_dir / f"{table_name}_details.yaml"
-    
-    def get_ddl_path(self, table_name: str) -> Path:
-        """DDLファイルのパスを取得"""
-        return self.ddl_dir / f"{table_name}.sql"
-    
-    def get_table_definition_path(self, table_name: str, logical_name: str) -> Path:
-        """テーブル定義書のパスを取得"""
-        return self.tables_dir / f"テーブル定義書_{table_name}_{logical_name}.md"
-    
-    def get_sample_data_path(self, table_name: str) -> Path:
-        """サンプルデータファイルのパスを取得"""
-        return self.data_dir / f"{table_name}_sample_data.sql"
-    
-    def get_table_list_file(self) -> Path:
-        """テーブル一覧ファイルのパスを取得"""
-        # データベース設計ディレクトリのテーブル一覧.mdファイル
-        db_design_dir = self.base_dir / "docs" / "design" / "database" if self.base_dir.name != "tools" else self.base_dir.parent
-        return db_design_dir / "テーブル一覧.md"
-    
-    def get_details_dir(self) -> Path:
-        """テーブル詳細定義ディレクトリのパスを取得"""
-        return self.table_details_dir
-    
-    def get_tables_dir(self) -> Path:
-        """テーブル定義書ディレクトリのパスを取得"""
-        return self.tables_dir
-    
-    def get_ddl_dir(self) -> Path:
-        """DDLディレクトリのパスを取得"""
-        return self.ddl_dir
-    
-    def get_backup_path(self, original_path: Path) -> Path:
-        """バックアップファイルのパスを取得"""
-        timestamp = self._get_timestamp()
-        backup_name = f"{original_path.stem}.backup.{timestamp}{original_path.suffix}"
-        return self.backup_dir / backup_name
-    
-    def _get_timestamp(self) -> str:
-        """タイムスタンプ文字列を取得"""
-        from datetime import datetime
-        return datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    def get_timestamp(self) -> str:
-        """タイムスタンプ文字列を取得（パブリックメソッド）"""
-        return self._get_timestamp()
+    def get_report_path(self, report_type: str, extension: str = "md") -> Path:
+        """レポートファイルパスを生成"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_name = f"{report_type}_{timestamp}.{extension}"
+        return self.paths.reports_dir / report_name
     
     def to_dict(self) -> Dict[str, Any]:
         """設定を辞書形式で取得"""
         return {
-            'base_dir': str(self.base_dir),
-            'encoding': self.encoding,
-            'line_ending': repr(self.line_ending),
-            'backup_enabled': self.backup_enabled,
-            'log_level': self.log_level.value,
-            'default_sample_count': self.default_sample_count,
-            'faker_locale': self.faker_locale,
-            'batch_insert_size': self.batch_insert_size,
-            'report_formats': [fmt.value for fmt in self.report_formats],
-            'keep_reports': self.keep_reports,
-            'max_reports': self.max_reports,
-            'check_types': [ct.value for ct in self.check_types],
-            'auto_fix_enabled': self.auto_fix_enabled,
-            'parallel_processing': self.parallel_processing,
-            'max_workers': self.max_workers,
-            'cache_enabled': self.cache_enabled,
-            'cache_ttl': self.cache_ttl
+            'database': {
+                'host': self.database.host,
+                'port': self.database.port,
+                'database': self.database.database,
+                'username': self.database.username,
+                'schema': self.database.schema,
+                'connection_timeout': self.database.connection_timeout,
+                'query_timeout': self.database.query_timeout
+            },
+            'paths': {
+                'base_dir': str(self.paths.base_dir),
+                'table_details_dir': str(self.paths.table_details_dir),
+                'ddl_dir': str(self.paths.ddl_dir),
+                'tables_dir': str(self.paths.tables_dir),
+                'reports_dir': str(self.paths.reports_dir),
+                'backup_dir': str(self.paths.backup_dir),
+                'temp_dir': str(self.paths.temp_dir)
+            },
+            'logging': {
+                'level': self.logging.level,
+                'format': self.logging.format,
+                'file_enabled': self.logging.file_enabled,
+                'console_enabled': self.logging.console_enabled,
+                'log_dir': str(self.logging.log_dir),
+                'max_file_size': self.logging.max_file_size,
+                'backup_count': self.logging.backup_count,
+                'encoding': self.logging.encoding
+            },
+            'tool': {
+                'encoding': self.tool.encoding,
+                'backup_enabled': self.tool.backup_enabled,
+                'auto_cleanup': self.tool.auto_cleanup,
+                'keep_reports': self.tool.keep_reports,
+                'max_reports': self.tool.max_reports,
+                'parallel_processing': self.tool.parallel_processing,
+                'max_workers': self.tool.max_workers,
+                'timeout': self.tool.timeout,
+                'retry_count': self.tool.retry_count,
+                'retry_delay': self.tool.retry_delay
+            },
+            'validation': {
+                'strict_mode': self.validation.strict_mode,
+                'required_sections': self.validation.required_sections,
+                'min_overview_length': self.validation.min_overview_length,
+                'min_notes_count': self.validation.min_notes_count,
+                'min_rules_count': self.validation.min_rules_count,
+                'allow_empty_tables': self.validation.allow_empty_tables,
+                'validate_foreign_keys': self.validation.validate_foreign_keys,
+                'validate_data_types': self.validation.validate_data_types
+            }
         }
+    
+    def save_to_file(self, config_file: Path):
+        """設定をファイルに保存"""
+        config_file = Path(config_file)
+        config_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        data = self.to_dict()
+        
+        try:
+            with open(config_file, 'w', encoding='utf-8') as f:
+                if config_file.suffix.lower() in ['.yaml', '.yml']:
+                    yaml.dump(data, f, default_flow_style=False, allow_unicode=True, indent=2)
+                elif config_file.suffix.lower() == '.json':
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                else:
+                    raise ValueError(f"サポートされていない設定ファイル形式: {config_file.suffix}")
+        
+        except Exception as e:
+            raise RuntimeError(f"設定ファイル保存エラー: {e}")
 
 
-# グローバル設定インスタンス
-_config_instance: Optional[DatabaseToolsConfig] = None
+# グローバルインスタンス
+_config_instance: Optional[Config] = None
 
 
-def get_config() -> DatabaseToolsConfig:
+def get_config(base_dir: Optional[str] = None, config_file: Optional[str] = None) -> Config:
     """グローバル設定インスタンスを取得"""
     global _config_instance
-    if _config_instance is None:
-        _config_instance = DatabaseToolsConfig.from_env()
+    if _config_instance is None or base_dir or config_file:
+        _config_instance = Config(base_dir, config_file)
     return _config_instance
 
 
-def set_config(config: DatabaseToolsConfig):
-    """グローバル設定インスタンスを設定"""
-    global _config_instance
-    _config_instance = config
-
-
-def reset_config():
-    """グローバル設定インスタンスをリセット"""
-    global _config_instance
-    _config_instance = None
+def create_check_config(**kwargs) -> 'CheckConfig':
+    """チェック設定を作成"""
+    from .models import CheckConfig
+    
+    config = get_config()
+    
+    return CheckConfig(
+        enabled_checks=kwargs.get('enabled_checks', []),
+        disabled_checks=kwargs.get('disabled_checks', []),
+        check_parameters=kwargs.get('check_parameters', {}),
+        output_format=kwargs.get('output_format', 'console'),
+        verbose=kwargs.get('verbose', False),
+        fail_fast=kwargs.get('fail_fast', False)
+    )

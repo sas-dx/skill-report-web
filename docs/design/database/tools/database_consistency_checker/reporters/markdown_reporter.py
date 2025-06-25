@@ -12,7 +12,7 @@ if str(_tools_dir) not in sys.path:
     sys.path.insert(0, str(_tools_dir))
 
 # 絶対インポートを使用
-from database_consistency_checker.core.models import ConsistencyReport, CheckResult, CheckSeverity
+from shared.core.models import ConsistencyReport, CheckResult, CheckSeverity
 from database_consistency_checker.core.check_definitions import get_japanese_check_name, get_all_check_definitions
 
 

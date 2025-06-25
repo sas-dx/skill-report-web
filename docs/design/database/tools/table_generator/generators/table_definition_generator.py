@@ -19,7 +19,7 @@ from shared.core.logger import DatabaseToolsLogger, get_logger
 from shared.core.config import DatabaseToolsConfig
 from shared.core.models import TableDefinition, GenerationResult, ProcessingResult, BusinessColumnDefinition
 from table_generator.utils.yaml_loader import YamlLoader
-from table_generator.utils.file_utils import FileUtils
+from shared.utils.file_utils import FileManager as FileUtils
 from table_generator.utils.sql_utils import SqlUtils
 from table_generator.generators.common_columns import CommonColumns
 from table_generator.generators.ddl_generator import DDLGenerator

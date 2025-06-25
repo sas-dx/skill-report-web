@@ -1,527 +1,353 @@
 """
-統一例外クラス定義
-データベースツール統合における統一エラーハンドリング
+統合例外処理システム
+全ツールで使用する共通例外クラス
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
-実装日: 2025-06-08
+実装日: 2025-06-25
 実装者: AI駆動開発チーム
 """
 
-from datetime import datetime
-from typing import Dict, Any, Optional, List
-from enum import Enum
+from typing import Optional, Dict, Any, List
+from pathlib import Path
 
 
-class ErrorSeverity(Enum):
-    """エラー重要度定義"""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
-
-class ErrorCategory(Enum):
-    """エラーカテゴリ定義"""
-    VALIDATION = "validation"
-    FILE_OPERATION = "file_operation"
-    MODEL_CONVERSION = "model_conversion"
-    PARSING = "parsing"
-    GENERATION = "generation"
-    CONSISTENCY_CHECK = "consistency_check"
-    CONFIGURATION = "configuration"
-    SYSTEM = "system"
-
-
-class DatabaseToolsException(Exception):
-    """統一例外基底クラス"""
+class DatabaseToolsError(Exception):
+    """データベースツール基底例外クラス"""
     
     def __init__(
-        self,
-        message: str,
-        error_code: str = None,
-        category: ErrorCategory = ErrorCategory.SYSTEM,
-        severity: ErrorSeverity = ErrorSeverity.MEDIUM,
+        self, 
+        message: str, 
+        error_code: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
-        suggestion: Optional[str] = None,
-        file_path: Optional[str] = None,
-        line_number: Optional[int] = None
+        suggestions: Optional[List[str]] = None
     ):
         super().__init__(message)
         self.message = message
-        self.timestamp = datetime.now()  # timestampを先に設定
-        self.error_code = error_code or self._generate_error_code()
-        self.category = category
-        self.severity = severity
+        self.error_code = error_code or self.__class__.__name__
         self.details = details or {}
-        self.suggestion = suggestion
-        self.file_path = file_path
-        self.line_number = line_number
-    
-    def _generate_error_code(self) -> str:
-        """エラーコード自動生成"""
-        class_name = self.__class__.__name__
-        timestamp = self.timestamp.strftime("%Y%m%d%H%M%S")
-        return f"{class_name}_{timestamp}"
+        self.suggestions = suggestions or []
     
     def to_dict(self) -> Dict[str, Any]:
         """例外情報を辞書形式で取得"""
         return {
+            'error_type': self.__class__.__name__,
             'error_code': self.error_code,
             'message': self.message,
-            'category': self.category.value,
-            'severity': self.severity.value,
             'details': self.details,
-            'suggestion': self.suggestion,
-            'file_path': self.file_path,
-            'line_number': self.line_number,
-            'timestamp': self.timestamp.isoformat(),
-            'exception_type': self.__class__.__name__
+            'suggestions': self.suggestions
         }
-    
-    def __str__(self) -> str:
-        """文字列表現"""
-        parts = [f"[{self.error_code}] {self.message}"]
-        
-        if self.file_path:
-            location = self.file_path
-            if self.line_number:
-                location += f":{self.line_number}"
-            parts.append(f"Location: {location}")
-        
-        if self.suggestion:
-            parts.append(f"Suggestion: {self.suggestion}")
-        
-        return " | ".join(parts)
 
 
-class ValidationError(DatabaseToolsException):
-    """バリデーションエラー"""
-    
-    def __init__(
-        self,
-        message: str,
-        field_name: Optional[str] = None,
-        field_value: Any = None,
-        validation_rule: Optional[str] = None,
-        **kwargs
-    ):
-        super().__init__(
-            message,
-            category=ErrorCategory.VALIDATION,
-            severity=ErrorSeverity.MEDIUM,
-            **kwargs
-        )
-        self.field_name = field_name
-        self.field_value = field_value
-        self.validation_rule = validation_rule
-        
-        # 詳細情報を追加
-        if field_name:
-            self.details['field_name'] = field_name
-        if field_value is not None:
-            self.details['field_value'] = str(field_value)
-        if validation_rule:
-            self.details['validation_rule'] = validation_rule
+class ConfigurationError(DatabaseToolsError):
+    """設定関連エラー"""
+    pass
 
 
-class FileOperationError(DatabaseToolsException):
+class FileOperationError(DatabaseToolsError):
     """ファイル操作エラー"""
     
     def __init__(
-        self,
-        message: str,
+        self, 
+        message: str, 
+        file_path: Optional[Path] = None,
         operation: Optional[str] = None,
-        file_path: Optional[str] = None,
         **kwargs
     ):
-        super().__init__(
-            message,
-            category=ErrorCategory.FILE_OPERATION,
-            severity=ErrorSeverity.HIGH,
-            file_path=file_path,
-            **kwargs
-        )
+        super().__init__(message, **kwargs)
+        self.file_path = file_path
         self.operation = operation
-        
+        if file_path:
+            self.details['file_path'] = str(file_path)
         if operation:
             self.details['operation'] = operation
 
 
-class ModelConversionError(DatabaseToolsException):
-    """モデル変換エラー"""
+class ValidationError(DatabaseToolsError):
+    """検証エラー"""
     
     def __init__(
-        self,
-        message: str,
-        source_model: Optional[str] = None,
-        target_model: Optional[str] = None,
-        conversion_step: Optional[str] = None,
+        self, 
+        message: str, 
+        field: Optional[str] = None,
+        value: Optional[Any] = None,
+        expected: Optional[str] = None,
         **kwargs
     ):
-        super().__init__(
-            message,
-            category=ErrorCategory.MODEL_CONVERSION,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
-        self.source_model = source_model
-        self.target_model = target_model
-        self.conversion_step = conversion_step
+        super().__init__(message, **kwargs)
+        self.field = field
+        self.value = value
+        self.expected = expected
         
-        if source_model:
-            self.details['source_model'] = source_model
-        if target_model:
-            self.details['target_model'] = target_model
-        if conversion_step:
-            self.details['conversion_step'] = conversion_step
+        if field:
+            self.details['field'] = field
+        if value is not None:
+            self.details['value'] = str(value)
+        if expected:
+            self.details['expected'] = expected
 
 
-class ParsingError(DatabaseToolsException):
-    """解析エラー"""
+class YamlFormatError(ValidationError):
+    """YAML形式エラー"""
     
     def __init__(
-        self,
-        message: str,
-        parser_type: Optional[str] = None,
-        source_format: Optional[str] = None,
+        self, 
+        message: str, 
+        file_path: Optional[Path] = None,
+        line_number: Optional[int] = None,
         **kwargs
     ):
-        super().__init__(
-            message,
-            category=ErrorCategory.PARSING,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
-        self.parser_type = parser_type
-        self.source_format = source_format
+        super().__init__(message, **kwargs)
+        self.file_path = file_path
+        self.line_number = line_number
         
-        if parser_type:
-            self.details['parser_type'] = parser_type
-        if source_format:
-            self.details['source_format'] = source_format
+        if file_path:
+            self.details['file_path'] = str(file_path)
+        if line_number:
+            self.details['line_number'] = line_number
 
 
-class GenerationError(DatabaseToolsException):
-    """生成エラー"""
+class TableDefinitionError(DatabaseToolsError):
+    """テーブル定義エラー"""
     
     def __init__(
-        self,
-        message: str,
-        generator_type: Optional[str] = None,
-        target_format: Optional[str] = None,
+        self, 
+        message: str, 
+        table_name: Optional[str] = None,
+        column_name: Optional[str] = None,
         **kwargs
     ):
-        super().__init__(
-            message,
-            category=ErrorCategory.GENERATION,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
-        self.generator_type = generator_type
-        self.target_format = target_format
+        super().__init__(message, **kwargs)
+        self.table_name = table_name
+        self.column_name = column_name
         
-        if generator_type:
-            self.details['generator_type'] = generator_type
-        if target_format:
-            self.details['target_format'] = target_format
+        if table_name:
+            self.details['table_name'] = table_name
+        if column_name:
+            self.details['column_name'] = column_name
 
 
-class ConsistencyCheckError(DatabaseToolsException):
-    """整合性チェックエラー"""
+class ConsistencyError(DatabaseToolsError):
+    """整合性エラー"""
     
     def __init__(
-        self,
-        message: str,
-        check_type: Optional[str] = None,
-        inconsistency_details: Optional[List[Dict]] = None,
+        self, 
+        message: str, 
+        source_file: Optional[Path] = None,
+        target_file: Optional[Path] = None,
+        inconsistency_type: Optional[str] = None,
         **kwargs
     ):
-        super().__init__(
-            message,
-            category=ErrorCategory.CONSISTENCY_CHECK,
-            severity=ErrorSeverity.MEDIUM,
-            **kwargs
-        )
-        self.check_type = check_type
-        self.inconsistency_details = inconsistency_details or []
-        
-        if check_type:
-            self.details['check_type'] = check_type
-        if inconsistency_details:
-            self.details['inconsistency_count'] = len(inconsistency_details)
-            self.details['inconsistencies'] = inconsistency_details
-
-
-class ConfigurationError(DatabaseToolsException):
-    """設定エラー"""
-    
-    def __init__(
-        self,
-        message: str,
-        config_key: Optional[str] = None,
-        config_value: Any = None,
-        **kwargs
-    ):
-        super().__init__(
-            message,
-            category=ErrorCategory.CONFIGURATION,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
-        self.config_key = config_key
-        self.config_value = config_value
-        
-        if config_key:
-            self.details['config_key'] = config_key
-        if config_value is not None:
-            self.details['config_value'] = str(config_value)
-
-
-class SystemError(DatabaseToolsException):
-    """システムエラー"""
-    
-    def __init__(
-        self,
-        message: str,
-        system_component: Optional[str] = None,
-        **kwargs
-    ):
-        super().__init__(
-            message,
-            category=ErrorCategory.SYSTEM,
-            severity=ErrorSeverity.CRITICAL,
-            **kwargs
-        )
-        self.system_component = system_component
-        
-        if system_component:
-            self.details['system_component'] = system_component
-
-
-class YamlParsingError(ParsingError):
-    """YAML解析エラー"""
-    
-    def __init__(
-        self,
-        message: str,
-        yaml_content: Optional[str] = None,
-        **kwargs
-    ):
-        super().__init__(
-            message,
-            parser_type="yaml",
-            source_format="yaml",
-            **kwargs
-        )
-        self.yaml_content = yaml_content
-        
-        if yaml_content:
-            self.details['yaml_content_length'] = len(yaml_content)
-
-
-class BackupError(DatabaseToolsException):
-    """バックアップエラー"""
-    
-    def __init__(
-        self,
-        message: str,
-        source_file: Optional[str] = None,
-        backup_file: Optional[str] = None,
-        **kwargs
-    ):
-        super().__init__(
-            message,
-            category=ErrorCategory.FILE_OPERATION,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
+        super().__init__(message, **kwargs)
         self.source_file = source_file
-        self.backup_file = backup_file
+        self.target_file = target_file
+        self.inconsistency_type = inconsistency_type
         
         if source_file:
             self.details['source_file'] = str(source_file)
-        if backup_file:
-            self.details['backup_file'] = str(backup_file)
+        if target_file:
+            self.details['target_file'] = str(target_file)
+        if inconsistency_type:
+            self.details['inconsistency_type'] = inconsistency_type
 
 
-# 例外ハンドリングユーティリティ
-class ExceptionHandler:
-    """統一例外ハンドリングユーティリティ"""
-    
-    @staticmethod
-    def handle_and_log(exception: DatabaseToolsException, logger=None):
-        """例外をログに記録"""
-        if logger:
-            log_method = {
-                ErrorSeverity.LOW: logger.debug,
-                ErrorSeverity.MEDIUM: logger.warning,
-                ErrorSeverity.HIGH: logger.error,
-                ErrorSeverity.CRITICAL: logger.critical
-            }.get(exception.severity, logger.error)
-            
-            log_method(f"Exception occurred: {exception}")
-            if exception.details:
-                logger.debug(f"Exception details: {exception.details}")
-    
-    @staticmethod
-    def handle_file_operation_error(func):
-        """ファイル操作エラーハンドリングデコレータ"""
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except FileOperationError:
-                # FileOperationErrorはそのまま再発生
-                raise
-            except Exception as e:
-                # その他の例外をFileOperationErrorに変換
-                raise FileOperationError(
-                    f"ファイル操作中にエラーが発生しました: {str(e)}",
-                    operation=func.__name__
-                ) from e
-        return wrapper
-    
-    @staticmethod
-    def handle_yaml_parsing_error(func):
-        """YAML解析エラーハンドリングデコレータ"""
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except YamlParsingError:
-                # YamlParsingErrorはそのまま再発生
-                raise
-            except Exception as e:
-                # その他の例外をYamlParsingErrorに変換
-                raise YamlParsingError(
-                    f"YAML解析中にエラーが発生しました: {str(e)}"
-                ) from e
-        return wrapper
-    
-    @staticmethod
-    def handle_parsing_error(func):
-        """一般的な解析エラーハンドリングデコレータ"""
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except ParsingError:
-                # ParsingErrorはそのまま再発生
-                raise
-            except Exception as e:
-                # その他の例外をParsingErrorに変換
-                raise ParsingError(
-                    f"解析中にエラーが発生しました: {str(e)}",
-                    parser_type=func.__name__
-                ) from e
-        return wrapper
-    
-    @staticmethod
-    def handle_generation_error(func):
-        """生成エラーハンドリングデコレータ"""
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except GenerationError:
-                # GenerationErrorはそのまま再発生
-                raise
-            except Exception as e:
-                # その他の例外をGenerationErrorに変換
-                raise GenerationError(
-                    f"生成中にエラーが発生しました: {str(e)}",
-                    generator_type=func.__name__
-                ) from e
-        return wrapper
-    
-    @staticmethod
-    def create_error_report(exceptions: List[DatabaseToolsException]) -> Dict[str, Any]:
-        """例外リストからエラーレポートを生成"""
-        if not exceptions:
-            return {'total_errors': 0, 'errors': []}
-        
-        # カテゴリ別集計
-        category_counts = {}
-        severity_counts = {}
-        
-        error_list = []
-        for exc in exceptions:
-            error_list.append(exc.to_dict())
-            
-            # カテゴリ別カウント
-            category = exc.category.value
-            category_counts[category] = category_counts.get(category, 0) + 1
-            
-            # 重要度別カウント
-            severity = exc.severity.value
-            severity_counts[severity] = severity_counts.get(severity, 0) + 1
-        
-        return {
-            'total_errors': len(exceptions),
-            'category_summary': category_counts,
-            'severity_summary': severity_counts,
-            'errors': error_list,
-            'generated_at': datetime.now().isoformat()
-        }
-
-
-# 便利な例外生成関数
-def validation_error(message: str, field_name: str = None, **kwargs) -> ValidationError:
-    """バリデーションエラー生成"""
-    return ValidationError(message, field_name=field_name, **kwargs)
-
-
-def file_not_found_error(file_path: str, **kwargs) -> FileOperationError:
-    """ファイル未発見エラー生成"""
-    return FileOperationError(
-        f"File not found: {file_path}",
-        operation="read",
-        file_path=file_path,
-        suggestion="Check if the file path is correct and the file exists",
-        **kwargs
-    )
-
-
-def parsing_error(message: str, file_path: str = None, **kwargs) -> ParsingError:
-    """解析エラー生成"""
-    return ParsingError(
-        message,
-        file_path=file_path,
-        suggestion="Check the file format and syntax",
-        **kwargs
-    )
-
-
-def model_conversion_error(source: str, target: str, **kwargs) -> ModelConversionError:
-    """モデル変換エラー生成"""
-    return ModelConversionError(
-        f"Failed to convert from {source} to {target}",
-        source_model=source,
-        target_model=target,
-        **kwargs
-    )
-
-
-class DataTransformError(DatabaseToolsException):
-    """データ変換エラー"""
+class DatabaseConnectionError(DatabaseToolsError):
+    """データベース接続エラー"""
     
     def __init__(
-        self,
-        message: str,
-        transform_type: Optional[str] = None,
-        source_data: Any = None,
+        self, 
+        message: str, 
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        database: Optional[str] = None,
         **kwargs
     ):
-        super().__init__(
-            message,
-            category=ErrorCategory.MODEL_CONVERSION,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
-        self.transform_type = transform_type
-        self.source_data = source_data
+        super().__init__(message, **kwargs)
+        self.host = host
+        self.port = port
+        self.database = database
         
-        if transform_type:
-            self.details['transform_type'] = transform_type
-        if source_data is not None:
-            self.details['source_data_type'] = type(source_data).__name__
+        if host:
+            self.details['host'] = host
+        if port:
+            self.details['port'] = port
+        if database:
+            self.details['database'] = database
 
 
-# 後方互換性のためのエイリアス
-ConversionError = ModelConversionError
+class GenerationError(DatabaseToolsError):
+    """生成処理エラー"""
+    
+    def __init__(
+        self, 
+        message: str, 
+        generation_type: Optional[str] = None,
+        target_file: Optional[Path] = None,
+        **kwargs
+    ):
+        super().__init__(message, **kwargs)
+        self.generation_type = generation_type
+        self.target_file = target_file
+        
+        if generation_type:
+            self.details['generation_type'] = generation_type
+        if target_file:
+            self.details['target_file'] = str(target_file)
+
+
+class ParsingError(DatabaseToolsError):
+    """解析エラー"""
+    
+    def __init__(
+        self, 
+        message: str, 
+        parser_type: Optional[str] = None,
+        source_file: Optional[Path] = None,
+        line_number: Optional[int] = None,
+        **kwargs
+    ):
+        super().__init__(message, **kwargs)
+        self.parser_type = parser_type
+        self.source_file = source_file
+        self.line_number = line_number
+        
+        if parser_type:
+            self.details['parser_type'] = parser_type
+        if source_file:
+            self.details['source_file'] = str(source_file)
+        if line_number:
+            self.details['line_number'] = line_number
+
+
+class ToolExecutionError(DatabaseToolsError):
+    """ツール実行エラー"""
+    
+    def __init__(
+        self, 
+        message: str, 
+        tool_name: Optional[str] = None,
+        command: Optional[str] = None,
+        exit_code: Optional[int] = None,
+        **kwargs
+    ):
+        super().__init__(message, **kwargs)
+        self.tool_name = tool_name
+        self.command = command
+        self.exit_code = exit_code
+        
+        if tool_name:
+            self.details['tool_name'] = tool_name
+        if command:
+            self.details['command'] = command
+        if exit_code is not None:
+            self.details['exit_code'] = exit_code
+
+
+def handle_exception(
+    exception: Exception, 
+    logger=None, 
+    context: Optional[Dict[str, Any]] = None
+) -> DatabaseToolsError:
+    """
+    例外を統一形式で処理
+    
+    Args:
+        exception: 発生した例外
+        logger: ログ出力用ロガー
+        context: 追加のコンテキスト情報
+        
+    Returns:
+        DatabaseToolsError: 統一形式の例外
+    """
+    context = context or {}
+    
+    # 既にDatabaseToolsErrorの場合はそのまま返す
+    if isinstance(exception, DatabaseToolsError):
+        if logger:
+            logger.error(f"ツールエラー: {exception.message}", extra=exception.details)
+        return exception
+    
+    # 標準例外を統一形式に変換
+    if isinstance(exception, FileNotFoundError):
+        error = FileOperationError(
+            message=f"ファイルが見つかりません: {exception}",
+            operation="read",
+            details=context
+        )
+    elif isinstance(exception, PermissionError):
+        error = FileOperationError(
+            message=f"ファイルアクセス権限がありません: {exception}",
+            operation="access",
+            details=context
+        )
+    elif isinstance(exception, ValueError):
+        error = ValidationError(
+            message=f"値が無効です: {exception}",
+            details=context
+        )
+    elif isinstance(exception, KeyError):
+        error = ValidationError(
+            message=f"必須キーが見つかりません: {exception}",
+            details=context
+        )
+    else:
+        error = DatabaseToolsError(
+            message=f"予期しないエラー: {exception}",
+            error_code="UNEXPECTED_ERROR",
+            details=context
+        )
+    
+    if logger:
+        logger.error(f"例外処理: {error.message}", extra=error.details)
+    
+    return error
+
+
+def create_suggestion_list(error_type: str, details: Dict[str, Any]) -> List[str]:
+    """
+    エラータイプに基づいて修正提案を生成
+    
+    Args:
+        error_type: エラータイプ
+        details: エラー詳細情報
+        
+    Returns:
+        List[str]: 修正提案リスト
+    """
+    suggestions = []
+    
+    if error_type == "FileNotFoundError":
+        suggestions.extend([
+            "ファイルパスが正しいか確認してください",
+            "ファイルが存在するか確認してください",
+            "相対パスではなく絶対パスを使用してみてください"
+        ])
+    
+    elif error_type == "YamlFormatError":
+        suggestions.extend([
+            "YAML構文が正しいか確認してください",
+            "インデントが正しいか確認してください",
+            "必須セクションが存在するか確認してください"
+        ])
+    
+    elif error_type == "ValidationError":
+        suggestions.extend([
+            "入力値の形式を確認してください",
+            "必須項目が入力されているか確認してください",
+            "データ型が正しいか確認してください"
+        ])
+    
+    elif error_type == "ConsistencyError":
+        suggestions.extend([
+            "関連ファイル間の整合性を確認してください",
+            "自動修正ツールの使用を検討してください",
+            "手動で不整合箇所を修正してください"
+        ])
+    
+    elif error_type == "DatabaseConnectionError":
+        suggestions.extend([
+            "データベースサーバーが起動しているか確認してください",
+            "接続設定（ホスト、ポート、認証情報）を確認してください",
+            "ネットワーク接続を確認してください"
+        ])
+    
+    return suggestions

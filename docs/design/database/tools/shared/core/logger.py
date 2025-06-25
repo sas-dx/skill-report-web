@@ -1,103 +1,124 @@
 """
-統合ログ管理システム
-データベースツール統合における統一ログ機能
+統合ログ機能
+全ツールで使用する共通ログ機能
 
 要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
-実装日: 2025-06-08
+実装日: 2025-06-25
 実装者: AI駆動開発チーム
 """
 
 import logging
-import sys
+import logging.handlers
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Optional, Dict, Any, Union
 from datetime import datetime
 import json
-
-from .config import get_config
+import sys
+import traceback
 
 
 class DatabaseToolsLogger:
-    """統合ログ管理クラス"""
+    """データベースツール統合ログクラス"""
     
-    def __init__(self, name: str = "database_tools"):
-        self.config = get_config()
+    def __init__(self, name: str, config: Optional['Config'] = None):
+        """ログ初期化"""
         self.name = name
-        self.logger = self._setup_logger()
-    
-    def _setup_logger(self) -> logging.Logger:
-        """ログ設定の初期化"""
-        logger = logging.getLogger(self.name)
+        self.config = config
+        self.logger = logging.getLogger(name)
         
-        # 既存のハンドラーをクリア
-        logger.handlers.clear()
+        # 重複ハンドラー防止
+        if not self.logger.handlers:
+            self._setup_logger()
+    
+    def _setup_logger(self):
+        """ログ設定"""
+        if self.config:
+            log_config = self.config.logging
+        else:
+            # デフォルト設定
+            from .config import LogConfig
+            log_config = LogConfig()
         
         # ログレベル設定
-        log_level = getattr(logging, self.config.log_level.value.upper(), logging.INFO)
-        logger.setLevel(log_level)
+        level = getattr(logging, log_config.level.upper(), logging.INFO)
+        self.logger.setLevel(level)
         
-        # フォーマッター設定
+        # フォーマッター作成
         formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            log_config.format,
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         
         # コンソールハンドラー
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(log_level)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+        if log_config.console_enabled:
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setLevel(level)
+            console_handler.setFormatter(formatter)
+            self.logger.addHandler(console_handler)
         
-        # ファイルハンドラー（設定されている場合）
-        if hasattr(self.config, 'log_file') and self.config.log_file:
-            log_file = Path(self.config.log_file)
-            log_file.parent.mkdir(parents=True, exist_ok=True)
+        # ファイルハンドラー
+        if log_config.file_enabled:
+            log_config.log_dir.mkdir(parents=True, exist_ok=True)
+            log_file = log_config.log_dir / f"{self.name}.log"
             
-            file_handler = logging.FileHandler(log_file, encoding='utf-8')
-            file_handler.setLevel(log_level)
+            file_handler = logging.handlers.RotatingFileHandler(
+                log_file,
+                maxBytes=log_config.max_file_size,
+                backupCount=log_config.backup_count,
+                encoding=log_config.encoding
+            )
+            file_handler.setLevel(level)
             file_handler.setFormatter(formatter)
-            logger.addHandler(file_handler)
-        
-        # 重複ログ防止
-        logger.propagate = False
-        
-        return logger
+            self.logger.addHandler(file_handler)
     
-    def debug(self, message: str, extra_data: Optional[Dict[str, Any]] = None):
+    def debug(self, message: str, extra: Optional[Dict[str, Any]] = None):
         """デバッグログ"""
-        self._log_with_extra(logging.DEBUG, message, extra_data)
+        self._log(logging.DEBUG, message, extra)
     
-    def info(self, message: str, extra_data: Optional[Dict[str, Any]] = None):
+    def info(self, message: str, extra: Optional[Dict[str, Any]] = None):
         """情報ログ"""
-        self._log_with_extra(logging.INFO, message, extra_data)
+        self._log(logging.INFO, message, extra)
     
-    def warning(self, message: str, extra_data: Optional[Dict[str, Any]] = None):
+    def warning(self, message: str, extra: Optional[Dict[str, Any]] = None):
         """警告ログ"""
-        self._log_with_extra(logging.WARNING, message, extra_data)
+        self._log(logging.WARNING, message, extra)
     
-    def error(self, message: str, extra_data: Optional[Dict[str, Any]] = None):
+    def error(self, message: str, extra: Optional[Dict[str, Any]] = None):
         """エラーログ"""
-        self._log_with_extra(logging.ERROR, message, extra_data)
+        self._log(logging.ERROR, message, extra)
     
-    def critical(self, message: str, extra_data: Optional[Dict[str, Any]] = None):
+    def critical(self, message: str, extra: Optional[Dict[str, Any]] = None):
         """重大エラーログ"""
-        self._log_with_extra(logging.CRITICAL, message, extra_data)
+        self._log(logging.CRITICAL, message, extra)
     
-    def _log_with_extra(self, level: int, message: str, extra_data: Optional[Dict[str, Any]]):
-        """追加データ付きログ出力"""
-        if extra_data:
-            # 追加データをJSON形式で付加
-            extra_json = json.dumps(extra_data, ensure_ascii=False, default=str)
-            full_message = f"{message} | Extra: {extra_json}"
+    def exception(self, message: str, extra: Optional[Dict[str, Any]] = None):
+        """例外ログ（スタックトレース付き）"""
+        extra = extra or {}
+        extra['exception'] = traceback.format_exc()
+        self._log(logging.ERROR, message, extra)
+    
+    def _log(self, level: int, message: str, extra: Optional[Dict[str, Any]] = None):
+        """内部ログ処理"""
+        if extra:
+            # 構造化ログ情報を追加
+            formatted_extra = self._format_extra(extra)
+            full_message = f"{message} | {formatted_extra}"
         else:
             full_message = message
         
         self.logger.log(level, full_message)
     
+    def _format_extra(self, extra: Dict[str, Any]) -> str:
+        """追加情報のフォーマット"""
+        try:
+            return json.dumps(extra, ensure_ascii=False, default=str)
+        except Exception:
+            return str(extra)
+    
     def log_file_operation(self, file_path: Path, operation: str, 
                           success: bool, **kwargs):
         """ファイル操作ログ"""
-        log_data = {
+        extra = {
             'file_path': str(file_path),
             'operation': operation,
             'success': success,
@@ -106,255 +127,288 @@ class DatabaseToolsLogger:
         }
         
         if success:
-            self.info(f"File operation successful: {operation} on {file_path}", log_data)
+            self.info(f"ファイル操作成功: {operation} - {file_path}", extra)
         else:
-            self.error(f"File operation failed: {operation} on {file_path}", log_data)
+            self.error(f"ファイル操作失敗: {operation} - {file_path}", extra)
     
-    def log_validation_result(self, validation_type: str, result: bool, 
-                             details: Optional[Dict[str, Any]] = None):
-        """バリデーション結果ログ"""
-        log_data = {
-            'validation_type': validation_type,
+    def log_check_result(self, check_name: str, table_name: Optional[str], 
+                        result: str, **kwargs):
+        """チェック結果ログ"""
+        extra = {
+            'check_name': check_name,
+            'table_name': table_name,
             'result': result,
+            'timestamp': datetime.now().isoformat(),
+            **kwargs
+        }
+        
+        if result in ['SUCCESS', 'PASSED']:
+            self.info(f"チェック成功: {check_name} - {table_name}", extra)
+        elif result in ['WARNING']:
+            self.warning(f"チェック警告: {check_name} - {table_name}", extra)
+        else:
+            self.error(f"チェック失敗: {check_name} - {table_name}", extra)
+    
+    def log_generation_result(self, table_name: str, file_type: str, 
+                            success: bool, **kwargs):
+        """生成結果ログ"""
+        extra = {
+            'table_name': table_name,
+            'file_type': file_type,
+            'success': success,
+            'timestamp': datetime.now().isoformat(),
+            **kwargs
+        }
+        
+        if success:
+            self.info(f"ファイル生成成功: {file_type} - {table_name}", extra)
+        else:
+            self.error(f"ファイル生成失敗: {file_type} - {table_name}", extra)
+    
+    def log_performance(self, operation: str, duration: float, **kwargs):
+        """パフォーマンスログ"""
+        extra = {
+            'operation': operation,
+            'duration_seconds': duration,
+            'timestamp': datetime.now().isoformat(),
+            **kwargs
+        }
+        
+        if duration > 10.0:  # 10秒以上は警告
+            self.warning(f"処理時間長: {operation} ({duration:.2f}秒)", extra)
+        else:
+            self.debug(f"処理時間: {operation} ({duration:.2f}秒)", extra)
+    
+    def log_tool_start(self, tool_name: str, **kwargs):
+        """ツール開始ログ"""
+        extra = {
+            'tool_name': tool_name,
+            'start_time': datetime.now().isoformat(),
+            **kwargs
+        }
+        self.info(f"ツール開始: {tool_name}", extra)
+    
+    def log_tool_end(self, tool_name: str, success: bool, **kwargs):
+        """ツール終了ログ"""
+        extra = {
+            'tool_name': tool_name,
+            'end_time': datetime.now().isoformat(),
+            'success': success,
+            **kwargs
+        }
+        
+        if success:
+            self.info(f"ツール正常終了: {tool_name}", extra)
+        else:
+            self.error(f"ツール異常終了: {tool_name}", extra)
+
+
+class PerformanceLogger:
+    """パフォーマンス測定ログクラス"""
+    
+    def __init__(self, logger: DatabaseToolsLogger):
+        self.logger = logger
+        self.start_times: Dict[str, datetime] = {}
+    
+    def start(self, operation: str):
+        """処理開始時刻を記録"""
+        self.start_times[operation] = datetime.now()
+        self.logger.debug(f"処理開始: {operation}")
+    
+    def end(self, operation: str, **kwargs):
+        """処理終了時刻を記録し、実行時間をログ出力"""
+        if operation in self.start_times:
+            start_time = self.start_times[operation]
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            self.logger.log_performance(operation, duration, **kwargs)
+            del self.start_times[operation]
+        else:
+            self.logger.warning(f"処理開始時刻が記録されていません: {operation}")
+    
+    def measure(self, operation: str):
+        """コンテキストマネージャーとして使用"""
+        return PerformanceMeasurer(self, operation)
+
+
+class PerformanceMeasurer:
+    """パフォーマンス測定コンテキストマネージャー"""
+    
+    def __init__(self, perf_logger: PerformanceLogger, operation: str):
+        self.perf_logger = perf_logger
+        self.operation = operation
+    
+    def __enter__(self):
+        self.perf_logger.start(self.operation)
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        success = exc_type is None
+        self.perf_logger.end(self.operation, success=success)
+
+
+class StructuredLogger:
+    """構造化ログクラス"""
+    
+    def __init__(self, logger: DatabaseToolsLogger):
+        self.logger = logger
+    
+    def log_table_processing(self, table_name: str, operation: str, 
+                           status: str, **kwargs):
+        """テーブル処理ログ"""
+        data = {
+            'table_name': table_name,
+            'operation': operation,
+            'status': status,
+            'timestamp': datetime.now().isoformat(),
+            **kwargs
+        }
+        
+        message = f"テーブル処理: {operation} - {table_name} ({status})"
+        
+        if status in ['SUCCESS', 'COMPLETED']:
+            self.logger.info(message, data)
+        elif status in ['WARNING', 'PARTIAL']:
+            self.logger.warning(message, data)
+        else:
+            self.logger.error(message, data)
+    
+    def log_validation_result(self, validator: str, target: str, 
+                            result: bool, details: Optional[Dict] = None):
+        """検証結果ログ"""
+        data = {
+            'validator': validator,
+            'target': target,
+            'result': 'PASS' if result else 'FAIL',
             'timestamp': datetime.now().isoformat()
         }
         
         if details:
-            log_data.update(details)
+            data['details'] = details
+        
+        message = f"検証結果: {validator} - {target} ({'PASS' if result else 'FAIL'})"
         
         if result:
-            self.info(f"Validation passed: {validation_type}", log_data)
+            self.logger.info(message, data)
         else:
-            self.warning(f"Validation failed: {validation_type}", log_data)
+            self.logger.error(message, data)
     
-    def log_generation_result(self, generator_type: str, target_file: Path, 
-                             success: bool, **kwargs):
-        """生成結果ログ"""
-        log_data = {
-            'generator_type': generator_type,
-            'target_file': str(target_file),
-            'success': success,
+    def log_file_statistics(self, file_type: str, count: int, 
+                          total_size: int, **kwargs):
+        """ファイル統計ログ"""
+        data = {
+            'file_type': file_type,
+            'count': count,
+            'total_size_bytes': total_size,
+            'total_size_mb': round(total_size / (1024 * 1024), 2),
             'timestamp': datetime.now().isoformat(),
             **kwargs
         }
         
-        if success:
-            self.info(f"Generation successful: {generator_type} -> {target_file}", log_data)
-        else:
-            self.error(f"Generation failed: {generator_type} -> {target_file}", log_data)
-    
-    def log_consistency_check(self, check_type: str, table_name: str, 
-                             issues_found: int, **kwargs):
-        """整合性チェックログ"""
-        log_data = {
-            'check_type': check_type,
-            'table_name': table_name,
-            'issues_found': issues_found,
-            'timestamp': datetime.now().isoformat(),
-            **kwargs
-        }
-        
-        if issues_found == 0:
-            self.info(f"Consistency check passed: {check_type} for {table_name}", log_data)
-        else:
-            self.warning(f"Consistency check found {issues_found} issues: {check_type} for {table_name}", log_data)
-    
-    def log_performance_metric(self, operation: str, duration_ms: float, 
-                              **kwargs):
-        """パフォーマンスメトリクスログ"""
-        log_data = {
-            'operation': operation,
-            'duration_ms': duration_ms,
-            'timestamp': datetime.now().isoformat(),
-            **kwargs
-        }
-        
-        # パフォーマンス閾値チェック
-        if duration_ms > 5000:  # 5秒以上
-            self.warning(f"Slow operation detected: {operation} took {duration_ms}ms", log_data)
-        else:
-            self.debug(f"Operation completed: {operation} took {duration_ms}ms", log_data)
-    
-    def log_tool_execution(self, tool_name: str, command: str, 
-                          success: bool, **kwargs):
-        """ツール実行ログ"""
-        log_data = {
-            'tool_name': tool_name,
-            'command': command,
-            'success': success,
-            'timestamp': datetime.now().isoformat(),
-            **kwargs
-        }
-        
-        if success:
-            self.info(f"Tool execution successful: {tool_name} - {command}", log_data)
-        else:
-            self.error(f"Tool execution failed: {tool_name} - {command}", log_data)
+        message = f"ファイル統計: {file_type} - {count}件 ({data['total_size_mb']}MB)"
+        self.logger.info(message, data)
 
 
-class StructuredLogger:
-    """構造化ログ出力クラス"""
-    
-    def __init__(self, base_logger: DatabaseToolsLogger):
-        self.base_logger = base_logger
-    
-    def log_structured(self, level: str, event_type: str, 
-                      data: Dict[str, Any]):
-        """構造化ログ出力"""
-        structured_data = {
-            'event_type': event_type,
-            'timestamp': datetime.now().isoformat(),
-            **data
-        }
-        
-        message = f"[{event_type}]"
-        
-        log_method = getattr(self.base_logger, level.lower(), self.base_logger.info)
-        log_method(message, structured_data)
-    
-    def log_table_operation(self, table_name: str, operation: str, 
-                           status: str, **kwargs):
-        """テーブル操作ログ"""
-        self.log_structured('info', 'table_operation', {
-            'table_name': table_name,
-            'operation': operation,
-            'status': status,
-            **kwargs
-        })
-    
-    def log_consistency_result(self, check_name: str, result: Dict[str, Any]):
-        """整合性チェック結果ログ"""
-        self.log_structured('info', 'consistency_check', {
-            'check_name': check_name,
-            'result': result
-        })
-    
-    def log_generation_stats(self, generator: str, stats: Dict[str, Any]):
-        """生成統計ログ"""
-        self.log_structured('info', 'generation_stats', {
-            'generator': generator,
-            'stats': stats
-        })
+# グローバルインスタンス管理
+_logger_instances: Dict[str, DatabaseToolsLogger] = {}
 
 
-# グローバルロガーインスタンス
-_logger_instance: Optional[DatabaseToolsLogger] = None
-_structured_logger_instance: Optional[StructuredLogger] = None
+def get_logger(name: str = "database_tools", config: Optional['Config'] = None) -> DatabaseToolsLogger:
+    """グローバルログインスタンスを取得"""
+    if name not in _logger_instances:
+        _logger_instances[name] = DatabaseToolsLogger(name, config)
+    return _logger_instances[name]
 
 
-def get_logger(name: str = "database_tools") -> DatabaseToolsLogger:
-    """グローバルロガーインスタンスを取得"""
-    global _logger_instance
-    if _logger_instance is None:
-        _logger_instance = DatabaseToolsLogger(name)
-    return _logger_instance
+def get_performance_logger(name: str = "database_tools") -> PerformanceLogger:
+    """パフォーマンスログインスタンスを取得"""
+    logger = get_logger(name)
+    return PerformanceLogger(logger)
 
 
-def get_structured_logger() -> StructuredLogger:
-    """構造化ロガーインスタンスを取得"""
-    global _structured_logger_instance
-    if _structured_logger_instance is None:
-        base_logger = get_logger()
-        _structured_logger_instance = StructuredLogger(base_logger)
-    return _structured_logger_instance
+def get_structured_logger(name: str = "database_tools") -> StructuredLogger:
+    """構造化ログインスタンスを取得"""
+    logger = get_logger(name)
+    return StructuredLogger(logger)
 
 
-def setup_logging(log_level: str = "INFO", log_file: Optional[str] = None):
+def setup_logging(config: Optional['Config'] = None):
     """ログ設定の初期化"""
-    global _logger_instance, _structured_logger_instance
+    # ルートロガーの設定
+    root_logger = logging.getLogger()
     
-    # 既存インスタンスをクリア
-    _logger_instance = None
-    _structured_logger_instance = None
+    # 既存のハンドラーをクリア
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
     
-    # 新しいロガーを作成
-    logger = get_logger()
-    
-    # ログレベル更新
-    if log_level:
-        level = getattr(logging, log_level.upper(), logging.INFO)
-        logger.logger.setLevel(level)
-        for handler in logger.logger.handlers:
-            handler.setLevel(level)
-    
-    return logger
+    # データベースツール用ログの初期化
+    get_logger("database_tools", config)
+    get_logger("consistency_checker", config)
+    get_logger("table_generator", config)
+    get_logger("sample_data_generator", config)
 
 
-# 便利な関数
-def log_exception(exception: Exception, context: str = ""):
-    """例外ログ出力"""
-    logger = get_logger()
+def cleanup_logging():
+    """ログリソースのクリーンアップ"""
+    global _logger_instances
     
-    error_data = {
-        'exception_type': type(exception).__name__,
-        'exception_message': str(exception),
-        'context': context
-    }
+    for logger_instance in _logger_instances.values():
+        for handler in logger_instance.logger.handlers[:]:
+            handler.close()
+            logger_instance.logger.removeHandler(handler)
     
-    logger.error(f"Exception occurred: {type(exception).__name__}", error_data)
+    _logger_instances.clear()
 
 
-def log_timing(operation_name: str):
-    """タイミング測定デコレータ"""
+# ログデコレーター
+def log_execution(logger_name: str = "database_tools"):
+    """関数実行ログデコレーター"""
     def decorator(func):
         def wrapper(*args, **kwargs):
-            logger = get_logger()
-            start_time = datetime.now()
+            logger = get_logger(logger_name)
+            perf_logger = get_performance_logger(logger_name)
+            
+            func_name = f"{func.__module__}.{func.__name__}"
             
             try:
-                result = func(*args, **kwargs)
-                duration = (datetime.now() - start_time).total_seconds() * 1000
-                logger.log_performance_metric(operation_name, duration, success=True)
-                return result
+                with perf_logger.measure(func_name):
+                    logger.debug(f"関数開始: {func_name}")
+                    result = func(*args, **kwargs)
+                    logger.debug(f"関数正常終了: {func_name}")
+                    return result
             except Exception as e:
-                duration = (datetime.now() - start_time).total_seconds() * 1000
-                logger.log_performance_metric(operation_name, duration, success=False, error=str(e))
+                logger.exception(f"関数異常終了: {func_name} - {str(e)}")
                 raise
         
         return wrapper
     return decorator
 
 
-def set_logger(logger: DatabaseToolsLogger):
-    """グローバルロガーインスタンスを設定"""
-    global _logger_instance
-    _logger_instance = logger
-
-
-def reset_logger():
-    """グローバルロガーインスタンスをリセット"""
-    global _logger_instance, _structured_logger_instance
-    _logger_instance = None
-    _structured_logger_instance = None
-
-
-def log_function_call(func_name: str, args: tuple = None, kwargs: dict = None):
-    """関数呼び出しログ"""
-    logger = get_logger()
-    log_data = {
-        'function_name': func_name,
-        'timestamp': datetime.now().isoformat()
-    }
-    
-    if args:
-        log_data['args_count'] = len(args)
-    if kwargs:
-        log_data['kwargs_keys'] = list(kwargs.keys())
-    
-    logger.debug(f"Function called: {func_name}", log_data)
-
-
-def log_execution_time(func_name: str, duration_ms: float, success: bool = True):
-    """実行時間ログ"""
-    logger = get_logger()
-    log_data = {
-        'function_name': func_name,
-        'duration_ms': duration_ms,
-        'success': success,
-        'timestamp': datetime.now().isoformat()
-    }
-    
-    if duration_ms > 1000:  # 1秒以上
-        logger.warning(f"Slow function execution: {func_name} took {duration_ms}ms", log_data)
-    else:
-        logger.debug(f"Function execution: {func_name} took {duration_ms}ms", log_data)
+def log_file_operation(operation: str, logger_name: str = "database_tools"):
+    """ファイル操作ログデコレーター"""
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            logger = get_logger(logger_name)
+            
+            # ファイルパスを引数から抽出
+            file_path = None
+            if args and hasattr(args[0], '__fspath__'):
+                file_path = Path(args[0])
+            elif 'file_path' in kwargs:
+                file_path = Path(kwargs['file_path'])
+            elif 'path' in kwargs:
+                file_path = Path(kwargs['path'])
+            
+            try:
+                result = func(*args, **kwargs)
+                if file_path:
+                    logger.log_file_operation(file_path, operation, True)
+                return result
+            except Exception as e:
+                if file_path:
+                    logger.log_file_operation(file_path, operation, False, error=str(e))
+                raise
+        
+        return wrapper
+    return decorator

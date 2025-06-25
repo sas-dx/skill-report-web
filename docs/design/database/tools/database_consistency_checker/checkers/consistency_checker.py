@@ -16,7 +16,7 @@ if str(_tools_dir) not in sys.path:
     sys.path.insert(0, str(_tools_dir))
 
 # 絶対インポートを使用
-from database_consistency_checker.core.models import (
+from shared.core.models import (
     CheckResult, CheckSeverity, ConsistencyReport, CheckSummary,
     create_info_result, create_warning_result, create_error_result,
     create_success_result

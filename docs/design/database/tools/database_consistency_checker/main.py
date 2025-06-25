@@ -1,20 +1,22 @@
 """
 データベース整合性チェックツール - メインエントリーポイント
+
+要求仕様ID: PLT.1-WEB.1 (システム基盤要件)
+実装日: 2025-06-25
+実装者: AI駆動開発チーム
 """
 import argparse
 import sys
 from pathlib import Path
 from typing import List, Optional
 
-# パス解決のセットアップ
-current_dir = Path(__file__).parent
-tools_dir = current_dir.parent
-if str(tools_dir) not in sys.path:
-    sys.path.insert(0, str(tools_dir))
+# 共通ライブラリのインポート
+from shared.core.config import get_config, create_check_config
+from shared.core.logger import get_logger, get_performance_logger, setup_logging
+from shared.core.models import CheckResult, CheckSeverity, ConsistencyReport
+from shared.utils.file_utils import get_file_manager
 
-# 絶対インポートを使用
-from database_consistency_checker.core.config import Config, create_check_config
-from database_consistency_checker.core.logger import ConsistencyLogger
+# ツール固有のインポート
 from database_consistency_checker.checkers.consistency_checker import ConsistencyChecker
 from database_consistency_checker.reporters.console_reporter import ConsoleReporter
 from database_consistency_checker.reporters.markdown_reporter import MarkdownReporter
@@ -196,31 +198,36 @@ def main():
     parser = create_argument_parser()
     args = parser.parse_args()
     
+    # ログ設定の初期化
+    logger = get_logger("consistency_checker")
+    perf_logger = get_performance_logger("consistency_checker")
+    
     # 設定の初期化
     try:
-        config = Config(args.base_dir)
+        config = get_config(args.base_dir)
+        setup_logging(config)
+        
         check_config = create_check_config(
-            suggest_fixes=args.suggest_fixes,
-            fix_types=args.fix_types,
-            auto_apply=args.auto_apply,
-            output_fixes=args.output_fixes,
-            verbose=args.verbose,
-            target_tables=args.tables,
-            base_dir=args.base_dir,
+            enabled_checks=args.checks or [],
             output_format=args.output_format,
-            output_file=args.output_file,
-            report_dir=args.report_dir,
-            keep_reports=args.keep_reports,
-            max_reports=args.max_reports,
-            report_prefix=args.report_prefix,
-            auto_cleanup=not args.no_cleanup
+            verbose=args.verbose
         )
+        
+        logger.log_tool_start("consistency_checker", 
+                            base_dir=str(config.paths.base_dir),
+                            tables=args.tables,
+                            checks=args.checks)
+        
     except Exception as e:
         print(f"❌ 設定初期化エラー: {e}", file=sys.stderr)
         sys.exit(1)
     
     # チェッカーの初期化
-    checker = ConsistencyChecker(config, check_config)
+    try:
+        checker = ConsistencyChecker(config, check_config)
+    except Exception as e:
+        logger.error(f"チェッカー初期化エラー: {e}")
+        sys.exit(1)
     
     # 利用可能なチェック一覧の表示
     if args.list_checks:
