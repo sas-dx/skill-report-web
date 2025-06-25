@@ -1,0 +1,53 @@
+================================================================================
+サンプルデータ整合性チェックレポート
+================================================================================
+生成日時: 2025-06-24 22:55:15
+
+⚠️ サンプルデータが不足しているテーブル:
+  - _TEMPLATE
+
+❌ YAML定義が不足しているテーブル:
+  - MST_TEMPLATE
+
+🔍 カラム整合性の問題:
+
+📋 テーブル: TRN_SkillRecord
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_EmployeeSkillGrade
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_SkillEvidence
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_PDU
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_Notification
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_TrainingHistory
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_ProjectRecord
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+
+📋 テーブル: TRN_GoalProgress
+  ❌ サンプルデータに余分なカラム:
+    - created_by
+    - updated_by
+

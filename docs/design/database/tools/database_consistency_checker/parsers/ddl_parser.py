@@ -6,7 +6,7 @@ import logging
 from typing import List, Dict, Optional, Tuple, Any
 from pathlib import Path
 
-from core.models import (
+from shared.core.models import (
     ColumnDefinition, IndexDefinition, ForeignKeyDefinition, 
     ConstraintDefinition, DDLTable
 )

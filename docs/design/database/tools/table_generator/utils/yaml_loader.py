@@ -11,6 +11,12 @@ YAML形式のテーブル定義ファイルの読み込み・解析機能を提�
 import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+import sys
+from pathlib import Path
+
+# パッケージのパスを追加
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from shared.core.logger import DatabaseToolsLogger
 from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition, BusinessColumnDefinition, ConstraintDefinition
 

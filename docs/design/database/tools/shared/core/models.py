@@ -38,10 +38,14 @@ class CheckStatus(Enum):
     WARNING = "WARNING"
     ERROR = "ERROR"
     SKIPPED = "SKIPPED"
+    PENDING = "pending"
+    RUNNING = "running"
+    FAILED = "failed"
 
 
 class CheckSeverity(Enum):
     """チェック重要度"""
+    SUCCESS = "success"
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -54,6 +58,15 @@ class GenerationStatus(Enum):
     PARTIAL = "PARTIAL"
     FAILED = "FAILED"
     SKIPPED = "SKIPPED"
+
+
+class FixType(Enum):
+    """修正タイプ"""
+    DDL = "ddl"
+    YAML = "yaml"
+    INSERT = "insert"
+    DEFINITION = "definition"
+    ALL = "all"
 
 
 class DataType(Enum):
@@ -132,6 +145,7 @@ class IndexDefinition:
     unique: bool = False
     comment: Optional[str] = None
     type: str = "btree"  # インデックスタイプ（btree, hash, gin, gist等）
+    metadata: Dict[str, Any] = field(default_factory=dict)
     
     def to_ddl(self, table_name: str) -> str:
         """DDL文を生成"""
@@ -148,6 +162,9 @@ class ForeignKeyDefinition:
     references: Dict[str, Any] = field(default_factory=dict)  # table, columns
     on_update: str = "CASCADE"
     on_delete: str = "RESTRICT"
+    comment: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
     # 旧形式との互換性のため
     column: Optional[str] = None
     reference_table: Optional[str] = None
@@ -155,7 +172,6 @@ class ForeignKeyDefinition:
     # DDLParser互換性のため
     references_table: Optional[str] = None
     references_columns: Optional[List[str]] = None
-    comment: str = ""
     
     def __post_init__(self):
         """初期化後の処理 - 旧形式との互換性"""
@@ -309,6 +325,7 @@ class TableDefinition:
     business_columns: List[BusinessColumnDefinition] = field(default_factory=list)
     business_indexes: List[BusinessIndexDefinition] = field(default_factory=list)
     constraints: List[ConstraintDefinition] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
     
     # .clinerules準拠のための追加属性
     overview: Optional[str] = None
@@ -392,24 +409,95 @@ class TableDefinition:
 
 
 @dataclass
+class TableInfo:
+    """テーブル情報（database_consistency_checker互換性）"""
+    name: str
+    logical_name: str = ""
+    category: str = ""
+    priority: str = ""
+    requirement_id: str = ""
+    comment: str = ""
+    yaml_file: Optional[str] = None
+    ddl_file: Optional[str] = None
+    definition_file: Optional[str] = None
+    columns: List[Dict[str, Any]] = field(default_factory=list)
+    indexes: List[Dict[str, Any]] = field(default_factory=list)
+    foreign_keys: List[Dict[str, Any]] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ColumnInfo:
+    """カラム情報（database_consistency_checker互換性）"""
+    name: str
+    type: str
+    nullable: bool = True
+    primary_key: bool = False
+    unique: bool = False
+    default: Optional[str] = None
+    comment: str = ""
+    requirement_id: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class IndexInfo:
+    """インデックス情報（database_consistency_checker互換性）"""
+    name: str
+    columns: List[str] = field(default_factory=list)
+    unique: bool = False
+    comment: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ForeignKeyInfo:
+    """外部キー情報（database_consistency_checker互換性）"""
+    name: str
+    columns: List[str] = field(default_factory=list)
+    references_table: str = ""
+    references_columns: List[str] = field(default_factory=list)
+    on_update: str = "RESTRICT"
+    on_delete: str = "RESTRICT"
+    comment: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class CheckResult:
     """統合チェック結果モデル - 整合性チェック結果の統一"""
-    check_type: str
-    table_name: str
-    status: CheckStatus
-    message: str
-    details: Dict[str, Any] = field(default_factory=dict)
+    check_name: str
+    table_name: Optional[str] = None
+    status: CheckStatus = CheckStatus.SUCCESS
+    severity: CheckSeverity = CheckSeverity.INFO
+    message: str = ""
+    details: Optional[str] = None
+    file_path: Optional[str] = None
+    line_number: Optional[int] = None
+    column_name: Optional[str] = None
+    expected_value: Optional[str] = None
+    actual_value: Optional[str] = None
+    suggestion: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
+    
+    # 統合モデル用の追加属性
+    check_type: str = ""
     fix_suggestion: Optional[str] = None
-    timestamp: Optional[datetime] = None
-    severity: str = 'info'  # 'error', 'warning', 'info'
     is_valid: Optional[bool] = None
-    errors: List['CheckResult'] = field(default_factory=list)
-    warnings: List['CheckResult'] = field(default_factory=list)
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
     
     def __post_init__(self):
         """初期化後の処理"""
-        if self.timestamp is None:
-            self.timestamp = datetime.now()
+        if isinstance(self.severity, str):
+            self.severity = CheckSeverity(self.severity)
+        if isinstance(self.status, str):
+            self.status = CheckStatus(self.status)
+        
+        # check_typeが空の場合はcheck_nameを使用
+        if not self.check_type:
+            self.check_type = self.check_name
         
         # is_validが設定されていない場合は自動判定
         if self.is_valid is None:
@@ -417,27 +505,56 @@ class CheckResult:
     
     def is_error(self) -> bool:
         """エラーかどうか判定"""
-        return self.status == CheckStatus.ERROR or self.severity == 'error'
+        return (self.status in [CheckStatus.ERROR, CheckStatus.FAILED] or 
+                self.severity in [CheckSeverity.ERROR, CheckSeverity.CRITICAL])
     
     def is_warning(self) -> bool:
         """警告かどうか判定"""
-        return self.status == CheckStatus.WARNING or self.severity == 'warning'
+        return self.status == CheckStatus.WARNING or self.severity == CheckSeverity.WARNING
     
     def is_success(self) -> bool:
         """成功かどうか判定"""
-        return self.status == CheckStatus.SUCCESS and self.severity not in ['error', 'warning']
+        return (self.status == CheckStatus.SUCCESS and 
+                self.severity in [CheckSeverity.SUCCESS, CheckSeverity.INFO])
+    
+    def set_success(self):
+        """成功状態に設定"""
+        self.status = CheckStatus.SUCCESS
+        self.severity = CheckSeverity.SUCCESS
+    
+    def set_failed(self):
+        """失敗状態に設定"""
+        self.status = CheckStatus.FAILED
+        self.severity = CheckSeverity.ERROR
+    
+    def add_error(self, error: str):
+        """エラーを追加"""
+        self.errors.append(error)
+        if self.status == CheckStatus.SUCCESS:
+            self.status = CheckStatus.FAILED
+            self.severity = CheckSeverity.ERROR
+    
+    def add_warning(self, warning: str):
+        """警告を追加"""
+        self.warnings.append(warning)
+        if self.status == CheckStatus.SUCCESS:
+            self.status = CheckStatus.WARNING
+            self.severity = CheckSeverity.WARNING
     
     def to_dict(self) -> Dict[str, Any]:
         """辞書形式に変換"""
         return {
+            'check_name': self.check_name,
             'check_type': self.check_type,
             'table_name': self.table_name,
             'status': self.status.value,
+            'severity': self.severity.value,
             'message': self.message,
             'details': self.details,
             'fix_suggestion': self.fix_suggestion,
-            'severity': self.severity,
             'is_valid': self.is_valid,
+            'errors': self.errors,
+            'warnings': self.warnings,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
         }
 
@@ -475,36 +592,39 @@ class CheckResultSummary:
     def add_error(self, check_type: str, table_name: str, message: str, details: Dict[str, Any] = None):
         """エラーを追加"""
         result = CheckResult(
+            check_name=check_type,
             check_type=check_type,
             table_name=table_name,
             status=CheckStatus.ERROR,
+            severity=CheckSeverity.ERROR,
             message=message,
-            details=details or {},
-            severity='error'
+            details=str(details) if details else None
         )
         self.add_result(result)
     
     def add_warning(self, check_type: str, table_name: str, message: str, details: Dict[str, Any] = None):
         """警告を追加"""
         result = CheckResult(
+            check_name=check_type,
             check_type=check_type,
             table_name=table_name,
             status=CheckStatus.WARNING,
+            severity=CheckSeverity.WARNING,
             message=message,
-            details=details or {},
-            severity='warning'
+            details=str(details) if details else None
         )
         self.add_result(result)
     
     def add_success(self, check_type: str, table_name: str, message: str, details: Dict[str, Any] = None):
         """成功を追加"""
         result = CheckResult(
+            check_name=check_type,
             check_type=check_type,
             table_name=table_name,
             status=CheckStatus.SUCCESS,
+            severity=CheckSeverity.SUCCESS,
             message=message,
-            details=details or {},
-            severity='info'
+            details=str(details) if details else None
         )
         self.add_result(result)
     
@@ -538,6 +658,81 @@ class CheckResultSummary:
             'success_count': len(self.successes),
             'results': [r.to_dict() for r in self.results]
         }
+
+
+@dataclass
+class CheckSummary:
+    """チェック結果サマリー（database_consistency_checker互換性）"""
+    total_checks: int = 0
+    passed_checks: int = 0
+    failed_checks: int = 0
+    skipped_checks: int = 0
+    error_count: int = 0
+    warning_count: int = 0
+    info_count: int = 0
+    critical_count: int = 0
+    execution_time: float = 0.0
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    
+    @property
+    def success_rate(self) -> float:
+        """成功率を計算"""
+        if self.total_checks == 0:
+            return 0.0
+        return (self.passed_checks / self.total_checks) * 100
+    
+    @property
+    def has_errors(self) -> bool:
+        """エラーがあるかどうか"""
+        return self.error_count > 0 or self.critical_count > 0
+
+
+@dataclass
+class FixSuggestion:
+    """修正提案（database_consistency_checker互換性）"""
+    fix_type: str  # ddl, yaml, insert
+    target_file: str
+    description: str
+    before_content: Optional[str] = None
+    after_content: Optional[str] = None
+    line_number: Optional[int] = None
+    confidence: float = 1.0  # 0.0-1.0
+    risk_level: str = "low"  # low, medium, high
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ValidationResult:
+    """検証結果（database_consistency_checker互換性）"""
+    is_valid: bool
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+    suggestions: List[FixSuggestion] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ReportData:
+    """レポートデータ（database_consistency_checker互換性）"""
+    summary: CheckSummary
+    results: List[CheckResult] = field(default_factory=list)
+    tables: List[TableInfo] = field(default_factory=list)
+    suggestions: List[FixSuggestion] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    generated_at: datetime = field(default_factory=datetime.now)
+    
+    def get_results_by_severity(self, severity: CheckSeverity) -> List[CheckResult]:
+        """重要度別の結果を取得"""
+        return [r for r in self.results if r.severity == severity]
+    
+    def get_results_by_table(self, table_name: str) -> List[CheckResult]:
+        """テーブル別の結果を取得"""
+        return [r for r in self.results if r.table_name == table_name]
+    
+    def get_failed_results(self) -> List[CheckResult]:
+        """失敗した結果を取得"""
+        return [r for r in self.results if r.status in [CheckStatus.FAILED, CheckStatus.ERROR]]
 
 
 @dataclass
@@ -578,6 +773,11 @@ class GenerationResult:
         self.status = GenerationStatus.FAILED
         self.success = False
     
+    def set_success(self):
+        """成功状態に設定"""
+        self.status = GenerationStatus.SUCCESS
+        self.success = True
+    
     def is_success(self) -> bool:
         """成功かどうか判定"""
         return self.status == GenerationStatus.SUCCESS
@@ -614,7 +814,6 @@ class ProcessingResult:
     processed_files: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
-    status: GenerationStatus = GenerationStatus.SUCCESS
     execution_time: Optional[float] = None
     timestamp: Optional[datetime] = None
     
@@ -623,33 +822,14 @@ class ProcessingResult:
         if self.timestamp is None:
             self.timestamp = datetime.now()
     
-    def add_generated_file(self, file_path: Union[Path, str]):
-        """生成ファイルを追加"""
-        self.generated_files.append(str(file_path))
-    
     def add_error(self, error: str):
         """エラーを追加"""
         self.errors.append(error)
         self.success = False
-        if self.status == GenerationStatus.SUCCESS:
-            self.status = GenerationStatus.PARTIAL
     
     def add_warning(self, warning: str):
         """警告を追加"""
         self.warnings.append(warning)
-    
-    def set_failed(self):
-        """失敗状態に設定"""
-        self.status = GenerationStatus.FAILED
-        self.success = False
-    
-    def is_success(self) -> bool:
-        """成功かどうか判定"""
-        return self.success and self.status == GenerationStatus.SUCCESS
-    
-    def is_failed(self) -> bool:
-        """失敗かどうか判定"""
-        return not self.success or self.status == GenerationStatus.FAILED
     
     def to_dict(self) -> Dict[str, Any]:
         """辞書形式に変換"""
@@ -663,117 +843,6 @@ class ProcessingResult:
             'processed_files': self.processed_files,
             'errors': self.errors,
             'warnings': self.warnings,
-            'status': self.status.value,
-            'execution_time': self.execution_time,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None
-        }
-
-
-@dataclass
-class FixResult:
-    """修正結果モデル"""
-    fix_type: str
-    target_file: Path
-    status: GenerationStatus
-    original_content: Optional[str] = None
-    fixed_content: Optional[str] = None
-    backup_file: Optional[Path] = None
-    errors: List[str] = field(default_factory=list)
-    timestamp: Optional[datetime] = None
-    
-    def __post_init__(self):
-        """初期化後の処理"""
-        if self.timestamp is None:
-            self.timestamp = datetime.now()
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """辞書形式に変換"""
-        return {
-            'fix_type': self.fix_type,
-            'target_file': str(self.target_file),
-            'status': self.status.value,
-            'backup_file': str(self.backup_file) if self.backup_file else None,
-            'errors': self.errors,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None
-        }
-
-
-@dataclass
-class FileMetadata:
-    """ファイルメタデータ"""
-    path: Path
-    size: int
-    modified_time: datetime
-    file_type: str
-    encoding: str = 'utf-8'
-    checksum: Optional[str] = None
-    
-    def __post_init__(self):
-        """初期化後の処理"""
-        if isinstance(self.path, str):
-            self.path = Path(self.path)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """辞書形式に変換"""
-        return {
-            'path': str(self.path),
-            'size': self.size,
-            'modified_time': self.modified_time.isoformat(),
-            'file_type': self.file_type,
-            'encoding': self.encoding,
-            'checksum': self.checksum
-        }
-
-
-@dataclass
-class ReportSummary:
-    """レポートサマリー"""
-    total_tables: int = 0
-    total_checks: int = 0
-    success_count: int = 0
-    warning_count: int = 0
-    error_count: int = 0
-    generation_count: int = 0
-    fix_count: int = 0
-    execution_time: Optional[float] = None
-    timestamp: Optional[datetime] = None
-    
-    def __post_init__(self):
-        """初期化後の処理"""
-        if self.timestamp is None:
-            self.timestamp = datetime.now()
-    
-    def add_check_result(self, result: CheckResult):
-        """チェック結果を追加"""
-        self.total_checks += 1
-        if result.is_success():
-            self.success_count += 1
-        elif result.is_warning():
-            self.warning_count += 1
-        elif result.is_error():
-            self.error_count += 1
-    
-    def add_generation_result(self, result: GenerationResult):
-        """生成結果を追加"""
-        self.generation_count += 1
-    
-    def get_success_rate(self) -> float:
-        """成功率を取得"""
-        if self.total_checks == 0:
-            return 0.0
-        return (self.success_count / self.total_checks) * 100
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """辞書形式に変換"""
-        return {
-            'total_tables': self.total_tables,
-            'total_checks': self.total_checks,
-            'success_count': self.success_count,
-            'warning_count': self.warning_count,
-            'error_count': self.error_count,
-            'generation_count': self.generation_count,
-            'fix_count': self.fix_count,
-            'success_rate': self.get_success_rate(),
             'execution_time': self.execution_time,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
         }
@@ -781,116 +850,176 @@ class ReportSummary:
 
 @dataclass
 class ConsistencyReport:
-    """整合性チェックレポート"""
-    summary: ReportSummary = field(default_factory=ReportSummary)
-    check_results: List[CheckResult] = field(default_factory=list)
-    table_results: Dict[str, CheckResultSummary] = field(default_factory=dict)
-    execution_time: Optional[float] = None
-    timestamp: Optional[datetime] = None
+    """整合性チェックレポート（database_consistency_checker互換性）"""
+    summary: Dict[str, int] = field(default_factory=dict)
+    results: List[CheckResult] = field(default_factory=list)
+    tables: List[TableInfo] = field(default_factory=list)
+    suggestions: List[FixSuggestion] = field(default_factory=list)
+    fix_suggestions: List[FixSuggestion] = field(default_factory=list)  # エイリアス
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    generated_at: datetime = field(default_factory=datetime.now)
+    check_date: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    total_tables: int = 0
+    total_checks: int = 0
     
-    def __post_init__(self):
-        """初期化後の処理"""
-        if self.timestamp is None:
-            self.timestamp = datetime.now()
+    def get_results_by_severity(self, severity: CheckSeverity) -> List[CheckResult]:
+        """重要度別の結果を取得"""
+        return [r for r in self.results if r.severity == severity]
     
-    def add_check_result(self, result: CheckResult):
-        """チェック結果を追加"""
-        self.check_results.append(result)
-        self.summary.add_check_result(result)
-        
-        # テーブル別結果に追加
-        if result.table_name not in self.table_results:
-            self.table_results[result.table_name] = CheckResultSummary(table_name=result.table_name)
-        self.table_results[result.table_name].add_result(result)
+    def get_results_by_table(self, table_name: str) -> List[CheckResult]:
+        """テーブル別の結果を取得"""
+        return [r for r in self.results if r.table_name == table_name]
     
-    def get_error_count(self) -> int:
-        """エラー数を取得"""
-        return len([r for r in self.check_results if r.is_error()])
+    def get_failed_results(self) -> List[CheckResult]:
+        """失敗した結果を取得"""
+        return [r for r in self.results if r.status in [CheckStatus.FAILED, CheckStatus.ERROR]]
     
-    def get_warning_count(self) -> int:
-        """警告数を取得"""
-        return len([r for r in self.check_results if r.is_warning()])
+    @classmethod
+    def from_report_data(cls, report_data: ReportData) -> 'ConsistencyReport':
+        """ReportDataから変換"""
+        return cls(
+            summary=report_data.summary.__dict__,
+            results=report_data.results,
+            tables=report_data.tables,
+            suggestions=report_data.suggestions,
+            metadata=report_data.metadata,
+            generated_at=report_data.generated_at
+        )
+
+
+@dataclass
+class CheckConfig:
+    """チェック設定（database_consistency_checker互換性）"""
+    enabled_checks: List[str] = field(default_factory=list)
+    disabled_checks: List[str] = field(default_factory=list)
+    check_parameters: Dict[str, Any] = field(default_factory=dict)
+    output_format: str = "json"
+    verbose: bool = False
+    fail_fast: bool = False
     
-    def get_success_count(self) -> int:
-        """成功数を取得"""
-        return len([r for r in self.check_results if r.is_success()])
-    
-    def has_errors(self) -> bool:
-        """エラーがあるかチェック"""
-        return self.get_error_count() > 0
-    
-    def has_warnings(self) -> bool:
-        """警告があるかチェック"""
-        return self.get_warning_count() > 0
-    
-    def is_valid(self) -> bool:
-        """全体的に有効かどうか判定"""
-        return not self.has_errors()
+    def is_check_enabled(self, check_name: str) -> bool:
+        """チェックが有効かどうか判定"""
+        if self.disabled_checks and check_name in self.disabled_checks:
+            return False
+        if self.enabled_checks:
+            return check_name in self.enabled_checks
+        return True
+
+
+@dataclass
+class TableListEntry:
+    """テーブルリストエントリ（database_consistency_checker互換性）"""
+    name: str
+    logical_name: str = ""
+    category: str = ""
+    priority: str = ""
+    requirement_id: str = ""
+    yaml_file: Optional[str] = None
+    ddl_file: Optional[str] = None
+    definition_file: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """辞書形式に変換"""
         return {
-            'summary': self.summary.to_dict(),
-            'check_results': [r.to_dict() for r in self.check_results],
-            'table_results': {k: v.to_dict() for k, v in self.table_results.items()},
-            'execution_time': self.execution_time,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
-            'error_count': self.get_error_count(),
-            'warning_count': self.get_warning_count(),
-            'success_count': self.get_success_count(),
-            'is_valid': self.is_valid()
+            'name': self.name,
+            'logical_name': self.logical_name,
+            'category': self.category,
+            'priority': self.priority,
+            'requirement_id': self.requirement_id,
+            'yaml_file': self.yaml_file,
+            'ddl_file': self.ddl_file,
+            'definition_file': self.definition_file
         }
 
 
 # ユーティリティ関数
-def create_table_definition_from_yaml(yaml_data: Dict[str, Any]) -> TableDefinition:
-    """YAMLデータからTableDefinitionを作成"""
-    columns = []
-    for col_data in yaml_data.get('columns', []):
-        column = ColumnDefinition(
-            name=col_data['name'],
-            type=col_data['type'],
-            nullable=col_data.get('nullable', True),
-            primary_key=col_data.get('primary_key', False),
-            unique=col_data.get('unique', False),
-            default=col_data.get('default'),
-            comment=col_data.get('comment'),
-            requirement_id=col_data.get('requirement_id'),
-            length=col_data.get('length'),
-            precision=col_data.get('precision'),
-            scale=col_data.get('scale')
-        )
-        columns.append(column)
+def create_check_result(
+    check_name: str,
+    table_name: Optional[str] = None,
+    severity: Union[CheckSeverity, str] = CheckSeverity.INFO,
+    status: Union[CheckStatus, str] = CheckStatus.SUCCESS,
+    message: str = "",
+    **kwargs
+) -> CheckResult:
+    """チェック結果を作成するヘルパー関数"""
+    if isinstance(severity, str):
+        severity = CheckSeverity(severity)
+    if isinstance(status, str):
+        status = CheckStatus(status)
     
-    indexes = []
-    for idx_data in yaml_data.get('indexes', []):
-        index = IndexDefinition(
-            name=idx_data['name'],
-            columns=idx_data['columns'],
-            unique=idx_data.get('unique', False),
-            comment=idx_data.get('comment')
-        )
-        indexes.append(index)
-    
-    foreign_keys = []
-    for fk_data in yaml_data.get('foreign_keys', []):
-        foreign_key = ForeignKeyDefinition(
-            name=fk_data['name'],
-            columns=fk_data['columns'],
-            references=fk_data['references'],
-            on_update=fk_data.get('on_update', 'CASCADE'),
-            on_delete=fk_data.get('on_delete', 'RESTRICT')
-        )
-        foreign_keys.append(foreign_key)
-    
-    return TableDefinition(
-        name=yaml_data['table_name'],
-        logical_name=yaml_data['logical_name'],
-        category=yaml_data['category'],
-        priority=yaml_data['priority'],
-        requirement_id=yaml_data['requirement_id'],
-        columns=columns,
-        indexes=indexes,
-        foreign_keys=foreign_keys,
-        comment=yaml_data.get('comment')
+    return CheckResult(
+        check_name=check_name,
+        table_name=table_name,
+        severity=severity,
+        status=status,
+        message=message,
+        **kwargs
+    )
+
+
+def create_error_result(
+    check_name: str,
+    message: str,
+    table_name: Optional[str] = None,
+    **kwargs
+) -> CheckResult:
+    """エラー結果を作成するヘルパー関数"""
+    return create_check_result(
+        check_name=check_name,
+        table_name=table_name,
+        severity=CheckSeverity.ERROR,
+        status=CheckStatus.FAILED,
+        message=message,
+        **kwargs
+    )
+
+
+def create_warning_result(
+    check_name: str,
+    message: str,
+    table_name: Optional[str] = None,
+    **kwargs
+) -> CheckResult:
+    """警告結果を作成するヘルパー関数"""
+    return create_check_result(
+        check_name=check_name,
+        table_name=table_name,
+        severity=CheckSeverity.WARNING,
+        status=CheckStatus.SUCCESS,
+        message=message,
+        **kwargs
+    )
+
+
+def create_info_result(
+    check_name: str,
+    message: str,
+    table_name: Optional[str] = None,
+    **kwargs
+) -> CheckResult:
+    """情報結果を作成するヘルパー関数"""
+    return create_check_result(
+        check_name=check_name,
+        table_name=table_name,
+        severity=CheckSeverity.INFO,
+        status=CheckStatus.SUCCESS,
+        message=message,
+        **kwargs
+    )
+
+
+def create_success_result(
+    check_name: str,
+    message: str,
+    table_name: Optional[str] = None,
+    **kwargs
+) -> CheckResult:
+    """成功結果を作成するヘルパー関数"""
+    return create_check_result(
+        check_name=check_name,
+        table_name=table_name,
+        severity=CheckSeverity.SUCCESS,
+        status=CheckStatus.SUCCESS,
+        message=message,
+        **kwargs
     )

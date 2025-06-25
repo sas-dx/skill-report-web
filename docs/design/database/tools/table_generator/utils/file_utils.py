@@ -10,8 +10,13 @@
 
 import os
 import shutil
+import sys
 from pathlib import Path
 from typing import List, Optional, Dict, Any
+
+# パッケージのパスを追加
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from shared.core.logger import get_logger
 
 

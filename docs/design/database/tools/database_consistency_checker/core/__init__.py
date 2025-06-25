@@ -3,7 +3,12 @@
 """
 
 from .config import Config, create_check_config
-from .models import CheckResult, CheckSeverity, ConsistencyReport, CheckSummary
+from ...shared.core.models import (
+    CheckResult, CheckSeverity, ConsistencyReport, CheckSummary,
+    TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition,
+    CheckStatus, CheckResultSummary, ValidationResult, FixSuggestion,
+    ReportData, TableInfo, ColumnInfo, IndexInfo, ForeignKeyInfo
+)
 
 __all__ = [
     'Config',
@@ -11,5 +16,18 @@ __all__ = [
     'CheckResult',
     'CheckSeverity',
     'ConsistencyReport',
-    'CheckSummary'
+    'CheckSummary',
+    'TableDefinition',
+    'ColumnDefinition',
+    'IndexDefinition',
+    'ForeignKeyDefinition',
+    'CheckStatus',
+    'CheckResultSummary',
+    'ValidationResult',
+    'FixSuggestion',
+    'ReportData',
+    'TableInfo',
+    'ColumnInfo',
+    'IndexInfo',
+    'ForeignKeyInfo'
 ]

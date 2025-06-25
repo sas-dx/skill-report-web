@@ -15,7 +15,8 @@ from typing import List, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.core.logger import get_logger
-from table_generator.generators.table_definition_generator import TableDefinitionGenerator
+from table_generator.core import Logger
+from table_generator.core import Adapters
 
 
 def parse_arguments():
@@ -64,44 +65,73 @@ def main():
         args = parse_arguments()
         
         # ログ設定
-        logger = get_logger()
+        logger = Logger(enable_color=True)
         if args.verbose:
             logger.info("詳細ログモードで実行します")
         
         # ベースディレクトリを設定（toolsディレクトリの親の親）
         base_dir = Path(__file__).parent.parent.parent
         
-        # テーブル生成器を初期化
-        generator = TableDefinitionGenerator(
-            base_dir=str(base_dir),
-            logger=logger
-        )
+        # テーブル生成サービスを初期化
+        service = Adapters()
+        
+        # 出力ディレクトリを設定
+        output_dirs = {
+            'ddl': base_dir / 'ddl',
+            'tables': base_dir / 'tables',
+            'data': base_dir / 'data'
+        }
+        
+        if args.output:
+            output_base = Path(args.output)
+            output_dirs = {
+                'ddl': output_base / 'ddl',
+                'tables': output_base / 'tables',
+                'data': output_base / 'data'
+            }
+        
+        yaml_dir = base_dir / 'table-details'
         
         # 対象テーブルを決定
-        table_names = None
         if args.table:
             table_names = [args.table]
             logger.info(f"指定テーブル: {args.table}")
-        elif args.all:
-            logger.info("全テーブルを対象に生成します")
+            results = service.process_multiple_tables(table_names, yaml_dir, output_dirs)
         else:
-            logger.info("全テーブルを対象に生成します（デフォルト）")
+            logger.info("全テーブルを対象に生成します")
+            # テーブル一覧を取得
+            table_names = []
+            for yaml_file in yaml_dir.glob("*_details.yaml"):
+                table_name = yaml_file.stem.replace("_details", "")
+                table_names.append(table_name)
+            
+            if not table_names:
+                logger.warning("処理対象のテーブルが見つかりませんでした")
+                return 1
+            
+            results = service.process_multiple_tables(table_names, yaml_dir, output_dirs)
         
-        # 生成実行
-        result = generator.generate_files(
-            table_names=table_names,
-            output_dir=args.output,
-            dry_run=args.dry_run
-        )
+        # 結果サマリーを取得
+        summary = service.get_generation_summary(results)
         
         # 結果出力
-        if result.success:
-            logger.info("🎉 テーブル生成が正常に完了しました！")
+        logger.header("テーブル生成結果")
+        logger.info(f"処理対象テーブル数: {summary['total_tables']}")
+        logger.info(f"成功: {summary['successful_tables']}")
+        logger.info(f"失敗: {summary['failed_tables']}")
+        logger.info(f"成功率: {summary['success_rate']:.1f}%")
+        logger.info(f"生成ファイル数: {summary['total_generated_files']}")
+        
+        if summary['total_errors'] > 0:
+            logger.warning(f"エラー数: {summary['total_errors']}")
+            for error in summary['errors'][:5]:  # 最初の5件のみ表示
+                logger.error(f"  - {error}")
+        
+        if summary['failed_tables'] == 0:
+            logger.success("🎉 テーブル生成が正常に完了しました！")
             return 0
         else:
-            logger.error("💥 テーブル生成でエラーが発生しました")
-            if result.error_message:
-                logger.error(f"エラー詳細: {result.error_message}")
+            logger.error("💥 一部のテーブル生成でエラーが発生しました")
             return 1
             
     except KeyboardInterrupt:

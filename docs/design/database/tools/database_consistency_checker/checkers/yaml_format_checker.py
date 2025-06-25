@@ -5,7 +5,7 @@ YAMLフォーマット整合性チェッカー
 import os
 import yaml
 from typing import Dict, List, Any, Optional, Tuple
-from core.models import CheckResult, CheckSeverity
+from shared.core.models import CheckResult, CheckSeverity
 
 
 class YamlFormatChecker:

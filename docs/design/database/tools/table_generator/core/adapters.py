@@ -242,3 +242,7 @@ def process_tables_batch(table_names: List[str], yaml_dir: Path, output_dirs: Di
     """複数テーブル一括処理の便利関数"""
     service = create_table_generator_service()
     return service.process_multiple_tables(table_names, yaml_dir, output_dirs)
+
+
+# 後方互換性のためのエイリアス
+Adapters = TableGeneratorService

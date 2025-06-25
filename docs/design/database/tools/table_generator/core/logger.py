@@ -155,3 +155,7 @@ class EnhancedLogger:
             int: 警告ログの件数
         """
         return len([log for log in self.logs if log[0] == LogLevel.WARNING])
+
+
+# 後方互換性のためのエイリアス
+Logger = EnhancedLogger

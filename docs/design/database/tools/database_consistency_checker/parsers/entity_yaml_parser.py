@@ -4,8 +4,8 @@
 import yaml
 from pathlib import Path
 from typing import List, Dict, Optional, Any
-from core.models import EntityRelationship, TableDefinition, ColumnDefinition
-from core.logger import ConsistencyLogger
+from shared.core.models import EntityRelationship, TableDefinition, ColumnDefinition
+from database_consistency_checker.core.logger import ConsistencyLogger
 
 
 class EntityYamlParser:
