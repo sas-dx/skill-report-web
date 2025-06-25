@@ -16,14 +16,17 @@ __description__ = "データベースツール共有ライブラリ"
 from .core.config import get_config, Config
 from .core.logger import get_logger, setup_logging
 from .core.exceptions import (
-    DatabaseToolError,
+    DatabaseToolsError,
     ValidationError,
     FileOperationError,
     ConfigurationError,
     ParsingError,
     GenerationError,
-    PerformanceError,
-    CacheError
+    YamlFormatError,
+    TableDefinitionError,
+    ConsistencyError,
+    DatabaseConnectionError,
+    ToolExecutionError
 )
 from .core.models import (
     TableInfo,
@@ -87,6 +90,14 @@ from .monitoring.metrics_collector import (
     start_system_monitoring,
     export_metrics
 )
+
+# パーサー
+from .parsers.base_parser import BaseParser
+from .parsers.unified_parser import UnifiedParser
+
+# ジェネレーター
+from .generators.base_generator import BaseGenerator
+from .generators.unified_generator import UnifiedGenerator
 
 # 便利関数
 def initialize_shared_library(
@@ -174,14 +185,17 @@ __all__ = [
     'Config',
     'get_logger',
     'setup_logging',
-    'DatabaseToolError',
+    'DatabaseToolsError',
     'ValidationError',
     'FileOperationError',
     'ConfigurationError',
     'ParsingError',
     'GenerationError',
-    'PerformanceError',
-    'CacheError',
+    'YamlFormatError',
+    'TableDefinitionError',
+    'ConsistencyError',
+    'DatabaseConnectionError',
+    'ToolExecutionError',
     'TableInfo',
     'ColumnInfo',
     'IndexInfo',
@@ -230,5 +244,11 @@ __all__ = [
     'record_metric',
     'time_function',
     'start_system_monitoring',
-    'export_metrics'
+    'export_metrics',
+    
+    # パーサー・ジェネレーター
+    'BaseParser',
+    'UnifiedParser',
+    'BaseGenerator',
+    'UnifiedGenerator'
 ]
