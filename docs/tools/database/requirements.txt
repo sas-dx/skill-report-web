@@ -1,0 +1,30 @@
+# データベース設計ツール統合パッケージ - 依存関係定義
+# 要求仕様ID: PLT.1-WEB.1, SKL.1-HIER.1
+# 設計書: docs/design/database/08-database-design-guidelines.md
+
+# 基本パッケージ
+PyYAML>=6.0
+pathlib2>=2.3.7
+
+# テストフレームワーク
+pytest>=7.4.0
+pytest-html>=3.2.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.0
+pytest-mock>=3.11.0
+
+# パフォーマンス監視（オプション）
+psutil>=5.9.0
+
+# 開発ツール
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# レポート生成
+jinja2>=3.1.0
+markdown>=3.4.0
+
+# ユーティリティ
+colorama>=0.4.6
+tqdm>=4.65.0
