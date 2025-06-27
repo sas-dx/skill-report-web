@@ -1,12 +1,13 @@
 """
-設計統合ツール - データベース設計管理モジュール
+設計統合ツール - データベース設計管理モジュール（完全統合版）
 要求仕様ID: PLT.1-WEB.1
 
-既存のデータベースツール機能をラップし、統合インターフェースを提供します。
+既存のデータベースツール機能を完全統合し、統合インターフェースを提供します。
 """
 
 import sys
 import subprocess
+import importlib.util
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import logging
@@ -17,7 +18,7 @@ from ..core.logger import get_logger
 
 
 class DatabaseDesignManager:
-    """データベース設計管理クラス"""
+    """データベース設計管理クラス（完全統合版）"""
     
     def __init__(self, config: DesignIntegrationConfig):
         """
@@ -29,35 +30,91 @@ class DatabaseDesignManager:
         self.config = config
         self.logger = get_logger(__name__)
         
-        # 既存データベースツールのパス
-        self.db_tools_path = config.project_root / "docs" / "design" / "database" / "tools"
-        self.legacy_tool_path = self.db_tools_path / "db_tools_refactored.py"
+        # 統合されたデータベースツールのパス
+        self.db_tools_root = config.project_root / "docs" / "tools" / "database"
+        self.main_tool_path = self.db_tools_root / "db_tools_refactored.py"
         
-        # 新しい統合ツールのパス
-        self.integrated_tool_path = config.project_root / "docs" / "tools" / "database" / "db_tools_refactored.py"
+        # 統合ツールモジュールのパス
+        self.modules_path = self.db_tools_root / "modules"
+        self.core_path = self.db_tools_root / "core"
         
-        # 既存ツールが利用可能かチェック
+        # パスをsys.pathに追加
+        sys.path.insert(0, str(self.db_tools_root))
+        sys.path.insert(0, str(self.modules_path))
+        sys.path.insert(0, str(self.core_path))
+        
+        # 統合ツールが利用可能かチェック
         self._check_tool_availability()
+        
+        # 統合モジュールを初期化
+        self._initialize_integrated_modules()
     
     def _check_tool_availability(self):
-        """既存ツールの利用可能性をチェック"""
-        if not self.legacy_tool_path.exists() and not self.integrated_tool_path.exists():
+        """統合ツールの利用可能性をチェック"""
+        if not self.main_tool_path.exists():
             raise DesignIntegrationError(
-                f"データベースツールが見つかりません: {self.legacy_tool_path} または {self.integrated_tool_path}"
+                f"統合データベースツールが見つかりません: {self.main_tool_path}"
             )
+        
+        required_modules = [
+            self.modules_path / "yaml_validator.py",
+            self.modules_path / "table_generator.py",
+            self.modules_path / "consistency_checker.py"
+        ]
+        
+        for module_path in required_modules:
+            if not module_path.exists():
+                raise DesignIntegrationError(
+                    f"必須モジュールが見つかりません: {module_path}"
+                )
     
-    def _get_available_tool_path(self) -> Path:
-        """利用可能なツールパスを取得"""
-        if self.integrated_tool_path.exists():
-            return self.integrated_tool_path
-        elif self.legacy_tool_path.exists():
-            return self.legacy_tool_path
-        else:
-            raise DesignIntegrationError("利用可能なデータベースツールが見つかりません")
+    def _initialize_integrated_modules(self):
+        """統合モジュールを初期化"""
+        try:
+            # 設定モジュールをインポート
+            config_spec = importlib.util.spec_from_file_location(
+                "db_config", self.core_path / "config.py"
+            )
+            config_module = importlib.util.module_from_spec(config_spec)
+            config_spec.loader.exec_module(config_module)
+            
+            # データベースツール設定を初期化
+            self.db_config = config_module.Config()
+            
+            # 各モジュールをインポート
+            validator_spec = importlib.util.spec_from_file_location(
+                "yaml_validator", self.modules_path / "yaml_validator.py"
+            )
+            validator_module = importlib.util.module_from_spec(validator_spec)
+            validator_spec.loader.exec_module(validator_module)
+            self.yaml_validator = validator_module.YAMLValidator(self.db_config)
+            
+            generator_spec = importlib.util.spec_from_file_location(
+                "table_generator", self.modules_path / "table_generator.py"
+            )
+            generator_module = importlib.util.module_from_spec(generator_spec)
+            generator_spec.loader.exec_module(generator_module)
+            self.table_generator = generator_module.TableGenerator(self.db_config)
+            
+            checker_spec = importlib.util.spec_from_file_location(
+                "consistency_checker", self.modules_path / "consistency_checker.py"
+            )
+            checker_module = importlib.util.module_from_spec(checker_spec)
+            checker_spec.loader.exec_module(checker_module)
+            self.consistency_checker = checker_module.ConsistencyChecker(self.db_config)
+            
+            self.logger.info("統合データベースモジュールの初期化が完了しました")
+            
+        except Exception as e:
+            self.logger.warning(f"統合モジュール初期化に失敗: {e}")
+            self.logger.info("フォールバックモードで動作します")
+            self.yaml_validator = None
+            self.table_generator = None
+            self.consistency_checker = None
     
     def _execute_db_tool(self, args: List[str], verbose: bool = False) -> bool:
         """
-        データベースツールを実行
+        データベースツールを実行（フォールバック用）
         
         Args:
             args: 実行引数
@@ -67,8 +124,7 @@ class DatabaseDesignManager:
             実行成功フラグ
         """
         try:
-            tool_path = self._get_available_tool_path()
-            cmd = [sys.executable, str(tool_path)] + args
+            cmd = [sys.executable, str(self.main_tool_path)] + args
             
             if verbose:
                 self.logger.info(f"実行コマンド: {' '.join(cmd)}")
@@ -104,18 +160,27 @@ class DatabaseDesignManager:
         """
         self.logger.info("全データベース設計の検証を開始")
         
-        args = ['validate', '--all']
-        if verbose:
-            args.append('--verbose')
-        
-        success = self._execute_db_tool(args, verbose)
-        
-        if success:
-            self.logger.info("全データベース設計の検証が完了しました")
-        else:
-            self.logger.error("データベース設計の検証でエラーが発生しました")
-        
-        return success
+        try:
+            if self.yaml_validator:
+                # 統合モジュールを使用
+                success = self.yaml_validator.validate_all(verbose)
+            else:
+                # フォールバックモード
+                args = ['validate', '--all']
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info("全データベース設計の検証が完了しました")
+            else:
+                self.logger.error("データベース設計の検証でエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"検証実行エラー: {e}")
+            return False
     
     def validate_table(self, table_name: str, verbose: bool = False) -> bool:
         """
@@ -130,18 +195,27 @@ class DatabaseDesignManager:
         """
         self.logger.info(f"テーブル {table_name} の設計検証を開始")
         
-        args = ['validate', '--table', table_name]
-        if verbose:
-            args.append('--verbose')
-        
-        success = self._execute_db_tool(args, verbose)
-        
-        if success:
-            self.logger.info(f"テーブル {table_name} の設計検証が完了しました")
-        else:
-            self.logger.error(f"テーブル {table_name} の設計検証でエラーが発生しました")
-        
-        return success
+        try:
+            if self.yaml_validator:
+                # 統合モジュールを使用
+                success = self.yaml_validator.validate_single(table_name, verbose)
+            else:
+                # フォールバックモード
+                args = ['validate', '--table', table_name]
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info(f"テーブル {table_name} の設計検証が完了しました")
+            else:
+                self.logger.error(f"テーブル {table_name} の設計検証でエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"テーブル検証実行エラー ({table_name}): {e}")
+            return False
     
     def generate_all(self, verbose: bool = False) -> bool:
         """
@@ -155,18 +229,27 @@ class DatabaseDesignManager:
         """
         self.logger.info("全データベース設計書の生成を開始")
         
-        args = ['generate', '--all']
-        if verbose:
-            args.append('--verbose')
-        
-        success = self._execute_db_tool(args, verbose)
-        
-        if success:
-            self.logger.info("全データベース設計書の生成が完了しました")
-        else:
-            self.logger.error("データベース設計書の生成でエラーが発生しました")
-        
-        return success
+        try:
+            if self.table_generator:
+                # 統合モジュールを使用
+                success = self.table_generator.generate_all(verbose)
+            else:
+                # フォールバックモード
+                args = ['generate', '--all']
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info("全データベース設計書の生成が完了しました")
+            else:
+                self.logger.error("データベース設計書の生成でエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"生成実行エラー: {e}")
+            return False
     
     def generate_table(self, table_name: str, verbose: bool = False) -> bool:
         """
@@ -181,18 +264,27 @@ class DatabaseDesignManager:
         """
         self.logger.info(f"テーブル {table_name} の設計書生成を開始")
         
-        args = ['generate', '--table', table_name]
-        if verbose:
-            args.append('--verbose')
-        
-        success = self._execute_db_tool(args, verbose)
-        
-        if success:
-            self.logger.info(f"テーブル {table_name} の設計書生成が完了しました")
-        else:
-            self.logger.error(f"テーブル {table_name} の設計書生成でエラーが発生しました")
-        
-        return success
+        try:
+            if self.table_generator:
+                # 統合モジュールを使用
+                success = self.table_generator.generate(table_name, verbose)
+            else:
+                # フォールバックモード
+                args = ['generate', '--table', table_name]
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info(f"テーブル {table_name} の設計書生成が完了しました")
+            else:
+                self.logger.error(f"テーブル {table_name} の設計書生成でエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"テーブル生成実行エラー ({table_name}): {e}")
+            return False
     
     def check_consistency(self, verbose: bool = False) -> bool:
         """
@@ -206,18 +298,62 @@ class DatabaseDesignManager:
         """
         self.logger.info("データベース設計の整合性チェックを開始")
         
-        args = ['check', '--all']
-        if verbose:
-            args.append('--verbose')
+        try:
+            if self.consistency_checker:
+                # 統合モジュールを使用
+                success = self.consistency_checker.check_all(verbose)
+            else:
+                # フォールバックモード
+                args = ['check', '--all']
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info("データベース設計の整合性チェックが完了しました")
+            else:
+                self.logger.error("データベース設計の整合性チェックでエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"整合性チェック実行エラー: {e}")
+            return False
+    
+    def check_table_consistency(self, table_name: str, verbose: bool = False) -> bool:
+        """
+        特定テーブルの整合性をチェック
         
-        success = self._execute_db_tool(args, verbose)
+        Args:
+            table_name: テーブル名
+            verbose: 詳細出力フラグ
+            
+        Returns:
+            チェック成功フラグ
+        """
+        self.logger.info(f"テーブル {table_name} の整合性チェックを開始")
         
-        if success:
-            self.logger.info("データベース設計の整合性チェックが完了しました")
-        else:
-            self.logger.error("データベース設計の整合性チェックでエラーが発生しました")
-        
-        return success
+        try:
+            if self.consistency_checker:
+                # 統合モジュールを使用
+                success = self.consistency_checker.check_single(table_name, verbose)
+            else:
+                # フォールバックモード
+                args = ['check', '--table', table_name]
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info(f"テーブル {table_name} の整合性チェックが完了しました")
+            else:
+                self.logger.error(f"テーブル {table_name} の整合性チェックでエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"テーブル整合性チェック実行エラー ({table_name}): {e}")
+            return False
     
     def get_table_list(self) -> List[str]:
         """
@@ -282,18 +418,78 @@ class DatabaseDesignManager:
         """
         self.logger.info("YAML形式の検証を開始")
         
-        args = ['yaml-check', '--all']
-        if verbose:
-            args.append('--verbose')
+        try:
+            if self.yaml_validator:
+                # 統合モジュールを使用
+                success = self.yaml_validator.validate_all(verbose)
+            else:
+                # フォールバックモード
+                args = ['validate', '--all']
+                if verbose:
+                    args.append('--verbose')
+                success = self._execute_db_tool(args, verbose)
+            
+            if success:
+                self.logger.info("YAML形式の検証が完了しました")
+            else:
+                self.logger.error("YAML形式の検証でエラーが発生しました")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"YAML検証実行エラー: {e}")
+            return False
+    
+    def execute_full_workflow(self, verbose: bool = False) -> bool:
+        """
+        完全ワークフローを実行（検証→生成→整合性チェック）
         
-        success = self._execute_db_tool(args, verbose)
+        Args:
+            verbose: 詳細出力フラグ
+            
+        Returns:
+            実行成功フラグ
+        """
+        self.logger.info("データベース設計の完全ワークフローを開始")
         
-        if success:
-            self.logger.info("YAML形式の検証が完了しました")
+        success_count = 0
+        total_count = 3
+        
+        # 1. YAML検証
+        print("\n1. YAML検証を実行中...")
+        if self.validate_all(verbose):
+            print("✅ YAML検証完了")
+            success_count += 1
         else:
-            self.logger.error("YAML形式の検証でエラーが発生しました")
+            print("❌ YAML検証でエラーが発生しました")
         
-        return success
+        # 2. テーブル生成
+        print("\n2. テーブル生成を実行中...")
+        if self.generate_all(verbose):
+            print("✅ テーブル生成完了")
+            success_count += 1
+        else:
+            print("❌ テーブル生成でエラーが発生しました")
+        
+        # 3. 整合性チェック
+        print("\n3. 整合性チェックを実行中...")
+        if self.check_consistency(verbose):
+            print("✅ 整合性チェック完了")
+            success_count += 1
+        else:
+            print("❌ 整合性チェックでエラーが発生しました")
+        
+        # 結果サマリー
+        print(f"\n📊 データベース設計ワークフロー結果: {success_count}/{total_count} 成功")
+        
+        if success_count == total_count:
+            print("\n🎉 データベース設計の完全ワークフローが正常に完了しました！")
+            self.logger.info("データベース設計の完全ワークフローが完了しました")
+            return True
+        else:
+            print(f"\n⚠️  {total_count - success_count} 個の処理でエラーが発生しました")
+            self.logger.warning(f"データベース設計ワークフローで {total_count - success_count} 個のエラーが発生しました")
+            return False
     
     def get_statistics(self) -> Dict[str, Any]:
         """
@@ -314,7 +510,10 @@ class DatabaseDesignManager:
                 'work_tables': 0,
                 'tables_by_category': {},
                 'total_columns': 0,
-                'tables_with_issues': 0
+                'tables_with_issues': 0,
+                'validation_status': 'unknown',
+                'generation_status': 'unknown',
+                'consistency_status': 'unknown'
             }
             
             for table_name in tables:
@@ -347,3 +546,74 @@ class DatabaseDesignManager:
         except Exception as e:
             self.logger.error(f"統計情報取得エラー: {e}")
             return {}
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """
+        データベース設計の健全性ステータスを取得
+        
+        Returns:
+            健全性ステータス辞書
+        """
+        try:
+            health = {
+                'overall_status': 'unknown',
+                'yaml_validation': 'unknown',
+                'table_generation': 'unknown',
+                'consistency_check': 'unknown',
+                'issues': [],
+                'recommendations': [],
+                'last_check': None
+            }
+            
+            # 簡易チェックを実行
+            tables = self.get_table_list()
+            if not tables:
+                health['issues'].append("テーブル定義が見つかりません")
+                health['overall_status'] = 'error'
+                return health
+            
+            # YAMLファイルの存在チェック
+            yaml_dir = self.config.get_database_yaml_dir()
+            ddl_dir = self.config.get_database_ddl_dir()
+            tables_dir = self.config.get_database_tables_dir()
+            
+            missing_files = 0
+            for table_name in tables:
+                yaml_file = yaml_dir / f"テーブル詳細定義YAML_{table_name}.yaml"
+                ddl_file = ddl_dir / f"{table_name}.sql"
+                table_file = tables_dir / f"テーブル定義書_{table_name}_*.md"
+                
+                if not yaml_file.exists():
+                    missing_files += 1
+                    health['issues'].append(f"YAMLファイルが見つかりません: {table_name}")
+            
+            if missing_files == 0:
+                health['yaml_validation'] = 'ok'
+            elif missing_files < len(tables) * 0.1:  # 10%未満
+                health['yaml_validation'] = 'warning'
+            else:
+                health['yaml_validation'] = 'error'
+            
+            # 全体ステータスを決定
+            if health['yaml_validation'] == 'ok':
+                health['overall_status'] = 'ok'
+            elif health['yaml_validation'] == 'warning':
+                health['overall_status'] = 'warning'
+            else:
+                health['overall_status'] = 'error'
+            
+            # 推奨事項を追加
+            if missing_files > 0:
+                health['recommendations'].append("不足しているファイルを生成してください")
+            
+            health['recommendations'].append("定期的な整合性チェックを実行してください")
+            
+            return health
+            
+        except Exception as e:
+            self.logger.error(f"健全性ステータス取得エラー: {e}")
+            return {
+                'overall_status': 'error',
+                'issues': [f"ステータス取得エラー: {str(e)}"],
+                'recommendations': ["システム管理者に連絡してください"]
+            }
