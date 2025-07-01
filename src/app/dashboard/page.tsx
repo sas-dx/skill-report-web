@@ -1,4 +1,9 @@
-// PLT.1-WEB.1: ダッシュボード画面
+/**
+ * 要求仕様ID: PLT.1-WEB.1
+ * 対応設計書: docs/design/screens/specs/画面設計書_SCR-DASHBOARD_ダッシュボード画面.md
+ * 実装内容: ダッシュボード画面（実データ対応）
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -10,9 +15,6 @@ import { Sidebar } from '@/components/dashboard/Sidebar';
 export default function DashboardPage() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // TODO: 実際の認証状態とユーザー情報を取得
-  const userName = 'テストユーザー';
 
   const handleLogout = () => {
     // TODO: 実際のログアウト処理を実装
@@ -46,10 +48,8 @@ export default function DashboardPage() {
 
         {/* メインコンテンツエリア */}
         <div className="flex-1 lg:ml-64">
-          {/* コンテンツ */}
-          <DashboardContent 
-            userName={userName}
-          />
+          {/* コンテンツ - userNameプロパティを削除（useDashboardフックで取得） */}
+          <DashboardContent />
         </div>
       </div>
     </div>
