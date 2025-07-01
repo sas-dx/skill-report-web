@@ -1,0 +1,426 @@
+table_name: HIS_ReportGeneration
+logical_name: 帳票生成履歴
+category: 履歴系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 帳票生成履歴テーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222630
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+overview: 'HIS_ReportGeneration（帳票生成履歴）は、システムで生成された帳票・レポートの履歴を管理するテーブルです。
+
+
+  主な目的：
+
+  - 帳票生成の履歴管理
+
+  - 生成成功・失敗の記録
+
+  - 帳票ファイルの管理
+
+  - 生成パフォーマンスの監視
+
+  - 帳票利用状況の分析
+
+
+  このテーブルは、帳票・レポート機能において生成状況の把握と品質向上を支える重要な履歴データです。
+
+  '
+columns:
+- name: id
+  logical: ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: マルチテナント識別子
+- name: report_title
+  logical: 帳票タイトル
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成された帳票のタイトル
+- name: completed_at
+  logical: 完了日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成処理が完了した日時
+- name: download_count
+  logical: ダウンロード回数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票がダウンロードされた回数
+  default: 0
+- name: error_details
+  logical: エラー詳細
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成失敗時のエラー詳細情報（JSON形式）
+- name: error_message
+  logical: エラーメッセージ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成失敗時のエラーメッセージ
+- name: expires_at
+  logical: 有効期限
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成された帳票ファイルの有効期限
+- name: file_path
+  logical: ファイルパス
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成された帳票ファイルのパス
+- name: file_size
+  logical: ファイルサイズ
+  type: BIGINT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成された帳票ファイルのサイズ（バイト）
+- name: generation_status
+  logical: 生成状態
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生成の状態（PENDING:待機中、PROCESSING:処理中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル）
+  enum_values:
+  - PENDING
+  - PROCESSING
+  - SUCCESS
+  - FAILED
+  - CANCELLED
+- name: last_downloaded_at
+  logical: 最終ダウンロード日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票が最後にダウンロードされた日時
+- name: output_format
+  logical: 出力形式
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML）
+  enum_values:
+  - PDF
+  - EXCEL
+  - CSV
+  - HTML
+- name: parameters
+  logical: パラメータ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成時のパラメータ（JSON形式）
+- name: processing_time_ms
+  logical: 処理時間
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成にかかった時間（ミリ秒）
+- name: report_category
+  logical: 帳票カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析）
+  enum_values:
+  - SKILL
+  - GOAL
+  - EVALUATION
+  - SUMMARY
+  - ANALYTICS
+- name: reportgeneration_id
+  logical: HIS_ReportGenerationの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: HIS_ReportGenerationの主キー
+  default: null
+- name: requested_at
+  logical: 要求日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成が要求された日時
+- name: requested_by
+  logical: 要求者
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成を要求したユーザーID
+- name: started_at
+  logical: 開始日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 帳票生成処理が開始された日時
+- name: template_id
+  logical: テンプレートID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 使用された帳票テンプレートのID（MST_ReportTemplateへの参照）
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_report_generation_template
+  columns:
+  - - template_id
+  unique: false
+  description: テンプレートID別検索用
+- name: idx_report_generation_requester
+  columns:
+  - - requested_by
+  unique: false
+  description: 要求者別検索用
+- name: idx_report_generation_tenant_status
+  columns:
+  - - tenant_id
+  - - generation_status
+  unique: false
+  description: テナント別生成状態検索用
+- name: idx_report_generation_category
+  columns:
+  - - report_category
+  unique: false
+  description: 帳票カテゴリ別検索用
+- name: idx_report_generation_format
+  columns:
+  - - output_format
+  unique: false
+  description: 出力形式別検索用
+- name: idx_report_generation_requested
+  columns:
+  - - requested_at
+  unique: false
+  description: 要求日時検索用
+- name: idx_report_generation_completed
+  columns:
+  - - completed_at
+  unique: false
+  description: 完了日時検索用
+- name: idx_report_generation_expires
+  columns:
+  - - expires_at
+  unique: false
+  description: 有効期限検索用
+- name: idx_his_reportgeneration_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: chk_report_generation_category
+  type: CHECK
+  description: 帳票カテゴリ値チェック制約
+  condition: report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS')
+- name: chk_report_generation_format
+  type: CHECK
+  description: 出力形式値チェック制約
+  condition: output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML')
+- name: chk_report_generation_status
+  type: CHECK
+  description: 生成状態値チェック制約
+  condition: generation_status IN ('PENDING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELLED')
+- name: chk_report_generation_file_size_positive
+  type: CHECK
+  description: ファイルサイズ正数チェック制約
+  condition: file_size IS NULL OR file_size >= 0
+- name: chk_report_generation_download_count_positive
+  type: CHECK
+  description: ダウンロード回数正数チェック制約
+  condition: download_count >= 0
+- name: chk_report_generation_processing_time_positive
+  type: CHECK
+  description: 処理時間正数チェック制約
+  condition: processing_time_ms IS NULL OR processing_time_ms >= 0
+foreign_keys:
+- name: fk_report_generation_template
+  columns:
+  - - template_id
+  references:
+    table:
+    - MST_ReportTemplate
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: RESTRICT
+  comment: 外部キー制約
+sample_data:
+- id: RG001
+  tenant_id: TENANT001
+  template_id: RT001
+  requested_by: USER001
+  report_title: 山田太郎さんのスキルサマリーレポート
+  report_category: SKILL
+  output_format: PDF
+  generation_status: SUCCESS
+  parameters: '{"employee_id": "EMP001", "report_date": "2025-06-01"}'
+  file_path: /reports/2025/06/01/skill_summary_EMP001_20250601.pdf
+  file_size: 1048576
+  download_count: 3
+  last_downloaded_at: '2025-06-01 18:45:00'
+  requested_at: '2025-06-01 15:30:00'
+  started_at: '2025-06-01 15:30:05'
+  completed_at: '2025-06-01 15:30:25'
+  processing_time_ms: 20000
+  error_message: null
+  error_details: null
+  expires_at: '2025-06-08 15:30:00'
+- id: RG002
+  tenant_id: TENANT001
+  template_id: RT002
+  requested_by: USER002
+  report_title: 開発部目標進捗レポート
+  report_category: GOAL
+  output_format: EXCEL
+  generation_status: FAILED
+  parameters: '{"department_id": "DEPT001", "period_start": "2025-05-01", "period_end":
+    "2025-05-31"}'
+  file_path: null
+  file_size: null
+  download_count: 0
+  last_downloaded_at: null
+  requested_at: '2025-06-01 16:00:00'
+  started_at: '2025-06-01 16:00:10'
+  completed_at: '2025-06-01 16:00:15'
+  processing_time_ms: 5000
+  error_message: 'データ取得エラー: 指定された期間のデータが見つかりません'
+  error_details: '{"error_code": "DATA_NOT_FOUND", "sql_error": "No rows found for
+    the specified period"}'
+  expires_at: null
+notes:
+- 帳票生成履歴は1年間保持される
+- 生成されたファイルは有効期限後に自動削除
+- 処理時間はパフォーマンス監視に活用
+- エラー詳細はJSON形式で構造化された情報を格納
+- ダウンロード統計は利用状況分析に活用
+- 大容量ファイルは外部ストレージに保存
+- パラメータ情報は再生成時の参考に使用
+- 生成成功時はファイルパス・サイズを必須記録
+- 生成失敗時はエラー情報を詳細に記録
+- 有効期限切れファイルは自動削除対象
+- 同一パラメータでの重複生成は制限
+- 処理時間が閾値を超える場合は警告
+- ダウンロード時は統計情報を更新
+- キャンセルされた生成は中間ファイルを削除
+- テンプレート削除時は関連履歴を保持
+rules:
+- 生成成功時はファイルパス・サイズを必須記録
+- 生成失敗時はエラー情報を詳細に記録
+- 有効期限切れファイルは自動削除対象
+- 同一パラメータでの重複生成は制限
+- 処理時間が閾値を超える場合は警告
+- ダウンロード時は統計情報を更新
+- キャンセルされた生成は中間ファイルを削除
+- テンプレート削除時は関連履歴を保持

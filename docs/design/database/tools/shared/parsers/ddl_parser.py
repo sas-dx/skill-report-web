@@ -116,15 +116,26 @@ class DDLParser(BaseParser):
     def _load_ddl_content(self, source: Any) -> str:
         """DDL内容の読み込み"""
         if isinstance(source, (str, Path)):
-            # ファイルパスの場合
-            file_path = Path(source)
+            # 文字列がファイルパスかDDL内容かを判定
+            source_str = str(source)
+            
+            # DDL内容の特徴をチェック（CREATE TABLEが含まれているか）
+            if 'CREATE TABLE' in source_str.upper():
+                # DDL文字列として扱う
+                return source_str
+            
+            # ファイルパスとして扱う
+            file_path = Path(source_str)
             if not file_path.exists():
+                # ファイルが存在しない場合、DDL文字列として扱う
+                if len(source_str) > 260:  # Windowsのパス長制限を考慮
+                    return source_str
                 raise ParsingError(f"DDLファイルが見つかりません: {file_path}")
             
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
         else:
-            # 文字列の場合
+            # その他の場合は文字列として扱う
             return str(source)
     
     def _find_table_end(self, ddl_content: str, start_pos: int) -> int:

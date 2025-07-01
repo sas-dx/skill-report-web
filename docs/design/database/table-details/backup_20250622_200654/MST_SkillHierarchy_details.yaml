@@ -1,0 +1,300 @@
+table_name: MST_SkillHierarchy
+logical_name: スキル階層マスタ
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - スキル階層マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+overview: 'MST_SkillHierarchy（スキル階層マスタ）は、スキル項目間の階層関係を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - スキルの親子関係・階層構造の管理
+
+  - スキル分類の体系化（大分類→中分類→小分類）
+
+  - スキル検索・フィルタリングの基盤提供
+
+  - スキルマップ・スキルツリーの表示支援
+
+  - 関連スキルの推薦機能の基盤
+
+
+  このテーブルにより、技術スキル、ビジネススキル、資格等を体系的に分類し、
+
+  社員のスキル管理を効率的に行うことができます。
+
+  '
+columns:
+- name: skill_id
+  logical: スキルID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル項目のID（MST_SkillItemへの外部キー）
+- name: parent_skill_id
+  logical: 親スキルID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 親スキルのID（MST_SkillHierarchyへの自己参照外部キー、NULLの場合はルートスキル）
+- name: hierarchy_level
+  logical: 階層レベル
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 階層の深さ（1:大分類、2:中分類、3:小分類、最大5階層まで）
+  validation: 1 <= hierarchy_level <= 5
+- name: skill_path
+  logical: スキルパス
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: ルートからのスキルパス（例：/技術スキル/プログラミング/Java）
+- name: sort_order
+  logical: 表示順序
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同一階層内での表示順序
+  default: 0
+- name: is_leaf
+  logical: 末端フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 末端ノード（子を持たない）かどうか
+  default: true
+- name: skill_category
+  logical: スキルカテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの大分類（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格、SOFT:ソフトスキル）
+  enum_values:
+  - TECHNICAL
+  - BUSINESS
+  - CERTIFICATION
+  - SOFT
+- name: description
+  logical: 説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル階層の詳細説明
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 階層が有効かどうか
+  default: true
+- name: skillhierarchy_id
+  logical: MST_SkillHierarchyの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_SkillHierarchyの主キー
+  default: null
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_skill_id
+  columns:
+  - - skill_id
+  unique: false
+  description: スキルID検索用
+- name: idx_parent_skill
+  columns:
+  - - parent_skill_id
+  unique: false
+  description: 親スキル検索用
+- name: idx_hierarchy_level
+  columns:
+  - - hierarchy_level
+  unique: false
+  description: 階層レベル検索用
+- name: idx_skill_path
+  columns:
+  - - skill_path
+  unique: false
+  description: スキルパス検索用
+- name: idx_category_level
+  columns:
+  - - skill_category
+  - - hierarchy_level
+  unique: false
+  description: カテゴリ別階層検索用
+- name: idx_parent_sort
+  columns:
+  - - parent_skill_id
+  - - sort_order
+  unique: false
+  description: 親スキル内での順序検索用
+- name: idx_mst_skillhierarchy_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_skill_hierarchy
+  type: UNIQUE
+  description: スキルと親スキルの組み合わせ一意制約
+  columns:
+  - - skill_id
+  - - parent_skill_id
+- name: chk_hierarchy_level
+  type: CHECK
+  description: 階層レベル範囲チェック制約
+  condition: hierarchy_level >= 1 AND hierarchy_level <= 5
+- name: chk_skill_category
+  type: CHECK
+  description: スキルカテゴリ値チェック制約
+  condition: skill_category IN ('TECHNICAL', 'BUSINESS', 'CERTIFICATION', 'SOFT')
+- name: chk_no_self_reference
+  type: CHECK
+  description: 自己参照防止制約
+  condition: skill_id != parent_skill_id
+foreign_keys:
+- name: fk_hierarchy_skill
+  columns:
+  - - skill_id
+  references:
+    table:
+    - MST_SkillItem
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+- name: fk_hierarchy_parent
+  columns:
+  - - parent_skill_id
+  references:
+    table:
+    - MST_SkillHierarchy
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+sample_data:
+- skill_id: SKILL_TECH_001
+  parent_skill_id: null
+  hierarchy_level: 1
+  skill_path: /技術スキル
+  sort_order: 1
+  is_leaf: false
+  skill_category: TECHNICAL
+  description: 技術系スキルの大分類
+  is_active: true
+- skill_id: SKILL_PROG_001
+  parent_skill_id: SKILL_TECH_001
+  hierarchy_level: 2
+  skill_path: /技術スキル/プログラミング
+  sort_order: 1
+  is_leaf: false
+  skill_category: TECHNICAL
+  description: プログラミング言語・技術
+  is_active: true
+- skill_id: SKILL_JAVA_001
+  parent_skill_id: SKILL_PROG_001
+  hierarchy_level: 3
+  skill_path: /技術スキル/プログラミング/Java
+  sort_order: 1
+  is_leaf: true
+  skill_category: TECHNICAL
+  description: Java言語でのプログラミングスキル
+  is_active: true
+notes:
+- 階層の最大深度は5階層まで制限
+- 循環参照を防ぐため、自己参照チェック制約を設定
+- スキルパスは検索・表示用に事前計算して格納
+- is_leafフラグは子ノード追加時に自動更新
+- 論理削除は is_active フラグで管理
+- 階層変更時は関連する子ノードのパス更新が必要
+- === 業務ルール ===
+- ルートスキル（parent_skill_id = NULL）は各カテゴリに1つまで
+- 階層レベルは親の階層レベル + 1 である必要がある
+- スキルパスは親のパス + '/' + 自スキル名で構成
+- 子ノードが存在する場合、is_leaf = false に自動更新
+- 階層削除時は子ノードも含めて論理削除
+- 同一親内での表示順序は重複可能だが、連番推奨
+- スキルカテゴリは階層全体で統一する必要がある
+rules:
+- ルートスキル（parent_skill_id = NULL）は各カテゴリに1つまで
+- 階層レベルは親の階層レベル + 1 である必要がある
+- スキルパスは親のパス + '/' + 自スキル名で構成
+- 子ノードが存在する場合、is_leaf = false に自動更新
+- 階層削除時は子ノードも含めて論理削除
+- 同一親内での表示順序は重複可能だが、連番推奨
+- スキルカテゴリは階層全体で統一する必要がある

@@ -1,35 +1,49 @@
 -- ============================================
 -- テーブル: SYS_SystemLog
 -- 論理名: システムログ
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: SYS_SystemLog（システムログ）は、アプリケーション全体で発生するあらゆるシステムイベントを記録・管理するログテーブルです。
+
+主な目的：
+- システム運用監視（エラー、警告、情報ログの記録）
+- セキュリティ監査（認証、アクセス、操作履歴の追跡）
+- パフォーマンス分析（レスポンス時間、処理時間の測定）
+- 障害調査・デバッグ（詳細なエラー情報、スタックトレースの保存）
+- 分散システムトレーシング（相関IDによるリクエスト追跡）
+- コンプライアンス対応（法的要件に基づくログ保持）
+
+このテーブルは、システムの安定運用、セキュリティ確保、問題解決の基盤となる重要なログ管理システムです。
+大量データの効率的な管理のため、月次パーティション分割と自動アーカイブ機能を実装しています。
+
+-- 作成日: 2025-06-24 23:05:57
 -- ============================================
 
 DROP TABLE IF EXISTS SYS_SystemLog;
 
 CREATE TABLE SYS_SystemLog (
-    log_level ENUM COMMENT 'ログレベル（ERROR:エラー、WARN:警告、INFO:情報、DEBUG:デバッグ）',
-    log_category VARCHAR(50) COMMENT 'ログのカテゴリ（AUTH:認証、API:API、BATCH:バッチ、SYSTEM:システム）',
-    message TEXT COMMENT 'ログメッセージの内容',
-    user_id VARCHAR(50) COMMENT 'ログを発生させたユーザーのID（MST_UserAuthへの外部キー）',
-    session_id VARCHAR(100) COMMENT 'セッションID（ユーザーセッションの識別）',
-    ip_address VARCHAR(45) COMMENT 'クライアントのIPアドレス（IPv4/IPv6対応）',
-    user_agent TEXT COMMENT 'クライアントのユーザーエージェント情報',
-    request_url TEXT COMMENT 'リクエストされたURL',
-    request_method VARCHAR(10) COMMENT 'HTTPメソッド（GET、POST、PUT、DELETE等）',
-    response_status INT COMMENT 'HTTPレスポンスステータスコード',
-    response_time INT COMMENT 'レスポンス時間（ミリ秒）',
-    error_code VARCHAR(20) COMMENT 'アプリケーション固有のエラーコード',
-    stack_trace TEXT COMMENT 'エラー発生時のスタックトレース',
-    request_body TEXT COMMENT 'リクエストボディ（個人情報含む可能性があるため暗号化）',
-    response_body TEXT COMMENT 'レスポンスボディ（個人情報含む可能性があるため暗号化）',
-    correlation_id VARCHAR(100) COMMENT '分散システムでのトレーシング用相関ID',
-    component_name VARCHAR(100) COMMENT 'ログを出力したコンポーネント名',
-    thread_name VARCHAR(100) COMMENT 'ログを出力したスレッド名',
-    server_name VARCHAR(100) COMMENT 'ログを出力したサーバー名',
     id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
-    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
-    PRIMARY KEY (id)
+    tenant_id VARCHAR(50) COMMENT 'テナントID',
+    log_level ENUM('ERROR', 'WARN', 'INFO', 'DEBUG') COMMENT 'ログレベル',
+    message TEXT COMMENT 'ログメッセージ',
+    component_name VARCHAR(100) COMMENT 'コンポーネント名',
+    user_id VARCHAR(50) COMMENT '実行ユーザーID',
+    session_id VARCHAR(100) COMMENT 'セッションID',
+    correlation_id VARCHAR(100) COMMENT '相関ID',
+    error_code VARCHAR(20) COMMENT 'エラーコード',
+    stack_trace TEXT COMMENT 'スタックトレース',
+    request_url TEXT COMMENT 'リクエストURL',
+    request_method VARCHAR(10) COMMENT 'HTTPメソッド',
+    request_body TEXT COMMENT 'リクエストボディ',
+    response_status INT COMMENT 'レスポンスステータス',
+    response_body TEXT COMMENT 'レスポンスボディ',
+    user_agent TEXT COMMENT 'ユーザーエージェント',
+    ip_address VARCHAR(45) COMMENT 'IPアドレス',
+    log_category VARCHAR(50) COMMENT 'ログカテゴリ',
+    response_time INT COMMENT 'レスポンス時間',
+    server_name VARCHAR(100) COMMENT 'サーバー名',
+    thread_name VARCHAR(100) COMMENT 'スレッド名',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -46,7 +60,7 @@ CREATE INDEX idx_response_time ON SYS_SystemLog (response_time);
 CREATE INDEX idx_created_at_level ON SYS_SystemLog (created_at, log_level);
 
 -- 外部キー制約
-ALTER TABLE SYS_SystemLog ADD CONSTRAINT fk_log_user FOREIGN KEY (user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE SYS_SystemLog ADD CONSTRAINT fk_log_user FOREIGN KEY (user_id) REFERENCES MST_UserAuth(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 -- その他の制約
 ALTER TABLE SYS_SystemLog ADD CONSTRAINT chk_log_level CHECK (log_level IN ('ERROR', 'WARN', 'INFO', 'DEBUG'));

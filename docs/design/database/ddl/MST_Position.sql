@@ -1,33 +1,50 @@
 -- ============================================
 -- テーブル: MST_Position
 -- 論理名: 役職マスタ
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: MST_Position（役職マスタ）は、組織内の役職・職位の階層構造と基本情報を管理するマスタテーブルです。
+
+主な目的：
+- 役職階層の構造管理（社長、部長、課長、主任等の階層関係）
+- 役職基本情報の管理（役職名、役職コード、権限レベル等）
+- 人事評価・昇進管理の基盤
+- 給与・手当計算の基礎データ
+- 権限・アクセス制御の役職単位設定
+- 組織図・名刺作成の基礎データ
+- 人事制度・キャリアパス管理
+
+このテーブルは、人事管理、権限管理、給与計算、組織運営など、
+企業の階層的組織運営の基盤となる重要なマスタデータです。
+
+-- 作成日: 2025-06-24 23:05:57
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Position;
 
 CREATE TABLE MST_Position (
-    position_code VARCHAR(20) COMMENT '役職を一意に識別するコード（例：POS001）',
-    position_name VARCHAR(100) COMMENT '役職の正式名称',
-    position_name_short VARCHAR(50) COMMENT '役職の略称・短縮名',
-    position_level INT COMMENT '役職の階層レベル（1:最上位、数値が大きいほど下位）',
-    position_rank INT COMMENT '同レベル内での序列・ランク',
-    position_category ENUM COMMENT '役職のカテゴリ（EXECUTIVE:役員、MANAGER:管理職、SUPERVISOR:監督職、STAFF:一般職）',
-    authority_level INT COMMENT 'システム権限レベル（1-10、数値が大きいほど高権限）',
-    approval_limit DECIMAL(15,2) COMMENT '承認可能な金額の上限（円）',
-    salary_grade VARCHAR(10) COMMENT '給与計算用の等級コード',
-    allowance_amount DECIMAL(10,2) COMMENT '月額役職手当（円）',
-    is_management BOOLEAN DEFAULT False COMMENT '管理職かどうか（労働基準法上の管理監督者判定）',
-    is_executive BOOLEAN DEFAULT False COMMENT '役員かどうか',
-    requires_approval BOOLEAN DEFAULT False COMMENT '承認権限を持つかどうか',
-    can_hire BOOLEAN DEFAULT False COMMENT '採用権限を持つかどうか',
-    can_evaluate BOOLEAN DEFAULT False COMMENT '人事評価権限を持つかどうか',
-    position_status ENUM DEFAULT 'ACTIVE' COMMENT '役職の状態（ACTIVE:有効、INACTIVE:無効、ABOLISHED:廃止）',
-    sort_order INT COMMENT '組織図等での表示順序',
-    description TEXT COMMENT '役職の責任・権限・業務内容の説明',
-    code VARCHAR(20) NOT NULL COMMENT 'マスタコード',
-    name VARCHAR(100) NOT NULL COMMENT 'マスタ名称'
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    position_code VARCHAR(20) COMMENT '役職コード',
+    position_name VARCHAR(100) COMMENT '役職名',
+    allowance_amount DECIMAL(10,2) COMMENT '役職手当額',
+    approval_limit DECIMAL(15,2) COMMENT '承認限度額',
+    authority_level INT COMMENT '権限レベル',
+    can_evaluate BOOLEAN DEFAULT False COMMENT '評価権限フラグ',
+    can_hire BOOLEAN DEFAULT False COMMENT '採用権限フラグ',
+    description TEXT COMMENT '役職説明',
+    is_executive BOOLEAN DEFAULT False COMMENT '役員フラグ',
+    is_management BOOLEAN DEFAULT False COMMENT '管理職フラグ',
+    position_category ENUM('EXECUTIVE', 'MANAGER', 'SUPERVISOR', 'STAFF') COMMENT '役職カテゴリ',
+    position_id INT AUTO_INCREMENT NOT NULL COMMENT 'MST_Positionの主キー',
+    position_level INT COMMENT '役職レベル',
+    position_name_short VARCHAR(50) COMMENT '役職名略称',
+    position_rank INT COMMENT '役職ランク',
+    position_status ENUM('ACTIVE', 'INACTIVE', 'ABOLISHED') DEFAULT 'ACTIVE' COMMENT '役職状態',
+    requires_approval BOOLEAN DEFAULT False COMMENT '承認権限フラグ',
+    salary_grade VARCHAR(10) COMMENT '給与等級',
+    sort_order INT COMMENT '表示順序',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -40,9 +57,10 @@ CREATE INDEX idx_salary_grade ON MST_Position (salary_grade);
 CREATE INDEX idx_status ON MST_Position (position_status);
 CREATE INDEX idx_management_flags ON MST_Position (is_management, is_executive);
 CREATE INDEX idx_sort_order ON MST_Position (sort_order);
+CREATE INDEX idx_mst_position_tenant_id ON MST_Position (tenant_id);
 
 -- その他の制約
-ALTER TABLE MST_Position ADD CONSTRAINT uk_position_code UNIQUE ();
+-- 制約DDL生成エラー: uk_position_code
 ALTER TABLE MST_Position ADD CONSTRAINT chk_position_level CHECK (position_level > 0);
 ALTER TABLE MST_Position ADD CONSTRAINT chk_position_rank CHECK (position_rank > 0);
 ALTER TABLE MST_Position ADD CONSTRAINT chk_authority_level CHECK (authority_level BETWEEN 1 AND 10);

@@ -1,7 +1,9 @@
 /**
- * 要求仕様ID: CAR.1-PLAN.1
- * 対応設計書: docs/design/screens/specs/画面定義書_SCR_CAR_Plan_キャリアプラン画面.md
- * 実装内容: セレクトボックスUIコンポーネント
+ * 要求仕様ID: CAR.1-PLAN.1, PRO.1-BASE.1
+ * 対応設計書: 
+ * - docs/design/screens/specs/画面定義書_SCR_CAR_Plan_キャリアプラン画面.md
+ * - docs/design/components/共通部品定義書.md
+ * 実装内容: 統合Selectコンポーネント（高機能版とシンプル版）
  */
 
 'use client';
@@ -20,7 +22,7 @@ interface SelectProps {
   value?: string;
   placeholder?: string;
   disabled?: boolean;
-  error?: string;
+  error?: string | boolean;
   className?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
@@ -29,7 +31,7 @@ interface SelectProps {
 }
 
 /**
- * セレクトボックスコンポーネント
+ * 高機能セレクトボックスコンポーネント
  * アクセシビリティ対応済み、キーボード操作対応
  */
 export function Select({
@@ -51,6 +53,10 @@ export function Select({
 
   // 選択されたオプションを取得
   const selectedOption = options.find(option => option.value === value);
+
+  // エラー状態の正規化
+  const hasError = typeof error === 'string' ? !!error : !!error;
+  const errorMessage = typeof error === 'string' ? error : undefined;
 
   // 外部クリックでドロップダウンを閉じる
   useEffect(() => {
@@ -140,7 +146,7 @@ export function Select({
     transition-colors duration-200
   `;
 
-  const stateClasses = error
+  const stateClasses = hasError
     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
     : disabled
     ? 'border-gray-200 bg-gray-50 cursor-not-allowed text-gray-500'
@@ -220,9 +226,9 @@ export function Select({
       )}
 
       {/* エラーメッセージ */}
-      {error && (
+      {errorMessage && (
         <p className="mt-1 text-sm text-red-600" role="alert">
-          {error}
+          {errorMessage}
         </p>
       )}
     </div>
@@ -231,13 +237,14 @@ export function Select({
 
 /**
  * シンプルなセレクトコンポーネント（ネイティブselect要素ベース）
+ * 軽量で高速、フォーム用途に最適
  */
 interface SimpleSelectProps {
   options: SelectOption[];
   value?: string;
   placeholder?: string;
   disabled?: boolean;
-  error?: string;
+  error?: string | boolean;
   className?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
@@ -248,7 +255,7 @@ interface SimpleSelectProps {
 export function SimpleSelect({
   options,
   value,
-  placeholder,
+  placeholder = '選択してください',
   disabled = false,
   error,
   className = '',
@@ -261,17 +268,20 @@ export function SimpleSelect({
     onChange?.(event.target.value);
   };
 
+  // エラー状態の正規化
+  const hasError = typeof error === 'string' ? !!error : !!error;
+  const errorMessage = typeof error === 'string' ? error : undefined;
+
   const baseClasses = `
     w-full px-3 py-2 border rounded-md shadow-sm
     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+    disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
     transition-colors duration-200
   `;
 
-  const stateClasses = error
+  const stateClasses = hasError
     ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-    : disabled
-    ? 'border-gray-200 bg-gray-50 cursor-not-allowed text-gray-500'
-    : 'border-gray-300 hover:border-gray-400';
+    : 'border-gray-300';
 
   return (
     <div className={className}>
@@ -284,11 +294,9 @@ export function SimpleSelect({
         aria-label={ariaLabel}
         aria-describedby={ariaDescribedBy}
       >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
+        <option value="" disabled>
+          {placeholder}
+        </option>
         {options.map((option) => (
           <option
             key={option.value}
@@ -300,9 +308,9 @@ export function SimpleSelect({
         ))}
       </select>
 
-      {error && (
+      {errorMessage && (
         <p className="mt-1 text-sm text-red-600" role="alert">
-          {error}
+          {errorMessage}
         </p>
       )}
     </div>

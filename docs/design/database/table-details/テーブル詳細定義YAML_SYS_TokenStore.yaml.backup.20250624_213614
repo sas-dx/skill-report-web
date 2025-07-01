@@ -1,0 +1,338 @@
+table_name: SYS_TokenStore
+logical_name: トークン管理
+category: システム系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - トークン管理システムテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+overview: 'SYS_TokenStore（トークン管理）は、認証・認可システムで使用するトークン情報を管理するシステムテーブルです。
+
+
+  主な目的：
+
+  - JWTアクセストークンの管理
+
+  - リフレッシュトークンの管理
+
+  - セッション管理
+
+  - トークンの有効期限管理
+
+  - セキュリティ監査のためのトークン履歴管理
+
+
+  このテーブルは、認証・認可システムの基盤となる重要なシステムデータです。
+
+  '
+columns:
+- name: id
+  logical: ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: マルチテナント識別子
+- name: tokenstore_id
+  logical: SYS_TokenStoreの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_TokenStoreの主キー
+  default: null
+- name: user_id
+  logical: ユーザーID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンの所有者ユーザーID（MST_UserAuthへの参照）
+- name: token_type
+  logical: トークンタイプ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンの種類（ACCESS:アクセストークン、REFRESH:リフレッシュトークン、SESSION:セッション）
+  enum_values:
+  - ACCESS
+  - REFRESH
+  - SESSION
+- name: token_value
+  logical: トークン値
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: true
+  description: トークンの値（暗号化必須）
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+- name: client_ip
+  logical: クライアントIP
+  type: VARCHAR
+  length: 45
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークン発行時のクライアントIPアドレス（IPv6対応）
+- name: device_fingerprint
+  logical: デバイスフィンガープリント
+  type: VARCHAR
+  length: 255
+  'null': true
+  unique: false
+  encrypted: false
+  description: デバイス識別用フィンガープリント
+- name: expires_at
+  logical: 有効期限
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンの有効期限
+- name: is_revoked
+  logical: 無効化フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンが無効化されているかどうか
+  default: false
+- name: issued_at
+  logical: 発行日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンの発行日時
+- name: last_used_at
+  logical: 最終使用日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンの最終使用日時
+- name: revoked_at
+  logical: 無効化日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンが無効化された日時
+- name: revoked_reason
+  logical: 無効化理由
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 無効化の理由（LOGOUT:ログアウト、EXPIRED:期限切れ、SECURITY:セキュリティ、ADMIN:管理者操作）
+  enum_values:
+  - LOGOUT
+  - EXPIRED
+  - SECURITY
+  - ADMIN
+- name: scope
+  logical: スコープ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークンのアクセススコープ（JSON形式）
+- name: token_hash
+  logical: トークンハッシュ
+  type: VARCHAR
+  length: 255
+  'null': true
+  unique: true
+  encrypted: false
+  description: トークン値のハッシュ値（検索用）
+- name: user_agent
+  logical: ユーザーエージェント
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: トークン発行時のユーザーエージェント情報
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_token_store_hash
+  columns:
+  - - token_hash
+  unique: true
+  description: トークンハッシュ検索用（一意）
+- name: idx_token_store_user_type
+  columns:
+  - - user_id
+  - - token_type
+  unique: false
+  description: ユーザー別トークンタイプ検索用
+- name: idx_token_store_expires
+  columns:
+  - - expires_at
+  - - is_revoked
+  unique: false
+  description: 有効期限・無効化状態検索用
+- name: idx_token_store_tenant_user
+  columns:
+  - - tenant_id
+  - - user_id
+  unique: false
+  description: テナント別ユーザー検索用
+- name: idx_token_store_issued
+  columns:
+  - - issued_at
+  unique: false
+  description: 発行日時検索用
+- name: idx_token_store_last_used
+  columns:
+  - - last_used_at
+  unique: false
+  description: 最終使用日時検索用
+constraints:
+- name: uk_token_store_hash
+  type: UNIQUE
+  description: トークンハッシュ一意制約
+  columns:
+  - - token_hash
+- name: chk_token_store_type
+  type: CHECK
+  description: トークンタイプ値チェック制約
+  condition: token_type IN ('ACCESS', 'REFRESH', 'SESSION')
+- name: chk_token_store_revoked_reason
+  type: CHECK
+  description: 無効化理由値チェック制約
+  condition: revoked_reason IS NULL OR revoked_reason IN ('LOGOUT', 'EXPIRED', 'SECURITY',
+    'ADMIN')
+- name: chk_token_store_expires_after_issued
+  type: CHECK
+  description: 有効期限が発行日時より後であることをチェック
+  condition: expires_at > issued_at
+- name: chk_token_store_revoked_consistency
+  type: CHECK
+  description: 無効化フラグと無効化日時の整合性チェック
+  condition: (is_revoked = false AND revoked_at IS NULL AND revoked_reason IS NULL)
+    OR (is_revoked = true AND revoked_at IS NOT NULL)
+foreign_keys:
+- name: fk_token_store_user
+  columns:
+  - - user_id
+  references:
+    table:
+    - MST_UserAuth
+    columns:
+    - user_id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+sample_data:
+- id: TS001
+  tenant_id: TENANT001
+  user_id: USER001
+  token_type: ACCESS
+  token_value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  token_hash: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+  expires_at: '2025-06-01 20:00:00'
+  issued_at: '2025-06-01 19:00:00'
+  last_used_at: '2025-06-01 19:30:00'
+  client_ip: 192.168.1.100
+  user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+  device_fingerprint: fp_abc123def456
+  scope: '["read:profile", "write:skills", "read:goals"]'
+  is_revoked: false
+  revoked_at: null
+  revoked_reason: null
+- id: TS002
+  tenant_id: TENANT001
+  user_id: USER001
+  token_type: REFRESH
+  token_value: rt_xyz789abc123def456ghi789jkl012mno345
+  token_hash: b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1
+  expires_at: '2025-06-08 19:00:00'
+  issued_at: '2025-06-01 19:00:00'
+  last_used_at: null
+  client_ip: 192.168.1.100
+  user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+  device_fingerprint: fp_abc123def456
+  scope: '["refresh"]'
+  is_revoked: false
+  revoked_at: null
+  revoked_reason: null
+notes:
+- トークン値は暗号化必須、検索にはハッシュ値を使用
+- 有効期限は作成から1日経過で自動削除される
+- セキュリティ監査のため発行・使用履歴を記録
+- デバイスフィンガープリントによる不正アクセス検知に対応
+- スコープ情報はJSON形式で柔軟な権限管理に対応
+- 無効化されたトークンも監査のため一定期間保持
+- IPv6アドレスに対応したクライアントIP管理
+- トークンハッシュは全システムで一意である必要がある
+- 有効期限切れのトークンは自動的に無効化される
+- 無効化されたトークンは再利用不可
+- 同一ユーザーの同一タイプトークンは複数発行可能
+- リフレッシュトークンの有効期限はアクセストークンより長期
+- セッショントークンはブラウザセッション管理用
+- トークン使用時は最終使用日時を更新
+- セキュリティ上の理由で無効化されたトークンは即座に削除対象
+rules:
+- トークンハッシュは全システムで一意である必要がある
+- 有効期限切れのトークンは自動的に無効化される
+- 無効化されたトークンは再利用不可
+- 同一ユーザーの同一タイプトークンは複数発行可能
+- リフレッシュトークンの有効期限はアクセストークンより長期
+- セッショントークンはブラウザセッション管理用
+- トークン使用時は最終使用日時を更新
+- セキュリティ上の理由で無効化されたトークンは即座に削除対象

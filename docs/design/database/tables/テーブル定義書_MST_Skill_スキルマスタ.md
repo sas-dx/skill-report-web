@@ -7,80 +7,77 @@
 | テーブル名 | MST_Skill |
 | 論理名 | スキルマスタ |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-06 19:50:10 |
+| 生成日時 | 2025-06-24 23:05:57 |
 
 ## 概要
 
 スキルマスタテーブルは、システムで管理するスキル項目の基本情報を管理するマスタテーブルです。
-
 主な目的：
 - スキル項目の一元管理
 - スキルカテゴリとレベル定義の管理
 - スキル評価基準の標準化
 - スキル検索とフィルタリングの支援
-
 このテーブルは、スキル管理システムの基盤となるマスタテーブルで、
 統一されたスキル評価基準と効率的なスキル管理を実現します。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | スキルID | VARCHAR | 50 | ○ |  | スキルの一意識別子 |
-| skill_name | スキル名 | VARCHAR | 200 | ○ |  | スキルの名称 |
-| skill_name_en | スキル名英語 | VARCHAR | 200 | ○ |  | スキルの英語名称 |
-| category_id | カテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリのID（MST_SkillCategoryへの外部キー） |
-| skill_type | スキル種別 | ENUM |  | ○ | TECHNICAL | スキルの種別（TECHNICAL:技術スキル、BUSINESS:ビジネススキル、SOFT:ソフトスキル、LANGUAGE:言語スキル） |
-| difficulty_level | 難易度レベル | INTEGER |  | ○ | 3 | スキルの習得難易度（1:易、2:普通、3:難、4:非常に難、5:最高難度） |
-| description | 説明 | TEXT |  | ○ |  | スキルの詳細説明 |
-| evaluation_criteria | 評価基準 | TEXT |  | ○ |  | スキル評価の基準や指標（JSON形式） |
-| required_experience_months | 必要経験月数 | INTEGER |  | ○ |  | スキル習得に必要な経験期間（月数） |
-| related_skills | 関連スキル | TEXT |  | ○ |  | 関連するスキルのID一覧（JSON配列形式） |
-| prerequisite_skills | 前提スキル | TEXT |  | ○ |  | 習得前提となるスキルのID一覧（JSON配列形式） |
-| certification_info | 資格情報 | TEXT |  | ○ |  | 関連する資格や認定情報（JSON形式） |
-| learning_resources | 学習リソース | TEXT |  | ○ |  | 学習に役立つリソースのURL一覧（JSON配列形式） |
-| market_demand | 市場需要 | ENUM |  | ○ | MEDIUM | 市場での需要レベル（LOW:低、MEDIUM:中、HIGH:高、VERY_HIGH:非常に高） |
-| technology_trend | 技術トレンド | ENUM |  | ○ | STABLE | 技術トレンド（EMERGING:新興、GROWING:成長中、STABLE:安定、DECLINING:衰退） |
-| is_core_skill | コアスキルフラグ | BOOLEAN |  | ○ | False | 組織のコアスキルかどうか |
-| display_order | 表示順序 | INTEGER |  | ○ | 0 | 同一カテゴリ内での表示順序 |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | スキルが有効かどうか |
-| effective_from | 有効開始日 | DATE |  | ○ |  | スキルの有効開始日 |
-| effective_to | 有効終了日 | DATE |  | ○ |  | スキルの有効終了日 |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| id | スキルID | VARCHAR | 50 | ○ |  | スキルID |
+| tenant_id | テナントID | VARCHAR | 50 | ○ |  | テナントID |
+| skill_name | スキル名 | VARCHAR | 200 | ○ |  | スキル名 |
+| category_id | カテゴリID | VARCHAR | 50 | ○ |  | カテゴリID |
+| certification_info | 資格情報 | TEXT |  | ○ |  | 資格情報 |
+| description | 説明 | TEXT |  | ○ |  | 説明 |
+| difficulty_level | 難易度レベル | INTEGER |  | ○ | 3 | 難易度レベル |
+| display_order | 表示順序 | INTEGER |  | ○ | 0 | 表示順序 |
+| effective_from | 有効開始日 | DATE |  | ○ |  | 有効開始日 |
+| effective_to | 有効終了日 | DATE |  | ○ |  | 有効終了日 |
+| evaluation_criteria | 評価基準 | TEXT |  | ○ |  | 評価基準 |
+| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| is_core_skill | コアスキルフラグ | BOOLEAN |  | ○ | False | コアスキルフラグ |
+| learning_resources | 学習リソース | TEXT |  | ○ |  | 学習リソース |
+| market_demand | 市場需要 | ENUM |  | ○ | MEDIUM | 市場需要 |
+| prerequisite_skills | 前提スキル | TEXT |  | ○ |  | 前提スキル |
+| related_skills | 関連スキル | TEXT |  | ○ |  | 関連スキル |
+| required_experience_months | 必要経験月数 | INTEGER |  | ○ |  | 必要経験月数 |
+| skill_id | MST_Skillの主キー | SERIAL |  | × |  | MST_Skillの主キー |
+| skill_name_en | スキル名英語 | VARCHAR | 200 | ○ |  | スキル名英語 |
+| skill_type | スキル種別 | ENUM |  | ○ | TECHNICAL | スキル種別 |
+| technology_trend | 技術トレンド | ENUM |  | ○ | STABLE | 技術トレンド |
+| is_deleted | 削除フラグ | BOOLEAN |  | ○ | False | 削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | ○ | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_Skill_id | id | ○ | スキルID検索用（一意） |
-| idx_MST_Skill_skill_name | skill_name | × | スキル名検索用 |
-| idx_MST_Skill_category_id | category_id | × | カテゴリID検索用 |
-| idx_MST_Skill_skill_type | skill_type | × | スキル種別検索用 |
-| idx_MST_Skill_category_order | category_id, display_order | × | カテゴリ別表示順序検索用 |
-| idx_MST_Skill_market_demand | market_demand | × | 市場需要検索用 |
-| idx_MST_Skill_is_active | is_active | × | 有効フラグ検索用 |
+| idx_MST_Skill_id | id | ○ |  |
+| idx_MST_Skill_skill_name | skill_name | × |  |
+| idx_MST_Skill_category_id | category_id | × |  |
+| idx_MST_Skill_skill_type | skill_type | × |  |
+| idx_MST_Skill_category_order | category_id, display_order | × |  |
+| idx_MST_Skill_market_demand | market_demand | × |  |
+| idx_MST_Skill_is_active | is_active | × |  |
+| idx_mst_skill_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_MST_Skill_category | category_id | MST_SkillCategory | id | CASCADE | RESTRICT | MST_SkillCategoryへの外部キー |
+| fk_MST_Skill_tenant | tenant_id | MST_Tenant | id | CASCADE | RESTRICT | 外部キー制約 |
+| fk_MST_Skill_category | category_id | MST_SkillCategory | id | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_MST_Skill_id | UNIQUE |  | スキルID一意制約 |
-| chk_MST_Skill_skill_type | CHECK | skill_type IN ('TECHNICAL', 'BUSINESS', 'SOFT', 'LANGUAGE') | スキル種別値チェック制約 |
-| chk_MST_Skill_difficulty_level | CHECK | difficulty_level BETWEEN 1 AND 5 | 難易度レベル値チェック制約（1-5） |
-| chk_MST_Skill_required_experience | CHECK | required_experience_months IS NULL OR required_experience_months >= 0 | 必要経験月数非負数チェック制約 |
-| chk_MST_Skill_market_demand | CHECK | market_demand IN ('LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH') | 市場需要値チェック制約 |
-| chk_MST_Skill_technology_trend | CHECK | technology_trend IN ('EMERGING', 'GROWING', 'STABLE', 'DECLINING') | 技術トレンド値チェック制約 |
-| chk_MST_Skill_display_order | CHECK | display_order >= 0 | 表示順序非負数チェック制約 |
-| chk_MST_Skill_effective_period | CHECK | effective_to IS NULL OR effective_from IS NULL OR effective_to >= effective_from | 有効期間整合性チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_difficulty_level | CHECK | difficulty_level > 0 | difficulty_level正値チェック制約 |
+| chk_skill_type | CHECK | skill_type IN (...) | skill_type値チェック制約 |
 
 ## サンプルデータ
 
@@ -99,9 +96,6 @@
 - 学習リソースはURL一覧をJSON配列で管理
 - 有効期間を設定することで、廃止予定スキルの管理が可能
 - 論理削除は is_active フラグで管理
-
-## 業務ルール
-
 - スキルIDは「SKILL + 連番」形式で生成する
 - 新しいスキル追加時は適切なカテゴリに分類する
 - 評価基準は5段階で定義し、各レベルの説明を含める
@@ -111,8 +105,23 @@
 - 廃止予定のスキルは有効終了日を設定し、段階的に無効化する
 - 関連スキルの設定により、スキルマップの可視化を支援する
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - MST_Skillの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214907 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_215000 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215053 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223432 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

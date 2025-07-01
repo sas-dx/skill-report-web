@@ -119,10 +119,16 @@ class DatabaseToolsConfig:
     def __post_init__(self):
         """初期化後の設定"""
         # 実行時のディレクトリを考慮してパスを設定
-        if self.base_dir.name == "tools":
-            # toolsディレクトリから実行されている場合
-            db_dir = self.base_dir.parent
-            self.tools_dir = self.base_dir
+        if self.base_dir.name == "tools" or (self.base_dir / "tools").exists():
+            # toolsディレクトリから実行されている場合、またはdatabase/ディレクトリの場合
+            if self.base_dir.name == "tools":
+                db_dir = self.base_dir.parent
+                self.tools_dir = self.base_dir
+            else:
+                # database/ディレクトリの場合
+                db_dir = self.base_dir
+                self.tools_dir = self.base_dir / "tools"
+            
             self.table_details_dir = db_dir / "table-details"
             self.ddl_dir = db_dir / "ddl"
             self.tables_dir = db_dir / "tables"
@@ -210,6 +216,24 @@ class DatabaseToolsConfig:
     def get_sample_data_path(self, table_name: str) -> Path:
         """サンプルデータファイルのパスを取得"""
         return self.data_dir / f"{table_name}_sample_data.sql"
+    
+    def get_table_list_file(self) -> Path:
+        """テーブル一覧ファイルのパスを取得"""
+        # データベース設計ディレクトリのテーブル一覧.mdファイル
+        db_design_dir = self.base_dir / "docs" / "design" / "database" if self.base_dir.name != "tools" else self.base_dir.parent
+        return db_design_dir / "テーブル一覧.md"
+    
+    def get_details_dir(self) -> Path:
+        """テーブル詳細定義ディレクトリのパスを取得"""
+        return self.table_details_dir
+    
+    def get_tables_dir(self) -> Path:
+        """テーブル定義書ディレクトリのパスを取得"""
+        return self.tables_dir
+    
+    def get_ddl_dir(self) -> Path:
+        """DDLディレクトリのパスを取得"""
+        return self.ddl_dir
     
     def get_backup_path(self, original_path: Path) -> Path:
         """バックアップファイルのパスを取得"""

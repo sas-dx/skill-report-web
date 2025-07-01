@@ -1,0 +1,343 @@
+table_name: MST_NotificationTemplate
+logical_name: 通知テンプレート
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 通知テンプレートマスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+overview: 'MST_NotificationTemplate（通知テンプレート）は、システムで使用する通知メッセージのテンプレートを管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - 通知メッセージの定型文管理
+
+  - 多言語対応の通知テンプレート管理
+
+  - 通知チャネル別のテンプレート管理
+
+  - 動的パラメータを含むテンプレート管理
+
+  - テナント別カスタマイズ対応
+
+
+  このテーブルは、通知・連携管理機能において一貫性のあるメッセージ配信を実現する重要なマスタデータです。
+
+  '
+columns:
+- name: id
+  logical: ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: マルチテナント識別子
+- name: template_key
+  logical: テンプレートキー
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの識別キー（例：skill_update_email、goal_reminder_slack等）
+- name: template_name
+  logical: テンプレート名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの表示名
+- name: notification_type
+  logical: 通知タイプ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 対応する通知の種類（EMAIL:メール、SLACK:Slack、TEAMS:Teams、WEBHOOK:Webhook）
+  enum_values:
+  - EMAIL
+  - SLACK
+  - TEAMS
+  - WEBHOOK
+- name: language_code
+  logical: 言語コード
+  type: VARCHAR
+  length: 10
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートの言語（ja:日本語、en:英語等）
+  default: ja
+- name: subject_template
+  logical: 件名テンプレート
+  type: VARCHAR
+  length: 500
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知の件名テンプレート（メール等で使用）
+- name: body_template
+  logical: 本文テンプレート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知の本文テンプレート（プレースホルダー含む）
+- name: format_type
+  logical: フォーマットタイプ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートのフォーマット（PLAIN:プレーンテキスト、HTML:HTML、MARKDOWN:Markdown）
+  enum_values:
+  - PLAIN
+  - HTML
+  - MARKDOWN
+  default: PLAIN
+- name: parameters
+  logical: パラメータ定義
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートで使用可能なパラメータの定義（JSON形式）
+- name: sample_data
+  logical: サンプルデータ
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレート確認用のサンプルデータ（JSON形式）
+- name: is_default
+  logical: デフォルトフラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同一キー・タイプでのデフォルトテンプレートかどうか
+  default: false
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートが有効かどうか
+  default: true
+- name: version
+  logical: バージョン
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: false
+  encrypted: false
+  description: テンプレートのバージョン番号
+  default: 1.0.0
+- name: notificationtemplate_id
+  logical: MST_NotificationTemplateの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_NotificationTemplateの主キー
+  default: null
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_notification_template_tenant_key_type
+  columns:
+  - - tenant_id
+  - - template_key
+  - - notification_type
+  - - language_code
+  unique: true
+  description: テナント別テンプレート検索用（一意）
+- name: idx_notification_template_type
+  columns:
+  - - notification_type
+  unique: false
+  description: 通知タイプ別検索用
+- name: idx_notification_template_language
+  columns:
+  - - language_code
+  unique: false
+  description: 言語別検索用
+- name: idx_notification_template_default
+  columns:
+  - - is_default
+  - - is_active
+  unique: false
+  description: デフォルト・有効テンプレート検索用
+- name: idx_notification_template_key
+  columns:
+  - - template_key
+  unique: false
+  description: テンプレートキー別検索用
+- name: idx_mst_notificationtemplate_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_notification_template_tenant_key_type_lang
+  type: UNIQUE
+  description: テナント内テンプレート一意制約
+  columns:
+  - - tenant_id
+  - - template_key
+  - - notification_type
+  - - language_code
+- name: chk_notification_template_type
+  type: CHECK
+  description: 通知タイプ値チェック制約
+  condition: notification_type IN ('EMAIL', 'SLACK', 'TEAMS', 'WEBHOOK')
+- name: chk_notification_template_format
+  type: CHECK
+  description: フォーマットタイプ値チェック制約
+  condition: format_type IN ('PLAIN', 'HTML', 'MARKDOWN')
+- name: chk_notification_template_language
+  type: CHECK
+  description: 言語コード値チェック制約
+  condition: language_code IN ('ja', 'en')
+foreign_keys: []
+sample_data:
+- id: NT001
+  tenant_id: TENANT001
+  template_key: skill_update_notification
+  template_name: スキル更新通知テンプレート
+  notification_type: EMAIL
+  language_code: ja
+  subject_template: 【スキル更新】{{employee_name}}さんのスキル情報が更新されました
+  body_template: '{{employee_name}}さん
+
+
+    以下のスキル情報が更新されました。
+
+
+    スキル名: {{skill_name}}
+
+    更新日時: {{updated_at}}
+
+    更新者: {{updated_by}}
+
+
+    詳細は以下のリンクからご確認ください。
+
+    {{skill_detail_url}}
+
+
+    ※このメールは自動送信されています。
+
+    '
+  format_type: PLAIN
+  parameters: '{"employee_name": "社員名", "skill_name": "スキル名", "updated_at": "更新日時",
+    "updated_by": "更新者", "skill_detail_url": "詳細URL"}'
+  sample_data: '{"employee_name": "山田太郎", "skill_name": "Java", "updated_at": "2025-06-01
+    10:30:00", "updated_by": "佐藤花子", "skill_detail_url": "https://system.company.com/skills/123"}'
+  is_default: true
+  is_active: true
+  version: 1.0.0
+- id: NT002
+  tenant_id: TENANT001
+  template_key: goal_deadline_reminder
+  template_name: 目標期限リマインダーテンプレート
+  notification_type: SLACK
+  language_code: ja
+  subject_template: null
+  body_template: ':warning: *目標期限のお知らせ* :warning:
+
+
+    {{employee_name}}さんの目標「{{goal_title}}」の期限が近づいています。
+
+
+    • 期限: {{deadline_date}}
+
+    • 残り日数: {{remaining_days}}日
+
+    • 進捗率: {{progress_rate}}%
+
+
+    <{{goal_detail_url}}|詳細を確認する>
+
+    '
+  format_type: MARKDOWN
+  parameters: '{"employee_name": "社員名", "goal_title": "目標タイトル", "deadline_date": "期限日",
+    "remaining_days": "残り日数", "progress_rate": "進捗率", "goal_detail_url": "詳細URL"}'
+  sample_data: '{"employee_name": "山田太郎", "goal_title": "Java認定資格取得", "deadline_date":
+    "2025-06-30", "remaining_days": "29", "progress_rate": "75", "goal_detail_url":
+    "https://system.company.com/goals/456"}'
+  is_default: true
+  is_active: true
+  version: 1.0.0
+notes:
+- テンプレートはテナント・キー・タイプ・言語の組み合わせで一意
+- body_templateにはプレースホルダー（{{parameter_name}}）を使用可能
+- parametersフィールドでテンプレートで使用可能なパラメータを定義
+- sample_dataフィールドでテンプレートのプレビュー確認が可能
+- is_defaultフラグにより同一条件での優先テンプレートを指定
+- 多言語対応により国際化に対応
+- format_typeによりプレーンテキスト・HTML・Markdownに対応
+- 同一テナント・キー・タイプ・言語の組み合わせは重複不可
+- 無効化されたテンプレートは通知処理から除外される
+- デフォルトテンプレートは同一条件で1つのみ設定可能
+- プレースホルダーはparametersフィールドで定義されたもののみ使用可能
+- subject_templateはメール系通知でのみ使用
+- Slack・Teams等ではMarkdown形式の装飾が推奨
+- テンプレートバージョンは変更時に更新が必要
+rules:
+- 同一テナント・キー・タイプ・言語の組み合わせは重複不可
+- 無効化されたテンプレートは通知処理から除外される
+- デフォルトテンプレートは同一条件で1つのみ設定可能
+- プレースホルダーはparametersフィールドで定義されたもののみ使用可能
+- subject_templateはメール系通知でのみ使用
+- Slack・Teams等ではMarkdown形式の装飾が推奨
+- テンプレートバージョンは変更時に更新が必要

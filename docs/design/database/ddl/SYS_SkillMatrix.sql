@@ -1,27 +1,38 @@
 -- ============================================
 -- テーブル: SYS_SkillMatrix
 -- 論理名: スキルマップ
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: スキルマップテーブルは、社員のスキル評価とスキル項目の関連を管理するシステムテーブルです。
+
+主な目的：
+- 社員とスキル項目の多対多関係を管理
+- スキル評価レベルの記録
+- スキル評価履歴の管理
+
+このテーブルは、スキル管理システムの中核となるテーブルで、
+社員のスキル可視化やスキル分析の基盤データを提供します。
+
+-- 作成日: 2025-06-24 23:05:57
 -- ============================================
 
 DROP TABLE IF EXISTS SYS_SkillMatrix;
 
 CREATE TABLE SYS_SkillMatrix (
-    employee_id VARCHAR(50) COMMENT '評価対象の社員ID（MST_Employeeへの外部キー）',
-    skill_id VARCHAR(50) COMMENT 'スキル項目ID（MST_Skillへの外部キー）',
-    skill_level INTEGER DEFAULT 1 COMMENT 'スキル評価レベル（1:初級、2:中級、3:上級、4:エキスパート、5:マスター）',
-    self_assessment INTEGER COMMENT '本人による自己評価レベル（1-5）',
-    manager_assessment INTEGER COMMENT '上司による評価レベル（1-5）',
-    peer_assessment INTEGER COMMENT '同僚による評価レベル（1-5）',
-    assessment_date DATE COMMENT 'スキル評価を実施した日付',
-    evidence_url VARCHAR(500) COMMENT 'スキル評価の根拠となる資料やプロジェクトのURL',
-    notes TEXT COMMENT 'スキル評価に関する詳細な備考やコメント',
-    next_target_level INTEGER COMMENT '次回評価での目標レベル（1-5）',
-    target_date DATE COMMENT '目標レベル達成予定日',
     id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
-    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
-    PRIMARY KEY (id)
+    assessment_date DATE COMMENT '評価日',
+    employee_id VARCHAR(50) COMMENT '社員ID',
+    evidence_url VARCHAR(500) COMMENT '根拠URL',
+    manager_assessment INTEGER COMMENT '上司評価',
+    next_target_level INTEGER COMMENT '次回目標レベル',
+    notes TEXT COMMENT '備考',
+    peer_assessment INTEGER COMMENT '同僚評価',
+    self_assessment INTEGER COMMENT '自己評価',
+    skill_id VARCHAR(50) COMMENT 'スキルID',
+    skill_level INTEGER DEFAULT 1 COMMENT 'スキルレベル',
+    skillmatrix_id INT AUTO_INCREMENT NOT NULL COMMENT 'SYS_SkillMatrixの主キー',
+    target_date DATE COMMENT '目標達成日',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -36,7 +47,7 @@ ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT fk_SYS_SkillMatrix_employee FOREIGN K
 ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT fk_SYS_SkillMatrix_skill FOREIGN KEY (skill_id) REFERENCES MST_Skill(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- その他の制約
-ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT uk_SYS_SkillMatrix_employee_skill UNIQUE ();
+-- 制約DDL生成エラー: uk_SYS_SkillMatrix_employee_skill
 ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT chk_SYS_SkillMatrix_skill_level CHECK (skill_level BETWEEN 1 AND 5);
 ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT chk_SYS_SkillMatrix_self_assessment CHECK (self_assessment IS NULL OR self_assessment BETWEEN 1 AND 5);
 ALTER TABLE SYS_SkillMatrix ADD CONSTRAINT chk_SYS_SkillMatrix_manager_assessment CHECK (manager_assessment IS NULL OR manager_assessment BETWEEN 1 AND 5);

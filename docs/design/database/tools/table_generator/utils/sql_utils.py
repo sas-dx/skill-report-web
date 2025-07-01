@@ -50,7 +50,9 @@ class SqlUtils:
                 col_def = self._generate_column_definition(column)
                 column_definitions.append(f"    {col_def}")
                 
-                if column.primary:
+                # プライマリキーの判定（互換性のため複数の属性をチェック）
+                is_primary = getattr(column, 'primary', None) or getattr(column, 'primary_key', False)
+                if is_primary:
                     primary_keys.append(column.name)
             
             # プライマリキー制約を追加
@@ -76,28 +78,51 @@ class SqlUtils:
         Returns:
             str: カラム定義文
         """
-        col_type = column.data_type.upper()
+        col_type = column.type.upper()
+        
+        # ENUM型の処理
+        if col_type == 'ENUM':
+            if hasattr(column, 'enum_values') and column.enum_values:
+                enum_values = "', '".join(column.enum_values)
+                col_type = f"ENUM('{enum_values}')"
+            else:
+                # enum_valuesが無い場合はVARCHAR(50)にフォールバック
+                col_type = "VARCHAR(50)"
+                self.logger.warning(f"ENUM型のカラム {column.name} にenum_valuesが定義されていません。VARCHAR(50)に変更します。")
         
         # 長さ指定
-        if column.length and col_type in ['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC']:
+        elif column.length and col_type in ['VARCHAR', 'CHAR', 'DECIMAL', 'NUMERIC']:
             col_type += f"({column.length})"
+        
+        # SERIAL型の処理（PostgreSQL互換）
+        elif col_type == 'SERIAL':
+            col_type = "INT AUTO_INCREMENT"
         
         col_def = f"{column.name} {col_type}"
         
         # NULL制約
-        if not column.null:
+        if not column.nullable:
             col_def += " NOT NULL"
         
         # デフォルト値
         if column.default is not None:
-            if isinstance(column.default, str) and column.default.upper() not in ['CURRENT_TIMESTAMP', 'NULL']:
-                col_def += f" DEFAULT '{column.default}'"
+            if isinstance(column.default, str):
+                if column.default.upper() in ['CURRENT_TIMESTAMP', 'NULL']:
+                    col_def += f" DEFAULT {column.default}"
+                elif column.default.lower() in ['true', 'false']:
+                    # Boolean値の処理
+                    bool_val = 'TRUE' if column.default.lower() == 'true' else 'FALSE'
+                    col_def += f" DEFAULT {bool_val}"
+                else:
+                    col_def += f" DEFAULT '{column.default}'"
             else:
                 col_def += f" DEFAULT {column.default}"
         
         # AUTO_INCREMENT（主キーかつINTEGER系の場合）
-        if column.primary and col_type.startswith(('INT', 'BIGINT', 'SMALLINT')):
-            col_def += " AUTO_INCREMENT"
+        is_primary = getattr(column, 'primary', None) or getattr(column, 'primary_key', False)
+        if is_primary and col_type.startswith(('INT', 'BIGINT', 'SMALLINT')):
+            if "AUTO_INCREMENT" not in col_def:
+                col_def += " AUTO_INCREMENT"
         
         # コメント
         if column.description:

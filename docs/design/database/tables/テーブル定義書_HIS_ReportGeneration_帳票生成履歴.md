@@ -7,78 +7,75 @@
 | テーブル名 | HIS_ReportGeneration |
 | 論理名 | 帳票生成履歴 |
 | カテゴリ | 履歴系 |
-| 生成日時 | 2025-06-05 23:01:00 |
+| 生成日時 | 2025-06-24 23:05:57 |
 
 ## 概要
 
 HIS_ReportGeneration（帳票生成履歴）は、システムで生成された帳票・レポートの履歴を管理するテーブルです。
-
 主な目的：
 - 帳票生成の履歴管理
 - 生成成功・失敗の記録
 - 帳票ファイルの管理
 - 生成パフォーマンスの監視
 - 帳票利用状況の分析
-
 このテーブルは、帳票・レポート機能において生成状況の把握と品質向上を支える重要な履歴データです。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| id | ID | VARCHAR | 50 | ○ |  | プライマリキー（UUID） |
-| tenant_id | テナントID | VARCHAR | 50 | ○ |  | マルチテナント識別子 |
-| template_id | テンプレートID | VARCHAR | 50 | ○ |  | 使用された帳票テンプレートのID（MST_ReportTemplateへの参照） |
-| requested_by | 要求者 | VARCHAR | 50 | ○ |  | 帳票生成を要求したユーザーID |
-| report_title | 帳票タイトル | VARCHAR | 200 | ○ |  | 生成された帳票のタイトル |
-| report_category | 帳票カテゴリ | ENUM |  | ○ |  | 帳票の分類（SKILL:スキル関連、GOAL:目標関連、EVALUATION:評価関連、SUMMARY:サマリー、ANALYTICS:分析） |
-| output_format | 出力形式 | ENUM |  | ○ |  | 帳票の出力形式（PDF:PDF、EXCEL:Excel、CSV:CSV、HTML:HTML） |
-| generation_status | 生成状態 | ENUM |  | ○ |  | 生成の状態（PENDING:待機中、PROCESSING:処理中、SUCCESS:成功、FAILED:失敗、CANCELLED:キャンセル） |
-| parameters | パラメータ | TEXT |  | ○ |  | 帳票生成時のパラメータ（JSON形式） |
-| file_path | ファイルパス | VARCHAR | 500 | ○ |  | 生成された帳票ファイルのパス |
-| file_size | ファイルサイズ | BIGINT |  | ○ |  | 生成された帳票ファイルのサイズ（バイト） |
-| download_count | ダウンロード回数 | INTEGER |  | ○ | 0 | 帳票がダウンロードされた回数 |
-| last_downloaded_at | 最終ダウンロード日時 | TIMESTAMP |  | ○ |  | 帳票が最後にダウンロードされた日時 |
-| requested_at | 要求日時 | TIMESTAMP |  | ○ |  | 帳票生成が要求された日時 |
-| started_at | 開始日時 | TIMESTAMP |  | ○ |  | 帳票生成処理が開始された日時 |
-| completed_at | 完了日時 | TIMESTAMP |  | ○ |  | 帳票生成処理が完了した日時 |
-| processing_time_ms | 処理時間 | INTEGER |  | ○ |  | 帳票生成にかかった時間（ミリ秒） |
-| error_message | エラーメッセージ | TEXT |  | ○ |  | 生成失敗時のエラーメッセージ |
-| error_details | エラー詳細 | TEXT |  | ○ |  | 生成失敗時のエラー詳細情報（JSON形式） |
-| expires_at | 有効期限 | TIMESTAMP |  | ○ |  | 生成された帳票ファイルの有効期限 |
-| is_deleted | 削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| id | ID | VARCHAR | 50 | ○ |  | ID |
+| tenant_id | テナントID | VARCHAR | 50 | ○ |  | テナントID |
+| completed_at | 完了日時 | TIMESTAMP |  | ○ |  | 完了日時 |
+| download_count | ダウンロード回数 | INTEGER |  | ○ | 0 | ダウンロード回数 |
+| error_details | エラー詳細 | TEXT |  | ○ |  | エラー詳細 |
+| error_message | エラーメッセージ | TEXT |  | ○ |  | エラーメッセージ |
+| expires_at | 有効期限 | TIMESTAMP |  | ○ |  | 有効期限 |
+| file_path | ファイルパス | VARCHAR | 500 | ○ |  | ファイルパス |
+| file_size | ファイルサイズ | BIGINT |  | ○ |  | ファイルサイズ |
+| generation_status | 生成状態 | ENUM |  | ○ |  | 生成状態 |
+| last_downloaded_at | 最終ダウンロード日時 | TIMESTAMP |  | ○ |  | 最終ダウンロード日時 |
+| output_format | 出力形式 | ENUM |  | ○ |  | 出力形式 |
+| parameters | パラメータ | TEXT |  | ○ |  | パラメータ |
+| processing_time_ms | 処理時間 | INTEGER |  | ○ |  | 処理時間 |
+| report_category | 帳票カテゴリ | ENUM |  | ○ |  | 帳票カテゴリ |
+| report_title | 帳票タイトル | VARCHAR | 200 | ○ |  | 帳票タイトル |
+| reportgeneration_id | HIS_ReportGenerationの主キー | SERIAL |  | × |  | HIS_ReportGenerationの主キー |
+| requested_at | 要求日時 | TIMESTAMP |  | ○ |  | 要求日時 |
+| requested_by | 要求者 | VARCHAR | 50 | ○ |  | 要求者 |
+| started_at | 開始日時 | TIMESTAMP |  | ○ |  | 開始日時 |
+| template_id | テンプレートID | VARCHAR | 50 | ○ |  | テンプレートID |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_report_generation_template | template_id | × | テンプレートID別検索用 |
-| idx_report_generation_requester | requested_by | × | 要求者別検索用 |
-| idx_report_generation_tenant_status | tenant_id, generation_status | × | テナント別生成状態検索用 |
-| idx_report_generation_category | report_category | × | 帳票カテゴリ別検索用 |
-| idx_report_generation_format | output_format | × | 出力形式別検索用 |
-| idx_report_generation_requested | requested_at | × | 要求日時検索用 |
-| idx_report_generation_completed | completed_at | × | 完了日時検索用 |
-| idx_report_generation_expires | expires_at | × | 有効期限検索用 |
+| idx_report_generation_template | template_id | × |  |
+| idx_report_generation_requester | requested_by | × |  |
+| idx_report_generation_tenant_status | tenant_id, generation_status | × |  |
+| idx_report_generation_category | report_category | × |  |
+| idx_report_generation_format | output_format | × |  |
+| idx_report_generation_requested | requested_at | × |  |
+| idx_report_generation_completed | completed_at | × |  |
+| idx_report_generation_expires | expires_at | × |  |
+| idx_his_reportgeneration_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_report_generation_template | template_id | MST_ReportTemplate | id | CASCADE | RESTRICT | 帳票テンプレートへの外部キー |
+| fk_report_generation_template | template_id | MST_ReportTemplate | id | CASCADE | RESTRICT | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| chk_report_generation_category | CHECK | report_category IN ('SKILL', 'GOAL', 'EVALUATION', 'SUMMARY', 'ANALYTICS') | 帳票カテゴリ値チェック制約 |
-| chk_report_generation_format | CHECK | output_format IN ('PDF', 'EXCEL', 'CSV', 'HTML') | 出力形式値チェック制約 |
-| chk_report_generation_status | CHECK | generation_status IN ('PENDING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELLED') | 生成状態値チェック制約 |
-| chk_report_generation_file_size_positive | CHECK | file_size IS NULL OR file_size >= 0 | ファイルサイズ正数チェック制約 |
-| chk_report_generation_download_count_positive | CHECK | download_count >= 0 | ダウンロード回数正数チェック制約 |
-| chk_report_generation_processing_time_positive | CHECK | processing_time_ms IS NULL OR processing_time_ms >= 0 | 処理時間正数チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_generation_status | CHECK | generation_status IN (...) | generation_status値チェック制約 |
 
 ## サンプルデータ
 
@@ -96,9 +93,6 @@ HIS_ReportGeneration（帳票生成履歴）は、システムで生成された
 - ダウンロード統計は利用状況分析に活用
 - 大容量ファイルは外部ストレージに保存
 - パラメータ情報は再生成時の参考に使用
-
-## 業務ルール
-
 - 生成成功時はファイルパス・サイズを必須記録
 - 生成失敗時はエラー情報を詳細に記録
 - 有効期限切れファイルは自動削除対象
@@ -108,8 +102,23 @@ HIS_ReportGeneration（帳票生成履歴）は、システムで生成された
 - キャンセルされた生成は中間ファイルを削除
 - テンプレート削除時は関連履歴を保持
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 帳票生成履歴テーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214905 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_214959 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215052 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222630 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223431 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

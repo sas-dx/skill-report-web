@@ -1,8 +1,13 @@
-// PLT.1-WEB.1: ユーザードロップダウンコンポーネント
+/**
+ * 要求仕様ID: PLT.1-WEB.1
+ * 対応設計書: docs/design/components/共通部品定義書.md
+ * ユーザードロップダウンコンポーネント - プロフィール表示名対応
+ */
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { ProfileData } from '../../hooks/useProfile';
 
 interface User {
   id: string;
@@ -15,24 +20,38 @@ interface User {
 
 interface UserDropdownProps {
   user?: User;
+  profile?: ProfileData | null;
+  loading?: boolean;
+  error?: string | null;
   onLogout?: () => void;
 }
 
-// モックユーザーデータ
-const mockUser: User = {
-  id: 'user001',
-  name: '山田 太郎',
-  email: 'yamada.taro@example.com',
-  department: '開発部',
-  role: '一般ユーザー',
-};
-
 export const UserDropdown: React.FC<UserDropdownProps> = ({
-  user = mockUser,
+  user,
+  profile,
+  loading,
+  error,
   onLogout,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // プロフィール情報からユーザー情報を構築（プロフィールデータを優先）
+  const displayUser = profile ? {
+    id: profile.id,
+    name: profile.personalInfo?.displayName || 'ユーザー',
+    email: profile.email || '',
+    department: profile.organizationInfo?.departmentName || '未設定',
+    role: profile.organizationInfo?.positionName || '未設定',
+    avatar: undefined
+  } : user || {
+    id: 'unknown',
+    name: 'ユーザー',
+    email: '',
+    department: '未設定',
+    role: '未設定',
+    avatar: undefined
+  };
 
   // 外部クリックでドロップダウンを閉じる
   useEffect(() => {
@@ -53,13 +72,40 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     onLogout?.();
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  // 表示名の処理 - 未設定の場合はアイコン表示用の文字を生成
+  const getDisplayName = (name: string) => {
+    if (!name || name === 'ユーザー' || name.trim() === '') {
+      return '未設定';
+    }
+    return name;
+  };
+
+  // アイコン用の文字を生成（名前の最初の文字、または適切なアイコン文字）
+  const getAvatarText = (name: string) => {
+    if (!name || name === 'ユーザー' || name.trim() === '' || name === '未設定') {
+      return '👤'; // ユーザーアイコン絵文字
+    }
+    
+    // 「社員」で始まる場合は社員番号の最初の文字を使用
+    if (name.startsWith('社員')) {
+      const empCode = name.replace('社員', '');
+      if (empCode) {
+        return empCode.charAt(0).toUpperCase();
+      }
+      return '社';
+    }
+    
+    // 通常の名前の場合は最初の文字を使用
+    const firstChar = name.charAt(0);
+    return firstChar.toUpperCase();
+  };
+
+  // アイコンの背景色を決定（未設定の場合はグレー）
+  const getAvatarBgColor = (name: string) => {
+    if (!name || name === 'ユーザー' || name.trim() === '') {
+      return 'bg-gray-500';
+    }
+    return 'bg-blue-600';
   };
 
   const menuItems = [
@@ -96,6 +142,36 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     },
   ];
 
+  // ローディング中の表示
+  if (loading) {
+    return (
+      <div className="flex items-center space-x-3 p-2">
+        <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+        <div className="hidden md:block">
+          <div className="w-20 h-4 bg-gray-300 rounded animate-pulse mb-1"></div>
+          <div className="w-16 h-3 bg-gray-300 rounded animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // エラー時の表示
+  if (error) {
+    return (
+      <div className="flex items-center space-x-3 p-2">
+        <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <div className="hidden md:block">
+          <div className="text-sm font-medium text-red-600">エラー</div>
+          <div className="text-xs text-red-500">プロフィール取得失敗</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* ユーザーアバターボタン */}
@@ -104,23 +180,23 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         className="flex items-center space-x-3 p-2 text-sm rounded-full hover:bg-gray-100 transition-colors duration-150"
         aria-label="ユーザーメニューを開く"
       >
-        {/* アバター */}
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-          {user.avatar ? (
+        {/* アバターアイコン */}
+        <div className={`w-8 h-8 ${getAvatarBgColor(displayUser.name)} rounded-full flex items-center justify-center text-white font-medium text-sm`}>
+          {displayUser.avatar ? (
             <img
-              src={user.avatar}
-              alt={user.name}
+              src={displayUser.avatar}
+              alt={displayUser.name}
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
-            getInitials(user.name)
+            getAvatarText(displayUser.name)
           )}
         </div>
         
         {/* ユーザー名（デスクトップのみ表示） */}
         <div className="hidden md:block text-left">
-          <div className="text-sm font-medium text-gray-900">{user.name}</div>
-          <div className="text-xs text-gray-500">{user.department}</div>
+          <div className="text-sm font-medium text-gray-900">{getDisplayName(displayUser.name)}</div>
+          <div className="text-xs text-gray-500">{displayUser.department}</div>
         </div>
 
         {/* ドロップダウン矢印 */}
@@ -142,26 +218,26 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
           {/* ユーザー情報ヘッダー */}
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-                {user.avatar ? (
+              <div className={`w-10 h-10 ${getAvatarBgColor(displayUser.name)} rounded-full flex items-center justify-center text-white font-medium`}>
+                {displayUser.avatar ? (
                   <img
-                    src={user.avatar}
-                    alt={user.name}
+                    src={displayUser.avatar}
+                    alt={displayUser.name}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (
-                  getInitials(user.name)
+                  getAvatarText(displayUser.name)
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-gray-900 truncate">
-                  {user.name}
+                  {getDisplayName(displayUser.name)}
                 </div>
                 <div className="text-xs text-gray-500 truncate">
-                  {user.email}
+                  {displayUser.email || '未設定'}
                 </div>
                 <div className="text-xs text-gray-400">
-                  {user.department} • {user.role}
+                  {displayUser.department} • {displayUser.role}
                 </div>
               </div>
             </div>

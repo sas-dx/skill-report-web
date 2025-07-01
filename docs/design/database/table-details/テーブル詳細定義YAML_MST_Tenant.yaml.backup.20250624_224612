@@ -1,0 +1,492 @@
+table_name: MST_Tenant
+logical_name: テナント（組織）
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - MST_Tenantテーブルの詳細定義
+- version: 1.1.0
+  date: '2025-06-12'
+  author: 開発チーム
+  changes: 必須セクション追加 - revision_history, overview, notes, business_rules
+- version: 3.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.1.20250624_214048
+  date: '2025-06-24'
+  author: MST_Tenant修正ツール
+  changes: tenant_id重複問題を解決し、カラム順序を統一テンプレートに従って修正
+- version: 8.0.20250624_214439
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール
+  changes: 主キー（id）を先頭に移動し、推奨カラム順序に最終修正
+- version: 9.0.20250624_214522
+  date: '2025-06-24'
+  author: 完全カラム順序修正ツール
+  changes: 推奨カラム順序（1.主キー 2.tenant_id 3.その他）に完全修正
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 10.0.20250624_223346
+  date: '2025-06-24'
+  author: MST_Tenant特殊ケース修正ツール
+  changes: MST_Tenantテーブルの特殊ケース対応：tenant_idを実質的な主キーとして先頭に配置
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
+overview: 'マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル。
+
+
+  主な目的：
+
+  - 複数の組織・会社（テナント）の基本情報管理
+
+  - テナント別のシステム設定・カスタマイズ情報の管理
+
+  - 階層構造による組織関係の表現（親子関係）
+
+  - テナント別のブランディング設定（ロゴ、カラー）
+
+  - 契約・課金情報の管理（プラン、ユーザー数制限）
+
+  - マルチテナント認証・認可の基盤データ提供
+
+
+  このテーブルはマルチテナントシステムの中核となるマスタデータであり、
+
+  全ての業務データがテナント単位で分離される基盤を提供する。
+
+  現在はシングルテナント実装だが、将来のマルチテナント化に備えた設計。
+
+  '
+columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: tenant_id
+  logical: テナントを一意に識別するID
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: テナントを一意に識別するID
+- name: address
+  logical: テナントの住所
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの住所
+- name: admin_email
+  logical: テナント管理者のメールアドレス
+  type: VARCHAR(255)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント管理者のメールアドレス
+- name: contact_email
+  logical: テナントの一般連絡先メールアドレス
+  type: VARCHAR(255)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの一般連絡先メールアドレス
+- name: contract_end_date
+  logical: テナント契約の終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナント契約の終了日
+- name: contract_start_date
+  logical: テナント契約の開始日
+  type: DATE
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント契約の開始日
+- name: country_code
+  logical: 国コード（ISO 3166-1 alpha-2）
+  type: VARCHAR(2)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 国コード（ISO 3166-1 alpha-2）
+  default: JP
+- name: currency_code
+  logical: テナントで使用する通貨コード（ISO 4217）
+  type: VARCHAR(3)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントで使用する通貨コード（ISO 4217）
+  default: JPY
+- name: domain_name
+  logical: テナント専用ドメイン名
+  type: VARCHAR(100)
+  length: null
+  'null': true
+  unique: true
+  encrypted: false
+  description: テナント専用ドメイン名
+- name: locale
+  logical: テナントのデフォルトロケール
+  type: VARCHAR(10)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントのデフォルトロケール
+  default: ja_JP
+- name: logo_url
+  logical: テナントロゴ画像のURL
+  type: VARCHAR(500)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントロゴ画像のURL
+- name: max_storage_gb
+  logical: 契約上の最大ストレージ容量（GB）
+  type: INTEGER
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 契約上の最大ストレージ容量（GB）
+  default: 10
+- name: max_users
+  logical: 契約上の最大ユーザー数
+  type: INTEGER
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 契約上の最大ユーザー数
+  default: 100
+- name: parent_tenant_id
+  logical: 親テナントのID（階層構造の場合）
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 親テナントのID（階層構造の場合）
+- name: phone_number
+  logical: テナントの電話番号
+  type: VARCHAR(20)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの電話番号
+- name: postal_code
+  logical: 郵便番号
+  type: VARCHAR(10)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 郵便番号
+- name: primary_color
+  logical: テナントのプライマリカラー（#RRGGBB）
+  type: VARCHAR(7)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントのプライマリカラー（#RRGGBB）
+- name: secondary_color
+  logical: テナントのセカンダリカラー（#RRGGBB）
+  type: VARCHAR(7)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントのセカンダリカラー（#RRGGBB）
+- name: status
+  logical: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
+  type: VARCHAR(20)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）
+  default: TRIAL
+- name: subdomain
+  logical: サブドメイン名（xxx.system.com）
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: true
+  encrypted: false
+  description: サブドメイン名（xxx.system.com）
+- name: subscription_plan
+  logical: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
+  type: VARCHAR(20)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）
+  default: BASIC
+- name: tenant_code
+  logical: テナントの識別コード（URL等で使用）
+  type: VARCHAR(20)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: テナントの識別コード（URL等で使用）
+- name: tenant_level
+  logical: テナント階層のレベル（1が最上位）
+  type: INTEGER
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント階層のレベル（1が最上位）
+  default: 1
+- name: tenant_name
+  logical: テナント（組織・会社）の正式名称
+  type: VARCHAR(200)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナント（組織・会社）の正式名称
+- name: tenant_name_en
+  logical: テナントの英語名称
+  type: VARCHAR(200)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの英語名称
+- name: tenant_short_name
+  logical: テナントの略称・短縮名
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントの略称・短縮名
+- name: tenant_type
+  logical: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
+  type: VARCHAR(20)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）
+  default: ENTERPRISE
+- name: timezone
+  logical: テナントのデフォルトタイムゾーン
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントのデフォルトタイムゾーン
+  default: Asia/Tokyo
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: false
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_tenant_id
+  columns:
+  - - tenant_id
+  unique: true
+  description: テナントID検索用（一意）
+- name: idx_tenant_code
+  columns:
+  - - tenant_code
+  unique: true
+  description: テナントコード検索用（一意）
+- name: idx_domain_name
+  columns:
+  - - domain_name
+  unique: true
+  description: ドメイン名検索用（一意）
+- name: idx_subdomain
+  columns:
+  - - subdomain
+  unique: true
+  description: サブドメイン検索用（一意）
+- name: idx_tenant_type
+  columns:
+  - - tenant_type
+  unique: false
+  description: テナント種別検索用
+- name: idx_parent_tenant_id
+  columns:
+  - - parent_tenant_id
+  unique: false
+  description: 親テナント検索用
+- name: idx_subscription_plan
+  columns:
+  - - subscription_plan
+  unique: false
+  description: サブスクリプションプラン検索用
+- name: idx_status
+  columns:
+  - - status
+  unique: false
+  description: ステータス検索用
+- name: idx_admin_email
+  columns:
+  - - admin_email
+  unique: false
+  description: 管理者メール検索用
+constraints: []
+foreign_keys:
+- name: fk_tenant_parent
+  columns:
+  - - parent_tenant_id
+  references:
+    table:
+    - MST_Tenant
+    columns:
+    - tenant_id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+sample_data:
+- tenant_id: tenant_001
+  tenant_code: main-corp
+  tenant_name: メイン株式会社
+  tenant_name_en: Main Corporation
+  tenant_short_name: メイン
+  tenant_type: ENTERPRISE
+  parent_tenant_id: null
+  tenant_level: 1
+  domain_name: main-corp.com
+  subdomain: main
+  logo_url: https://cdn.example.com/logos/main-corp.png
+  primary_color: '#0066CC'
+  secondary_color: '#FF6600'
+  timezone: Asia/Tokyo
+  locale: ja_JP
+  currency_code: JPY
+  admin_email: admin@main-corp.com
+  contact_email: contact@main-corp.com
+  phone_number: 03-1234-5678
+  address: 東京都千代田区丸の内1-1-1
+  postal_code: 100-0005
+  country_code: JP
+  subscription_plan: ENTERPRISE
+  max_users: 1000
+  max_storage_gb: 100
+  status: ACTIVE
+  contract_start_date: '2025-04-01'
+  contract_end_date: null
+  is_deleted: false
+- tenant_id: tenant_002
+  tenant_code: sub-division
+  tenant_name: サブ事業部
+  tenant_name_en: Sub Division
+  tenant_short_name: サブ
+  tenant_type: DEPARTMENT
+  parent_tenant_id: tenant_001
+  tenant_level: 2
+  domain_name: null
+  subdomain: sub
+  logo_url: null
+  primary_color: '#0066CC'
+  secondary_color: '#FF6600'
+  timezone: Asia/Tokyo
+  locale: ja_JP
+  currency_code: JPY
+  admin_email: admin@sub.main-corp.com
+  contact_email: null
+  phone_number: null
+  address: null
+  postal_code: null
+  country_code: JP
+  subscription_plan: STANDARD
+  max_users: 100
+  max_storage_gb: 20
+  status: ACTIVE
+  contract_start_date: '2025-04-01'
+  contract_end_date: null
+  is_deleted: false
+notes:
+- 現在はシングルテナント実装のため、1レコードのみ存在
+- 将来のマルチテナント化に備えた完全な設計を実装
+- parent_tenant_idによる自己参照で組織階層を表現
+- domain_name、subdomainは一意制約でテナント分離を保証
+- カラーコードは#RRGGBB形式で統一（UI表示用）
+- 契約情報（プラン、制限値）は課金システムとの連携を想定
+- 論理削除は is_deleted フラグで管理
+- タイムゾーン・ロケール設定でグローバル対応
+- テナントID（tenant_id）は一意で変更不可
+- テナントコード（tenant_code）はURL等で使用するため英数字のみ
+- ドメイン名・サブドメインは重複不可（テナント分離保証）
+- 親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能
+- 契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL
+- 最大ユーザー数・ストレージ容量は契約プランに応じて設定
+- ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可
+- 管理者メール（admin_email）は必須、システム通知の送信先
+- 論理削除時は関連する全データも論理削除対象
+- 階層レベル（tenant_level）は親子関係の整合性を保証
+rules:
+- テナントID（tenant_id）は一意で変更不可
+- テナントコード（tenant_code）はURL等で使用するため英数字のみ
+- ドメイン名・サブドメインは重複不可（テナント分離保証）
+- 親テナント（parent_tenant_id）は同一テナント種別内のみ設定可能
+- 契約開始日（contract_start_date）は必須、終了日は無期限契約の場合NULL
+- 最大ユーザー数・ストレージ容量は契約プランに応じて設定
+- ステータスがINACTIVE/SUSPENDEDの場合、ログイン不可
+- 管理者メール（admin_email）は必須、システム通知の送信先
+- 論理削除時は関連する全データも論理削除対象
+- 階層レベル（tenant_level）は親子関係の整合性を保証

@@ -1,36 +1,52 @@
 -- ============================================
 -- テーブル: MST_UserRole
 -- 論理名: ユーザーロール紐付け
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: MST_UserRole（ユーザーロール紐付け）は、ユーザーとロールの関連付けを管理するマスタテーブルです。
+
+主な目的：
+- ユーザーとロールの多対多関係管理
+- 動的なロール割り当て・解除
+- 時限ロール・条件付きロール割り当て
+- ロール継承・委譲の管理
+- 権限昇格・降格の履歴管理
+- 職務分離・最小権限の原則実装
+- 監査・コンプライアンス対応
+
+このテーブルは、ユーザーの実際の権限を決定する重要な関連テーブルであり、
+システムセキュリティの実装において中核的な役割を果たします。
+
+-- 作成日: 2025-06-24 23:05:56
 -- ============================================
 
 DROP TABLE IF EXISTS MST_UserRole;
 
 CREATE TABLE MST_UserRole (
-    user_id VARCHAR(50) COMMENT 'ユーザーのID（MST_UserAuthへの外部キー）',
-    role_id VARCHAR(50) COMMENT 'ロールのID（MST_Roleへの外部キー）',
-    assignment_type ENUM DEFAULT 'DIRECT' COMMENT 'ロール割り当ての種別（DIRECT:直接、INHERITED:継承、DELEGATED:委譲、TEMPORARY:一時的）',
-    assigned_by VARCHAR(50) COMMENT 'ロールを割り当てた管理者のID（MST_UserAuthへの外部キー）',
-    assignment_reason TEXT COMMENT 'ロール割り当ての理由・根拠',
-    effective_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'ロール割り当ての有効開始日時',
-    effective_to TIMESTAMP COMMENT 'ロール割り当ての有効終了日時',
-    is_primary_role BOOLEAN DEFAULT False COMMENT 'ユーザーの主要ロールかどうか',
-    priority_order INT DEFAULT 999 COMMENT '複数ロール保持時の優先順序（数値が小さいほど高優先）',
-    conditions JSON COMMENT 'ロール適用の条件（時間帯、場所、状況等をJSON形式）',
-    delegation_source_user_id VARCHAR(50) COMMENT '委譲ロールの場合の委譲元ユーザーID',
-    delegation_expires_at TIMESTAMP COMMENT '委譲ロールの期限',
-    auto_assigned BOOLEAN DEFAULT False COMMENT 'システムによる自動割り当てかどうか',
-    requires_approval BOOLEAN DEFAULT False COMMENT 'ロール行使に承認が必要かどうか',
-    approval_status ENUM COMMENT '承認の状態（PENDING:承認待ち、APPROVED:承認済み、REJECTED:却下）',
-    approved_by VARCHAR(50) COMMENT 'ロール割り当てを承認した管理者のID',
-    approved_at TIMESTAMP COMMENT 'ロール割り当てが承認された日時',
-    assignment_status ENUM DEFAULT 'ACTIVE' COMMENT '割り当ての状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、EXPIRED:期限切れ）',
-    last_used_at TIMESTAMP COMMENT 'このロールが最後に使用された日時',
-    usage_count INT DEFAULT 0 COMMENT 'このロールが使用された回数',
-    code VARCHAR(20) NOT NULL COMMENT 'マスタコード',
-    name VARCHAR(100) NOT NULL COMMENT 'マスタ名称',
-    description TEXT COMMENT 'マスタ説明'
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    approval_status ENUM('PENDING', 'APPROVED', 'REJECTED') COMMENT '承認状態',
+    approved_at TIMESTAMP COMMENT '承認日時',
+    approved_by VARCHAR(50) COMMENT '承認者ID',
+    assigned_by VARCHAR(50) COMMENT '割り当て者ID',
+    assignment_reason TEXT COMMENT '割り当て理由',
+    assignment_status ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED') DEFAULT 'ACTIVE' COMMENT '割り当て状態',
+    assignment_type ENUM('DIRECT', 'INHERITED', 'DELEGATED', 'TEMPORARY') DEFAULT 'DIRECT' COMMENT '割り当て種別',
+    auto_assigned BOOLEAN DEFAULT False COMMENT '自動割り当てフラグ',
+    conditions JSON COMMENT '適用条件',
+    delegation_expires_at TIMESTAMP COMMENT '委譲期限',
+    delegation_source_user_id VARCHAR(50) COMMENT '委譲元ユーザーID',
+    effective_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '有効開始日時',
+    effective_to TIMESTAMP COMMENT '有効終了日時',
+    is_primary_role BOOLEAN DEFAULT False COMMENT '主ロールフラグ',
+    last_used_at TIMESTAMP COMMENT '最終使用日時',
+    priority_order INT DEFAULT 999 COMMENT '優先順序',
+    requires_approval BOOLEAN DEFAULT False COMMENT '承認要求フラグ',
+    role_id VARCHAR(50) COMMENT 'ロールID',
+    usage_count INT DEFAULT 0 COMMENT '使用回数',
+    user_id VARCHAR(50) COMMENT 'ユーザーID',
+    userrole_id INT AUTO_INCREMENT NOT NULL COMMENT 'MST_UserRoleの主キー',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -44,16 +60,17 @@ CREATE INDEX idx_primary_role ON MST_UserRole (user_id, is_primary_role);
 CREATE INDEX idx_assignment_status ON MST_UserRole (assignment_status);
 CREATE INDEX idx_approval_status ON MST_UserRole (approval_status);
 CREATE INDEX idx_delegation_source ON MST_UserRole (delegation_source_user_id);
+CREATE INDEX idx_mst_userrole_tenant_id ON MST_UserRole (tenant_id);
 
 -- 外部キー制約
 ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_user FOREIGN KEY (user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_role FOREIGN KEY (role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE CASCADE;
-ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_assigned_by FOREIGN KEY (assigned_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_delegation_source FOREIGN KEY (delegation_source_user_id) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_approved_by FOREIGN KEY (approved_by) REFERENCES MST_UserAuth(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_assigned_by FOREIGN KEY (assigned_by) REFERENCES MST_UserAuth(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_delegation_source FOREIGN KEY (delegation_source_user_id) REFERENCES MST_UserAuth(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE MST_UserRole ADD CONSTRAINT fk_userrole_approved_by FOREIGN KEY (approved_by) REFERENCES MST_UserAuth(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 -- その他の制約
-ALTER TABLE MST_UserRole ADD CONSTRAINT uk_user_role_active UNIQUE ();
+-- 制約DDL生成エラー: uk_user_role_active
 ALTER TABLE MST_UserRole ADD CONSTRAINT chk_assignment_type CHECK (assignment_type IN ('DIRECT', 'INHERITED', 'DELEGATED', 'TEMPORARY'));
 ALTER TABLE MST_UserRole ADD CONSTRAINT chk_assignment_status CHECK (assignment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'EXPIRED'));
 ALTER TABLE MST_UserRole ADD CONSTRAINT chk_approval_status CHECK (approval_status IS NULL OR approval_status IN ('PENDING', 'APPROVED', 'REJECTED'));

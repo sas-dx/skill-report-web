@@ -1,0 +1,349 @@
+table_name: MST_Employee
+logical_name: 社員基本情報
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - MST_Employeeテーブルの詳細定義
+- version: 1.1.0
+  date: '2025-06-12'
+  author: 開発チーム
+  changes: カラム追加 - manager_id, job_type_idを追加
+- version: 3.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 6.1.20250624_214209
+  date: '2025-06-24'
+  author: カラム順序修正ツール
+  changes: 主キー（employee_id）を先頭に移動し、推奨カラム順序に修正
+- version: 7.0.20250624_214254
+  date: '2025-06-24'
+  author: カラム順序最終修正ツール
+  changes: 主キー（id）を先頭に移動し、推奨カラム順序に最終修正
+- version: 10.0.20250624_214905
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215052
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+overview: '組織に所属する全社員の基本的な個人情報と組織情報を一元管理するマスタテーブル。
+
+
+  主な目的：
+
+  - 社員の基本情報（氏名、連絡先、入社日等）の管理
+
+  - 組織構造（部署、役職、上司関係）の管理
+
+  - 認証・権限管理のためのユーザー情報提供
+
+  - 人事システムとの連携データ基盤
+
+
+  このテーブルは年間スキル報告書システムの中核となるマスタデータであり、
+
+  スキル管理、目標管理、作業実績管理の全ての機能で参照される。
+
+  '
+columns:
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: プライマリキー（UUID）
+- name: employee_code
+  logical: 社員番号（例：EMP000001）
+  type: VARCHAR(30)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: 社員番号（例：EMP000001）
+- name: full_name
+  logical: 氏名（暗号化対象）
+  type: VARCHAR(100)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 氏名（暗号化対象）
+- name: full_name_kana
+  logical: 氏名カナ（暗号化対象）
+  type: VARCHAR(100)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 氏名カナ（暗号化対象）
+- name: email
+  logical: メールアドレス（ログイン認証用）
+  type: VARCHAR(255)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: メールアドレス（ログイン認証用）
+- name: birth_date
+  logical: 生年月日（暗号化対象）
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 生年月日（暗号化対象）
+- name: gender
+  logical: 性別（M:男性、F:女性、O:その他）
+  type: VARCHAR(1)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 性別（M:男性、F:女性、O:その他）
+- name: phone
+  logical: 電話番号（暗号化対象）
+  type: VARCHAR(20)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 電話番号（暗号化対象）
+- name: hire_date
+  logical: 入社日
+  type: DATE
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 入社日
+- name: employment_status
+  logical: 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）
+  type: VARCHAR(20)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 雇用形態（FULL_TIME:正社員、PART_TIME:パート、CONTRACT:契約社員）
+  default: FULL_TIME
+- name: employee_status
+  logical: 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職）
+  type: VARCHAR(20)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 在籍状況（ACTIVE:在籍、RETIRED:退職、SUSPENDED:休職）
+  default: ACTIVE
+- name: department_id
+  logical: 所属部署ID
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 所属部署ID
+- name: position_id
+  logical: 役職ID
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 役職ID
+- name: job_type_id
+  logical: 職種ID
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 職種ID
+- name: manager_id
+  logical: 直属の上司ID（自己参照）
+  type: VARCHAR(50)
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 直属の上司ID（自己参照）
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: false
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_employee_code
+  columns:
+  - - employee_code
+  unique: true
+  description: 社員番号検索用（一意）
+- name: idx_email
+  columns:
+  - - email
+  unique: true
+  description: メールアドレス検索用（一意）
+- name: idx_department
+  columns:
+  - - department_id
+  unique: false
+  description: 部署別検索用
+- name: idx_manager
+  columns:
+  - - manager_id
+  unique: false
+  description: 上司別検索用
+- name: idx_status
+  columns:
+  - - employee_status
+  unique: false
+  description: 在籍状況別検索用
+- name: idx_hire_date
+  columns:
+  - - hire_date
+  unique: false
+  description: 入社日検索用
+constraints: []
+foreign_keys:
+- name: fk_employee_department
+  columns:
+  - - department_id
+  references:
+    table:
+    - MST_Department
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: RESTRICT
+  comment: 外部キー制約
+- name: fk_employee_position
+  columns:
+  - - position_id
+  references:
+    table:
+    - MST_Position
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+- name: fk_employee_job_type
+  columns:
+  - - job_type_id
+  references:
+    table:
+    - MST_JobType
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+- name: fk_employee_manager
+  columns:
+  - - manager_id
+  references:
+    table:
+    - MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+sample_data:
+- id: emp_001
+  employee_code: EMP000001
+  full_name: 山田太郎
+  full_name_kana: ヤマダタロウ
+  email: yamada.taro@example.com
+  phone: 090-1234-5678
+  hire_date: '2020-04-01'
+  birth_date: '1990-01-15'
+  gender: M
+  department_id: dept_001
+  position_id: pos_003
+  job_type_id: job_001
+  employment_status: FULL_TIME
+  manager_id: emp_002
+  employee_status: ACTIVE
+  is_deleted: false
+- id: emp_002
+  employee_code: EMP000002
+  full_name: 佐藤花子
+  full_name_kana: サトウハナコ
+  email: sato.hanako@example.com
+  phone: 090-2345-6789
+  hire_date: '2018-04-01'
+  birth_date: '1985-03-20'
+  gender: F
+  department_id: dept_001
+  position_id: pos_002
+  job_type_id: job_001
+  employment_status: FULL_TIME
+  manager_id: null
+  employee_status: ACTIVE
+  is_deleted: false
+notes:
+- 個人情報（氏名、氏名カナ、電話番号、生年月日）は暗号化対象
+- 論理削除は is_deleted フラグで管理
+- manager_idによる自己参照で組織階層を表現
+- 人事システムとの連携でマスタデータを同期
+- 認証・権限管理システムの基盤テーブル
+- スキル管理・目標管理・作業実績管理の全機能で参照される
+- 社員番号（employee_code）は一意で変更不可
+- メールアドレス（email）は認証用のため一意制約必須
+- 在籍状況（employee_status）がRETIREDの場合、論理削除フラグをtrueに設定
+- 直属の上司（manager_id）は同一部署内の上位役職者のみ設定可能
+- 雇用形態（employment_status）に応じた権限・機能制限を適用
+- 個人情報の暗号化は法的要件に基づく必須対応
+- 監査証跡として作成日時・更新日時は自動設定
+rules:
+- 社員番号（employee_code）は一意で変更不可
+- メールアドレス（email）は認証用のため一意制約必須
+- 在籍状況（employee_status）がRETIREDの場合、論理削除フラグをtrueに設定
+- 直属の上司（manager_id）は同一部署内の上位役職者のみ設定可能
+- 雇用形態（employment_status）に応じた権限・機能制限を適用
+- 個人情報の暗号化は法的要件に基づく必須対応
+- 監査証跡として作成日時・更新日時は自動設定

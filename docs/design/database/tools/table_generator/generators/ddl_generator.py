@@ -94,11 +94,18 @@ class DDLGenerator:
             ddl_lines.append("")
         
         # その他の制約
-        if table_def.business_constraints:
+        constraints_to_process = []
+        if hasattr(table_def, 'constraints') and table_def.constraints:
+            constraints_to_process.extend(table_def.constraints)
+        elif hasattr(table_def, 'business_constraints') and table_def.business_constraints:
+            constraints_to_process.extend(table_def.business_constraints)
+        
+        if constraints_to_process:
             ddl_lines.append("-- その他の制約")
-            for constraint in table_def.business_constraints:
+            for constraint in constraints_to_process:
                 constraint_sql = self._generate_constraint_ddl(table_def.table_name, constraint)
-                ddl_lines.append(constraint_sql)
+                if constraint_sql and not constraint_sql.startswith("-- 未対応"):
+                    ddl_lines.append(constraint_sql)
             ddl_lines.append("")
         
         # 初期データ挿入
@@ -137,12 +144,21 @@ class DDLGenerator:
         Returns:
             str: 外部キーDDL
         """
+        # 旧形式の属性を優先的に使用
+        column = fk.column if fk.column else (fk.columns[0] if fk.columns else None)
+        reference_table = fk.reference_table if fk.reference_table else fk.references.get('table')
+        reference_column = fk.reference_column if fk.reference_column else (fk.references.get('columns', [None])[0] if fk.references else None)
+        
+        if not column or not reference_table or not reference_column:
+            self.logger.error(f"外部キー定義が不完全です: {fk.name}")
+            return f"-- ERROR: 外部キー定義が不完全: {fk.name}"
+        
         return self.sql_utils.generate_add_foreign_key_sql(
             table_name=table_name,
             constraint_name=fk.name,
-            column=fk.column,
-            reference_table=fk.reference_table,
-            reference_column=fk.reference_column,
+            column=column,
+            reference_table=reference_table,
+            reference_column=reference_column,
             on_delete=getattr(fk, 'on_delete', 'RESTRICT'),
             on_update=getattr(fk, 'on_update', 'RESTRICT')
         )
@@ -157,14 +173,29 @@ class DDLGenerator:
         Returns:
             str: 制約DDL
         """
-        # 制約の種類に応じてDDLを生成
-        if constraint.type.upper() == 'CHECK':
-            return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} CHECK ({constraint.condition});"
-        elif constraint.type.upper() == 'UNIQUE':
-            columns = ', '.join(constraint.columns) if hasattr(constraint, 'columns') else constraint.condition
-            return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({columns});"
-        else:
-            return f"-- 未対応の制約タイプ: {constraint.type}"
+        try:
+            # 制約の種類に応じてDDLを生成
+            if constraint.type.upper() == 'CHECK':
+                if hasattr(constraint, 'condition') and constraint.condition:
+                    return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} CHECK ({constraint.condition});"
+                else:
+                    self.logger.warning(f"CHECK制約 {constraint.name} に条件が設定されていません")
+                    return f"-- CHECK制約 {constraint.name} に条件が設定されていません"
+            elif constraint.type.upper() == 'UNIQUE':
+                if hasattr(constraint, 'columns') and constraint.columns:
+                    columns = ', '.join(constraint.columns)
+                    return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({columns});"
+                elif hasattr(constraint, 'condition') and constraint.condition:
+                    return f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint.name} UNIQUE ({constraint.condition});"
+                else:
+                    self.logger.warning(f"UNIQUE制約 {constraint.name} にカラムが設定されていません")
+                    return f"-- UNIQUE制約 {constraint.name} にカラムが設定されていません"
+            else:
+                self.logger.warning(f"未対応の制約タイプ: {constraint.type}")
+                return f"-- 未対応の制約タイプ: {constraint.type}"
+        except Exception as e:
+            self.logger.error(f"制約DDL生成エラー ({constraint.name}): {e}")
+            return f"-- 制約DDL生成エラー: {constraint.name}"
     
     def _generate_initial_data_ddl(self, table_name: str, initial_data: List[Dict[str, Any]]) -> List[str]:
         """初期データ挿入DDLを生成
@@ -281,7 +312,7 @@ class DDLGenerator:
         """
         return (
             old_col.data_type != new_col.data_type or
-            old_col.null != new_col.null or
+            old_col.nullable != new_col.nullable or
             old_col.default != new_col.default or
             old_col.description != new_col.description
         )

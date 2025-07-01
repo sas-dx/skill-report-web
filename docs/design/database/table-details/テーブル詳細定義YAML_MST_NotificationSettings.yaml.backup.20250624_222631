@@ -1,0 +1,333 @@
+table_name: MST_NotificationSettings
+logical_name: 通知設定
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 通知設定マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_214959
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+overview: 'MST_NotificationSettings（通知設定）は、システム全体の通知機能に関する設定情報を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - 通知チャネル（メール、Slack、Teams等）の設定管理
+
+  - 通知タイミング・頻度の制御設定
+
+  - 通知対象者・グループの設定管理
+
+  - 通知テンプレートとの紐付け設定
+
+  - テナント別通知設定の管理
+
+
+  このテーブルは、通知・連携管理機能の基盤となる重要なマスタデータです。
+
+  '
+columns:
+- name: id
+  logical: ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: マルチテナント識別子
+- name: notificationsettings_id
+  logical: MST_NotificationSettingsの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_NotificationSettingsの主キー
+  default: null
+- name: setting_key
+  logical: 設定キー
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知設定の識別キー（例：skill_update_notification、goal_reminder等）
+- name: setting_name
+  logical: 設定名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知設定の表示名
+- name: channel_config
+  logical: チャネル設定
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知チャネル固有の設定情報（JSON形式）
+- name: frequency_type
+  logical: 頻度タイプ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知頻度（IMMEDIATE:即座、DAILY:日次、WEEKLY:週次、MONTHLY:月次）
+  enum_values:
+  - IMMEDIATE
+  - DAILY
+  - WEEKLY
+  - MONTHLY
+  default: IMMEDIATE
+- name: frequency_value
+  logical: 頻度値
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 頻度の具体的な値（日次の場合は時間、週次の場合は曜日等）
+- name: is_enabled
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知設定が有効かどうか
+  default: true
+- name: notification_type
+  logical: 通知タイプ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知の種類（EMAIL:メール、SLACK:Slack、TEAMS:Teams、WEBHOOK:Webhook）
+  enum_values:
+  - EMAIL
+  - SLACK
+  - TEAMS
+  - WEBHOOK
+- name: priority_level
+  logical: 優先度レベル
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知の優先度（HIGH:高、MEDIUM:中、LOW:低）
+  enum_values:
+  - HIGH
+  - MEDIUM
+  - LOW
+  default: MEDIUM
+- name: target_audience
+  logical: 対象者
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知対象（ALL:全員、MANAGER:管理者、EMPLOYEE:一般社員、CUSTOM:カスタム）
+  enum_values:
+  - ALL
+  - MANAGER
+  - EMPLOYEE
+  - CUSTOM
+- name: template_id
+  logical: テンプレートID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 使用する通知テンプレートのID（MST_NotificationTemplateへの参照）
+- name: trigger_event
+  logical: トリガーイベント
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 通知を発生させるイベント（例：skill_registered、goal_deadline_approaching等）
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_notification_settings_tenant_key
+  columns:
+  - - tenant_id
+  - - setting_key
+  unique: true
+  description: テナント別設定キー検索用（一意）
+- name: idx_notification_settings_type
+  columns:
+  - - notification_type
+  unique: false
+  description: 通知タイプ別検索用
+- name: idx_notification_settings_event
+  columns:
+  - - trigger_event
+  unique: false
+  description: トリガーイベント別検索用
+- name: idx_notification_settings_enabled
+  columns:
+  - - is_enabled
+  unique: false
+  description: 有効設定検索用
+- name: idx_notification_settings_template
+  columns:
+  - - template_id
+  unique: false
+  description: テンプレート別検索用
+- name: idx_mst_notificationsettings_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_notification_settings_tenant_key
+  type: UNIQUE
+  description: テナント内設定キー一意制約
+  columns:
+  - - tenant_id
+  - - setting_key
+- name: chk_notification_settings_type
+  type: CHECK
+  description: 通知タイプ値チェック制約
+  condition: notification_type IN ('EMAIL', 'SLACK', 'TEAMS', 'WEBHOOK')
+- name: chk_notification_settings_audience
+  type: CHECK
+  description: 対象者値チェック制約
+  condition: target_audience IN ('ALL', 'MANAGER', 'EMPLOYEE', 'CUSTOM')
+- name: chk_notification_settings_frequency
+  type: CHECK
+  description: 頻度タイプ値チェック制約
+  condition: frequency_type IN ('IMMEDIATE', 'DAILY', 'WEEKLY', 'MONTHLY')
+- name: chk_notification_settings_priority
+  type: CHECK
+  description: 優先度レベル値チェック制約
+  condition: priority_level IN ('HIGH', 'MEDIUM', 'LOW')
+foreign_keys:
+- name: fk_notification_settings_template
+  columns:
+  - - template_id
+  references:
+    table:
+    - MST_NotificationTemplate
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+sample_data:
+- id: NS001
+  tenant_id: TENANT001
+  setting_key: skill_update_notification
+  setting_name: スキル更新通知
+  notification_type: EMAIL
+  target_audience: MANAGER
+  trigger_event: skill_registered
+  frequency_type: IMMEDIATE
+  frequency_value: null
+  template_id: NT001
+  channel_config: '{"smtp_server": "smtp.company.com", "from_address": "noreply@company.com"}'
+  is_enabled: true
+  priority_level: MEDIUM
+- id: NS002
+  tenant_id: TENANT001
+  setting_key: goal_deadline_reminder
+  setting_name: 目標期限リマインダー
+  notification_type: SLACK
+  target_audience: EMPLOYEE
+  trigger_event: goal_deadline_approaching
+  frequency_type: DAILY
+  frequency_value: 9
+  template_id: NT002
+  channel_config: '{"webhook_url": "https://hooks.slack.com/services/xxx", "channel":
+    "#notifications"}'
+  is_enabled: true
+  priority_level: HIGH
+notes:
+- 通知設定はテナント別に管理され、同一テナント内で設定キーは一意
+- channel_configはJSON形式で通知チャネル固有の設定を格納
+- frequency_valueは頻度タイプに応じて異なる意味を持つ（時間、曜日等）
+- 論理削除は is_enabled フラグで管理
+- 通知テンプレートとの連携により柔軟な通知内容設定が可能
+- 優先度レベルにより通知の重要度を制御
+- 同一テナント内で設定キーは重複不可
+- 無効化された設定は通知処理から除外される
+- テンプレートIDが指定されていない場合はデフォルトテンプレートを使用
+- CUSTOM対象者の場合は別途対象者マスタで詳細設定が必要
+- 頻度タイプがIMMEDIATEの場合、frequency_valueは不要
+- 通知チャネル設定はJSON形式で各チャネルの仕様に準拠
+rules:
+- 同一テナント内で設定キーは重複不可
+- 無効化された設定は通知処理から除外される
+- テンプレートIDが指定されていない場合はデフォルトテンプレートを使用
+- CUSTOM対象者の場合は別途対象者マスタで詳細設定が必要
+- 頻度タイプがIMMEDIATEの場合、frequency_valueは不要
+- 通知チャネル設定はJSON形式で各チャネルの仕様に準拠

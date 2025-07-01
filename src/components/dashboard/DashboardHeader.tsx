@@ -5,6 +5,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { NotificationIcon } from '../ui/NotificationIcon';
 import { UserDropdown } from '../ui/UserDropdown';
+import { useProfile } from '../../hooks/useProfile';
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -16,6 +17,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   title = 'ダッシュボード' 
 }) => {
   const router = useRouter();
+  const { profile, loading, error } = useProfile();
 
   const handleLogout = () => {
     // ログアウト処理
@@ -71,7 +73,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           />
 
           {/* ユーザードロップダウン */}
-          <UserDropdown onLogout={handleLogout} />
+          <UserDropdown 
+            onLogout={handleLogout}
+            profile={profile}
+            loading={loading}
+            error={error}
+          />
         </div>
       </div>
     </header>

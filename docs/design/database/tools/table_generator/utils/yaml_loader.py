@@ -12,7 +12,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from shared.core.logger import DatabaseToolsLogger
-from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition
+from shared.core.models import TableDefinition, ColumnDefinition, IndexDefinition, ForeignKeyDefinition, BusinessColumnDefinition, ConstraintDefinition
 
 
 class YamlLoader:
@@ -86,24 +86,36 @@ class YamlLoader:
                 category=yaml_data.get('category', ''),
                 priority=yaml_data.get('priority', 'medium'),
                 requirement_id=yaml_data.get('requirement_id', ''),
-                comment=yaml_data.get('overview', '')
+                comment=yaml_data.get('comment', yaml_data.get('overview', ''))
             )
             
-            # 業務カラム定義
-            if 'business_columns' in yaml_data:
+            # overviewフィールドを保存
+            if 'overview' in yaml_data:
+                table_def.overview = yaml_data['overview']
+            
+            # 業務カラム定義（columnsフィールドを優先）
+            if 'columns' in yaml_data:
+                table_def.business_columns = self._parse_columns(yaml_data['columns'])
+            elif 'business_columns' in yaml_data:
                 table_def.business_columns = self._parse_columns(yaml_data['business_columns'])
+            else:
+                table_def.business_columns = []
             
             # インデックス定義
-            if 'business_indexes' in yaml_data:
+            if 'indexes' in yaml_data:
+                table_def.business_indexes = self._parse_indexes(yaml_data['indexes'])
+            elif 'business_indexes' in yaml_data:
                 table_def.business_indexes = self._parse_indexes(yaml_data['business_indexes'])
             
             # 外部キー定義
             if 'foreign_keys' in yaml_data:
                 table_def.foreign_keys = self._parse_foreign_keys(yaml_data['foreign_keys'])
             
-            # 制約定義（コメントアウト - ConstraintDefinitionクラスが存在しないため）
-            # if 'business_constraints' in yaml_data:
-            #     table_def.business_constraints = self._parse_constraints(yaml_data['business_constraints'])
+            # 制約定義
+            if 'constraints' in yaml_data:
+                table_def.constraints = self._parse_constraints(yaml_data['constraints'])
+            elif 'business_constraints' in yaml_data:
+                table_def.business_constraints = self._parse_constraints(yaml_data['business_constraints'])
             
             # サンプルデータ
             if 'sample_data' in yaml_data:
@@ -126,30 +138,47 @@ class YamlLoader:
             self.logger.error(f"テーブル定義解析エラー: {e}")
             return None
     
-    def _parse_columns(self, columns_data: List[Dict[str, Any]]) -> List[ColumnDefinition]:
+    def _parse_columns(self, columns_data: List[Dict[str, Any]]) -> List[BusinessColumnDefinition]:
         """カラム定義を解析
         
         Args:
             columns_data (List[Dict[str, Any]]): カラム定義データ
             
         Returns:
-            List[ColumnDefinition]: カラム定義リスト
+            List[BusinessColumnDefinition]: カラム定義リスト
         """
         columns = []
         
         for col_data in columns_data:
             try:
-                column = ColumnDefinition(
+                # データ型の処理（lengthがある場合は結合）
+                data_type = col_data['type']
+                if 'length' in col_data and col_data['length'] is not None:
+                    if ',' in str(col_data['length']):  # DECIMAL(10,2)のような場合
+                        data_type = f"{data_type}({col_data['length']})"
+                    else:
+                        data_type = f"{data_type}({col_data['length']})"
+                
+                # nullable の処理（'null'フィールドを使用）
+                nullable = col_data.get('null', col_data.get('nullable', True))
+                
+                # コメントの処理（'logical'フィールドを優先、なければ'description'）
+                comment = col_data.get('logical', col_data.get('description', col_data.get('comment', '')))
+                
+                column = BusinessColumnDefinition(
                     name=col_data['name'],
-                    type=col_data['type'],
-                    nullable=col_data.get('null', True),
-                    primary_key=col_data.get('primary', False),
+                    data_type=data_type,
+                    nullable=nullable,
+                    primary=col_data.get('primary_key', False),
                     unique=col_data.get('unique', False),
                     default=col_data.get('default'),
-                    comment=col_data.get('description', ''),
-                    requirement_id=col_data.get('requirement_id'),
-                    length=col_data.get('length')
+                    comment=comment,
+                    requirement_id=col_data.get('requirement_id')
                 )
+                
+                # ENUM値の処理
+                if 'enum_values' in col_data:
+                    column.enum_values = col_data['enum_values']
                 columns.append(column)
                 
             except KeyError as e:
@@ -176,7 +205,7 @@ class YamlLoader:
                     name=idx_data['name'],
                     columns=idx_data['columns'],
                     unique=idx_data.get('unique', False),
-                    description=idx_data.get('description', '')
+                    comment=idx_data.get('comment', '')
                 )
                 indexes.append(index)
                 
@@ -200,14 +229,44 @@ class YamlLoader:
         
         for fk_data in fks_data:
             try:
+                # YAMLの構造に合わせて解析
+                columns = fk_data.get('columns', [])
+                references = fk_data.get('references', {})
+                
+                if not columns or not references:
+                    self.logger.error(f"外部キー定義に必須フィールドがありません: columns または references")
+                    continue
+                
+                # カラム名の取得（ネストした配列に対応）
+                if isinstance(columns[0], list):
+                    column = columns[0][0] if columns[0] else ''
+                else:
+                    column = columns[0] if columns else ''
+                
+                # 参照テーブル名の取得（ネストした配列に対応）
+                reference_table_data = references.get('table', '')
+                if isinstance(reference_table_data, list):
+                    reference_table = reference_table_data[0] if reference_table_data else ''
+                else:
+                    reference_table = reference_table_data
+                
+                # 参照カラム名の取得
+                reference_columns = references.get('columns', [])
+                reference_column = reference_columns[0] if reference_columns else ''
+                
                 fk = ForeignKeyDefinition(
                     name=fk_data['name'],
-                    column=fk_data['column'],
-                    reference_table=fk_data['reference_table'],
-                    reference_column=fk_data['reference_column'],
+                    columns=[column],
+                    column=column,  # 旧形式との互換性
+                    reference_table=reference_table,  # 旧形式との互換性
+                    reference_column=reference_column,  # 旧形式との互換性
+                    references={
+                        'table': reference_table,
+                        'columns': [reference_column]
+                    },
                     on_update=fk_data.get('on_update', 'CASCADE'),
                     on_delete=fk_data.get('on_delete', 'CASCADE'),
-                    description=fk_data.get('description', '')
+                    comment=fk_data.get('comment', '')
                 )
                 foreign_keys.append(fk)
                 
@@ -218,33 +277,34 @@ class YamlLoader:
         
         return foreign_keys
     
-    # def _parse_constraints(self, constraints_data: List[Dict[str, Any]]) -> List[ConstraintDefinition]:
-    #     """制約定義を解析（ConstraintDefinitionクラスが存在しないためコメントアウト）
-    #     
-    #     Args:
-    #         constraints_data (List[Dict[str, Any]]): 制約定義データ
-    #         
-    #     Returns:
-    #         List[ConstraintDefinition]: 制約定義リスト
-    #     """
-    #     constraints = []
-    #     
-    #     for const_data in constraints_data:
-    #         try:
-    #             constraint = ConstraintDefinition(
-    #                 name=const_data['name'],
-    #                 type=const_data['type'],
-    #                 condition=const_data.get('condition', ''),
-    #                 description=const_data.get('description', '')
-    #             )
-    #             constraints.append(constraint)
-    #             
-    #         except KeyError as e:
-    #             self.logger.error(f"制約定義に必須フィールドがありません: {e}")
-    #         except Exception as e:
-    #             self.logger.error(f"制約定義解析エラー: {e}")
-    #     
-    #     return constraints
+    def _parse_constraints(self, constraints_data: List[Dict[str, Any]]) -> List[ConstraintDefinition]:
+        """制約定義を解析
+        
+        Args:
+            constraints_data (List[Dict[str, Any]]): 制約定義データ
+            
+        Returns:
+            List[ConstraintDefinition]: 制約定義リスト
+        """
+        constraints = []
+        
+        for const_data in constraints_data:
+            try:
+                constraint = ConstraintDefinition(
+                    name=const_data['name'],
+                    type=const_data['type'],
+                    columns=const_data.get('columns', []),
+                    condition=const_data.get('condition', ''),
+                    comment=const_data.get('comment', const_data.get('description', ''))
+                )
+                constraints.append(constraint)
+                
+            except KeyError as e:
+                self.logger.error(f"制約定義に必須フィールドがありません: {e}")
+            except Exception as e:
+                self.logger.error(f"制約定義解析エラー: {e}")
+        
+        return constraints
     
     def validate_yaml_structure(self, yaml_data: Dict[str, Any]) -> bool:
         """YAML構造の妥当性をチェック
@@ -274,7 +334,7 @@ class YamlLoader:
                         self.logger.error(f"カラム定義{i}は辞書形式である必要があります")
                         return False
                     
-                    required_col_fields = ['name', 'logical', 'type']
+                    required_col_fields = ['name', 'type']
                     for field in required_col_fields:
                         if field not in col:
                             self.logger.error(f"カラム定義{i}に必須フィールドが不足: {field}")

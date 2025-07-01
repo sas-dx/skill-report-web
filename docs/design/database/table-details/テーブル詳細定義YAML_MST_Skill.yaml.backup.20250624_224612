@@ -1,0 +1,475 @@
+table_name: MST_Skill
+logical_name: スキルマスタ
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - MST_Skillの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+- version: 11.0.20250624_215000
+  date: '2025-06-24'
+  author: 最終カラム順序修正ツール（実構成対応版）
+  changes: 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正
+- version: 12.0.20250624_215053
+  date: '2025-06-24'
+  author: 現実的カラム順序修正ツール
+  changes: 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: 13.0.20250624_222631
+  date: '2025-06-24'
+  author: ユーザー要求対応カラム順序修正ツール
+  changes: ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分）
+- version: FINAL.20250624_223432
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 推奨カラム順序テンプレートに従って最終統一
+overview: 'スキルマスタテーブルは、システムで管理するスキル項目の基本情報を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - スキル項目の一元管理
+
+  - スキルカテゴリとレベル定義の管理
+
+  - スキル評価基準の標準化
+
+  - スキル検索とフィルタリングの支援
+
+
+  このテーブルは、スキル管理システムの基盤となるマスタテーブルで、
+
+  統一されたスキル評価基準と効率的なスキル管理を実現します。
+
+  '
+columns:
+- name: id
+  logical: スキルID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: スキルの一意識別子
+- name: tenant_id
+  logical: テナントID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+- name: skill_name
+  logical: スキル名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの名称
+- name: category_id
+  logical: カテゴリID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルカテゴリのID（MST_SkillCategoryへの外部キー）
+- name: certification_info
+  logical: 資格情報
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連する資格や認定情報（JSON形式）
+- name: description
+  logical: 説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの詳細説明
+- name: difficulty_level
+  logical: 難易度レベル
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの習得難易度（1:易、2:普通、3:難、4:非常に難、5:最高難度）
+  default: 3
+- name: display_order
+  logical: 表示順序
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同一カテゴリ内での表示順序
+  default: 0
+- name: effective_from
+  logical: 有効開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの有効開始日
+- name: effective_to
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの有効終了日
+- name: evaluation_criteria
+  logical: 評価基準
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル評価の基準や指標（JSON形式）
+- name: is_active
+  logical: 有効フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルが有効かどうか
+  default: true
+- name: is_core_skill
+  logical: コアスキルフラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 組織のコアスキルかどうか
+  default: false
+- name: learning_resources
+  logical: 学習リソース
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 学習に役立つリソースのURL一覧（JSON配列形式）
+- name: market_demand
+  logical: 市場需要
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 市場での需要レベル（LOW:低、MEDIUM:中、HIGH:高、VERY_HIGH:非常に高）
+  enum_values:
+  - LOW
+  - MEDIUM
+  - HIGH
+  - VERY_HIGH
+  default: MEDIUM
+- name: prerequisite_skills
+  logical: 前提スキル
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 習得前提となるスキルのID一覧（JSON配列形式）
+- name: related_skills
+  logical: 関連スキル
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連するスキルのID一覧（JSON配列形式）
+- name: required_experience_months
+  logical: 必要経験月数
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル習得に必要な経験期間（月数）
+- name: skill_id
+  logical: MST_Skillの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_Skillの主キー
+  default: null
+- name: skill_name_en
+  logical: スキル名英語
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの英語名称
+- name: skill_type
+  logical: スキル種別
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの種別（TECHNICAL:技術スキル、BUSINESS:ビジネススキル、SOFT:ソフトスキル、LANGUAGE:言語スキル）
+  enum_values:
+  - TECHNICAL
+  - BUSINESS
+  - SOFT
+  - LANGUAGE
+  default: TECHNICAL
+- name: technology_trend
+  logical: 技術トレンド
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 技術トレンド（EMERGING:新興、GROWING:成長中、STABLE:安定、DECLINING:衰退）
+  enum_values:
+  - EMERGING
+  - GROWING
+  - STABLE
+  - DECLINING
+  default: STABLE
+- name: is_deleted
+  logical: 削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: false
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: レコード作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: レコード更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_MST_Skill_id
+  columns:
+  - - id
+  unique: true
+  description: スキルID検索用（一意）
+- name: idx_MST_Skill_skill_name
+  columns:
+  - - skill_name
+  unique: false
+  description: スキル名検索用
+- name: idx_MST_Skill_category_id
+  columns:
+  - - category_id
+  unique: false
+  description: カテゴリID検索用
+- name: idx_MST_Skill_skill_type
+  columns:
+  - - skill_type
+  unique: false
+  description: スキル種別検索用
+- name: idx_MST_Skill_category_order
+  columns:
+  - - category_id
+  - - display_order
+  unique: false
+  description: カテゴリ別表示順序検索用
+- name: idx_MST_Skill_market_demand
+  columns:
+  - - market_demand
+  unique: false
+  description: 市場需要検索用
+- name: idx_MST_Skill_is_active
+  columns:
+  - - is_active
+  unique: false
+  description: 有効フラグ検索用
+- name: idx_mst_skill_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_MST_Skill_id
+  type: UNIQUE
+  description: スキルID一意制約
+  columns:
+  - - id
+- name: chk_MST_Skill_skill_type
+  type: CHECK
+  description: スキル種別値チェック制約
+  condition: skill_type IN ('TECHNICAL', 'BUSINESS', 'SOFT', 'LANGUAGE')
+- name: chk_MST_Skill_difficulty_level
+  type: CHECK
+  description: 難易度レベル値チェック制約（1-5）
+  condition: difficulty_level BETWEEN 1 AND 5
+- name: chk_MST_Skill_required_experience
+  type: CHECK
+  description: 必要経験月数非負数チェック制約
+  condition: required_experience_months IS NULL OR required_experience_months >= 0
+- name: chk_MST_Skill_market_demand
+  type: CHECK
+  description: 市場需要値チェック制約
+  condition: market_demand IN ('LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH')
+- name: chk_MST_Skill_technology_trend
+  type: CHECK
+  description: 技術トレンド値チェック制約
+  condition: technology_trend IN ('EMERGING', 'GROWING', 'STABLE', 'DECLINING')
+- name: chk_MST_Skill_display_order
+  type: CHECK
+  description: 表示順序非負数チェック制約
+  condition: display_order >= 0
+- name: chk_MST_Skill_effective_period
+  type: CHECK
+  description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from IS NULL OR effective_to >= effective_from
+foreign_keys:
+- name: fk_MST_Skill_tenant
+  columns:
+  - - tenant_id
+  references:
+    table:
+    - MST_Tenant
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: RESTRICT
+  comment: 外部キー制約
+- name: fk_MST_Skill_category
+  columns:
+  - - category_id
+  references:
+    table:
+    - MST_SkillCategory
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: RESTRICT
+  comment: 外部キー制約
+sample_data:
+- id: SKILL001
+  skill_name: React
+  skill_name_en: React
+  category_id: CAT_FRONTEND
+  skill_type: TECHNICAL
+  difficulty_level: 3
+  description: Reactライブラリを使用したフロントエンド開発スキル。コンポーネント設計、状態管理、Hooksの理解が含まれます。
+  evaluation_criteria: '{"level1":"基本的なコンポーネント作成","level2":"状態管理とイベント処理","level3":"Hooks活用とパフォーマンス最適化","level4":"複雑なアプリケーション設計","level5":"ライブラリ開発とベストプラクティス"}'
+  required_experience_months: 6
+  related_skills: '["SKILL002", "SKILL003", "SKILL004"]'
+  prerequisite_skills: '["SKILL_JS001", "SKILL_HTML001"]'
+  certification_info: '{"name":"React Developer Certification","provider":"Meta","url":"https://developers.facebook.com/certification/"}'
+  learning_resources: '["https://reactjs.org/docs/","https://react.dev/learn","https://egghead.io/courses/react"]'
+  market_demand: HIGH
+  technology_trend: GROWING
+  is_core_skill: true
+  display_order: 1
+  is_active: true
+  effective_from: '2024-01-01'
+  effective_to: null
+- id: SKILL002
+  skill_name: TypeScript
+  skill_name_en: TypeScript
+  category_id: CAT_FRONTEND
+  skill_type: TECHNICAL
+  difficulty_level: 3
+  description: TypeScriptを使用した型安全なJavaScript開発スキル。型定義、ジェネリクス、高度な型操作が含まれます。
+  evaluation_criteria: '{"level1":"基本的な型定義","level2":"インターフェースとクラス","level3":"ジェネリクスと高度な型","level4":"型レベルプログラミング","level5":"ライブラリ型定義作成"}'
+  required_experience_months: 4
+  related_skills: '["SKILL001", "SKILL003"]'
+  prerequisite_skills: '["SKILL_JS001"]'
+  certification_info: null
+  learning_resources: '["https://www.typescriptlang.org/docs/","https://typescript-jp.gitbook.io/deep-dive/"]'
+  market_demand: VERY_HIGH
+  technology_trend: GROWING
+  is_core_skill: true
+  display_order: 2
+  is_active: true
+  effective_from: '2024-01-01'
+  effective_to: null
+- id: SKILL003
+  skill_name: Node.js
+  skill_name_en: Node.js
+  category_id: CAT_BACKEND
+  skill_type: TECHNICAL
+  difficulty_level: 3
+  description: Node.jsを使用したサーバーサイド開発スキル。非同期処理、API開発、パフォーマンス最適化が含まれます。
+  evaluation_criteria: '{"level1":"基本的なサーバー構築","level2":"Express.jsでのAPI開発","level3":"非同期処理とストリーム","level4":"パフォーマンス最適化","level5":"スケーラブルアーキテクチャ設計"}'
+  required_experience_months: 8
+  related_skills: '["SKILL001", "SKILL002", "SKILL004"]'
+  prerequisite_skills: '["SKILL_JS001"]'
+  certification_info: null
+  learning_resources: '["https://nodejs.org/en/docs/","https://expressjs.com/","https://nodeschool.io/"]'
+  market_demand: HIGH
+  technology_trend: STABLE
+  is_core_skill: true
+  display_order: 1
+  is_active: true
+  effective_from: '2024-01-01'
+  effective_to: null
+notes:
+- スキルIDは一意である必要がある
+- スキル名は重複可能（異なるカテゴリで同名スキルが存在する場合）
+- 評価基準はJSON形式でレベル別に定義する
+- 関連スキルと前提スキルはJSON配列形式で管理
+- 学習リソースはURL一覧をJSON配列で管理
+- 有効期間を設定することで、廃止予定スキルの管理が可能
+- 論理削除は is_active フラグで管理
+- スキルIDは「SKILL + 連番」形式で生成する
+- 新しいスキル追加時は適切なカテゴリに分類する
+- 評価基準は5段階で定義し、各レベルの説明を含める
+- 前提スキルは循環参照しないよう注意する
+- 市場需要と技術トレンドは定期的に見直しを行う
+- コアスキルは組織戦略に基づいて設定する
+- 廃止予定のスキルは有効終了日を設定し、段階的に無効化する
+- 関連スキルの設定により、スキルマップの可視化を支援する
+rules:
+- スキルIDは「SKILL + 連番」形式で生成する
+- 新しいスキル追加時は適切なカテゴリに分類する
+- 評価基準は5段階で定義し、各レベルの説明を含める
+- 前提スキルは循環参照しないよう注意する
+- 市場需要と技術トレンドは定期的に見直しを行う
+- コアスキルは組織戦略に基づいて設定する
+- 廃止予定のスキルは有効終了日を設定し、段階的に無効化する
+- 関連スキルの設定により、スキルマップの可視化を支援する

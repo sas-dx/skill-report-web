@@ -1,30 +1,28 @@
-# フロントエンド設計ガイドライン（Next.js 14特化）
+# フロントエンド設計ガイドライン（汎用的）
+
+## エグゼクティブサマリー
+
+この文書はフロントエンド設計における汎用的なガイドラインを定義します。コンポーネント設計原則、状態管理パターン、レスポンシブデザイン、アクセシビリティ要件、パフォーマンス最適化手法を提供し、モダンで保守性の高いフロントエンドアプリケーションの構築を支援します。技術スタック非依存の基本原則を中心に記載し、特定フレームワーク固有の実装詳細は01-project-specific-rules.mdを参照してください。
 
 ## 基本設計原則
 
-### 1. Next.js 14 App Router設計原則
-- **App Router必須**: Pages Routerは使用禁止
-- **Server Components優先**: クライアントサイドレンダリングは必要最小限
-- **Server Actions活用**: フォーム処理・データ更新はServer Actions優先
-- **ファイルベースルーティング**: app/ディレクトリ構造でルーティング管理
-
-### 2. コンポーネント設計原則
+### 1. コンポーネント設計原則
 - **単一責任の原則**: 1つのコンポーネントは1つの責任を持つ
 - **再利用性**: 汎用的で再利用可能なコンポーネントを作成
-- **Server/Client分離**: Server ComponentsとClient Componentsの適切な使い分け
+- **疎結合**: コンポーネント間の依存関係を最小限に
 - **高凝集**: 関連する機能は同じコンポーネント内にまとめる
 
-### 3. 状態管理パターン（Next.js 14対応）
-- **Server State優先**: サーバーサイドでの状態管理を優先
-- **useState/useReducer**: クライアントサイドの局所的な状態管理
-- **URL State**: 検索条件等はURLパラメータで管理
+### 2. 状態管理パターン
+- **状態の局所化**: 状態は可能な限りローカルに保持
+- **単一方向データフロー**: データの流れを予測可能に
 - **状態の最小化**: 必要最小限の状態のみを管理
+- **派生状態の活用**: 計算可能な値は状態として保持しない
 
-### 4. パフォーマンス最適化（Next.js 14特化）
-- **Server Components**: サーバーサイドレンダリングでパフォーマンス向上
-- **動的インポート**: next/dynamicによる遅延読み込み
-- **Image最適化**: next/imageによる画像最適化
-- **バンドル最適化**: Next.js自動最適化機能の活用
+### 3. パフォーマンス最適化
+- **遅延読み込み**: 必要な時にリソースを読み込み
+- **メモ化**: 計算コストの高い処理の結果をキャッシュ
+- **仮想化**: 大量のデータを効率的に表示
+- **バンドル最適化**: 不要なコードの除去
 
 ## コンポーネント設計規約
 
@@ -39,7 +37,7 @@
 - **機能を表現**: コンポーネントの役割が分かる名前
 - **接頭辞の活用**: 共通コンポーネントには統一された接頭辞
 
-```javascript
+```typescript
 // 良い例
 const UserProfileCard = () => { /* ... */ };
 const SkillInputForm = () => { /* ... */ };
@@ -58,7 +56,7 @@ const Component1 = () => { /* ... */ };
 - **必須プロパティの最小化**: 必須プロパティは最小限に抑える
 - **コールバック命名**: イベントハンドラーは`on`で開始
 
-```javascript
+```typescript
 // 良い例
 interface ButtonProps {
   children: React.ReactNode;
@@ -91,9 +89,30 @@ interface ButtonProps {
 - **状態の派生**: 計算可能な値は状態として保持しない
 - **状態の同期**: サーバー状態とクライアント状態の同期を適切に管理
 
-```javascript
+```typescript
+interface User {
+  id: string;
+  name: string;
+  departmentId: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+}
+
+interface NormalizedState {
+  users: {
+    byId: Record<string, User>;
+    allIds: string[];
+  };
+  departments: {
+    byId: Record<string, Department>;
+  };
+}
+
 // 良い例（正規化された状態）
-const state = {
+const state: NormalizedState = {
   users: {
     byId: {
       '1': { id: '1', name: '山田太郎', departmentId: 'dept1' },
@@ -110,7 +129,7 @@ const state = {
 };
 
 // 悪い例（非正規化された状態）
-const state = {
+const badState = {
   users: [
     { id: '1', name: '山田太郎', department: { id: 'dept1', name: '開発部' } },
     { id: '2', name: '佐藤花子', department: { id: 'dept2', name: '営業部' } }
@@ -132,12 +151,24 @@ const state = {
 - **リアルタイム更新**: WebSocketやServer-Sent Eventsによるリアルタイム通信
 - **バックグラウンド同期**: 定期的なデータ同期
 
-```javascript
+```typescript
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface UseUserDataReturn {
+  data: UserData | null;
+  loading: boolean;
+  error: string | null;
+}
+
 // 良い例（エラーハンドリングとローディング状態を含む）
-const useUserData = (userId) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const useUserData = (userId: string): UseUserDataReturn => {
+  const [data, setData] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -147,7 +178,7 @@ const useUserData = (userId) => {
         setData(response.data);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         setData(null);
       } finally {
         setLoading(false);
@@ -161,8 +192,8 @@ const useUserData = (userId) => {
 };
 
 // 悪い例（エラーハンドリングなし）
-const useUserData = (userId) => {
-  const [data, setData] = useState(null);
+const useUserDataBad = (userId: string) => {
+  const [data, setData] = useState<UserData | null>(null);
 
   useEffect(() => {
     api.getUser(userId).then(response => {
@@ -188,10 +219,21 @@ const useUserData = (userId) => {
 - **文字数制限**: 最小・最大文字数の制限
 - **カスタムルール**: ビジネスロジックに基づく独自の検証
 
-```javascript
+```typescript
+interface SkillFormData {
+  skillName?: string;
+  level: number;
+  description?: string;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: Record<string, string>;
+}
+
 // 良い例（包括的なバリデーション）
-const validateSkillForm = (formData) => {
-  const errors = {};
+const validateSkillForm = (formData: SkillFormData): ValidationResult => {
+  const errors: Record<string, string> = {};
 
   // 必須項目チェック
   if (!formData.skillName?.trim()) {
@@ -204,7 +246,7 @@ const validateSkillForm = (formData) => {
   }
 
   // 文字数制限
-  if (formData.description?.length > 500) {
+  if (formData.description?.length && formData.description.length > 500) {
     errors.description = '説明は500文字以内で入力してください';
   }
 
@@ -215,7 +257,7 @@ const validateSkillForm = (formData) => {
 };
 
 // 悪い例（不十分なバリデーション）
-const validateSkillForm = (formData) => {
+const validateSkillFormBad = (formData: SkillFormData): boolean => {
   return formData.skillName ? true : false;
 };
 ```

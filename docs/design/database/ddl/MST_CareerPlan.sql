@@ -1,56 +1,70 @@
 -- ============================================
 -- テーブル: MST_CareerPlan
 -- 論理名: 目標・キャリアプラン
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: MST_CareerPlan（目標・キャリアプラン）は、社員の中長期的なキャリア目標と成長計画を管理するマスタテーブルです。
+
+主な目的：
+- キャリア目標の設定・管理
+- 成長計画の策定支援
+- スキル開発ロードマップの提供
+- 人事評価・昇進判定の基準設定
+- 人材育成計画の立案支援
+
+このテーブルにより、個人の成長と組織の人材戦略を連携させ、
+効果的なキャリア開発と人材育成を実現できます。
+
+-- 作成日: 2025-06-24 23:05:56
 -- ============================================
 
 DROP TABLE IF EXISTS MST_CareerPlan;
 
 CREATE TABLE MST_CareerPlan (
-    career_plan_id VARCHAR(50) COMMENT 'キャリアプランを一意に識別するID',
-    employee_id VARCHAR(50) COMMENT '対象社員のID（MST_Employeeへの外部キー）',
-    plan_name VARCHAR(200) COMMENT 'キャリアプランの名称',
-    plan_description TEXT COMMENT 'キャリアプランの詳細説明',
-    plan_type ENUM COMMENT 'プランの種別（SHORT_TERM:短期、MEDIUM_TERM:中期、LONG_TERM:長期、SPECIALIZED:専門特化、MANAGEMENT:管理職、TECHNICAL:技術職）',
-    target_position_id VARCHAR(50) COMMENT '目標とする役職のID（MST_Positionへの外部キー）',
-    target_job_type_id VARCHAR(50) COMMENT '目標とする職種のID（MST_JobTypeへの外部キー）',
-    target_department_id VARCHAR(50) COMMENT '目標とする部署のID（MST_Departmentへの外部キー）',
-    current_level ENUM COMMENT '現在のキャリアレベル（ENTRY:新人、JUNIOR:初級、INTERMEDIATE:中級、SENIOR:上級、EXPERT:エキスパート、MANAGER:管理職、EXECUTIVE:役員）',
-    target_level ENUM COMMENT '目標とするキャリアレベル（ENTRY:新人、JUNIOR:初級、INTERMEDIATE:中級、SENIOR:上級、EXPERT:エキスパート、MANAGER:管理職、EXECUTIVE:役員）',
-    plan_start_date DATE COMMENT 'キャリアプランの開始日',
-    plan_end_date DATE COMMENT 'キャリアプランの目標達成予定日',
-    milestone_1_date DATE COMMENT '第1マイルストーンの目標日',
-    milestone_1_description VARCHAR(500) COMMENT '第1マイルストーンの内容説明',
-    milestone_2_date DATE COMMENT '第2マイルストーンの目標日',
-    milestone_2_description VARCHAR(500) COMMENT '第2マイルストーンの内容説明',
-    milestone_3_date DATE COMMENT '第3マイルストーンの目標日',
-    milestone_3_description VARCHAR(500) COMMENT '第3マイルストーンの内容説明',
-    required_skills TEXT COMMENT '目標達成に必要なスキル一覧（JSON形式）',
-    required_certifications TEXT COMMENT '目標達成に必要な資格一覧（JSON形式）',
-    required_experiences TEXT COMMENT '目標達成に必要な経験・実績（JSON形式）',
-    development_actions TEXT COMMENT '具体的な育成・開発アクション（JSON形式）',
-    training_plan TEXT COMMENT '推奨研修・教育プログラム（JSON形式）',
-    mentor_id VARCHAR(50) COMMENT '指導担当者のID（MST_Employeeへの外部キー）',
-    supervisor_id VARCHAR(50) COMMENT '直属上司のID（MST_Employeeへの外部キー）',
-    plan_status ENUM DEFAULT 'DRAFT' COMMENT 'プランの進捗状況（DRAFT:下書き、ACTIVE:実行中、ON_HOLD:保留、COMPLETED:完了、CANCELLED:中止、REVISED:改訂）',
-    progress_percentage DECIMAL(5,2) DEFAULT 0.0 COMMENT 'プランの進捗率（0.00-100.00）',
-    last_review_date DATE COMMENT '最後にレビューを実施した日付',
-    next_review_date DATE COMMENT '次回レビュー予定日',
-    review_frequency ENUM DEFAULT 'QUARTERLY' COMMENT 'レビューの実施頻度（MONTHLY:月次、QUARTERLY:四半期、SEMI_ANNUAL:半年、ANNUAL:年次）',
-    success_criteria TEXT COMMENT 'プラン成功の判定基準',
-    risk_factors TEXT COMMENT '目標達成のリスク要因・課題',
-    support_resources TEXT COMMENT '利用可能な支援・リソース情報',
-    budget_allocated DECIMAL(10,2) COMMENT 'プラン実行のための割当予算',
-    budget_used DECIMAL(10,2) DEFAULT 0.0 COMMENT '実際に使用した予算',
-    priority_level ENUM DEFAULT 'NORMAL' COMMENT 'プランの優先度（LOW:低、NORMAL:通常、HIGH:高、CRITICAL:最重要）',
-    visibility_level ENUM DEFAULT 'MANAGER' COMMENT 'プランの公開範囲（PRIVATE:本人のみ、MANAGER:上司まで、DEPARTMENT:部署内、COMPANY:全社）',
-    template_id VARCHAR(50) COMMENT '使用したプランテンプレートのID',
-    custom_fields TEXT COMMENT '組織固有の追加項目（JSON形式）',
-    notes TEXT COMMENT 'その他の備考・メモ',
-    code VARCHAR(20) NOT NULL COMMENT 'マスタコード',
-    name VARCHAR(100) NOT NULL COMMENT 'マスタ名称',
-    description TEXT COMMENT 'マスタ説明'
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    plan_name VARCHAR(200) COMMENT 'プラン名',
+    budget_allocated DECIMAL(10,2) COMMENT '割当予算',
+    budget_used DECIMAL(10,2) DEFAULT 0.0 COMMENT '使用予算',
+    career_plan_id VARCHAR(50) COMMENT 'キャリアプランID',
+    careerplan_id INT AUTO_INCREMENT NOT NULL COMMENT 'MST_CareerPlanの主キー',
+    current_level ENUM('ENTRY', 'JUNIOR', 'INTERMEDIATE', 'SENIOR', 'EXPERT', 'MANAGER', 'EXECUTIVE') COMMENT '現在レベル',
+    custom_fields TEXT COMMENT 'カスタムフィールド',
+    development_actions TEXT COMMENT '育成アクション',
+    employee_id VARCHAR(50) COMMENT '社員ID',
+    last_review_date DATE COMMENT '最終レビュー日',
+    mentor_id VARCHAR(50) COMMENT 'メンターID',
+    milestone_1_date DATE COMMENT 'マイルストーン1日付',
+    milestone_1_description VARCHAR(500) COMMENT 'マイルストーン1説明',
+    milestone_2_date DATE COMMENT 'マイルストーン2日付',
+    milestone_2_description VARCHAR(500) COMMENT 'マイルストーン2説明',
+    milestone_3_date DATE COMMENT 'マイルストーン3日付',
+    milestone_3_description VARCHAR(500) COMMENT 'マイルストーン3説明',
+    next_review_date DATE COMMENT '次回レビュー日',
+    notes TEXT COMMENT '備考',
+    plan_description TEXT COMMENT 'プラン説明',
+    plan_end_date DATE COMMENT 'プラン終了日',
+    plan_start_date DATE COMMENT 'プラン開始日',
+    plan_status ENUM('DRAFT', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED', 'REVISED') DEFAULT 'DRAFT' COMMENT 'プラン状況',
+    plan_type ENUM('SHORT_TERM', 'MEDIUM_TERM', 'LONG_TERM', 'SPECIALIZED', 'MANAGEMENT', 'TECHNICAL') COMMENT 'プラン種別',
+    priority_level ENUM('LOW', 'NORMAL', 'HIGH', 'CRITICAL') DEFAULT 'NORMAL' COMMENT '優先度',
+    progress_percentage DECIMAL(5,2) DEFAULT 0.0 COMMENT '進捗率',
+    required_certifications TEXT COMMENT '必要資格',
+    required_experiences TEXT COMMENT '必要経験',
+    required_skills TEXT COMMENT '必要スキル',
+    review_frequency ENUM('MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL') DEFAULT 'QUARTERLY' COMMENT 'レビュー頻度',
+    risk_factors TEXT COMMENT 'リスク要因',
+    success_criteria TEXT COMMENT '成功基準',
+    supervisor_id VARCHAR(50) COMMENT '上司ID',
+    support_resources TEXT COMMENT '支援リソース',
+    target_department_id VARCHAR(50) COMMENT '目標部署ID',
+    target_job_type_id VARCHAR(50) COMMENT '目標職種ID',
+    target_level ENUM('ENTRY', 'JUNIOR', 'INTERMEDIATE', 'SENIOR', 'EXPERT', 'MANAGER', 'EXECUTIVE') COMMENT '目標レベル',
+    target_position_id VARCHAR(50) COMMENT '目標役職ID',
+    template_id VARCHAR(50) COMMENT 'テンプレートID',
+    training_plan TEXT COMMENT '研修計画',
+    visibility_level ENUM('PRIVATE', 'MANAGER', 'DEPARTMENT', 'COMPANY') DEFAULT 'MANAGER' COMMENT '公開レベル',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -65,6 +79,7 @@ CREATE INDEX idx_review_date ON MST_CareerPlan (next_review_date);
 CREATE INDEX idx_mentor_id ON MST_CareerPlan (mentor_id);
 CREATE INDEX idx_supervisor_id ON MST_CareerPlan (supervisor_id);
 CREATE INDEX idx_priority_level ON MST_CareerPlan (priority_level);
+CREATE INDEX idx_mst_careerplan_tenant_id ON MST_CareerPlan (tenant_id);
 
 -- 外部キー制約
 ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_employee FOREIGN KEY (employee_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT;
@@ -75,7 +90,7 @@ ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_mentor FOREIGN KEY (men
 ALTER TABLE MST_CareerPlan ADD CONSTRAINT fk_career_plan_supervisor FOREIGN KEY (supervisor_id) REFERENCES MST_Employee(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 -- その他の制約
-ALTER TABLE MST_CareerPlan ADD CONSTRAINT uk_career_plan_id UNIQUE ();
+-- 制約DDL生成エラー: uk_career_plan_id
 ALTER TABLE MST_CareerPlan ADD CONSTRAINT chk_plan_type CHECK (plan_type IN ('SHORT_TERM', 'MEDIUM_TERM', 'LONG_TERM', 'SPECIALIZED', 'MANAGEMENT', 'TECHNICAL'));
 ALTER TABLE MST_CareerPlan ADD CONSTRAINT chk_current_level CHECK (current_level IN ('ENTRY', 'JUNIOR', 'INTERMEDIATE', 'SENIOR', 'EXPERT', 'MANAGER', 'EXECUTIVE'));
 ALTER TABLE MST_CareerPlan ADD CONSTRAINT chk_target_level CHECK (target_level IN ('ENTRY', 'JUNIOR', 'INTERMEDIATE', 'SENIOR', 'EXPERT', 'MANAGER', 'EXECUTIVE'));

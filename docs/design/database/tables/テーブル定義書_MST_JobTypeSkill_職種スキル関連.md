@@ -7,12 +7,11 @@
 | テーブル名 | MST_JobTypeSkill |
 | 論理名 | 職種スキル関連 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-24 23:05:57 |
 
 ## 概要
 
 MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関連付けを管理するマスタテーブルです。
-
 主な目的：
 - 職種ごとの必要スキルの定義
 - スキル要求レベルの管理
@@ -20,67 +19,66 @@ MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関�
 - 人材配置時のスキルマッチング
 - 教育計画立案の基礎データ
 - 採用要件定義の支援
-
 このテーブルにより、各職種に求められるスキルセットを明確に定義し、
 人材育成や配置転換の判断基準として活用できます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| job_type_id | 職種ID | VARCHAR | 50 | ○ |  | 職種のID（MST_JobTypeへの外部キー） |
-| skill_item_id | スキル項目ID | VARCHAR | 50 | ○ |  | スキル項目のID（MST_SkillItemへの外部キー） |
-| required_level | 必要レベル | INTEGER |  | ○ |  | 当該職種で必要なスキルレベル（1-5、5が最高レベル） |
-| skill_priority | スキル優先度 | ENUM |  | ○ | MEDIUM | スキル優先度（CRITICAL:必須、HIGH:重要、MEDIUM:推奨、LOW:あれば良い） |
-| skill_category | スキル分類 | ENUM |  | ○ |  | スキル分類（TECHNICAL:技術、BUSINESS:業務、MANAGEMENT:管理、COMMUNICATION:コミュニケーション） |
-| experience_years | 必要経験年数 | DECIMAL | 4,1 | ○ |  | 当該スキルの必要経験年数 |
-| certification_required | 資格必須 | BOOLEAN |  | ○ | False | 関連資格の取得が必須かどうか |
-| skill_weight | スキル重み | DECIMAL | 5,2 | ○ |  | 職種内でのスキル重み（%、合計100%） |
-| evaluation_criteria | 評価基準 | TEXT |  | ○ |  | スキルレベルの評価基準・判定方法 |
-| learning_path | 学習パス | TEXT |  | ○ |  | スキル習得のための推奨学習パス |
-| skill_status | スキル状況 | ENUM |  | ○ | ACTIVE | スキル状況（ACTIVE:有効、DEPRECATED:非推奨、OBSOLETE:廃止） |
-| effective_date | 有効開始日 | DATE |  | ○ |  | スキル要件の有効開始日 |
-| expiry_date | 有効終了日 | DATE |  | ○ |  | スキル要件の有効終了日（NULL:無期限） |
-| alternative_skills | 代替スキル | TEXT |  | ○ |  | 代替可能なスキルのリスト（JSON形式） |
-| prerequisite_skills | 前提スキル | TEXT |  | ○ |  | 前提となるスキルのリスト（JSON形式） |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| alternative_skills | 代替スキル | TEXT |  | ○ |  | 代替スキル |
+| certification_required | 資格必須 | BOOLEAN |  | ○ | False | 資格必須 |
+| effective_date | 有効開始日 | DATE |  | ○ |  | 有効開始日 |
+| evaluation_criteria | 評価基準 | TEXT |  | ○ |  | 評価基準 |
+| experience_years | 必要経験年数 | DECIMAL | 4,1 | ○ |  | 必要経験年数 |
+| expiry_date | 有効終了日 | DATE |  | ○ |  | 有効終了日 |
+| job_type_id | 職種ID | VARCHAR | 50 | ○ |  | 職種ID |
+| jobtypeskill_id | MST_JobTypeSkillの主キー | SERIAL |  | × |  | MST_JobTypeSkillの主キー |
+| learning_path | 学習パス | TEXT |  | ○ |  | 学習パス |
+| prerequisite_skills | 前提スキル | TEXT |  | ○ |  | 前提スキル |
+| required_level | 必要レベル | INTEGER |  | ○ |  | 必要レベル |
+| skill_category | スキル分類 | ENUM |  | ○ |  | スキル分類 |
+| skill_item_id | スキル項目ID | VARCHAR | 50 | ○ |  | スキル項目ID |
+| skill_priority | スキル優先度 | ENUM |  | ○ | MEDIUM | スキル優先度 |
+| skill_status | スキル状況 | ENUM |  | ○ | ACTIVE | スキル状況 |
+| skill_weight | スキル重み | DECIMAL | 5,2 | ○ |  | スキル重み |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_MST_JobTypeSkill_job_type_id | job_type_id | × | 職種ID検索用 |
-| idx_MST_JobTypeSkill_skill_item_id | skill_item_id | × | スキル項目ID検索用 |
-| idx_MST_JobTypeSkill_job_skill | job_type_id, skill_item_id | ○ | 職種・スキル複合検索用（一意） |
-| idx_MST_JobTypeSkill_required_level | required_level | × | 必要レベル別検索用 |
-| idx_MST_JobTypeSkill_priority | skill_priority | × | 優先度別検索用 |
-| idx_MST_JobTypeSkill_category | skill_category | × | スキル分類別検索用 |
-| idx_MST_JobTypeSkill_status | skill_status | × | スキル状況別検索用 |
-| idx_MST_JobTypeSkill_effective_date | effective_date | × | 有効開始日検索用 |
+| idx_MST_JobTypeSkill_job_type_id | job_type_id | × |  |
+| idx_MST_JobTypeSkill_skill_item_id | skill_item_id | × |  |
+| idx_MST_JobTypeSkill_job_skill | job_type_id, skill_item_id | ○ |  |
+| idx_MST_JobTypeSkill_required_level | required_level | × |  |
+| idx_MST_JobTypeSkill_priority | skill_priority | × |  |
+| idx_MST_JobTypeSkill_category | skill_category | × |  |
+| idx_MST_JobTypeSkill_status | skill_status | × |  |
+| idx_MST_JobTypeSkill_effective_date | effective_date | × |  |
+| idx_mst_jobtypeskill_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_MST_JobTypeSkill_job_type | job_type_id | MST_JobType | id | CASCADE | CASCADE | 職種への外部キー |
-| fk_MST_JobTypeSkill_skill_item | skill_item_id | MST_SkillItem | id | CASCADE | CASCADE | スキル項目への外部キー |
+| fk_MST_JobTypeSkill_job_type | job_type_id | MST_JobType | id | CASCADE | CASCADE | 外部キー制約 |
+| fk_MST_JobTypeSkill_skill_item | skill_item_id | MST_SkillItem | id | CASCADE | CASCADE | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_MST_JobTypeSkill_job_skill | UNIQUE |  | 職種・スキル項目一意制約 |
-| chk_MST_JobTypeSkill_required_level | CHECK | required_level >= 1 AND required_level <= 5 | 必要レベル範囲チェック制約 |
-| chk_MST_JobTypeSkill_priority | CHECK | skill_priority IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW') | スキル優先度値チェック制約 |
-| chk_MST_JobTypeSkill_category | CHECK | skill_category IN ('TECHNICAL', 'BUSINESS', 'MANAGEMENT', 'COMMUNICATION') | スキル分類値チェック制約 |
-| chk_MST_JobTypeSkill_status | CHECK | skill_status IN ('ACTIVE', 'DEPRECATED', 'OBSOLETE') | スキル状況値チェック制約 |
-| chk_MST_JobTypeSkill_experience_years | CHECK | experience_years IS NULL OR experience_years >= 0 | 必要経験年数非負値チェック制約 |
-| chk_MST_JobTypeSkill_skill_weight | CHECK | skill_weight IS NULL OR (skill_weight >= 0 AND skill_weight <= 100) | スキル重み範囲チェック制約 |
-| chk_MST_JobTypeSkill_date_range | CHECK | expiry_date IS NULL OR effective_date <= expiry_date | 日付範囲整合性チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| chk_job_type_id | CHECK | job_type_id IN (...) | job_type_id値チェック制約 |
+| chk_jobtypeskill_id | CHECK | jobtypeskill_id IN (...) | jobtypeskill_id値チェック制約 |
+| chk_required_level | CHECK | required_level > 0 | required_level正値チェック制約 |
+| chk_skill_status | CHECK | skill_status IN (...) | skill_status値チェック制約 |
 
 ## サンプルデータ
 
@@ -99,9 +97,6 @@ MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関�
 - 有効期限により時期に応じたスキル要件変更に対応
 - 論理削除は is_deleted フラグで管理
 - 資格必須フラグにより採用・昇進要件を明確化
-
-## 業務ルール
-
 - CRITICAL優先度のスキルは必須要件
 - HIGH優先度のスキルは重要要件（推奨）
 - MEDIUM/LOW優先度のスキルは付加価値要件
@@ -113,8 +108,23 @@ MST_JobTypeSkill（職種スキル関連）は、職種と必要スキルの関�
 - 代替スキルは同等の価値を持つスキルとして扱う
 - 有効期限切れのスキル要件は自動的に無効化
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 職種スキル関連テーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214906 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_214959 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215053 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223432 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

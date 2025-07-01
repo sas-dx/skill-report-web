@@ -86,6 +86,11 @@ class ColumnDefinition:
     scale: Optional[int] = None
     auto_increment: bool = False
     check_constraint: Optional[str] = None
+    enum_values: Optional[List[str]] = None  # ENUM型の値リスト
+    
+    # 旧形式との互換性のため
+    primary: Optional[bool] = None
+    description: Optional[str] = None
     
     def __post_init__(self):
         """初期化後の処理"""
@@ -219,14 +224,32 @@ class BusinessColumnDefinition:
     unique: bool = False
     default: Optional[str] = None
     comment: Optional[str] = None
+    description: Optional[str] = None  # DDLGenerator互換性のため追加
     requirement_id: Optional[str] = None
     length: Optional[int] = None
     precision: Optional[int] = None
     scale: Optional[int] = None
+    enum_values: Optional[List[str]] = None  # ENUM型の値リスト
+    
+    def __post_init__(self):
+        """初期化後の処理"""
+        # descriptionがない場合はcommentを使用
+        if self.description is None:
+            self.description = self.comment
+    
+    @property
+    def type(self) -> str:
+        """data_typeのエイリアス（互換性のため）"""
+        return self.data_type
+    
+    @property
+    def primary_key(self) -> bool:
+        """primaryのエイリアス（互換性のため）"""
+        return self.primary
     
     def to_column_definition(self) -> ColumnDefinition:
         """ColumnDefinitionに変換"""
-        return ColumnDefinition(
+        col_def = ColumnDefinition(
             name=self.name,
             type=self.data_type,
             nullable=self.nullable,
@@ -239,6 +262,12 @@ class BusinessColumnDefinition:
             precision=self.precision,
             scale=self.scale
         )
+        
+        # ENUM値の引き継ぎ
+        if self.enum_values:
+            col_def.enum_values = self.enum_values
+        
+        return col_def
 
 
 @dataclass
@@ -280,6 +309,14 @@ class TableDefinition:
     business_columns: List[BusinessColumnDefinition] = field(default_factory=list)
     business_indexes: List[BusinessIndexDefinition] = field(default_factory=list)
     constraints: List[ConstraintDefinition] = field(default_factory=list)
+    
+    # .clinerules準拠のための追加属性
+    overview: Optional[str] = None
+    notes: List[str] = field(default_factory=list)
+    business_rules: List[str] = field(default_factory=list)
+    revision_history: List[Dict[str, str]] = field(default_factory=list)
+    sample_data: List[Dict[str, Any]] = field(default_factory=list)
+    initial_data: List[Dict[str, Any]] = field(default_factory=list)  # InsertGenerator互換性のため
     
     def __post_init__(self):
         """初期化後の処理"""

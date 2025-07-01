@@ -1,0 +1,370 @@
+table_name: SYS_MasterData
+logical_name: マスターデータ管理
+category: システム系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: システム
+  changes: 初版作成 - SYS_MasterDataの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+overview: 'マスターデータ管理テーブルは、システム全体で使用される各種マスターデータの管理を行うシステムテーブルです。
+
+
+  主な目的：
+
+  - システム設定値の一元管理
+
+  - 各種コードマスターの管理
+
+  - 動的な設定変更への対応
+
+  - マスターデータの変更履歴管理
+
+
+  このテーブルは、システムの柔軟性と保守性を向上させる重要なテーブルで、
+
+  ハードコーディングを避け、設定値の動的な変更を可能にします。
+
+  '
+columns:
+- name: masterdata_id
+  logical: SYS_MasterDataの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: SYS_MasterDataの主キー
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: master_key
+  logical: マスターキー
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: true
+  encrypted: false
+  description: マスターデータの一意識別キー
+- name: master_name
+  logical: マスター名
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータの表示名
+- name: data_type
+  logical: データ型
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスター値のデータ型（STRING:文字列、INTEGER:整数、DECIMAL:小数、BOOLEAN:真偽値、JSON:JSON、DATE:日付）
+  enum_values:
+  - STRING
+  - INTEGER
+  - DECIMAL
+  - BOOLEAN
+  - JSON
+  - DATE
+  default: STRING
+- name: default_value
+  logical: デフォルト値
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータのデフォルト値
+- name: description
+  logical: 説明
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータの詳細説明
+- name: display_order
+  logical: 表示順序
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 同一カテゴリ内での表示順序
+  default: 0
+- name: effective_from
+  logical: 有効開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータの有効開始日
+- name: effective_to
+  logical: 有効終了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータの有効終了日
+- name: is_editable
+  logical: 編集可能フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 管理画面から編集可能かどうか
+  default: true
+- name: is_system_managed
+  logical: システム管理フラグ
+  type: BOOLEAN
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: システムが管理するマスターデータかどうか（true:システム管理、false:ユーザー管理）
+  default: false
+- name: last_modified_at
+  logical: 最終更新日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 最後にマスターデータを更新した日時
+- name: last_modified_by
+  logical: 最終更新者
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: 最後にマスターデータを更新したユーザー
+- name: master_category
+  logical: マスターカテゴリ
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータのカテゴリ（SYSTEM:システム設定、CODE:コードマスター、CONFIG:設定値）
+- name: master_value
+  logical: マスター値
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータの値（JSON形式も可）
+- name: validation_rule
+  logical: バリデーションルール
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 値の妥当性チェック用の正規表現やルール
+- name: version
+  logical: バージョン
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: マスターデータのバージョン番号（楽観的排他制御用）
+  default: 1
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_SYS_MasterData_master_key
+  columns:
+  - - master_key
+  unique: true
+  description: マスターキー検索用（一意）
+- name: idx_SYS_MasterData_category
+  columns:
+  - - master_category
+  unique: false
+  description: マスターカテゴリ検索用
+- name: idx_SYS_MasterData_category_order
+  columns:
+  - - master_category
+  - - display_order
+  unique: false
+  description: カテゴリ別表示順序検索用
+- name: idx_SYS_MasterData_effective_period
+  columns:
+  - - effective_from
+  - - effective_to
+  unique: false
+  description: 有効期間検索用
+- name: idx_SYS_MasterData_system_managed
+  columns:
+  - - is_system_managed
+  unique: false
+  description: システム管理フラグ検索用
+constraints:
+- name: uk_SYS_MasterData_master_key
+  type: UNIQUE
+  description: マスターキー一意制約
+  columns:
+  - - master_key
+- name: chk_SYS_MasterData_data_type
+  type: CHECK
+  description: データ型値チェック制約
+  condition: data_type IN ('STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON', 'DATE')
+- name: chk_SYS_MasterData_effective_period
+  type: CHECK
+  description: 有効期間整合性チェック制約
+  condition: effective_to IS NULL OR effective_from IS NULL OR effective_to >= effective_from
+- name: chk_SYS_MasterData_display_order
+  type: CHECK
+  description: 表示順序非負数チェック制約
+  condition: display_order >= 0
+- name: chk_SYS_MasterData_version
+  type: CHECK
+  description: バージョン正数チェック制約
+  condition: version > 0
+foreign_keys: []
+sample_data:
+- master_key: SYSTEM.MAX_LOGIN_ATTEMPTS
+  master_category: SYSTEM
+  master_name: 最大ログイン試行回数
+  master_value: '5'
+  data_type: INTEGER
+  default_value: '3'
+  validation_rule: ^[1-9][0-9]*$
+  is_system_managed: true
+  is_editable: true
+  display_order: 1
+  description: ログイン失敗時の最大試行回数。この回数を超えるとアカウントがロックされます。
+  effective_from: '2024-01-01'
+  effective_to: null
+  last_modified_by: system_admin
+  last_modified_at: '2024-01-01 10:00:00'
+  version: 1
+- master_key: SYSTEM.SESSION_TIMEOUT_MINUTES
+  master_category: SYSTEM
+  master_name: セッションタイムアウト時間
+  master_value: '30'
+  data_type: INTEGER
+  default_value: '30'
+  validation_rule: ^[1-9][0-9]*$
+  is_system_managed: true
+  is_editable: true
+  display_order: 2
+  description: ユーザーセッションの有効時間（分）。この時間を過ぎると自動的にログアウトされます。
+  effective_from: '2024-01-01'
+  effective_to: null
+  last_modified_by: system_admin
+  last_modified_at: '2024-01-01 10:00:00'
+  version: 1
+- master_key: CODE.SKILL_LEVELS
+  master_category: CODE
+  master_name: スキルレベル定義
+  master_value: '{"1":"初級","2":"中級","3":"上級","4":"エキスパート","5":"マスター"}'
+  data_type: JSON
+  default_value: '{"1":"初級","2":"中級","3":"上級","4":"エキスパート","5":"マスター"}'
+  validation_rule: null
+  is_system_managed: false
+  is_editable: true
+  display_order: 1
+  description: スキル評価で使用するレベル定義。1-5の数値とその意味を定義します。
+  effective_from: '2024-01-01'
+  effective_to: null
+  last_modified_by: admin_user
+  last_modified_at: '2024-01-01 10:00:00'
+  version: 1
+- master_key: CONFIG.BACKUP_RETENTION_DAYS
+  master_category: CONFIG
+  master_name: バックアップ保持日数
+  master_value: '90'
+  data_type: INTEGER
+  default_value: '30'
+  validation_rule: ^[1-9][0-9]*$
+  is_system_managed: true
+  is_editable: true
+  display_order: 1
+  description: フルバックアップファイルの保持期間（日数）。この期間を過ぎたバックアップは自動削除されます。
+  effective_from: '2024-01-01'
+  effective_to: null
+  last_modified_by: system_admin
+  last_modified_at: '2024-01-01 10:00:00'
+  version: 1
+notes:
+- マスターキーは一意である必要がある
+- システム管理のマスターデータは慎重に変更する必要がある
+- JSON形式の値は妥当性チェックを行う
+- 有効期間を設定することで、時限的な設定変更が可能
+- バージョン管理により楽観的排他制御を実現
+- 変更履歴は別テーブルで管理する
+- 論理削除は is_deleted フラグで管理
+- マスターキーは「カテゴリ.項目名」形式で命名する
+- システム管理のマスターデータ変更時は管理者承認が必要
+- JSON形式の値は構文チェックを行う
+- 有効期間外のマスターデータは使用しない
+- バージョン番号は更新時に自動インクリメントする
+- 重要な設定変更時は変更前後の値をログに記録する
+- デフォルト値は必ず設定し、システム障害時の代替値として使用する
+- バリデーションルールに違反する値は登録・更新を拒否する
+rules:
+- マスターキーは「カテゴリ.項目名」形式で命名する
+- システム管理のマスターデータ変更時は管理者承認が必要
+- JSON形式の値は構文チェックを行う
+- 有効期間外のマスターデータは使用しない
+- バージョン番号は更新時に自動インクリメントする
+- 重要な設定変更時は変更前後の値をログに記録する
+- デフォルト値は必ず設定し、システム障害時の代替値として使用する
+- バリデーションルールに違反する値は登録・更新を拒否する

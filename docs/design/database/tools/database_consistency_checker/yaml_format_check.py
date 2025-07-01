@@ -361,7 +361,7 @@ def check_yaml_format_enhanced(tables=None, verbose=False):
                 for error in result['errors']:
                     print(f"    {Fore.RED}- {error}{Style.RESET_ALL}")
         
-        print(f"{Fore.YELLOW}詳細なガイドラインは docs/design/database/tools/yaml_validator/README_REQUIRED_SECTIONS.md を参照してください。{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}詳細なガイドラインは .clinerules/08-database-design-guidelines.md を参照してください。{Style.RESET_ALL}")
     
     return {
         'success': invalid_count == 0,

@@ -1,0 +1,201 @@
+table_name: MST_SkillItem
+logical_name: スキル項目マスタ
+category: マスタ系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - スキル項目マスタテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214006
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214907
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+overview: 'MST_SkillItem（スキル項目マスタ）は、組織で管理・評価対象となるスキル項目の詳細情報を管理するマスタテーブルです。
+
+
+  主な目的：
+
+  - スキル項目の体系的管理（技術スキル、ビジネススキル、資格等）
+
+  - スキル評価基準の標準化（レベル定義、評価指標等）
+
+  - スキルカテゴリ・分類の階層管理
+
+  - 人材育成計画・研修プログラムの基盤
+
+  - プロジェクトアサインメント・スキルマッチングの基礎
+
+  - 組織スキル分析・可視化の基盤
+
+  - 外部資格・認定との連携管理
+
+
+  このテーブルは、人材のスキル管理、キャリア開発、組織能力分析など、
+
+  戦略的人材マネジメントの基盤となる重要なマスタデータです。
+
+  '
+columns:
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: skillitem_id
+  logical: MST_SkillItemの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: MST_SkillItemの主キー
+  default: null
+- name: skill_code
+  logical: スキルコード
+  type: VARCHAR
+  length: 20
+  'null': true
+  unique: true
+  encrypted: false
+  description: スキル項目を一意に識別するコード（例：SKILL001）
+- name: skill_name
+  logical: スキル名
+  type: VARCHAR
+  length: 100
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル項目の正式名称
+- name: difficulty_level
+  logical: 習得難易度
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキル習得の難易度（1-5段階）
+- name: importance_level
+  logical: 重要度
+  type: INT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 組織における重要度（1-5段階）
+- name: skill_category_id
+  logical: スキルカテゴリID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルカテゴリのID
+- name: skill_type
+  logical: スキル種別
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: スキルの種別（TECHNICAL:技術、BUSINESS:ビジネス、CERTIFICATION:資格）
+  enum_values:
+  - TECHNICAL
+  - BUSINESS
+  - CERTIFICATION
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_skill_code
+  columns:
+  - - skill_code
+  unique: true
+  description: スキルコード検索用
+- name: idx_skill_category
+  columns:
+  - - skill_category_id
+  unique: false
+  description: スキルカテゴリ別検索用
+- name: idx_mst_skillitem_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_skill_code
+  type: UNIQUE
+  description: スキルコード一意制約
+  columns:
+  - - skill_code
+foreign_keys: []
+sample_data:
+- skill_code: SKILL001
+  skill_name: Java
+  skill_category_id: CAT001
+  skill_type: TECHNICAL
+  difficulty_level: 3
+  importance_level: 4
+notes:
+- スキル項目は階層構造で管理
+- 評価基準は標準化されたレベル定義を使用
+- スキル項目の追加・変更は承認プロセスを経て実施
+- スキルコードは自動採番（SKILL + 3桁連番）
+- 重要度・難易度は1-5の5段階評価
+- スキル項目の削除は論理削除で実施し、履歴を保持
+rules:
+- スキルコードは自動採番（SKILL + 3桁連番）
+- 重要度・難易度は1-5の5段階評価
+- スキル項目の削除は論理削除で実施し、履歴を保持

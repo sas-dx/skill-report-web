@@ -1,32 +1,43 @@
 -- ============================================
 -- テーブル: HIS_AuditLog
 -- 論理名: 監査ログ
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: システム内で発生する全ての重要な操作を記録する監査ログテーブルです。
+
+主な目的：
+- セキュリティ監査のための操作履歴記録
+- システム不正利用の検知・追跡
+- コンプライアンス要件への対応
+- トラブルシューティング時の操作履歴確認
+
+このテーブルは法的要件やセキュリティポリシーに基づき、
+90日間のログ保持期間を設けています。
+
+-- 作成日: 2025-06-24 23:05:57
 -- ============================================
 
 DROP TABLE IF EXISTS HIS_AuditLog;
 
 CREATE TABLE HIS_AuditLog (
-    id VARCHAR(50) COMMENT 'プライマリキー（UUID）',
-    user_id VARCHAR(50) COMMENT '操作を実行したユーザーのID',
-    session_id VARCHAR(100) COMMENT '操作時のセッション識別子',
-    action_type ENUM COMMENT '実行されたアクションの種別（CREATE:作成、READ:参照、UPDATE:更新、DELETE:削除、LOGIN:ログイン、LOGOUT:ログアウト）',
-    target_table VARCHAR(100) COMMENT '操作対象のテーブル名',
-    target_id VARCHAR(50) COMMENT '操作対象のレコードID',
-    old_values TEXT COMMENT '更新・削除前のデータ（JSON形式）',
-    new_values TEXT COMMENT '作成・更新後のデータ（JSON形式）',
-    ip_address VARCHAR(45) COMMENT '操作元のIPアドレス（IPv6対応）',
-    user_agent VARCHAR(500) COMMENT '操作時のブラウザ・アプリケーション情報',
-    result_status ENUM DEFAULT 'SUCCESS' COMMENT '操作の実行結果（SUCCESS:成功、FAILURE:失敗、ERROR:エラー）',
-    error_message TEXT COMMENT '操作失敗時のエラーメッセージ',
-    execution_time_ms INTEGER COMMENT '操作の実行時間（ミリ秒）',
-    is_deleted BOOLEAN DEFAULT False COMMENT '論理削除フラグ（監査ログは物理削除禁止）',
-    tenant_id VARCHAR(50) COMMENT 'マルチテナント識別子',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード作成日時',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'レコード更新日時',
-    created_by VARCHAR(50) COMMENT 'レコード作成者のユーザーID',
-    updated_by VARCHAR(50) COMMENT 'レコード更新者のユーザーID'
+    id VARCHAR(50) COMMENT 'ID',
+    tenant_id VARCHAR(50) COMMENT 'テナントID',
+    action_type ENUM('CREATE', 'READ', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT') COMMENT 'アクション種別',
+    auditlog_id INT AUTO_INCREMENT NOT NULL COMMENT 'HIS_AuditLogの主キー',
+    created_by VARCHAR(50) COMMENT '作成者',
+    error_message TEXT COMMENT 'エラーメッセージ',
+    execution_time_ms INTEGER COMMENT '実行時間',
+    ip_address VARCHAR(45) COMMENT 'IPアドレス',
+    new_values TEXT COMMENT '変更後値',
+    old_values TEXT COMMENT '変更前値',
+    result_status ENUM('SUCCESS', 'FAILURE', 'ERROR') DEFAULT 'SUCCESS' COMMENT '実行結果',
+    session_id VARCHAR(100) COMMENT 'セッションID',
+    target_id VARCHAR(50) COMMENT '対象レコードID',
+    target_table VARCHAR(100) COMMENT '対象テーブル',
+    updated_by VARCHAR(50) COMMENT '更新者',
+    user_agent VARCHAR(500) COMMENT 'ユーザーエージェント',
+    user_id VARCHAR(50) COMMENT 'ユーザーID',
+    is_deleted BOOLEAN DEFAULT False COMMENT '削除フラグ',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成

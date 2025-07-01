@@ -122,10 +122,10 @@ class UnifiedDataTransformAdapter:
             
             # データ型の正規化
             for column in table_def.columns:
-                normalized_type = self._normalize_data_type(column.data_type)
-                if normalized_type != column.data_type:
-                    warnings.append(f"データ型を正規化しました: {column.name} {column.data_type} → {normalized_type}")
-                    column.data_type = normalized_type
+                normalized_type = self._normalize_data_type(column.type)
+                if normalized_type != column.type:
+                    warnings.append(f"データ型を正規化しました: {column.name} {column.type} → {normalized_type}")
+                    column.type = normalized_type
             
             return TransformResult(True, table_def, errors, warnings)
             
@@ -199,14 +199,14 @@ class UnifiedDataTransformAdapter:
             errors = []
             warnings = []
             
-            # DDLを解析
-            parsed_ddl = self.ddl_parser.parse(ddl_content)
+            # DDLを解析（修正されたパーサーを使用）
+            parsed_tables = self.ddl_parser.parse(ddl_content)
             
-            if not parsed_ddl:
+            if not parsed_tables:
                 return TransformResult(False, None, ["DDLの解析に失敗しました"], [])
             
-            # TableDefinitionオブジェクトを作成
-            table_def = self._create_table_definition_from_ddl(parsed_ddl)
+            # 最初のテーブル定義を返す（複数テーブルの場合は最初のもの）
+            table_def = parsed_tables[0] if isinstance(parsed_tables, list) else parsed_tables
             
             return TransformResult(True, table_def, errors, warnings)
             
@@ -333,16 +333,16 @@ class UnifiedDataTransformAdapter:
                 ddl_col = ddl_columns[col_name]
                 
                 # データ型チェック
-                if not self._are_data_types_compatible(yaml_col.data_type, ddl_col.data_type):
-                    errors.append(f"カラム '{col_name}' のデータ型が一致しません: YAML({yaml_col.data_type}) ≠ DDL({ddl_col.data_type})")
+                if not self._are_data_types_compatible(yaml_col.type, ddl_col.type):
+                    errors.append(f"カラム '{col_name}' のデータ型が一致しません: YAML({yaml_col.type}) ≠ DDL({ddl_col.type})")
                 
                 # NULL制約チェック
                 if yaml_col.nullable != ddl_col.nullable:
                     errors.append(f"カラム '{col_name}' のNULL制約が一致しません: YAML({yaml_col.nullable}) ≠ DDL({ddl_col.nullable})")
                 
                 # デフォルト値チェック
-                if yaml_col.default_value != ddl_col.default_value:
-                    warnings.append(f"カラム '{col_name}' のデフォルト値が一致しません: YAML({yaml_col.default_value}) ≠ DDL({ddl_col.default_value})")
+                if yaml_col.default != ddl_col.default:
+                    warnings.append(f"カラム '{col_name}' のデフォルト値が一致しません: YAML({yaml_col.default}) ≠ DDL({ddl_col.default})")
             
             # インデックス整合性チェック
             yaml_indexes = {idx.name: idx for idx in yaml_table.indexes}
@@ -460,10 +460,10 @@ class UnifiedDataTransformAdapter:
         for col_data in parsed_ddl.get('columns', []):
             column = ColumnDefinition(
                 name=col_data['name'],
-                data_type=col_data['type'],
+                type=col_data['type'],
                 nullable=not col_data.get('not_null', False),
                 primary_key=col_data.get('primary_key', False),
-                default_value=col_data.get('default'),
+                default=col_data.get('default'),
                 comment=col_data.get('comment', ''),
                 requirement_id=''  # DDLからは取得できない
             )
@@ -514,10 +514,10 @@ class UnifiedDataTransformAdapter:
         for col_data in parsed_markdown.get('columns', []):
             column = ColumnDefinition(
                 name=col_data['name'],
-                data_type=col_data['type'],
+                type=col_data['type'],
                 nullable=col_data.get('nullable', True),
                 primary_key=col_data.get('primary_key', False),
-                default_value=col_data.get('default'),
+                default=col_data.get('default'),
                 comment=col_data.get('comment', ''),
                 requirement_id=col_data.get('requirement_id', '')
             )
@@ -678,16 +678,55 @@ class UnifiedDataTransformAdapter:
         if not table_name:
             return False
         
-        # プレフィックスチェック
-        valid_prefixes = ['MST_', 'TRN_', 'HIS_', 'SYS_', 'WRK_', 'IF_']
-        if not any(table_name.startswith(prefix) for prefix in valid_prefixes):
+        # 基本的な文字チェック（英数字とアンダースコアのみ）
+        import re
+        if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', table_name):
             return False
         
-        # 大文字チェック
+        # 長さチェック（最大64文字）
+        if len(table_name) > 64:
+            return False
+        
+        # プレフィックスチェック（必須）
+        valid_prefixes = ['MST_', 'TRN_', 'HIS_', 'SYS_', 'WRK_', 'IF_']
+        has_valid_prefix = any(table_name.upper().startswith(prefix) for prefix in valid_prefixes)
+        
+        if not has_valid_prefix:
+            return False
+        
+        # プレフィックス後の部分チェック
+        for prefix in valid_prefixes:
+            if table_name.upper().startswith(prefix):
+                suffix = table_name[len(prefix):]
+                # プレフィックス後に何もない場合は無効
+                if not suffix:
+                    return False
+                # プレフィックス後の部分が有効な識別子かチェック
+                if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', suffix):
+                    return False
+                break
+        
+        # 大文字・小文字混在チェック（MST_Employee形式を想定）
+        # 完全に大文字または適切なキャメルケースのみ許可
         if table_name != table_name.upper():
+            # キャメルケースの場合、プレフィックス部分は大文字である必要がある
+            for prefix in valid_prefixes:
+                if table_name.startswith(prefix):
+                    return True
             return False
         
         return True
+    def validate_table_name(self, table_name: str) -> bool:
+        """
+        テーブル名のバリデーション（テスト用公開メソッド）
+        
+        Args:
+            table_name: テーブル名
+            
+        Returns:
+            bool: 有効なテーブル名かどうか
+        """
+        return self._validate_table_name(table_name)
     
     def _normalize_data_type(self, data_type: str) -> str:
         """

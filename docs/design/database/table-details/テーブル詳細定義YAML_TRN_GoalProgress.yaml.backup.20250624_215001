@@ -1,0 +1,660 @@
+table_name: TRN_GoalProgress
+logical_name: 目標進捗
+category: トランザクション系
+revision_history:
+- version: 1.0.0
+  date: '2025-06-01'
+  author: 開発チーム
+  changes: 初版作成 - 目標進捗トランザクションテーブルの詳細定義
+- version: 2.0.0
+  date: '2025-06-22'
+  author: 自動変換ツール
+  changes: テンプレート形式への自動変換
+- version: 3.1.20250624
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を推奨順序に自動修正
+- version: 4.0.20250624_213614
+  date: '2025-06-24'
+  author: 自動修正ツール
+  changes: カラム順序を統一テンプレートに従って自動修正
+- version: 5.0.20250624_214007
+  date: '2025-06-24'
+  author: 統一カラム順序修正ツール
+  changes: カラム順序を統一テンプレート（Phase 1）に従って自動修正
+- version: 10.0.20250624_214908
+  date: '2025-06-24'
+  author: 最終カラム順序統一ツール
+  changes: 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正
+overview: 'TRN_GoalProgress（目標進捗）は、社員個人の目標設定と進捗状況を管理するトランザクションテーブルです。
+
+
+  主な目的：
+
+  - 個人目標の設定・管理（業務目標、スキル向上目標等）
+
+  - 目標達成度の定期的な進捗管理
+
+  - 上司・部下間での目標共有・フィードバック
+
+  - 人事評価・査定の基礎データ
+
+  - 組織目標と個人目標の連携管理
+
+  - 目標設定から達成までのプロセス管理
+
+  - 成果測定・KPI管理
+
+  - 人材育成計画の基礎データ
+
+
+  このテーブルは、人事評価制度、目標管理制度（MBO）、人材育成など、
+
+  組織の成果管理と人材開発の基盤となる重要なデータを提供します。
+
+  '
+columns:
+- name: tenant_id
+  logical: テナントID（マルチテナント対応）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: テナントID（マルチテナント対応）
+  default: null
+- name: id
+  logical: プライマリキー（UUID）
+  type: VARCHAR(50)
+  length: null
+  'null': false
+  unique: true
+  encrypted: false
+  description: プライマリキー（UUID）
+  default: null
+- name: goalprogress_id
+  logical: TRN_GoalProgressの主キー
+  type: SERIAL
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: TRN_GoalProgressの主キー
+  default: null
+- name: goal_title
+  logical: 目標タイトル
+  type: VARCHAR
+  length: 200
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標の簡潔なタイトル
+- name: achievement_rate
+  logical: 達成率
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 最終的な達成率（0.00-100.00%）
+- name: achievement_status
+  logical: 達成状況
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 達成状況（NOT_STARTED:未着手、IN_PROGRESS:進行中、COMPLETED:完了、OVERDUE:期限超過、CANCELLED:中止）
+  enum_values:
+  - NOT_STARTED
+  - IN_PROGRESS
+  - COMPLETED
+  - OVERDUE
+  - CANCELLED
+  default: NOT_STARTED
+- name: approval_status
+  logical: 承認状況
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 承認状況（DRAFT:下書き、PENDING:承認待ち、APPROVED:承認済み、REJECTED:却下）
+  enum_values:
+  - DRAFT
+  - PENDING
+  - APPROVED
+  - REJECTED
+  default: DRAFT
+- name: approved_at
+  logical: 承認日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標が承認された日時
+- name: approved_by
+  logical: 承認者ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標を承認した人のID（MST_Employeeへの外部キー）
+- name: completion_date
+  logical: 完了日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標が完了した日
+- name: current_value
+  logical: 現在値
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 定量目標の現在値
+- name: employee_id
+  logical: 社員ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標を設定した社員のID（MST_Employeeへの外部キー）
+- name: evaluation_comments
+  logical: 評価コメント
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 評価に関するコメント・フィードバック
+- name: goal_category
+  logical: 目標カテゴリ
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標のカテゴリ（BUSINESS:業務、SKILL:スキル、CAREER:キャリア、PERSONAL:個人）
+  enum_values:
+  - BUSINESS
+  - SKILL
+  - CAREER
+  - PERSONAL
+- name: goal_description
+  logical: 目標詳細
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標の詳細説明・背景・期待効果
+- name: goal_id
+  logical: 目標ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: true
+  encrypted: false
+  description: 目標を一意に識別するID（例：GOAL000001）
+- name: goal_type
+  logical: 目標種別
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標種別（QUANTITATIVE:定量、QUALITATIVE:定性、MILESTONE:マイルストーン）
+  enum_values:
+  - QUANTITATIVE
+  - QUALITATIVE
+  - MILESTONE
+- name: last_updated_at
+  logical: 最終更新日時
+  type: TIMESTAMP
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 進捗が最後に更新された日時
+- name: milestones
+  logical: マイルストーン
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標達成のマイルストーン（JSON形式）
+- name: next_review_date
+  logical: 次回レビュー日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 次回の進捗レビュー予定日
+- name: obstacles
+  logical: 障害・課題
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標達成の障害・課題（JSON形式）
+- name: priority_level
+  logical: 優先度
+  type: ENUM
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標の優先度（HIGH:高、MEDIUM:中、LOW:低）
+  enum_values:
+  - HIGH
+  - MEDIUM
+  - LOW
+  default: MEDIUM
+- name: progress_rate
+  logical: 進捗率
+  type: DECIMAL
+  length: 5,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標の進捗率（0.00-100.00%）
+  default: 0.0
+- name: related_career_plan_id
+  logical: 関連キャリアプランID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連するキャリアプランのID（MST_CareerPlanへの外部キー）
+- name: related_skill_items
+  logical: 関連スキル項目
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 関連するスキル項目のリスト（JSON形式）
+- name: self_evaluation
+  logical: 自己評価
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 本人による自己評価（1-5段階）
+- name: start_date
+  logical: 開始日
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標の開始日
+- name: supervisor_evaluation
+  logical: 上司評価
+  type: INTEGER
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 上司による評価（1-5段階）
+- name: supervisor_id
+  logical: 上司ID
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標を承認・管理する上司のID（MST_Employeeへの外部キー）
+- name: support_needed
+  logical: 必要サポート
+  type: TEXT
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標達成に必要なサポート・リソース
+- name: target_date
+  logical: 目標期限
+  type: DATE
+  length: null
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標達成の期限日
+- name: target_value
+  logical: 目標値
+  type: DECIMAL
+  length: 15,2
+  'null': true
+  unique: false
+  encrypted: false
+  description: 定量目標の目標値
+- name: unit
+  logical: 単位
+  type: VARCHAR
+  length: 50
+  'null': true
+  unique: false
+  encrypted: false
+  description: 目標値・現在値の単位（件、円、%等）
+- name: is_deleted
+  logical: 論理削除フラグ
+  type: BOOLEAN
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 論理削除フラグ
+  default: 'False'
+- name: created_at
+  logical: 作成日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 作成日時
+  default: CURRENT_TIMESTAMP
+- name: updated_at
+  logical: 更新日時
+  type: TIMESTAMP
+  length: null
+  'null': false
+  unique: false
+  encrypted: false
+  description: 更新日時
+  default: CURRENT_TIMESTAMP
+indexes:
+- name: idx_TRN_GoalProgress_goal_id
+  columns:
+  - - goal_id
+  unique: true
+  description: 目標ID検索用（一意）
+- name: idx_TRN_GoalProgress_employee_id
+  columns:
+  - - employee_id
+  unique: false
+  description: 社員別目標検索用
+- name: idx_TRN_GoalProgress_supervisor_id
+  columns:
+  - - supervisor_id
+  unique: false
+  description: 上司別目標検索用
+- name: idx_TRN_GoalProgress_category
+  columns:
+  - - goal_category
+  unique: false
+  description: 目標カテゴリ別検索用
+- name: idx_TRN_GoalProgress_status
+  columns:
+  - - achievement_status
+  unique: false
+  description: 達成状況別検索用
+- name: idx_TRN_GoalProgress_approval_status
+  columns:
+  - - approval_status
+  unique: false
+  description: 承認状況別検索用
+- name: idx_TRN_GoalProgress_target_date
+  columns:
+  - - target_date
+  unique: false
+  description: 目標期限別検索用
+- name: idx_TRN_GoalProgress_priority
+  columns:
+  - - priority_level
+  unique: false
+  description: 優先度別検索用
+- name: idx_TRN_GoalProgress_employee_period
+  columns:
+  - - employee_id
+  - - start_date
+  - - target_date
+  unique: false
+  description: 社員・期間複合検索用
+- name: idx_TRN_GoalProgress_next_review
+  columns:
+  - - next_review_date
+  unique: false
+  description: 次回レビュー日検索用
+- name: idx_trn_goalprogress_tenant_id
+  columns:
+  - - tenant_id
+  unique: false
+  description: テナントID検索用インデックス
+constraints:
+- name: uk_TRN_GoalProgress_goal_id
+  type: UNIQUE
+  description: 目標ID一意制約
+  columns:
+  - - goal_id
+- name: chk_TRN_GoalProgress_category
+  type: CHECK
+  description: 目標カテゴリ値チェック制約
+  condition: goal_category IN ('BUSINESS', 'SKILL', 'CAREER', 'PERSONAL')
+- name: chk_TRN_GoalProgress_type
+  type: CHECK
+  description: 目標種別値チェック制約
+  condition: goal_type IN ('QUANTITATIVE', 'QUALITATIVE', 'MILESTONE')
+- name: chk_TRN_GoalProgress_priority
+  type: CHECK
+  description: 優先度値チェック制約
+  condition: priority_level IN ('HIGH', 'MEDIUM', 'LOW')
+- name: chk_TRN_GoalProgress_progress_rate
+  type: CHECK
+  description: 進捗率範囲チェック制約
+  condition: progress_rate >= 0 AND progress_rate <= 100
+- name: chk_TRN_GoalProgress_achievement_status
+  type: CHECK
+  description: 達成状況値チェック制約
+  condition: achievement_status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'OVERDUE',
+    'CANCELLED')
+- name: chk_TRN_GoalProgress_approval_status
+  type: CHECK
+  description: 承認状況値チェック制約
+  condition: approval_status IN ('DRAFT', 'PENDING', 'APPROVED', 'REJECTED')
+- name: chk_TRN_GoalProgress_achievement_rate
+  type: CHECK
+  description: 達成率範囲チェック制約
+  condition: achievement_rate IS NULL OR (achievement_rate >= 0 AND achievement_rate
+    <= 100)
+- name: chk_TRN_GoalProgress_self_evaluation
+  type: CHECK
+  description: 自己評価範囲チェック制約
+  condition: self_evaluation IS NULL OR (self_evaluation >= 1 AND self_evaluation
+    <= 5)
+- name: chk_TRN_GoalProgress_supervisor_evaluation
+  type: CHECK
+  description: 上司評価範囲チェック制約
+  condition: supervisor_evaluation IS NULL OR (supervisor_evaluation >= 1 AND supervisor_evaluation
+    <= 5)
+- name: chk_TRN_GoalProgress_date_range
+  type: CHECK
+  description: 日付範囲整合性チェック制約
+  condition: start_date <= target_date
+- name: chk_TRN_GoalProgress_target_value
+  type: CHECK
+  description: 目標値非負値チェック制約
+  condition: target_value IS NULL OR target_value >= 0
+- name: chk_TRN_GoalProgress_current_value
+  type: CHECK
+  description: 現在値非負値チェック制約
+  condition: current_value IS NULL OR current_value >= 0
+foreign_keys:
+- name: fk_TRN_GoalProgress_employee
+  columns:
+  - - employee_id
+  references:
+    table:
+    - MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: CASCADE
+  comment: 外部キー制約
+- name: fk_TRN_GoalProgress_supervisor
+  columns:
+  - - supervisor_id
+  references:
+    table:
+    - MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+- name: fk_TRN_GoalProgress_approved_by
+  columns:
+  - - approved_by
+  references:
+    table:
+    - MST_Employee
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+- name: fk_TRN_GoalProgress_career_plan
+  columns:
+  - - related_career_plan_id
+  references:
+    table:
+    - MST_CareerPlan
+    columns:
+    - id
+  on_update: CASCADE
+  on_delete: SET NULL
+  comment: 外部キー制約
+sample_data:
+- goal_id: GOAL000001
+  employee_id: EMP000001
+  goal_title: Java技術習得
+  goal_description: Spring Frameworkを使用したWebアプリケーション開発技術の習得
+  goal_category: SKILL
+  goal_type: QUALITATIVE
+  priority_level: HIGH
+  target_value: null
+  current_value: null
+  unit: null
+  start_date: '2025-01-01'
+  target_date: '2025-12-31'
+  progress_rate: 50.0
+  achievement_status: IN_PROGRESS
+  supervisor_id: EMP000010
+  approval_status: APPROVED
+  approved_at: '2025-01-05 10:00:00'
+  approved_by: EMP000010
+  completion_date: null
+  achievement_rate: null
+  self_evaluation: null
+  supervisor_evaluation: null
+  evaluation_comments: null
+  related_career_plan_id: CP000001
+  related_skill_items: '["JAVA", "SPRING", "WEB_DEVELOPMENT"]'
+  milestones: '["基礎学習完了", "実践プロジェクト参加", "技術認定取得"]'
+  obstacles: null
+  support_needed: 外部研修参加、メンター指導
+  last_updated_at: '2025-06-01 09:00:00'
+  next_review_date: '2025-07-01'
+- goal_id: GOAL000002
+  employee_id: EMP000002
+  goal_title: 売上目標達成
+  goal_description: 第2四半期の個人売上目標1000万円の達成
+  goal_category: BUSINESS
+  goal_type: QUANTITATIVE
+  priority_level: HIGH
+  target_value: 10000000.0
+  current_value: 6500000.0
+  unit: 円
+  start_date: '2025-04-01'
+  target_date: '2025-06-30'
+  progress_rate: 65.0
+  achievement_status: IN_PROGRESS
+  supervisor_id: EMP000011
+  approval_status: APPROVED
+  approved_at: '2025-03-25 14:00:00'
+  approved_by: EMP000011
+  completion_date: null
+  achievement_rate: null
+  self_evaluation: null
+  supervisor_evaluation: null
+  evaluation_comments: null
+  related_career_plan_id: null
+  related_skill_items: '["SALES", "NEGOTIATION", "CUSTOMER_MANAGEMENT"]'
+  milestones: '["4月目標達成", "5月目標達成", "6月目標達成"]'
+  obstacles: '["競合他社の価格競争", "新規顧客開拓の困難"]'
+  support_needed: マーケティング支援、価格戦略見直し
+  last_updated_at: '2025-06-01 17:00:00'
+  next_review_date: '2025-06-15'
+- goal_id: GOAL000003
+  employee_id: EMP000003
+  goal_title: チームリーダー昇進
+  goal_description: リーダーシップスキル向上とチーム管理経験の積み重ね
+  goal_category: CAREER
+  goal_type: MILESTONE
+  priority_level: MEDIUM
+  target_value: null
+  current_value: null
+  unit: null
+  start_date: '2025-01-01'
+  target_date: '2025-12-31'
+  progress_rate: 30.0
+  achievement_status: IN_PROGRESS
+  supervisor_id: EMP000012
+  approval_status: APPROVED
+  approved_at: '2025-01-10 11:00:00'
+  approved_by: EMP000012
+  completion_date: null
+  achievement_rate: null
+  self_evaluation: null
+  supervisor_evaluation: null
+  evaluation_comments: null
+  related_career_plan_id: CP000002
+  related_skill_items: '["LEADERSHIP", "TEAM_MANAGEMENT", "COMMUNICATION"]'
+  milestones: '["リーダーシップ研修受講", "プロジェクトリーダー経験", "昇進面談"]'
+  obstacles: null
+  support_needed: リーダーシップ研修、メンタリング
+  last_updated_at: '2025-06-01 12:00:00'
+  next_review_date: '2025-08-01'
+notes:
+- 目標IDは自動採番または手動設定
+- 進捗率は定期的に更新
+- 承認フローにより目標の妥当性を担保
+- 定量目標は目標値・現在値で進捗管理
+- 定性目標は進捗率とコメントで管理
+- マイルストーン目標は段階的な達成管理
+- 関連スキル・キャリアプランとの連携
+- 論理削除は is_deleted フラグで管理
+- 進捗率は0-100%の範囲で設定
+- 目標期限は開始日より未来の日付
+- 承認済み目標のみ進捗管理対象
+- 期限超過時は自動的にOVERDUE状態に変更
+- 完了時は達成率・評価の入力必須
+- 自己評価・上司評価は1-5段階
+- 定量目標は目標値・現在値・単位の設定必須
+- 優先度HIGH目標は週次レビュー推奨
+- キャリア目標は年次評価と連動
+- 目標変更時は承認フロー再実行
+rules:
+- 進捗率は0-100%の範囲で設定
+- 目標期限は開始日より未来の日付
+- 承認済み目標のみ進捗管理対象
+- 期限超過時は自動的にOVERDUE状態に変更
+- 完了時は達成率・評価の入力必須
+- 自己評価・上司評価は1-5段階
+- 定量目標は目標値・現在値・単位の設定必須
+- 優先度HIGH目標は週次レビュー推奨
+- キャリア目標は年次評価と連動
+- 目標変更時は承認フロー再実行

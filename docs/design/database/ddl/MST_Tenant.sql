@@ -1,87 +1,70 @@
--- MST_Tenant (テナント（組織）)
--- 生成日時: 2025-06-11 01:52:36
--- カテゴリ: マスタ系
--- 要求仕様ID: TNT.1-MGMT.1
+-- ============================================
+-- テーブル: MST_Tenant
+-- 論理名: テナント（組織）
+-- 説明: マルチテナント対応システムにおける組織・会社情報を管理するマスタテーブル。
+
+主な目的：
+- 複数の組織・会社（テナント）の基本情報管理
+- テナント別のシステム設定・カスタマイズ情報の管理
+- 階層構造による組織関係の表現（親子関係）
+- テナント別のブランディング設定（ロゴ、カラー）
+- 契約・課金情報の管理（プラン、ユーザー数制限）
+- マルチテナント認証・認可の基盤データ提供
+
+このテーブルはマルチテナントシステムの中核となるマスタデータであり、
+全ての業務データがテナント単位で分離される基盤を提供する。
+現在はシングルテナント実装だが、将来のマルチテナント化に備えた設計。
+
+-- 作成日: 2025-06-24 23:05:57
+-- ============================================
+
+DROP TABLE IF EXISTS MST_Tenant;
 
 CREATE TABLE MST_Tenant (
-    tenant_id VARCHAR(50) NOT NULL,
-    tenant_code VARCHAR(20) NOT NULL,
-    tenant_name VARCHAR(200) NOT NULL,
-    tenant_name_en VARCHAR(200),
-    tenant_short_name VARCHAR(50),
-    tenant_type VARCHAR(20) NOT NULL DEFAULT 'ENTERPRISE',
-    parent_tenant_id VARCHAR(50),
-    tenant_level INTEGER NOT NULL DEFAULT 1,
-    domain_name VARCHAR(100),
-    subdomain VARCHAR(50),
-    logo_url VARCHAR(500),
-    primary_color VARCHAR(7),
-    secondary_color VARCHAR(7),
-    timezone VARCHAR(50) NOT NULL DEFAULT 'Asia/Tokyo',
-    locale VARCHAR(10) NOT NULL DEFAULT 'ja_JP',
-    currency_code VARCHAR(3) NOT NULL DEFAULT 'JPY',
-    admin_email VARCHAR(255) NOT NULL,
-    contact_email VARCHAR(255),
-    phone_number VARCHAR(20),
-    address TEXT,
-    postal_code VARCHAR(10),
-    country_code VARCHAR(2) NOT NULL DEFAULT 'JP',
-    subscription_plan VARCHAR(20) NOT NULL DEFAULT 'BASIC',
-    max_users INTEGER NOT NULL DEFAULT 100,
-    max_storage_gb INTEGER NOT NULL DEFAULT 10,
-    status VARCHAR(20) NOT NULL DEFAULT 'TRIAL',
-    contract_start_date DATE NOT NULL,
-    contract_end_date DATE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (tenant_id)
-);
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントを一意に識別するID',
+    address TEXT COMMENT 'テナントの住所',
+    admin_email VARCHAR(255) NOT NULL COMMENT 'テナント管理者のメールアドレス',
+    contact_email VARCHAR(255) COMMENT 'テナントの一般連絡先メールアドレス',
+    contract_end_date DATE COMMENT 'テナント契約の終了日',
+    contract_start_date DATE NOT NULL COMMENT 'テナント契約の開始日',
+    country_code VARCHAR(2) NOT NULL DEFAULT 'JP' COMMENT '国コード（ISO 3166-1 alpha-2）',
+    currency_code VARCHAR(3) NOT NULL DEFAULT 'JPY' COMMENT 'テナントで使用する通貨コード（ISO 4217）',
+    domain_name VARCHAR(100) COMMENT 'テナント専用ドメイン名',
+    locale VARCHAR(10) NOT NULL DEFAULT 'ja_JP' COMMENT 'テナントのデフォルトロケール',
+    logo_url VARCHAR(500) COMMENT 'テナントロゴ画像のURL',
+    max_storage_gb INTEGER NOT NULL DEFAULT 10 COMMENT '契約上の最大ストレージ容量（GB）',
+    max_users INTEGER NOT NULL DEFAULT 100 COMMENT '契約上の最大ユーザー数',
+    parent_tenant_id VARCHAR(50) COMMENT '親テナントのID（階層構造の場合）',
+    phone_number VARCHAR(20) COMMENT 'テナントの電話番号',
+    postal_code VARCHAR(10) COMMENT '郵便番号',
+    primary_color VARCHAR(7) COMMENT 'テナントのプライマリカラー（#RRGGBB）',
+    secondary_color VARCHAR(7) COMMENT 'テナントのセカンダリカラー（#RRGGBB）',
+    status VARCHAR(20) NOT NULL DEFAULT 'TRIAL' COMMENT 'テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）',
+    subdomain VARCHAR(50) COMMENT 'サブドメイン名（xxx.system.com）',
+    subscription_plan VARCHAR(20) NOT NULL DEFAULT 'BASIC' COMMENT '契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）',
+    tenant_code VARCHAR(20) NOT NULL COMMENT 'テナントの識別コード（URL等で使用）',
+    tenant_level INTEGER NOT NULL DEFAULT 1 COMMENT 'テナント階層のレベル（1が最上位）',
+    tenant_name VARCHAR(200) NOT NULL COMMENT 'テナント（組織・会社）の正式名称',
+    tenant_name_en VARCHAR(200) COMMENT 'テナントの英語名称',
+    tenant_short_name VARCHAR(50) COMMENT 'テナントの略称・短縮名',
+    tenant_type VARCHAR(20) NOT NULL DEFAULT 'ENTERPRISE' COMMENT 'テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）',
+    timezone VARCHAR(50) NOT NULL DEFAULT 'Asia/Tokyo' COMMENT 'テナントのデフォルトタイムゾーン',
+    is_deleted BOOLEAN NOT NULL DEFAULT False COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
-CREATE UNIQUE INDEX idx_tenant_id ON MST_Tenant (tenant_id); -- テナントID検索用（一意）
-CREATE UNIQUE INDEX idx_tenant_code ON MST_Tenant (tenant_code); -- テナントコード検索用（一意）
-CREATE UNIQUE INDEX idx_domain_name ON MST_Tenant (domain_name); -- ドメイン名検索用（一意）
-CREATE UNIQUE INDEX idx_subdomain ON MST_Tenant (subdomain); -- サブドメイン検索用（一意）
-CREATE INDEX idx_tenant_type ON MST_Tenant (tenant_type); -- テナント種別検索用
-CREATE INDEX idx_parent_tenant_id ON MST_Tenant (parent_tenant_id); -- 親テナント検索用
-CREATE INDEX idx_subscription_plan ON MST_Tenant (subscription_plan); -- サブスクリプションプラン検索用
-CREATE INDEX idx_status ON MST_Tenant (status); -- ステータス検索用
-CREATE INDEX idx_admin_email ON MST_Tenant (admin_email); -- 管理者メール検索用
+CREATE UNIQUE INDEX idx_tenant_id ON MST_Tenant (tenant_id);
+CREATE UNIQUE INDEX idx_tenant_code ON MST_Tenant (tenant_code);
+CREATE UNIQUE INDEX idx_domain_name ON MST_Tenant (domain_name);
+CREATE UNIQUE INDEX idx_subdomain ON MST_Tenant (subdomain);
+CREATE INDEX idx_tenant_type ON MST_Tenant (tenant_type);
+CREATE INDEX idx_parent_tenant_id ON MST_Tenant (parent_tenant_id);
+CREATE INDEX idx_subscription_plan ON MST_Tenant (subscription_plan);
+CREATE INDEX idx_status ON MST_Tenant (status);
+CREATE INDEX idx_admin_email ON MST_Tenant (admin_email);
 
 -- 外部キー制約
-ALTER TABLE MST_Tenant ADD CONSTRAINT fk_tenant_parent FOREIGN KEY (parent_tenant_id) REFERENCES MST_Tenant (tenant_id) ON UPDATE CASCADE ON DELETE SET NULL;
-
-COMMENT ON TABLE MST_Tenant IS 'テナント（組織）';
-
-COMMENT ON COLUMN MST_Tenant.tenant_id IS 'テナントを一意に識別するID';
-COMMENT ON COLUMN MST_Tenant.tenant_code IS 'テナントの識別コード（URL等で使用）';
-COMMENT ON COLUMN MST_Tenant.tenant_name IS 'テナント（組織・会社）の正式名称';
-COMMENT ON COLUMN MST_Tenant.tenant_name_en IS 'テナントの英語名称';
-COMMENT ON COLUMN MST_Tenant.tenant_short_name IS 'テナントの略称・短縮名';
-COMMENT ON COLUMN MST_Tenant.tenant_type IS 'テナントの種別（ENTERPRISE:企業、DEPARTMENT:部門、SUBSIDIARY:子会社、PARTNER:パートナー、TRIAL:試用）';
-COMMENT ON COLUMN MST_Tenant.parent_tenant_id IS '親テナントのID（階層構造の場合）';
-COMMENT ON COLUMN MST_Tenant.tenant_level IS 'テナント階層のレベル（1が最上位）';
-COMMENT ON COLUMN MST_Tenant.domain_name IS 'テナント専用ドメイン名';
-COMMENT ON COLUMN MST_Tenant.subdomain IS 'サブドメイン名（xxx.system.com）';
-COMMENT ON COLUMN MST_Tenant.logo_url IS 'テナントロゴ画像のURL';
-COMMENT ON COLUMN MST_Tenant.primary_color IS 'テナントのプライマリカラー（#RRGGBB）';
-COMMENT ON COLUMN MST_Tenant.secondary_color IS 'テナントのセカンダリカラー（#RRGGBB）';
-COMMENT ON COLUMN MST_Tenant.timezone IS 'テナントのデフォルトタイムゾーン';
-COMMENT ON COLUMN MST_Tenant.locale IS 'テナントのデフォルトロケール';
-COMMENT ON COLUMN MST_Tenant.currency_code IS 'テナントで使用する通貨コード（ISO 4217）';
-COMMENT ON COLUMN MST_Tenant.admin_email IS 'テナント管理者のメールアドレス';
-COMMENT ON COLUMN MST_Tenant.contact_email IS 'テナントの一般連絡先メールアドレス';
-COMMENT ON COLUMN MST_Tenant.phone_number IS 'テナントの電話番号';
-COMMENT ON COLUMN MST_Tenant.address IS 'テナントの住所';
-COMMENT ON COLUMN MST_Tenant.postal_code IS '郵便番号';
-COMMENT ON COLUMN MST_Tenant.country_code IS '国コード（ISO 3166-1 alpha-2）';
-COMMENT ON COLUMN MST_Tenant.subscription_plan IS '契約プラン（FREE:無料、BASIC:基本、STANDARD:標準、PREMIUM:プレミアム、ENTERPRISE:エンタープライズ）';
-COMMENT ON COLUMN MST_Tenant.max_users IS '契約上の最大ユーザー数';
-COMMENT ON COLUMN MST_Tenant.max_storage_gb IS '契約上の最大ストレージ容量（GB）';
-COMMENT ON COLUMN MST_Tenant.status IS 'テナントの状態（ACTIVE:有効、INACTIVE:無効、SUSPENDED:停止、TRIAL:試用中、EXPIRED:期限切れ）';
-COMMENT ON COLUMN MST_Tenant.contract_start_date IS 'テナント契約の開始日';
-COMMENT ON COLUMN MST_Tenant.contract_end_date IS 'テナント契約の終了日';
-COMMENT ON COLUMN MST_Tenant.created_at IS '作成日時';
-COMMENT ON COLUMN MST_Tenant.updated_at IS '更新日時';
-COMMENT ON COLUMN MST_Tenant.is_deleted IS '論理削除フラグ';
+ALTER TABLE MST_Tenant ADD CONSTRAINT fk_tenant_parent FOREIGN KEY (parent_tenant_id) REFERENCES MST_Tenant(tenant_id) ON UPDATE CASCADE ON DELETE SET NULL;

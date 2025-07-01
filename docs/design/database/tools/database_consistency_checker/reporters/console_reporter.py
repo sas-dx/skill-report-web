@@ -1,9 +1,19 @@
 """
 データベース整合性チェックツール - コンソールレポーター
 """
+import sys
+from pathlib import Path
 from typing import Dict, List
-from core.models import ConsistencyReport, CheckResult, CheckSeverity
-from core.check_definitions import get_japanese_check_name
+
+# パス解決のセットアップ
+_current_dir = Path(__file__).parent
+_tools_dir = _current_dir.parent.parent
+if str(_tools_dir) not in sys.path:
+    sys.path.insert(0, str(_tools_dir))
+
+# 絶対インポートを使用
+from database_consistency_checker.core.models import ConsistencyReport, CheckResult, CheckSeverity
+from database_consistency_checker.core.check_definitions import get_japanese_check_name
 
 
 class ConsoleReporter:
@@ -13,10 +23,10 @@ class ConsoleReporter:
         """レポーター初期化"""
         # カラーコード
         self.colors = {
-            CheckSeverity.SUCCESS: '\033[92m',  # 緑
+            CheckSeverity.INFO: '\033[92m',     # 緑（成功の代わり）
             CheckSeverity.WARNING: '\033[93m',  # 黄
             CheckSeverity.ERROR: '\033[91m',    # 赤
-            CheckSeverity.INFO: '\033[94m',     # 青
+            CheckSeverity.CRITICAL: '\033[95m', # マゼンタ
             'RESET': '\033[0m',
             'BOLD': '\033[1m',
             'HEADER': '\033[95m'  # マゼンタ
@@ -24,10 +34,10 @@ class ConsoleReporter:
         
         # 絵文字
         self.icons = {
-            CheckSeverity.SUCCESS: '✅',
+            CheckSeverity.INFO: '✅',
             CheckSeverity.WARNING: '⚠️',
             CheckSeverity.ERROR: '❌',
-            CheckSeverity.INFO: 'ℹ️'
+            CheckSeverity.CRITICAL: '🚨'
         }
     
     def generate_report(self, report: ConsistencyReport) -> str:
@@ -52,24 +62,78 @@ class ConsoleReporter:
         lines.append("データベース整合性チェック結果サマリー")
         lines.append(f"{'='*60}{self.colors['RESET']}")
         
-        lines.append(f"\n📅 チェック日時: {report.check_date}")
-        lines.append(f"📊 対象テーブル数: {report.total_tables}")
-        lines.append(f"🔍 総チェック数: {report.total_checks}")
+        # generated_atがない場合は現在時刻を使用
+        from datetime import datetime
+        generated_at = report.metadata.get('generated_at', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        lines.append(f"\n📅 チェック日時: {generated_at}")
+        
+        # report.tablesが存在するかチェック
+        if hasattr(report, 'tables'):
+            lines.append(f"📊 対象テーブル数: {len(report.tables)}")
+        
+        # report.summaryの型をチェック
+        if hasattr(report, 'summary'):
+            if hasattr(report.summary, 'total_checks'):
+                lines.append(f"🔍 総チェック数: {report.summary.total_checks}")
+            elif isinstance(report.summary, dict):
+                total_checks = report.summary.get('total_checks', 0)
+                lines.append(f"🔍 総チェック数: {total_checks}")
         
         # 結果サマリー
         lines.append(f"\n📈 結果サマリー:")
-        for severity, count in report.summary.items():
+        
+        # summaryの型に応じて処理を分岐
+        if hasattr(report.summary, 'info_count'):
+            # CheckSummaryオブジェクトの場合
+            summary_items = [
+                ('INFO', report.summary.info_count),
+                ('WARNING', report.summary.warning_count),
+                ('ERROR', report.summary.error_count),
+                ('CRITICAL', report.summary.critical_count)
+            ]
+        elif isinstance(report.summary, dict):
+            # dictの場合
+            summary_items = [
+                ('INFO', report.summary.get('info', 0)),
+                ('WARNING', report.summary.get('warning', 0)),
+                ('ERROR', report.summary.get('error', 0)),
+                ('CRITICAL', report.summary.get('critical', 0))
+            ]
+        else:
+            summary_items = []
+        
+        for severity_name, count in summary_items:
             if count > 0:
-                icon = self.icons.get(CheckSeverity(severity), '')
-                color = self.colors.get(CheckSeverity(severity), '')
-                reset = self.colors['RESET']
-                lines.append(f"  {color}{icon} {severity.upper()}: {count}件{reset}")
+                try:
+                    severity = CheckSeverity(severity_name.lower())
+                    icon = self.icons.get(severity, '')
+                    color = self.colors.get(severity, '')
+                    reset = self.colors['RESET']
+                    lines.append(f"  {color}{icon} {severity_name}: {count}件{reset}")
+                except ValueError:
+                    lines.append(f"  {severity_name}: {count}件")
         
         # エラー率の計算
-        if report.total_checks > 0:
-            error_rate = (report.summary.get('error', 0) / report.total_checks) * 100
-            warning_rate = (report.summary.get('warning', 0) / report.total_checks) * 100
-            success_rate = (report.summary.get('success', 0) / report.total_checks) * 100
+        total_checks = 0
+        error_count = 0
+        warning_count = 0
+        passed_checks = 0
+        
+        if hasattr(report.summary, 'total_checks'):
+            total_checks = report.summary.total_checks
+            error_count = report.summary.error_count
+            warning_count = report.summary.warning_count
+            passed_checks = report.summary.passed_checks
+        elif isinstance(report.summary, dict):
+            total_checks = report.summary.get('total_checks', 0)
+            error_count = report.summary.get('error', 0)
+            warning_count = report.summary.get('warning', 0)
+            passed_checks = report.summary.get('passed_checks', 0)
+        
+        if total_checks > 0:
+            error_rate = (error_count / total_checks) * 100
+            warning_rate = (warning_count / total_checks) * 100
+            success_rate = (passed_checks / total_checks) * 100
             
             lines.append(f"\n📊 統計:")
             lines.append(f"  成功率: {success_rate:.1f}%")
@@ -101,18 +165,33 @@ class ConsoleReporter:
                 lines.append(f"  ... 他 {len(critical_issues) - 5}件")
         
         # 修正提案がある場合
-        if report.fix_suggestions:
-            lines.append(f"\n🔧 修正提案: {len(report.fix_suggestions)}件")
+        if report.suggestions:
+            lines.append(f"\n🔧 修正提案: {len(report.suggestions)}件")
             lines.append("  詳細は --suggest-fixes オプションで確認してください")
         
         # 総合判定
         lines.append(f"\n🎯 総合判定:")
-        if report.summary.get('error', 0) > 0:
+        
+        # error_countとcritical_countを取得
+        if hasattr(report.summary, 'error_count'):
+            error_count = report.summary.error_count
+            critical_count = report.summary.critical_count
+            warning_count = report.summary.warning_count
+        elif isinstance(report.summary, dict):
+            error_count = report.summary.get('error', 0)
+            critical_count = report.summary.get('critical', 0)
+            warning_count = report.summary.get('warning', 0)
+        else:
+            error_count = 0
+            critical_count = 0
+            warning_count = 0
+        
+        if error_count > 0 or critical_count > 0:
             lines.append(f"  {self.colors[CheckSeverity.ERROR]}❌ 修正が必要な問題があります{self.colors['RESET']}")
-        elif report.summary.get('warning', 0) > 0:
+        elif warning_count > 0:
             lines.append(f"  {self.colors[CheckSeverity.WARNING]}⚠️ 注意が必要な項目があります{self.colors['RESET']}")
         else:
-            lines.append(f"  {self.colors[CheckSeverity.SUCCESS]}✅ 整合性に問題はありません{self.colors['RESET']}")
+            lines.append(f"  {self.colors[CheckSeverity.INFO]}✅ 整合性に問題はありません{self.colors['RESET']}")
         
         lines.append("")
         
@@ -152,9 +231,9 @@ class ConsoleReporter:
         # 重要度順にソート
         severity_order = {
             CheckSeverity.ERROR: 0,
-            CheckSeverity.WARNING: 1,
-            CheckSeverity.INFO: 2,
-            CheckSeverity.SUCCESS: 3
+            CheckSeverity.CRITICAL: 1,
+            CheckSeverity.WARNING: 2,
+            CheckSeverity.INFO: 3
         }
         
         sorted_results = sorted(
