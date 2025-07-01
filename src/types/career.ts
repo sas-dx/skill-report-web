@@ -27,7 +27,7 @@ export interface CareerInitResponse {
 }
 
 /**
- * キャリア目標データ
+ * キャリア目標データ（API-700レスポンス用）
  */
 export interface CareerGoalData {
   id?: string;
@@ -37,7 +37,7 @@ export interface CareerGoalData {
   current_level: string;
   target_level: string;
   progress_percentage: number;
-  plan_status?: string;
+  plan_status?: 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
   last_review_date?: string | null;
   next_review_date?: string | null;
 }
