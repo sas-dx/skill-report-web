@@ -431,6 +431,28 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // 部署の検証
+    const departmentId = body.organization_info?.department_id || body.department_id;
+    if (departmentId !== undefined && departmentId !== '') {
+      const department = await prisma.department.findUnique({
+        where: { department_code: departmentId }
+      });
+      if (!department) {
+        errors.push({ field: 'department_id', reason: '指定された部署が存在しません' });
+      }
+    }
+
+    // 役職の検証
+    const positionId = body.organization_info?.position_id || body.position_id;
+    if (positionId !== undefined && positionId !== '') {
+      const position = await prisma.position.findUnique({
+        where: { position_code: positionId }
+      });
+      if (!position) {
+        errors.push({ field: 'position_id', reason: '指定された役職が存在しません' });
+      }
+    }
+
     // エラーがある場合は400を返す
     if (errors.length > 0) {
       return NextResponse.json(
@@ -480,6 +502,20 @@ export async function PUT(request: NextRequest) {
     if (body.email !== undefined) {
       updateData.email = body.email;
       updatedFields.push('email');
+    }
+
+    // 部署の更新
+    const departmentIdForUpdate = body.organization_info?.department_id !== undefined ? body.organization_info.department_id : body.department_id;
+    if (departmentIdForUpdate !== undefined) {
+      updateData.department_id = departmentIdForUpdate || null;
+      updatedFields.push('department_id');
+    }
+
+    // 役職の更新
+    const positionIdForUpdate = body.organization_info?.position_id !== undefined ? body.organization_info.position_id : body.position_id;
+    if (positionIdForUpdate !== undefined) {
+      updateData.position_id = positionIdForUpdate || null;
+      updatedFields.push('position_id');
     }
 
     // 更新日時を追加
