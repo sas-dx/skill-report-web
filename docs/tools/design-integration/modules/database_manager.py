@@ -3,6 +3,7 @@
 要求仕様ID: PLT.1-WEB.1
 
 既存のデータベースツール機能を完全統合し、統合インターフェースを提供します。
+最新のリファクタリング版データベースツールを統合し、強化された機能を提供します。
 """
 
 import sys
@@ -11,10 +12,40 @@ import importlib.util
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import logging
+import yaml
+import json
+from datetime import datetime
 
-from ..core.config import DesignIntegrationConfig
-from ..core.exceptions import DesignIntegrationError
-from ..core.logger import get_logger
+import sys
+from pathlib import Path
+
+# パスを追加してモジュールをインポート
+current_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(current_dir))
+
+try:
+    from core.config import DesignIntegrationConfig
+    from core.exceptions import DesignIntegrationError
+    from core.logger import get_logger
+except ImportError as e:
+    print(f"インポートエラー: {e}")
+    # フォールバック用の基本クラス
+    class DesignIntegrationConfig:
+        def __init__(self, config_path=None):
+            self.project_root = Path.cwd()
+        def get_database_yaml_dir(self):
+            return self.project_root / "docs" / "design" / "database" / "table-details"
+        def get_database_ddl_dir(self):
+            return self.project_root / "docs" / "design" / "database" / "ddl"
+        def get_database_tables_dir(self):
+            return self.project_root / "docs" / "design" / "database" / "tables"
+    
+    class DesignIntegrationError(Exception):
+        pass
+    
+    def get_logger(name):
+        import logging
+        return logging.getLogger(name)
 
 
 class DatabaseDesignManager:

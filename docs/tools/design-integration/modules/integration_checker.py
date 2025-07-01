@@ -13,9 +13,30 @@ import yaml
 import json
 import re
 
-from ..core.config import DesignIntegrationConfig
-from ..core.exceptions import DesignIntegrationError
-from ..core.logger import get_logger
+import sys
+from pathlib import Path
+
+# パスを追加してモジュールをインポート
+current_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(current_dir))
+
+try:
+    from core.config import DesignIntegrationConfig
+    from core.exceptions import DesignIntegrationError
+    from core.logger import get_logger
+except ImportError as e:
+    print(f"インポートエラー: {e}")
+    # フォールバック用の基本クラス
+    class DesignIntegrationConfig:
+        def __init__(self, config_path=None):
+            self.project_root = Path.cwd()
+    
+    class DesignIntegrationError(Exception):
+        pass
+    
+    def get_logger(name):
+        import logging
+        return logging.getLogger(name)
 
 
 class IntegrationChecker:
