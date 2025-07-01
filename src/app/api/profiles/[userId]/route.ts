@@ -511,6 +511,21 @@ export async function PUT(
       updatedFields.push('contact_info.phone');
     }
 
+    // 組織情報の更新
+    if (body.organization_info?.department_id !== undefined) {
+      // 部署IDが空文字列の場合はnullに変換
+      updateData.department_id = body.organization_info.department_id === '' ? null : body.organization_info.department_id;
+      updatedFields.push('organization_info.department_id');
+      console.log('部署ID更新:', body.organization_info.department_id, '→', updateData.department_id);
+    }
+    
+    if (body.organization_info?.position_id !== undefined) {
+      // 役職IDが空文字列の場合はnullに変換
+      updateData.position_id = body.organization_info.position_id === '' ? null : body.organization_info.position_id;
+      updatedFields.push('organization_info.position_id');
+      console.log('役職ID更新:', body.organization_info.position_id, '→', updateData.position_id);
+    }
+
     // メールアドレスの更新（重複チェック付き）
     if (body.email !== undefined) {
       const trimmedEmail = body.email.trim();
@@ -568,15 +583,25 @@ export async function PUT(
     }
 
     // デバッグログを追加
-    console.log('Update data:', updateData);
+    console.log('=== プロフィール更新デバッグ ===');
     console.log('Target user ID:', targetUserId);
+    console.log('Request body:', JSON.stringify(body, null, 2));
+    console.log('Update data:', JSON.stringify(updateData, null, 2));
+    console.log('Updated fields:', updatedFields);
 
     const updatedUser = await prisma.employee.update({
       where: { employee_code: targetUserId },
       data: updateData
     });
 
-    console.log('Updated user:', updatedUser);
+    console.log('Updated user result:', {
+      employee_code: updatedUser.employee_code,
+      department_id: updatedUser.department_id,
+      position_id: updatedUser.position_id,
+      email: updatedUser.email,
+      full_name: updatedUser.full_name,
+      updated_at: updatedUser.updated_at
+    });
 
     // 部署情報の取得
     let department = null;
