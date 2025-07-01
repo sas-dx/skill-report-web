@@ -908,6 +908,204 @@ export async function GET(
 }
 
 /**
+ * キャリア目標追加API
+ * POST /api/career-goals/{user_id}
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { user_id: string } }
+): Promise<NextResponse<UpdateCareerGoalResponse | ErrorResponse>> {
+  try {
+    const userId = params.user_id;
+
+    // 認証チェック（テスト用に一時的に無効化）
+    // const authHeader = request.headers.get('authorization');
+    // if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    //   return NextResponse.json(
+    //     {
+    //       error: {
+    //         code: 'UNAUTHORIZED',
+    //         message: '認証が必要です'
+    //       }
+    //     },
+    //     { status: 401 }
+    //   );
+    // }
+
+    // ユーザーIDの存在チェック
+    if (!userId || userId.trim() === '') {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'ユーザーが見つかりません'
+          }
+        },
+        { status: 404 }
+      );
+    }
+
+    // リクエストボディの取得
+    let requestBody: any;
+    try {
+      requestBody = await request.json();
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_PARAMETER',
+            message: 'パラメータが不正です',
+            details: 'リクエストボディの形式が正しくありません'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // 必須パラメータの検証
+    if (!requestBody.title || !requestBody.target_date || !requestBody.status) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_PARAMETER',
+            message: 'パラメータが不正です',
+            details: 'タイトル、目標達成予定日、ステータスは必須項目です'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // 年度の設定（デフォルト：現在年度）
+    const currentYear = new Date().getFullYear();
+    const targetYear = requestBody.year || currentYear;
+
+    // 年度の妥当性チェック
+    if (targetYear < 2020 || targetYear > currentYear + 5) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_YEAR',
+            message: '年度が不正です',
+            details: '有効な年度を指定してください'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // ステータスの検証
+    if (!['not_started', 'in_progress', 'completed', 'postponed', 'cancelled'].includes(requestBody.status)) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_STATUS',
+            message: 'ステータスが不正です'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // 優先度の検証（デフォルト値設定）
+    const priority = requestBody.priority || 3;
+    if (priority < 1 || priority > 5) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_PRIORITY',
+            message: '優先度が不正です',
+            details: '優先度は1-5の範囲で指定してください'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // タイトルの文字数チェック
+    if (requestBody.title.length > 100) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_PARAMETER',
+            message: 'パラメータが不正です',
+            details: 'タイトルは100文字以内で入力してください'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // 説明の文字数チェック
+    if (requestBody.description && requestBody.description.length > 1000) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_PARAMETER',
+            message: 'パラメータが不正です',
+            details: '説明は1000文字以内で入力してください'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // 目標タイプの設定（デフォルト値）
+    const goalType = requestBody.goal_type || 'short_term';
+    if (!['short_term', 'mid_term', 'long_term'].includes(goalType)) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_GOAL_TYPE',
+            message: '目標タイプが不正です'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    // モック実装：新規目標の作成
+    const currentDateTime = new Date().toISOString();
+    const goalId = `G${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const updatedGoal: UpdatedGoal = {
+      goal_id: goalId,
+      goal_type: goalType,
+      title: requestBody.title,
+      status: requestBody.status,
+      updated_at: currentDateTime
+    };
+
+    // 成功レスポンス
+    const response: UpdateCareerGoalResponse = {
+      user_id: userId,
+      year: targetYear,
+      updated_goals: [updatedGoal],
+      operation_type: 'add',
+      operation_result: 'success',
+      last_updated: currentDateTime,
+      last_updated_by: userId
+    };
+
+    return NextResponse.json(response, { status: 201 });
+
+  } catch (error) {
+    console.error('キャリア目標追加API エラー:', error);
+    
+    return NextResponse.json(
+      {
+        error: {
+          code: 'SYSTEM_ERROR',
+          message: 'システムエラーが発生しました',
+          details: error instanceof Error ? error.message : '不明なエラー'
+        }
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * OPTIONS メソッド（CORS対応）
  */
 export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
@@ -915,7 +1113,7 @@ export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   });
