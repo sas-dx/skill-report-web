@@ -1,7 +1,7 @@
 /**
  * 要求仕様ID: PRO.1-BASE.1
  * 対応設計書: docs/design/screens/specs/画面定義書_SCR-PROFILE_プロフィール画面.md
- * 実装内容: プロフィール画面（実際のAPI連携版）
+ * 実装内容: プロフィール画面（新しい組織情報API対応版）
  */
 'use client';
 
@@ -11,8 +11,10 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { getProfile, updateProfile, ProfileData, ProfileUpdateRequest } from '@/lib/api/profile';
+import { useOrganization, Department, Position } from '@/hooks/useOrganization';
 
 interface EditableProfile {
   firstName: string;
@@ -22,8 +24,8 @@ interface EditableProfile {
   displayName: string;
   email: string;
   phoneNumber: string;
-  emergencyContactName: string;
-  emergencyContactPhone: string;
+  departmentId: string;
+  positionId: string;
 }
 
 export default function ProfilePage() {
@@ -36,6 +38,9 @@ export default function ProfilePage() {
   const [editedProfile, setEditedProfile] = useState<EditableProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  // 組織情報取得フック
+  const { data: organizationData, loading: orgLoading, error: orgError } = useOrganization();
 
   const handleMenuClick = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -52,31 +57,31 @@ export default function ProfilePage() {
         setIsLoading(true);
         setError(null);
         
-        const response = await getProfile('me', {
+        const profileResponse = await getProfile('me', {
           includeSkillSummary: true,
           includeGoalSummary: false,
           includeHistory: false
         });
         
-        if (response.success && response.data) {
-          setProfile(response.data.profile);
+        if (profileResponse.success && profileResponse.data) {
+          setProfile(profileResponse.data.profile);
           setEditedProfile({
-            firstName: response.data.profile.personalInfo.firstName,
-            lastName: response.data.profile.personalInfo.lastName,
-            firstNameKana: response.data.profile.personalInfo.firstNameKana,
-            lastNameKana: response.data.profile.personalInfo.lastNameKana,
-            displayName: response.data.profile.personalInfo.displayName,
-            email: response.data.profile.email,
-            phoneNumber: response.data.profile.personalInfo.phoneNumber,
-            emergencyContactName: response.data.profile.personalInfo.emergencyContact.name,
-            emergencyContactPhone: response.data.profile.personalInfo.emergencyContact.phoneNumber,
+            firstName: profileResponse.data.profile.personalInfo.firstName,
+            lastName: profileResponse.data.profile.personalInfo.lastName,
+            firstNameKana: profileResponse.data.profile.personalInfo.firstNameKana,
+            lastNameKana: profileResponse.data.profile.personalInfo.lastNameKana,
+            displayName: profileResponse.data.profile.personalInfo.displayName,
+            email: profileResponse.data.profile.email,
+            phoneNumber: profileResponse.data.profile.personalInfo.phoneNumber,
+            departmentId: profileResponse.data.profile.organizationInfo.departmentId,
+            positionId: profileResponse.data.profile.organizationInfo.positionId,
           });
         } else {
-          setError(response.error?.message || 'プロフィール情報の取得に失敗しました');
+          setError(profileResponse.error?.message || 'プロフィール情報の取得に失敗しました');
         }
       } catch (error) {
         console.error('プロフィール読み込みエラー:', error);
-        setError('プロフィール情報の読み込み中にエラーが発生しました');
+        setError('プロフィールの読み込み中にエラーが発生しました');
       } finally {
         setIsLoading(false);
       }
@@ -100,8 +105,8 @@ export default function ProfilePage() {
         displayName: profile.personalInfo.displayName,
         email: profile.email,
         phoneNumber: profile.personalInfo.phoneNumber,
-        emergencyContactName: profile.personalInfo.emergencyContact.name,
-        emergencyContactPhone: profile.personalInfo.emergencyContact.phoneNumber,
+        departmentId: profile.organizationInfo.departmentId,
+        positionId: profile.organizationInfo.positionId,
       });
     }
     setIsEditing(false);
@@ -157,6 +162,10 @@ export default function ProfilePage() {
         email: editedProfile.email,
         contact_info: {
           phone: editedProfile.phoneNumber
+        },
+        organization_info: {
+          department_id: editedProfile.departmentId,
+          position_id: editedProfile.positionId
         }
       };
 
@@ -164,7 +173,11 @@ export default function ProfilePage() {
       
       if (response.success) {
         // プロフィール状態を編集内容で更新（再読み込みではなく）
-        if (profile) {
+        if (profile && organizationData) {
+          // 部署名と役職名を取得
+          const selectedDepartment = organizationData.departments.find(d => d.id === editedProfile.departmentId);
+          const selectedPosition = organizationData.positions.find(p => p.id === editedProfile.positionId);
+
           const updatedProfile = {
             ...profile,
             email: editedProfile.email,
@@ -175,12 +188,14 @@ export default function ProfilePage() {
               firstNameKana: editedProfile.firstNameKana,
               lastNameKana: editedProfile.lastNameKana,
               displayName: editedProfile.displayName,
-              phoneNumber: editedProfile.phoneNumber,
-              emergencyContact: {
-                ...profile.personalInfo.emergencyContact,
-                name: editedProfile.emergencyContactName,
-                phoneNumber: editedProfile.emergencyContactPhone,
-              }
+              phoneNumber: editedProfile.phoneNumber
+            },
+            organizationInfo: {
+              ...profile.organizationInfo,
+              departmentId: editedProfile.departmentId,
+              departmentName: selectedDepartment?.name || '',
+              positionId: editedProfile.positionId,
+              positionName: selectedPosition?.name || ''
             }
           };
           setProfile(updatedProfile);
@@ -235,7 +250,25 @@ export default function ProfilePage() {
     }
   };
 
-  if (isLoading) {
+  // 部署選択肢を生成
+  const getDepartmentOptions = () => {
+    if (!organizationData?.departments) return [];
+    return organizationData.departments.map(dept => ({
+      value: dept.id,
+      label: dept.name
+    }));
+  };
+
+  // 役職選択肢を生成
+  const getPositionOptions = () => {
+    if (!organizationData?.positions) return [];
+    return organizationData.positions.map(pos => ({
+      value: pos.id,
+      label: pos.name
+    }));
+  };
+
+  if (isLoading || orgLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <DashboardHeader 
@@ -255,7 +288,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (error && !profile) {
+  if ((error && !profile) || orgError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <DashboardHeader 
@@ -269,8 +302,8 @@ export default function ProfilePage() {
           />
           <div className="flex-1 lg:ml-64 flex items-center justify-center">
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">プロフィールが見つかりません</h2>
-              <p className="text-gray-600 mb-4">{error}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">データの読み込みに失敗しました</h2>
+              <p className="text-gray-600 mb-4">{error || orgError}</p>
               <Button onClick={() => window.location.reload()} variant="primary">
                 再読み込み
               </Button>
@@ -436,11 +469,20 @@ export default function ProfilePage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         部署
                       </label>
-                      <Input
-                        value={profile.organizationInfo.departmentName}
-                        disabled={true}
-                        className="bg-gray-50"
-                      />
+                      {isEditing ? (
+                        <Select
+                          value={editedProfile?.departmentId || profile.organizationInfo.departmentId}
+                          onChange={(value) => handleInputChange('departmentId', value)}
+                          options={getDepartmentOptions()}
+                          placeholder="部署を選択してください"
+                        />
+                      ) : (
+                        <Input
+                          value={profile.organizationInfo.departmentName}
+                          disabled={true}
+                          className="bg-gray-50"
+                        />
+                      )}
                     </div>
 
                     {/* 役職 */}
@@ -448,11 +490,20 @@ export default function ProfilePage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         役職
                       </label>
-                      <Input
-                        value={profile.organizationInfo.positionName}
-                        disabled={true}
-                        className="bg-gray-50"
-                      />
+                      {isEditing ? (
+                        <Select
+                          value={editedProfile?.positionId || profile.organizationInfo.positionId}
+                          onChange={(value) => handleInputChange('positionId', value)}
+                          options={getPositionOptions()}
+                          placeholder="役職を選択してください"
+                        />
+                      ) : (
+                        <Input
+                          value={profile.organizationInfo.positionName}
+                          disabled={true}
+                          className="bg-gray-50"
+                        />
+                      )}
                     </div>
 
                     {/* 入社日 */}
@@ -483,18 +534,6 @@ export default function ProfilePage() {
                       )}
                     </div>
 
-                    {/* 緊急連絡先 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        緊急連絡先
-                      </label>
-                      <Input
-                        value={isEditing ? editedProfile?.emergencyContactPhone || '' : profile.personalInfo.emergencyContact.phoneNumber}
-                        onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
