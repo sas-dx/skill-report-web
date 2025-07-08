@@ -1,0 +1,18 @@
+{
+  "generated_at": "2025-06-30T21:57:13.955843",
+  "type": "mock_ui_image",
+  "description": "プロフィール管理画面のモックUI画像",
+  "size": "1792x1024",
+  "filename": "profile_ui_mockup_mock_20250630_215713.png",
+  "specification_id": "PRO.1-BASE.1",
+  "screen_id": "SCR-PROFILE",
+  "design_document": "docs/design/screens/specs/画面定義書_SCR_PRO_Profile_プロフィール画面.md",
+  "features": [
+    "ヘッダー（タイトル、ユーザードロップダウン、通知、ログアウト）",
+    "サイドバーナビゲーション（プロフィールがハイライト）",
+    "基本情報フォーム（社員番号、氏名、メール、生年月日、入社日）",
+    "所属情報フォーム（部署、役職、グループ、上長）",
+    "更新履歴テーブル（日時、項目、変更前、変更後、変更者）",
+    "アクションボタン（キャンセル、保存）"
+  ]
+}

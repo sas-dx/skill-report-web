@@ -1,7 +1,7 @@
 /**
  * 要求仕様ID: PRO.1-BASE.1
  * 対応設計書: docs/design/screens/specs/画面定義書_SCR-PROFILE_プロフィール画面.md
- * 実装内容: プロフィール画面（新しい組織情報API対応版）
+ * 実装内容: プロフィール画面（上長情報・更新履歴対応版）
  */
 'use client';
 
@@ -15,6 +15,8 @@ import { Select } from '@/components/ui/Select';
 import { Spinner } from '@/components/ui/Spinner';
 import { getProfile, updateProfile, ProfileData, ProfileUpdateRequest } from '@/lib/api/profile';
 import { useOrganization, Department, Position } from '@/hooks/useOrganization';
+import { useManagerInfo } from '@/hooks/useManagerInfo';
+import { useUpdateHistory } from '@/hooks/useUpdateHistory';
 
 interface EditableProfile {
   firstName: string;
@@ -41,6 +43,16 @@ export default function ProfilePage() {
 
   // 組織情報取得フック
   const { data: organizationData, loading: orgLoading, error: orgError } = useOrganization();
+  
+  // 上長情報取得フック
+  const { manager, loading: managerLoading, error: managerError } = useManagerInfo('me');
+  
+  // 更新履歴取得フック
+  const { history, loading: historyLoading, error: historyError } = useUpdateHistory('me', 10);
+
+  // デバッグログ
+  console.log('ProfilePage - Manager info:', { manager, managerLoading, managerError });
+  console.log('ProfilePage - Update history:', { history, historyLoading, historyError });
 
   const handleMenuClick = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -169,7 +181,12 @@ export default function ProfilePage() {
         }
       };
 
+      console.log('=== プロフィール更新 フロントエンド デバッグ ===');
+      console.log('Update data being sent:', JSON.stringify(updateData, null, 2));
+      
       const response = await updateProfile('me', updateData);
+      
+      console.log('Update response received:', JSON.stringify(response, null, 2));
       
       if (response.success) {
         // プロフィール状態を編集内容で更新（再読み込みではなく）
@@ -379,161 +396,291 @@ export default function ProfilePage() {
 
             {/* プロフィール情報 */}
             {profile && (
-              <div className="bg-white shadow rounded-lg">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-medium text-gray-900">基本情報</h2>
+              <div className="space-y-6">
+                {/* 基本情報 */}
+                <div className="bg-white shadow rounded-lg">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-medium text-gray-900">基本情報</h2>
+                  </div>
+                  
+                  <div className="px-6 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* 社員番号 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          社員番号
+                        </label>
+                        <Input
+                          value={profile.employeeId}
+                          disabled={true}
+                          className="bg-gray-50"
+                        />
+                      </div>
+
+                      {/* 姓 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          姓 <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          value={isEditing ? editedProfile?.lastName || '' : profile.personalInfo.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          disabled={!isEditing}
+                          className={!isEditing ? 'bg-gray-50' : ''}
+                        />
+                        {validationErrors.lastName && (
+                          <p className="mt-1 text-sm text-red-600">{validationErrors.lastName}</p>
+                        )}
+                      </div>
+
+                      {/* 名 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          名 <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          value={isEditing ? editedProfile?.firstName || '' : profile.personalInfo.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          disabled={!isEditing}
+                          className={!isEditing ? 'bg-gray-50' : ''}
+                        />
+                        {validationErrors.firstName && (
+                          <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
+                        )}
+                      </div>
+
+                      {/* 表示名 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          表示名 <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          value={isEditing ? editedProfile?.displayName || '' : profile.personalInfo.displayName}
+                          onChange={(e) => handleInputChange('displayName', e.target.value)}
+                          disabled={!isEditing}
+                          className={!isEditing ? 'bg-gray-50' : ''}
+                        />
+                        {validationErrors.displayName && (
+                          <p className="mt-1 text-sm text-red-600">{validationErrors.displayName}</p>
+                        )}
+                      </div>
+
+                      {/* メールアドレス */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          メールアドレス <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="email"
+                          value={isEditing ? editedProfile?.email || '' : profile.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          disabled={!isEditing}
+                          className={!isEditing ? 'bg-gray-50' : ''}
+                          placeholder="example@company.com"
+                        />
+                        {validationErrors.email && (
+                          <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                        )}
+                      </div>
+
+                      {/* 部署 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          部署
+                        </label>
+                        {isEditing ? (
+                          <Select
+                            value={editedProfile?.departmentId || profile.organizationInfo.departmentId}
+                            onChange={(value) => handleInputChange('departmentId', value)}
+                            options={getDepartmentOptions()}
+                            placeholder="部署を選択してください"
+                          />
+                        ) : (
+                          <Input
+                            value={profile.organizationInfo.departmentName}
+                            disabled={true}
+                            className="bg-gray-50"
+                          />
+                        )}
+                      </div>
+
+                      {/* 役職 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          役職
+                        </label>
+                        {isEditing ? (
+                          <Select
+                            value={editedProfile?.positionId || profile.organizationInfo.positionId}
+                            onChange={(value) => handleInputChange('positionId', value)}
+                            options={getPositionOptions()}
+                            placeholder="役職を選択してください"
+                          />
+                        ) : (
+                          <Input
+                            value={profile.organizationInfo.positionName}
+                            disabled={true}
+                            className="bg-gray-50"
+                          />
+                        )}
+                      </div>
+
+                      {/* 入社日 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          入社日
+                        </label>
+                        <Input
+                          value={profile.organizationInfo.hireDate}
+                          disabled={true}
+                          className="bg-gray-50"
+                        />
+                      </div>
+
+                      {/* 電話番号 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          電話番号
+                        </label>
+                        <Input
+                          value={isEditing ? editedProfile?.phoneNumber || '' : profile.personalInfo.phoneNumber}
+                          onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                          disabled={!isEditing}
+                          className={!isEditing ? 'bg-gray-50' : ''}
+                        />
+                        {validationErrors.phoneNumber && (
+                          <p className="mt-1 text-sm text-red-600">{validationErrors.phoneNumber}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="px-6 py-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* 社員番号 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        社員番号
-                      </label>
-                      <Input
-                        value={profile.employeeId}
-                        disabled={true}
-                        className="bg-gray-50"
-                      />
-                    </div>
 
-                    {/* 姓 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        姓 <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        value={isEditing ? editedProfile?.lastName || '' : profile.personalInfo.lastName}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
-                      />
-                      {validationErrors.lastName && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.lastName}</p>
-                      )}
-                    </div>
+                {/* 上長情報 */}
+                <div className="bg-white shadow rounded-lg">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-medium text-gray-900">上長情報</h2>
+                  </div>
+                  
+                  <div className="px-6 py-4">
+                    {managerLoading ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Spinner size="sm" />
+                        <span className="ml-2 text-gray-600">読み込み中...</span>
+                      </div>
+                    ) : managerError ? (
+                      <div className="text-red-600 text-sm">{managerError}</div>
+                    ) : manager ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            上長名
+                          </label>
+                          <Input
+                            value={manager.name}
+                            disabled={true}
+                            className="bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            部署
+                          </label>
+                          <Input
+                            value={manager.departmentName}
+                            disabled={true}
+                            className="bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            役職
+                          </label>
+                          <Input
+                            value={manager.positionName}
+                            disabled={true}
+                            className="bg-gray-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            メールアドレス
+                          </label>
+                          <Input
+                            value={manager.email}
+                            disabled={true}
+                            className="bg-gray-50"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 text-sm">上長情報が設定されていません</div>
+                    )}
+                  </div>
+                </div>
 
-                    {/* 名 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        名 <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        value={isEditing ? editedProfile?.firstName || '' : profile.personalInfo.firstName}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
-                      />
-                      {validationErrors.firstName && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
-                      )}
-                    </div>
-
-                    {/* 表示名 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        表示名 <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        value={isEditing ? editedProfile?.displayName || '' : profile.personalInfo.displayName}
-                        onChange={(e) => handleInputChange('displayName', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
-                      />
-                      {validationErrors.displayName && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.displayName}</p>
-                      )}
-                    </div>
-
-                    {/* メールアドレス */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        メールアドレス <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="email"
-                        value={isEditing ? editedProfile?.email || '' : profile.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
-                        placeholder="example@company.com"
-                      />
-                      {validationErrors.email && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
-                      )}
-                    </div>
-
-                    {/* 部署 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        部署
-                      </label>
-                      {isEditing ? (
-                        <Select
-                          value={editedProfile?.departmentId || profile.organizationInfo.departmentId}
-                          onChange={(value) => handleInputChange('departmentId', value)}
-                          options={getDepartmentOptions()}
-                          placeholder="部署を選択してください"
-                        />
-                      ) : (
-                        <Input
-                          value={profile.organizationInfo.departmentName}
-                          disabled={true}
-                          className="bg-gray-50"
-                        />
-                      )}
-                    </div>
-
-                    {/* 役職 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        役職
-                      </label>
-                      {isEditing ? (
-                        <Select
-                          value={editedProfile?.positionId || profile.organizationInfo.positionId}
-                          onChange={(value) => handleInputChange('positionId', value)}
-                          options={getPositionOptions()}
-                          placeholder="役職を選択してください"
-                        />
-                      ) : (
-                        <Input
-                          value={profile.organizationInfo.positionName}
-                          disabled={true}
-                          className="bg-gray-50"
-                        />
-                      )}
-                    </div>
-
-                    {/* 入社日 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        入社日
-                      </label>
-                      <Input
-                        value={profile.organizationInfo.hireDate}
-                        disabled={true}
-                        className="bg-gray-50"
-                      />
-                    </div>
-
-                    {/* 電話番号 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        電話番号
-                      </label>
-                      <Input
-                        value={isEditing ? editedProfile?.phoneNumber || '' : profile.personalInfo.phoneNumber}
-                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-50' : ''}
-                      />
-                      {validationErrors.phoneNumber && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.phoneNumber}</p>
-                      )}
-                    </div>
-
+                {/* 更新履歴 */}
+                <div className="bg-white shadow rounded-lg">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-medium text-gray-900">更新履歴</h2>
+                  </div>
+                  
+                  <div className="px-6 py-4">
+                    {historyLoading ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Spinner size="sm" />
+                        <span className="ml-2 text-gray-600">読み込み中...</span>
+                      </div>
+                    ) : historyError ? (
+                      <div className="text-red-600 text-sm">{historyError}</div>
+                    ) : history && history.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                日時
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                項目
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                変更前
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                変更後
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                変更者
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {history.map((item, index) => (
+                              <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {item.date}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {item.field}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {item.oldValue}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {item.newValue}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {item.updatedBy}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 text-sm">更新履歴がありません</div>
+                    )}
                   </div>
                 </div>
               </div>
