@@ -221,6 +221,14 @@ export function BulkUploadForm() {
     setShowErrorsOnly(!showErrorsOnly);
   };
 
+  // アップロードステップに戻る
+  const handleBackToUpload = () => {
+    setCurrentStep('upload');
+    setValidationResult(null);
+    setExecutionResult(null);
+    setShowErrorsOnly(false);
+  };
+
   // 表示用レコードのフィルタリング
   const getDisplayRecords = () => {
     if (!validationResult?.validation_result) return [];
@@ -374,6 +382,19 @@ export function BulkUploadForm() {
               登録前確認
             </h2>
             <div className="flex space-x-2">
+              {validationResult.success && (
+                <Button
+                  onClick={handleBackToUpload}
+                  variant="secondary"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  <span>戻る</span>
+                </Button>
+              )}
               <Button
                 onClick={toggleErrorsOnly}
                 variant="secondary"
