@@ -19,7 +19,7 @@ async function main() {
     // サンプルEmployeeの作成
     await prisma.employee.create({
       data: {
-        id: 'emp-001',
+        id: 'emp_001',
         employee_code: 'E001',
         full_name: '山田太郎',
         full_name_kana: 'ヤマダタロウ',
@@ -51,7 +51,7 @@ async function main() {
       {
         id: 'trn-001',
         training_history_id: 'TRN-001',
-        employee_id: 'emp-001',
+        employee_id: 'emp_001',
         training_name: 'React.js基礎研修',
         training_type: '社内研修',
         training_category: 'フロントエンド',
@@ -72,7 +72,7 @@ async function main() {
       {
         id: 'trn-002',
         training_history_id: 'TRN-002',
-        employee_id: 'emp-001',
+        employee_id: 'emp_001',
         training_name: 'AWS認定ソリューションアーキテクト研修',
         training_type: '外部研修',
         training_category: 'クラウド',
@@ -93,7 +93,7 @@ async function main() {
       {
         id: 'trn-003',
         training_history_id: 'TRN-003',
-        employee_id: 'emp-001',
+        employee_id: 'emp_001',
         training_name: 'プロジェクトマネジメント基礎',
         training_type: '社内研修',
         training_category: 'マネジメント',
@@ -178,7 +178,7 @@ async function main() {
       {
         id: 'pdu-001',
         pdu_id: 'PDU-001',
-        employee_id: 'emp-001',
+        employee_id: 'emp_001',
         certification_id: 'CERT-001',
         activity_type: 'CERTIFICATION',
         activity_name: '基本情報技術者試験',
@@ -195,7 +195,7 @@ async function main() {
       {
         id: 'pdu-002',
         pdu_id: 'PDU-002',
-        employee_id: 'emp-001',
+        employee_id: 'emp_001',
         certification_id: 'CERT-002',
         activity_type: 'CERTIFICATION',
         activity_name: 'AWS認定ソリューションアーキテクト',

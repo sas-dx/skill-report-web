@@ -43,7 +43,8 @@ export function TrainingContent() {
       setIsLoading(true);
       try {
         // 仮のユーザーID（実際の環境では認証情報から取得）
-        const userId = 'emp-001'; // シードデータに合わせたID
+        //const userId = 'emp-001'; // シードデータに合わせたID
+        const userId = 'emp_001'; // シードデータに合わせたID
         
         // 研修情報APIの呼び出し
         const trainingResponse = await fetch(`/api/trainings/${userId}`);
@@ -133,26 +134,26 @@ export function TrainingContent() {
       setTrainingRecords([
         {
           id: '1',
-          trainingName: 'React.js基礎研修',
+          trainingName: 'React.js基礎研修_mock',
           category: 'フロントエンド',
           startDate: '2025-04-01',
           endDate: '2025-04-05',
           hours: 40,
           status: 'completed',
           pduPoints: 40,
-          description: 'React.jsの基礎から応用まで学習',
+          description: 'React.jsの基礎から応用まで学習_mock',
           skills: ['React', 'JavaScript', 'フロントエンド開発']
         },
         {
           id: '2',
-          trainingName: 'AWS認定ソリューションアーキテクト研修',
+          trainingName: 'AWS認定ソリューションアーキテクト研修_mock',
           category: 'クラウド',
           startDate: '2025-05-01',
           endDate: '2025-05-31',
           hours: 80,
           status: 'in_progress',
           pduPoints: 80,
-          description: 'AWS認定資格取得のための研修',
+          description: 'AWS認定資格取得のための研修_mock',
           skills: ['AWS', 'クラウドアーキテクチャ', 'インフラ設計']
         }
       ]);
@@ -162,7 +163,7 @@ export function TrainingContent() {
       setCertificationRecords([
         {
           id: '1',
-          certificationName: '基本情報技術者試験',
+          certificationName: '基本情報技術者試験_mock',
           organization: 'IPA',
           acquiredDate: '2024-10-15',
           expiryDate: '無期限',
@@ -172,7 +173,7 @@ export function TrainingContent() {
         },
         {
           id: '2',
-          certificationName: 'AWS認定ソリューションアーキテクト',
+          certificationName: 'AWS認定ソリューションアーキテクト_mock',
           organization: 'Amazon Web Services',
           acquiredDate: '2025-03-20',
           expiryDate: '2028-03-20',
