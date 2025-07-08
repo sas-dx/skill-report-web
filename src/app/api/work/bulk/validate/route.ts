@@ -7,6 +7,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
 
+// 一時データストレージ（メモリベース）
+// 実際の実装では共有ストレージ（Redis等）を使用
+declare global {
+  var validationDataStore: Map<string, {
+    data: BulkWorkRecord[];
+    timestamp: number;
+    expiresAt: number;
+  }> | undefined;
+}
+
+// グローバル変数として初期化（開発環境用）
+if (!global.validationDataStore) {
+  global.validationDataStore = new Map();
+}
+
+// データクリーンアップ（30分経過したデータを削除）
+setInterval(() => {
+  const now = Date.now();
+  if (global.validationDataStore) {
+    for (const [key, value] of global.validationDataStore.entries()) {
+      if (now > value.expiresAt) {
+        global.validationDataStore.delete(key);
+      }
+    }
+  }
+}, 5 * 60 * 1000); // 5分ごとにクリーンアップ
+
 interface BulkWorkRecord {
   project_name: string;
   project_code: string;
@@ -197,6 +224,20 @@ export async function POST(request: NextRequest) {
 
     // 検証IDを生成（実行時に使用）
     const validationId = `validation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // 検証済みデータを一時ストレージに保存（30分間有効）
+    const now = Date.now();
+    const validRecords = validationResults
+      .filter(result => result.status === 'OK')
+      .map(result => result.data);
+
+    global.validationDataStore?.set(validationId, {
+      data: validRecords,
+      timestamp: now,
+      expiresAt: now + (30 * 60 * 1000) // 30分後に期限切れ
+    });
+
+    console.log(`Validation data stored for ID: ${validationId}, Records: ${validRecords.length}`);
 
     // 検証結果をセッションストレージ用に返す（実際の実装では Redis等を使用）
     const response = {

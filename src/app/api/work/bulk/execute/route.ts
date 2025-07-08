@@ -6,6 +6,47 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// バリデーションAPIと同じデータストレージを参照
+interface BulkWorkRecord {
+  project_name: string;
+  project_code: string;
+  client_name?: string;
+  project_type?: string;
+  project_scale?: string;
+  start_date: string;
+  end_date?: string;
+  participation_rate?: number;
+  role_title: string;
+  responsibilities?: string;
+  technologies_used?: string;
+  skills_applied?: string;
+  achievements?: string;
+  challenges_faced?: string;
+  lessons_learned?: string;
+  team_size?: number;
+  budget_range?: string;
+  project_status: string;
+  evaluation_score?: number;
+  evaluation_comment?: string;
+  is_confidential?: boolean;
+  is_public_reference?: boolean;
+}
+
+// 外部からvalidationDataStoreにアクセスするための関数
+// 実際の実装では共有ストレージ（Redis等）を使用
+declare global {
+  var validationDataStore: Map<string, {
+    data: BulkWorkRecord[];
+    timestamp: number;
+    expiresAt: number;
+  }> | undefined;
+}
+
+// グローバル変数として初期化（開発環境用）
+if (!global.validationDataStore) {
+  global.validationDataStore = new Map();
+}
+
 interface ExecutionResult {
   success: boolean;
   message: string;
@@ -31,37 +72,32 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 実際の実装では、validation_idに基づいて検証済みデータを取得
-    // ここでは簡易的にサンプルデータで実装
-    const sampleValidatedData = [
-      {
-        row: 1,
-        data: {
-          project_name: 'ECサイト構築プロジェクト',
-          project_code: 'PROJ-2024-001',
-          client_name: '株式会社サンプル',
-          project_type: 'Webアプリケーション開発',
-          project_scale: '中規模',
-          start_date: '2024-01-15',
-          end_date: '2024-06-30',
-          participation_rate: 80,
-          role_title: 'フロントエンドエンジニア',
-          responsibilities: 'UI/UX設計、React開発、テスト実装',
-          technologies_used: 'React, TypeScript, Next.js, Tailwind CSS',
-          skills_applied: 'フロントエンド開発、UI/UX設計',
-          achievements: 'レスポンシブ対応完了、パフォーマンス20%向上',
-          challenges_faced: '複雑な状態管理、API連携の最適化',
-          lessons_learned: 'React Hooks活用、TypeScript型安全性',
-          team_size: 5,
-          budget_range: '1000万円以上',
-          project_status: 'completed',
-          evaluation_score: 4,
-          evaluation_comment: '期待以上の成果を達成',
-          is_confidential: false,
-          is_public_reference: true
-        }
-      }
-    ];
+    // validation_idに基づいて検証済みデータを取得
+    const validationData = global.validationDataStore?.get(validation_id);
+    
+    if (!validationData) {
+      return NextResponse.json({
+        success: false,
+        message: 'バリデーションデータが見つかりません。再度ファイルをアップロードしてください。'
+      }, { status: 404 });
+    }
+
+    // データの有効期限チェック
+    if (Date.now() > validationData.expiresAt) {
+      global.validationDataStore?.delete(validation_id);
+      return NextResponse.json({
+        success: false,
+        message: 'バリデーションデータの有効期限が切れています。再度ファイルをアップロードしてください。'
+      }, { status: 410 });
+    }
+
+    console.log(`Processing validation ID: ${validation_id}, Records: ${validationData.data.length}`);
+
+    // 検証済みデータを処理用形式に変換
+    const validatedData = validationData.data.map((record, index) => ({
+      row: index + 1,
+      data: record
+    }));
 
     const results: Array<{
       row: number;
@@ -75,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     // トランザクション処理
     await prisma.$transaction(async (tx) => {
-      for (const item of sampleValidatedData) {
+      for (const item of validatedData) {
         try {
           // 作業実績レコード作成
           const workRecord = await tx.projectRecord.create({
@@ -84,24 +120,24 @@ export async function POST(request: NextRequest) {
               employee_id: 'emp_001', // TODO: 実際のログインユーザーIDを使用
               project_name: item.data.project_name,
               project_code: item.data.project_code,
-              client_name: item.data.client_name,
-              project_type: item.data.project_type,
-              project_scale: item.data.project_scale,
+              client_name: item.data.client_name || null,
+              project_type: item.data.project_type || null,
+              project_scale: item.data.project_scale || null,
               start_date: new Date(item.data.start_date),
               end_date: item.data.end_date ? new Date(item.data.end_date) : null,
-              participation_rate: item.data.participation_rate,
+              participation_rate: item.data.participation_rate || null,
               role_title: item.data.role_title,
-              responsibilities: item.data.responsibilities,
-              technologies_used: item.data.technologies_used,
-              skills_applied: item.data.skills_applied,
-              achievements: item.data.achievements,
-              challenges_faced: item.data.challenges_faced,
-              lessons_learned: item.data.lessons_learned,
-              team_size: item.data.team_size,
-              budget_range: item.data.budget_range,
+              responsibilities: item.data.responsibilities || null,
+              technologies_used: item.data.technologies_used || null,
+              skills_applied: item.data.skills_applied || null,
+              achievements: item.data.achievements || null,
+              challenges_faced: item.data.challenges_faced || null,
+              lessons_learned: item.data.lessons_learned || null,
+              team_size: item.data.team_size || null,
+              budget_range: item.data.budget_range || null,
               project_status: item.data.project_status,
-              evaluation_score: item.data.evaluation_score,
-              evaluation_comment: item.data.evaluation_comment,
+              evaluation_score: item.data.evaluation_score || null,
+              evaluation_comment: item.data.evaluation_comment || null,
               is_confidential: item.data.is_confidential || false,
               is_public_reference: item.data.is_public_reference || false,
               is_deleted: false,
