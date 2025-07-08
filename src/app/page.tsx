@@ -39,17 +39,13 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Cookieを含める
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // トークンを保存
-        if (data.data?.token) {
-          localStorage.setItem('token', data.data.token);
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-        }
         // ログイン成功時はダッシュボードにリダイレクト
         router.push('/dashboard');
       } else {

@@ -107,7 +107,7 @@ export function generateToken(user: { userId: string; employeeId: string; employ
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn: '24h'
+    expiresIn: '8h'
   });
 }
 

@@ -122,12 +122,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // JWTトークン生成（login_idとemployee_idを含める）
+    // JWTトークン生成（ダッシュボードAPIと整合性を保つ）
     const token = jwt.sign(
       {
-        loginId: userAuth.login_id,
-        employeeId: userAuth.employee_id,
         userId: userAuth.user_id,
+        employeeId: userAuth.employee_id,
+        employeeCode: userAuth.employee_id, // employee_idをemployeeCodeとしても使用
+        email: employeeInfo?.email || '',
       },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '8h' }
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
     console.log('Login successful for:', userAuth.login_id);
 
     // レスポンス（実際のユーザー情報を含める）
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         data: {
@@ -157,6 +158,17 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    // 認証トークンをhttpOnlyクッキーに設定
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 8 * 60 * 60, // 8時間
+      path: '/'
+    });
+
+    return response;
   } catch (error) {
     console.error('Login API Error:', error);
     return NextResponse.json(

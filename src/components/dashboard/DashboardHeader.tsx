@@ -19,13 +19,25 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const router = useRouter();
   const { profile, loading, error } = useProfile();
 
-  const handleLogout = () => {
-    // ログアウト処理
-    // TODO: 実際のログアウトAPI呼び出しを実装
-    console.log('ログアウト処理');
-    
-    // ルートページ（トップページ）に遷移
-    router.push('/');
+  const handleLogout = async () => {
+    try {
+      // ログアウトAPI呼び出し
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // Cookieを含める
+      });
+
+      if (response.ok) {
+        console.log('ログアウト成功');
+      } else {
+        console.error('ログアウトAPIエラー:', response.status);
+      }
+    } catch (error) {
+      console.error('ログアウト処理エラー:', error);
+    } finally {
+      // APIの成功・失敗に関わらずログインページに遷移
+      router.push('/');
+    }
   };
 
   return (
