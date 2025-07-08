@@ -5,6 +5,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { 
+  getCareerGoals, 
+  getSkillCategories, 
+  getPositions, 
+  getActiveCareerPlan 
+} from '@/lib/services/careerGoalService';
 
 // レスポンス型定義
 interface CareerGoal {
@@ -66,6 +72,95 @@ interface ErrorResponse {
 }
 
 /**
+ * データベースデータをAPI形式に変換する関数群
+ */
+function transformCareerGoal(dbGoal: any, careerPlan: any): CareerGoal {
+  if (!dbGoal && !careerPlan) {
+    // デフォルトの空のキャリア目標を返す
+    return {
+      id: '',
+      target_position: '',
+      target_date: '',
+      target_description: '',
+      current_level: 'JUNIOR',
+      target_level: 'SENIOR',
+      progress_percentage: 0,
+      plan_status: 'ACTIVE'
+    };
+  }
+
+  // キャリアプランが存在する場合はそれを優先
+  if (careerPlan) {
+    return {
+      id: careerPlan.career_plan_id || '',
+      target_position: careerPlan.target_position_id || '',
+      target_date: careerPlan.plan_end_date ? careerPlan.plan_end_date.toISOString().split('T')[0] : '',
+      target_description: careerPlan.plan_description || '',
+      current_level: careerPlan.current_level || 'JUNIOR',
+      target_level: careerPlan.target_level || 'SENIOR',
+      progress_percentage: careerPlan.progress_percentage ? Number(careerPlan.progress_percentage) : 0,
+      plan_status: careerPlan.plan_status || 'ACTIVE',
+      last_review_date: careerPlan.last_review_date ? careerPlan.last_review_date.toISOString().split('T')[0] : undefined,
+      next_review_date: careerPlan.next_review_date ? careerPlan.next_review_date.toISOString().split('T')[0] : undefined
+    };
+  }
+
+  // 目標進捗データから変換
+  return {
+    id: dbGoal.goal_id || '',
+    target_position: '',
+    target_date: dbGoal.target_date ? dbGoal.target_date.toISOString().split('T')[0] : '',
+    target_description: dbGoal.goal_description || '',
+    current_level: 'JUNIOR',
+    target_level: 'SENIOR',
+    progress_percentage: dbGoal.progress_rate ? Number(dbGoal.progress_rate) : 0,
+    plan_status: dbGoal.achievement_status === 'completed' ? 'COMPLETED' : 'ACTIVE'
+  };
+}
+
+function transformSkillCategories(dbCategories: any[]): SkillCategory[] {
+  return dbCategories.map(category => ({
+    id: category.category_code,
+    name: category.category_name || '',
+    short_name: category.category_name_short || category.category_name || '',
+    type: mapCategoryType(category.category_type),
+    parent_id: category.parent_category_id || undefined,
+    level: category.category_level || 1,
+    description: category.description || '',
+    icon_url: category.icon_url || undefined,
+    color_code: category.color_code || '#3399cc'
+  }));
+}
+
+function transformPositions(dbPositions: any[]): Position[] {
+  return dbPositions.map(position => ({
+    id: position.position_code,
+    name: position.position_name || '',
+    short_name: position.position_name_short || position.position_name || '',
+    level: position.position_level || 1,
+    rank: position.position_rank || 1,
+    category: position.position_category || 'GENERAL',
+    authority_level: position.authority_level || 1,
+    is_management: position.is_management || false,
+    is_executive: position.is_executive || false,
+    description: position.description || ''
+  }));
+}
+
+function mapCategoryType(dbType: string): 'TECHNICAL' | 'BUSINESS' | 'SOFT' {
+  switch (dbType?.toUpperCase()) {
+    case 'TECHNICAL':
+      return 'TECHNICAL';
+    case 'BUSINESS':
+      return 'BUSINESS';
+    case 'SOFT':
+      return 'SOFT';
+    default:
+      return 'TECHNICAL';
+  }
+}
+
+/**
  * キャリア初期データ取得API
  * GET /api/career/init
  */
@@ -96,226 +191,26 @@ export async function GET(
     // ユーザーIDが未指定の場合はデフォルト値を使用
     const effectiveUserId = userId || 'emp_001';
 
-    // モックデータの生成
-    const mockCareerInitData: CareerInitResponse = {
+    // データベースから並列でデータを取得
+    const [careerGoals, skillCategories, positions, careerPlan] = await Promise.all([
+      getCareerGoals(effectiveUserId, new Date().getFullYear(), 'active'),
+      getSkillCategories(),
+      getPositions(),
+      getActiveCareerPlan(effectiveUserId)
+    ]);
+
+    // データを変換してレスポンス形式に整形
+    const careerInitData: CareerInitResponse = {
       success: true,
       data: {
-        career_goal: {
-          id: "plan_001",
-          target_position: "pos_003",
-          target_date: "2027-12-31",
-          target_description: "シニアエンジニアを目指し、技術的なリーダーシップを発揮できるようになる",
-          current_level: "JUNIOR",
-          target_level: "SENIOR",
-          progress_percentage: 35.8,
-          plan_status: "ACTIVE",
-          last_review_date: "2025-05-15",
-          next_review_date: "2025-08-15"
-        },
-        skill_categories: [
-          {
-            id: "CAT_001",
-            name: "プログラミング",
-            short_name: "プログラミング",
-            type: "TECHNICAL",
-            level: 1,
-            description: "プログラミング言語とフレームワークのスキル",
-            icon_url: "/icons/programming.svg",
-            color_code: "#3399cc"
-          },
-          {
-            id: "CAT_002",
-            name: "フロントエンド",
-            short_name: "FE",
-            type: "TECHNICAL",
-            parent_id: "CAT_001",
-            level: 2,
-            description: "フロントエンド開発技術",
-            icon_url: "/icons/frontend.svg",
-            color_code: "#61dafb"
-          },
-          {
-            id: "CAT_003",
-            name: "バックエンド",
-            short_name: "BE",
-            type: "TECHNICAL",
-            parent_id: "CAT_001",
-            level: 2,
-            description: "バックエンド開発技術",
-            icon_url: "/icons/backend.svg",
-            color_code: "#68a063"
-          },
-          {
-            id: "CAT_004",
-            name: "データベース",
-            short_name: "DB",
-            type: "TECHNICAL",
-            level: 1,
-            description: "データベース設計・管理スキル",
-            icon_url: "/icons/database.svg",
-            color_code: "#f29111"
-          },
-          {
-            id: "CAT_005",
-            name: "クラウド",
-            short_name: "Cloud",
-            type: "TECHNICAL",
-            level: 1,
-            description: "クラウドサービス活用スキル",
-            icon_url: "/icons/cloud.svg",
-            color_code: "#ff9900"
-          },
-          {
-            id: "CAT_006",
-            name: "プロジェクト管理",
-            short_name: "PM",
-            type: "BUSINESS",
-            level: 1,
-            description: "プロジェクト管理・運営スキル",
-            icon_url: "/icons/project.svg",
-            color_code: "#8e44ad"
-          },
-          {
-            id: "CAT_007",
-            name: "コミュニケーション",
-            short_name: "コミュ",
-            type: "SOFT",
-            level: 1,
-            description: "コミュニケーション・協調性スキル",
-            icon_url: "/icons/communication.svg",
-            color_code: "#e74c3c"
-          },
-          {
-            id: "CAT_008",
-            name: "リーダーシップ",
-            short_name: "リーダー",
-            type: "SOFT",
-            level: 1,
-            description: "リーダーシップ・指導力スキル",
-            icon_url: "/icons/leadership.svg",
-            color_code: "#2ecc71"
-          }
-        ],
-        positions: [
-          {
-            id: "pos_001",
-            name: "ジュニアエンジニア",
-            short_name: "JE",
-            level: 1,
-            rank: 1,
-            category: "ENGINEER",
-            authority_level: 1,
-            is_management: false,
-            is_executive: false,
-            description: "エンジニアとしての基礎スキルを身につける段階"
-          },
-          {
-            id: "pos_002",
-            name: "エンジニア",
-            short_name: "E",
-            level: 2,
-            rank: 2,
-            category: "ENGINEER",
-            authority_level: 2,
-            is_management: false,
-            is_executive: false,
-            description: "独立してタスクを遂行できるエンジニア"
-          },
-          {
-            id: "pos_003",
-            name: "シニアエンジニア",
-            short_name: "SE",
-            level: 3,
-            rank: 3,
-            category: "ENGINEER",
-            authority_level: 3,
-            is_management: false,
-            is_executive: false,
-            description: "高度な技術スキルを持ち、チームをリードできるエンジニア"
-          },
-          {
-            id: "pos_004",
-            name: "リードエンジニア",
-            short_name: "LE",
-            level: 4,
-            rank: 4,
-            category: "ENGINEER",
-            authority_level: 4,
-            is_management: true,
-            is_executive: false,
-            description: "技術的なリーダーシップを発揮し、プロジェクトを牽引するエンジニア"
-          },
-          {
-            id: "pos_005",
-            name: "エンジニアリングマネージャー",
-            short_name: "EM",
-            level: 5,
-            rank: 5,
-            category: "ENGINEER",
-            authority_level: 5,
-            is_management: true,
-            is_executive: false,
-            description: "エンジニアチームの管理・育成を担当するマネージャー"
-          },
-          {
-            id: "pos_006",
-            name: "テクニカルディレクター",
-            short_name: "TD",
-            level: 6,
-            rank: 6,
-            category: "ENGINEER",
-            authority_level: 6,
-            is_management: true,
-            is_executive: true,
-            description: "技術戦略の策定・実行を担当する役員レベルのポジション"
-          },
-          {
-            id: "pos_101",
-            name: "ビジネスアナリスト",
-            short_name: "BA",
-            level: 3,
-            rank: 3,
-            category: "BUSINESS",
-            authority_level: 3,
-            is_management: false,
-            is_executive: false,
-            description: "ビジネス要件の分析・設計を担当する専門職"
-          },
-          {
-            id: "pos_102",
-            name: "プロジェクトマネージャー",
-            short_name: "PM",
-            level: 4,
-            rank: 4,
-            category: "BUSINESS",
-            authority_level: 4,
-            is_management: true,
-            is_executive: false,
-            description: "プロジェクト全体の管理・運営を担当するマネージャー"
-          }
-        ]
+        career_goal: transformCareerGoal(careerGoals[0], careerPlan),
+        skill_categories: transformSkillCategories(skillCategories),
+        positions: transformPositions(positions)
       },
       timestamp: new Date().toISOString()
     };
 
-    // ユーザーIDに基づいたデータのカスタマイズ（モック実装）
-    if (userId === 'emp_002') {
-      // 別のユーザーの場合は異なるキャリア目標を設定
-      mockCareerInitData.data.career_goal = {
-        id: "plan_002",
-        target_position: "pos_102",
-        target_date: "2026-06-30",
-        target_description: "プロジェクトマネージャーとして複数プロジェクトを統括できるようになる",
-        current_level: "INTERMEDIATE",
-        target_level: "ADVANCED",
-        progress_percentage: 55.2,
-        plan_status: "ACTIVE",
-        last_review_date: "2025-06-01",
-        next_review_date: "2025-09-01"
-      };
-    }
-
-    return NextResponse.json(mockCareerInitData, { status: 200 });
+    return NextResponse.json(careerInitData, { status: 200 });
 
   } catch (error) {
     console.error('キャリア初期データ取得API エラー:', error);
