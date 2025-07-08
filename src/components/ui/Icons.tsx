@@ -125,3 +125,128 @@ export const InformationCircleIcon: React.FC<IconProps> = ({ className = '', siz
     />
   </svg>
 );
+
+// プラスアイコン
+export const Plus: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 5v14m-7-7h14" />
+  </svg>
+);
+
+// 本アイコン
+export const BookOpen: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+  </svg>
+);
+
+// 上向き矢印アイコン
+export const ChevronUp: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m18 15-6-6-6 6" />
+  </svg>
+);
+
+// 外部リンクアイコン
+export const ExternalLink: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15,3 21,3 21,9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+
+// 編集アイコン
+export const Edit: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
+
+// ゴミ箱アイコン
+export const Trash: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 6h18" />
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+  </svg>
+);
+
+// アイコンをまとめたオブジェクト
+export const Icons = {
+  AcademicCap: AcademicCapIcon,
+  Eye: EyeIcon,
+  EyeSlash: EyeSlashIcon,
+  XCircle: XCircleIcon,
+  CheckCircle: CheckCircleIcon,
+  ExclamationTriangle: ExclamationTriangleIcon,
+  InformationCircle: InformationCircleIcon,
+  Plus,
+  BookOpen,
+  ChevronUp,
+  ExternalLink,
+  Edit,
+  Trash
+};
