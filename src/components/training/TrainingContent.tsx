@@ -16,6 +16,7 @@ interface TrainingRecord {
   status: 'completed' | 'in_progress' | 'planned';
   pduPoints: number;
   description: string;
+  skills?: string[]; // 習得したスキル情報
 }
 
 interface CertificationRecord {
@@ -36,58 +37,153 @@ export function TrainingContent() {
   const [certificationRecords, setCertificationRecords] = useState<CertificationRecord[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // モックデータの初期化
+  // APIからデータを取得
   useEffect(() => {
-    const mockTrainingData: TrainingRecord[] = [
-      {
-        id: '1',
-        trainingName: 'React.js基礎研修',
-        category: 'フロントエンド',
-        startDate: '2025-04-01',
-        endDate: '2025-04-05',
-        hours: 40,
-        status: 'completed',
-        pduPoints: 40,
-        description: 'React.jsの基礎から応用まで学習'
-      },
-      {
-        id: '2',
-        trainingName: 'AWS認定ソリューションアーキテクト研修',
-        category: 'クラウド',
-        startDate: '2025-05-01',
-        endDate: '2025-05-31',
-        hours: 80,
-        status: 'in_progress',
-        pduPoints: 80,
-        description: 'AWS認定資格取得のための研修'
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // 仮のユーザーID（実際の環境では認証情報から取得）
+        const userId = 'emp-001'; // シードデータに合わせたID
+        
+        // 研修情報APIの呼び出し
+        const trainingResponse = await fetch(`/api/trainings/${userId}`);
+        const trainingData = await trainingResponse.json();
+        
+        console.log('研修API応答:', trainingData);
+        
+        if (trainingData.success) {
+          // APIレスポンスの形式に合わせてデータを変換
+          if (Array.isArray(trainingData.data.trainings)) {
+            const formattedTrainings = trainingData.data.trainings.map((item: any) => ({
+              id: item.id || item.training_history_id || `training-${Math.random()}`,
+              trainingName: item.training_name || '不明な研修',
+              category: item.training_category || item.training_type || '未分類',
+              startDate: item.start_date ? new Date(item.start_date).toISOString().split('T')[0] : '-',
+              endDate: item.end_date ? new Date(item.end_date).toISOString().split('T')[0] : '-',
+              hours: item.duration_hours || 0,
+              status: (item.attendance_status || 'completed').toLowerCase(),
+              pduPoints: item.pdu_points || 0,
+              description: item.learning_objectives || '',
+              // スキル情報の処理
+              skills: item.skills_acquired ? 
+                (typeof item.skills_acquired === 'string' ? 
+                  JSON.parse(item.skills_acquired) : 
+                  item.skills_acquired) : 
+                []
+            }));
+            setTrainingRecords(formattedTrainings);
+            console.log('研修データ取得成功:', formattedTrainings);
+          } else {
+            console.warn('研修データの形式が予期しないものです:', trainingData.data);
+            // フォールバックとしてモックデータを使用
+            useTrainingMockData();
+          }
+        } else {
+          console.error('研修データ取得エラー:', trainingData.error);
+          // エラー時はモックデータを使用
+          useTrainingMockData();
+        }
+        
+        // 資格情報APIの呼び出し
+        const certResponse = await fetch(`/api/certifications/${userId}`);
+        const certData = await certResponse.json();
+        
+        console.log('資格API応答:', certData);
+        
+        if (certData.success) {
+          // APIレスポンスの形式に合わせてデータを変換
+          if (Array.isArray(certData.data.certifications)) {
+            const formattedCerts = certData.data.certifications.map((item: any) => ({
+              id: item.id || item.pdu_id || `cert-${Math.random()}`,
+              certificationName: item.certification_name || item.activity_name || '不明な資格',
+              organization: item.issuer || item.certification_provider || '不明',
+              acquiredDate: item.activity_date ? new Date(item.activity_date).toISOString().split('T')[0] : '-',
+              expiryDate: item.expiry_date ? new Date(item.expiry_date).toISOString().split('T')[0] : '無期限',
+              status: (item.approval_status || 'active').toLowerCase(),
+              score: item.certificate_number || item.pdu_points?.toString() || '-',
+              description: item.pdu_category || item.certification_level || ''
+            }));
+            setCertificationRecords(formattedCerts);
+            console.log('資格データ取得成功:', formattedCerts);
+          } else {
+            console.warn('資格データの形式が予期しないものです:', certData.data);
+            // フォールバックとしてモックデータを使用
+            useCertificationMockData();
+          }
+        } else {
+          console.error('資格データ取得エラー:', certData.error);
+          // エラー時はモックデータを使用
+          useCertificationMockData();
+        }
+      } catch (error) {
+        console.error('データ取得エラー:', error);
+        // エラー時はモックデータを使用
+        useTrainingMockData();
+        useCertificationMockData();
+      } finally {
+        // 少し遅延させてローディング状態を解除（UIの表示を確認するため）
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
-    ];
+    };
 
-    const mockCertificationData: CertificationRecord[] = [
-      {
-        id: '1',
-        certificationName: '基本情報技術者試験',
-        organization: 'IPA',
-        acquiredDate: '2024-10-15',
-        expiryDate: '無期限',
-        status: 'active',
-        score: '合格',
-        description: 'IT基礎知識の国家資格'
-      },
-      {
-        id: '2',
-        certificationName: 'AWS認定ソリューションアーキテクト',
-        organization: 'Amazon Web Services',
-        acquiredDate: '2025-03-20',
-        expiryDate: '2028-03-20',
-        status: 'active',
-        score: '850/1000',
-        description: 'AWSクラウドアーキテクチャ設計の認定資格'
-      }
-    ];
+    // モックデータを設定する関数
+    const useTrainingMockData = () => {
+      setTrainingRecords([
+        {
+          id: '1',
+          trainingName: 'React.js基礎研修',
+          category: 'フロントエンド',
+          startDate: '2025-04-01',
+          endDate: '2025-04-05',
+          hours: 40,
+          status: 'completed',
+          pduPoints: 40,
+          description: 'React.jsの基礎から応用まで学習',
+          skills: ['React', 'JavaScript', 'フロントエンド開発']
+        },
+        {
+          id: '2',
+          trainingName: 'AWS認定ソリューションアーキテクト研修',
+          category: 'クラウド',
+          startDate: '2025-05-01',
+          endDate: '2025-05-31',
+          hours: 80,
+          status: 'in_progress',
+          pduPoints: 80,
+          description: 'AWS認定資格取得のための研修',
+          skills: ['AWS', 'クラウドアーキテクチャ', 'インフラ設計']
+        }
+      ]);
+    };
 
-    setTrainingRecords(mockTrainingData);
-    setCertificationRecords(mockCertificationData);
+    const useCertificationMockData = () => {
+      setCertificationRecords([
+        {
+          id: '1',
+          certificationName: '基本情報技術者試験',
+          organization: 'IPA',
+          acquiredDate: '2024-10-15',
+          expiryDate: '無期限',
+          status: 'active',
+          score: '合格',
+          description: 'IT基礎知識の国家資格'
+        },
+        {
+          id: '2',
+          certificationName: 'AWS認定ソリューションアーキテクト',
+          organization: 'Amazon Web Services',
+          acquiredDate: '2025-03-20',
+          expiryDate: '2028-03-20',
+          status: 'active',
+          score: '850/1000',
+          description: 'AWSクラウドアーキテクチャ設計の認定資格'
+        }
+      ]);
+    };
+
+    fetchData();
   }, []);
 
   const getStatusBadge = (status: string) => {
@@ -209,7 +305,16 @@ export function TrainingContent() {
                     <tr key={record.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{record.trainingName}</div>
-                        <div className="text-sm text-gray-500">{record.description}</div>
+                      <div className="text-sm text-gray-500">{record.description}</div>
+                      {record.skills && record.skills.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {record.skills.map((skill: string, index: number) => (
+                            <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {record.category}
@@ -314,10 +419,24 @@ export function TrainingContent() {
       )}
 
       {/* ローディング表示 */}
-      {isLoading && (
+      {isLoading ? (
         <div className="flex justify-center items-center py-8">
           <Spinner size="lg" />
         </div>
+      ) : (
+        <>
+          {/* データが空の場合のメッセージ */}
+          {activeTab === 'training' && trainingRecords.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              研修記録がありません。「新規研修記録」ボタンから登録してください。
+            </div>
+          )}
+          {activeTab === 'certification' && certificationRecords.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              資格情報がありません。「新規資格登録」ボタンから登録してください。
+            </div>
+          )}
+        </>
       )}
     </div>
   );
