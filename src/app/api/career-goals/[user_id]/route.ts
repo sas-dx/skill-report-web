@@ -3,464 +3,103 @@
  * 対応設計書: 
  *   - docs/design/api/specs/API定義書_API-031_キャリア目標取得API.md
  *   - docs/design/api/specs/API定義書_API-032_キャリア目標更新API.md
- * 実装内容: 
- *   - キャリア目標取得API (API-031)
- *   - キャリア目標更新API (API-032)
+ * 実装内容: キャリア目標API（取得・作成・更新）
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { 
+  getCareerGoals, 
+  createCareerGoal, 
+  updateCareerGoal, 
+  deleteCareerGoal,
+  getCareerGoalStats,
+  CreateCareerGoalData,
+  UpdateCareerGoalData,
+  CareerGoalDB
+} from '@/lib/services/careerGoalService'
+import { Prisma } from '@prisma/client'
 
-// リクエスト型定義
-interface RelatedSkill {
-  skill_id: string;
-  target_level: number;
+// API型定義
+interface CareerGoalResponse {
+  id: string
+  goal_id: string
+  title: string
+  description?: string | undefined
+  goal_type: string
+  goal_category?: string | undefined
+  priority: number
+  target_date: string
+  status: string
+  progress_rate: number
+  achievement_rate: number
+  related_skills?: any[] | undefined
+  action_plans?: any[] | undefined
+  created_at: string
+  updated_at: string
 }
 
-interface ActionPlan {
-  action_id?: string;
-  title: string;
-  description?: string;
-  due_date: string;
-  status: 'not_started' | 'in_progress' | 'completed';
-  completed_date?: string;
+interface CareerGoalStatsResponse {
+  totalGoals: number
+  completedGoals: number
+  inProgressGoals: number
+  notStartedGoals: number
+  completionRate: number
 }
 
-interface Feedback {
-  feedback_id?: string;
-  comment: string;
-}
+// データベース型からAPI型への変換
+function convertToApiFormat(dbGoal: CareerGoalDB): CareerGoalResponse {
+  // 優先度レベルの変換（high/medium/low → 1-5）
+  let priority: number
+  switch (dbGoal.priority_level) {
+    case 'high':
+      priority = 5
+      break
+    case 'medium':
+      priority = 3
+      break
+    case 'low':
+      priority = 1
+      break
+    default:
+      priority = 3
+  }
 
-interface CareerGoal {
-  goal_id?: string;
-  goal_type?: 'short_term' | 'mid_term' | 'long_term';
-  title?: string;
-  description?: string;
-  target_date?: string;
-  status?: 'not_started' | 'in_progress' | 'completed' | 'postponed' | 'cancelled';
-  priority?: number;
-  related_skills?: RelatedSkill[];
-  action_plans?: ActionPlan[];
-  feedback?: Feedback[];
-}
+  // JSON文字列をオブジェクトに変換
+  let relatedSkills: any[] = []
+  let actionPlans: any[] = []
 
-interface UpdateCareerGoalRequest {
-  year: number;
-  operation_type: 'add' | 'update' | 'delete';
-  career_goals: CareerGoal[];
-}
-
-// レスポンス型定義
-interface UpdatedGoal {
-  goal_id: string;
-  goal_type: string;
-  title: string;
-  status: string;
-  updated_at: string;
-}
-
-interface UpdateCareerGoalResponse {
-  user_id: string;
-  year: number;
-  updated_goals: UpdatedGoal[];
-  operation_type: string;
-  operation_result: string;
-  last_updated: string;
-  last_updated_by: string;
-}
-
-// キャリア目標取得API用の型定義
-interface Milestone {
-  id: string;
-  title: string;
-  description: string;
-  status: 'completed' | 'in_progress' | 'not_started';
-  completedAt?: string;
-  targetDate?: string;
-  weight: number;
-}
-
-interface Progress {
-  percentage: number;
-  milestones?: Milestone[];
-  completedAt?: string;
-}
-
-interface Metrics {
-  skillAssessmentScore?: number;
-  targetScore?: number;
-  projectsCompleted?: number;
-  targetProjects?: number;
-  mentoringSessions?: number;
-  targetSessions?: number;
-  studyHours?: number;
-  targetHours?: number;
-  practiceTestScore?: number;
-  currentScore?: number;
-  improvementFromStart?: number;
-  teamSize?: number;
-  projectProgress?: number;
-  teamSatisfaction?: number;
-  targetSatisfaction?: number;
-}
-
-interface CareerGoalDetail {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';
-  targetLevel?: string;
-  currentLevel?: string;
-  progress: Progress;
-  targetDate: string;
-  createdAt: string;
-  updatedAt: string;
-  metrics?: Metrics;
-}
-
-interface GoalCategory {
-  id: string;
-  name: string;
-  description: string;
-  weight: number;
-  progress: number;
-  goals: CareerGoalDetail[];
-}
-
-interface OverallProgress {
-  completionRate: number;
-  totalGoals: number;
-  completedGoals: number;
-  inProgressGoals: number;
-  notStartedGoals: number;
-  lastUpdated: string;
-}
-
-interface Recommendation {
-  type: 'skill_gap' | 'timeline_adjustment' | 'resource_allocation';
-  priority: 'high' | 'medium' | 'low';
-  title: string;
-  description: string;
-  targetGoal: string;
-  suggestedActions: string[];
-}
-
-interface ManagerFeedback {
-  lastReviewDate: string;
-  overallRating: number;
-  comments: string;
-  suggestions: string[];
-  nextReviewDate: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  department: string;
-  position: string;
-  currentLevel: string;
-}
-
-interface CareerGoalsData {
-  year: number;
-  overallProgress: OverallProgress;
-  categories: GoalCategory[];
-  recommendations: Recommendation[];
-  nextReviewDate: string;
-  managerFeedback: ManagerFeedback;
-}
-
-interface GetCareerGoalsResponse {
-  success: true;
-  data: {
-    user: User;
-    careerGoals: CareerGoalsData;
-  };
-}
-
-interface ErrorResponse {
-  success?: false;
-  error: {
-    code: string;
-    message: string;
-    details?: string;
-  };
-}
-
-/**
- * キャリア目標更新API
- * PUT /api/career-goals/{user_id}
- */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { user_id: string } }
-): Promise<NextResponse<UpdateCareerGoalResponse | ErrorResponse>> {
   try {
-    const userId = params.user_id;
-
-    // 認証チェック（テスト用に一時的に無効化）
-    // const authHeader = request.headers.get('authorization');
-    // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    //   return NextResponse.json(
-    //     {
-    //       error: {
-    //         code: 'UNAUTHORIZED',
-    //         message: '認証が必要です'
-    //       }
-    //     },
-    //     { status: 401 }
-    //   );
-    // }
-
-    // ユーザーIDの存在チェック
-    if (!userId || userId.trim() === '') {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: 'ユーザーが見つかりません'
-          }
-        },
-        { status: 404 }
-      );
+    if (dbGoal.related_skill_items) {
+      relatedSkills = JSON.parse(dbGoal.related_skill_items)
     }
-
-    // リクエストボディの取得
-    let requestBody: UpdateCareerGoalRequest;
-    try {
-      requestBody = await request.json();
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
-            details: 'リクエストボディの形式が正しくありません'
-          }
-        },
-        { status: 400 }
-      );
-    }
-
-    // 必須パラメータの検証
-    if (!requestBody.year || !requestBody.operation_type || !requestBody.career_goals) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
-            details: '必須パラメータが不足しています'
-          }
-        },
-        { status: 400 }
-      );
-    }
-
-    // 年度の妥当性チェック
-    const currentYear = new Date().getFullYear();
-    if (requestBody.year < 2020 || requestBody.year > currentYear + 5) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_YEAR',
-            message: '年度が不正です',
-            details: '有効な年度を指定してください'
-          }
-        },
-        { status: 400 }
-      );
-    }
-
-    // 操作タイプの検証
-    if (!['add', 'update', 'delete'].includes(requestBody.operation_type)) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_OPERATION',
-            message: '操作タイプが不正です',
-            details: 'add, update, delete のいずれかを指定してください'
-          }
-        },
-        { status: 400 }
-      );
-    }
-
-    // キャリア目標の検証
-    for (const goal of requestBody.career_goals) {
-      // 更新・削除時のgoal_id必須チェック
-      if ((requestBody.operation_type === 'update' || requestBody.operation_type === 'delete') && !goal.goal_id) {
-        return NextResponse.json(
-          {
-            error: {
-              code: 'INVALID_PARAMETER',
-              message: 'パラメータが不正です',
-              details: '更新・削除時は目標IDが必須です'
-            }
-          },
-          { status: 400 }
-        );
-      }
-
-      // 追加・更新時の必須項目チェック
-      if (requestBody.operation_type === 'add' || requestBody.operation_type === 'update') {
-        if (!goal.goal_type || !goal.title || !goal.target_date || !goal.status || goal.priority === undefined) {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'INVALID_PARAMETER',
-                message: 'パラメータが不正です',
-                details: '目標タイプ、タイトル、目標達成予定日、ステータス、優先度は必須項目です'
-              }
-            },
-            { status: 400 }
-          );
-        }
-
-        // 目標タイプの検証
-        if (!['short_term', 'mid_term', 'long_term'].includes(goal.goal_type)) {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'INVALID_GOAL_TYPE',
-                message: '目標タイプが不正です'
-              }
-            },
-            { status: 400 }
-          );
-        }
-
-        // ステータスの検証
-        if (!['not_started', 'in_progress', 'completed', 'postponed', 'cancelled'].includes(goal.status)) {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'INVALID_STATUS',
-                message: 'ステータスが不正です'
-              }
-            },
-            { status: 400 }
-          );
-        }
-
-        // 優先度の検証
-        if (goal.priority < 1 || goal.priority > 5) {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'INVALID_PRIORITY',
-                message: '優先度が不正です',
-                details: '優先度は1-5の範囲で指定してください'
-              }
-            },
-            { status: 400 }
-          );
-        }
-
-        // タイトルの文字数チェック
-        if (goal.title && goal.title.length > 100) {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'INVALID_PARAMETER',
-                message: 'パラメータが不正です',
-                details: 'タイトルは100文字以内で入力してください'
-              }
-            },
-            { status: 400 }
-          );
-        }
-
-        // 説明の文字数チェック
-        if (goal.description && goal.description.length > 1000) {
-          return NextResponse.json(
-            {
-              error: {
-                code: 'INVALID_PARAMETER',
-                message: 'パラメータが不正です',
-                details: '説明は1000文字以内で入力してください'
-              }
-            },
-            { status: 400 }
-          );
-        }
-      }
-    }
-
-    // モック実装：操作タイプに応じた処理
-    const currentDateTime = new Date().toISOString();
-    const updatedGoals: UpdatedGoal[] = [];
-
-    for (const goal of requestBody.career_goals) {
-      let goalId: string;
-      let goalType: string;
-      let title: string;
-      let status: string;
-
-      switch (requestBody.operation_type) {
-        case 'add':
-          // 新規目標ID生成（モック）
-          goalId = `G${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          goalType = goal.goal_type!;
-          title = goal.title!;
-          status = goal.status!;
-          break;
-
-        case 'update':
-          // 既存目標の更新（モック）
-          goalId = goal.goal_id!;
-          goalType = goal.goal_type!;
-          title = goal.title!;
-          status = goal.status!;
-          break;
-
-        case 'delete':
-          // 目標の削除（論理削除）（モック）
-          goalId = goal.goal_id!;
-          goalType = 'unknown'; // 削除時は既存データから取得する想定
-          title = 'deleted_goal'; // 削除時は既存データから取得する想定
-          status = 'cancelled';
-          break;
-
-        default:
-          continue;
-      }
-
-      updatedGoals.push({
-        goal_id: goalId,
-        goal_type: goalType,
-        title: title,
-        status: status,
-        updated_at: currentDateTime
-      });
-    }
-
-    // 成功レスポンス
-    const response: UpdateCareerGoalResponse = {
-      user_id: userId,
-      year: requestBody.year,
-      updated_goals: updatedGoals,
-      operation_type: requestBody.operation_type,
-      operation_result: 'success',
-      last_updated: currentDateTime,
-      last_updated_by: userId
-    };
-
-    return NextResponse.json(response, { status: 200 });
-
   } catch (error) {
-    console.error('キャリア目標更新API エラー:', error);
-    
-    return NextResponse.json(
-      {
-        error: {
-          code: 'SYSTEM_ERROR',
-          message: 'システムエラーが発生しました',
-          details: error instanceof Error ? error.message : '不明なエラー'
-        }
-      },
-      { status: 500 }
-    );
+    console.warn('関連スキル情報のパースに失敗:', error)
+  }
+
+  try {
+    if (dbGoal.milestones) {
+      actionPlans = JSON.parse(dbGoal.milestones)
+    }
+  } catch (error) {
+    console.warn('アクションプラン情報のパースに失敗:', error)
+  }
+
+  return {
+    id: dbGoal.id,
+    goal_id: dbGoal.goal_id || '',
+    title: dbGoal.goal_title || '',
+    description: dbGoal.goal_description || undefined,
+    goal_type: dbGoal.goal_type || 'short_term',
+    goal_category: dbGoal.goal_category || undefined,
+    priority: priority,
+    target_date: dbGoal.target_date?.toISOString() || '',
+    status: dbGoal.achievement_status || 'not_started',
+    progress_rate: dbGoal.progress_rate ? Number(dbGoal.progress_rate) : 0,
+    achievement_rate: dbGoal.achievement_rate ? Number(dbGoal.achievement_rate) : 0,
+    related_skills: relatedSkills.length > 0 ? relatedSkills : undefined,
+    action_plans: actionPlans.length > 0 ? actionPlans : undefined,
+    created_at: dbGoal.created_at.toISOString(),
+    updated_at: dbGoal.updated_at.toISOString()
   }
 }
 
@@ -471,637 +110,430 @@ export async function PUT(
 export async function GET(
   request: NextRequest,
   { params }: { params: { user_id: string } }
-): Promise<NextResponse<GetCareerGoalsResponse | ErrorResponse>> {
+) {
   try {
-    const userId = params.user_id;
-    const { searchParams } = new URL(request.url);
+    const { user_id } = params
+    const { searchParams } = new URL(request.url)
+    const year = searchParams.get('year')
+    const status = searchParams.get('status')
 
-    // 認証チェック（テスト用に一時的に無効化）
-    // const authHeader = request.headers.get('authorization');
-    // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    //   return NextResponse.json(
-    //     {
-    //       error: {
-    //         code: 'UNAUTHORIZED',
-    //         message: '認証が必要です'
-    //       }
-    //     },
-    //     { status: 401 }
-    //   );
-    // }
-
-    // ユーザーIDの存在チェック
-    if (!userId || userId.trim() === '') {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: 'ユーザーが見つかりません'
-          }
-        },
-        { status: 404 }
-      );
+    // パラメータバリデーション
+    if (!user_id) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: 'ユーザーIDが必要です'
+        }
+      }, { status: 400 })
     }
 
-    // クエリパラメータの取得
-    const includeProgress = searchParams.get('includeProgress') !== 'false';
-    const includeHistory = searchParams.get('includeHistory') === 'true';
-    const yearParam = searchParams.get('year');
-    const statusParam = searchParams.get('status');
-
-    // 年度の設定（デフォルト：現在年度）
-    const currentYear = new Date().getFullYear();
-    let targetYear = currentYear;
-    
-    if (yearParam) {
-      const parsedYear = parseInt(yearParam, 10);
-      if (isNaN(parsedYear) || parsedYear < 2020 || parsedYear > currentYear + 5) {
-        return NextResponse.json(
-          {
-            error: {
-              code: 'INVALID_YEAR',
-              message: '無効な年度指定',
-              details: '有効な年度を指定してください'
-            }
-          },
-          { status: 400 }
-        );
+    // 年度の設定
+    let targetYear: number | undefined
+    if (year) {
+      const parsedYear = parseInt(year, 10)
+      if (isNaN(parsedYear) || parsedYear < 2020 || parsedYear > new Date().getFullYear() + 5) {
+        return NextResponse.json({
+          success: false,
+          error: {
+            code: 'INVALID_YEAR',
+            message: '無効な年度指定です'
+          }
+        }, { status: 400 })
       }
-      targetYear = parsedYear;
+      targetYear = parsedYear
     }
 
     // ステータスフィルタの検証
-    if (statusParam && !['active', 'completed', 'all'].includes(statusParam)) {
-      return NextResponse.json(
-        {
+    let statusFilter: 'active' | 'completed' | 'all' | undefined
+    if (status) {
+      if (!['active', 'completed', 'all'].includes(status)) {
+        return NextResponse.json({
+          success: false,
           error: {
             code: 'INVALID_STATUS',
-            message: '無効なステータス指定',
-            details: 'active, completed, all のいずれかを指定してください'
+            message: '無効なステータス指定です'
           }
-        },
-        { status: 400 }
-      );
-    }
-
-    // モックデータの生成
-    const currentDateTime = new Date().toISOString();
-    
-    const mockUser: User = {
-      id: userId,
-      name: '田中太郎',
-      department: 'エンジニアリング部',
-      position: 'シニアエンジニア',
-      currentLevel: 'L3'
-    };
-
-    const mockCareerGoals: CareerGoalsData = {
-      year: targetYear,
-      overallProgress: {
-        completionRate: 0.65,
-        totalGoals: 8,
-        completedGoals: 3,
-        inProgressGoals: 4,
-        notStartedGoals: 1,
-        lastUpdated: currentDateTime
-      },
-      categories: [
-        {
-          id: 'technical_skills',
-          name: '技術スキル',
-          description: '技術的な能力向上',
-          weight: 0.4,
-          progress: 0.7,
-          goals: [
-            {
-              id: 'goal_001',
-              title: 'React.js マスター',
-              description: 'React.jsの上級レベルまでスキルアップし、チームのテックリードとして活動する',
-              category: 'technical_skills',
-              priority: 'high',
-              status: 'in_progress',
-              targetLevel: 'advanced',
-              currentLevel: 'intermediate',
-              progress: {
-                percentage: 0.75,
-                milestones: [
-                  {
-                    id: 'milestone_001',
-                    title: '基礎学習完了',
-                    description: 'React基礎コースの受講完了',
-                    status: 'completed',
-                    completedAt: '2025-02-15T09:00:00Z',
-                    weight: 0.2
-                  },
-                  {
-                    id: 'milestone_002',
-                    title: '実践プロジェクト参加',
-                    description: 'Reactを使用した実際のプロジェクトに参加',
-                    status: 'completed',
-                    completedAt: '2025-04-20T15:30:00Z',
-                    weight: 0.3
-                  },
-                  {
-                    id: 'milestone_003',
-                    title: '上級機能習得',
-                    description: 'Context API、Hooks、パフォーマンス最適化の習得',
-                    status: 'in_progress',
-                    targetDate: '2025-07-31',
-                    weight: 0.3
-                  },
-                  {
-                    id: 'milestone_004',
-                    title: 'チーム指導',
-                    description: 'チームメンバーへのReact指導・メンタリング',
-                    status: 'not_started',
-                    targetDate: '2025-09-30',
-                    weight: 0.2
-                  }
-                ]
-              },
-              targetDate: '2025-09-30',
-              createdAt: '2025-01-10T09:00:00Z',
-              updatedAt: currentDateTime,
-              metrics: {
-                skillAssessmentScore: 3.2,
-                targetScore: 4.0,
-                projectsCompleted: 2,
-                targetProjects: 3,
-                mentoringSessions: 0,
-                targetSessions: 5
-              }
-            },
-            {
-              id: 'goal_002',
-              title: 'AWS認定取得',
-              description: 'AWS Solutions Architect Associate認定を取得する',
-              category: 'technical_skills',
-              priority: 'medium',
-              status: 'in_progress',
-              progress: {
-                percentage: 0.4,
-                milestones: [
-                  {
-                    id: 'milestone_005',
-                    title: '学習計画策定',
-                    status: 'completed',
-                    completedAt: '2025-03-01T09:00:00Z',
-                    description: '',
-                    weight: 0.2
-                  },
-                  {
-                    id: 'milestone_006',
-                    title: '模擬試験合格',
-                    status: 'in_progress',
-                    targetDate: '2025-07-15',
-                    description: '',
-                    weight: 0.4
-                  },
-                  {
-                    id: 'milestone_007',
-                    title: '本試験受験',
-                    status: 'not_started',
-                    targetDate: '2025-08-31',
-                    description: '',
-                    weight: 0.4
-                  }
-                ]
-              },
-              targetDate: '2025-08-31',
-              createdAt: '2025-02-01T09:00:00Z',
-              updatedAt: currentDateTime,
-              metrics: {
-                studyHours: 45,
-                targetHours: 120,
-                practiceTestScore: 65,
-                targetScore: 80
-              }
-            }
-          ]
-        },
-        {
-          id: 'leadership',
-          name: 'リーダーシップ',
-          description: 'チームリーダーとしての能力向上',
-          weight: 0.3,
-          progress: 0.5,
-          goals: [
-            {
-              id: 'goal_003',
-              title: 'プロジェクトリーダー経験',
-              description: '中規模プロジェクトのリーダーとして成功を収める',
-              category: 'leadership',
-              priority: 'high',
-              status: 'in_progress',
-              progress: {
-                percentage: 0.6,
-                milestones: [
-                  {
-                    id: 'milestone_008',
-                    title: 'リーダーシップ研修受講',
-                    status: 'completed',
-                    completedAt: '2025-03-15T14:00:00Z',
-                    description: '',
-                    weight: 0.2
-                  },
-                  {
-                    id: 'milestone_009',
-                    title: 'プロジェクト開始',
-                    status: 'completed',
-                    completedAt: '2025-04-01T09:00:00Z',
-                    description: '',
-                    weight: 0.3
-                  },
-                  {
-                    id: 'milestone_010',
-                    title: '中間評価',
-                    status: 'in_progress',
-                    targetDate: '2025-06-30',
-                    description: '',
-                    weight: 0.3
-                  },
-                  {
-                    id: 'milestone_011',
-                    title: 'プロジェクト完了',
-                    status: 'not_started',
-                    targetDate: '2025-09-30',
-                    description: '',
-                    weight: 0.2
-                  }
-                ]
-              },
-              targetDate: '2025-09-30',
-              createdAt: '2025-03-01T09:00:00Z',
-              updatedAt: currentDateTime,
-              metrics: {
-                teamSize: 5,
-                projectProgress: 0.6,
-                teamSatisfaction: 4.2,
-                targetSatisfaction: 4.0
-              }
-            }
-          ]
-        },
-        {
-          id: 'business_skills',
-          name: 'ビジネススキル',
-          description: 'ビジネス理解と提案力の向上',
-          weight: 0.2,
-          progress: 0.3,
-          goals: [
-            {
-              id: 'goal_004',
-              title: 'ビジネス分析スキル習得',
-              description: '要件定義とビジネス分析の基礎スキルを習得する',
-              category: 'business_skills',
-              priority: 'medium',
-              status: 'not_started',
-              progress: {
-                percentage: 0.0,
-                milestones: [
-                  {
-                    id: 'milestone_012',
-                    title: 'BA研修受講',
-                    status: 'not_started',
-                    targetDate: '2025-07-01',
-                    description: '',
-                    weight: 0.5
-                  },
-                  {
-                    id: 'milestone_013',
-                    title: '実践演習',
-                    status: 'not_started',
-                    targetDate: '2025-08-31',
-                    description: '',
-                    weight: 0.5
-                  }
-                ]
-              },
-              targetDate: '2025-10-31',
-              createdAt: '2025-01-15T09:00:00Z',
-              updatedAt: currentDateTime
-            }
-          ]
-        },
-        {
-          id: 'personal_development',
-          name: '自己啓発',
-          description: '個人的な成長と学習',
-          weight: 0.1,
-          progress: 0.8,
-          goals: [
-            {
-              id: 'goal_005',
-              title: '英語力向上',
-              description: 'TOEIC 800点以上を達成する',
-              category: 'personal_development',
-              priority: 'low',
-              status: 'completed',
-              progress: {
-                percentage: 1.0,
-                completedAt: '2025-04-15T10:00:00Z'
-              },
-              targetDate: '2025-06-30',
-              createdAt: '2025-01-05T09:00:00Z',
-              updatedAt: '2025-04-15T10:00:00Z',
-              metrics: {
-                currentScore: 820,
-                targetScore: 800,
-                improvementFromStart: 120
-              }
-            }
-          ]
-        }
-      ],
-      recommendations: [
-        {
-          type: 'skill_gap',
-          priority: 'high',
-          title: 'React.js学習加速',
-          description: '目標達成のため、週末の学習時間を増やすことを推奨',
-          targetGoal: 'goal_001',
-          suggestedActions: [
-            '週末の学習時間を2時間増加',
-            'オンライン勉強会への参加',
-            '実践プロジェクトでのアウトプット強化'
-          ]
-        },
-        {
-          type: 'timeline_adjustment',
-          priority: 'medium',
-          title: 'AWS認定スケジュール見直し',
-          description: '現在の進捗では目標達成が困難。スケジュール調整を検討',
-          targetGoal: 'goal_002',
-          suggestedActions: [
-            '目標日を1ヶ月延期',
-            '学習時間の確保（週5時間→8時間）',
-            'メンターのサポート依頼'
-          ]
-        }
-      ],
-      nextReviewDate: '2025-06-30',
-      managerFeedback: {
-        lastReviewDate: '2025-05-15T14:00:00Z',
-        overallRating: 4.2,
-        comments: '技術スキルの向上が顕著。リーダーシップ面でも成長が見られる。',
-        suggestions: [
-          'プロジェクトマネジメントスキルの強化',
-          '後輩指導の機会を増やす'
-        ],
-        nextReviewDate: '2025-06-30T14:00:00Z'
+        }, { status: 400 })
       }
-    };
-
-    // ステータスフィルタの適用
-    if (statusParam && statusParam !== 'all') {
-      mockCareerGoals.categories = mockCareerGoals.categories.map(category => ({
-        ...category,
-        goals: category.goals.filter(goal => {
-          if (statusParam === 'active') {
-            return goal.status === 'in_progress' || goal.status === 'not_started';
-          } else if (statusParam === 'completed') {
-            return goal.status === 'completed';
-          }
-          return true;
-        })
-      })).filter(category => category.goals.length > 0);
+      statusFilter = status as 'active' | 'completed' | 'all'
     }
 
-    // 進捗情報を含めない場合の処理
-    if (!includeProgress) {
-      mockCareerGoals.categories = mockCareerGoals.categories.map(category => ({
-        ...category,
-        goals: category.goals.map(goal => {
-          const { metrics, ...goalWithoutMetrics } = goal;
-          return {
-            ...goalWithoutMetrics,
-            progress: { percentage: goal.progress.percentage }
-          };
-        })
-      }));
-    }
+    // キャリア目標を取得
+    const goals = await getCareerGoals(user_id, targetYear, statusFilter)
+    
+    // 統計情報を取得
+    const stats = await getCareerGoalStats(user_id, targetYear)
 
-    const response: GetCareerGoalsResponse = {
+    // API形式に変換
+    const apiGoals = goals.map(convertToApiFormat)
+
+    return NextResponse.json({
       success: true,
       data: {
-        user: mockUser,
-        careerGoals: mockCareerGoals
-      }
-    };
-
-    return NextResponse.json(response, { status: 200 });
+        goals: apiGoals,
+        stats: stats
+      },
+      timestamp: new Date().toISOString()
+    })
 
   } catch (error) {
-    console.error('キャリア目標取得API エラー:', error);
+    console.error('キャリア目標取得エラー:', error)
     
-    return NextResponse.json(
-      {
-        error: {
-          code: 'SYSTEM_ERROR',
-          message: 'システムエラーが発生しました',
-          details: error instanceof Error ? error.message : '不明なエラー'
-        }
-      },
-      { status: 500 }
-    );
+    if (error && typeof error === 'object' && 'code' in error) {
+      return NextResponse.json({
+        success: false,
+        error: error
+      }, { status: 400 })
+    }
+
+    return NextResponse.json({
+      success: false,
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'サーバーエラーが発生しました'
+      }
+    }, { status: 500 })
   }
 }
 
 /**
- * キャリア目標追加API
+ * キャリア目標作成API
  * POST /api/career-goals/{user_id}
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: { user_id: string } }
-): Promise<NextResponse<UpdateCareerGoalResponse | ErrorResponse>> {
+) {
   try {
-    const userId = params.user_id;
+    const { user_id } = params
+    const body = await request.json()
 
-    // 認証チェック（テスト用に一時的に無効化）
-    // const authHeader = request.headers.get('authorization');
-    // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    //   return NextResponse.json(
-    //     {
-    //       error: {
-    //         code: 'UNAUTHORIZED',
-    //         message: '認証が必要です'
-    //       }
-    //     },
-    //     { status: 401 }
-    //   );
-    // }
-
-    // ユーザーIDの存在チェック
-    if (!userId || userId.trim() === '') {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: 'ユーザーが見つかりません'
-          }
-        },
-        { status: 404 }
-      );
+    // パラメータバリデーション
+    if (!user_id) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: 'ユーザーIDが必要です'
+        }
+      }, { status: 400 })
     }
 
-    // リクエストボディの取得
-    let requestBody: any;
-    try {
-      requestBody = await request.json();
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
-            details: 'リクエストボディの形式が正しくありません'
-          }
-        },
-        { status: 400 }
-      );
+    // 必須項目のバリデーション
+    if (!body.title || !body.goal_type || !body.target_date) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: '必須項目が不足しています',
+          details: [
+            { field: 'title', message: 'タイトルは必須です' },
+            { field: 'goal_type', message: '目標タイプは必須です' },
+            { field: 'target_date', message: '目標日は必須です' }
+          ]
+        }
+      }, { status: 400 })
     }
 
-    // 必須パラメータの検証
-    if (!requestBody.title || !requestBody.target_date || !requestBody.status) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
-            details: 'タイトル、目標達成予定日、ステータスは必須項目です'
-          }
-        },
-        { status: 400 }
-      );
-    }
-
-    // 年度の設定（デフォルト：現在年度）
-    const currentYear = new Date().getFullYear();
-    const targetYear = requestBody.year || currentYear;
-
-    // 年度の妥当性チェック
-    if (targetYear < 2020 || targetYear > currentYear + 5) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_YEAR',
-            message: '年度が不正です',
-            details: '有効な年度を指定してください'
-          }
-        },
-        { status: 400 }
-      );
+    // 目標タイプの検証
+    if (!['short_term', 'mid_term', 'long_term'].includes(body.goal_type)) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_GOAL_TYPE',
+          message: '無効な目標タイプです'
+        }
+      }, { status: 400 })
     }
 
     // ステータスの検証
-    if (!['not_started', 'in_progress', 'completed', 'postponed', 'cancelled'].includes(requestBody.status)) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_STATUS',
-            message: 'ステータスが不正です'
-          }
-        },
-        { status: 400 }
-      );
+    const status = body.status || 'not_started'
+    if (!['not_started', 'in_progress', 'completed', 'postponed', 'cancelled'].includes(status)) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_STATUS',
+          message: '無効なステータスです'
+        }
+      }, { status: 400 })
     }
 
-    // 優先度の検証（デフォルト値設定）
-    const priority = requestBody.priority || 3;
+    // 優先度の検証
+    const priority = body.priority || 3
     if (priority < 1 || priority > 5) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PRIORITY',
-            message: '優先度が不正です',
-            details: '優先度は1-5の範囲で指定してください'
-          }
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PRIORITY',
+          message: '優先度は1-5の範囲で指定してください'
+        }
+      }, { status: 400 })
     }
 
-    // タイトルの文字数チェック
-    if (requestBody.title.length > 100) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
-            details: 'タイトルは100文字以内で入力してください'
-          }
-        },
-        { status: 400 }
-      );
+    // 作成データの準備
+    const createData: CreateCareerGoalData = {
+      title: body.title,
+      description: body.description,
+      goal_type: body.goal_type,
+      goal_category: body.goal_category,
+      priority: priority,
+      target_date: body.target_date,
+      status: status,
+      related_skills: body.related_skills,
+      action_plans: body.action_plans
     }
 
-    // 説明の文字数チェック
-    if (requestBody.description && requestBody.description.length > 1000) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
-            details: '説明は1000文字以内で入力してください'
-          }
-        },
-        { status: 400 }
-      );
-    }
+    // キャリア目標を作成
+    const newGoal = await createCareerGoal(user_id, createData)
 
-    // 目標タイプの設定（デフォルト値）
-    const goalType = requestBody.goal_type || 'short_term';
-    if (!['short_term', 'mid_term', 'long_term'].includes(goalType)) {
-      return NextResponse.json(
-        {
-          error: {
-            code: 'INVALID_GOAL_TYPE',
-            message: '目標タイプが不正です'
-          }
-        },
-        { status: 400 }
-      );
-    }
+    // API形式に変換
+    const apiGoal = convertToApiFormat(newGoal)
 
-    // モック実装：新規目標の作成
-    const currentDateTime = new Date().toISOString();
-    const goalId = `G${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    const updatedGoal: UpdatedGoal = {
-      goal_id: goalId,
-      goal_type: goalType,
-      title: requestBody.title,
-      status: requestBody.status,
-      updated_at: currentDateTime
-    };
-
-    // 成功レスポンス
-    const response: UpdateCareerGoalResponse = {
-      user_id: userId,
-      year: targetYear,
-      updated_goals: [updatedGoal],
-      operation_type: 'add',
-      operation_result: 'success',
-      last_updated: currentDateTime,
-      last_updated_by: userId
-    };
-
-    return NextResponse.json(response, { status: 201 });
+    return NextResponse.json({
+      success: true,
+      data: {
+        goal: apiGoal
+      },
+      timestamp: new Date().toISOString()
+    }, { status: 201 })
 
   } catch (error) {
-    console.error('キャリア目標追加API エラー:', error);
+    console.error('キャリア目標作成エラー:', error)
     
-    return NextResponse.json(
-      {
+    if (error && typeof error === 'object' && 'code' in error) {
+      return NextResponse.json({
+        success: false,
+        error: error
+      }, { status: 400 })
+    }
+
+    return NextResponse.json({
+      success: false,
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'サーバーエラーが発生しました'
+      }
+    }, { status: 500 })
+  }
+}
+
+/**
+ * キャリア目標更新API
+ * PUT /api/career-goals/{user_id}
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { user_id: string } }
+) {
+  try {
+    const { user_id } = params
+    const body = await request.json()
+
+    // パラメータバリデーション
+    if (!user_id) {
+      return NextResponse.json({
+        success: false,
         error: {
-          code: 'SYSTEM_ERROR',
-          message: 'システムエラーが発生しました',
-          details: error instanceof Error ? error.message : '不明なエラー'
+          code: 'INVALID_PARAMETER',
+          message: 'ユーザーIDが必要です'
         }
+      }, { status: 400 })
+    }
+
+    if (!body.goal_id) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: '目標IDが必要です'
+        }
+      }, { status: 400 })
+    }
+
+    // 目標タイプの検証（指定されている場合）
+    if (body.goal_type && !['short_term', 'mid_term', 'long_term'].includes(body.goal_type)) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_GOAL_TYPE',
+          message: '無効な目標タイプです'
+        }
+      }, { status: 400 })
+    }
+
+    // ステータスの検証（指定されている場合）
+    if (body.status && !['not_started', 'in_progress', 'completed', 'postponed', 'cancelled'].includes(body.status)) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_STATUS',
+          message: '無効なステータスです'
+        }
+      }, { status: 400 })
+    }
+
+    // 優先度の検証（指定されている場合）
+    if (body.priority !== undefined && (body.priority < 1 || body.priority > 5)) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PRIORITY',
+          message: '優先度は1-5の範囲で指定してください'
+        }
+      }, { status: 400 })
+    }
+
+    // 更新データの準備
+    const updateData: UpdateCareerGoalData = {
+      goal_id: body.goal_id,
+      title: body.title,
+      description: body.description,
+      goal_type: body.goal_type,
+      goal_category: body.goal_category,
+      priority: body.priority,
+      target_date: body.target_date,
+      status: body.status,
+      progress_rate: body.progress_rate,
+      achievement_rate: body.achievement_rate,
+      self_evaluation: body.self_evaluation,
+      evaluation_comments: body.evaluation_comments,
+      milestones: body.milestones,
+      obstacles: body.obstacles,
+      support_needed: body.support_needed
+    }
+
+    // キャリア目標を更新
+    const updatedGoal = await updateCareerGoal(user_id, updateData)
+
+    // API形式に変換
+    const apiGoal = convertToApiFormat(updatedGoal)
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        goal: apiGoal
       },
-      { status: 500 }
-    );
+      timestamp: new Date().toISOString()
+    })
+
+  } catch (error) {
+    console.error('キャリア目標更新エラー:', error)
+    
+    if (error && typeof error === 'object' && 'message' in error) {
+      if (error.message === 'GOAL_NOT_FOUND') {
+        return NextResponse.json({
+          success: false,
+          error: {
+            code: 'GOAL_NOT_FOUND',
+            message: '指定された目標が見つかりません'
+          }
+        }, { status: 404 })
+      }
+    }
+
+    if (error && typeof error === 'object' && 'code' in error) {
+      return NextResponse.json({
+        success: false,
+        error: error
+      }, { status: 400 })
+    }
+
+    return NextResponse.json({
+      success: false,
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'サーバーエラーが発生しました'
+      }
+    }, { status: 500 })
+  }
+}
+
+/**
+ * キャリア目標削除API
+ * DELETE /api/career-goals/{user_id}
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { user_id: string } }
+) {
+  try {
+    const { user_id } = params
+    const { searchParams } = new URL(request.url)
+    const goalId = searchParams.get('goal_id')
+
+    // パラメータバリデーション
+    if (!user_id) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: 'ユーザーIDが必要です'
+        }
+      }, { status: 400 })
+    }
+
+    if (!goalId) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: '目標IDが必要です'
+        }
+      }, { status: 400 })
+    }
+
+    // キャリア目標を削除
+    const result = await deleteCareerGoal(user_id, goalId)
+
+    if (!result) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'GOAL_NOT_FOUND',
+          message: '指定された目標が見つかりません'
+        }
+      }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        message: '目標が正常に削除されました',
+        goal_id: goalId
+      },
+      timestamp: new Date().toISOString()
+    })
+
+  } catch (error) {
+    console.error('キャリア目標削除エラー:', error)
+    
+    if (error && typeof error === 'object' && 'message' in error) {
+      if (error.message === 'GOAL_NOT_FOUND') {
+        return NextResponse.json({
+          success: false,
+          error: {
+            code: 'GOAL_NOT_FOUND',
+            message: '指定された目標が見つかりません'
+          }
+        }, { status: 404 })
+      }
+    }
+
+    if (error && typeof error === 'object' && 'code' in error) {
+      return NextResponse.json({
+        success: false,
+        error: error
+      }, { status: 400 })
+    }
+
+    return NextResponse.json({
+      success: false,
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'サーバーエラーが発生しました'
+      }
+    }, { status: 500 })
   }
 }
 
@@ -1113,8 +545,8 @@ export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
-  });
+  })
 }

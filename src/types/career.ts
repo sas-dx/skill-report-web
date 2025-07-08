@@ -31,12 +31,12 @@ export interface CareerInitResponse {
  */
 export interface CareerGoalData {
   id?: string;
-  target_position: string;
-  target_date: string;
-  target_description: string;
-  current_level: string;
-  target_level: string;
-  progress_percentage: number;
+  target_position?: string;
+  target_date?: string;
+  target_description?: string;
+  current_level?: string;
+  target_level?: string;
+  progress_percentage?: number;
   plan_status?: 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
   last_review_date?: string | null;
   next_review_date?: string | null;

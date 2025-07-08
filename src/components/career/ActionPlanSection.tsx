@@ -17,13 +17,13 @@ import {
   ExclamationTriangleIcon,
   CalendarIcon
 } from '@/components/ui/Icons';
-import { ActionPlanItem } from '@/types/career';
+import { ActionPlanItem, CareerGoalData } from '@/types/career';
 
 /**
  * アクションプランセクションのプロパティ
  */
 interface ActionPlanSectionProps {
-  careerGoal: any;
+  careerGoal: CareerGoalData | null;
   year: number;
   isLoading?: boolean;
 }
@@ -62,33 +62,93 @@ export function ActionPlanSection({
 }: ActionPlanSectionProps) {
   const [filterStatus, setFilterStatus] = useState<ActionPlanItem['status'] | 'all'>('all');
 
-  // careerGoalからアクションプランデータを生成（モック）
-  const actionPlans: ActionPlanItem[] = useMemo(() => [
-    {
-      id: '1',
-      item: 'リーダーシップ研修受講',
-      skill: 'リーダーシップ',
-      description: 'マネジメント基礎研修を受講し、チームリーダーとしてのスキルを習得する',
-      deadline: '2025-09-30',
-      status: '進行中' as const
-    },
-    {
-      id: '2',
-      item: 'プロジェクト管理資格取得',
-      skill: 'プロジェクト管理',
-      description: 'PMP資格の取得を目指し、プロジェクト管理の体系的な知識を身につける',
-      deadline: '2025-12-31',
-      status: '未着手' as const
-    },
-    {
-      id: '3',
-      item: 'チームビルディング実践',
-      skill: 'チームマネジメント',
-      description: '現在のチームでビルディング活動を実施し、チーム力向上を図る',
-      deadline: '2025-08-31',
-      status: '完了' as const
-    }
-  ], [careerGoal, year]);
+  // careerGoalからアクションプランデータを生成
+  const actionPlans: ActionPlanItem[] = useMemo(() => {
+    if (!careerGoal) return [];
+
+    // キャリア目標に基づいてアクションプランを動的生成
+    const generateActionPlans = (): ActionPlanItem[] => {
+      // careerGoalがnullの場合は空配列を返す
+      if (!careerGoal) return [];
+      
+      // 型安全性を確保した値の取得
+      const targetPosition: string = careerGoal?.target_position || 'キャリア目標';
+      const targetDate: string = careerGoal?.target_date || '';
+      const progressPercentage: number = careerGoal?.progress_percentage || 0;
+      
+      // 目標ポジションに基づく基本アクションプラン
+      const baseActions = [
+        {
+          item: '研修受講',
+          skill: 'リーダーシップ',
+          description: 'リーダーシップスキルを習得するための研修を受講する',
+          priority: 1
+        },
+        {
+          item: 'プロジェクト管理経験の積み重ね',
+          skill: 'プロジェクト管理',
+          description: '実際のプロジェクトでリーダー役を担い、管理経験を積む',
+          priority: 2
+        },
+        {
+          item: 'チームマネジメント実践',
+          skill: 'チームマネジメント',
+          description: 'チームメンバーの指導・育成を通じてマネジメントスキルを向上させる',
+          priority: 1
+        },
+        {
+          item: '業界知識の習得',
+          skill: '専門知識',
+          description: '担当領域の専門知識を深め、業界トレンドをキャッチアップする',
+          priority: 3
+        },
+        {
+          item: 'ネットワーキング活動',
+          skill: 'コミュニケーション',
+          description: '社内外のネットワークを構築し、情報収集・協力関係を築く',
+          priority: 2
+        }
+      ];
+
+      // 進捗に基づいてステータスを決定
+      const getStatusByProgress = (index: number): ActionPlanItem['status'] => {
+        const progressThreshold = (index + 1) * (100 / baseActions.length);
+        if (progressPercentage >= progressThreshold) return '完了';
+        if (progressPercentage >= progressThreshold - 20) return '進行中';
+        return '未着手';
+      };
+
+      // 期限を計算（目標日から逆算）
+      const calculateDeadline = (index: number): string => {
+        if (!targetDate) {
+          // デフォルトの期限設定（今から3-12ヶ月後）
+          const months = 3 + (index * 2);
+          const deadline = new Date();
+          deadline.setMonth(deadline.getMonth() + months);
+          return deadline.toISOString().split('T')[0] || '';
+        }
+        
+        // 目標日から逆算して期限を設定
+        const targetDateObj = new Date(targetDate);
+        const monthsBeforeTarget = baseActions.length - index;
+        const deadline = new Date(targetDateObj);
+        deadline.setMonth(deadline.getMonth() - monthsBeforeTarget);
+        return deadline.toISOString().split('T')[0] || '';
+      };
+
+      return baseActions.map((action, index) => ({
+        id: `action_${index + 1}`,
+        item: action.item,
+        skill: action.skill,
+        description: action.description,
+        deadline: calculateDeadline(index),
+        status: getStatusByProgress(index),
+        priority: action.priority
+      }));
+    };
+
+    return generateActionPlans();
+  }, [careerGoal, year]);
 
   // フィルタリング（安全にハンドリング）
   const filteredPlans = useMemo(() => 

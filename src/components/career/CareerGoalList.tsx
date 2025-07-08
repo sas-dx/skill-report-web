@@ -110,18 +110,27 @@ export function CareerGoalList({
     }
   };
 
-  // CareerGoalDataからCareerGoal配列を生成（モックデータ）
-  const mockGoals: CareerGoal[] = useMemo(() => {
+  /**
+   * 進捗率に基づく優先度の推定
+   */
+  const estimatePriority = (progressPercentage: number): CareerGoalPriority => {
+    if (progressPercentage >= 80) return 1; // 高優先度（完了間近）
+    if (progressPercentage >= 40) return 2; // 中優先度（進行中）
+    return 3; // 低優先度（開始段階）
+  };
+
+  // CareerGoalDataからCareerGoal配列を生成
+  const convertedGoals: CareerGoal[] = useMemo(() => {
     if (!careerGoal) return [];
 
     // CareerGoalDataからCareerGoalに変換
     const convertedGoal: CareerGoal = {
-      id: careerGoal.id || 'goal_001',
-      user_id: 'user_001',
-      title: `目標: ${careerGoal.target_position}`,
+      id: careerGoal.id || `goal_${Date.now()}`,
+      user_id: 'current_user', // 実際のユーザーIDは親コンポーネントから取得
+      title: careerGoal.target_position || '',
       description: careerGoal.target_description || '',
       status: mapPlanStatusToCareerStatus(careerGoal.plan_status),
-      priority: 2 as CareerGoalPriority,
+      priority: estimatePriority(careerGoal.progress_percentage || 0),
       target_date: careerGoal.target_date,
       progress_percentage: careerGoal.progress_percentage || 0,
       created_at: new Date().toISOString(),
@@ -133,15 +142,15 @@ export function CareerGoalList({
 
   // フィルタリングとソート
   const filteredAndSortedGoals = useMemo(() => {
-    let filtered = mockGoals;
+    let filtered = convertedGoals;
 
     // ステータスフィルタリング
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(goal => goal.status === filterStatus);
+      filtered = filtered.filter((goal: CareerGoal) => goal.status === filterStatus);
     }
 
     // ソート
-    filtered.sort((a, b) => {
+    filtered.sort((a: CareerGoal, b: CareerGoal) => {
       switch (sortBy) {
         case 'priority':
           return a.priority - b.priority;
@@ -155,7 +164,7 @@ export function CareerGoalList({
     });
 
     return filtered;
-  }, [mockGoals, filterStatus, sortBy]);
+  }, [convertedGoals, filterStatus, sortBy]);
 
   /**
    * 進捗バーの色を取得
@@ -367,7 +376,7 @@ export function CareerGoalList({
         <h4 className="text-sm font-medium text-gray-900 mb-3">目標統計</h4>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {Object.entries(STATUS_CONFIG).map(([status, config]) => {
-            const count = mockGoals.filter(goal => goal.status === status).length;
+            const count = convertedGoals.filter((goal: CareerGoal) => goal.status === status).length;
             return (
               <div key={status} className="text-center">
                 <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color} mb-1`}>
