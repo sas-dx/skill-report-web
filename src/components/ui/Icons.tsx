@@ -178,6 +178,40 @@ export const ChevronUp: React.FC<IconProps> = ({ className = '', size = 24 }) =>
   </svg>
 );
 
+// 右向き矢印アイコン
+export const ChevronRightIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+);
+
+// 下向き矢印アイコン
+export const ChevronDownIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+  <svg
+    className={className}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
 // 外部リンクアイコン
 export const ExternalLink: React.FC<IconProps> = ({ className = '', size = 24 }) => (
   <svg

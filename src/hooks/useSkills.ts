@@ -282,10 +282,10 @@ export function useSkillEditor() {
     setFormData({
       skillId: skill.skillId,
       level: skill.level,
-      acquiredDate: skill.acquiredDate,
-      experienceYears: skill.experienceYears,
-      lastUsed: skill.lastUsed,
-      remarks: skill.remarks
+      acquiredDate: skill.acquiredDate || undefined,
+      experienceYears: skill.experienceYears || undefined,
+      lastUsed: skill.lastUsed || undefined,
+      remarks: skill.remarks || undefined
     });
     setIsEditing(true);
   }, []);
@@ -294,7 +294,7 @@ export function useSkillEditor() {
     setEditingSkill(null);
     setFormData({
       skillId,
-      level: 1,
+      level: 1 as SkillLevel,
       acquiredDate: undefined,
       experienceYears: undefined,
       lastUsed: undefined,
@@ -321,5 +321,65 @@ export function useSkillEditor() {
     startCreate,
     cancelEdit,
     updateFormData
+  };
+}
+
+// 統合スキル管理フック
+export function useSkills(userId?: string) {
+  const userSkillsHook = useUserSkills(userId);
+  const skillMasterHook = useSkillMaster();
+  const skillSearchHook = useSkillSearch();
+  const skillEditorHook = useSkillEditor();
+
+  const [selectedSkill, setSelectedSkill] = useState<SkillHierarchy | null>(null);
+
+  const selectSkill = useCallback((skill: SkillHierarchy | null) => {
+    setSelectedSkill(skill);
+  }, []);
+
+  const saveSkill = useCallback(async (data: SkillFormData) => {
+    const existingSkill = userSkillsHook.skills.find(s => s.skillId === data.skillId);
+    if (existingSkill) {
+      return await userSkillsHook.updateSkill(data);
+    } else {
+      return await userSkillsHook.createSkill(data);
+    }
+  }, [userSkillsHook]);
+
+  const searchSkills = useCallback(async (filters: any) => {
+    const params: SkillSearchParams = {
+      keyword: filters.keyword,
+      category: filters.categoryId,
+      subcategory: filters.subcategoryId,
+      minLevel: filters.minLevel,
+      maxLevel: filters.maxLevel,
+      hasExperience: filters.hasExperience,
+      isActive: filters.isActive
+    };
+    const result = await skillSearchHook.searchSkills(params);
+    return result.skills;
+  }, [skillSearchHook]);
+
+  return {
+    // データ
+    skills: skillMasterHook.skills,
+    userSkills: userSkillsHook.skills,
+    skillHierarchy: skillMasterHook.hierarchy,
+    selectedSkill,
+    formData: skillEditorHook.formData,
+    
+    // 状態
+    isLoading: userSkillsHook.loading || skillMasterHook.loading || skillSearchHook.loading,
+    error: userSkillsHook.error || skillMasterHook.error || skillSearchHook.error,
+    
+    // アクション
+    loadSkills: skillMasterHook.refetchSkills,
+    loadUserSkills: userSkillsHook.refetch,
+    loadSkillHierarchy: skillMasterHook.refetchHierarchy,
+    selectSkill,
+    updateFormData: skillEditorHook.updateFormData,
+    saveSkill,
+    deleteSkill: userSkillsHook.deleteSkill,
+    searchSkills
   };
 }

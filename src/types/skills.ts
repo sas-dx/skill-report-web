@@ -9,7 +9,7 @@ export interface SkillHierarchy {
   id: string;
   name: string;
   category: string;
-  subcategory?: string;
+  subcategory?: string | undefined;
   parentId?: string;
   children?: SkillHierarchy[];
   level: number; // 階層レベル（1: カテゴリ, 2: サブカテゴリ, 3: スキル項目）
@@ -23,7 +23,7 @@ export interface UserSkill {
   userId: string;
   skillName: string;
   category: string;
-  subcategory?: string;
+  subcategory?: string | undefined;
   level: 1 | 2 | 3 | 4; // ×/△/○/◎
   acquiredDate?: string;
   experienceYears?: number;
@@ -128,6 +128,24 @@ export interface SkillFormData {
   remarks?: string | undefined;
 }
 
+// スキル検索フィルタ
+export interface SkillSearchFilters {
+  keyword?: string;
+  categoryId?: string;
+  subcategoryId?: string;
+  minLevel?: number;
+  maxLevel?: number;
+  hasExperience?: boolean;
+  isActive?: boolean;
+}
+
+// スキルカテゴリ（検索用）
+export interface SkillCategoryWithId {
+  id: string;
+  name: string;
+  subcategories?: SkillCategoryWithId[];
+}
+
 export interface CertificationFormData {
   certificationName: string;
   organizationName?: string;
@@ -145,7 +163,10 @@ export interface SkillSearchParams {
   category?: string;
   subcategory?: string;
   level?: SkillLevel;
+  minLevel?: number;
+  maxLevel?: number;
   hasExperience?: boolean;
+  isActive?: boolean;
   page?: number;
   limit?: number;
 }
