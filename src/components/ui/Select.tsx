@@ -1,9 +1,8 @@
 /**
- * 要求仕様ID: PRO.1-BASE.1
- * 対応設計書: docs/design/components/共通部品定義書.md
- * 実装内容: Selectコンポーネント（部署・役職選択用）
+ * 要求仕様ID: PLT.1-WEB.1
+ * 対応設計書: docs/design/components/shared/共通部品定義書.md
+ * 実装内容: Selectコンポーネント（ドロップダウン選択）
  */
-'use client';
 
 import React from 'react';
 
@@ -19,41 +18,44 @@ interface SelectProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-  error?: boolean;
+  required?: boolean;
 }
 
-export function Select({
+export const Select: React.FC<SelectProps> = ({
   value = '',
   onChange,
-  options,
+  options = [],
   placeholder = '選択してください',
   disabled = false,
   className = '',
-  error = false
-}: SelectProps) {
+  required = false
+}) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (onChange) {
+      onChange(event.target.value);
+    }
+  };
+
   const baseClasses = `
-    w-full px-3 py-2 border rounded-md shadow-sm
+    w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
     disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
-    transition-colors duration-200
-  `;
-
-  const errorClasses = error
-    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-    : 'border-gray-300';
-
-  const combinedClasses = `${baseClasses} ${errorClasses} ${className}`.trim();
+    text-sm
+  `.trim().replace(/\s+/g, ' ');
 
   return (
     <select
       value={value}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={handleChange}
       disabled={disabled}
-      className={combinedClasses}
+      required={required}
+      className={`${baseClasses} ${className}`}
     >
-      <option value="" disabled>
-        {placeholder}
-      </option>
+      {placeholder && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
@@ -61,4 +63,4 @@ export function Select({
       ))}
     </select>
   );
-}
+};

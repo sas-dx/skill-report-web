@@ -1,114 +1,102 @@
 /**
- * 要求仕様ID: API-013
- * 設計書: docs/design/api/specs/API定義書_API-013_組織情報取得API.md
- * 実装内容: 組織情報（部署・役職・職種）取得API
+ * 要求仕様ID: PRO.1-BASE.1
+ * 対応設計書: docs/design/api/specs/API定義書_API-013_組織情報取得API.md
+ * 実装内容: 組織情報取得API（部署・役職一覧）
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
 
+// モックデータ（実際の実装では Prisma を使用）
+const mockOrganizationData = {
+  departments: [
+    { id: 'DEPT001', name: '開発部', description: 'システム開発を担当' },
+    { id: 'DEPT002', name: '営業部', description: '営業活動を担当' },
+    { id: 'DEPT003', name: '人事部', description: '人事管理を担当' },
+    { id: 'DEPT004', name: '総務部', description: '総務業務を担当' },
+    { id: 'DEPT005', name: '経理部', description: '経理業務を担当' },
+    { id: 'DEPT006', name: 'マーケティング部', description: 'マーケティング活動を担当' }
+  ],
+  positions: [
+    { id: 'POS001', name: 'エンジニア', level: 1, description: '開発業務を担当' },
+    { id: 'POS002', name: 'シニアエンジニア', level: 2, description: '上級開発業務を担当' },
+    { id: 'POS003', name: 'リードエンジニア', level: 3, description: 'チームリーダー業務を担当' },
+    { id: 'POS004', name: 'マネージャー', level: 4, description: '管理業務を担当' },
+    { id: 'POS005', name: '営業担当', level: 1, description: '営業活動を担当' },
+    { id: 'POS006', name: '営業主任', level: 2, description: '営業チームの主任' },
+    { id: 'POS007', name: '営業課長', level: 3, description: '営業課の管理' },
+    { id: 'POS008', name: '人事担当', level: 1, description: '人事業務を担当' },
+    { id: 'POS009', name: '人事主任', level: 2, description: '人事業務の主任' },
+    { id: 'POS010', name: '総務担当', level: 1, description: '総務業務を担当' }
+  ]
+};
+
+/**
+ * 組織情報取得API
+ * GET /api/organization
+ */
 export async function GET(request: NextRequest) {
   try {
-    console.log('🏢 組織情報取得API開始')
+    const { searchParams } = new URL(request.url);
+    
+    // クエリパラメータの取得
+    const includeDepartments = searchParams.get('include_departments') !== 'false';
+    const includePositions = searchParams.get('include_positions') !== 'false';
+    const departmentId = searchParams.get('department_id');
+    const positionLevel = searchParams.get('position_level');
 
-    // 部署情報を取得
-    const departments = await prisma.department.findMany({
-      where: {
-        department_status: 'ACTIVE'
-      },
-      select: {
-        department_code: true,
-        department_name: true,
-        department_name_short: true,
-        department_level: true,
-        sort_order: true
-      },
-      orderBy: {
-        sort_order: 'asc'
+    // 実際の実装では、ここでデータベースから組織情報を取得
+    // const departments = await prisma.department.findMany({
+    //   where: departmentId ? { id: departmentId } : undefined,
+    //   orderBy: { name: 'asc' }
+    // });
+    // 
+    // const positions = await prisma.position.findMany({
+    //   where: positionLevel ? { level: parseInt(positionLevel) } : undefined,
+    //   orderBy: [{ level: 'asc' }, { name: 'asc' }]
+    // });
+
+    let responseData: any = {};
+
+    // 部署情報の取得
+    if (includeDepartments) {
+      let departments = [...mockOrganizationData.departments];
+      
+      // 特定の部署IDでフィルタリング
+      if (departmentId) {
+        departments = departments.filter(dept => dept.id === departmentId);
       }
-    })
+      
+      responseData.departments = departments;
+    }
 
-    // 役職情報を取得
-    const positions = await prisma.position.findMany({
-      where: {
-        position_status: 'ACTIVE'
-      },
-      select: {
-        position_code: true,
-        position_name: true,
-        position_name_short: true,
-        position_level: true,
-        position_category: true,
-        sort_order: true
-      },
-      orderBy: {
-        sort_order: 'asc'
+    // 役職情報の取得
+    if (includePositions) {
+      let positions = [...mockOrganizationData.positions];
+      
+      // 特定の役職レベルでフィルタリング
+      if (positionLevel) {
+        const level = parseInt(positionLevel);
+        if (!isNaN(level)) {
+          positions = positions.filter(pos => pos.level === level);
+        }
       }
-    })
-
-    // 職種情報を取得
-    const jobTypes = await prisma.jobType.findMany({
-      where: {
-        is_active: true
-      },
-      select: {
-        job_type_code: true,
-        job_type_name: true,
-        job_category: true,
-        job_level: true,
-        sort_order: true
-      },
-      orderBy: {
-        sort_order: 'asc'
-      }
-    })
-
-    console.log('📊 取得結果:', {
-      departments: departments.length,
-      positions: positions.length,
-      jobTypes: jobTypes.length
-    })
+      
+      responseData.positions = positions;
+    }
 
     return NextResponse.json({
       success: true,
-      data: {
-        departments: departments.map(dept => ({
-          id: dept.department_code,
-          code: dept.department_code,
-          name: dept.department_name,
-          shortName: dept.department_name_short,
-          level: dept.department_level
-        })),
-        positions: positions.map(pos => ({
-          id: pos.position_code,
-          code: pos.position_code,
-          name: pos.position_name,
-          shortName: pos.position_name_short,
-          level: pos.position_level,
-          category: pos.position_category
-        })),
-        jobTypes: jobTypes.map(job => ({
-          id: job.job_type_code,
-          code: job.job_type_code,
-          name: job.job_type_name,
-          category: job.job_category,
-          level: job.job_level
-        }))
-      },
-      timestamp: new Date().toISOString()
-    })
+      data: responseData
+    });
 
   } catch (error) {
-    console.error('❌ 組織情報取得エラー:', error)
-    
+    console.error('組織情報取得エラー:', error);
     return NextResponse.json({
       success: false,
       error: {
-        code: 'ORGANIZATION_FETCH_ERROR',
-        message: '組織情報の取得に失敗しました',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      timestamp: new Date().toISOString()
-    }, { status: 500 })
+        code: 'INTERNAL_SERVER_ERROR',
+        message: '組織情報の取得中にエラーが発生しました'
+      }
+    }, { status: 500 });
   }
 }

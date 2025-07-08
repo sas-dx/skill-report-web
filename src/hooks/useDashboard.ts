@@ -124,7 +124,7 @@ export function useDashboard(): UseDashboardReturn {
         throw new Error(result.error?.message || 'データの取得に失敗しました');
       }
 
-      // 日付文字列をDateオブジェクトに変換
+      // 日付文字列をDateオブジェクトに変換（防御的プログラミング）
       const processedData = {
         ...result.data,
         profile: result.data.profile ? {
@@ -132,25 +132,25 @@ export function useDashboard(): UseDashboardReturn {
           hire_date: result.data.profile.hire_date ? new Date(result.data.profile.hire_date) : null,
         } : null,
         skillSummary: {
-          ...result.data.skillSummary,
-          recentSkills: result.data.skillSummary.recentSkills.map((skill: any) => ({
+          levelCounts: result.data.skillSummary?.levelCounts || { level1: 0, level2: 0, level3: 0, level4: 0, total: 0 },
+          recentSkills: (result.data.skillSummary?.recentSkills || []).map((skill: any) => ({
             ...skill,
-            updated_at: new Date(skill.updated_at)
+            updated_at: skill.updated_at ? new Date(skill.updated_at) : new Date()
           })),
-          lastUpdated: result.data.skillSummary.lastUpdated ? new Date(result.data.skillSummary.lastUpdated) : null,
+          lastUpdated: result.data.skillSummary?.lastUpdated ? new Date(result.data.skillSummary.lastUpdated) : null,
         },
-        recentTraining: result.data.recentTraining.map((training: any) => ({
+        recentTraining: (result.data.recentTraining || []).map((training: any) => ({
           ...training,
           start_date: training.start_date ? new Date(training.start_date) : null,
           end_date: training.end_date ? new Date(training.end_date) : null,
         })),
-        goalProgress: result.data.goalProgress.map((goal: any) => ({
+        goalProgress: (result.data.goalProgress || []).map((goal: any) => ({
           ...goal,
           target_date: goal.target_date ? new Date(goal.target_date) : null,
         })),
-        notifications: result.data.notifications.map((notification: any) => ({
+        notifications: (result.data.notifications || []).map((notification: any) => ({
           ...notification,
-          created_at: new Date(notification.created_at)
+          created_at: notification.created_at ? new Date(notification.created_at) : new Date()
         }))
       };
 

@@ -7,6 +7,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { 
@@ -18,7 +19,25 @@ import {
 } from '@/hooks/useDashboard';
 
 export function DashboardContent() {
+  const router = useRouter();
   const { data, loading, error, refetch } = useDashboard();
+
+  // ナビゲーションハンドラー
+  const handleSkillManagement = () => {
+    router.push('/skills');
+  };
+
+  const handleProfileEdit = () => {
+    router.push('/profile');
+  };
+
+  const handleGoalSetting = () => {
+    router.push('/career');
+  };
+
+  const handleReportView = () => {
+    router.push('/reports');
+  };
 
   if (loading) {
     return (
@@ -164,7 +183,7 @@ export function DashboardContent() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* スキル情報管理 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={handleSkillManagement}>
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,13 +195,13 @@ export function DashboardContent() {
                 <p className="text-sm text-gray-600 mb-4">
                   スキル情報を登録・更新して、あなたの成長を記録しましょう
                 </p>
-                <Button size="sm" className="w-full">
+                <Button size="sm" className="w-full" onClick={handleSkillManagement}>
                   スキル管理へ
                 </Button>
               </div>
 
               {/* プロフィール管理 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={handleProfileEdit}>
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,13 +213,13 @@ export function DashboardContent() {
                 <p className="text-sm text-gray-600 mb-4">
                   基本情報・目標を設定して、キャリアプランを明確にしましょう
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full" onClick={handleProfileEdit}>
                   プロフィール編集
                 </Button>
               </div>
 
               {/* 目標管理 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={handleGoalSetting}>
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,13 +231,13 @@ export function DashboardContent() {
                 <p className="text-sm text-gray-600 mb-4">
                   キャリア目標を設定し、進捗を管理しましょう
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full" onClick={handleGoalSetting}>
                   目標設定
                 </Button>
               </div>
 
               {/* レポート */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={handleReportView}>
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                     <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +249,7 @@ export function DashboardContent() {
                 <p className="text-sm text-gray-600 mb-4">
                   スキル分析・レポートを確認して成長を可視化しましょう
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full" onClick={handleReportView}>
                   レポート表示
                 </Button>
               </div>
