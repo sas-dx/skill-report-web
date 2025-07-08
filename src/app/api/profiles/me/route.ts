@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog, getObjectDiff } from '@/lib/auditLogger';
 
 // 現在のユーザーのプロフィール取得API
 export async function GET(request: NextRequest) {
@@ -378,62 +379,100 @@ export async function PUT(request: NextRequest) {
     const currentEmployeeId = authResult.employeeId || authResult.userId;
 
     // リクエストボディの取得
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.error('JSON parse error:', error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_JSON',
+            message: 'リクエストボディのJSONが不正です'
+          }
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log('=== プロフィール更新API デバッグ情報 ===');
+    console.log('Request method:', request.method);
+    console.log('Request URL:', request.url);
+    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
+    console.log('Received update data:', JSON.stringify(body, null, 2));
+    console.log('Body keys:', Object.keys(body));
+    console.log('Body type:', typeof body);
+    console.log('Body first_name:', body.first_name, typeof body.first_name);
+    console.log('Body last_name:', body.last_name, typeof body.last_name);
+    console.log('Body display_name:', body.display_name, typeof body.display_name);
+    console.log('Body email:', body.email, typeof body.email);
+    console.log('Body contact_info:', body.contact_info);
+    console.log('Body organization_info:', body.organization_info);
 
     // 入力値検証
     const errors: Array<{ field: string; reason: string }> = [];
 
-    // 氏名の検証
-    if (body.first_name && (body.first_name.length < 1 || body.first_name.length > 30)) {
-      errors.push({ field: 'first_name', reason: '名は1-30文字で入力してください' });
+    // 必須項目の検証
+    if (!body.first_name || typeof body.first_name !== 'string' || body.first_name.trim() === '') {
+      errors.push({ field: 'first_name', reason: '名前（名）は必須です' });
+    } else if (body.first_name.length > 30) {
+      errors.push({ field: 'first_name', reason: '名は30文字以内で入力してください' });
     }
-    if (body.last_name && (body.last_name.length < 1 || body.last_name.length > 30)) {
-      errors.push({ field: 'last_name', reason: '姓は1-30文字で入力してください' });
-    }
-
-    // カナの検証
-    const katakanaRegex = /^[ァ-ヶー]+$/;
-    if (body.first_name_kana && !katakanaRegex.test(body.first_name_kana)) {
-      errors.push({ field: 'first_name_kana', reason: '全角カタカナで入力してください' });
-    }
-    if (body.last_name_kana && !katakanaRegex.test(body.last_name_kana)) {
-      errors.push({ field: 'last_name_kana', reason: '全角カタカナで入力してください' });
+    
+    if (!body.last_name || typeof body.last_name !== 'string' || body.last_name.trim() === '') {
+      errors.push({ field: 'last_name', reason: '名前（姓）は必須です' });
+    } else if (body.last_name.length > 30) {
+      errors.push({ field: 'last_name', reason: '姓は30文字以内で入力してください' });
     }
 
-    // 表示名の検証
-    if (body.display_name && (body.display_name.length < 1 || body.display_name.length > 50)) {
-      errors.push({ field: 'display_name', reason: '表示名は1-50文字で入力してください' });
+    if (!body.display_name || typeof body.display_name !== 'string' || body.display_name.trim() === '') {
+      errors.push({ field: 'display_name', reason: '表示名は必須です' });
+    } else if (body.display_name.length > 50) {
+      errors.push({ field: 'display_name', reason: '表示名は50文字以内で入力してください' });
     }
 
-    // メールアドレスの検証
-    if (body.email !== undefined) {
-      if (!body.email || body.email.trim() === '') {
-        errors.push({ field: 'email', reason: 'メールアドレスは必須です' });
+    if (!body.email || typeof body.email !== 'string' || body.email.trim() === '') {
+      errors.push({ field: 'email', reason: 'メールアドレスは必須です' });
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(body.email)) {
+        errors.push({ field: 'email', reason: '有効なメールアドレスを入力してください' });
+      } else if (body.email.length > 255) {
+        errors.push({ field: 'email', reason: 'メールアドレスは255文字以内で入力してください' });
       } else {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(body.email)) {
-          errors.push({ field: 'email', reason: '有効なメールアドレスを入力してください' });
-        } else if (body.email.length > 255) {
-          errors.push({ field: 'email', reason: 'メールアドレスは255文字以内で入力してください' });
-        } else {
-          // メールアドレス重複チェック
-          const existingUser = await prisma.employee.findFirst({
-            where: {
-              email: body.email,
-              employee_code: { not: currentEmployeeId }
-            }
-          });
-          
-          if (existingUser) {
-            errors.push({ field: 'email', reason: 'このメールアドレスは既に他のユーザーによって使用されています' });
+        // メールアドレス重複チェック
+        const existingUser = await prisma.employee.findFirst({
+          where: {
+            email: body.email,
+            employee_code: { not: currentEmployeeId }
           }
+        });
+        
+        if (existingUser) {
+          errors.push({ field: 'email', reason: 'このメールアドレスは既に他のユーザーによって使用されています' });
         }
       }
     }
 
-    // 部署の検証
-    const departmentId = body.organization_info?.department_id || body.department_id;
-    if (departmentId !== undefined && departmentId !== '') {
+    // カナの検証（オプション）
+    const katakanaRegex = /^[ァ-ヶー\s]*$/;
+    if (body.first_name_kana && typeof body.first_name_kana === 'string' && body.first_name_kana.trim() !== '' && !katakanaRegex.test(body.first_name_kana)) {
+      errors.push({ field: 'first_name_kana', reason: '全角カタカナで入力してください' });
+    }
+    if (body.last_name_kana && typeof body.last_name_kana === 'string' && body.last_name_kana.trim() !== '' && !katakanaRegex.test(body.last_name_kana)) {
+      errors.push({ field: 'last_name_kana', reason: '全角カタカナで入力してください' });
+    }
+
+    // 電話番号の検証（オプション）
+    const phoneNumber = body.contact_info?.phone;
+    if (phoneNumber && typeof phoneNumber === 'string' && phoneNumber.trim() !== '' && !/^[\d\-+()]*$/.test(phoneNumber)) {
+      errors.push({ field: 'phone', reason: '電話番号の形式が正しくありません' });
+    }
+
+    // 部署の検証（オプション）
+    const departmentId = body.organization_info?.department_id;
+    if (departmentId && typeof departmentId === 'string' && departmentId.trim() !== '') {
       const department = await prisma.department.findUnique({
         where: { department_code: departmentId }
       });
@@ -442,9 +481,9 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // 役職の検証
-    const positionId = body.organization_info?.position_id || body.position_id;
-    if (positionId !== undefined && positionId !== '') {
+    // 役職の検証（オプション）
+    const positionId = body.organization_info?.position_id;
+    if (positionId && typeof positionId === 'string' && positionId.trim() !== '') {
       const position = await prisma.position.findUnique({
         where: { position_code: positionId }
       });
@@ -459,8 +498,8 @@ export async function PUT(request: NextRequest) {
         {
           success: false,
           error: {
-            code: 'INVALID_PARAMETER',
-            message: 'パラメータが不正です',
+            code: 'VALIDATION_ERROR',
+            message: '入力値に誤りがあります',
             details: errors[0]?.reason || '',
             invalid_fields: errors
           }
@@ -474,58 +513,112 @@ export async function PUT(request: NextRequest) {
     const updatedFields: string[] = [];
 
     // フルネームの構築
-    let fullName = '';
-    let fullNameKana = '';
+    const lastName = body.last_name || '';
+    const firstName = body.first_name || '';
+    const fullName = `${lastName} ${firstName}`.trim();
+    updateData.full_name = fullName;
+    updatedFields.push('full_name');
     
-    if (body.first_name !== undefined || body.last_name !== undefined) {
-      const lastName = body.last_name || '';
-      const firstName = body.first_name || '';
-      fullName = `${lastName} ${firstName}`.trim();
-      updateData.full_name = fullName;
-      updatedFields.push('full_name');
-    }
-    
-    if (body.first_name_kana !== undefined || body.last_name_kana !== undefined) {
+    // フルネームカナの構築
+    if (body.first_name_kana || body.last_name_kana) {
       const lastNameKana = body.last_name_kana || '';
       const firstNameKana = body.first_name_kana || '';
-      fullNameKana = `${lastNameKana} ${firstNameKana}`.trim();
+      const fullNameKana = `${lastNameKana} ${firstNameKana}`.trim();
       updateData.full_name_kana = fullNameKana;
       updatedFields.push('full_name_kana');
     }
     
-    if (body.contact_info?.phone !== undefined) {
-      updateData.phone = body.contact_info.phone;
-      updatedFields.push('contact_info.phone');
+    // 電話番号の更新
+    if (body.contact_info && typeof body.contact_info.phone === 'string') {
+      updateData.phone = body.contact_info.phone.trim() || null;
+      updatedFields.push('phone');
     }
 
     // メールアドレスの更新
-    if (body.email !== undefined) {
-      updateData.email = body.email;
-      updatedFields.push('email');
-    }
+    updateData.email = body.email;
+    updatedFields.push('email');
 
     // 部署の更新
-    const departmentIdForUpdate = body.organization_info?.department_id !== undefined ? body.organization_info.department_id : body.department_id;
-    if (departmentIdForUpdate !== undefined) {
-      updateData.department_id = departmentIdForUpdate || null;
+    if (body.organization_info && typeof body.organization_info.department_id === 'string') {
+      updateData.department_id = body.organization_info.department_id.trim() || null;
       updatedFields.push('department_id');
     }
 
     // 役職の更新
-    const positionIdForUpdate = body.organization_info?.position_id !== undefined ? body.organization_info.position_id : body.position_id;
-    if (positionIdForUpdate !== undefined) {
-      updateData.position_id = positionIdForUpdate || null;
+    if (body.organization_info && typeof body.organization_info.position_id === 'string') {
+      updateData.position_id = body.organization_info.position_id.trim() || null;
       updatedFields.push('position_id');
     }
 
     // 更新日時を追加
     updateData.updated_at = new Date();
 
+    console.log('Update data to be saved:', JSON.stringify(updateData, null, 2));
+
+    // 更新前のデータを取得（AuditLog用）
+    const currentUser = await prisma.employee.findUnique({
+      where: { employee_code: currentEmployeeId }
+    });
+
+    if (!currentUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'ユーザーが見つかりません'
+          }
+        },
+        { status: 404 }
+      );
+    }
+
     // データベース更新
     const updatedUser = await prisma.employee.update({
       where: { employee_code: currentEmployeeId },
       data: updateData
     });
+
+    // AuditLog記録（更新後に実行）
+    try {
+      const { oldValues, newValues } = getObjectDiff(
+        {
+          full_name: currentUser.full_name,
+          full_name_kana: currentUser.full_name_kana,
+          email: currentUser.email,
+          phone: currentUser.phone,
+          department_id: currentUser.department_id,
+          position_id: currentUser.position_id
+        },
+        {
+          full_name: updatedUser.full_name,
+          full_name_kana: updatedUser.full_name_kana,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          department_id: updatedUser.department_id,
+          position_id: updatedUser.position_id
+        }
+      );
+
+      // 変更があった場合のみAuditLogを記録
+      if (Object.keys(newValues).length > 0) {
+        await createAuditLog({
+          userId: currentEmployeeId,
+          actionType: 'UPDATE',
+          targetTable: 'Employee',
+          targetId: currentEmployeeId,
+          oldValues,
+          newValues,
+          changeReason: 'プロフィール更新',
+          ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown'
+        });
+        console.log('AuditLog記録完了:', { oldValues, newValues });
+      }
+    } catch (auditError) {
+      console.error('AuditLog記録エラー:', auditError);
+      // AuditLogの失敗はメイン処理を止めない
+    }
 
     // 部署情報の取得
     let department = null;

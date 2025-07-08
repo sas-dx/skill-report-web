@@ -58,8 +58,8 @@ export async function GET(
 
     const currentUserId = authResult.userId;
 
-    // "me"の場合は現在のユーザーIDに置き換え
-    const targetUserId = userId === 'me' ? currentUserId : userId;
+    // userIdが'me'の場合は認証されたユーザーのIDを使用
+    const targetUserId = userId === 'me' ? (authResult.employeeId || currentUserId) : userId;
 
     // クエリパラメータの取得
     const { searchParams } = new URL(request.url);
@@ -68,7 +68,8 @@ export async function GET(
     const includeGoalSummary = searchParams.get('includeGoalSummary') === 'true';
 
     // 権限チェック（自分以外のプロフィールを見る場合）
-    if (targetUserId !== currentUserId) {
+    const currentEmployeeId = authResult.employeeId || currentUserId;
+    if (targetUserId !== currentEmployeeId) {
       // TODO: 管理者権限チェックを実装
       // 現在は暫定的に403を返す
       return NextResponse.json(
@@ -131,6 +132,16 @@ export async function GET(
       });
     }
 
+    // 上長情報の取得
+    let managerName = '';
+    if (user.manager_id) {
+      const manager = await prisma.employee.findUnique({
+        where: { employee_code: user.manager_id },
+        select: { full_name: true }
+      });
+      managerName = manager?.full_name || '';
+    }
+
     // フルネームを分割（仮実装）
     const fullName = user?.full_name || '';
     const nameParts = fullName.split(' ');
@@ -172,7 +183,7 @@ export async function GET(
         employmentType: user.employment_status || '正社員',
         hireDate: user.hire_date ? user.hire_date.toISOString().split('T')[0] : '',
         managerUserId: user.manager_id || '',
-        managerName: ''
+        managerName: managerName
       },
       workInfo: {
         workLocation: '東京本社',
@@ -486,24 +497,52 @@ export async function PUT(
     const updateData: any = {};
     const updatedFields: string[] = [];
 
-    // フルネームの構築
-    let fullName = '';
-    let fullNameKana = '';
-    
+    // 現在のユーザー情報を取得して、既存の姓名を取得
+    const currentUser = await prisma.employee.findUnique({
+      where: { employee_code: targetUserId }
+    });
+
+    if (!currentUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'ユーザーが見つかりません'
+          }
+        },
+        { status: 404 }
+      );
+    }
+
+    // 既存の姓名を分割
+    const existingFullName = currentUser.full_name || '';
+    const existingNameParts = existingFullName.split(' ');
+    const existingLastName = existingNameParts[0] || '';
+    const existingFirstName = existingNameParts[1] || '';
+
+    const existingFullNameKana = currentUser.full_name_kana || '';
+    const existingKanaNameParts = existingFullNameKana.split(' ');
+    const existingLastNameKana = existingKanaNameParts[0] || '';
+    const existingFirstNameKana = existingKanaNameParts[1] || '';
+
+    // フルネームの構築（既存の値を保持しつつ更新）
     if (body.first_name !== undefined || body.last_name !== undefined) {
-      const lastName = body.last_name || '';
-      const firstName = body.first_name || '';
-      fullName = `${lastName} ${firstName}`.trim();
+      const lastName = body.last_name !== undefined ? body.last_name : existingLastName;
+      const firstName = body.first_name !== undefined ? body.first_name : existingFirstName;
+      const fullName = `${lastName} ${firstName}`.trim();
       updateData.full_name = fullName;
       updatedFields.push('full_name');
+      console.log('姓名更新:', { lastName, firstName, fullName });
     }
     
     if (body.first_name_kana !== undefined || body.last_name_kana !== undefined) {
-      const lastNameKana = body.last_name_kana || '';
-      const firstNameKana = body.first_name_kana || '';
-      fullNameKana = `${lastNameKana} ${firstNameKana}`.trim();
+      const lastNameKana = body.last_name_kana !== undefined ? body.last_name_kana : existingLastNameKana;
+      const firstNameKana = body.first_name_kana !== undefined ? body.first_name_kana : existingFirstNameKana;
+      const fullNameKana = `${lastNameKana} ${firstNameKana}`.trim();
       updateData.full_name_kana = fullNameKana;
       updatedFields.push('full_name_kana');
+      console.log('カナ更新:', { lastNameKana, firstNameKana, fullNameKana });
     }
     
     if (body.contact_info?.phone !== undefined) {
@@ -531,10 +570,6 @@ export async function PUT(
       const trimmedEmail = body.email.trim();
       
       // 現在のユーザーのメールアドレスと異なる場合のみ重複チェック
-      const currentUser = await prisma.employee.findUnique({
-        where: { employee_code: targetUserId }
-      });
-      
       if (currentUser && currentUser.email !== trimmedEmail) {
         // 他のユーザーが同じメールアドレスを使用していないかチェック
         const existingUser = await prisma.employee.findFirst({
