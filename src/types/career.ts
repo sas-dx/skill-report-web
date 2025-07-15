@@ -86,7 +86,7 @@ export interface RelatedSkill {
 }
 
 /**
- * アクションプラン
+ * アクションプラン（API用）
  */
 export interface ActionPlan {
   action_id?: string;
@@ -95,6 +95,109 @@ export interface ActionPlan {
   due_date: string;
   status: 'not_started' | 'in_progress' | 'completed';
   completed_date?: string;
+  priority?: 'high' | 'medium' | 'low';
+  progress_percentage?: number;
+  category?: string;
+  related_skill_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * アクションプラン取得APIレスポンス (API-703)
+ */
+export interface ActionPlanGetResponse {
+  success: boolean;
+  data?: {
+    action_plans: ActionPlan[];
+    total_count: number;
+    pagination?: {
+      page: number;
+      limit: number;
+      total_pages: number;
+    };
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+  timestamp: string;
+}
+
+/**
+ * アクションプラン追加APIリクエスト (API-706)
+ */
+export interface ActionPlanCreateRequest {
+  title: string;
+  description?: string;
+  due_date: string;
+  priority?: 'high' | 'medium' | 'low';
+  category?: string;
+  related_skill_id?: string;
+  related_career_plan_id?: string;
+}
+
+/**
+ * アクションプラン追加APIレスポンス (API-706)
+ */
+export interface ActionPlanCreateResponse {
+  success: boolean;
+  data?: {
+    action_plan: ActionPlan;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+  timestamp: string;
+}
+
+/**
+ * アクションプラン更新APIリクエスト (API-707)
+ */
+export interface ActionPlanUpdateRequest {
+  title?: string;
+  description?: string;
+  due_date?: string;
+  status?: 'not_started' | 'in_progress' | 'completed';
+  priority?: 'high' | 'medium' | 'low';
+  progress_percentage?: number;
+  completed_date?: string;
+}
+
+/**
+ * アクションプラン更新APIレスポンス (API-707)
+ */
+export interface ActionPlanUpdateResponse {
+  success: boolean;
+  data?: {
+    action_plan: ActionPlan;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+  timestamp: string;
+}
+
+/**
+ * アクションプラン削除APIレスポンス (API-708)
+ */
+export interface ActionPlanDeleteResponse {
+  success: boolean;
+  data?: {
+    deleted_action_plan_id: string;
+    deleted_at: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+  timestamp: string;
 }
 
 /**

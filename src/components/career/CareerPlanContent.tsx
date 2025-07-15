@@ -13,6 +13,9 @@ import { CareerGoalForm } from './CareerGoalForm';
 import { CareerGoalList } from './CareerGoalList';
 import { CareerProgressChart } from './CareerProgressChart';
 import { ActionPlanSection } from './ActionPlanSection';
+import { SkillGapRadarChart } from './SkillGapRadarChart';
+import { CareerPathTimeline } from './CareerPathTimeline';
+import { ManagerFeedbackSection } from './ManagerFeedbackSection';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { 
@@ -45,7 +48,7 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
   const [selectedYear, setSelectedYear] = useState(year || new Date().getFullYear());
   const [showGoalForm, setShowGoalForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<CareerGoal | null>(null);
-  const [activeTab, setActiveTab] = useState<'goals' | 'progress' | 'actions'>('goals');
+  const [activeTab, setActiveTab] = useState<'goals' | 'progress' | 'actions' | 'skillgap' | 'path' | 'feedback'>('goals');
 
   // カスタムフック
   const { 
@@ -265,6 +268,45 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
                 <span>アクションプラン</span>
               </div>
             </button>
+            <button
+              onClick={() => setActiveTab('skillgap')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'skillgap'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <ChartBarIcon className="h-4 w-4" />
+                <span>スキルギャップ</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('path')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'path'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <DocumentTextIcon className="h-4 w-4" />
+                <span>キャリアパス</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('feedback')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'feedback'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <DocumentTextIcon className="h-4 w-4" />
+                <span>フィードバック</span>
+              </div>
+            </button>
           </nav>
         </div>
       </div>
@@ -323,6 +365,27 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
             <ActionPlanSection
               careerGoal={careerGoal}
               year={selectedYear}
+            />
+          )}
+
+          {activeTab === 'skillgap' && (
+            <SkillGapRadarChart
+              userId={userId || 'emp_001'}
+              className="w-full"
+            />
+          )}
+
+          {activeTab === 'path' && (
+            <CareerPathTimeline
+              userId={userId || 'emp_001'}
+              className="w-full"
+            />
+          )}
+
+          {activeTab === 'feedback' && (
+            <ManagerFeedbackSection
+              userId={userId || 'emp_001'}
+              className="w-full"
             />
           )}
         </div>

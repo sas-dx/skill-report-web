@@ -96,28 +96,24 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer dummy-token', // 実際の実装では適切なトークンを使用
       };
 
       if (userId) {
         headers['x-user-id'] = userId;
       }
-
-      const targetUserId = userId || 'user_001';
       
-      // POSTメソッドで直接CareerGoalオブジェクトを送信
-      // CareerGoal型からCareerGoalApiData型に変換
+      // 実装済みのAPI-701エンドポイントに合わせてリクエストボディを構築
       const requestBody = {
-        title: goal.title,
-        description: goal.description,
+        target_position: goal.title, // titleをtarget_positionとして使用
         target_date: goal.target_date,
-        status: goal.status,
-        priority: goal.priority,
-        year,
-        goal_type: 'short_term' as const, // デフォルト値
+        target_description: goal.description || '',
+        current_level: 'JUNIOR',
+        target_level: 'SENIOR',
+        goal_type: 'short_term' as const,
+        priority: goal.priority
       };
 
-      const response = await fetch(`/api/career-goals/${targetUserId}`, {
+      const response = await fetch('/api/career/goal', {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
@@ -127,9 +123,14 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: CareerGoalUpdateResponse = await response.json();
-      setIsSuccess(true);
-      return data;
+      const data = await response.json();
+      
+      if (data.success) {
+        setIsSuccess(true);
+        return data;
+      } else {
+        throw new Error(data.error?.message || 'キャリア目標の追加に失敗しました');
+      }
 
     } catch (err) {
       console.error('キャリア目標追加エラー:', err);
