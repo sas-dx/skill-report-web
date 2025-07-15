@@ -13,6 +13,7 @@ import { SkillSearch } from '@/components/skills/SkillSearch';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { useSkills } from '@/hooks/useSkills';
+import { loginAsMockUser, getCurrentAuthState } from '@/lib/authClient';
 import { 
   SkillHierarchy, 
   UserSkill, 
@@ -52,12 +53,31 @@ export default function SkillsPage() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [showCertForm, setShowCertForm] = useState(false);
 
+  // 認証状態管理
+  const [authState, setAuthState] = useState(() => getCurrentAuthState());
+
   // 初期データ読み込み
   useEffect(() => {
+    // 認証されていない場合はモックユーザーでログイン
+    if (!authState.isAuthenticated) {
+      const mockAuth = loginAsMockUser();
+      setAuthState(mockAuth);
+    }
+    
     loadSkills();
     loadUserSkills();
     loadSkillHierarchy();
-  }, [loadSkills, loadUserSkills, loadSkillHierarchy]);
+  }, [loadSkills, loadUserSkills, loadSkillHierarchy, authState.isAuthenticated]);
+
+  // モックログイン処理
+  const handleMockLogin = () => {
+    const mockAuth = loginAsMockUser();
+    setAuthState(mockAuth);
+    // データを再読み込み
+    loadSkills();
+    loadUserSkills();
+    loadSkillHierarchy();
+  };
 
   // スキル選択時の処理
   const handleSkillSelect = (skill: SkillHierarchy) => {

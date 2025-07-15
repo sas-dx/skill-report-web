@@ -54,10 +54,12 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     
     return parts.map((part, index) => 
       regex.test(part) ? (
-        <mark key={index} className="bg-yellow-200 px-1 rounded">
+        <mark key={`highlight-${index}`} className="bg-yellow-200 px-1 rounded">
           {part}
         </mark>
-      ) : part
+      ) : (
+        <span key={`text-${index}`}>{part}</span>
+      )
     );
   };
 
