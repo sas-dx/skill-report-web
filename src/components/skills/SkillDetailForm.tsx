@@ -18,6 +18,9 @@ interface SkillDetailFormProps {
   onSave: (formData: SkillFormData) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
+  isNewSkillMode?: boolean;
+  customSkillName?: string;
+  customSkillCategory?: string;
 }
 
 export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
@@ -26,7 +29,10 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
   relatedCertifications,
   onSave,
   onCancel,
-  isLoading = false
+  isLoading = false,
+  isNewSkillMode = false,
+  customSkillName = '',
+  customSkillCategory = 'technical'
 }) => {
   const [formData, setFormData] = useState<SkillFormData>({
     skillId: '',
@@ -42,9 +48,9 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
 
   // フォームデータの初期化
   useEffect(() => {
-    if (selectedSkill) {
+    if (selectedSkill || isNewSkillMode) {
       setFormData({
-        skillId: selectedSkill.id,
+        skillId: selectedSkill?.id || 'new-skill',
         level: userSkill?.level || 1,
         acquiredDate: userSkill?.acquiredDate || undefined,
         experienceYears: userSkill?.experienceYears || undefined,
@@ -53,7 +59,7 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
       });
       setIsEditing(!!userSkill);
     }
-  }, [selectedSkill, userSkill]);
+  }, [selectedSkill, userSkill, isNewSkillMode]);
 
   // バリデーション
   const validateForm = (): boolean => {
@@ -106,12 +112,12 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
     }
   };
 
-  if (!selectedSkill) {
+  if (!selectedSkill && !isNewSkillMode) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6 h-full flex items-center justify-center">
         <div className="text-center text-gray-500">
           <p className="text-sm">スキルを選択してください</p>
-          <p className="text-xs mt-1">左側のツリーからスキル項目を選択すると詳細が表示されます</p>
+          <p className="text-xs mt-1">左側のツリーからスキル項目を選択するか、新規スキル追加ボタンをクリックしてください</p>
         </div>
       </div>
     );
@@ -120,12 +126,20 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 h-full overflow-y-auto">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">{selectedSkill.name}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {isNewSkillMode ? customSkillName || '新規スキル' : selectedSkill?.name}
+        </h3>
         <p className="text-sm text-gray-600 mt-1">
-          {selectedSkill.category} {selectedSkill.subcategory && `> ${selectedSkill.subcategory}`}
+          {isNewSkillMode 
+            ? `${customSkillCategory} (新規作成)`
+            : `${selectedSkill?.category} ${selectedSkill?.subcategory && `> ${selectedSkill.subcategory}`}`
+          }
         </p>
-        {selectedSkill.description && (
+        {selectedSkill?.description && !isNewSkillMode && (
           <p className="text-sm text-gray-500 mt-2">{selectedSkill.description}</p>
+        )}
+        {isNewSkillMode && (
+          <p className="text-sm text-gray-500 mt-2">新規スキルとして登録されます</p>
         )}
       </div>
 

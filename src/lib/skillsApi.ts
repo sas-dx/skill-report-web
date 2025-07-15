@@ -1058,5 +1058,16 @@ export const skillsApi = {
   ...certificationApi
 };
 
+// エラーハンドリング関数
+export function handleApiError(error: unknown): string {
+  if (error instanceof Error) {
+    if (error.message.includes('API_ERROR')) {
+      return 'APIエラーが発生しました。しばらく時間をおいて再度お試しください。';
+    }
+    return error.message;
+  }
+  return '予期しないエラーが発生しました。';
+}
+
 // デフォルトエクスポート
 export default skillsApi;

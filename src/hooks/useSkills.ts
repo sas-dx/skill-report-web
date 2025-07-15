@@ -177,7 +177,7 @@ export function useSkillMaster() {
 
 // スキル検索フック
 export function useSkillSearch() {
-  const [searchResult, setSearchResult] = useState<SkillSearchResult | null>(null);
+  const [searchResult, setSearchResult] = useState<SkillSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -202,7 +202,7 @@ export function useSkillSearch() {
   }, []);
 
   const clearSearch = useCallback(() => {
-    setSearchResult(null);
+    setSearchResult([]);
     setError(null);
   }, []);
 
@@ -370,6 +370,18 @@ export function useSkills(userId?: string) {
     }
   }, [userSkillsHook]);
 
+  const saveCustomSkill = useCallback(async (data: SkillFormData, customSkillName: string, customSkillCategory: string) => {
+    // カスタムスキルの場合、skill_idとしてカスタムスキル名を使用
+    const customSkillData = {
+      ...data,
+      skillId: customSkillName,
+      category: customSkillCategory,
+      name: customSkillName
+    };
+    
+    return await userSkillsHook.createSkill(customSkillData);
+  }, [userSkillsHook]);
+
   const searchSkills = useCallback(async (filters: SkillSearchFilters) => {
     const params: SkillSearchParams = {};
     
@@ -382,7 +394,7 @@ export function useSkills(userId?: string) {
     if (filters.isActive !== undefined) params.isActive = filters.isActive;
     
     const result = await skillSearchHook.searchSkills(params);
-    return result.skills;
+    return result;
   }, [skillSearchHook]);
 
   return {
@@ -404,6 +416,7 @@ export function useSkills(userId?: string) {
     selectSkill,
     updateFormData: skillEditorHook.updateFormData,
     saveSkill,
+    saveCustomSkill,
     deleteSkill: userSkillsHook.deleteSkill,
     searchSkills
   };

@@ -11,6 +11,7 @@ import { SkillHierarchyTree } from '@/components/skills/SkillHierarchyTree';
 import { SkillDetailForm } from '@/components/skills/SkillDetailForm';
 import { SkillSearch } from '@/components/skills/SkillSearch';
 import { CertificationForm } from '@/components/skills/CertificationForm';
+import { SkillSelectionModal } from '@/components/skills/SkillSelectionModal';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { useSkills } from '@/hooks/useSkills';
@@ -55,6 +56,10 @@ export default function SkillsPage() {
   const [showCertForm, setShowCertForm] = useState(false);
   const [editingCertification, setEditingCertification] = useState<Certification | null>(null);
   const [certLoading, setCertLoading] = useState(false);
+  const [isSkillSelectionModalOpen, setIsSkillSelectionModalOpen] = useState(false);
+  const [isNewSkillMode, setIsNewSkillMode] = useState(false);
+  const [customSkillName, setCustomSkillName] = useState('');
+  const [customSkillCategory, setCustomSkillCategory] = useState('technical');
 
   // 認証状態管理
   const [authState, setAuthState] = useState(() => getCurrentAuthState());
@@ -143,6 +148,9 @@ export default function SkillsPage() {
   // フォームキャンセル処理
   const handleFormCancel = () => {
     setShowForm(false);
+    setIsNewSkillMode(false);
+    setCustomSkillName('');
+    setCustomSkillCategory('technical');
     selectSkill(null);
   };
 
@@ -164,7 +172,7 @@ export default function SkillsPage() {
     try {
       const results = await searchSkills(filters);
       // SkillMasterをUserSkillに変換
-      const userSkillResults: UserSkill[] = results.map(skill => ({
+      const userSkillResults: UserSkill[] = results.map((skill: any) => ({
         id: skill.id,
         skillId: skill.id,
         userId: 'current-user', // 実際のユーザーIDに置き換え
@@ -188,8 +196,25 @@ export default function SkillsPage() {
 
   // 新規スキル追加
   const handleAddNewSkill = () => {
+    setIsSkillSelectionModalOpen(true);
+  };
+
+  // スキル選択モーダルからの新規スキル作成
+  const handleNewSkillFromModal = (skillName: string, category: string) => {
+    setCustomSkillName(skillName);
+    setCustomSkillCategory(category);
+    setIsNewSkillMode(true);
     selectSkill(null);
     setShowForm(true);
+    setIsSkillSelectionModalOpen(false);
+  };
+
+  // 既存スキル選択
+  const handleExistingSkillSelect = (skill: SkillHierarchy) => {
+    setIsNewSkillMode(false);
+    selectSkill(skill);
+    setShowForm(true);
+    setIsSkillSelectionModalOpen(false);
   };
 
   // 資格情報保存処理
@@ -485,6 +510,9 @@ export default function SkillsPage() {
                     onSave={handleFormSave}
                     onCancel={handleFormCancel}
                     isLoading={isLoading}
+                    isNewSkillMode={isNewSkillMode}
+                    customSkillName={customSkillName}
+                    customSkillCategory={customSkillCategory}
                   />
                 ) : (
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -580,6 +608,16 @@ export default function SkillsPage() {
           </div>
         )}
       </div>
+
+      {/* スキル選択モーダル */}
+      <SkillSelectionModal
+        isOpen={isSkillSelectionModalOpen}
+        onClose={() => setIsSkillSelectionModalOpen(false)}
+        onSelectSkill={handleExistingSkillSelect}
+        onCreateCustomSkill={handleNewSkillFromModal}
+        skillHierarchy={skillHierarchy}
+        skills={skills}
+      />
     </div>
   );
 }
