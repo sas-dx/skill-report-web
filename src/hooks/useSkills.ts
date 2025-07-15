@@ -122,11 +122,16 @@ export function useSkillMaster() {
     try {
       setLoading(true);
       setError(null);
-      const data = await skillMasterApi.getHierarchy(categoryId);
+      console.log('fetchHierarchy called with categoryId:', categoryId);
       
-      // カテゴリIDでフィルタリング
-      if (categoryId) {
+      const data = await skillMasterApi.getHierarchy(categoryId);
+      console.log('API returned data:', data);
+      
+      // APIが既にカテゴリでフィルタリングして返している場合はそのまま使用
+      // そうでない場合は手動でフィルタリング
+      if (categoryId && data.length > 1) {
         const filteredData = data.filter(item => item.id === categoryId);
+        console.log('Filtered data:', filteredData);
         setHierarchy(filteredData);
       } else {
         setHierarchy(data);

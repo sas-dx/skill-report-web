@@ -73,11 +73,19 @@ export default function SkillsPage() {
     if (authState.isAuthenticated) {
       loadSkills();
       loadUserSkills();
-      // カテゴリ名をカテゴリIDに変換してAPIに送信
-      loadSkillHierarchy(getCategoryId(activeCategory));
       loadCertifications();
     }
-  }, [authState.isAuthenticated, activeCategory, loadSkills, loadUserSkills, loadSkillHierarchy]);
+  }, [authState.isAuthenticated, loadSkills, loadUserSkills]);
+
+  // カテゴリ変更時にスキル階層を再読み込み
+  useEffect(() => {
+    if (authState.isAuthenticated) {
+      // カテゴリ名をカテゴリIDに変換してAPIに送信
+      const categoryId = getCategoryId(activeCategory);
+      console.log('Loading skill hierarchy for category:', activeCategory, '-> ID:', categoryId);
+      loadSkillHierarchy(categoryId);
+    }
+  }, [authState.isAuthenticated, activeCategory, loadSkillHierarchy]);
 
   // 資格情報読み込み
   const loadCertifications = async () => {

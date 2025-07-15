@@ -38,7 +38,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   const [isExpanded, setIsExpanded] = useState(level < 2); // 最初の2階層は展開
 
   const hasChildren = node.children && node.children.length > 0;
-  const isLeafNode = level === 2; // スキル項目レベル
+  const isLeafNode = level === 3 || (!hasChildren && level >= 2); // 3階層目またはスキル項目レベル
   const isSelected = selectedSkillId === node.id;
 
   // ユーザーのスキルレベルを取得
@@ -78,8 +78,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   };
 
   const getIndentClass = (level: number) => {
-    const indents = ['pl-0', 'pl-4', 'pl-8'];
-    return indents[level] || 'pl-8';
+    const indents = ['pl-0', 'pl-4', 'pl-8', 'pl-12'];
+    return indents[level] || 'pl-12';
   };
 
   const getNodeIcon = () => {
@@ -135,7 +135,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             text-sm truncate
             ${level === 0 ? 'font-semibold text-gray-900' : ''}
             ${level === 1 ? 'font-medium text-gray-800' : ''}
-            ${level === 2 ? 'text-gray-700' : ''}
+            ${level === 2 ? 'font-medium text-gray-700' : ''}
+            ${level === 3 ? 'text-gray-600' : ''}
           `}>
             {highlightText(node.name)}
           </span>
@@ -201,7 +202,8 @@ export const SkillHierarchyTree: React.FC<SkillHierarchyTreeProps> = ({
       
       {hierarchy.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          <p className="text-sm">スキル階層データがありません</p>
+          <p className="text-sm">選択されたカテゴリのスキル階層データがありません</p>
+          <p className="text-xs mt-1">他のカテゴリタブを選択してください</p>
         </div>
       )}
     </div>

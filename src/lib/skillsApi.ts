@@ -89,36 +89,59 @@ export const skillMasterApi = {
   async getHierarchy(category?: string): Promise<SkillHierarchy[]> {
     try {
       const params = new URLSearchParams();
-      if (category) params.append('category', category);
+      if (category) {
+        params.append('category', category);
+        console.log('API request with category:', category);
+      }
       
       const apiResponse = await apiRequest<any[]>(
         `/skills/master${params.toString() ? `?${params.toString()}` : ''}`
       );
       
-      // APIレスポンスをSkillHierarchy形式に変換
-      const hierarchyData: SkillHierarchy[] = apiResponse.map(categoryData => ({
-        id: categoryData.category_id || categoryData.category_code,
-        name: categoryData.category_name,
-        category: categoryData.category_name,
-        level: 1,
-        description: categoryData.description || '',
-        children: categoryData.skills?.map((skill: any) => ({
-          id: skill.skill_id || skill.skill_code,
-          name: skill.skill_name,
-          category: categoryData.category_name,
-          subcategory: categoryData.category_name,
-          parentId: categoryData.category_id || categoryData.category_code,
-          level: 2,
-          description: skill.description || ''
-        })) || []
-      }));
+      console.log('API response:', apiResponse);
       
-      return hierarchyData;
+      // APIレスポンスの構造を確認して適切に変換
+      if (Array.isArray(apiResponse) && apiResponse.length > 0) {
+        // APIが3階層構造のデータを返している場合
+        const hierarchyData: SkillHierarchy[] = apiResponse.map(categoryData => ({
+          id: categoryData.id || categoryData.category_id || categoryData.category_code,
+          name: categoryData.name || categoryData.category_name,
+          category: categoryData.name || categoryData.category_name,
+          level: categoryData.level || 1,
+          description: categoryData.description || '',
+          children: (categoryData.children || []).map((subcategory: any) => ({
+            id: subcategory.id,
+            name: subcategory.name,
+            category: categoryData.name || categoryData.category_name,
+            subcategory: subcategory.name,
+            parentId: categoryData.id || categoryData.category_id,
+            level: subcategory.level || 2,
+            description: subcategory.description || '',
+            children: (subcategory.children || []).map((skill: any) => ({
+              id: skill.id,
+              name: skill.name,
+              category: categoryData.name || categoryData.category_name,
+              subcategory: subcategory.name,
+              parentId: subcategory.id,
+              level: skill.level || 3,
+              description: skill.description || '',
+              difficulty_level: skill.difficulty_level,
+              importance_level: skill.importance_level
+            }))
+          }))
+        }));
+        
+        console.log('Converted hierarchy data:', hierarchyData);
+        return hierarchyData;
+      }
+      
+      // フォールバック処理
+      throw new Error('Invalid API response structure');
     } catch (error) {
       console.warn('スキル階層API呼び出しに失敗しました。モックデータを返します:', error);
       
-      // モックデータを返す（5つのカテゴリに対応）
-      return [
+      // カテゴリが指定されている場合は、そのカテゴリのみを返す
+      const allMockData = [
         {
           id: 'technical',
           name: '技術スキル',
@@ -127,49 +150,100 @@ export const skillMasterApi = {
           description: 'プログラミング言語・フレームワーク・技術基盤',
           children: [
             {
-              id: 'javascript',
-              name: 'JavaScript',
+              id: 'technical_programming',
+              name: 'プログラミング',
               category: '技術スキル',
-              subcategory: 'プログラミング言語',
+              subcategory: 'プログラミング',
               parentId: 'technical',
               level: 2,
-              description: 'JavaScript プログラミング言語'
+              description: 'プログラミング言語',
+              children: [
+                {
+                  id: 'javascript',
+                  name: 'JavaScript',
+                  category: '技術スキル',
+                  subcategory: 'プログラミング',
+                  parentId: 'technical_programming',
+                  level: 3,
+                  description: 'JavaScript プログラミング言語'
+                },
+                {
+                  id: 'typescript',
+                  name: 'TypeScript',
+                  category: '技術スキル',
+                  subcategory: 'プログラミング',
+                  parentId: 'technical_programming',
+                  level: 3,
+                  description: 'TypeScript プログラミング言語'
+                },
+                {
+                  id: 'python',
+                  name: 'Python',
+                  category: '技術スキル',
+                  subcategory: 'プログラミング',
+                  parentId: 'technical_programming',
+                  level: 3,
+                  description: 'Python プログラミング言語'
+                }
+              ]
             },
             {
-              id: 'typescript',
-              name: 'TypeScript',
-              category: '技術スキル',
-              subcategory: 'プログラミング言語',
-              parentId: 'technical',
-              level: 2,
-              description: 'TypeScript プログラミング言語'
-            },
-            {
-              id: 'react',
-              name: 'React',
+              id: 'technical_framework',
+              name: 'フレームワーク',
               category: '技術スキル',
               subcategory: 'フレームワーク',
               parentId: 'technical',
               level: 2,
-              description: 'React フレームワーク'
+              description: 'フレームワーク・ライブラリ',
+              children: [
+                {
+                  id: 'react',
+                  name: 'React',
+                  category: '技術スキル',
+                  subcategory: 'フレームワーク',
+                  parentId: 'technical_framework',
+                  level: 3,
+                  description: 'React フレームワーク'
+                },
+                {
+                  id: 'nextjs',
+                  name: 'Next.js',
+                  category: '技術スキル',
+                  subcategory: 'フレームワーク',
+                  parentId: 'technical_framework',
+                  level: 3,
+                  description: 'Next.js フレームワーク'
+                }
+              ]
             },
             {
-              id: 'nodejs',
-              name: 'Node.js',
-              category: '技術スキル',
-              subcategory: 'ランタイム',
-              parentId: 'technical',
-              level: 2,
-              description: 'Node.js ランタイム環境'
-            },
-            {
-              id: 'postgresql',
-              name: 'PostgreSQL',
+              id: 'technical_database',
+              name: 'データベース',
               category: '技術スキル',
               subcategory: 'データベース',
               parentId: 'technical',
               level: 2,
-              description: 'PostgreSQL データベース'
+              description: 'データベース技術',
+              children: [
+                {
+                  id: 'postgresql',
+                  name: 'PostgreSQL',
+                  category: '技術スキル',
+                  subcategory: 'データベース',
+                  parentId: 'technical_database',
+                  level: 3,
+                  description: 'PostgreSQL データベース'
+                },
+                {
+                  id: 'mysql',
+                  name: 'MySQL',
+                  category: '技術スキル',
+                  subcategory: 'データベース',
+                  parentId: 'technical_database',
+                  level: 3,
+                  description: 'MySQL データベース'
+                }
+              ]
             }
           ]
         },
@@ -327,6 +401,16 @@ export const skillMasterApi = {
           ]
         }
       ];
+
+      // カテゴリが指定されている場合は、そのカテゴリのみを返す
+      if (category) {
+        const filteredData = allMockData.filter(item => item.id === category);
+        console.log('Filtering mock data for category:', category, 'Result:', filteredData);
+        return filteredData;
+      }
+
+      console.log('Returning all mock data:', allMockData);
+      return allMockData;
     }
   },
 
