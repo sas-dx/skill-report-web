@@ -41,73 +41,145 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // データベースからスキルマスタ情報を取得
-      let whereCondition: any = {};
+      // データベースからスキルカテゴリとスキル項目を取得
+      const [skillCategories, skillItems, skillHierarchy] = await Promise.all([
+        prisma.skillCategory.findMany({
+          where: {
+            category_status: 'active'
+          },
+          orderBy: {
+            display_order: 'asc'
+          }
+        }),
+        prisma.skillItem.findMany({
+          where: category ? { skill_category_id: category } : {},
+          orderBy: [
+            { skill_category_id: 'asc' },
+            { difficulty_level: 'asc' },
+            { skill_name: 'asc' }
+          ]
+        }),
+        prisma.skillHierarchy.findMany({
+          where: {
+            is_active: true
+          },
+          orderBy: [
+            { hierarchy_level: 'asc' },
+            { sort_order: 'asc' }
+          ]
+        })
+      ]);
 
-      if (category) {
-        whereCondition.skill_category_id = category;
-      }
+      // カテゴリマッピング
+      const categoryMapping: { [key: string]: string } = {
+        'TECH': '技術スキル',
+        'DEV': '開発スキル', 
+        'BIZ': '業務スキル',
+        'MGT': '管理スキル',
+        'PROD': '生産スキル'
+      };
 
-      if (type) {
-        whereCondition.skill_type = type;
-      }
-
-      if (level) {
-        whereCondition.difficulty_level = parseInt(level);
-      }
-
-      if (search) {
-        whereCondition.OR = [
-          { skill_name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } }
-        ];
-      }
-
-      const skillItems = await prisma.skillItem.findMany({
-        where: whereCondition,
-        orderBy: [
-          { skill_category_id: 'asc' },
-          { difficulty_level: 'asc' },
-          { skill_name: 'asc' }
-        ]
-      });
-
-      // 階層構造に変換
-      const categoryMap = new Map();
+      // 階層構造を構築
+      const hierarchyMap = new Map();
       
-      skillItems.forEach(skill => {
-        const categoryId = skill.skill_category_id || 'technical';
-        if (!categoryMap.has(categoryId)) {
-          categoryMap.set(categoryId, {
-            id: categoryId,
-            name: categoryId === 'technical' ? '技術スキル' : 
-                  categoryId === 'business' ? 'ビジネススキル' : categoryId,
-            category: categoryId === 'technical' ? '技術スキル' : 
-                     categoryId === 'business' ? 'ビジネススキル' : categoryId,
+      // 1階層目：メインカテゴリ
+      skillCategories.forEach(category => {
+        if (category.category_level === 1) {
+          const categoryName = categoryMapping[category.category_code] || category.category_name || category.name;
+          hierarchyMap.set(category.category_code, {
+            id: category.category_code,
+            name: categoryName,
+            category: categoryName,
             level: 1,
-            description: '',
-            children: []
+            description: category.description || '',
+            children: new Map()
           });
         }
-        
-        categoryMap.get(categoryId).children.push({
-          id: skill.skill_code,
-          name: skill.skill_name || skill.name,
-          category: categoryId === 'technical' ? '技術スキル' : 
-                   categoryId === 'business' ? 'ビジネススキル' : categoryId,
-          subcategory: skill.skill_type || 'その他',
-          parentId: categoryId,
-          level: 2,
-          description: skill.description || ''
-        });
       });
 
-      const hierarchyData = Array.from(categoryMap.values());
+      // 2階層目：サブカテゴリ
+      skillCategories.forEach(category => {
+        if (category.category_level === 2 && category.parent_category_id) {
+          const parentCategory = hierarchyMap.get(category.parent_category_id);
+          if (parentCategory) {
+            parentCategory.children.set(category.category_code, {
+              id: category.category_code,
+              name: category.category_name || category.name,
+              category: parentCategory.name,
+              subcategory: category.category_name || category.name,
+              parentId: category.parent_category_id,
+              level: 2,
+              description: category.description || '',
+              children: []
+            });
+          }
+        }
+      });
+
+      // 3階層目：スキル項目
+      skillItems.forEach(skill => {
+        const categoryId = skill.skill_category_id;
+        if (categoryId) {
+          // 直接カテゴリに属する場合
+          const directCategory = hierarchyMap.get(categoryId);
+          if (directCategory && directCategory.level === 1) {
+            if (!directCategory.children.has('default')) {
+              directCategory.children.set('default', {
+                id: `${categoryId}_default`,
+                name: 'その他',
+                category: directCategory.name,
+                subcategory: 'その他',
+                parentId: categoryId,
+                level: 2,
+                description: '',
+                children: []
+              });
+            }
+            directCategory.children.get('default').children.push({
+              id: skill.skill_code,
+              name: skill.skill_name || skill.name,
+              category: directCategory.name,
+              subcategory: 'その他',
+              parentId: `${categoryId}_default`,
+              level: 3,
+              description: skill.description || '',
+              difficulty_level: skill.difficulty_level,
+              importance_level: skill.importance_level
+            });
+          } else {
+            // サブカテゴリに属する場合
+            for (const [parentId, parentCategory] of hierarchyMap) {
+              const subcategory = parentCategory.children.get(categoryId);
+              if (subcategory) {
+                subcategory.children.push({
+                  id: skill.skill_code,
+                  name: skill.skill_name || skill.name,
+                  category: parentCategory.name,
+                  subcategory: subcategory.name,
+                  parentId: categoryId,
+                  level: 3,
+                  description: skill.description || '',
+                  difficulty_level: skill.difficulty_level,
+                  importance_level: skill.importance_level
+                });
+                break;
+              }
+            }
+          }
+        }
+      });
+
+      // Map構造を配列に変換
+      const hierarchyData = Array.from(hierarchyMap.values()).map(category => ({
+        ...category,
+        children: Array.from(category.children.values())
+      }));
 
       return NextResponse.json({
         success: true,
         data: hierarchyData,
         count: hierarchyData.length,
+        source: 'database',
         timestamp: new Date().toISOString()
       });
 

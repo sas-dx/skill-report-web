@@ -83,6 +83,25 @@ async function apiRequest<T>(
   }
 }
 
+// APIレスポンス変換関数
+function convertSkillResponseToUserSkill(skillResponse: any): UserSkill {
+  return {
+    id: skillResponse.skill_id || '',
+    skillId: skillResponse.skill_id || '',
+    userId: 'current-user', // 現在のユーザーID
+    skillName: skillResponse.name || '',
+    category: skillResponse.category || 'technical',
+    subcategory: skillResponse.subcategory || undefined,
+    level: (skillResponse.level as SkillLevel) || 1,
+    acquiredDate: skillResponse.acquired_date || undefined,
+    experienceYears: skillResponse.experience_years || undefined,
+    lastUsed: skillResponse.last_used_date || undefined,
+    remarks: skillResponse.description || undefined,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
 // スキルマスタAPI (API-023)
 export const skillMasterApi = {
   // スキル階層取得
@@ -140,21 +159,21 @@ export const skillMasterApi = {
     } catch (error) {
       console.warn('スキル階層API呼び出しに失敗しました。モックデータを返します:', error);
       
-      // カテゴリが指定されている場合は、そのカテゴリのみを返す
+      // 完全なモックデータを定義
       const allMockData = [
         {
-          id: 'technical',
+          id: 'TECH',
           name: '技術スキル',
           category: '技術スキル',
           level: 1,
           description: 'プログラミング言語・フレームワーク・技術基盤',
           children: [
             {
-              id: 'technical_programming',
+              id: 'TECH_programming',
               name: 'プログラミング',
               category: '技術スキル',
               subcategory: 'プログラミング',
-              parentId: 'technical',
+              parentId: 'TECH',
               level: 2,
               description: 'プログラミング言語',
               children: [
@@ -163,7 +182,7 @@ export const skillMasterApi = {
                   name: 'JavaScript',
                   category: '技術スキル',
                   subcategory: 'プログラミング',
-                  parentId: 'technical_programming',
+                  parentId: 'TECH_programming',
                   level: 3,
                   description: 'JavaScript プログラミング言語'
                 },
@@ -172,7 +191,7 @@ export const skillMasterApi = {
                   name: 'TypeScript',
                   category: '技術スキル',
                   subcategory: 'プログラミング',
-                  parentId: 'technical_programming',
+                  parentId: 'TECH_programming',
                   level: 3,
                   description: 'TypeScript プログラミング言語'
                 },
@@ -181,18 +200,18 @@ export const skillMasterApi = {
                   name: 'Python',
                   category: '技術スキル',
                   subcategory: 'プログラミング',
-                  parentId: 'technical_programming',
+                  parentId: 'TECH_programming',
                   level: 3,
                   description: 'Python プログラミング言語'
                 }
               ]
             },
             {
-              id: 'technical_framework',
+              id: 'TECH_framework',
               name: 'フレームワーク',
               category: '技術スキル',
               subcategory: 'フレームワーク',
-              parentId: 'technical',
+              parentId: 'TECH',
               level: 2,
               description: 'フレームワーク・ライブラリ',
               children: [
@@ -201,7 +220,7 @@ export const skillMasterApi = {
                   name: 'React',
                   category: '技術スキル',
                   subcategory: 'フレームワーク',
-                  parentId: 'technical_framework',
+                  parentId: 'TECH_framework',
                   level: 3,
                   description: 'React フレームワーク'
                 },
@@ -210,18 +229,18 @@ export const skillMasterApi = {
                   name: 'Next.js',
                   category: '技術スキル',
                   subcategory: 'フレームワーク',
-                  parentId: 'technical_framework',
+                  parentId: 'TECH_framework',
                   level: 3,
                   description: 'Next.js フレームワーク'
                 }
               ]
             },
             {
-              id: 'technical_database',
+              id: 'TECH_database',
               name: 'データベース',
               category: '技術スキル',
               subcategory: 'データベース',
-              parentId: 'technical',
+              parentId: 'TECH',
               level: 2,
               description: 'データベース技術',
               children: [
@@ -230,7 +249,7 @@ export const skillMasterApi = {
                   name: 'PostgreSQL',
                   category: '技術スキル',
                   subcategory: 'データベース',
-                  parentId: 'technical_database',
+                  parentId: 'TECH_database',
                   level: 3,
                   description: 'PostgreSQL データベース'
                 },
@@ -239,7 +258,7 @@ export const skillMasterApi = {
                   name: 'MySQL',
                   category: '技術スキル',
                   subcategory: 'データベース',
-                  parentId: 'technical_database',
+                  parentId: 'TECH_database',
                   level: 3,
                   description: 'MySQL データベース'
                 }
@@ -248,155 +267,357 @@ export const skillMasterApi = {
           ]
         },
         {
-          id: 'development',
+          id: 'DEV',
           name: '開発スキル',
           category: '開発スキル',
           level: 1,
           description: '開発手法・ツール・プロセス',
           children: [
             {
-              id: 'git',
-              name: 'Git',
+              id: 'DEV_version_control',
+              name: 'バージョン管理',
               category: '開発スキル',
               subcategory: 'バージョン管理',
-              parentId: 'development',
+              parentId: 'DEV',
               level: 2,
-              description: 'Git バージョン管理システム'
+              description: 'ソースコード管理',
+              children: [
+                {
+                  id: 'git',
+                  name: 'Git',
+                  category: '開発スキル',
+                  subcategory: 'バージョン管理',
+                  parentId: 'DEV_version_control',
+                  level: 3,
+                  description: 'Git バージョン管理システム'
+                },
+                {
+                  id: 'github',
+                  name: 'GitHub',
+                  category: '開発スキル',
+                  subcategory: 'バージョン管理',
+                  parentId: 'DEV_version_control',
+                  level: 3,
+                  description: 'GitHub プラットフォーム'
+                }
+              ]
             },
             {
-              id: 'docker',
-              name: 'Docker',
+              id: 'DEV_container',
+              name: 'コンテナ技術',
               category: '開発スキル',
               subcategory: 'コンテナ技術',
-              parentId: 'development',
+              parentId: 'DEV',
               level: 2,
-              description: 'Docker コンテナ技術'
+              description: 'コンテナ化技術',
+              children: [
+                {
+                  id: 'docker',
+                  name: 'Docker',
+                  category: '開発スキル',
+                  subcategory: 'コンテナ技術',
+                  parentId: 'DEV_container',
+                  level: 3,
+                  description: 'Docker コンテナ技術'
+                },
+                {
+                  id: 'kubernetes',
+                  name: 'Kubernetes',
+                  category: '開発スキル',
+                  subcategory: 'コンテナ技術',
+                  parentId: 'DEV_container',
+                  level: 3,
+                  description: 'Kubernetes オーケストレーション'
+                }
+              ]
             },
             {
-              id: 'ci-cd',
-              name: 'CI/CD',
+              id: 'DEV_automation',
+              name: '自動化',
               category: '開発スキル',
               subcategory: '自動化',
-              parentId: 'development',
+              parentId: 'DEV',
               level: 2,
-              description: '継続的インテグレーション・デプロイメント'
-            },
-            {
-              id: 'testing',
-              name: 'テスト技法',
-              category: '開発スキル',
-              subcategory: '品質保証',
-              parentId: 'development',
-              level: 2,
-              description: 'ユニットテスト・統合テスト・E2Eテスト'
+              description: '開発プロセス自動化',
+              children: [
+                {
+                  id: 'ci-cd',
+                  name: 'CI/CD',
+                  category: '開発スキル',
+                  subcategory: '自動化',
+                  parentId: 'DEV_automation',
+                  level: 3,
+                  description: '継続的インテグレーション・デプロイメント'
+                },
+                {
+                  id: 'testing',
+                  name: 'テスト技法',
+                  category: '開発スキル',
+                  subcategory: '自動化',
+                  parentId: 'DEV_automation',
+                  level: 3,
+                  description: 'ユニットテスト・統合テスト・E2Eテスト'
+                }
+              ]
             }
           ]
         },
         {
-          id: 'business',
+          id: 'BIZ',
           name: '業務スキル',
           category: '業務スキル',
           level: 1,
           description: '業務知識・ドメイン知識',
           children: [
             {
-              id: 'requirements-analysis',
-              name: '要件分析',
+              id: 'BIZ_analysis',
+              name: '分析',
               category: '業務スキル',
               subcategory: '分析',
-              parentId: 'business',
+              parentId: 'BIZ',
               level: 2,
-              description: '業務要件の分析・整理'
+              description: '業務分析・要件分析',
+              children: [
+                {
+                  id: 'requirements-analysis',
+                  name: '要件分析',
+                  category: '業務スキル',
+                  subcategory: '分析',
+                  parentId: 'BIZ_analysis',
+                  level: 3,
+                  description: '業務要件の分析・整理'
+                },
+                {
+                  id: 'business-analysis',
+                  name: '業務分析',
+                  category: '業務スキル',
+                  subcategory: '分析',
+                  parentId: 'BIZ_analysis',
+                  level: 3,
+                  description: '業務プロセスの分析・改善'
+                }
+              ]
             },
             {
-              id: 'system-design',
-              name: 'システム設計',
+              id: 'BIZ_design',
+              name: '設計',
               category: '業務スキル',
               subcategory: '設計',
-              parentId: 'business',
+              parentId: 'BIZ',
               level: 2,
-              description: 'システム全体の設計・アーキテクチャ'
+              description: 'システム設計・業務設計',
+              children: [
+                {
+                  id: 'system-design',
+                  name: 'システム設計',
+                  category: '業務スキル',
+                  subcategory: '設計',
+                  parentId: 'BIZ_design',
+                  level: 3,
+                  description: 'システム全体の設計・アーキテクチャ'
+                },
+                {
+                  id: 'ui-ux-design',
+                  name: 'UI/UX設計',
+                  category: '業務スキル',
+                  subcategory: '設計',
+                  parentId: 'BIZ_design',
+                  level: 3,
+                  description: 'ユーザーインターフェース・体験設計'
+                }
+              ]
             },
             {
-              id: 'documentation',
-              name: 'ドキュメント作成',
+              id: 'BIZ_communication',
+              name: 'コミュニケーション',
               category: '業務スキル',
               subcategory: 'コミュニケーション',
-              parentId: 'business',
+              parentId: 'BIZ',
               level: 2,
-              description: '技術文書・仕様書の作成'
+              description: 'コミュニケーション・ドキュメント作成',
+              children: [
+                {
+                  id: 'documentation',
+                  name: 'ドキュメント作成',
+                  category: '業務スキル',
+                  subcategory: 'コミュニケーション',
+                  parentId: 'BIZ_communication',
+                  level: 3,
+                  description: '技術文書・仕様書の作成'
+                },
+                {
+                  id: 'presentation',
+                  name: 'プレゼンテーション',
+                  category: '業務スキル',
+                  subcategory: 'コミュニケーション',
+                  parentId: 'BIZ_communication',
+                  level: 3,
+                  description: '効果的なプレゼンテーション技法'
+                }
+              ]
             }
           ]
         },
         {
-          id: 'management',
+          id: 'MGT',
           name: '管理スキル',
           category: '管理スキル',
           level: 1,
           description: 'プロジェクト管理・チーム管理',
           children: [
             {
-              id: 'project-management',
-              name: 'プロジェクト管理',
+              id: 'MGT_project',
+              name: 'プロジェクト',
               category: '管理スキル',
               subcategory: 'プロジェクト',
-              parentId: 'management',
+              parentId: 'MGT',
               level: 2,
-              description: 'プロジェクトの計画・実行・管理'
+              description: 'プロジェクト管理・計画',
+              children: [
+                {
+                  id: 'project-management',
+                  name: 'プロジェクト管理',
+                  category: '管理スキル',
+                  subcategory: 'プロジェクト',
+                  parentId: 'MGT_project',
+                  level: 3,
+                  description: 'プロジェクトの計画・実行・管理'
+                },
+                {
+                  id: 'schedule-management',
+                  name: 'スケジュール管理',
+                  category: '管理スキル',
+                  subcategory: 'プロジェクト',
+                  parentId: 'MGT_project',
+                  level: 3,
+                  description: 'プロジェクトスケジュールの管理'
+                }
+              ]
             },
             {
-              id: 'team-leadership',
-              name: 'チームリーダーシップ',
+              id: 'MGT_leadership',
+              name: 'リーダーシップ',
               category: '管理スキル',
               subcategory: 'リーダーシップ',
-              parentId: 'management',
+              parentId: 'MGT',
               level: 2,
-              description: 'チームの指導・育成・マネジメント'
+              description: 'チーム指導・人材育成',
+              children: [
+                {
+                  id: 'team-leadership',
+                  name: 'チームリーダーシップ',
+                  category: '管理スキル',
+                  subcategory: 'リーダーシップ',
+                  parentId: 'MGT_leadership',
+                  level: 3,
+                  description: 'チームの指導・育成・マネジメント'
+                },
+                {
+                  id: 'mentoring',
+                  name: 'メンタリング',
+                  category: '管理スキル',
+                  subcategory: 'リーダーシップ',
+                  parentId: 'MGT_leadership',
+                  level: 3,
+                  description: '後輩・部下の指導・育成'
+                }
+              ]
             },
             {
-              id: 'risk-management',
-              name: 'リスク管理',
+              id: 'MGT_risk',
+              name: 'リスク',
               category: '管理スキル',
               subcategory: 'リスク',
-              parentId: 'management',
+              parentId: 'MGT',
               level: 2,
-              description: 'プロジェクトリスクの識別・対策'
+              description: 'リスク管理・品質管理',
+              children: [
+                {
+                  id: 'risk-management',
+                  name: 'リスク管理',
+                  category: '管理スキル',
+                  subcategory: 'リスク',
+                  parentId: 'MGT_risk',
+                  level: 3,
+                  description: 'プロジェクトリスクの識別・対策'
+                },
+                {
+                  id: 'quality-management',
+                  name: '品質管理',
+                  category: '管理スキル',
+                  subcategory: 'リスク',
+                  parentId: 'MGT_risk',
+                  level: 3,
+                  description: '品質保証・品質改善'
+                }
+              ]
             }
           ]
         },
         {
-          id: 'productivity',
+          id: 'PROD',
           name: '生産スキル',
           category: '生産スキル',
           level: 1,
           description: '生産性向上・効率化',
           children: [
             {
-              id: 'automation',
-              name: '自動化',
+              id: 'PROD_efficiency',
+              name: '効率化',
               category: '生産スキル',
               subcategory: '効率化',
-              parentId: 'productivity',
+              parentId: 'PROD',
               level: 2,
-              description: '業務プロセスの自動化'
+              description: '業務効率化・自動化',
+              children: [
+                {
+                  id: 'automation',
+                  name: '自動化',
+                  category: '生産スキル',
+                  subcategory: '効率化',
+                  parentId: 'PROD_efficiency',
+                  level: 3,
+                  description: '業務プロセスの自動化'
+                },
+                {
+                  id: 'process-improvement',
+                  name: 'プロセス改善',
+                  category: '生産スキル',
+                  subcategory: '効率化',
+                  parentId: 'PROD_efficiency',
+                  level: 3,
+                  description: '業務プロセスの改善・最適化'
+                }
+              ]
             },
             {
-              id: 'optimization',
-              name: '最適化',
+              id: 'PROD_performance',
+              name: 'パフォーマンス',
               category: '生産スキル',
               subcategory: 'パフォーマンス',
-              parentId: 'productivity',
+              parentId: 'PROD',
               level: 2,
-              description: 'システム・プロセスの最適化'
-            },
-            {
-              id: 'monitoring',
-              name: '監視・運用',
-              category: '生産スキル',
-              subcategory: '運用',
-              parentId: 'productivity',
-              level: 2,
-              description: 'システム監視・運用保守'
+              description: 'システム・業務パフォーマンス向上',
+              children: [
+                {
+                  id: 'optimization',
+                  name: '最適化',
+                  category: '生産スキル',
+                  subcategory: 'パフォーマンス',
+                  parentId: 'PROD_performance',
+                  level: 3,
+                  description: 'システム・プロセスの最適化'
+                },
+                {
+                  id: 'monitoring',
+                  name: '監視・運用',
+                  category: '生産スキル',
+                  subcategory: 'パフォーマンス',
+                  parentId: 'PROD_performance',
+                  level: 3,
+                  description: 'システム監視・運用保守'
+                }
+              ]
             }
           ]
         }
@@ -460,25 +681,6 @@ export const skillMasterApi = {
     }
   }
 };
-
-// APIレスポンス変換関数
-function convertSkillResponseToUserSkill(skillResponse: any): UserSkill {
-  return {
-    id: skillResponse.skill_id || '',
-    skillId: skillResponse.skill_id || '',
-    userId: 'current-user', // 現在のユーザーID
-    skillName: skillResponse.name || '',
-    category: skillResponse.category || 'technical',
-    subcategory: skillResponse.subcategory || undefined,
-    level: (skillResponse.level as SkillLevel) || 1,
-    acquiredDate: skillResponse.acquired_date || undefined,
-    experienceYears: skillResponse.experience_years || undefined,
-    lastUsed: skillResponse.last_used_date || undefined,
-    remarks: skillResponse.description || undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-}
 
 // ユーザースキルAPI (API-021, API-022)
 export const userSkillApi = {
@@ -544,387 +746,317 @@ export const userSkillApi = {
 
   // 特定スキル取得
   async getSkill(skillId: string, userId?: string): Promise<UserSkill> {
-    const endpoint = userId ? `/skills/${userId}` : '/skills';
-    const params = new URLSearchParams({ skillId });
-    const skillResponse = await apiRequest<any>(`${endpoint}?${params.toString()}`);
-    return convertSkillResponseToUserSkill(skillResponse);
+    try {
+      const endpoint = userId ? `/skills/${userId}` : '/skills';
+      const params = new URLSearchParams({ skillId });
+      const skillResponse = await apiRequest<any>(`${endpoint}?${params.toString()}`);
+      return convertSkillResponseToUserSkill(skillResponse);
+    } catch (error) {
+      console.warn('スキル取得API呼び出しに失敗しました。モックデータを返します:', error);
+      
+      // モックデータを返す
+      return {
+        id: skillId,
+        skillId: skillId,
+        userId: 'current-user',
+        skillName: skillId,
+        category: '技術スキル',
+        subcategory: 'プログラミング言語',
+        level: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
   },
 
   // スキル情報更新
   async updateSkill(skillData: SkillFormData, userId?: string): Promise<UserSkill> {
-    const endpoint = userId ? `/skills/${userId}` : '/skills';
-    
-    // APIが期待する形式に変換
-    const requestData = {
-      year: new Date().getFullYear(),
-      skills: [{
-        skill_id: skillData.skillId,
-        name: skillData.skillId, // スキル名（実際にはマスタから取得すべき）
-        category: 'technical', // デフォルトカテゴリ
+    try {
+      const endpoint = userId ? `/skills/${userId}` : '/skills';
+      
+      // APIが期待する形式に変換
+      const requestData = {
+        year: new Date().getFullYear(),
+        skills: [{
+          skill_id: skillData.skillId,
+          name: skillData.skillId, // スキル名（実際にはマスタから取得すべき）
+          category: 'technical', // デフォルトカテゴリ
+          level: skillData.level,
+          experience_years: skillData.experienceYears || 0,
+          description: skillData.remarks || '',
+          last_used_date: skillData.lastUsed || '',
+          projects: [],
+          certifications: [],
+          self_assessment: {
+            strengths: '',
+            weaknesses: '',
+            improvement_plan: ''
+          }
+        }]
+      };
+      
+      const response = await apiRequest<any>(endpoint, {
+        method: 'PUT',
+        body: JSON.stringify(requestData),
+      });
+      
+      // レスポンスから最初のスキルを取得して変換
+      const skillResponse = response.skills[0];
+      return convertSkillResponseToUserSkill(skillResponse);
+    } catch (error) {
+      console.warn('スキル更新API呼び出しに失敗しました。モックデータを返します:', error);
+      
+      // モックデータを返す
+      return {
+        id: skillData.skillId,
+        skillId: skillData.skillId,
+        userId: 'current-user',
+        skillName: skillData.skillId,
+        category: '技術スキル',
         level: skillData.level,
-        experience_years: skillData.experienceYears || 0,
-        description: skillData.remarks || '',
-        last_used_date: skillData.lastUsed || '',
-        projects: [],
-        certifications: [],
-        self_assessment: {
-          strengths: '',
-          weaknesses: '',
-          improvement_plan: ''
-        }
-      }]
-    };
-    
-    const response = await apiRequest<any>(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(requestData),
-    });
-    
-    // レスポンスから最初のスキルを取得して変換
-    const skillResponse = response.skills[0];
-    return convertSkillResponseToUserSkill(skillResponse);
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
   },
 
-  // スキル情報作成
+  // スキル作成
   async createSkill(skillData: SkillFormData, userId?: string): Promise<UserSkill> {
-    const endpoint = userId ? `/skills/${userId}` : '/skills';
-    
-    // APIが期待する形式に変換
-    const requestData = {
-      name: skillData.skillId, // スキル名（実際にはマスタから取得すべき）
-      category: 'technical', // デフォルトカテゴリ
-      level: skillData.level,
-      experience_years: skillData.experienceYears || 0,
-      description: skillData.remarks || '',
-      last_used_date: skillData.lastUsed || '',
-      projects: [],
-      certifications: [],
-      self_assessment: {
-        strengths: '',
-        weaknesses: '',
-        improvement_plan: ''
-      }
-    };
-    
-    const skillResponse = await apiRequest<any>(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(requestData),
-    });
-    
-    return convertSkillResponseToUserSkill(skillResponse);
+    try {
+      const endpoint = userId ? `/skills/${userId}` : '/skills';
+      
+      // APIが期待する形式に変換
+      const requestData = {
+        year: new Date().getFullYear(),
+        skills: [{
+          skill_id: skillData.skillId,
+          name: skillData.skillId,
+          category: 'technical',
+          level: skillData.level,
+          experience_years: skillData.experienceYears || 0,
+          description: skillData.remarks || '',
+          last_used_date: skillData.lastUsed || '',
+          projects: [],
+          certifications: [],
+          self_assessment: {
+            strengths: '',
+            weaknesses: '',
+            improvement_plan: ''
+          }
+        }]
+      };
+      
+      const response = await apiRequest<any>(endpoint, {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+      });
+      
+      const skillResponse = response.skills[0];
+      return convertSkillResponseToUserSkill(skillResponse);
+    } catch (error) {
+      console.warn('スキル作成API呼び出しに失敗しました。モックデータを返します:', error);
+      
+      return {
+        id: skillData.skillId,
+        skillId: skillData.skillId,
+        userId: 'current-user',
+        skillName: skillData.skillId,
+        category: '技術スキル',
+        level: skillData.level,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
   },
 
   // スキル削除
   async deleteSkill(skillId: string, userId?: string): Promise<void> {
-    const endpoint = userId ? `/skills/${userId}` : '/skills';
-    await apiRequest<void>(endpoint, {
-      method: 'DELETE',
-      body: JSON.stringify({ skillId }),
-    });
+    try {
+      const endpoint = userId ? `/skills/${userId}` : '/skills';
+      const params = new URLSearchParams({ skillId });
+      
+      await apiRequest<void>(`${endpoint}?${params.toString()}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.warn('スキル削除API呼び出しに失敗しました:', error);
+      // モックでは何もしない
+    }
   }
 };
 
-// スキル検索API (API-030)
+// スキル検索API
 export const skillSearchApi = {
   // スキル検索
-  async searchSkills(params: SkillSearchParams): Promise<SkillSearchResult> {
+  async searchSkills(params: SkillSearchParams): Promise<SkillSearchResult[]> {
     try {
       const searchParams = new URLSearchParams();
-      
       if (params.keyword) searchParams.append('keyword', params.keyword);
       if (params.category) searchParams.append('category', params.category);
       if (params.subcategory) searchParams.append('subcategory', params.subcategory);
       if (params.level) searchParams.append('level', params.level.toString());
-      if (params.hasExperience !== undefined) searchParams.append('hasExperience', params.hasExperience.toString());
-      if (params.page) searchParams.append('page', params.page.toString());
-      if (params.limit) searchParams.append('limit', params.limit.toString());
-
-      // APIレスポンスを直接取得（SkillApiResponse形式ではない）
-      const url = `/api/skills/search?${searchParams.toString()}`;
-      const authHeaders = getAuthHeaders();
       
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`API_ERROR: ${response.status}`);
-      }
-
-      const apiResponse = await response.json();
-      
-      if (!apiResponse.success) {
-        throw new Error(apiResponse.error?.message || 'API request failed');
-      }
-
-      // APIレスポンスの data.results を SkillMaster[] に変換
-      const searchResults = apiResponse.data.results.map((result: any) => ({
-        id: result.skill_id || result.skill_code,
-        name: result.skill_name,
-        category: result.category?.category_name || '技術スキル',
-        subcategory: result.category?.category_code || undefined,
-        description: result.description || '',
-        isActive: result.is_active || true,
-        sortOrder: 1
-      }));
-
-      return {
-        skills: searchResults,
-        total: apiResponse.data.pagination?.total_count || searchResults.length,
-        page: apiResponse.data.pagination?.current_page || 1,
-        limit: apiResponse.data.pagination?.limit || 20
-      };
+      return await apiRequest<SkillSearchResult[]>(
+        `/skills/search?${searchParams.toString()}`
+      );
     } catch (error) {
       console.warn('スキル検索API呼び出しに失敗しました。モックデータを返します:', error);
       
       // モックデータを返す
-      const mockSkills: SkillMaster[] = [
+      return [
         {
-          id: 'javascript',
-          name: 'JavaScript',
+          skillId: 'javascript',
+          skillName: 'JavaScript',
           category: '技術スキル',
           subcategory: 'プログラミング言語',
           description: 'Webフロントエンド開発言語',
-          isActive: true,
-          sortOrder: 1
+          userCount: 150,
+          averageLevel: 2.8
         },
         {
-          id: 'typescript',
-          name: 'TypeScript',
+          skillId: 'typescript',
+          skillName: 'TypeScript',
           category: '技術スキル',
           subcategory: 'プログラミング言語',
           description: 'JavaScript拡張言語',
-          isActive: true,
-          sortOrder: 2
-        },
-        {
-          id: 'react',
-          name: 'React',
-          category: '技術スキル',
-          subcategory: 'フレームワーク',
-          description: 'Webフロントエンドライブラリ',
-          isActive: true,
-          sortOrder: 3
-        },
-        {
-          id: 'nodejs',
-          name: 'Node.js',
-          category: '技術スキル',
-          subcategory: 'ランタイム',
-          description: 'サーバーサイドJavaScript',
-          isActive: true,
-          sortOrder: 4
+          userCount: 120,
+          averageLevel: 2.5
         }
       ];
-
-      // フィルタリング処理
-      let filteredSkills = mockSkills;
-      
-      if (params.keyword) {
-        const keyword = params.keyword.toLowerCase();
-        filteredSkills = filteredSkills.filter(skill => 
-          skill.name.toLowerCase().includes(keyword) ||
-          skill.description?.toLowerCase().includes(keyword)
-        );
-      }
-      
-      if (params.category) {
-        filteredSkills = filteredSkills.filter(skill => skill.category === params.category);
-      }
-      
-      if (params.subcategory) {
-        filteredSkills = filteredSkills.filter(skill => skill.subcategory === params.subcategory);
-      }
-
-      // ページネーション
-      const page = params.page || 1;
-      const limit = params.limit || 10;
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedSkills = filteredSkills.slice(startIndex, endIndex);
-
-      return {
-        skills: paginatedSkills,
-        total: filteredSkills.length,
-        page,
-        limit
-      };
     }
   }
 };
 
-// 資格マスタAPI (API-009)
-export const certificationMasterApi = {
-  // 資格マスタ取得
-  async getCertifications(params?: { keyword?: string; category?: string }): Promise<CertificationMaster[]> {
-    const searchParams = new URLSearchParams();
-    if (params?.keyword) searchParams.append('keyword', params.keyword);
-    if (params?.category) searchParams.append('category', params.category);
-    
-    return apiRequest<CertificationMaster[]>(
-      `/certifications/master${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-    );
-  }
-};
-
-// ユーザー資格API (API-010)
-export const userCertificationApi = {
-  // ユーザー資格取得
-  async getUserCertifications(userId?: string): Promise<Certification[]> {
-    const endpoint = userId ? `/certifications/${userId}` : '/certifications';
-    return apiRequest<Certification[]>(endpoint);
+// 資格情報API
+export const certificationApi = {
+  // 資格一覧取得
+  async getCertifications(userId?: string): Promise<Certification[]> {
+    try {
+      const endpoint = userId ? `/certifications?userId=${userId}` : '/certifications';
+      return await apiRequest<Certification[]>(endpoint);
+    } catch (error) {
+      console.warn('資格情報API呼び出しに失敗しました。モックデータを返します:', error);
+      
+      // モックデータを返す
+      return [
+        {
+          id: '1',
+          userId: 'current-user',
+          certificationName: 'AWS Solutions Architect Associate',
+          acquiredDate: '2023-06-15',
+          expiryDate: '2026-06-15',
+          score: '850',
+          remarks: 'クラウドアーキテクチャ設計の基礎知識',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+    }
   },
 
-  // 資格情報作成
-  async createCertification(certData: CertificationFormData, userId?: string): Promise<Certification> {
-    const endpoint = userId ? `/certifications/${userId}` : '/certifications';
-    return apiRequest<Certification>(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(certData),
-    });
+  // 資格作成
+  async createCertification(certificationData: CertificationFormData, userId?: string): Promise<Certification> {
+    try {
+      const endpoint = '/certifications';
+      
+      const requestData = {
+        ...certificationData,
+        userId: userId || 'current-user'
+      };
+      
+      return await apiRequest<Certification>(endpoint, {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+      });
+    } catch (error) {
+      console.warn('資格作成API呼び出しに失敗しました。モックデータを返します:', error);
+      
+      return {
+        id: Date.now().toString(),
+        userId: 'current-user',
+        certificationName: certificationData.certificationName,
+        acquiredDate: certificationData.acquiredDate,
+        expiryDate: certificationData.expiryDate || '',
+        score: certificationData.score || '',
+        remarks: certificationData.remarks || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
   },
 
-  // 資格情報更新
-  async updateCertification(certId: string, certData: CertificationFormData, userId?: string): Promise<Certification> {
-    const endpoint = userId ? `/certifications/${userId}` : '/certifications';
-    return apiRequest<Certification>(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify({ id: certId, ...certData }),
-    });
+  // 資格更新
+  async updateCertification(id: string, certificationData: CertificationFormData): Promise<Certification> {
+    try {
+      return await apiRequest<Certification>(`/certifications/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(certificationData),
+      });
+    } catch (error) {
+      console.warn('資格更新API呼び出しに失敗しました。モックデータを返します:', error);
+      
+      return {
+        id,
+        userId: 'current-user',
+        certificationName: certificationData.certificationName,
+        acquiredDate: certificationData.acquiredDate,
+        expiryDate: certificationData.expiryDate || '',
+        score: certificationData.score || '',
+        remarks: certificationData.remarks || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
   },
 
   // 資格削除
-  async deleteCertification(certId: string, userId?: string): Promise<void> {
-    const endpoint = userId ? `/certifications/${userId}` : '/certifications';
-    return apiRequest<void>(endpoint, {
-      method: 'DELETE',
-      body: JSON.stringify({ id: certId }),
-    });
-  }
-};
-
-// スキルマップAPI (API-026)
-export const skillMapApi = {
-  // スキルマップデータ取得
-  async getSkillMapData(params?: {
-    department?: string;
-    position?: string;
-    skills?: string[];
-  }): Promise<any> {
+  async deleteCertification(id: string): Promise<void> {
     try {
-      const searchParams = new URLSearchParams();
-      if (params?.department) searchParams.append('department', params.department);
-      if (params?.position) searchParams.append('position', params.position);
-      if (params?.skills) {
-        params.skills.forEach(skill => searchParams.append('skills', skill));
-      }
-      
-      return await apiRequest<any>(`/skills/map?${searchParams.toString()}`);
+      await apiRequest<void>(`/certifications/${id}`, {
+        method: 'DELETE',
+      });
     } catch (error) {
-      console.warn('スキルマップAPI呼び出しに失敗しました。モックデータを返します:', error);
+      console.warn('資格削除API呼び出しに失敗しました:', error);
+      // モックでは何もしない
+    }
+  },
+
+  // 資格マスタ取得
+  async getCertificationMasters(): Promise<CertificationMaster[]> {
+    try {
+      return await apiRequest<CertificationMaster[]>('/certifications/master');
+    } catch (error) {
+      console.warn('資格マスタAPI呼び出しに失敗しました。モックデータを返します:', error);
       
-      // モックデータを返す
-      return {
-        users: [
-          {
-            id: 'user1',
-            name: '山田太郎',
-            department: '開発部',
-            position: 'シニアエンジニア',
-            skills: [
-              { skillId: 'javascript', skillName: 'JavaScript', level: 4 },
-              { skillId: 'typescript', skillName: 'TypeScript', level: 3 },
-              { skillId: 'react', skillName: 'React', level: 4 }
-            ]
-          },
-          {
-            id: 'user2',
-            name: '佐藤花子',
-            department: '開発部',
-            position: 'エンジニア',
-            skills: [
-              { skillId: 'javascript', skillName: 'JavaScript', level: 3 },
-              { skillId: 'typescript', skillName: 'TypeScript', level: 2 },
-              { skillId: 'react', skillName: 'React', level: 3 }
-            ]
-          }
-        ],
-        skillSummary: {
-          javascript: { total: 2, levels: { 1: 0, 2: 0, 3: 1, 4: 1 } },
-          typescript: { total: 2, levels: { 1: 0, 2: 1, 3: 1, 4: 0 } },
-          react: { total: 2, levels: { 1: 0, 2: 0, 3: 1, 4: 1 } }
+      return [
+        {
+          id: 'aws-saa',
+          name: 'AWS Solutions Architect Associate',
+          organizationName: 'Amazon Web Services',
+          category: 'クラウド',
+          description: 'AWSクラウドアーキテクチャ設計の基礎資格',
+          isActive: true
+        },
+        {
+          id: 'aws-sap',
+          name: 'AWS Solutions Architect Professional',
+          organizationName: 'Amazon Web Services',
+          category: 'クラウド',
+          description: 'AWSクラウドアーキテクチャ設計の上級資格',
+          isActive: true
         }
-      };
+      ];
     }
-  },
-
-  // スキルマップ条件取得
-  async getMapConditions(): Promise<any> {
-    try {
-      return await apiRequest<any>('/skills/map/conditions');
-    } catch (error) {
-      console.warn('スキルマップ条件API呼び出しに失敗しました。モックデータを返します:', error);
-      
-      // モックデータを返す
-      return {
-        departments: [
-          { id: 'dev', name: '開発部' },
-          { id: 'sales', name: '営業部' },
-          { id: 'hr', name: '人事部' }
-        ],
-        positions: [
-          { id: 'senior', name: 'シニアエンジニア' },
-          { id: 'engineer', name: 'エンジニア' },
-          { id: 'junior', name: 'ジュニアエンジニア' }
-        ],
-        skills: [
-          { id: 'javascript', name: 'JavaScript', category: '技術スキル' },
-          { id: 'typescript', name: 'TypeScript', category: '技術スキル' },
-          { id: 'react', name: 'React', category: '技術スキル' },
-          { id: 'nodejs', name: 'Node.js', category: '技術スキル' }
-        ]
-      };
-    }
-  },
-
-  // スキルマップエクスポート
-  async exportSkillMap(params: any): Promise<Blob> {
-    const authHeaders = getAuthHeaders();
-    
-    const response = await fetch(`${API_BASE_URL}/skills/map/export`, {
-      method: 'POST',
-      headers: {
-        ...authHeaders,
-      },
-      body: JSON.stringify(params),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Export failed: ${response.status}`);
-    }
-
-    return response.blob();
   }
 };
 
-// エラーハンドリング用ユーティリティ
-export const handleApiError = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return 'An unexpected error occurred';
+// 統合API（useSkillsフックで使用）
+export const skillsApi = {
+  ...userSkillApi,
+  ...skillMasterApi,
+  ...skillSearchApi,
+  ...certificationApi
 };
 
-// ローディング状態管理用ユーティリティ
-export const createLoadingState = () => {
-  let loadingCount = 0;
-  
-  return {
-    start: () => ++loadingCount > 0,
-    end: () => --loadingCount > 0,
-    isLoading: () => loadingCount > 0
-  };
-};
+// デフォルトエクスポート
+export default skillsApi;

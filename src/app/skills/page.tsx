@@ -87,6 +87,15 @@ export default function SkillsPage() {
     }
   }, [authState.isAuthenticated, activeCategory, loadSkillHierarchy]);
 
+  const handleCategoryChange = (categoryName: string) => {
+    console.log('Category changed to:', categoryName);
+    setActiveCategory(categoryName);
+    // カテゴリ変更時にスキル階層を再読み込み
+    const categoryId = getCategoryId(categoryName);
+    console.log('Loading skill hierarchy for category:', categoryName, '-> ID:', categoryId);
+    loadSkillHierarchy(categoryId);
+  };
+
   // 資格情報読み込み
   const loadCertifications = async () => {
     try {
@@ -250,25 +259,25 @@ export default function SkillsPage() {
     setEditingCertification(null);
   };
 
-  // カテゴリ名からカテゴリIDへのマッピング
+  // カテゴリ名からカテゴリIDへのマッピング（データベースのカテゴリコードに合わせる）
   const getCategoryId = (categoryName: string): string => {
     switch (categoryName) {
-      case '技術スキル': return 'technical';
-      case '開発スキル': return 'development';
-      case '業務スキル': return 'business';
-      case '管理スキル': return 'management';
-      case '生産スキル': return 'productivity';
-      default: return 'technical';
+      case '技術スキル': return 'TECH';
+      case '開発スキル': return 'DEV';
+      case '業務スキル': return 'BIZ';
+      case '管理スキル': return 'MGT';
+      case '生産スキル': return 'PROD';
+      default: return 'TECH';
     }
   };
 
-  // カテゴリデータをSkillCategoryWithId形式に変換
+  // カテゴリデータをSkillCategoryWithId形式に変換（データベースのカテゴリコードに合わせる）
   const categories: SkillCategoryWithId[] = [
-    { id: 'technical', name: '技術スキル' },
-    { id: 'development', name: '開発スキル' },
-    { id: 'business', name: '業務スキル' },
-    { id: 'management', name: '管理スキル' },
-    { id: 'productivity', name: '生産スキル' }
+    { id: 'TECH', name: '技術スキル' },
+    { id: 'DEV', name: '開発スキル' },
+    { id: 'BIZ', name: '業務スキル' },
+    { id: 'MGT', name: '管理スキル' },
+    { id: 'PROD', name: '生産スキル' }
   ];
 
   if (error) {
@@ -364,7 +373,7 @@ export default function SkillsPage() {
                 {SKILL_CATEGORIES.map((category) => (
                   <button
                     key={category}
-                    onClick={() => setActiveCategory(category)}
+                    onClick={() => handleCategoryChange(category)}
                     className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       activeCategory === category
                         ? 'bg-white text-gray-900 shadow-sm'

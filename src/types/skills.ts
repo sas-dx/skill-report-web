@@ -73,10 +73,13 @@ export interface CertificationMaster {
 
 // スキル検索結果
 export interface SkillSearchResult {
-  skills: SkillMaster[];
-  total: number;
-  page: number;
-  limit: number;
+  skillId: string;
+  skillName: string;
+  category: string;
+  subcategory?: string;
+  description?: string;
+  userCount: number;
+  averageLevel: number;
 }
 
 // スキル評価レベル
