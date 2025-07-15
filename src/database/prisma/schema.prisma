@@ -1417,8 +1417,7 @@ model BatchJobLog {
   total_records         Int?
   processed_records     Int?
   success_records       Int?
-  error_records         Int?
-  error_details         String?
+  error_records         String?
   input_file_path       String?
   output_file_path      String?
   executed_by           String?
@@ -1429,4 +1428,24 @@ model BatchJobLog {
   is_deleted            Boolean
 
   @@map("WRK_BatchJobLog")
+}
+
+model PersonalCertificationRecord {
+  id                    String    @id @default(cuid())
+  employee_id           String
+  certification_name    String
+  organization_name     String?
+  acquired_date         DateTime
+  expiry_date           DateTime?
+  score                 String?
+  remarks               String?
+  is_deleted            Boolean   @default(false)
+  tenant_id             String    @default("default")
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  created_by            String    @default("system")
+  updated_by            String    @default("system")
+
+  @@unique([employee_id, certification_name])
+  @@map("TRN_PersonalCertificationRecord")
 }

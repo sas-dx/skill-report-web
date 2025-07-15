@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { SkillHierarchyTree } from '@/components/skills/SkillHierarchyTree';
 import { SkillDetailForm } from '@/components/skills/SkillDetailForm';
 import { SkillSearch } from '@/components/skills/SkillSearch';
+import { CertificationForm } from '@/components/skills/CertificationForm';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { useSkills } from '@/hooks/useSkills';
@@ -52,6 +53,8 @@ export default function SkillsPage() {
   const [searchResults, setSearchResults] = useState<UserSkill[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [showCertForm, setShowCertForm] = useState(false);
+  const [editingCertification, setEditingCertification] = useState<Certification | null>(null);
+  const [certLoading, setCertLoading] = useState(false);
 
   // 認証状態管理
   const [authState, setAuthState] = useState(() => getCurrentAuthState());
@@ -63,11 +66,33 @@ export default function SkillsPage() {
       const mockAuth = loginAsMockUser();
       setAuthState(mockAuth);
     }
-    
-    loadSkills();
-    loadUserSkills();
-    loadSkillHierarchy();
-  }, [loadSkills, loadUserSkills, loadSkillHierarchy, authState.isAuthenticated]);
+  }, [authState.isAuthenticated]);
+
+  // 認証後にデータを読み込み
+  useEffect(() => {
+    if (authState.isAuthenticated) {
+      loadSkills();
+      loadUserSkills();
+      loadSkillHierarchy(activeCategory);
+      loadCertifications();
+    }
+  }, [authState.isAuthenticated, activeCategory, loadSkills, loadUserSkills, loadSkillHierarchy]);
+
+  // 資格情報読み込み
+  const loadCertifications = async () => {
+    try {
+      setCertLoading(true);
+      const response = await fetch('/api/certifications');
+      if (response.ok) {
+        const data = await response.json();
+        setCertifications(data.data || []);
+      }
+    } catch (error) {
+      console.error('資格情報読み込みエラー:', error);
+    } finally {
+      setCertLoading(false);
+    }
+  };
 
   // モックログイン処理
   const handleMockLogin = () => {
@@ -147,6 +172,73 @@ export default function SkillsPage() {
   const handleAddNewSkill = () => {
     selectSkill(null);
     setShowForm(true);
+  };
+
+  // 資格情報保存処理
+  const handleCertificationSave = async (data: CertificationFormData) => {
+    try {
+      setCertLoading(true);
+      const method = editingCertification ? 'PUT' : 'POST';
+      const url = editingCertification 
+        ? `/api/certifications/${editingCertification.id}`
+        : '/api/certifications';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setShowCertForm(false);
+        setEditingCertification(null);
+        await loadCertifications();
+      } else {
+        const error = await response.json();
+        console.error('資格情報保存エラー:', error);
+      }
+    } catch (error) {
+      console.error('資格情報保存エラー:', error);
+    } finally {
+      setCertLoading(false);
+    }
+  };
+
+  // 資格情報編集処理
+  const handleCertificationEdit = (certification: Certification) => {
+    setEditingCertification(certification);
+    setShowCertForm(true);
+  };
+
+  // 資格情報削除処理
+  const handleCertificationDelete = async (certificationId: string) => {
+    if (confirm('この資格情報を削除しますか？')) {
+      try {
+        setCertLoading(true);
+        const response = await fetch(`/api/certifications/${certificationId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          await loadCertifications();
+        } else {
+          const error = await response.json();
+          console.error('資格情報削除エラー:', error);
+        }
+      } catch (error) {
+        console.error('資格情報削除エラー:', error);
+      } finally {
+        setCertLoading(false);
+      }
+    }
+  };
+
+  // 資格情報フォームキャンセル処理
+  const handleCertificationCancel = () => {
+    setShowCertForm(false);
+    setEditingCertification(null);
   };
 
   // カテゴリデータをSkillCategoryWithId形式に変換
@@ -380,57 +472,81 @@ export default function SkillsPage() {
           </>
         ) : (
           /* 資格情報タブ */
-          <div className="bg-white border border-gray-200 rounded-lg">
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-medium text-gray-900">資格情報</h2>
-                  <p className="text-sm text-gray-600">取得済み資格の管理</p>
-                </div>
-                <Button onClick={() => setShowCertForm(true)}>
-                  新規資格追加
-                </Button>
-              </div>
-            </div>
-            <div className="p-4">
-              {certifications.length > 0 ? (
-                <div className="space-y-4">
-                  {certifications.map((cert) => (
-                    <div key={cert.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">{cert.certificationName}</h3>
-                          {cert.organizationName && (
-                            <p className="text-sm text-gray-600">{cert.organizationName}</p>
-                          )}
-                          <div className="mt-2 text-sm text-gray-500">
-                            <p>取得日: {cert.acquiredDate}</p>
-                            {cert.expiryDate && <p>有効期限: {cert.expiryDate}</p>}
-                            {cert.score && <p>スコア: {cert.score}</p>}
-                          </div>
-                          {cert.remarks && (
-                            <p className="mt-2 text-sm text-gray-600">{cert.remarks}</p>
-                          )}
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button variant="secondary" size="sm">
-                            編集
-                          </Button>
-                          <Button variant="secondary" size="sm">
-                            削除
-                          </Button>
-                        </div>
-                      </div>
+          <div>
+            {showCertForm ? (
+              <CertificationForm
+                certification={editingCertification}
+                onSave={handleCertificationSave}
+                onCancel={handleCertificationCancel}
+                isLoading={certLoading}
+              />
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-lg">
+                <div className="p-4 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-medium text-gray-900">資格情報</h2>
+                      <p className="text-sm text-gray-600">取得済み資格の管理</p>
                     </div>
-                  ))}
+                    <Button onClick={() => setShowCertForm(true)}>
+                      新規資格追加
+                    </Button>
+                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>登録された資格情報がありません</p>
-                  <p className="text-sm mt-1">「新規資格追加」ボタンから資格情報を登録してください</p>
+                <div className="p-4">
+                  {certLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Spinner size="md" />
+                      <span className="ml-2 text-gray-600">読み込み中...</span>
+                    </div>
+                  ) : certifications.length > 0 ? (
+                    <div className="space-y-4">
+                      {certifications.map((cert) => (
+                        <div key={cert.id} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900">{cert.certificationName}</h3>
+                              {cert.organizationName && (
+                                <p className="text-sm text-gray-600">{cert.organizationName}</p>
+                              )}
+                              <div className="mt-2 text-sm text-gray-500">
+                                <p>取得日: {cert.acquiredDate}</p>
+                                {cert.expiryDate && <p>有効期限: {cert.expiryDate}</p>}
+                                {cert.score && <p>スコア: {cert.score}</p>}
+                              </div>
+                              {cert.remarks && (
+                                <p className="mt-2 text-sm text-gray-600">{cert.remarks}</p>
+                              )}
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button 
+                                variant="secondary" 
+                                size="sm"
+                                onClick={() => handleCertificationEdit(cert)}
+                              >
+                                編集
+                              </Button>
+                              <Button 
+                                variant="secondary" 
+                                size="sm"
+                                onClick={() => handleCertificationDelete(cert.id)}
+                              >
+                                削除
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>登録された資格情報がありません</p>
+                      <p className="text-sm mt-1">「新規資格追加」ボタンから資格情報を登録してください</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
