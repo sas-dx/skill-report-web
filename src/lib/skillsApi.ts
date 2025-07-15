@@ -117,95 +117,212 @@ export const skillMasterApi = {
     } catch (error) {
       console.warn('スキル階層API呼び出しに失敗しました。モックデータを返します:', error);
       
-      // モックデータを返す
+      // モックデータを返す（5つのカテゴリに対応）
       return [
         {
-          id: 'frontend',
-          name: 'フロントエンド',
-          category: 'フロントエンド',
+          id: 'technical',
+          name: '技術スキル',
+          category: '技術スキル',
           level: 1,
-          description: 'フロントエンド開発技術',
+          description: 'プログラミング言語・フレームワーク・技術基盤',
           children: [
             {
               id: 'javascript',
               name: 'JavaScript',
-              category: 'フロントエンド',
-              subcategory: 'フロントエンド',
-              parentId: 'frontend',
+              category: '技術スキル',
+              subcategory: 'プログラミング言語',
+              parentId: 'technical',
               level: 2,
               description: 'JavaScript プログラミング言語'
             },
             {
               id: 'typescript',
               name: 'TypeScript',
-              category: 'フロントエンド',
-              subcategory: 'フロントエンド',
-              parentId: 'frontend',
+              category: '技術スキル',
+              subcategory: 'プログラミング言語',
+              parentId: 'technical',
               level: 2,
               description: 'TypeScript プログラミング言語'
             },
             {
               id: 'react',
               name: 'React',
-              category: 'フロントエンド',
-              subcategory: 'フロントエンド',
-              parentId: 'frontend',
+              category: '技術スキル',
+              subcategory: 'フレームワーク',
+              parentId: 'technical',
               level: 2,
               description: 'React フレームワーク'
-            }
-          ]
-        },
-        {
-          id: 'backend',
-          name: 'バックエンド',
-          category: 'バックエンド',
-          level: 1,
-          description: 'バックエンド開発技術',
-          children: [
+            },
             {
               id: 'nodejs',
               name: 'Node.js',
-              category: 'バックエンド',
-              subcategory: 'バックエンド',
-              parentId: 'backend',
+              category: '技術スキル',
+              subcategory: 'ランタイム',
+              parentId: 'technical',
               level: 2,
               description: 'Node.js ランタイム環境'
             },
             {
-              id: 'python',
-              name: 'Python',
-              category: 'バックエンド',
-              subcategory: 'バックエンド',
-              parentId: 'backend',
+              id: 'postgresql',
+              name: 'PostgreSQL',
+              category: '技術スキル',
+              subcategory: 'データベース',
+              parentId: 'technical',
               level: 2,
-              description: 'Python プログラミング言語'
+              description: 'PostgreSQL データベース'
             }
           ]
         },
         {
-          id: 'database',
-          name: 'データベース',
-          category: 'データベース',
+          id: 'development',
+          name: '開発スキル',
+          category: '開発スキル',
           level: 1,
-          description: 'データベース技術',
+          description: '開発手法・ツール・プロセス',
           children: [
             {
-              id: 'postgresql',
-              name: 'PostgreSQL',
-              category: 'データベース',
-              subcategory: 'データベース',
-              parentId: 'database',
+              id: 'git',
+              name: 'Git',
+              category: '開発スキル',
+              subcategory: 'バージョン管理',
+              parentId: 'development',
               level: 2,
-              description: 'PostgreSQL データベース'
+              description: 'Git バージョン管理システム'
             },
             {
-              id: 'mysql',
-              name: 'MySQL',
-              category: 'データベース',
-              subcategory: 'データベース',
-              parentId: 'database',
+              id: 'docker',
+              name: 'Docker',
+              category: '開発スキル',
+              subcategory: 'コンテナ技術',
+              parentId: 'development',
               level: 2,
-              description: 'MySQL データベース'
+              description: 'Docker コンテナ技術'
+            },
+            {
+              id: 'ci-cd',
+              name: 'CI/CD',
+              category: '開発スキル',
+              subcategory: '自動化',
+              parentId: 'development',
+              level: 2,
+              description: '継続的インテグレーション・デプロイメント'
+            },
+            {
+              id: 'testing',
+              name: 'テスト技法',
+              category: '開発スキル',
+              subcategory: '品質保証',
+              parentId: 'development',
+              level: 2,
+              description: 'ユニットテスト・統合テスト・E2Eテスト'
+            }
+          ]
+        },
+        {
+          id: 'business',
+          name: '業務スキル',
+          category: '業務スキル',
+          level: 1,
+          description: '業務知識・ドメイン知識',
+          children: [
+            {
+              id: 'requirements-analysis',
+              name: '要件分析',
+              category: '業務スキル',
+              subcategory: '分析',
+              parentId: 'business',
+              level: 2,
+              description: '業務要件の分析・整理'
+            },
+            {
+              id: 'system-design',
+              name: 'システム設計',
+              category: '業務スキル',
+              subcategory: '設計',
+              parentId: 'business',
+              level: 2,
+              description: 'システム全体の設計・アーキテクチャ'
+            },
+            {
+              id: 'documentation',
+              name: 'ドキュメント作成',
+              category: '業務スキル',
+              subcategory: 'コミュニケーション',
+              parentId: 'business',
+              level: 2,
+              description: '技術文書・仕様書の作成'
+            }
+          ]
+        },
+        {
+          id: 'management',
+          name: '管理スキル',
+          category: '管理スキル',
+          level: 1,
+          description: 'プロジェクト管理・チーム管理',
+          children: [
+            {
+              id: 'project-management',
+              name: 'プロジェクト管理',
+              category: '管理スキル',
+              subcategory: 'プロジェクト',
+              parentId: 'management',
+              level: 2,
+              description: 'プロジェクトの計画・実行・管理'
+            },
+            {
+              id: 'team-leadership',
+              name: 'チームリーダーシップ',
+              category: '管理スキル',
+              subcategory: 'リーダーシップ',
+              parentId: 'management',
+              level: 2,
+              description: 'チームの指導・育成・マネジメント'
+            },
+            {
+              id: 'risk-management',
+              name: 'リスク管理',
+              category: '管理スキル',
+              subcategory: 'リスク',
+              parentId: 'management',
+              level: 2,
+              description: 'プロジェクトリスクの識別・対策'
+            }
+          ]
+        },
+        {
+          id: 'productivity',
+          name: '生産スキル',
+          category: '生産スキル',
+          level: 1,
+          description: '生産性向上・効率化',
+          children: [
+            {
+              id: 'automation',
+              name: '自動化',
+              category: '生産スキル',
+              subcategory: '効率化',
+              parentId: 'productivity',
+              level: 2,
+              description: '業務プロセスの自動化'
+            },
+            {
+              id: 'optimization',
+              name: '最適化',
+              category: '生産スキル',
+              subcategory: 'パフォーマンス',
+              parentId: 'productivity',
+              level: 2,
+              description: 'システム・プロセスの最適化'
+            },
+            {
+              id: 'monitoring',
+              name: '監視・運用',
+              category: '生産スキル',
+              subcategory: '運用',
+              parentId: 'productivity',
+              level: 2,
+              description: 'システム監視・運用保守'
             }
           ]
         }

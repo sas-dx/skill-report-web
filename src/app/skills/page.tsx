@@ -73,7 +73,8 @@ export default function SkillsPage() {
     if (authState.isAuthenticated) {
       loadSkills();
       loadUserSkills();
-      loadSkillHierarchy(activeCategory);
+      // カテゴリ名をカテゴリIDに変換してAPIに送信
+      loadSkillHierarchy(getCategoryId(activeCategory));
       loadCertifications();
     }
   }, [authState.isAuthenticated, activeCategory, loadSkills, loadUserSkills, loadSkillHierarchy]);
@@ -241,13 +242,25 @@ export default function SkillsPage() {
     setEditingCertification(null);
   };
 
+  // カテゴリ名からカテゴリIDへのマッピング
+  const getCategoryId = (categoryName: string): string => {
+    switch (categoryName) {
+      case '技術スキル': return 'technical';
+      case '開発スキル': return 'development';
+      case '業務スキル': return 'business';
+      case '管理スキル': return 'management';
+      case '生産スキル': return 'productivity';
+      default: return 'technical';
+    }
+  };
+
   // カテゴリデータをSkillCategoryWithId形式に変換
   const categories: SkillCategoryWithId[] = [
-    { id: 'tech', name: '技術スキル' },
-    { id: 'dev', name: '開発スキル' },
+    { id: 'technical', name: '技術スキル' },
+    { id: 'development', name: '開発スキル' },
     { id: 'business', name: '業務スキル' },
     { id: 'management', name: '管理スキル' },
-    { id: 'production', name: '生産スキル' }
+    { id: 'productivity', name: '生産スキル' }
   ];
 
   if (error) {

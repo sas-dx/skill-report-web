@@ -118,12 +118,19 @@ export function useSkillMaster() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchHierarchy = useCallback(async (category?: string) => {
+  const fetchHierarchy = useCallback(async (categoryId?: string) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await skillMasterApi.getHierarchy(category);
-      setHierarchy(data);
+      const data = await skillMasterApi.getHierarchy(categoryId);
+      
+      // カテゴリIDでフィルタリング
+      if (categoryId) {
+        const filteredData = data.filter(item => item.id === categoryId);
+        setHierarchy(filteredData);
+      } else {
+        setHierarchy(data);
+      }
     } catch (err) {
       // APIエラーの場合はモックデータが既に返されているので、エラーを表示しない
       console.warn('スキル階層取得でAPIエラーが発生しましたが、モックデータで継続します:', err);

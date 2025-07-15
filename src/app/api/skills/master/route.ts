@@ -118,6 +118,7 @@ export async function GET(request: NextRequest) {
       console.log('データベース接続エラーのためモックデータを使用');
       
       const mockSkills = [
+        // 技術スキル
         {
           skill_id: 'javascript',
           name: 'JavaScript',
@@ -206,11 +207,127 @@ export async function GET(request: NextRequest) {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         },
+        
+        // 開発スキル
+        {
+          skill_id: 'agile_development',
+          name: 'アジャイル開発',
+          category: 'development',
+          type: 'methodology',
+          difficulty_level: 3,
+          importance_level: 4,
+          description: '反復的で漸進的なソフトウェア開発手法',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'test_driven_development',
+          name: 'テスト駆動開発',
+          category: 'development',
+          type: 'methodology',
+          difficulty_level: 4,
+          importance_level: 4,
+          description: 'テストを先に書いてから実装を行う開発手法',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'code_review',
+          name: 'コードレビュー',
+          category: 'development',
+          type: 'process',
+          difficulty_level: 2,
+          importance_level: 5,
+          description: 'コード品質向上のためのレビュープロセス',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'version_control',
+          name: 'バージョン管理',
+          category: 'development',
+          type: 'tool',
+          difficulty_level: 2,
+          importance_level: 5,
+          description: 'Git等を使用したソースコード管理',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'ci_cd',
+          name: 'CI/CD',
+          category: 'development',
+          type: 'automation',
+          difficulty_level: 4,
+          importance_level: 4,
+          description: '継続的インテグレーション・継続的デプロイメント',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        
+        // 業務スキル
+        {
+          skill_id: 'requirements_analysis',
+          name: '要件分析',
+          category: 'business',
+          type: 'analysis',
+          difficulty_level: 3,
+          importance_level: 5,
+          description: 'ビジネス要件の分析と整理',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'system_design',
+          name: 'システム設計',
+          category: 'business',
+          type: 'design',
+          difficulty_level: 4,
+          importance_level: 5,
+          description: 'システム全体のアーキテクチャ設計',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'documentation',
+          name: 'ドキュメント作成',
+          category: 'business',
+          type: 'communication',
+          difficulty_level: 2,
+          importance_level: 4,
+          description: '技術文書・仕様書の作成',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'customer_communication',
+          name: '顧客対応',
+          category: 'business',
+          type: 'communication',
+          difficulty_level: 3,
+          importance_level: 4,
+          description: '顧客との効果的なコミュニケーション',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'presentation',
+          name: 'プレゼンテーション',
+          category: 'business',
+          type: 'communication',
+          difficulty_level: 3,
+          importance_level: 4,
+          description: '効果的な発表・説明スキル',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        
+        // 管理スキル
         {
           skill_id: 'project_management',
           name: 'プロジェクト管理',
-          category: 'business',
-          type: 'management',
+          category: 'management',
+          type: 'planning',
           difficulty_level: 3,
           importance_level: 4,
           description: 'プロジェクトの計画・実行・監視・制御',
@@ -220,7 +337,7 @@ export async function GET(request: NextRequest) {
         {
           skill_id: 'team_leadership',
           name: 'チームリーダーシップ',
-          category: 'business',
+          category: 'management',
           type: 'leadership',
           difficulty_level: 4,
           importance_level: 5,
@@ -229,24 +346,92 @@ export async function GET(request: NextRequest) {
           updated_at: new Date().toISOString()
         },
         {
-          skill_id: 'communication',
-          name: 'コミュニケーション',
-          category: 'business',
-          type: 'soft_skill',
-          difficulty_level: 2,
-          importance_level: 5,
-          description: '効果的な意思疎通とコラボレーション能力',
+          skill_id: 'risk_management',
+          name: 'リスク管理',
+          category: 'management',
+          type: 'planning',
+          difficulty_level: 4,
+          importance_level: 4,
+          description: 'プロジェクトリスクの識別と対策',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         },
         {
-          skill_id: 'problem_solving',
-          name: '問題解決',
-          category: 'business',
-          type: 'soft_skill',
+          skill_id: 'resource_management',
+          name: 'リソース管理',
+          category: 'management',
+          type: 'planning',
+          difficulty_level: 3,
+          importance_level: 4,
+          description: '人的・物的リソースの効率的な配分',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'quality_management',
+          name: '品質管理',
+          category: 'management',
+          type: 'process',
           difficulty_level: 3,
           importance_level: 5,
-          description: '複雑な問題を分析し解決策を見つける能力',
+          description: '成果物の品質保証と改善',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        
+        // 生産スキル
+        {
+          skill_id: 'time_management',
+          name: '時間管理',
+          category: 'productivity',
+          type: 'efficiency',
+          difficulty_level: 2,
+          importance_level: 5,
+          description: '効率的な時間の使い方と優先順位付け',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'task_prioritization',
+          name: 'タスク優先順位付け',
+          category: 'productivity',
+          type: 'efficiency',
+          difficulty_level: 2,
+          importance_level: 4,
+          description: '重要度・緊急度に基づくタスク管理',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'automation',
+          name: '自動化',
+          category: 'productivity',
+          type: 'efficiency',
+          difficulty_level: 3,
+          importance_level: 4,
+          description: '反復作業の自動化による効率向上',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'continuous_improvement',
+          name: '継続的改善',
+          category: 'productivity',
+          type: 'process',
+          difficulty_level: 3,
+          importance_level: 4,
+          description: '業務プロセスの継続的な見直しと改善',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          skill_id: 'knowledge_sharing',
+          name: '知識共有',
+          category: 'productivity',
+          type: 'collaboration',
+          difficulty_level: 2,
+          importance_level: 4,
+          description: 'チーム内での知識・ノウハウの共有',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
@@ -279,15 +464,25 @@ export async function GET(request: NextRequest) {
       // モックデータも階層構造に変換
       const mockCategoryMap = new Map();
       
+      // カテゴリ名のマッピング関数
+      const getCategoryName = (categoryId: string): string => {
+        switch (categoryId) {
+          case 'technical': return '技術スキル';
+          case 'development': return '開発スキル';
+          case 'business': return '業務スキル';
+          case 'management': return '管理スキル';
+          case 'productivity': return '生産スキル';
+          default: return categoryId;
+        }
+      };
+      
       filteredSkills.forEach(skill => {
         const categoryId = skill.category;
         if (!mockCategoryMap.has(categoryId)) {
           mockCategoryMap.set(categoryId, {
             id: categoryId,
-            name: categoryId === 'technical' ? '技術スキル' : 
-                  categoryId === 'business' ? 'ビジネススキル' : categoryId,
-            category: categoryId === 'technical' ? '技術スキル' : 
-                     categoryId === 'business' ? 'ビジネススキル' : categoryId,
+            name: getCategoryName(categoryId),
+            category: getCategoryName(categoryId),
             level: 1,
             description: '',
             children: []
@@ -297,8 +492,7 @@ export async function GET(request: NextRequest) {
         mockCategoryMap.get(categoryId).children.push({
           id: skill.skill_id,
           name: skill.name,
-          category: categoryId === 'technical' ? '技術スキル' : 
-                   categoryId === 'business' ? 'ビジネススキル' : categoryId,
+          category: getCategoryName(categoryId),
           subcategory: skill.type || 'その他',
           parentId: categoryId,
           level: 2,
