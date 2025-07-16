@@ -15,11 +15,12 @@ interface SelectOption {
 interface SelectProps {
   value?: string;
   onChange?: (value: string) => void;
-  options: SelectOption[];
+  options?: SelectOption[];
   placeholder?: string;
   disabled?: boolean;
   className?: string;
   error?: boolean;
+  children?: React.ReactNode;
 }
 
 export function Select({
@@ -29,7 +30,8 @@ export function Select({
   placeholder = '選択してください',
   disabled = false,
   className = '',
-  error = false
+  error = false,
+  children
 }: SelectProps) {
   const baseClasses = `
     w-full px-3 py-2 border rounded-md shadow-sm
@@ -51,10 +53,12 @@ export function Select({
       disabled={disabled}
       className={combinedClasses}
     >
-      <option value="" disabled>
-        {placeholder}
-      </option>
-      {options.map((option) => (
+      {!children && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
+      {children || options?.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
         </option>
