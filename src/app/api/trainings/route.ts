@@ -106,3 +106,162 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+/**
+ * 研修記録更新API
+ * 
+ * @param request - リクエスト
+ * @returns 更新結果
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const trainingId = searchParams.get('id');
+    const body = await request.json();
+
+    if (!trainingId) {
+      return createErrorResponse(
+        'INVALID_PARAMETER',
+        '研修IDが必要です',
+        'URLパラメータにidを指定してください',
+        400
+      );
+    }
+
+    // 必須項目の検証
+    if (!body.training_name || !body.start_date) {
+      return createErrorResponse(
+        'INVALID_PARAMETER',
+        '必須項目が不足しています',
+        '研修名、開始日は必須です',
+        400
+      );
+    }
+
+    // 既存の研修記録を確認
+    const existingTraining = await prisma.trainingHistory.findUnique({
+      where: { id: trainingId }
+    });
+
+    if (!existingTraining) {
+      return createErrorResponse(
+        'RESOURCE_NOT_FOUND',
+        '指定された研修記録が見つかりません',
+        `Training ID: ${trainingId}`,
+        404
+      );
+    }
+
+    // 研修記録の更新
+    const updatedTraining = await prisma.trainingHistory.update({
+      where: { id: trainingId },
+      data: {
+        training_name: body.training_name,
+        training_type: body.training_type || existingTraining.training_type,
+        training_category: body.training_category || existingTraining.training_category,
+        provider_name: body.provider_name || existingTraining.provider_name,
+        start_date: new Date(body.start_date),
+        end_date: body.end_date ? new Date(body.end_date) : existingTraining.end_date,
+        duration_hours: body.duration_hours || existingTraining.duration_hours,
+        attendance_status: body.attendance_status || existingTraining.attendance_status,
+        completion_rate: body.completion_rate || existingTraining.completion_rate,
+        certificate_obtained: body.certificate_obtained !== undefined ? body.certificate_obtained : existingTraining.certificate_obtained,
+        skills_acquired: body.skills_acquired ? 
+          JSON.stringify(body.skills_acquired) : existingTraining.skills_acquired,
+        learning_objectives: body.learning_objectives || existingTraining.learning_objectives,
+        learning_outcomes: body.learning_outcomes || existingTraining.learning_outcomes,
+        feedback: body.feedback || existingTraining.feedback,
+        updated_by: body.employee_id || existingTraining.employee_id,
+        updated_at: new Date()
+      }
+    });
+
+    // レスポンスの構築
+    return createSuccessResponse({
+      training: {
+        id: updatedTraining.id,
+        training_history_id: updatedTraining.training_history_id,
+        employee_id: updatedTraining.employee_id,
+        training_name: updatedTraining.training_name,
+        training_type: updatedTraining.training_type,
+        training_category: updatedTraining.training_category,
+        provider_name: updatedTraining.provider_name,
+        start_date: updatedTraining.start_date,
+        end_date: updatedTraining.end_date,
+        duration_hours: updatedTraining.duration_hours,
+        attendance_status: updatedTraining.attendance_status,
+        completion_rate: updatedTraining.completion_rate,
+        certificate_obtained: updatedTraining.certificate_obtained,
+        skills_acquired: updatedTraining.skills_acquired,
+        updated_at: updatedTraining.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('研修記録更新エラー:', error);
+    return createErrorResponse(
+      'SYSTEM_ERROR',
+      'システムエラーが発生しました',
+      error instanceof Error ? error.message : '不明なエラー',
+      500
+    );
+  }
+}
+
+/**
+ * 研修記録削除API
+ * 
+ * @param request - リクエスト
+ * @returns 削除結果
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const trainingId = searchParams.get('id');
+
+    if (!trainingId) {
+      return createErrorResponse(
+        'INVALID_PARAMETER',
+        '研修IDが必要です',
+        'URLパラメータにidを指定してください',
+        400
+      );
+    }
+
+    // 既存の研修記録を確認
+    const existingTraining = await prisma.trainingHistory.findUnique({
+      where: { id: trainingId }
+    });
+
+    if (!existingTraining) {
+      return createErrorResponse(
+        'RESOURCE_NOT_FOUND',
+        '指定された研修記録が見つかりません',
+        `Training ID: ${trainingId}`,
+        404
+      );
+    }
+
+    // 論理削除（is_deletedフラグを立てる）
+    const deletedTraining = await prisma.trainingHistory.update({
+      where: { id: trainingId },
+      data: {
+        is_deleted: true,
+        updated_at: new Date()
+      }
+    });
+
+    // レスポンスの構築
+    return createSuccessResponse({
+      message: '研修記録を削除しました',
+      training_id: trainingId
+    });
+  } catch (error) {
+    console.error('研修記録削除エラー:', error);
+    return createErrorResponse(
+      'SYSTEM_ERROR',
+      'システムエラーが発生しました',
+      error instanceof Error ? error.message : '不明なエラー',
+      500
+    );
+  }
+}

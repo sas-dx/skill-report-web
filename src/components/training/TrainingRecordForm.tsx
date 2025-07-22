@@ -22,21 +22,22 @@ interface TrainingRecordFormData {
 }
 
 interface TrainingRecordFormProps {
-  onSave: (data: TrainingRecordFormData) => Promise<void>;
+  onSave: (data: TrainingRecordFormData) => void;
   onCancel: () => void;
-  isLoading?: boolean;
+  isLoading: boolean;
+  initialData?: any; // 編集時の初期データ
 }
 
-export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: TrainingRecordFormProps) {
+export function TrainingRecordForm({ onSave, onCancel, isLoading, initialData }: TrainingRecordFormProps) {
   const [formData, setFormData] = useState<TrainingRecordFormData>({
-    trainingName: '',
-    category: '',
-    startDate: '',
-    endDate: '',
-    hours: 0,
-    pduPoints: 0,
-    description: '',
-    skills: []
+    trainingName: initialData?.trainingName || '',
+    category: initialData?.category || 'フロントエンド',
+    startDate: initialData?.startDate || '',
+    endDate: initialData?.endDate || '',
+    hours: initialData?.hours || 0,
+    pduPoints: initialData?.pduPoints || 0,
+    description: initialData?.description || '',
+    skills: initialData?.skills || []
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -62,9 +63,9 @@ export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: Trai
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateString)) return false;
     
-    // 年の範囲チェック（1900-2099）
+    // 年の範囲チェック（1900-9999）
     const year = parseInt(dateString.substring(0, 4));
-    if (year < 1900 || year > 2099) return false;
+    if (year < 1900 || year > 9999) return false;
     
     // 日付の妥当性チェック
     const date = new Date(dateString);
@@ -92,14 +93,14 @@ export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: Trai
     if (!formData.startDate) {
       newErrors.startDate = '開始日は必須です';
     } else if (!validateDate(formData.startDate)) {
-      newErrors.startDate = '正しい日付形式で入力してください（1900-2099年）';
+      newErrors.startDate = '正しい日付形式で入力してください（1900-9999年）';
     }
 
     // 終了日チェック
     if (!formData.endDate) {
       newErrors.endDate = '終了日は必須です';
     } else if (!validateDate(formData.endDate)) {
-      newErrors.endDate = '正しい日付形式で入力してください（1900-2099年）';
+      newErrors.endDate = '正しい日付形式で入力してください（1900-9999年）';
     }
 
     // 日付の整合性チェック
@@ -137,7 +138,11 @@ export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: Trai
     }
 
     try {
-      await onSave(formData);
+      // 編集時はIDを含めて送信
+      const dataToSave = initialData?.id 
+        ? { ...formData, id: initialData.id }
+        : formData;
+      await onSave(dataToSave);
     } catch (error) {
       console.error('研修記録保存エラー:', error);
     }
@@ -192,7 +197,9 @@ export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: Trai
         <div className="p-6">
           {/* ヘッダー */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">新規研修記録</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              {initialData?.id ? '研修記録編集' : '新規研修記録'}
+            </h2>
             <button
               onClick={onCancel}
               className="text-gray-400 hover:text-gray-600"
@@ -252,7 +259,7 @@ export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: Trai
                   value={formData.startDate}
                   onChange={(e) => handleInputChange('startDate', e.target.value)}
                   min="1900-01-01"
-                  max="2099-12-31"
+                  max="9999-12-31"
                   error={errors.startDate}
                   disabled={isLoading}
                 />
@@ -266,7 +273,7 @@ export function TrainingRecordForm({ onSave, onCancel, isLoading = false }: Trai
                   value={formData.endDate}
                   onChange={(e) => handleInputChange('endDate', e.target.value)}
                   min="1900-01-01"
-                  max="2099-12-31"
+                  max="9999-12-31"
                   error={errors.endDate}
                   disabled={isLoading}
                 />
