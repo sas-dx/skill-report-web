@@ -64,7 +64,8 @@ export async function POST(request: NextRequest) {
         attendance_status: body.attendance_status || 'completed',
         completion_rate: body.completion_rate || 100,
         certificate_obtained: body.certificate_obtained || false,
-        skills_acquired: body.skills_acquired || [],
+        skills_acquired: body.skills_acquired ? 
+          JSON.stringify(body.skills_acquired) : null,
         learning_objectives: body.learning_objectives || '',
         learning_outcomes: body.learning_outcomes || '',
         feedback: body.feedback || '',

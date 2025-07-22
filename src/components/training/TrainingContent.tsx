@@ -5,6 +5,18 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
+import { TrainingRecordForm } from './TrainingRecordForm';
+
+interface TrainingRecordFormData {
+  trainingName: string;
+  category: string;
+  startDate: string;
+  endDate: string;
+  hours: number;
+  pduPoints: number;
+  description: string;
+  skills: string[];
+}
 
 interface TrainingRecord {
   id: string;
@@ -213,9 +225,79 @@ export function TrainingContent() {
     setShowAddForm(false);
   };
 
-  const handleSaveRecord = () => {
-    // TODO: 実際の保存処理を実装
-    setShowAddForm(false);
+  const handleSaveRecord = async (formData: TrainingRecordFormData) => {
+    try {
+      setIsLoading(true);
+      
+      // APIに送信するデータを準備
+      const apiData = {
+        employee_id: 'emp_001', // 実際の環境では認証情報から取得
+        training_name: formData.trainingName,
+        training_type: '社内研修',
+        training_category: formData.category,
+        provider_name: '自社',
+        start_date: formData.startDate,
+        end_date: formData.endDate,
+        duration_hours: formData.hours,
+        attendance_status: 'completed',
+        completion_rate: 100,
+        certificate_obtained: false,
+        skills_acquired: formData.skills,
+        learning_objectives: formData.description,
+        learning_outcomes: formData.description,
+        feedback: '',
+        tenant_id: 'default'
+      };
+
+      console.log('API送信データ:', apiData);
+
+      // 実際のAPI呼び出し
+      const response = await fetch('/api/trainings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiData)
+      });
+
+      const result = await response.json();
+      console.log('API応答:', result);
+
+      if (result.success) {
+        // 新しい研修記録をローカル状態に追加
+        const newRecord: TrainingRecord = {
+          id: result.data.training.id || `training-${Date.now()}`,
+          trainingName: result.data.training.training_name || formData.trainingName,
+          category: result.data.training.training_category || formData.category,
+          startDate: result.data.training.start_date ? 
+            new Date(result.data.training.start_date).toISOString().split('T')[0] || '' : 
+            formData.startDate || '',
+          endDate: result.data.training.end_date ? 
+            new Date(result.data.training.end_date).toISOString().split('T')[0] || '' : 
+            formData.endDate || '',
+          hours: result.data.training.duration_hours || formData.hours,
+          status: 'completed' as const,
+          pduPoints: formData.pduPoints,
+          description: result.data.training.learning_objectives || formData.description,
+          skills: result.data.training.skills_acquired ? 
+            (typeof result.data.training.skills_acquired === 'string' ? 
+              JSON.parse(result.data.training.skills_acquired) : 
+              result.data.training.skills_acquired) : 
+            formData.skills
+        };
+
+        setTrainingRecords(prev => [newRecord, ...prev]);
+        setShowAddForm(false);
+        
+        console.log('研修記録保存成功:', newRecord);
+      } else {
+        console.error('API エラー:', result.error);
+        alert(`保存に失敗しました: ${result.error.message}`);
+      }
+    } catch (error) {
+      console.error('研修記録保存エラー:', error);
+      alert('保存中にエラーが発生しました。もう一度お試しください。');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -438,6 +520,15 @@ export function TrainingContent() {
             </div>
           )}
         </>
+      )}
+
+      {/* 新規研修記録フォーム */}
+      {showAddForm && (
+        <TrainingRecordForm
+          onSave={handleSaveRecord}
+          onCancel={handleCancelAdd}
+          isLoading={isLoading}
+        />
       )}
     </div>
   );
