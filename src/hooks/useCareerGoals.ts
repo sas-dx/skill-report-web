@@ -211,30 +211,18 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
   }, [userId]);
 
   /**
-   * キャリア目標を削除する（PUTメソッド使用）
+   * キャリア目標を削除する（DELETEメソッド使用）
    */
   const deleteCareerGoal = useCallback(async (
     goal: CareerGoal,
     year: number
   ): Promise<CareerGoalUpdateResponse | null> => {
-    // CareerGoal型からCareerGoalApiData型に変換（削除時は最小限の情報のみ）
-    const apiGoal = {
-      goal_id: goal.id,
-    };
-
-    const request: CareerGoalUpdateRequest = {
-      year,
-      operation_type: 'delete',
-      career_goals: [apiGoal],
-    };
-
     try {
       setIsLoading(true);
       setError(null);
       setIsSuccess(false);
 
       const headers: HeadersInit = {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer dummy-token',
       };
 
@@ -244,10 +232,10 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
 
       const targetUserId = userId || 'user_001';
       
-      const response = await fetch(`/api/career-goals/${targetUserId}`, {
-        method: 'PUT',
+      // DELETEメソッドでクエリパラメータを使用
+      const response = await fetch(`/api/career-goals/${targetUserId}?goal_id=${goal.id}`, {
+        method: 'DELETE',
         headers,
-        body: JSON.stringify(request),
       });
 
       if (!response.ok) {
