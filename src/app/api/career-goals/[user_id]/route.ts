@@ -459,8 +459,12 @@ export async function DELETE(
 ) {
   try {
     const { user_id } = params
-    const { searchParams } = new URL(request.url)
-    const goalId = searchParams.get('goal_id')
+    
+    // リクエストボディから削除情報を取得
+    const body = await request.json()
+    const { goal_id, year, user_id: bodyUserId } = body
+
+    console.log('削除API呼び出し:', { user_id, goal_id, year, bodyUserId })
 
     // パラメータバリデーション
     if (!user_id) {
@@ -473,7 +477,8 @@ export async function DELETE(
       }, { status: 400 })
     }
 
-    if (!goalId) {
+    // goal_idが指定されていない場合、エラーを返す
+    if (!goal_id) {
       return NextResponse.json({
         success: false,
         error: {
@@ -483,10 +488,25 @@ export async function DELETE(
       }, { status: 400 })
     }
 
-    // キャリア目標を削除
-    const result = await deleteCareerGoal(user_id, goalId)
+    // goal_idが指定されている場合の通常の削除
+    const result = await deleteCareerGoal(user_id, goal_id)
 
-    if (!result) {
+    console.log('削除結果:', result)
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        message: '目標が正常に削除されました',
+        goal_id: goal_id
+      },
+      timestamp: new Date().toISOString()
+    })
+
+  } catch (error) {
+    console.error('キャリア目標削除API エラー:', error)
+    
+    // GOAL_NOT_FOUNDエラーの処理
+    if (error instanceof Error && error.message === 'GOAL_NOT_FOUND') {
       return NextResponse.json({
         success: false,
         error: {
@@ -496,30 +516,7 @@ export async function DELETE(
       }, { status: 404 })
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        message: '目標が正常に削除されました',
-        goal_id: goalId
-      },
-      timestamp: new Date().toISOString()
-    })
-
-  } catch (error) {
-    console.error('キャリア目標削除エラー:', error)
-    
-    if (error && typeof error === 'object' && 'message' in error) {
-      if (error.message === 'GOAL_NOT_FOUND') {
-        return NextResponse.json({
-          success: false,
-          error: {
-            code: 'GOAL_NOT_FOUND',
-            message: '指定された目標が見つかりません'
-          }
-        }, { status: 404 })
-      }
-    }
-
+    // その他のエラーオブジェクトの処理
     if (error && typeof error === 'object' && 'code' in error) {
       return NextResponse.json({
         success: false,
@@ -527,11 +524,13 @@ export async function DELETE(
       }, { status: 400 })
     }
 
+    // 予期しないエラーの処理
     return NextResponse.json({
       success: false,
       error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'サーバーエラーが発生しました'
+        code: 'UNKNOWN_ERROR',
+        message: '不明なエラーが発生しました',
+        details: error instanceof Error ? error.message : String(error)
       }
     }, { status: 500 })
   }
