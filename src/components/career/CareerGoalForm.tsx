@@ -26,6 +26,7 @@ interface CareerGoalFormProps {
   goal?: CareerGoalData | null;
   skillCategories: SkillCategory[];
   positions: Position[];
+  userId: string;
   onSubmit: (goal: CareerGoal) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
@@ -37,6 +38,7 @@ interface CareerGoalFormProps {
 interface FormData {
   title: string;
   description: string;
+  goal_type: string;
   target_date: string;
   status: string;
   priority: string;
@@ -56,6 +58,7 @@ export function CareerGoalForm({
   goal,
   skillCategories,
   positions,
+  userId,
   onSubmit,
   onCancel,
   isLoading = false
@@ -64,6 +67,7 @@ export function CareerGoalForm({
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
+    goal_type: 'career_advancement',
     target_date: '',
     status: 'not_started',
     priority: '2',
@@ -76,13 +80,22 @@ export function CareerGoalForm({
   // 編集モードの場合、初期値を設定
   useEffect(() => {
     if (goal) {
+      // 型安全な値の取得
+      const title = (goal.target_position ?? '') as string;
+      const description = (goal.target_description ?? '') as string;
+      const targetDate = (goal.target_date ? goal.target_date.split('T')[0] : '') as string;
+      const progressPercentage = (goal.progress_percentage ?? 0) as number;
+      
       setFormData({
-        title: goal.target_position,
-        description: goal.target_description,
-        target_date: goal.target_date ? goal.target_date.split('T')[0] : '',
-        status: goal.plan_status || 'not_started',
+        title,
+        description,
+        goal_type: 'career_advancement',
+        target_date: targetDate,
+        status: goal.plan_status === 'ACTIVE' ? 'in_progress' : 
+                goal.plan_status === 'COMPLETED' ? 'completed' : 
+                goal.plan_status === 'INACTIVE' ? 'not_started' : 'not_started',
         priority: '2',
-        progress_percentage: goal.progress_percentage
+        progress_percentage: progressPercentage
       });
     } else {
       // 新規作成の場合、デフォルト値を設定
@@ -92,7 +105,8 @@ export function CareerGoalForm({
       setFormData({
         title: '',
         description: '',
-        target_date: nextYear.toISOString().split('T')[0],
+        goal_type: 'career_advancement',
+        target_date: nextYear.toISOString().split('T')[0] as string,
         status: 'not_started',
         priority: '2',
         progress_percentage: 0
@@ -152,7 +166,7 @@ export function CareerGoalForm({
 
     // 進捗率
     if (formData.progress_percentage < 0 || formData.progress_percentage > 100) {
-      newErrors.progress_percentage = '進捗率は0-100の範囲で入力してください';
+      newErrors.progress_percentage = '進捗率は0-100の範囲で入力してください' as any;
     }
 
     setErrors(newErrors);
@@ -174,7 +188,7 @@ export function CareerGoalForm({
     try {
       const goalData: CareerGoal = {
         id: goal?.id || crypto.randomUUID(),
-        user_id: 'current-user', // TODO: 実際のユーザーIDを取得
+        user_id: userId,
         title: formData.title,
         description: formData.description,
         status: formData.status as CareerGoalStatus,
@@ -330,9 +344,9 @@ export function CareerGoalForm({
               type="number"
               min="0"
               max="100"
-              value={formData.progress_percentage.toString()}
+              value={String(formData.progress_percentage)}
               onChange={(e) => handleInputChange('progress_percentage', parseInt(e.target.value) || 0)}
-              error={errors.progress_percentage}
+              error={errors.progress_percentage ? String(errors.progress_percentage) : undefined}
               className="w-full"
             />
           </div>

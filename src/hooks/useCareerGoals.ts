@@ -1,32 +1,28 @@
 /**
  * 要求仕様ID: CAR.1-PLAN.1
  * 対応設計書: docs/design/screens/specs/画面定義書_SCR_CAR_Plan_キャリアプラン画面.md
- * 実装内容: キャリア目標管理カスタムフック
+ * 実装内容: キャリア目標操作カスタムフック
  */
 
 import { useState, useCallback } from 'react';
-import { 
-  CareerGoalUpdateRequest,
-  CareerGoalUpdateResponse,
-  CareerGoal,
-  OperationState 
-} from '@/types/career';
+import { CareerGoal } from '@/types/career';
 
 /**
- * キャリア目標管理フックの戻り値型
+ * キャリア目標操作フックの戻り値型
  */
-interface UseCareerGoalsReturn extends OperationState {
-  updateCareerGoals: (request: CareerGoalUpdateRequest) => Promise<CareerGoalUpdateResponse | null>;
-  addCareerGoal: (goal: CareerGoal, year: number) => Promise<CareerGoalUpdateResponse | null>;
-  updateCareerGoal: (goal: CareerGoal, year: number) => Promise<CareerGoalUpdateResponse | null>;
-  deleteCareerGoal: (goal: CareerGoal, year: number) => Promise<CareerGoalUpdateResponse | null>;
+interface UseCareerGoalsReturn {
+  addCareerGoal: (goal: CareerGoal, year: number) => Promise<void>;
+  updateCareerGoal: (goal: CareerGoal, year: number) => Promise<void>;
+  deleteCareerGoal: (goal: CareerGoal, year: number) => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+  isSuccess: boolean;
 }
 
 /**
- * キャリア目標管理カスタムフック
- * API-701: キャリア目標更新APIを呼び出し、目標の追加・更新・削除を行う
+ * キャリア目標操作カスタムフック
  * 
- * @param userId - ユーザーID（オプション、未指定時はヘッダーから取得）
+ * @param userId - ユーザーID（オプション）
  * @returns キャリア目標操作関数とローディング状態
  */
 export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
@@ -35,142 +31,57 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
   const [isSuccess, setIsSuccess] = useState(false);
 
   /**
-   * キャリア目標を更新する共通関数
+   * キャリア目標追加
    */
-  const updateCareerGoals = useCallback(async (
-    request: CareerGoalUpdateRequest
-  ): Promise<CareerGoalUpdateResponse | null> => {
+  const addCareerGoal = useCallback(async (goal: CareerGoal, year: number) => {
     try {
       setIsLoading(true);
       setError(null);
       setIsSuccess(false);
 
-      // API-701: キャリア目標更新API呼び出し
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
 
-      // ユーザーIDが指定されている場合はヘッダーに追加
       if (userId) {
         headers['x-user-id'] = userId;
       }
 
-      // ユーザーIDが指定されていない場合はデフォルト値を使用
-      const targetUserId = userId || 'user_001';
-      
-      const response = await fetch(`/api/career-goals/${targetUserId}`, {
+      // バックエンドが期待するCreateCareerGoalData形式に変換
+      const createData = {
+        title: goal.title,
+        description: goal.description,
+        goal_type: 'career_advancement', // 必須フィールドを追加
+        target_date: goal.target_date,
+        status: goal.status,
+        priority: goal.priority,
+        progress_percentage: goal.progress_percentage,
+      };
+
+      const response = await fetch(`/api/career-goals/${userId || 'current'}`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(createData),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'キャリア目標の追加に失敗しました');
       }
-
-      const data: CareerGoalUpdateResponse = await response.json();
 
       setIsSuccess(true);
-      return data;
-
-    } catch (err) {
-      console.error('キャリア目標更新エラー:', err);
-      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId]);
-
-  /**
-   * キャリア目標を追加する（POSTメソッド使用）
-   */
-  const addCareerGoal = useCallback(async (
-    goal: CareerGoal,
-    year: number
-  ): Promise<CareerGoalUpdateResponse | null> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      setIsSuccess(false);
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (userId) {
-        headers['x-user-id'] = userId;
-      }
-      
-      // 実装済みのAPI-701エンドポイントに合わせてリクエストボディを構築
-      const requestBody = {
-        target_position: goal.title, // titleをtarget_positionとして使用
-        target_date: goal.target_date,
-        target_description: goal.description || '',
-        current_level: 'JUNIOR',
-        target_level: 'SENIOR',
-        goal_type: 'short_term' as const,
-        priority: goal.priority
-      };
-
-      const response = await fetch('/api/career/goal', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setIsSuccess(true);
-        return data;
-      } else {
-        throw new Error(data.error?.message || 'キャリア目標の追加に失敗しました');
-      }
-
     } catch (err) {
       console.error('キャリア目標追加エラー:', err);
       setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
-      return null;
     } finally {
       setIsLoading(false);
     }
   }, [userId]);
 
   /**
-   * キャリア目標を更新する（PUTメソッド使用）
+   * キャリア目標更新
    */
-  const updateCareerGoal = useCallback(async (
-    goal: CareerGoal,
-    year: number
-  ): Promise<CareerGoalUpdateResponse | null> => {
-    // CareerGoal型からCareerGoalApiData型に変換
-    const apiGoal: any = {
-      goal_id: goal.id,
-      title: goal.title,
-      status: goal.status,
-      priority: goal.priority,
-      goal_type: 'short_term' as const, // デフォルト値
-    };
-
-    // オプショナルフィールドは値が存在する場合のみ追加
-    if (goal.description) {
-      apiGoal.description = goal.description;
-    }
-    if (goal.target_date) {
-      apiGoal.target_date = goal.target_date;
-    }
-
-    const request: CareerGoalUpdateRequest = {
-      year,
-      operation_type: 'update',
-      career_goals: [apiGoal],
-    };
-
+  const updateCareerGoal = useCallback(async (goal: CareerGoal, year: number) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -178,211 +89,104 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer dummy-token',
       };
 
       if (userId) {
         headers['x-user-id'] = userId;
       }
 
-      const targetUserId = userId || 'user_001';
-      
-      const response = await fetch(`/api/career-goals/${targetUserId}`, {
+      // バックエンドが期待するUpdateCareerGoalData形式に変換
+      const updateData = {
+        goal_id: goal.id,
+        title: goal.title,
+        description: goal.description,
+        goal_type: 'career_advancement',
+        target_date: goal.target_date,
+        status: goal.status,
+        priority: goal.priority,
+        progress_percentage: goal.progress_percentage,
+      };
+
+      const response = await fetch(`/api/career-goals/${userId || 'current'}`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'キャリア目標の更新に失敗しました');
       }
 
-      const data: CareerGoalUpdateResponse = await response.json();
       setIsSuccess(true);
-      return data;
-
     } catch (err) {
       console.error('キャリア目標更新エラー:', err);
       setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
-      return null;
     } finally {
       setIsLoading(false);
     }
   }, [userId]);
 
   /**
-   * キャリア目標を削除する（DELETEメソッド使用）
+   * キャリア目標削除
    */
-  const deleteCareerGoal = useCallback(async (
-    goal: CareerGoal,
-    year: number
-  ): Promise<CareerGoalUpdateResponse | null> => {
+  const deleteCareerGoal = useCallback(async (goal: CareerGoal, year: number) => {
     try {
       setIsLoading(true);
       setError(null);
       setIsSuccess(false);
 
-      const headers: HeadersInit = {
-        'Authorization': 'Bearer dummy-token',
-      };
+      console.log('削除対象の目標:', { goal, year, userId });
+
+      // goal_idを取得（複数のフィールドから適切なIDを特定）
+      let goalId = goal.id;
+      
+      // もしgoal.goal_idが存在する場合はそれを優先
+      if ('goal_id' in goal && typeof goal.goal_id === 'string' && goal.goal_id) {
+        goalId = goal.goal_id;
+      }
+      
+      console.log('使用するgoal_id:', goalId);
+
+      if (!goalId) {
+        throw new Error('削除対象の目標IDが特定できません');
+      }
+
+      // クエリパラメータでgoal_idを送信
+      const url = new URL(`/api/career-goals/${userId || 'current'}`, window.location.origin);
+      url.searchParams.set('goal_id', goalId);
+
+      const headers: HeadersInit = {};
 
       if (userId) {
         headers['x-user-id'] = userId;
       }
 
-      const targetUserId = userId || 'user_001';
-      
-      // DELETEメソッドでクエリパラメータを使用
-      const response = await fetch(`/api/career-goals/${targetUserId}?goal_id=${goal.id}`, {
+      const response = await fetch(url.toString(), {
         method: 'DELETE',
         headers,
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'キャリア目標の削除に失敗しました');
       }
 
-      const data: CareerGoalUpdateResponse = await response.json();
       setIsSuccess(true);
-      return data;
-
     } catch (err) {
       console.error('キャリア目標削除エラー:', err);
       setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
-      return null;
     } finally {
       setIsLoading(false);
     }
   }, [userId]);
 
   return {
-    isLoading,
-    error,
-    isSuccess,
-    updateCareerGoals,
     addCareerGoal,
     updateCareerGoal,
     deleteCareerGoal,
-  };
-}
-
-/**
- * キャリア目標フォーム用のバリデーションフック
- */
-export function useCareerGoalValidation() {
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  /**
-   * キャリア目標をバリデーションする
-   */
-  const validateCareerGoal = useCallback((goal: Partial<CareerGoal>): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    // タイトルの検証
-    if (!goal.title?.trim()) {
-      newErrors.title = 'タイトルは必須です';
-    } else if (goal.title.length > 100) {
-      newErrors.title = 'タイトルは100文字以内で入力してください';
-    }
-
-    // 説明の検証
-    if (goal.description && goal.description.length > 500) {
-      newErrors.description = '説明は500文字以内で入力してください';
-    }
-
-    // 目標日の検証
-    if (!goal.target_date) {
-      newErrors.target_date = '目標日は必須です';
-    } else {
-      const targetDate = new Date(goal.target_date);
-      const today = new Date();
-      if (targetDate <= today) {
-        newErrors.target_date = '目標日は今日より後の日付を設定してください';
-      }
-    }
-
-    // ステータスの検証
-    if (!goal.status) {
-      newErrors.status = 'ステータスは必須です';
-    }
-
-    // 優先度の検証
-    if (goal.priority !== undefined && (goal.priority < 1 || goal.priority > 5)) {
-      newErrors.priority = '優先度は1から5の範囲で設定してください';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, []);
-
-  /**
-   * エラーをクリアする
-   */
-  const clearErrors = useCallback(() => {
-    setErrors({});
-  }, []);
-
-  /**
-   * 特定のフィールドのエラーをクリアする
-   */
-  const clearFieldError = useCallback((field: string) => {
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
-  }, []);
-
-  return {
-    errors,
-    validateCareerGoal,
-    clearErrors,
-    clearFieldError,
-  };
-}
-
-/**
- * アクションプラン管理用のフック
- */
-export function useActionPlans() {
-  const [actionPlans, setActionPlans] = useState<any[]>([]);
-
-  /**
-   * アクションプランを追加する
-   */
-  const addActionPlan = useCallback((plan: any) => {
-    setActionPlans(prev => [...prev, { ...plan, id: Date.now().toString() }]);
-  }, []);
-
-  /**
-   * アクションプランを更新する
-   */
-  const updateActionPlan = useCallback((id: string, updates: Partial<any>) => {
-    setActionPlans(prev => 
-      prev.map(plan => plan.id === id ? { ...plan, ...updates } : plan)
-    );
-  }, []);
-
-  /**
-   * アクションプランを削除する
-   */
-  const removeActionPlan = useCallback((id: string) => {
-    setActionPlans(prev => prev.filter(plan => plan.id !== id));
-  }, []);
-
-  /**
-   * アクションプランをクリアする
-   */
-  const clearActionPlans = useCallback(() => {
-    setActionPlans([]);
-  }, []);
-
-  return {
-    actionPlans,
-    addActionPlan,
-    updateActionPlan,
-    removeActionPlan,
-    clearActionPlans,
-    setActionPlans,
+    isLoading,
+    error,
+    isSuccess,
   };
 }
