@@ -371,15 +371,22 @@ export function useSkills(userId?: string) {
   }, [userSkillsHook]);
 
   const saveCustomSkill = useCallback(async (data: SkillFormData, customSkillName: string, customSkillCategory: string) => {
-    // カスタムスキルの場合、skill_idとしてカスタムスキル名を使用
-    const customSkillData = {
-      ...data,
-      skillId: customSkillName,
-      category: customSkillCategory,
-      name: customSkillName
-    };
-    
-    return await userSkillsHook.createSkill(customSkillData);
+    try {
+      console.log('カスタムスキル保存開始:', { data, customSkillName, customSkillCategory });
+      
+      // カスタムスキルの場合、skill_idとしてカスタムスキル名を使用
+      const customSkillData: SkillFormData = {
+        ...data,
+        skillId: customSkillName
+      };
+      
+      const result = await userSkillsHook.createSkill(customSkillData);
+      console.log('カスタムスキル保存完了:', result);
+      return result;
+    } catch (error) {
+      console.error('カスタムスキル保存エラー:', error);
+      throw error;
+    }
   }, [userSkillsHook]);
 
   const searchSkills = useCallback(async (filters: SkillSearchFilters) => {

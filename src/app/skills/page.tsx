@@ -42,6 +42,7 @@ export default function SkillsPage() {
     selectSkill,
     updateFormData,
     saveSkill,
+    saveCustomSkill,
     deleteSkill,
     searchSkills
   } = useSkills();
@@ -136,8 +137,17 @@ export default function SkillsPage() {
   // フォーム保存処理
   const handleFormSave = async (data: SkillFormData) => {
     try {
-      await saveSkill(data);
+      if (isNewSkillMode && customSkillName) {
+        // 新規カスタムスキルの場合
+        await saveCustomSkill(data, customSkillName, customSkillCategory);
+      } else {
+        // 既存スキルの場合
+        await saveSkill(data);
+      }
       setShowForm(false);
+      setIsNewSkillMode(false);
+      setCustomSkillName('');
+      setCustomSkillCategory('technical');
       // ユーザースキル一覧を再読み込み
       loadUserSkills();
     } catch (error) {

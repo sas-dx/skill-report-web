@@ -48,9 +48,10 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
 
   // フォームデータの初期化
   useEffect(() => {
-    if (selectedSkill || isNewSkillMode) {
+    if (selectedSkill) {
+      // 既存スキルの場合
       setFormData({
-        skillId: selectedSkill?.id || 'new-skill',
+        skillId: selectedSkill.id,
         level: userSkill?.level || 1,
         acquiredDate: userSkill?.acquiredDate || undefined,
         experienceYears: userSkill?.experienceYears || undefined,
@@ -58,8 +59,19 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
         remarks: userSkill?.remarks || undefined
       });
       setIsEditing(!!userSkill);
+    } else if (isNewSkillMode && customSkillName) {
+      // 新規カスタムスキルの場合
+      setFormData({
+        skillId: customSkillName, // カスタムスキル名をskillIdとして使用
+        level: 1,
+        acquiredDate: undefined,
+        experienceYears: undefined,
+        lastUsed: undefined,
+        remarks: undefined
+      });
+      setIsEditing(false);
     }
-  }, [selectedSkill, userSkill, isNewSkillMode]);
+  }, [selectedSkill, userSkill, isNewSkillMode, customSkillName]);
 
   // バリデーション
   const validateForm = (): boolean => {
@@ -86,13 +98,18 @@ export const SkillDetailForm: React.FC<SkillDetailFormProps> = ({
     e.preventDefault();
     
     if (!validateForm()) {
+      console.log('バリデーションエラー:', errors);
       return;
     }
 
     try {
+      console.log('スキル保存開始:', formData);
       await onSave(formData);
+      console.log('スキル保存完了');
     } catch (error) {
       console.error('スキル保存エラー:', error);
+      // エラーが発生してもユーザーに通知
+      alert('スキルの保存中にエラーが発生しました。再度お試しください。');
     }
   };
 
