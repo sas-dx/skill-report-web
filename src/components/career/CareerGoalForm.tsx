@@ -39,7 +39,7 @@ interface CareerGoalFormProps {
 interface FormData {
   title: string;
   description: string;
-  goal_type: string;
+  goal_type: CareerGoalType;
   target_date: string;
   status: string;
   priority: string;
@@ -140,7 +140,7 @@ export function CareerGoalForm({
    * バリデーション
    */
   const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const newErrors: Record<string, string> = {};
 
     // タイトル
     if (!formData.title.trim()) {
@@ -174,7 +174,7 @@ export function CareerGoalForm({
 
     // 進捗率
     if (formData.progress_percentage < 0 || formData.progress_percentage > 100) {
-      newErrors.progress_percentage = '進捗率は0-100の範囲で入力してください' as any;
+      newErrors.progress_percentage = '進捗率は0-100の範囲で入力してください';
     }
 
     setErrors(newErrors);
@@ -197,6 +197,7 @@ export function CareerGoalForm({
       const goalData: CareerGoal = {
         id: goal?.id || crypto.randomUUID(),
         user_id: userId,
+        goal_type: formData.goal_type,
         title: formData.title,
         description: formData.description,
         status: formData.status as CareerGoalStatus,

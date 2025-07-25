@@ -282,6 +282,7 @@ export type CareerGoalPriority = 1 | 2 | 3; // 1: high, 2: medium, 3: low
 export interface CareerGoal {
   id: string;
   user_id: string;
+  goal_type: CareerGoalType;
   title: string;
   description?: string;
   status: CareerGoalStatus;
