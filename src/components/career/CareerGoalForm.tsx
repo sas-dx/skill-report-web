@@ -86,7 +86,10 @@ export function CareerGoalForm({
       const description = (goal.target_description ?? '') as string;
       const targetDate = (goal.target_date ? goal.target_date.split('T')[0] : '') as string;
       const progressPercentage = (goal.progress_percentage ?? 0) as number;
-      const goalType = (goal.goal_type ?? 'short_term') as CareerGoalType;
+      
+      // 目標タイプの型安全な設定
+      const rawGoalType = goal.goal_type ?? 'short_term';
+      const goalType = isValidGoalType(rawGoalType) ? rawGoalType : 'short_term';
       
       setFormData({
         title,
@@ -123,10 +126,19 @@ export function CareerGoalForm({
     field: keyof FormData,
     value: string | number
   ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    // 目標タイプの場合は型安全な処理
+    if (field === 'goal_type' && typeof value === 'string') {
+      const goalType = isValidGoalType(value) ? value : 'short_term';
+      setFormData(prev => ({
+        ...prev,
+        [field]: goalType
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
 
     // エラーをクリア
     if (errors[field]) {
@@ -135,6 +147,13 @@ export function CareerGoalForm({
         [field]: undefined
       }));
     }
+  };
+
+  /**
+   * 型ガード関数：有効な目標タイプかチェック
+   */
+  const isValidGoalType = (value: string): value is CareerGoalType => {
+    return ['short_term', 'mid_term', 'long_term'].includes(value);
   };
 
   /**
@@ -149,10 +168,9 @@ export function CareerGoalForm({
     }
 
     // 目標タイプ - 型安全なバリデーション
-    const validGoalTypes: CareerGoalType[] = ['short_term', 'mid_term', 'long_term'];
     if (!formData.goal_type) {
       newErrors.goal_type = '目標タイプを選択してください';
-    } else if (!validGoalTypes.includes(formData.goal_type)) {
+    } else if (!isValidGoalType(formData.goal_type)) {
       newErrors.goal_type = '無効な目標タイプです';
     }
 
