@@ -262,6 +262,11 @@ export interface CareerGoalUpdateResponse {
 // ============================================================================
 
 /**
+ * キャリア目標タイプ
+ */
+export type CareerGoalType = 'short_term' | 'mid_term' | 'long_term';
+
+/**
  * キャリア目標ステータス
  */
 export type CareerGoalStatus = 'not_started' | 'in_progress' | 'completed' | 'postponed' | 'cancelled';

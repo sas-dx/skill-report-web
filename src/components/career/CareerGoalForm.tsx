@@ -16,7 +16,8 @@ import {
   SkillCategory, 
   Position,
   CareerGoalStatus,
-  CareerGoalPriority
+  CareerGoalPriority,
+  CareerGoalType
 } from '@/types/career';
 
 /**
@@ -67,7 +68,7 @@ export function CareerGoalForm({
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
-    goal_type: 'career_advancement',
+    goal_type: 'short_term',
     target_date: '',
     status: 'not_started',
     priority: '2',
@@ -89,7 +90,7 @@ export function CareerGoalForm({
       setFormData({
         title,
         description,
-        goal_type: 'career_advancement',
+        goal_type: 'short_term',
         target_date: targetDate,
         status: goal.plan_status === 'ACTIVE' ? 'in_progress' : 
                 goal.plan_status === 'COMPLETED' ? 'completed' : 
@@ -105,7 +106,7 @@ export function CareerGoalForm({
       setFormData({
         title: '',
         description: '',
-        goal_type: 'career_advancement',
+        goal_type: 'short_term',
         target_date: nextYear.toISOString().split('T')[0] as string,
         status: 'not_started',
         priority: '2',
@@ -144,6 +145,13 @@ export function CareerGoalForm({
     // タイトル
     if (!formData.title.trim()) {
       newErrors.title = 'タイトルを入力してください';
+    }
+
+    // 目標タイプ
+    if (!formData.goal_type) {
+      newErrors.goal_type = '目標タイプを選択してください';
+    } else if (!['short_term', 'mid_term', 'long_term'].includes(formData.goal_type)) {
+      newErrors.goal_type = '無効な目標タイプです';
     }
 
     // 目標達成日
@@ -232,6 +240,17 @@ export function CareerGoalForm({
     ];
   };
 
+  /**
+   * 目標タイプ選択肢を生成
+   */
+  const generateGoalTypeOptions = () => {
+    return [
+      { value: 'short_term', label: '短期目標（1年以内）' },
+      { value: 'mid_term', label: '中期目標（1-3年）' },
+      { value: 'long_term', label: '長期目標（3年以上）' }
+    ];
+  };
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
       <div className="mb-6">
@@ -260,6 +279,26 @@ export function CareerGoalForm({
             />
           </div>
 
+          {/* 目標タイプ */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              目標タイプ <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.goal_type}
+              onChange={(e) => handleInputChange('goal_type', e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {generateGoalTypeOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
           {/* 目標達成日 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
