@@ -31,6 +31,7 @@ export interface CareerInitResponse {
  */
 export interface CareerGoalData {
   id?: string;
+  goal_type?: CareerGoalType;
   target_position?: string;
   target_date?: string;
   target_description?: string;

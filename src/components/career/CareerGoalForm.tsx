@@ -86,11 +86,12 @@ export function CareerGoalForm({
       const description = (goal.target_description ?? '') as string;
       const targetDate = (goal.target_date ? goal.target_date.split('T')[0] : '') as string;
       const progressPercentage = (goal.progress_percentage ?? 0) as number;
+      const goalType = (goal.goal_type ?? 'short_term') as CareerGoalType;
       
       setFormData({
         title,
         description,
-        goal_type: 'short_term',
+        goal_type: goalType,
         target_date: targetDate,
         status: goal.plan_status === 'ACTIVE' ? 'in_progress' : 
                 goal.plan_status === 'COMPLETED' ? 'completed' : 
@@ -147,10 +148,11 @@ export function CareerGoalForm({
       newErrors.title = 'タイトルを入力してください';
     }
 
-    // 目標タイプ
+    // 目標タイプ - 型安全なバリデーション
+    const validGoalTypes: CareerGoalType[] = ['short_term', 'mid_term', 'long_term'];
     if (!formData.goal_type) {
       newErrors.goal_type = '目標タイプを選択してください';
-    } else if (!['short_term', 'mid_term', 'long_term'].includes(formData.goal_type)) {
+    } else if (!validGoalTypes.includes(formData.goal_type)) {
       newErrors.goal_type = '無効な目標タイプです';
     }
 

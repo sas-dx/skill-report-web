@@ -337,6 +337,7 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
                 goal={editingGoal}
                 skillCategories={skillCategories}
                 positions={positions}
+                userId={userId || 'emp_001'}
                 onSubmit={handleFormSubmit}
                 onCancel={handleFormCancel}
                 isLoading={goalLoading}
