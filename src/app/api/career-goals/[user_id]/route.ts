@@ -209,6 +209,12 @@ export async function POST(
     const { user_id } = params
     const body = await request.json()
 
+    // デバッグ用ログ追加
+    console.log('=== キャリア目標作成API デバッグ ===')
+    console.log('user_id:', user_id)
+    console.log('リクエストボディ:', JSON.stringify(body, null, 2))
+    console.log('body.goal_type:', body.goal_type, 'typeof:', typeof body.goal_type)
+
     // パラメータバリデーション
     if (!user_id) {
       return NextResponse.json({
@@ -222,6 +228,11 @@ export async function POST(
 
     // 必須項目のバリデーション
     if (!body.title || !body.goal_type || !body.target_date) {
+      console.log('必須項目チェック失敗:')
+      console.log('- title:', body.title)
+      console.log('- goal_type:', body.goal_type)
+      console.log('- target_date:', body.target_date)
+      
       return NextResponse.json({
         success: false,
         error: {
@@ -237,12 +248,19 @@ export async function POST(
     }
 
     // 目標タイプの検証
-    if (!['short_term', 'mid_term', 'long_term'].includes(body.goal_type)) {
+    const validGoalTypes = ['short_term', 'mid_term', 'long_term']
+    console.log('目標タイプ検証:')
+    console.log('- 受信した値:', body.goal_type)
+    console.log('- 有効な値:', validGoalTypes)
+    console.log('- includes結果:', validGoalTypes.includes(body.goal_type))
+    
+    if (!validGoalTypes.includes(body.goal_type)) {
+      console.log('目標タイプ検証失敗!')
       return NextResponse.json({
         success: false,
         error: {
           code: 'INVALID_GOAL_TYPE',
-          message: '無効な目標タイプです'
+          message: `無効な目標タイプです。受信した値: ${body.goal_type}, 有効な値: ${validGoalTypes.join(', ')}`
         }
       }, { status: 400 })
     }

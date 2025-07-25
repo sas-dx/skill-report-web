@@ -51,12 +51,18 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
       const createData = {
         title: goal.title,
         description: goal.description,
-        goal_type: 'career_advancement', // 必須フィールドを追加
+        goal_type: goal.goal_type, // フォームから送信された値を使用
         target_date: goal.target_date,
         status: goal.status,
         priority: goal.priority,
         progress_percentage: goal.progress_percentage,
       };
+
+      // デバッグ用ログ追加
+      console.log('=== useCareerGoals addCareerGoal デバッグ ===');
+      console.log('元のgoal:', goal);
+      console.log('送信するcreateData:', createData);
+      console.log('goal_type:', createData.goal_type, 'typeof:', typeof createData.goal_type);
 
       const response = await fetch(`/api/career-goals/${userId || 'current'}`, {
         method: 'POST',
@@ -100,7 +106,7 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         goal_id: goal.id,
         title: goal.title,
         description: goal.description,
-        goal_type: 'career_advancement',
+        goal_type: goal.goal_type, // フォームから送信された値を使用
         target_date: goal.target_date,
         status: goal.status,
         priority: goal.priority,

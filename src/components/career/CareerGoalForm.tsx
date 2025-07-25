@@ -228,6 +228,12 @@ export function CareerGoalForm({
         updated_at: new Date().toISOString()
       };
 
+      // デバッグ用ログ追加
+      console.log('=== フォーム送信データ デバッグ ===');
+      console.log('formData:', formData);
+      console.log('goalData:', goalData);
+      console.log('goal_type:', goalData.goal_type, 'typeof:', typeof goalData.goal_type);
+
       await onSubmit(goalData);
     } catch (error) {
       console.error('フォーム送信エラー:', error);
