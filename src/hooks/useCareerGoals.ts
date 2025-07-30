@@ -55,7 +55,6 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         target_date: goal.target_date,
         status: goal.status,
         priority: goal.priority,
-        progress_percentage: goal.progress_percentage,
       };
 
       // デバッグ用ログ追加
@@ -110,7 +109,7 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         target_date: goal.target_date,
         status: goal.status,
         priority: goal.priority,
-        progress_percentage: goal.progress_percentage,
+        progress_rate: goal.progress_percentage,
       };
 
       const response = await fetch(`/api/career-goals/${userId || 'current'}`, {

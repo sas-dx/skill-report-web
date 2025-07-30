@@ -469,7 +469,7 @@ export async function PUT(
 
 /**
  * キャリア目標削除API
- * DELETE /api/career-goals/{user_id}
+ * DELETE /api/career-goals/{user_id}?goal_id={goal_id}
  */
 export async function DELETE(
   request: NextRequest,
@@ -477,12 +477,10 @@ export async function DELETE(
 ) {
   try {
     const { user_id } = params
-    
-    // リクエストボディから削除情報を取得
-    const body = await request.json()
-    const { goal_id, year, user_id: bodyUserId } = body
+    const { searchParams } = new URL(request.url)
+    const goal_id = searchParams.get('goal_id')
 
-    console.log('削除API呼び出し:', { user_id, goal_id, year, bodyUserId })
+    console.log('削除API呼び出し:', { user_id, goal_id })
 
     // パラメータバリデーション
     if (!user_id) {
@@ -501,12 +499,12 @@ export async function DELETE(
         success: false,
         error: {
           code: 'INVALID_PARAMETER',
-          message: '目標IDが必要です'
+          message: '目標IDが必要です（クエリパラメータ: goal_id）'
         }
       }, { status: 400 })
     }
 
-    // goal_idが指定されている場合の通常の削除
+    // キャリア目標を削除
     const result = await deleteCareerGoal(user_id, goal_id)
 
     console.log('削除結果:', result)

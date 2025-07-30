@@ -126,15 +126,17 @@ export function CareerGoalList({
     // CareerGoalDataからCareerGoalに変換
     const convertedGoal: CareerGoal = {
       id: careerGoal.id || `goal_${Date.now()}`,
+      goal_id: careerGoal.id || `goal_${Date.now()}`, // goal_idを追加
       user_id: 'current_user', // 実際のユーザーIDは親コンポーネントから取得
       title: careerGoal.target_position || '',
       description: careerGoal.target_description || '',
+      goal_type: careerGoal.goal_type || 'mid_term', // goal_typeを追加（デフォルト値設定）
       status: mapPlanStatusToCareerStatus(careerGoal.plan_status),
       priority: estimatePriority(careerGoal.progress_percentage || 0),
-      target_date: careerGoal.target_date,
       progress_percentage: careerGoal.progress_percentage || 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      ...(careerGoal.target_date && { target_date: careerGoal.target_date }), // 条件付きでプロパティを追加
     };
 
     return [convertedGoal];
