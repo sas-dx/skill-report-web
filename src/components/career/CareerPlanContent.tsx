@@ -24,7 +24,7 @@ import {
   DocumentTextIcon,
   CalendarIcon 
 } from '@/components/ui/Icons';
-import { CareerGoal } from '@/types/career';
+import { CareerGoal, CareerGoalData } from '@/types/career';
 
 /**
  * キャリアプラン画面のプロパティ
@@ -47,7 +47,7 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
   // 状態管理
   const [selectedYear, setSelectedYear] = useState(year || new Date().getFullYear());
   const [showGoalForm, setShowGoalForm] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<CareerGoal | null>(null);
+  const [editingGoal, setEditingGoal] = useState<CareerGoalData | null>(null);
   const [activeTab, setActiveTab] = useState<'goals' | 'progress' | 'actions' | 'skillgap' | 'path' | 'feedback'>('goals');
 
   // カスタムフック
@@ -97,7 +97,20 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
    * 目標編集ハンドラー
    */
   const handleEditGoal = (goal: CareerGoal) => {
-    setEditingGoal(goal);
+    // CareerGoalをCareerGoalData形式に変換
+    const goalData: CareerGoalData = {
+      id: goal.id,
+      goal_type: goal.goal_type,
+      target_position: goal.title,
+      target_description: goal.description || '',
+      target_date: goal.target_date || '',
+      plan_status: goal.status === 'in_progress' ? 'ACTIVE' : 
+                   goal.status === 'completed' ? 'COMPLETED' : 
+                   goal.status === 'not_started' ? 'INACTIVE' : 'INACTIVE',
+      progress_percentage: goal.progress_percentage || 0
+    };
+    
+    setEditingGoal(goalData);
     setShowGoalForm(true);
   };
 
