@@ -139,6 +139,7 @@ export async function createCareerGoal(
 ): Promise<CareerGoalDB> {
   try {
     const goalId = `G${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const careerPlanId = `CP${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const currentDateTime = new Date()
 
     // 優先度レベルの変換（1-5 → high/medium/low）
@@ -155,31 +156,86 @@ export async function createCareerGoal(
     const relatedSkillsJson = goalData.related_skills ? JSON.stringify(goalData.related_skills) : null
     const actionPlansJson = goalData.action_plans ? JSON.stringify(goalData.action_plans) : null
 
-    const newGoal = await prisma.goalProgress.create({
-      data: {
-        id: `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        goal_id: goalId,
-        employee_id: userId,
-        goal_title: goalData.title,
-        goal_description: goalData.description || null,
-        goal_category: goalData.goal_category || 'general',
-        goal_type: goalData.goal_type,
-        priority_level: priorityLevel,
-        target_date: new Date(goalData.target_date),
-        start_date: currentDateTime,
-        achievement_status: goalData.status,
-        progress_rate: new Prisma.Decimal(0),
-        achievement_rate: new Prisma.Decimal(0),
-        related_skill_items: relatedSkillsJson,
-        milestones: actionPlansJson,
-        tenant_id: 'default', // シングルテナント環境
-        created_by: userId,
-        updated_by: userId,
-        is_deleted: false
+    // トランザクションで両テーブルに登録
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. TRN_GoalProgress に詳細な目標データを登録
+      const newGoal = await tx.goalProgress.create({
+        data: {
+          id: `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          goal_id: goalId,
+          employee_id: userId,
+          goal_title: goalData.title,
+          goal_description: goalData.description || null,
+          goal_category: goalData.goal_category || 'general',
+          goal_type: goalData.goal_type,
+          priority_level: priorityLevel,
+          target_date: new Date(goalData.target_date),
+          start_date: currentDateTime,
+          achievement_status: goalData.status,
+          progress_rate: new Prisma.Decimal(0),
+          achievement_rate: new Prisma.Decimal(0),
+          related_skill_items: relatedSkillsJson,
+          milestones: actionPlansJson,
+          tenant_id: 'default', // シングルテナント環境
+          created_by: userId,
+          updated_by: userId,
+          is_deleted: false
+        }
+      })
+
+      // 2. 既存のアクティブなキャリアプランがあるかチェック
+      const existingCareerPlan = await tx.careerPlan.findFirst({
+        where: {
+          employee_id: userId,
+          is_deleted: false,
+          plan_status: 'ACTIVE'
+        }
+      })
+
+      if (existingCareerPlan) {
+        // 既存のキャリアプランを更新
+        await tx.careerPlan.update({
+          where: {
+            career_plan_id: existingCareerPlan.career_plan_id
+          },
+          data: {
+            plan_description: goalData.title,
+            target_level: goalData.goal_type === 'long_term' ? 'SENIOR' : 
+                         goalData.goal_type === 'mid_term' ? 'INTERMEDIATE' : 'JUNIOR',
+            plan_end_date: new Date(goalData.target_date),
+            progress_percentage: new Prisma.Decimal(0),
+            priority_level: priorityLevel,
+            updated_at: currentDateTime
+          }
+        })
+      } else {
+        // 新規キャリアプランを作成
+        await tx.careerPlan.create({
+          data: {
+            career_plan_id: careerPlanId,
+            employee_id: userId,
+            plan_name: `${goalData.title} - キャリアプラン`,
+            plan_description: goalData.title,
+            plan_type: goalData.goal_type,
+            current_level: 'JUNIOR',
+            target_level: goalData.goal_type === 'long_term' ? 'SENIOR' : 
+                         goalData.goal_type === 'mid_term' ? 'INTERMEDIATE' : 'JUNIOR',
+            plan_start_date: currentDateTime,
+            plan_end_date: new Date(goalData.target_date),
+            plan_status: 'ACTIVE',
+            progress_percentage: new Prisma.Decimal(0),
+            priority_level: priorityLevel,
+            required_skills: relatedSkillsJson,
+            development_actions: actionPlansJson,
+            is_deleted: false
+          }
+        })
       }
+
+      return newGoal
     })
 
-    return newGoal
+    return result
   } catch (error) {
     console.error('キャリア目標作成エラー:', error)
     throw handlePrismaError(error)
@@ -207,61 +263,118 @@ export async function updateCareerGoal(
       throw new Error('GOAL_NOT_FOUND')
     }
 
-    // 更新データの準備
-    const updateFields: any = {
-      updated_by: userId,
-      updated_at: new Date()
-    }
-
-    if (updateData.title !== undefined) {
-      updateFields.goal_title = updateData.title
-    }
-    if (updateData.description !== undefined) {
-      updateFields.goal_description = updateData.description
-    }
-    if (updateData.goal_type !== undefined) {
-      updateFields.goal_type = updateData.goal_type
-    }
-    if (updateData.goal_category !== undefined) {
-      updateFields.goal_category = updateData.goal_category
-    }
-    if (updateData.priority !== undefined) {
-      // 優先度レベルの変換
-      let priorityLevel: string
-      if (updateData.priority >= 4) {
-        priorityLevel = 'high'
-      } else if (updateData.priority >= 2) {
-        priorityLevel = 'medium'
-      } else {
-        priorityLevel = 'low'
+    // トランザクションで両テーブルを更新
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. TRN_GoalProgress の更新データ準備
+      const updateFields: any = {
+        updated_by: userId,
+        updated_at: new Date()
       }
-      updateFields.priority_level = priorityLevel
-    }
-    if (updateData.target_date !== undefined) {
-      updateFields.target_date = new Date(updateData.target_date)
-    }
-    if (updateData.status !== undefined) {
-      updateFields.achievement_status = updateData.status
-      
-      // 完了時の処理
-      if (updateData.status === 'completed') {
-        updateFields.completion_date = new Date()
-        updateFields.progress_rate = new Prisma.Decimal(100)
-        updateFields.achievement_rate = new Prisma.Decimal(100)
-      }
-    }
-    if (updateData.progress_rate !== undefined) {
-      updateFields.progress_rate = new Prisma.Decimal(updateData.progress_rate)
-    }
 
-    const updatedGoal = await prisma.goalProgress.update({
-      where: {
-        id: existingGoal.id
-      },
-      data: updateFields
+      if (updateData.title !== undefined) {
+        updateFields.goal_title = updateData.title
+      }
+      if (updateData.description !== undefined) {
+        updateFields.goal_description = updateData.description
+      }
+      if (updateData.goal_type !== undefined) {
+        updateFields.goal_type = updateData.goal_type
+      }
+      if (updateData.goal_category !== undefined) {
+        updateFields.goal_category = updateData.goal_category
+      }
+      if (updateData.priority !== undefined) {
+        // 優先度レベルの変換
+        let priorityLevel: string
+        if (updateData.priority >= 4) {
+          priorityLevel = 'high'
+        } else if (updateData.priority >= 2) {
+          priorityLevel = 'medium'
+        } else {
+          priorityLevel = 'low'
+        }
+        updateFields.priority_level = priorityLevel
+      }
+      if (updateData.target_date !== undefined) {
+        updateFields.target_date = new Date(updateData.target_date)
+      }
+      if (updateData.status !== undefined) {
+        updateFields.achievement_status = updateData.status
+        
+        // 完了時の処理
+        if (updateData.status === 'completed') {
+          updateFields.completion_date = new Date()
+          updateFields.progress_rate = new Prisma.Decimal(100)
+          updateFields.achievement_rate = new Prisma.Decimal(100)
+        }
+      }
+      if (updateData.progress_rate !== undefined) {
+        updateFields.progress_rate = new Prisma.Decimal(updateData.progress_rate)
+      }
+
+      // TRN_GoalProgress を更新
+      const updatedGoal = await tx.goalProgress.update({
+        where: {
+          id: existingGoal.id
+        },
+        data: updateFields
+      })
+
+      // 2. 対応するキャリアプランも更新
+      const existingCareerPlan = await tx.careerPlan.findFirst({
+        where: {
+          employee_id: userId,
+          is_deleted: false,
+          plan_status: 'ACTIVE'
+        }
+      })
+
+      if (existingCareerPlan) {
+        const careerPlanUpdateFields: any = {
+          updated_at: new Date()
+        }
+
+        if (updateData.title !== undefined) {
+          careerPlanUpdateFields.plan_description = updateData.title
+        }
+        if (updateData.goal_type !== undefined) {
+          careerPlanUpdateFields.target_level = updateData.goal_type === 'long_term' ? 'SENIOR' : 
+                                               updateData.goal_type === 'mid_term' ? 'INTERMEDIATE' : 'JUNIOR'
+        }
+        if (updateData.target_date !== undefined) {
+          careerPlanUpdateFields.plan_end_date = new Date(updateData.target_date)
+        }
+        if (updateData.priority !== undefined) {
+          let priorityLevel: string
+          if (updateData.priority >= 4) {
+            priorityLevel = 'high'
+          } else if (updateData.priority >= 2) {
+            priorityLevel = 'medium'
+          } else {
+            priorityLevel = 'low'
+          }
+          careerPlanUpdateFields.priority_level = priorityLevel
+        }
+        if (updateData.progress_rate !== undefined) {
+          careerPlanUpdateFields.progress_percentage = new Prisma.Decimal(updateData.progress_rate)
+        }
+        if (updateData.status === 'completed') {
+          careerPlanUpdateFields.plan_status = 'COMPLETED'
+          careerPlanUpdateFields.progress_percentage = new Prisma.Decimal(100)
+        }
+
+        await tx.careerPlan.update({
+          where: {
+            career_plan_id: existingCareerPlan.career_plan_id
+          },
+          data: careerPlanUpdateFields
+        })
+      }
+
+      return updatedGoal
     })
 
-    return updatedGoal
+    return result
   } catch (error) {
     console.error('キャリア目標更新エラー:', error)
     throw handlePrismaError(error)
