@@ -6,234 +6,55 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
-import { ProgressData, CareerGoalData, SkillGapData, SkillProgress } from '@/types/career';
+import React from 'react';
+import { CareerGoalData } from '@/types/career';
 
-/**
- * キャリア進捗チャートのプロパティ
- */
 interface CareerProgressChartProps {
-  careerGoal: CareerGoalData | null;
+  careerGoal: CareerGoalData;
   year: number;
-  isLoading?: boolean;
 }
 
 /**
  * キャリア進捗チャートコンポーネント
- * 
- * 機能:
- * - 全体進捗の円グラフ表示
- * - スキル別進捗の棒グラフ表示
- * - アクションプラン進捗の表示
  */
-export function CareerProgressChart({ 
-  careerGoal, 
-  year,
-  isLoading = false 
-}: CareerProgressChartProps) {
-  
-  // CareerGoalDataからProgressDataを生成
-  const progressData = useMemo((): ProgressData | null => {
-    if (!careerGoal) return null;
-
-    // 現在レベルと目標レベルを数値に変換
-    const currentLevel = parseInt(careerGoal.current_level || '1') || 1;
-    const targetLevel = parseInt(careerGoal.target_level || '4') || 4;
-    
-    // 目標ポジションに基づいてスキル進捗データを生成
-    const generateSkillProgress = (): SkillProgress[] => {
-      const baseSkills = [
-        { name: 'リーダーシップ', category: 'management' },
-        { name: 'プロジェクト管理', category: 'management' },
-        { name: 'チームマネジメント', category: 'management' },
-        { name: '戦略立案', category: 'strategy' },
-        { name: 'コミュニケーション', category: 'soft_skills' },
-        { name: '問題解決', category: 'soft_skills' }
-      ];
-
-      return baseSkills.map((skill, index) => {
-        // 現在のレベルに基づいて各スキルの進捗を計算
-        const skillCurrentLevel = Math.max(1, currentLevel + (index % 2 === 0 ? 0 : -1));
-        const skillTargetLevel = Math.min(4, targetLevel + (index % 3 === 0 ? 0 : 1));
-        const progressPercentage = Math.round((skillCurrentLevel / skillTargetLevel) * 100);
-
-        return {
-          skill_name: skill.name,
-          current_level: skillCurrentLevel,
-          target_level: skillTargetLevel,
-          progress_percentage: Math.min(100, progressPercentage),
-          category: skill.category
-        };
-      });
-    };
-
-    // アクションプラン進捗を計算
-    const calculateActionPlanProgress = () => {
-      const overallProgress = careerGoal.progress_percentage || 0;
-      const totalCount = 8; // 標準的なアクションプラン数
-      
-      // 全体進捗に基づいて各ステータスの数を計算
-      const completedCount = Math.floor((overallProgress / 100) * totalCount);
-      const inProgressCount = Math.min(3, totalCount - completedCount);
-      const notStartedCount = totalCount - completedCount - inProgressCount;
-      
-      return {
-        total_count: totalCount,
-        completed_count: completedCount,
-        in_progress_count: inProgressCount,
-        not_started_count: notStartedCount,
-        completion_rate: Math.round((completedCount / totalCount) * 100),
-      };
-    };
-
-    return {
-      overall_progress: careerGoal.progress_percentage || 0,
-      skill_progress: generateSkillProgress(),
-      action_plan_progress: calculateActionPlanProgress(),
-      last_updated: careerGoal.last_review_date || new Date().toISOString(),
-    };
-  }, [careerGoal]);
-  
-  // ローディング表示
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="bg-gray-200 rounded-lg h-64"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // データが存在しない場合
-  if (!progressData) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-gray-400 mb-4">
-          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          進捗データがありません
-        </h3>
-        <p className="text-sm text-gray-500">
-          キャリア目標を設定すると、進捗が表示されます。
-        </p>
-      </div>
-    );
-  }
-
+export function CareerProgressChart({ careerGoal, year }: CareerProgressChartProps) {
   return (
     <div className="space-y-6">
-      {/* 全体進捗 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">全体進捗</h3>
-        <div className="flex items-center justify-center">
-          <div className="relative w-32 h-32">
-            {/* 円形進捗バー */}
-            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-              <circle
-                cx="60"
-                cy="60"
-                r="50"
-                stroke="currentColor"
-                strokeWidth="8"
-                fill="transparent"
-                className="text-gray-200"
-              />
-              <circle
-                cx="60"
-                cy="60"
-                r="50"
-                stroke="currentColor"
-                strokeWidth="8"
-                fill="transparent"
-                strokeDasharray={`${2 * Math.PI * 50}`}
-                strokeDashoffset={`${2 * Math.PI * 50 * (1 - progressData.overall_progress / 100)}`}
-                className="text-blue-500 transition-all duration-300"
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold text-gray-900">
-                {progressData.overall_progress}%
-              </span>
-            </div>
-          </div>
-        </div>
-        <p className="text-center text-sm text-gray-600 mt-4">
-          最終更新: {new Date(progressData.last_updated).toLocaleDateString('ja-JP')}
-        </p>
-      </div>
-
-      {/* スキル別進捗 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">スキル別進捗</h3>
-        <div className="space-y-4">
-          {progressData.skill_progress.map((skill, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-gray-900">{skill.skill_name}</span>
-                <span className="text-gray-600">
-                  {skill.current_level} → {skill.target_level} ({skill.progress_percentage}%)
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${skill.progress_percentage}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-500">
-                カテゴリ: {skill.category}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* アクションプラン進捗 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">アクションプラン進捗</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">
-              {progressData.action_plan_progress.total_count}
-            </div>
-            <div className="text-sm text-gray-600">総数</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {progressData.action_plan_progress.completed_count}
-            </div>
-            <div className="text-sm text-gray-600">完了</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {progressData.action_plan_progress.in_progress_count}
-            </div>
-            <div className="text-sm text-gray-600">進行中</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600">
-              {progressData.action_plan_progress.not_started_count}
-            </div>
-            <div className="text-sm text-gray-600">未着手</div>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-gray-900">完了率</span>
-            <span className="text-gray-600">
-              {progressData.action_plan_progress.completion_rate}%
-            </span>
+      <div className="text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          {year}年度 キャリア進捗状況
+        </h3>
+        
+        {/* 進捗バー */}
+        <div className="max-w-md mx-auto">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>進捗率</span>
+            <span>{careerGoal.progress_percentage}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className="bg-green-500 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${progressData.action_plan_progress.completion_rate}%` }}
+            <div 
+              className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${careerGoal.progress_percentage}%` }}
             ></div>
+          </div>
+        </div>
+
+        {/* 目標情報 */}
+        <div className="mt-6 bg-gray-50 rounded-lg p-4">
+          <h4 className="font-medium text-gray-900 mb-2">目標詳細</h4>
+          <div className="text-left space-y-2">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">目標職位:</span> {careerGoal.target_position}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">現在レベル:</span> {careerGoal.current_level}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">目標レベル:</span> {careerGoal.target_level}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">目標期日:</span> {careerGoal.target_date ? new Date(careerGoal.target_date).toLocaleDateString('ja-JP') : '未設定'}
+            </p>
           </div>
         </div>
       </div>
