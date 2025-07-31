@@ -1,13 +1,21 @@
-// 要求仕様ID: PLT.1-WEB.1 - UIアイコンコンポーネント
-import React from 'react';
+import React from "react";
 
-interface IconProps {
+/**
+ * 共通UIで利用するアイコンコンポーネント群。
+ * strokeWidth は 1.5 に統一し、Tailwind などの className が上書きできるよう
+ * すべて currentColor を継承させる。
+ */
+
+export interface IconProps {
+  /** 追加のクラス名 */
   className?: string;
+  /** アイコンの一辺（px） */
   size?: number;
 }
 
-// 学位帽アイコン（AcademicCapIcon相当）
-export const AcademicCapIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+// --------------------------- 基本アイコン --------------------------- //
+
+export const AcademicCapIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -23,8 +31,7 @@ export const AcademicCapIcon: React.FC<IconProps> = ({ className = '', size = 24
   </svg>
 );
 
-// 目アイコン（EyeIcon相当）
-export const EyeIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const EyeIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -41,8 +48,7 @@ export const EyeIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
   </svg>
 );
 
-// 目を閉じたアイコン（EyeSlashIcon相当）
-export const EyeSlashIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const EyeSlashIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -58,8 +64,7 @@ export const EyeSlashIcon: React.FC<IconProps> = ({ className = '', size = 24 })
   </svg>
 );
 
-// エラーアイコン（XCircleIcon相当）
-export const XCircleIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const XCircleIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -75,8 +80,7 @@ export const XCircleIcon: React.FC<IconProps> = ({ className = '', size = 24 }) 
   </svg>
 );
 
-// 成功アイコン（CheckCircleIcon相当）
-export const CheckCircleIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const CheckCircleIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -92,8 +96,7 @@ export const CheckCircleIcon: React.FC<IconProps> = ({ className = '', size = 24
   </svg>
 );
 
-// 警告アイコン（ExclamationTriangleIcon相当）
-export const ExclamationTriangleIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const ExclamationTriangleIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -109,8 +112,7 @@ export const ExclamationTriangleIcon: React.FC<IconProps> = ({ className = '', s
   </svg>
 );
 
-// 情報アイコン（InformationCircleIcon相当）
-export const InformationCircleIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const InformationCircleIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -126,8 +128,9 @@ export const InformationCircleIcon: React.FC<IconProps> = ({ className = '', siz
   </svg>
 );
 
-// プラスアイコン（PlusIcon相当）
-export const PlusIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+// --------------------------- 追加アイコン --------------------------- //
+
+export const PlusIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -143,8 +146,7 @@ export const PlusIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => 
   </svg>
 );
 
-// チャートバーアイコン（ChartBarIcon相当）
-export const ChartBarIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const ChartBarIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -160,8 +162,7 @@ export const ChartBarIcon: React.FC<IconProps> = ({ className = '', size = 24 })
   </svg>
 );
 
-// ドキュメントテキストアイコン（DocumentTextIcon相当）
-export const DocumentTextIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const SearchIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -173,12 +174,12 @@ export const DocumentTextIcon: React.FC<IconProps> = ({ className = '', size = 2
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.35-4.35" />
   </svg>
 );
 
-// カレンダーアイコン（CalendarIcon相当）
-export const CalendarIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const EditIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -190,12 +191,12 @@ export const CalendarIcon: React.FC<IconProps> = ({ className = '', size = 24 })
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
   </svg>
 );
 
-// 編集アイコン（PencilIcon相当）
-export const PencilIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const DocumentTextIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -207,12 +208,13 @@ export const PencilIcon: React.FC<IconProps> = ({ className = '', size = 24 }) =
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+    <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25" />
+    <path d="M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+    <path d="M8.25 16.5h7.5M8.25 19.5H12" />
   </svg>
 );
 
-// 削除アイコン（TrashIcon相当）
-export const TrashIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const CalendarIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -224,12 +226,11 @@ export const TrashIcon: React.FC<IconProps> = ({ className = '', size = 24 }) =>
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+    <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25M3 18.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75M3 18.75v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
   </svg>
 );
 
-// フラグアイコン（FlagIcon相当）
-export const FlagIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
+export const PencilIcon: React.FC<IconProps> = ({ className = "", size = 24 }) => (
   <svg
     className={className}
     width={size}
@@ -241,24 +242,4 @@ export const FlagIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => 
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d="M3 3v18h18M7 8l4-4 4 4v8l-4-4-4 4V8z" />
-  </svg>
-);
-
-// 時計アイコン（ClockIcon相当）
-export const ClockIcon: React.FC<IconProps> = ({ className = '', size = 24 }) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12,6 12,12 16,14" />
-  </svg>
-);
+    <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 
