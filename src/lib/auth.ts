@@ -40,7 +40,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
  * @param payload - トークンに含めるデータ
  * @returns JWTトークン
  */
-export function generateToken(payload: { userId: string; email: string; role: string }): string {
+export function generateToken(payload: { userId: string; loginId: string; employeeId: string }): string {
   return jwt.sign(payload, JWT_SECRET as jwt.Secret, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
 }
 
@@ -49,9 +49,9 @@ export function generateToken(payload: { userId: string; email: string; role: st
  * @param token - 検証するトークン
  * @returns デコードされたペイロード
  */
-export function verifyToken(token: string): { userId: string; email: string; role: string } | null {
+export function verifyToken(token: string): { userId: string; loginId: string; employeeId: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; loginId: string; employeeId: string };
     return decoded;
   } catch (error) {
     return null;
@@ -69,4 +69,30 @@ export function getTokenFromRequest(request: Request): string | null {
     return authHeader.substring(7);
   }
   return null;
+}
+
+/**
+ * リクエストの認証を検証する
+ * @param request - HTTPリクエスト
+ * @returns 認証結果
+ */
+export async function verifyAuth(request: Request): Promise<{ success: boolean; userId?: string; loginId?: string; employeeId?: string }> {
+  const token = getTokenFromRequest(request);
+  
+  if (!token) {
+    return { success: false };
+  }
+
+  const decoded = verifyToken(token);
+  
+  if (!decoded) {
+    return { success: false };
+  }
+
+  return {
+    success: true,
+    userId: decoded.userId,
+    loginId: decoded.loginId,
+    employeeId: decoded.employeeId
+  };
 }

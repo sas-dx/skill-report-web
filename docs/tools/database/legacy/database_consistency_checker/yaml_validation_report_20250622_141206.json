@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "total_files": 2,
+  "valid_files": 2,
+  "invalid_files": 0,
+  "files": {
+    "MST_Employee": {
+      "success": true,
+      "table_name": "MST_Employee",
+      "errors": [],
+      "warnings": [],
+      "suggestions": [],
+      "checks": {
+        "file_exists": true,
+        "yaml_parsable": true,
+        "sections_exist": true,
+        "sections_order": true,
+        "content_quality": true
+      },
+      "file_path": "/home/kurosawa/skill-report-web/docs/design/database/table-details/MST_Employee_details.yaml",
+      "validation_time": 0.014801
+    },
+    "MST_Department": {
+      "success": true,
+      "table_name": "MST_Department",
+      "errors": [],
+      "warnings": [],
+      "suggestions": [],
+      "checks": {
+        "file_exists": true,
+        "yaml_parsable": true,
+        "sections_exist": true,
+        "sections_order": true,
+        "content_quality": true
+      },
+      "file_path": "/home/kurosawa/skill-report-web/docs/design/database/table-details/MST_Department_details.yaml",
+      "validation_time": 0.02963
+    }
+  },
+  "summary_errors": [],
+  "summary_warnings": [],
+  "summary_suggestions": [],
+  "validation_time": 0.044431
+}

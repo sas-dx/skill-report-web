@@ -7,76 +7,75 @@
 | テーブル名 | MST_Certification |
 | 論理名 | 資格情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-24 23:05:57 |
 
 ## 概要
 
 MST_Certification（資格情報）は、各種資格・認定・免許の基本情報を管理するマスタテーブルです。
-
 主な目的：
 - IT資格、業務資格、国家資格等の統一管理
 - 資格の有効期限・更新要件の管理
 - 資格とスキルの関連付け
 - 資格取得推奨・必須要件の管理
 - 資格取得状況の追跡・分析基盤
-
 このテーブルにより、社員の資格取得状況を体系的に管理し、
 キャリア開発や人材配置の判断材料として活用できます。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| certification_code | 資格コード | VARCHAR | 50 | ○ |  | 資格を一意に識別するコード（例：CERT_AWS_SAA、CERT_PMP） |
-| certification_name | 資格名 | VARCHAR | 200 | ○ |  | 正式な資格名称 |
-| certification_name_en | 資格名（英語） | VARCHAR | 200 | ○ |  | 英語での資格名称 |
-| issuer | 発行機関 | VARCHAR | 100 | ○ |  | 資格を発行する機関・団体名 |
-| issuer_country | 発行国 | VARCHAR | 10 | ○ |  | 資格発行国（ISO 3166-1 alpha-2コード） |
-| certification_category | 資格カテゴリ | ENUM |  | ○ |  | 資格の分類（IT:IT関連、BUSINESS:ビジネス、NATIONAL:国家資格、LANGUAGE:語学、OTHER:その他） |
-| certification_level | 資格レベル | ENUM |  | ○ |  | 資格の難易度レベル（BASIC:基礎、INTERMEDIATE:中級、ADVANCED:上級、EXPERT:エキスパート） |
-| validity_period_months | 有効期間（月） | INTEGER |  | ○ |  | 資格の有効期間（月数、NULLの場合は無期限） |
-| renewal_required | 更新要否 | BOOLEAN |  | ○ | False | 定期的な更新が必要かどうか |
-| renewal_requirements | 更新要件 | TEXT |  | ○ |  | 資格更新に必要な要件・条件 |
-| exam_fee | 受験料 | DECIMAL | 10,2 | ○ |  | 受験料（円） |
-| exam_language | 試験言語 | VARCHAR | 50 | ○ |  | 試験で使用される言語 |
-| exam_format | 試験形式 | ENUM |  | ○ |  | 試験の実施形式（ONLINE:オンライン、OFFLINE:会場、BOTH:両方） |
-| official_url | 公式URL | VARCHAR | 500 | ○ |  | 資格の公式サイトURL |
-| description | 説明 | TEXT |  | ○ |  | 資格の詳細説明・概要 |
-| skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | 関連するスキルカテゴリのID |
-| is_recommended | 推奨資格フラグ | BOOLEAN |  | ○ | False | 会社として取得を推奨する資格かどうか |
-| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 資格が有効かどうか |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| certification_code | 資格コード | VARCHAR | 50 | ○ |  | 資格コード |
+| certification_name | 資格名 | VARCHAR | 200 | ○ |  | 資格名 |
+| certification_category | 資格カテゴリ | ENUM |  | ○ |  | 資格カテゴリ |
+| certification_id | 資格ID | INTEGER |  | × |  | 資格ID |
+| certification_level | 資格レベル | ENUM |  | ○ |  | 資格レベル |
+| certification_name_en | 資格名 | VARCHAR | 200 | ○ |  | 資格名（英語） |
+| description | 説明 | TEXT |  | ○ |  | 説明 |
+| exam_fee | 受験料 | DECIMAL | 10,2 | ○ |  | 受験料 |
+| exam_format | 試験形式 | ENUM |  | ○ |  | 試験形式 |
+| exam_language | 試験言語 | VARCHAR | 50 | ○ |  | 試験言語 |
+| is_active | 有効フラグ | BOOLEAN |  | ○ | True | 有効フラグ |
+| is_recommended | 推奨資格フラグ | BOOLEAN |  | ○ | False | 推奨資格フラグ |
+| issuer | 発行機関 | VARCHAR | 100 | ○ |  | 発行機関 |
+| issuer_country | 発行国 | VARCHAR | 10 | ○ |  | 発行国 |
+| official_url | 公式URL | VARCHAR | 500 | ○ |  | 公式URL |
+| renewal_required | 更新要否 | BOOLEAN |  | ○ | False | 更新要否 |
+| renewal_requirements | 更新要件 | TEXT |  | ○ |  | 更新要件 |
+| skill_category_id | スキルカテゴリID | VARCHAR | 50 | ○ |  | スキルカテゴリID |
+| validity_period_months | 有効期間 | INTEGER |  | ○ |  | 有効期間（月） |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_certification_code | certification_code | ○ | 資格コード検索用（一意） |
-| idx_certification_name | certification_name | × | 資格名検索用 |
-| idx_issuer | issuer | × | 発行機関検索用 |
-| idx_category_level | certification_category, certification_level | × | カテゴリ・レベル別検索用 |
-| idx_recommended | is_recommended, is_active | × | 推奨資格検索用 |
-| idx_skill_category | skill_category_id | × | スキルカテゴリ別検索用 |
+| idx_certification_code | certification_code | ○ |  |
+| idx_certification_name | certification_name | × |  |
+| idx_issuer | issuer | × |  |
+| idx_category_level | certification_category, certification_level | × |  |
+| idx_recommended | is_recommended, is_active | × |  |
+| idx_skill_category | skill_category_id | × |  |
+| idx_mst_certification_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_certification_skill_category | skill_category_id | MST_SkillCategory | id | CASCADE | SET NULL | スキルカテゴリへの外部キー |
+| fk_certification_skill_category | skill_category_id | MST_SkillCategory | id | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_certification_code | UNIQUE |  | 資格コード一意制約 |
-| chk_certification_category | CHECK | certification_category IN ('IT', 'BUSINESS', 'NATIONAL', 'LANGUAGE', 'OTHER') | 資格カテゴリ値チェック制約 |
-| chk_certification_level | CHECK | certification_level IN ('BASIC', 'INTERMEDIATE', 'ADVANCED', 'EXPERT') | 資格レベル値チェック制約 |
-| chk_exam_format | CHECK | exam_format IN ('ONLINE', 'OFFLINE', 'BOTH') | 試験形式値チェック制約 |
-| chk_validity_period | CHECK | validity_period_months IS NULL OR validity_period_months > 0 | 有効期間正数チェック制約 |
-| chk_exam_fee | CHECK | exam_fee IS NULL OR exam_fee >= 0 | 受験料非負数チェック制約 |
+| pk_mst_certification | PRIMARY KEY | certification_id | 主キー制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| uk_certification_code | UNIQUE |  | certification_code一意制約 |
 
 ## サンプルデータ
 
@@ -96,16 +95,24 @@ MST_Certification（資格情報）は、各種資格・認定・免許の基本
 
 ## 業務ルール
 
-- 資格コードは一意である必要がある
-- 推奨資格は定期的に見直しを行う
-- 有効期限のある資格は更新要件を必須記載
-- 受験料は税込み価格で記録
-- 公式URLは資格詳細情報の参照先として使用
-- スキルカテゴリとの関連付けにより、関連スキル推薦機能で活用
-- 資格レベルは社内スキルグレードとの対応付けに使用
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
 
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - 資格情報マスタテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 3.2.20250624 | 2025-06-24 | 主キー修正ツール | certification_id カラム削除、id を正しい主キーに設定 |
+| 4.0.20250624 | 2025-06-24 | カラム順序統一ツール | certification_id を主キーとして復活、指定されたカラム順序に統一 |
+| 4.1.20250624 | 2025-06-24 | 制約修正ツール | デフォルト値の型修正、制約処理の有効化 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 10.0.20250624_214905 | 2025-06-24 | 最終カラム順序統一ツール | 要求仕様に従って主キー→tenant_id→UUID→その他の順序に最終修正 |
+| 11.0.20250624_214959 | 2025-06-24 | 最終カラム順序修正ツール（実構成対応版） | 実際のカラム構成に基づいて主キー→tenant_id→その他→終了部分の順序に修正 |
+| 12.0.20250624_215052 | 2025-06-24 | 現実的カラム順序修正ツール | 実際に存在するカラムに基づいて現実的な順序に修正（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| 13.0.20250624_222630 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223431 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

@@ -7,12 +7,11 @@
 | テーブル名 | MST_UserAuth |
 | 論理名 | ユーザー認証情報 |
 | カテゴリ | マスタ系 |
-| 生成日時 | 2025-06-04 06:57:02 |
+| 生成日時 | 2025-06-24 23:05:56 |
 
 ## 概要
 
 MST_UserAuth（ユーザー認証情報）は、システムにアクセスする全ユーザーの認証・認可情報を管理するマスタテーブルです。
-
 主な目的：
 - ユーザーアカウントの一元管理（ログインID、パスワード等）
 - 認証情報のセキュアな保存（パスワードハッシュ化、多要素認証対応）
@@ -21,67 +20,68 @@ MST_UserAuth（ユーザー認証情報）は、システムにアクセスす�
 - パスワードポリシーの適用・管理
 - ログイン履歴・セキュリティ監査
 - 外部認証システム連携（SSO、LDAP等）
-
 このテーブルは、システム全体のセキュリティの基盤となり、不正アクセス防止、
 個人情報保護、コンプライアンス対応において重要な役割を果たします。
-
 
 
 ## カラム定義
 
 | カラム名 | 論理名 | データ型 | 長さ | NULL | デフォルト | 説明 |
 |----------|--------|----------|------|------|------------|------|
-| user_id | ユーザーID | VARCHAR | 50 | ○ |  | ユーザーを一意に識別するID（例：USER000001） |
-| login_id | ログインID | VARCHAR | 100 | ○ |  | ログイン時に使用するID（通常はメールアドレス） |
-| password_hash | パスワードハッシュ | VARCHAR | 255 | ○ |  | ハッシュ化されたパスワード（bcrypt等） |
-| password_salt | パスワードソルト | VARCHAR | 100 | ○ |  | パスワードハッシュ化用のソルト値 |
-| employee_id | 社員ID | VARCHAR | 50 | ○ |  | 関連する社員のID（MST_Employeeへの外部キー） |
-| account_status | アカウント状態 | ENUM |  | ○ | ACTIVE | アカウントの状態（ACTIVE:有効、INACTIVE:無効、LOCKED:ロック、SUSPENDED:停止） |
-| last_login_at | 最終ログイン日時 | TIMESTAMP |  | ○ |  | 最後にログインした日時 |
-| last_login_ip | 最終ログインIP | VARCHAR | 45 | ○ |  | 最後にログインしたIPアドレス（IPv4/IPv6対応） |
-| failed_login_count | ログイン失敗回数 | INT |  | ○ | 0 | 連続ログイン失敗回数（アカウントロック判定用） |
-| last_failed_login_at | 最終ログイン失敗日時 | TIMESTAMP |  | ○ |  | 最後にログインに失敗した日時 |
-| password_changed_at | パスワード変更日時 | TIMESTAMP |  | ○ |  | パスワードを最後に変更した日時 |
-| password_expires_at | パスワード有効期限 | TIMESTAMP |  | ○ |  | パスワードの有効期限 |
-| mfa_enabled | 多要素認証有効 | BOOLEAN |  | ○ | False | 多要素認証が有効かどうか |
-| mfa_secret | 多要素認証シークレット | VARCHAR | 255 | ○ |  | TOTP等の多要素認証用シークレットキー |
-| recovery_token | 復旧トークン | VARCHAR | 255 | ○ |  | パスワードリセット等の復旧用トークン |
-| recovery_token_expires_at | 復旧トークン有効期限 | TIMESTAMP |  | ○ |  | 復旧トークンの有効期限 |
-| session_timeout | セッションタイムアウト | INT |  | ○ |  | セッションタイムアウト時間（分） |
-| external_auth_provider | 外部認証プロバイダ | VARCHAR | 50 | ○ |  | 外部認証プロバイダ（LDAP、SAML、OAuth等） |
-| external_auth_id | 外部認証ID | VARCHAR | 255 | ○ |  | 外部認証システムでのユーザーID |
-| code | コード | VARCHAR | 20 | × |  | マスタコード |
-| name | 名称 | VARCHAR | 100 | × |  | マスタ名称 |
-| description | 説明 | TEXT |  | ○ |  | マスタ説明 |
+| id | プライマリキー | VARCHAR | 50 | × |  | プライマリキー（UUID） |
+| tenant_id | テナントID | VARCHAR | 50 | × |  | テナントID（マルチテナント対応） |
+| account_status | アカウント状態 | ENUM |  | ○ | ACTIVE | アカウント状態 |
+| employee_id | 社員ID | VARCHAR | 50 | ○ |  | 社員ID |
+| external_auth_id | 外部認証ID | VARCHAR | 255 | ○ |  | 外部認証ID |
+| external_auth_provider | 外部認証プロバイダ | VARCHAR | 50 | ○ |  | 外部認証プロバイダ |
+| failed_login_count | ログイン失敗回数 | INT |  | ○ | 0 | ログイン失敗回数 |
+| last_failed_login_at | 最終ログイン失敗日時 | TIMESTAMP |  | ○ |  | 最終ログイン失敗日時 |
+| last_login_at | 最終ログイン日時 | TIMESTAMP |  | ○ |  | 最終ログイン日時 |
+| last_login_ip | 最終ログインIP | VARCHAR | 45 | ○ |  | 最終ログインIP |
+| login_id | ログインID | VARCHAR | 100 | ○ |  | ログインID |
+| mfa_enabled | 多要素認証有効 | BOOLEAN |  | ○ | False | 多要素認証有効 |
+| mfa_secret | 多要素認証シークレット | VARCHAR | 255 | ○ |  | 多要素認証シークレット |
+| password_changed_at | パスワード変更日時 | TIMESTAMP |  | ○ |  | パスワード変更日時 |
+| password_expires_at | パスワード有効期限 | TIMESTAMP |  | ○ |  | パスワード有効期限 |
+| password_hash | パスワードハッシュ | VARCHAR | 255 | ○ |  | パスワードハッシュ |
+| password_salt | パスワードソルト | VARCHAR | 100 | ○ |  | パスワードソルト |
+| recovery_token | 復旧トークン | VARCHAR | 255 | ○ |  | 復旧トークン |
+| recovery_token_expires_at | 復旧トークン有効期限 | TIMESTAMP |  | ○ |  | 復旧トークン有効期限 |
+| session_timeout | セッションタイムアウト | INT |  | ○ |  | セッションタイムアウト |
+| user_id | ユーザーID | VARCHAR | 50 | ○ |  | ユーザーID |
+| userauth_id | MST_UserAuthの主キー | SERIAL |  | × |  | MST_UserAuthの主キー |
+| is_deleted | 論理削除フラグ | BOOLEAN |  | × | False | 論理削除フラグ |
+| created_at | 作成日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 作成日時 |
+| updated_at | 更新日時 | TIMESTAMP |  | × | CURRENT_TIMESTAMP | 更新日時 |
 
 ## インデックス
 
 | インデックス名 | カラム | ユニーク | 説明 |
 |----------------|--------|----------|------|
-| idx_user_id | user_id | ○ | ユーザーID検索用（一意） |
-| idx_login_id | login_id | ○ | ログインID検索用（一意） |
-| idx_employee_id | employee_id | ○ | 社員ID検索用（一意） |
-| idx_account_status | account_status | × | アカウント状態別検索用 |
-| idx_last_login | last_login_at | × | 最終ログイン日時検索用 |
-| idx_password_expires | password_expires_at | × | パスワード有効期限検索用 |
-| idx_external_auth | external_auth_provider, external_auth_id | × | 外部認証検索用 |
+| idx_user_id | user_id | ○ |  |
+| idx_login_id | login_id | ○ |  |
+| idx_employee_id | employee_id | ○ |  |
+| idx_account_status | account_status | × |  |
+| idx_last_login | last_login_at | × |  |
+| idx_password_expires | password_expires_at | × |  |
+| idx_external_auth | external_auth_provider, external_auth_id | × |  |
+| idx_mst_userauth_tenant_id | tenant_id | × |  |
 
 ## 外部キー
 
 | 制約名 | カラム | 参照テーブル | 参照カラム | 更新時 | 削除時 | 説明 |
 |--------|--------|--------------|------------|--------|--------|------|
-| fk_userauth_employee | employee_id | MST_Employee | id | CASCADE | SET NULL | 社員への外部キー |
+| fk_userauth_employee | employee_id | MST_Employee | id | CASCADE | SET NULL | 外部キー制約 |
 
 ## 制約
 
 | 制約名 | 種別 | 条件 | 説明 |
 |--------|------|------|------|
-| uk_user_id | UNIQUE |  | ユーザーID一意制約 |
-| uk_login_id | UNIQUE |  | ログインID一意制約 |
-| uk_employee_id | UNIQUE |  | 社員ID一意制約 |
-| chk_account_status | CHECK | account_status IN ('ACTIVE', 'INACTIVE', 'LOCKED', 'SUSPENDED') | アカウント状態値チェック制約 |
-| chk_failed_login_count | CHECK | failed_login_count >= 0 | ログイン失敗回数非負値チェック制約 |
-| chk_session_timeout | CHECK | session_timeout IS NULL OR session_timeout > 0 | セッションタイムアウト正値チェック制約 |
+| uk_id | UNIQUE |  | id一意制約 |
+| uk_employee_id | UNIQUE |  | employee_id一意制約 |
+| uk_login_id | UNIQUE |  | login_id一意制約 |
+| uk_user_id | UNIQUE |  | user_id一意制約 |
+| chk_account_status | CHECK | account_status IN (...) | account_status値チェック制約 |
 
 ## サンプルデータ
 
@@ -99,9 +99,6 @@ MST_UserAuth（ユーザー認証情報）は、システムにアクセスす�
 - 外部認証システム連携対応
 - パスワード有効期限管理
 - セッションタイムアウト個別設定可能
-
-## 業務ルール
-
 - ログイン失敗5回でアカウント自動ロック
 - パスワードは90日で有効期限切れ
 - パスワードは過去3回分と同じものは使用不可
@@ -111,8 +108,22 @@ MST_UserAuth（ユーザー認証情報）は、システムにアクセスす�
 - 復旧トークンの有効期限は24時間
 - セッションタイムアウトのデフォルトは8時間
 
+## 業務ルール
+
+- 主キーの一意性は必須で変更不可
+- 外部キー制約による参照整合性の保証
+- 論理削除による履歴データの保持
+
 ## 改版履歴
 
 | バージョン | 更新日 | 更新者 | 変更内容 |
 |------------|--------|--------|----------|
 | 1.0.0 | 2025-06-01 | 開発チーム | 初版作成 - ユーザ認証マスタテーブルの詳細定義 |
+| 2.0.0 | 2025-06-22 | 自動変換ツール | テンプレート形式への自動変換 |
+| 3.1.20250624 | 2025-06-24 | 自動修正ツール | カラム順序を推奨順序に自動修正 |
+| 4.0.20250624_213614 | 2025-06-24 | 自動修正ツール | カラム順序を統一テンプレートに従って自動修正 |
+| 5.0.20250624_214006 | 2025-06-24 | 統一カラム順序修正ツール | カラム順序を統一テンプレート（Phase 1）に従って自動修正 |
+| 8.0.20250624_214439 | 2025-06-24 | 最終カラム順序修正ツール | 主キー（id）を先頭に移動し、推奨カラム順序に最終修正 |
+| 9.0.20250624_214522 | 2025-06-24 | 完全カラム順序修正ツール | 推奨カラム順序（1.UUID 2.tenant_id 3.主キー 4.その他）に完全修正 |
+| 13.0.20250624_222631 | 2025-06-24 | ユーザー要求対応カラム順序修正ツール | ユーザー要求に従ってカラム順序を統一（id→tenant_id→ビジネスキー→名称→その他→終了部分） |
+| FINAL.20250624_223433 | 2025-06-24 | 最終カラム順序統一ツール | 推奨カラム順序テンプレートに従って最終統一 |

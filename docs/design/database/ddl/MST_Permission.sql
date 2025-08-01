@@ -1,34 +1,51 @@
 -- ============================================
 -- テーブル: MST_Permission
 -- 論理名: 権限情報
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: MST_Permission（権限情報）は、システム内の権限（許可）を管理するマスタテーブルです。
+
+主な目的：
+- システム内の権限定義・管理（画面アクセス、機能実行、データ操作等）
+- 権限の階層・グループ管理
+- 細粒度アクセス制御の実現
+- リソースベースアクセス制御（RBAC）の基盤
+- 動的権限管理・条件付きアクセス制御
+- 監査・コンプライアンス要件への対応
+- 最小権限の原則実装
+
+このテーブルは、ロールと組み合わせてシステムセキュリティを構成し、
+適切なアクセス制御を実現する重要なマスタデータです。
+
+-- 作成日: 2025-06-24 23:05:57
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Permission;
 
 CREATE TABLE MST_Permission (
-    permission_code VARCHAR(50) COMMENT '権限を一意に識別するコード（例：PERM_USER_READ）',
-    permission_name VARCHAR(100) COMMENT '権限の正式名称',
-    permission_name_short VARCHAR(50) COMMENT '権限の略称・短縮名',
-    permission_category ENUM COMMENT '権限のカテゴリ（SYSTEM:システム、SCREEN:画面、API:API、DATA:データ、FUNCTION:機能）',
-    resource_type VARCHAR(50) COMMENT '権限対象のリソース種別（USER、SKILL、REPORT等）',
-    action_type ENUM COMMENT '許可するアクション（CREATE:作成、READ:参照、UPDATE:更新、DELETE:削除、EXECUTE:実行）',
-    scope_level ENUM COMMENT '権限のスコープ（GLOBAL:全体、TENANT:テナント、DEPARTMENT:部署、SELF:自分のみ）',
-    parent_permission_id VARCHAR(50) COMMENT '上位権限のID（MST_Permissionへの自己参照外部キー）',
-    is_system_permission BOOLEAN DEFAULT False COMMENT 'システム標準権限かどうか（削除・変更不可）',
-    requires_conditions BOOLEAN DEFAULT False COMMENT '権限行使に条件が必要かどうか',
-    condition_expression TEXT COMMENT '権限行使の条件式（SQL WHERE句形式等）',
-    risk_level INT DEFAULT 1 COMMENT '権限のリスクレベル（1:低、2:中、3:高、4:最高）',
-    requires_approval BOOLEAN DEFAULT False COMMENT '権限行使に承認が必要かどうか',
-    audit_required BOOLEAN DEFAULT False COMMENT '権限行使時の監査ログ記録が必要かどうか',
-    permission_status ENUM DEFAULT 'ACTIVE' COMMENT '権限の状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨）',
-    effective_from DATE COMMENT '権限の有効開始日',
-    effective_to DATE COMMENT '権限の有効終了日',
-    sort_order INT COMMENT '画面表示時の順序',
-    description TEXT COMMENT '権限の詳細説明・用途',
-    code VARCHAR(20) NOT NULL COMMENT 'マスタコード',
-    name VARCHAR(100) NOT NULL COMMENT 'マスタ名称'
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    action_type ENUM('CREATE', 'READ', 'UPDATE', 'DELETE', 'EXECUTE') COMMENT 'アクション種別',
+    audit_required BOOLEAN DEFAULT False COMMENT '監査要求フラグ',
+    condition_expression TEXT COMMENT '条件式',
+    description TEXT COMMENT '権限説明',
+    effective_from DATE COMMENT '有効開始日',
+    effective_to DATE COMMENT '有効終了日',
+    is_system_permission BOOLEAN DEFAULT False COMMENT 'システム権限フラグ',
+    parent_permission_id VARCHAR(50) COMMENT '親権限ID',
+    permission_category ENUM('SYSTEM', 'SCREEN', 'API', 'DATA', 'FUNCTION') COMMENT '権限カテゴリ',
+    permission_code VARCHAR(50) COMMENT '権限コード',
+    permission_id INT AUTO_INCREMENT NOT NULL COMMENT 'MST_Permissionの主キー',
+    permission_name VARCHAR(100) COMMENT '権限名',
+    permission_name_short VARCHAR(50) COMMENT '権限名略称',
+    permission_status ENUM('ACTIVE', 'INACTIVE', 'DEPRECATED') DEFAULT 'ACTIVE' COMMENT '権限状態',
+    requires_approval BOOLEAN DEFAULT False COMMENT '承認要求フラグ',
+    requires_conditions BOOLEAN DEFAULT False COMMENT '条件要求フラグ',
+    resource_type VARCHAR(50) COMMENT 'リソース種別',
+    risk_level INT DEFAULT 1 COMMENT 'リスクレベル',
+    scope_level ENUM('GLOBAL', 'TENANT', 'DEPARTMENT', 'SELF') COMMENT 'スコープレベル',
+    sort_order INT COMMENT '表示順序',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -41,12 +58,13 @@ CREATE INDEX idx_system_permission ON MST_Permission (is_system_permission);
 CREATE INDEX idx_risk_level ON MST_Permission (risk_level);
 CREATE INDEX idx_permission_status ON MST_Permission (permission_status);
 CREATE INDEX idx_effective_period ON MST_Permission (effective_from, effective_to);
+CREATE INDEX idx_mst_permission_tenant_id ON MST_Permission (tenant_id);
 
 -- 外部キー制約
 ALTER TABLE MST_Permission ADD CONSTRAINT fk_permission_parent FOREIGN KEY (parent_permission_id) REFERENCES MST_Permission(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 -- その他の制約
-ALTER TABLE MST_Permission ADD CONSTRAINT uk_permission_code UNIQUE ();
+-- 制約DDL生成エラー: uk_permission_code
 ALTER TABLE MST_Permission ADD CONSTRAINT chk_permission_category CHECK (permission_category IN ('SYSTEM', 'SCREEN', 'API', 'DATA', 'FUNCTION'));
 ALTER TABLE MST_Permission ADD CONSTRAINT chk_action_type CHECK (action_type IN ('CREATE', 'READ', 'UPDATE', 'DELETE', 'EXECUTE'));
 ALTER TABLE MST_Permission ADD CONSTRAINT chk_scope_level CHECK (scope_level IN ('GLOBAL', 'TENANT', 'DEPARTMENT', 'SELF'));

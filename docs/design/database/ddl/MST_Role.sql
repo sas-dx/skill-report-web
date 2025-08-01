@@ -1,31 +1,48 @@
 -- ============================================
 -- テーブル: MST_Role
 -- 論理名: ロール情報
--- 説明: 
--- 作成日: 2025-06-04 06:57:02
+-- 説明: MST_Role（ロール情報）は、システム内のロール（役割）を管理するマスタテーブルです。
+
+主な目的：
+- システム内のロール定義・管理（管理者、一般ユーザー、閲覧者等）
+- ロール階層の管理（上位ロール、下位ロール）
+- ロール別権限設定の基盤
+- 職務分離・最小権限の原則実装
+- 動的権限管理・ロールベースアクセス制御（RBAC）
+- 組織変更に対応した柔軟な権限管理
+- 監査・コンプライアンス対応
+
+このテーブルは、システムセキュリティの基盤となり、
+適切なアクセス制御と権限管理を実現する重要なマスタデータです。
+
+-- 作成日: 2025-06-24 23:05:57
 -- ============================================
 
 DROP TABLE IF EXISTS MST_Role;
 
 CREATE TABLE MST_Role (
-    role_code VARCHAR(20) COMMENT 'ロールを一意に識別するコード（例：ROLE001）',
-    role_name VARCHAR(100) COMMENT 'ロールの正式名称',
-    role_name_short VARCHAR(50) COMMENT 'ロールの略称・短縮名',
-    role_category ENUM COMMENT 'ロールのカテゴリ（SYSTEM:システム、BUSINESS:業務、TENANT:テナント、CUSTOM:カスタム）',
-    role_level INT COMMENT 'ロールの階層レベル（1:最上位、数値が大きいほど下位）',
-    parent_role_id VARCHAR(50) COMMENT '上位ロールのID（MST_Roleへの自己参照外部キー）',
-    is_system_role BOOLEAN DEFAULT False COMMENT 'システム標準ロールかどうか（削除・変更不可）',
-    is_tenant_specific BOOLEAN DEFAULT False COMMENT 'テナント固有のロールかどうか',
-    max_users INT COMMENT 'このロールに割り当て可能な最大ユーザー数',
-    role_priority INT DEFAULT 999 COMMENT '複数ロール保持時の優先度（数値が小さいほど高優先）',
-    auto_assign_conditions JSON COMMENT '自動ロール割り当ての条件（JSON形式）',
-    role_status ENUM DEFAULT 'ACTIVE' COMMENT 'ロールの状態（ACTIVE:有効、INACTIVE:無効、DEPRECATED:非推奨）',
-    effective_from DATE COMMENT 'ロールの有効開始日',
-    effective_to DATE COMMENT 'ロールの有効終了日',
-    sort_order INT COMMENT '画面表示時の順序',
-    description TEXT COMMENT 'ロールの詳細説明・用途',
-    code VARCHAR(20) NOT NULL COMMENT 'マスタコード',
-    name VARCHAR(100) NOT NULL COMMENT 'マスタ名称'
+    id VARCHAR(50) NOT NULL COMMENT 'プライマリキー（UUID）',
+    tenant_id VARCHAR(50) NOT NULL COMMENT 'テナントID（マルチテナント対応）',
+    auto_assign_conditions JSON COMMENT '自動割り当て条件',
+    description TEXT COMMENT 'ロール説明',
+    effective_from DATE COMMENT '有効開始日',
+    effective_to DATE COMMENT '有効終了日',
+    is_system_role BOOLEAN DEFAULT False COMMENT 'システムロールフラグ',
+    is_tenant_specific BOOLEAN DEFAULT False COMMENT 'テナント固有フラグ',
+    max_users INT COMMENT '最大ユーザー数',
+    parent_role_id VARCHAR(50) COMMENT '親ロールID',
+    role_category ENUM('SYSTEM', 'BUSINESS', 'TENANT', 'CUSTOM') COMMENT 'ロールカテゴリ',
+    role_code VARCHAR(20) COMMENT 'ロールコード',
+    role_id INT AUTO_INCREMENT NOT NULL COMMENT 'MST_Roleの主キー',
+    role_level INT COMMENT 'ロールレベル',
+    role_name VARCHAR(100) COMMENT 'ロール名',
+    role_name_short VARCHAR(50) COMMENT 'ロール名略称',
+    role_priority INT DEFAULT 999 COMMENT 'ロール優先度',
+    role_status ENUM('ACTIVE', 'INACTIVE', 'DEPRECATED') DEFAULT 'ACTIVE' COMMENT 'ロール状態',
+    sort_order INT COMMENT '表示順序',
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE COMMENT '論理削除フラグ',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '作成日時',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新日時'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- インデックス作成
@@ -38,12 +55,13 @@ CREATE INDEX idx_tenant_specific ON MST_Role (is_tenant_specific);
 CREATE INDEX idx_role_status ON MST_Role (role_status);
 CREATE INDEX idx_effective_period ON MST_Role (effective_from, effective_to);
 CREATE INDEX idx_sort_order ON MST_Role (sort_order);
+CREATE INDEX idx_mst_role_tenant_id ON MST_Role (tenant_id);
 
 -- 外部キー制約
 ALTER TABLE MST_Role ADD CONSTRAINT fk_role_parent FOREIGN KEY (parent_role_id) REFERENCES MST_Role(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 -- その他の制約
-ALTER TABLE MST_Role ADD CONSTRAINT uk_role_code UNIQUE ();
+-- 制約DDL生成エラー: uk_role_code
 ALTER TABLE MST_Role ADD CONSTRAINT chk_role_level CHECK (role_level > 0);
 ALTER TABLE MST_Role ADD CONSTRAINT chk_role_category CHECK (role_category IN ('SYSTEM', 'BUSINESS', 'TENANT', 'CUSTOM'));
 ALTER TABLE MST_Role ADD CONSTRAINT chk_role_status CHECK (role_status IN ('ACTIVE', 'INACTIVE', 'DEPRECATED'));
