@@ -368,7 +368,7 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
             />
           )}
 
-          {activeTab === 'progress' && (
+          {activeTab === 'progress' && careerGoal && (
             <CareerProgressChart
               careerGoal={careerGoal}
               year={selectedYear}
