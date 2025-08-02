@@ -26,6 +26,7 @@
     "db:migrate": "prisma migrate dev --schema=src/database/prisma/schema.prisma",
     "db:migrate:reset": "prisma migrate reset --schema=src/database/prisma/schema.prisma",
     "db:seed": "tsx scripts/run-seed.ts",
+    "db:seed:training": "node scripts/run-training-seed.js",
     "db:studio": "prisma studio --schema=src/database/prisma/schema.prisma",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -46,6 +47,7 @@
     "docker:dev:detached": "docker-compose up --build -d",
     "docker:db:migrate": "docker-compose exec app npm run db:migrate",
     "docker:db:seed": "docker-compose exec app npm run db:seed",
+    "docker:db:seed:training": "docker-compose exec app npm run db:seed:training",
     "docker:db:studio": "docker-compose exec app npm run db:studio"
   },
   "dependencies": {
