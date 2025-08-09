@@ -106,7 +106,7 @@ export async function GET(
     
     // レスポンスの構築
     return createSuccessResponse({
-      trainings: trainings.map(training => ({
+      trainings: trainings.map((training: any) => ({
         id: training.id,
         training_history_id: training.training_history_id,
         employee_id: training.employee_id,
