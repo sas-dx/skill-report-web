@@ -47,6 +47,23 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         headers['x-user-id'] = userId;
       }
 
+      // 優先度を確実に数値に変換
+      let priorityNumber: number;
+      if (typeof goal.priority === 'string') {
+        priorityNumber = parseInt(goal.priority, 10);
+        if (isNaN(priorityNumber)) {
+          priorityNumber = 2; // デフォルト値
+        }
+      } else {
+        priorityNumber = goal.priority;
+      }
+
+      // バックエンドが期待する範囲（1-5）に調整
+      if (priorityNumber < 1 || priorityNumber > 3) {
+        // フロントエンドの1-3を維持
+        priorityNumber = Math.max(1, Math.min(3, priorityNumber));
+      }
+
       // バックエンドが期待するCreateCareerGoalData形式に変換
       const createData = {
         title: goal.title,
@@ -54,13 +71,16 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         goal_type: goal.goal_type, // フォームから送信された値を使用
         target_date: goal.target_date,
         status: goal.status,
-        priority: goal.priority,
+        priority: priorityNumber, // 確実に数値として送信
       };
 
       // デバッグ用ログ追加
       console.log('=== useCareerGoals addCareerGoal デバッグ ===');
       console.log('元のgoal:', goal);
+      console.log('goal.priority (original):', goal.priority, 'typeof:', typeof goal.priority);
+      console.log('priorityNumber (converted):', priorityNumber, 'typeof:', typeof priorityNumber);
       console.log('送信するcreateData:', createData);
+      console.log('createData.priority:', createData.priority, 'typeof:', typeof createData.priority);
       console.log('goal_type:', createData.goal_type, 'typeof:', typeof createData.goal_type);
 
       const response = await fetch(`/api/career-goals/${userId || 'current'}`, {
@@ -70,8 +90,33 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'キャリア目標の追加に失敗しました');
+        let errorMessage = 'キャリア目標の追加に失敗しました';
+        let errorDetails = '';
+        
+        try {
+          const errorData = await response.json();
+          console.log('=== API エラーレスポンス詳細 ===');
+          console.log('ステータス:', response.status);
+          console.log('エラーデータ:', errorData);
+          
+          if (errorData.error) {
+            errorMessage = errorData.error.message || errorMessage;
+            if (errorData.error.details) {
+              errorDetails = typeof errorData.error.details === 'string' 
+                ? errorData.error.details 
+                : JSON.stringify(errorData.error.details);
+            }
+          }
+        } catch (parseError) {
+          console.error('エラーレスポンスのパースに失敗:', parseError);
+          errorMessage = `HTTPエラー ${response.status}: ${response.statusText}`;
+        }
+        
+        const fullErrorMessage = errorDetails 
+          ? `${errorMessage}\n詳細: ${errorDetails}`
+          : errorMessage;
+        
+        throw new Error(fullErrorMessage);
       }
 
       setIsSuccess(true);
@@ -100,17 +145,41 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
         headers['x-user-id'] = userId;
       }
 
+      // 優先度を確実に数値に変換（更新時も同様の処理）
+      let priorityNumber: number;
+      if (typeof goal.priority === 'string') {
+        priorityNumber = parseInt(goal.priority, 10);
+        if (isNaN(priorityNumber)) {
+          priorityNumber = 2; // デフォルト値
+        }
+      } else {
+        priorityNumber = goal.priority;
+      }
+
+      // バックエンドが期待する範囲（1-5）に調整
+      if (priorityNumber < 1 || priorityNumber > 3) {
+        // フロントエンドの1-3を維持
+        priorityNumber = Math.max(1, Math.min(3, priorityNumber));
+      }
+
       // バックエンドが期待するUpdateCareerGoalData形式に変換
       const updateData = {
-        goal_id: goal.id,
+        goal_id: goal.goal_id || goal.id,  // goal_idがある場合はそれを使用、なければidを使用
         title: goal.title,
         description: goal.description,
         goal_type: goal.goal_type, // フォームから送信された値を使用
         target_date: goal.target_date,
         status: goal.status,
-        priority: goal.priority,
+        priority: priorityNumber, // 確実に数値として送信
         progress_rate: goal.progress_percentage,
       };
+
+      // デバッグ用ログ追加
+      console.log('=== useCareerGoals updateCareerGoal デバッグ ===');
+      console.log('元のgoal:', goal);
+      console.log('goal.priority (original):', goal.priority, 'typeof:', typeof goal.priority);
+      console.log('priorityNumber (converted):', priorityNumber, 'typeof:', typeof priorityNumber);
+      console.log('送信するupdateData:', updateData);
 
       const response = await fetch(`/api/career-goals/${userId || 'current'}`, {
         method: 'PUT',
@@ -119,8 +188,33 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'キャリア目標の更新に失敗しました');
+        let errorMessage = 'キャリア目標の更新に失敗しました';
+        let errorDetails = '';
+        
+        try {
+          const errorData = await response.json();
+          console.log('=== API エラーレスポンス詳細（更新） ===');
+          console.log('ステータス:', response.status);
+          console.log('エラーデータ:', errorData);
+          
+          if (errorData.error) {
+            errorMessage = errorData.error.message || errorMessage;
+            if (errorData.error.details) {
+              errorDetails = typeof errorData.error.details === 'string' 
+                ? errorData.error.details 
+                : JSON.stringify(errorData.error.details);
+            }
+          }
+        } catch (parseError) {
+          console.error('エラーレスポンスのパースに失敗:', parseError);
+          errorMessage = `HTTPエラー ${response.status}: ${response.statusText}`;
+        }
+        
+        const fullErrorMessage = errorDetails 
+          ? `${errorMessage}\n詳細: ${errorDetails}`
+          : errorMessage;
+        
+        throw new Error(fullErrorMessage);
       }
 
       setIsSuccess(true);
@@ -173,8 +267,33 @@ export function useCareerGoals(userId?: string): UseCareerGoalsReturn {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'キャリア目標の削除に失敗しました');
+        let errorMessage = 'キャリア目標の削除に失敗しました';
+        let errorDetails = '';
+        
+        try {
+          const errorData = await response.json();
+          console.log('=== API エラーレスポンス詳細（削除） ===');
+          console.log('ステータス:', response.status);
+          console.log('エラーデータ:', errorData);
+          
+          if (errorData.error) {
+            errorMessage = errorData.error.message || errorMessage;
+            if (errorData.error.details) {
+              errorDetails = typeof errorData.error.details === 'string' 
+                ? errorData.error.details 
+                : JSON.stringify(errorData.error.details);
+            }
+          }
+        } catch (parseError) {
+          console.error('エラーレスポンスのパースに失敗:', parseError);
+          errorMessage = `HTTPエラー ${response.status}: ${response.statusText}`;
+        }
+        
+        const fullErrorMessage = errorDetails 
+          ? `${errorMessage}\n詳細: ${errorDetails}`
+          : errorMessage;
+        
+        throw new Error(fullErrorMessage);
       }
 
       setIsSuccess(true);

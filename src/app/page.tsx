@@ -46,9 +46,11 @@ export default function LoginPage() {
 
       if (response.ok) {
         // トークンを保存
-        if (data.data?.token) {
-          localStorage.setItem('token', data.data.token);
+        if (data.data?.accessToken) {
+          localStorage.setItem('token', data.data.accessToken);
+          localStorage.setItem('refreshToken', data.data.refreshToken);
           localStorage.setItem('user', JSON.stringify(data.data.user));
+          localStorage.setItem('tenant', JSON.stringify(data.data.tenant));
         }
         // ログイン成功時はダッシュボードにリダイレクト
         router.push('/dashboard');

@@ -62,101 +62,53 @@ export default function WorkPage() {
     setIsSidebarOpen(false);
   };
 
-  // モックデータの初期化
+  // API呼び出しによるデータ取得
   useEffect(() => {
     const loadData = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const mockRecords: WorkRecord[] = [
-          {
-            id: '1',
-            project_name: '年間スキル報告書WEB化プロジェクト',
-            project_code: 'SKILL-WEB-2025',
-            role: 'プロジェクトリーダー',
-            start_date: '2025-05-01',
-            end_date: '',
-            status: 'active',
-            description: '既存のExcelベースのスキル報告書をWebアプリケーション化するプロジェクト',
-            technologies: ['Next.js', 'TypeScript', 'React', 'Tailwind CSS', 'PostgreSQL'],
-            achievements: [
-              'プロジェクト計画の策定と承認取得',
-              '技術スタックの選定と環境構築',
-              'UI/UXデザインの設計と実装'
-            ],
-            team_size: 6,
-            responsibilities: [
-              'プロジェクト全体の進行管理',
-              '技術的な意思決定',
-              'チームメンバーのタスク管理',
-              'ステークホルダーとの調整'
-            ],
-            created_at: '2025-05-01',
-            updated_at: '2025-05-30'
-          },
-          {
-            id: '2',
-            project_name: '顧客管理システム改修',
-            project_code: 'CRM-UPG-2024',
-            role: 'フロントエンドエンジニア',
-            start_date: '2024-10-01',
-            end_date: '2025-03-31',
-            status: 'completed',
-            description: '既存の顧客管理システムのUI/UX改善とパフォーマンス最適化',
-            technologies: ['React', 'Redux', 'Material-UI', 'Node.js', 'MySQL'],
-            achievements: [
-              'ページ読み込み速度を50%改善',
-              'ユーザビリティテストで満足度90%達成',
-              'レスポンシブデザインの実装完了'
-            ],
-            team_size: 4,
-            responsibilities: [
-              'フロントエンド開発',
-              'UI/UXデザインの実装',
-              'パフォーマンス最適化',
-              'テストケース作成・実行'
-            ],
-            created_at: '2024-10-01',
-            updated_at: '2025-03-31'
-          },
-          {
-            id: '3',
-            project_name: 'ECサイト新規構築',
-            project_code: 'EC-NEW-2024',
-            role: 'フルスタックエンジニア',
-            start_date: '2024-06-01',
-            end_date: '2024-09-30',
-            status: 'completed',
-            description: '中小企業向けECサイトの新規構築プロジェクト',
-            technologies: ['Vue.js', 'Nuxt.js', 'Express.js', 'MongoDB', 'AWS'],
-            achievements: [
-              '決済システムの安全な実装',
-              '在庫管理機能の自動化',
-              'SEO最適化による検索順位向上'
-            ],
-            team_size: 3,
-            responsibilities: [
-              'フロントエンド・バックエンド開発',
-              'データベース設計',
-              'AWS環境構築・運用',
-              '決済システム連携'
-            ],
-            created_at: '2024-06-01',
-            updated_at: '2024-09-30'
+        setIsLoading(true);
+        
+        // 作業実績データをAPIから取得
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/work/me', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : '',
           }
-        ];
+        });
 
-        const mockSummary: ProjectSummary = {
-          total_projects: mockRecords.length,
-          active_projects: mockRecords.filter(r => r.status === 'active').length,
-          completed_projects: mockRecords.filter(r => r.status === 'completed').length,
-          total_technologies: [...new Set(mockRecords.flatMap(r => r.technologies))].length
-        };
+        if (!response.ok) {
+          throw new Error(`HTTPエラー: ${response.status}`);
+        }
 
-        setWorkRecords(mockRecords);
-        setSummary(mockSummary);
+        const data = await response.json();
+
+        if (data.success) {
+          setWorkRecords(data.data.records || []);
+          setSummary(data.data.summary || null);
+        } else {
+          console.error('APIエラー:', data.error);
+          // エラー時はモックデータを使用（フォールバック）
+          const mockRecords: WorkRecord[] = [];
+          const mockSummary: ProjectSummary = {
+            total_projects: 0,
+            active_projects: 0,
+            completed_projects: 0,
+            total_technologies: 0
+          };
+          setWorkRecords(mockRecords);
+          setSummary(mockSummary);
+        }
       } catch (error) {
         console.error('データ読み込みエラー:', error);
+        // エラー時は空データを設定
+        setWorkRecords([]);
+        setSummary({
+          total_projects: 0,
+          active_projects: 0,
+          completed_projects: 0,
+          total_technologies: 0
+        });
       } finally {
         setIsLoading(false);
       }
@@ -191,9 +143,35 @@ export default function WorkPage() {
     return matchesStatus && matchesSearch;
   });
 
-  const handleAddRecord = () => {
+  const handleAddRecord = async () => {
     if (!newRecord.project_name || !newRecord.project_code || !newRecord.role || !newRecord.start_date) {
       alert('必須項目を入力してください');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/work', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify(newRecord)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('作業実績を登録しました');
+        // データを再読み込み
+        window.location.reload();
+      } else {
+        alert(`登録エラー: ${data.error?.message || '不明なエラー'}`);
+      }
+    } catch (error) {
+      console.error('登録エラー:', error);
+      alert('作業実績の登録に失敗しました');
       return;
     }
 
@@ -229,6 +207,84 @@ export default function WorkPage() {
       responsibilities: []
     });
     setActiveTab('records');
+  };
+
+  const handleEditRecord = (record: WorkRecord) => {
+    // 編集対象のレコードをフォームに設定
+    setNewRecord({
+      ...record,
+      id: record.id  // IDを保持して更新時に使用
+    });
+    setActiveTab('add');  // 追加タブに切り替え
+  };
+
+  const handleDeleteRecord = async (recordId: string) => {
+    if (!confirm('この作業実績を削除してもよろしいですか？')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/work?id=${recordId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('作業実績を削除しました');
+        // データを再読み込み
+        window.location.reload();
+      } else {
+        alert(`削除エラー: ${data.error?.message || '不明なエラー'}`);
+      }
+    } catch (error) {
+      console.error('削除エラー:', error);
+      alert('作業実績の削除に失敗しました');
+    }
+  };
+
+  const handleUpdateRecord = async () => {
+    if (!newRecord.id) {
+      // 新規追加の場合は既存の処理を実行
+      await handleAddRecord();
+      return;
+    }
+
+    // 更新処理
+    if (!newRecord.project_name || !newRecord.project_code || !newRecord.role || !newRecord.start_date) {
+      alert('必須項目を入力してください');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/work', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify(newRecord)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('作業実績を更新しました');
+        // データを再読み込み
+        window.location.reload();
+      } else {
+        alert(`更新エラー: ${data.error?.message || '不明なエラー'}`);
+      }
+    } catch (error) {
+      console.error('更新エラー:', error);
+      alert('作業実績の更新に失敗しました');
+    }
   };
 
   if (isLoading) {
@@ -487,10 +543,18 @@ export default function WorkPage() {
                         </div>
 
                         <div className="ml-4 flex space-x-2">
-                          <Button variant="secondary" size="sm">
+                          <Button 
+                            variant="secondary" 
+                            size="sm"
+                            onClick={() => handleEditRecord(record)}
+                          >
                             編集
                           </Button>
-                          <Button variant="secondary" size="sm">
+                          <Button 
+                            variant="secondary" 
+                            size="sm"
+                            onClick={() => handleDeleteRecord(record.id)}
+                          >
                             削除
                           </Button>
                         </div>
@@ -504,7 +568,9 @@ export default function WorkPage() {
             {/* 実績追加タブ */}
             {activeTab === 'add' && (
               <div className="bg-white shadow rounded-lg p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-6">新しい作業実績を追加</h2>
+                <h2 className="text-lg font-medium text-gray-900 mb-6">
+                  {newRecord.id ? '作業実績を編集' : '新しい作業実績を追加'}
+                </h2>
                 
                 <div className="space-y-6">
                   {/* 基本情報 */}
@@ -604,20 +670,84 @@ export default function WorkPage() {
                         placeholder="プロジェクトの概要や目的を入力してください"
                       />
                     </div>
+
+                    {/* 使用技術 */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        使用技術（カンマ区切りで入力）
+                      </label>
+                      <Input
+                        value={newRecord.technologies?.join(', ') || ''}
+                        onChange={(e) => setNewRecord({
+                          ...newRecord, 
+                          technologies: e.target.value.split(',').map(tech => tech.trim()).filter(tech => tech)
+                        })}
+                        placeholder="例: React, TypeScript, Node.js"
+                      />
+                    </div>
+
+                    {/* 成果・実績 */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        成果・実績（改行区切りで入力）
+                      </label>
+                      <textarea
+                        value={newRecord.achievements?.join('\n') || ''}
+                        onChange={(e) => setNewRecord({
+                          ...newRecord,
+                          achievements: e.target.value.split('\n').filter(item => item.trim())
+                        })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="達成した成果や実績を入力してください"
+                      />
+                    </div>
+
+                    {/* 担当業務 */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        担当業務（改行区切りで入力）
+                      </label>
+                      <textarea
+                        value={newRecord.responsibilities?.join('\n') || ''}
+                        onChange={(e) => setNewRecord({
+                          ...newRecord,
+                          responsibilities: e.target.value.split('\n').filter(item => item.trim())
+                        })}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="担当した業務内容を入力してください"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex justify-end space-x-3">
                     <Button
-                      onClick={() => setActiveTab('records')}
+                      onClick={() => {
+                        setNewRecord({
+                          project_name: '',
+                          project_code: '',
+                          role: '',
+                          start_date: '',
+                          end_date: '',
+                          status: 'active',
+                          description: '',
+                          technologies: [],
+                          achievements: [],
+                          team_size: 1,
+                          responsibilities: []
+                        });
+                        setActiveTab('records');
+                      }}
                       variant="secondary"
                     >
                       キャンセル
                     </Button>
                     <Button
-                      onClick={handleAddRecord}
+                      onClick={newRecord.id ? handleUpdateRecord : handleAddRecord}
                       variant="primary"
                     >
-                      実績を追加
+                      {newRecord.id ? '実績を更新' : '実績を追加'}
                     </Button>
                   </div>
                 </div>

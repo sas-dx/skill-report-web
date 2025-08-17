@@ -47,6 +47,13 @@ interface FormData {
 }
 
 /**
+ * フォームエラーの型定義
+ */
+interface FormErrors extends Partial<FormData> {
+  _general?: string; // 全般的なエラーメッセージ用
+}
+
+/**
  * キャリア目標フォームコンポーネント
  * 
  * 機能:
@@ -75,7 +82,7 @@ export function CareerGoalForm({
     progress_percentage: 0
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 編集モードの場合、初期値を設定
@@ -214,6 +221,12 @@ export function CareerGoalForm({
     setIsSubmitting(true);
 
     try {
+      // 優先度を確実に数値に変換
+      const priorityNumber = parseInt(formData.priority, 10);
+      if (isNaN(priorityNumber) || priorityNumber < 1 || priorityNumber > 3) {
+        throw new Error('優先度は1-3の範囲で指定してください');
+      }
+
       const goalData: CareerGoal = {
         id: goal?.id || crypto.randomUUID(),
         user_id: userId,
@@ -221,7 +234,7 @@ export function CareerGoalForm({
         title: formData.title,
         description: formData.description,
         status: formData.status as CareerGoalStatus,
-        priority: parseInt(formData.priority) as CareerGoalPriority,
+        priority: priorityNumber as CareerGoalPriority,
         target_date: formData.target_date,
         progress_percentage: formData.progress_percentage,
         created_at: new Date().toISOString(),
@@ -231,12 +244,38 @@ export function CareerGoalForm({
       // デバッグ用ログ追加
       console.log('=== フォーム送信データ デバッグ ===');
       console.log('formData:', formData);
+      console.log('formData.priority (string):', formData.priority, 'typeof:', typeof formData.priority);
+      console.log('priorityNumber (converted):', priorityNumber, 'typeof:', typeof priorityNumber);
       console.log('goalData:', goalData);
+      console.log('goalData.priority:', goalData.priority, 'typeof:', typeof goalData.priority);
       console.log('goal_type:', goalData.goal_type, 'typeof:', typeof goalData.goal_type);
+
+      // エラーをクリア
+      setErrors({});
 
       await onSubmit(goalData);
     } catch (error) {
       console.error('フォーム送信エラー:', error);
+      
+      // ユーザーフレンドリーなエラーメッセージ表示
+      let userMessage = 'キャリア目標の保存に失敗しました。';
+      if (error instanceof Error) {
+        if (error.message.includes('優先度')) {
+          userMessage = '優先度の設定に問題があります。再度お試しください。';
+        } else if (error.message.includes('目標タイプ')) {
+          userMessage = '目標タイプの選択に問題があります。再度お試しください。';
+        } else if (error.message.includes('必須')) {
+          userMessage = '必須項目が不足しています。入力内容をご確認ください。';
+        } else if (error.message.includes('詳細:')) {
+          userMessage = error.message; // APIからの詳細エラーメッセージを表示
+        }
+      }
+      
+      // エラー表示のため、setErrors を使用してユーザーに通知
+      setErrors(prev => ({
+        ...prev,
+        _general: userMessage
+      }));
     } finally {
       setIsSubmitting(false);
     }
@@ -259,11 +298,11 @@ export function CareerGoalForm({
    */
   const generateStatusOptions = () => {
     return [
-      { value: 'not_started', label: '未開始' },
+      { value: 'not_started', label: '未着手' },
       { value: 'in_progress', label: '進行中' },
       { value: 'completed', label: '完了' },
-      { value: 'on_hold', label: '保留' },
-      { value: 'cancelled', label: 'キャンセル' }
+      { value: 'postponed', label: '延期' },
+      { value: 'cancelled', label: '中止' }
     ];
   };
 
@@ -290,6 +329,22 @@ export function CareerGoalForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* 全般エラーメッセージ表示 */}
+        {errors._general && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  エラーが発生しました
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <pre className="whitespace-pre-wrap">{errors._general}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* タイトル */}
           <div>

@@ -15,9 +15,16 @@ import {
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  CalendarIcon
+  CalendarIcon,
+  XIcon
 } from '@/components/ui/Icons';
-import { ActionPlanItem, CareerGoalData } from '@/types/career';
+import { 
+  ActionPlan, 
+  ActionPlanCreateRequest, 
+  ActionPlanUpdateRequest, 
+  CareerGoalData 
+} from '@/types/career';
+import { ActionPlanForm } from './ActionPlanForm';
 
 /**
  * アクションプランセクションのプロパティ
@@ -26,6 +33,7 @@ interface ActionPlanSectionProps {
   careerGoal: CareerGoalData | null;
   year: number;
   isLoading?: boolean;
+  userId?: string;
 }
 
 /**
@@ -58,120 +66,239 @@ const STATUS_CONFIG = {
 export function ActionPlanSection({ 
   careerGoal, 
   year,
-  isLoading = false 
+  isLoading = false,
+  userId
 }: ActionPlanSectionProps) {
-  const [filterStatus, setFilterStatus] = useState<ActionPlanItem['status'] | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<'not_started' | 'in_progress' | 'completed' | 'all'>('all');
+  const [actionPlans, setActionPlans] = useState<ActionPlan[]>([]);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<ActionPlan | null>(null);
 
-  // careerGoalからアクションプランデータを生成
-  const actionPlans: ActionPlanItem[] = useMemo(() => {
-    if (!careerGoal) return [];
+  /**
+   * アクションプラン一覧を取得
+   */
+  const fetchActionPlans = async () => {
+    try {
+      setApiLoading(true);
+      setError(null);
 
-    // キャリア目標に基づいてアクションプランを動的生成
-    const generateActionPlans = (): ActionPlanItem[] => {
-      // careerGoalがnullの場合は空配列を返す
-      if (!careerGoal) return [];
-      
-      // 型安全性を確保した値の取得
-      const targetPosition: string = careerGoal?.target_position || 'キャリア目標';
-      const targetDate: string = careerGoal?.target_date || '';
-      const progressPercentage: number = careerGoal?.progress_percentage || 0;
-      
-      // 目標ポジションに基づく基本アクションプラン
-      const baseActions = [
-        {
-          item: '研修受講',
-          skill: 'リーダーシップ',
-          description: 'リーダーシップスキルを習得するための研修を受講する',
-          priority: 1
-        },
-        {
-          item: 'プロジェクト管理経験の積み重ね',
-          skill: 'プロジェクト管理',
-          description: '実際のプロジェクトでリーダー役を担い、管理経験を積む',
-          priority: 2
-        },
-        {
-          item: 'チームマネジメント実践',
-          skill: 'チームマネジメント',
-          description: 'チームメンバーの指導・育成を通じてマネジメントスキルを向上させる',
-          priority: 1
-        },
-        {
-          item: '業界知識の習得',
-          skill: '専門知識',
-          description: '担当領域の専門知識を深め、業界トレンドをキャッチアップする',
-          priority: 3
-        },
-        {
-          item: 'ネットワーキング活動',
-          skill: 'コミュニケーション',
-          description: '社内外のネットワークを構築し、情報収集・協力関係を築く',
-          priority: 2
-        }
-      ];
-
-      // 進捗に基づいてステータスを決定
-      const getStatusByProgress = (index: number): ActionPlanItem['status'] => {
-        const progressThreshold = (index + 1) * (100 / baseActions.length);
-        if (progressPercentage >= progressThreshold) return '完了';
-        if (progressPercentage >= progressThreshold - 20) return '進行中';
-        return '未着手';
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
       };
 
-      // 期限を計算（目標日から逆算）
-      const calculateDeadline = (index: number): string => {
-        if (!targetDate) {
-          // デフォルトの期限設定（今から3-12ヶ月後）
-          const months = 3 + (index * 2);
-          const deadline = new Date();
-          deadline.setMonth(deadline.getMonth() + months);
-          return deadline.toISOString().split('T')[0] || '';
-        }
-        
-        // 目標日から逆算して期限を設定
-        const targetDateObj = new Date(targetDate);
-        const monthsBeforeTarget = baseActions.length - index;
-        const deadline = new Date(targetDateObj);
-        deadline.setMonth(deadline.getMonth() - monthsBeforeTarget);
-        return deadline.toISOString().split('T')[0] || '';
-      };
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
 
-      return baseActions.map((action, index) => ({
-        id: `action_${index + 1}`,
-        item: action.item,
-        skill: action.skill,
-        description: action.description,
-        deadline: calculateDeadline(index),
-        status: getStatusByProgress(index),
-        priority: action.priority
-      }));
-    };
+      const response = await fetch('/api/career/action-plans', {
+        method: 'GET',
+        headers,
+      });
 
-    return generateActionPlans();
-  }, [careerGoal, year]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-  // フィルタリング（安全にハンドリング）
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setActionPlans(data.data.action_plans || []);
+      } else {
+        throw new Error(data.error?.message || 'アクションプランの取得に失敗しました');
+      }
+
+    } catch (err) {
+      console.error('アクションプラン取得エラー:', err);
+      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+    } finally {
+      setApiLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActionPlans();
+  }, [userId, year]);
+
+  // フィルタリング
   const filteredPlans = useMemo(() => 
     actionPlans.filter(plan => 
       filterStatus === 'all' || plan.status === filterStatus
     ), [actionPlans, filterStatus]
   );
 
-  // ハンドラー関数（モック）
+  // ステータス表示マッピング
+  const getStatusDisplay = (status: string): string => {
+    switch (status) {
+      case 'not_started': return '未着手';
+      case 'in_progress': return '進行中';
+      case 'completed': return '完了';
+      default: return status;
+    }
+  };
+
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'not_started': return 'bg-gray-100 text-gray-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  /**
+   * アクションプラン追加
+   */
   const handleAdd = () => {
-    console.log('アクションプラン追加');
+    setEditingPlan(null);
+    setIsDialogOpen(true);
   };
 
-  const handleEdit = (plan: ActionPlanItem) => {
-    console.log('アクションプラン編集:', plan);
+  /**
+   * アクションプラン編集
+   */
+  const handleEdit = (plan: ActionPlan) => {
+    setEditingPlan(plan);
+    setIsDialogOpen(true);
   };
 
-  const handleDelete = (plan: ActionPlanItem) => {
-    console.log('アクションプラン削除:', plan);
+  /**
+   * アクションプラン削除
+   */
+  const handleDelete = async (plan: ActionPlan) => {
+    if (!window.confirm('このアクションプランを削除してもよろしいですか？')) {
+      return;
+    }
+
+    try {
+      setApiLoading(true);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      const response = await fetch(`/api/career/action-plan/${plan.action_id}`, {
+        method: 'DELETE',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchActionPlans(); // リストを再取得
+      } else {
+        throw new Error(data.error?.message || 'アクションプランの削除に失敗しました');
+      }
+
+    } catch (err) {
+      console.error('アクションプラン削除エラー:', err);
+      setError(err instanceof Error ? err.message : '削除に失敗しました');
+    } finally {
+      setApiLoading(false);
+    }
   };
 
-  const handleStatusChange = (planId: string, status: ActionPlanItem['status']) => {
-    console.log('ステータス変更:', planId, status);
+  /**
+   * ステータス変更
+   */
+  const handleStatusChange = async (planId: string, status: 'not_started' | 'in_progress' | 'completed') => {
+    try {
+      setApiLoading(true);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      const updateData: ActionPlanUpdateRequest = {
+        status,
+        ...(status === 'completed' && { completed_date: new Date().toISOString().split('T')[0] })
+      };
+
+      const response = await fetch(`/api/career/action-plan/${planId}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchActionPlans(); // リストを再取得
+      } else {
+        throw new Error(data.error?.message || 'ステータスの更新に失敗しました');
+      }
+
+    } catch (err) {
+      console.error('ステータス更新エラー:', err);
+      setError(err instanceof Error ? err.message : 'ステータス更新に失敗しました');
+    } finally {
+      setApiLoading(false);
+    }
+  };
+
+  /**
+   * フォーム送信処理
+   */
+  const handleSubmit = async (formData: ActionPlanCreateRequest) => {
+    try {
+      setApiLoading(true);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      let response;
+      if (editingPlan) {
+        // 更新
+        response = await fetch(`/api/career/action-plan/${editingPlan.action_id}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // 新規追加
+        response = await fetch('/api/career/action-plans', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(formData),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setIsDialogOpen(false);
+        setEditingPlan(null);
+        await fetchActionPlans(); // リストを再取得
+      } else {
+        throw new Error(data.error?.message || '保存に失敗しました');
+      }
+
+    } catch (err) {
+      console.error('保存エラー:', err);
+      setError(err instanceof Error ? err.message : '保存に失敗しました');
+    } finally {
+      setApiLoading(false);
+    }
   };
 
   /**
@@ -196,7 +323,7 @@ export function ActionPlanSection({
   };
 
   // ローディング表示
-  if (isLoading) {
+  if (isLoading || apiLoading) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, index) => (
@@ -204,6 +331,19 @@ export function ActionPlanSection({
             <div className="bg-gray-200 rounded-lg h-24"></div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  // エラー表示
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-500 mb-2">⚠️</div>
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button onClick={fetchActionPlans} variant="outline">
+          再試行
+        </Button>
       </div>
     );
   }
@@ -230,13 +370,13 @@ export function ActionPlanSection({
         <select
           id="status-filter"
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value as ActionPlanItem['status'] | 'all')}
+          onChange={(e) => setFilterStatus(e.target.value as 'not_started' | 'in_progress' | 'completed' | 'all')}
           className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="all">すべて</option>
-          <option value="未着手">未着手</option>
-          <option value="進行中">進行中</option>
-          <option value="完了">完了</option>
+          <option value="not_started">未着手</option>
+          <option value="in_progress">進行中</option>
+          <option value="completed">完了</option>
         </select>
       </div>
 
@@ -249,7 +389,7 @@ export function ActionPlanSection({
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {filterStatus === 'all' ? 'アクションプランがありません' : `${filterStatus}のプランがありません`}
+            {filterStatus === 'all' ? 'アクションプランがありません' : `${getStatusDisplay(filterStatus)}のプランがありません`}
           </h3>
           <p className="text-sm text-gray-500">
             新しいアクションプランを追加して、目標達成に向けた具体的な行動を計画しましょう。
@@ -258,12 +398,13 @@ export function ActionPlanSection({
       ) : (
         <div className="space-y-4">
           {filteredPlans.map((plan) => {
-            const StatusIcon = STATUS_CONFIG[plan.status]?.icon || ClockIcon;
-            const daysUntilDeadline = getDaysUntilDeadline(plan.deadline);
+            const statusDisplay = getStatusDisplay(plan.status);
+            const StatusIcon = STATUS_CONFIG[statusDisplay as keyof typeof STATUS_CONFIG]?.icon || ClockIcon;
+            const daysUntilDeadline = getDaysUntilDeadline(plan.due_date);
 
             return (
               <div
-                key={plan.id}
+                key={plan.action_id}
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
               >
                 <div className="flex items-start justify-between">
@@ -271,18 +412,20 @@ export function ActionPlanSection({
                     {/* タイトルとステータス */}
                     <div className="flex items-center space-x-3 mb-2">
                       <h4 className="text-base font-medium text-gray-900 truncate">
-                        {plan.item}
+                        {plan.title}
                       </h4>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_CONFIG[plan.status]?.color}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(plan.status)}`}>
                         <StatusIcon className="h-3 w-3 mr-1" />
-                        {plan.status}
+                        {statusDisplay}
                       </span>
                     </div>
 
                     {/* スキル */}
-                    <div className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">関連スキル:</span> {plan.skill}
-                    </div>
+                    {plan.related_skill_id && (
+                      <div className="text-sm text-gray-600 mb-2">
+                        <span className="font-medium">関連スキル:</span> {plan.related_skill_id}
+                      </div>
+                    )}
 
                     {/* 説明 */}
                     {plan.description && (
@@ -296,7 +439,7 @@ export function ActionPlanSection({
                       <div className="flex items-center space-x-1">
                         <CalendarIcon className="h-4 w-4 text-gray-400" />
                         <span className="text-gray-600">
-                          期限: {new Date(plan.deadline).toLocaleDateString('ja-JP')}
+                          期限: {new Date(plan.due_date).toLocaleDateString('ja-JP')}
                         </span>
                       </div>
                       <span className={`font-medium ${getDeadlineColor(daysUntilDeadline)}`}>
@@ -313,15 +456,15 @@ export function ActionPlanSection({
                   {/* アクションボタン */}
                   <div className="flex items-center space-x-2 ml-4">
                     {/* ステータス変更ボタン */}
-                    {plan.status !== '完了' && (
+                    {plan.status !== 'completed' && (
                       <select
                         value={plan.status}
-                        onChange={(e) => handleStatusChange(plan.id, e.target.value as ActionPlanItem['status'])}
+                        onChange={(e) => handleStatusChange(plan.action_id!, e.target.value as 'not_started' | 'in_progress' | 'completed')}
                         className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="未着手">未着手</option>
-                        <option value="進行中">進行中</option>
-                        <option value="完了">完了</option>
+                        <option value="not_started">未着手</option>
+                        <option value="in_progress">進行中</option>
+                        <option value="completed">完了</option>
                       </select>
                     )}
                     
@@ -356,19 +499,59 @@ export function ActionPlanSection({
         <div className="bg-gray-50 rounded-lg p-4">
           <h4 className="text-sm font-medium text-gray-900 mb-3">進捗統計</h4>
           <div className="grid grid-cols-3 gap-4">
-            {Object.keys(STATUS_CONFIG).map((status) => {
+            {['not_started', 'in_progress', 'completed'].map((status) => {
               const count = actionPlans.filter(plan => plan.status === status).length;
               const percentage = actionPlans.length > 0 ? Math.round((count / actionPlans.length) * 100) : 0;
+              const statusDisplay = getStatusDisplay(status);
               return (
                 <div key={status} className="text-center">
-                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${STATUS_CONFIG[status as keyof typeof STATUS_CONFIG].color} mb-1`}>
-                    {status}
+                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)} mb-1`}>
+                    {statusDisplay}
                   </div>
                   <div className="text-lg font-semibold text-gray-900">{count}</div>
                   <div className="text-xs text-gray-500">{percentage}%</div>
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* アクションプラン作成・編集ダイアログ */}
+      {isDialogOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* オーバーレイ */}
+            <div 
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+              onClick={() => setIsDialogOpen(false)}
+            />
+            
+            {/* ダイアログコンテンツ */}
+            <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* ヘッダー */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900">
+                  {editingPlan ? 'アクションプランを編集' : '新しいアクションプランを作成'}
+                </h2>
+                <button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
+                >
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
+              
+              {/* フォーム */}
+              <div className="px-6 py-4">
+                <ActionPlanForm
+                  plan={editingPlan}
+                  onSubmit={handleSubmit}
+                  onCancel={() => setIsDialogOpen(false)}
+                  isLoading={apiLoading}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

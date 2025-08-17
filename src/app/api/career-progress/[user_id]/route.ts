@@ -7,8 +7,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getGoalProgress, updateGoalProgress } from '@/lib/services/goalProgressService'
-import { createAuditLog } from '@/lib/auditLogger'
+import { prisma } from '@/lib/prisma'
+import { 
+  createSuccessResponse, 
+  createErrorResponse,
+  createAuthErrorResponse,
+  createValidationErrorResponse 
+} from '@/lib/api-utils'
+import { verifyAuth } from '@/lib/auth'
+import { Prisma } from '@prisma/client'
 
 /**
  * API-033: 目標進捗取得API
@@ -19,107 +26,100 @@ export async function GET(
   { params }: { params: { user_id: string } }
 ) {
   try {
+    // 認証チェック
+    const authResult = await verifyAuth(request)
+    if (!authResult.success) {
+      return createAuthErrorResponse()
+    }
+
     const { user_id } = params
     const { searchParams } = new URL(request.url)
-    
-    // クエリパラメータを取得
-    const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : undefined
-    const goalId = searchParams.get('goal_id') || undefined
-    const includeCompleted = searchParams.get('include_completed') !== 'false'
-    const includeDetails = searchParams.get('include_details') === 'true'
+    const goalId = searchParams.get('goal_id')
+    const year = searchParams.get('year')
 
-    // 入力値検証
-    if (!user_id) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'ユーザーIDは必須です',
-          details: [{ field: 'user_id', message: 'ユーザーIDが指定されていません' }]
-        }
-      }, { status: 400 })
+    // 基本的な検索条件
+    const whereCondition: any = {
+      employee_id: user_id,
+      is_deleted: false
     }
 
-    if (year && (year < 2020 || year > 2030)) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: '年度は2020年から2030年の範囲で指定してください',
-          details: [{ field: 'year', message: '無効な年度が指定されています' }]
-        }
-      }, { status: 400 })
+    // 特定の目標IDが指定された場合
+    if (goalId) {
+      whereCondition.OR = [
+        { goal_id: goalId },
+        { id: goalId }
+      ]
     }
 
-    // 目標進捗情報を取得
-    const progressData = await getGoalProgress(
-      user_id,
-      year,
-      goalId,
-      includeCompleted,
-      includeDetails
-    )
+    // 年度フィルタ
+    if (year) {
+      const yearNum = parseInt(year)
+      const startDate = new Date(`${yearNum}-01-01`)
+      const endDate = new Date(`${yearNum + 1}-01-01`)
+      whereCondition.start_date = {
+        gte: startDate,
+        lt: endDate
+      }
+    }
 
-    // 監査ログを記録（READ操作は監査対象外のため、コメントアウト）
-    // await createAuditLog({
-    //   userId: user_id,
-    //   actionType: 'READ',
-    //   targetTable: 'TRN_CareerPlan',
-    //   targetId: goalId || 'all',
-    //   newValues: {
-    //     year: year || new Date().getFullYear(),
-    //     include_completed: includeCompleted,
-    //     include_details: includeDetails
-    //   }
-    // })
+    // 進捗データを取得
+    const progressData = await prisma.goalProgress.findMany({
+      where: whereCondition,
+      orderBy: [
+        { priority_level: 'desc' },
+        { created_at: 'desc' }
+      ]
+    })
 
-    return NextResponse.json({
-      success: true,
-      data: progressData,
-      timestamp: new Date().toISOString()
+    // レスポンスデータの整形
+    const formattedProgress = progressData.map(progress => ({
+      id: progress.id,
+      goal_id: progress.goal_id,
+      title: progress.goal_title,
+      description: progress.goal_description,
+      goal_type: progress.goal_type,
+      category: progress.goal_category,
+      priority: progress.priority_level === 'high' ? 5 : 
+                progress.priority_level === 'medium' ? 3 : 1,
+      target_date: progress.target_date?.toISOString(),
+      start_date: progress.start_date?.toISOString(),
+      status: progress.achievement_status,
+      progress_rate: progress.progress_rate ? Number(progress.progress_rate) : 0,
+      achievement_rate: progress.achievement_rate ? Number(progress.achievement_rate) : 0,
+      completion_date: progress.completion_date?.toISOString(),
+      self_evaluation: progress.self_evaluation,
+      evaluation_comments: progress.evaluation_comments,
+      milestones: progress.milestones ? JSON.parse(progress.milestones as string) : [],
+      obstacles: progress.obstacles,
+      support_needed: progress.support_needed,
+      created_at: progress.created_at.toISOString(),
+      updated_at: progress.updated_at.toISOString()
+    }))
+
+    // 全体の進捗サマリーを計算
+    const summary = {
+      total_goals: formattedProgress.length,
+      completed: formattedProgress.filter(p => p.status === 'completed').length,
+      in_progress: formattedProgress.filter(p => p.status === 'in_progress').length,
+      not_started: formattedProgress.filter(p => p.status === 'not_started').length,
+      average_progress: formattedProgress.length > 0 
+        ? Math.round(formattedProgress.reduce((sum, p) => sum + p.progress_rate, 0) / formattedProgress.length)
+        : 0
+    }
+
+    return createSuccessResponse({
+      progress: formattedProgress,
+      summary
     })
 
   } catch (error) {
-    console.error('目標進捗取得API エラー:', error)
-
-    if (error instanceof Error) {
-      switch (error.message) {
-        case 'GOAL_PROGRESS_FETCH_ERROR':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'GOAL_PROGRESS_FETCH_ERROR',
-              message: '目標進捗情報の取得に失敗しました'
-            }
-          }, { status: 500 })
-
-        case 'USER_NOT_FOUND':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'USER_NOT_FOUND',
-              message: '指定されたユーザーが見つかりません'
-            }
-          }, { status: 404 })
-
-        default:
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'INTERNAL_SERVER_ERROR',
-              message: 'システムエラーが発生しました'
-            }
-          }, { status: 500 })
-      }
-    }
-
-    return NextResponse.json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'システムエラーが発生しました'
-      }
-    }, { status: 500 })
+    console.error('目標進捗取得エラー:', error)
+    return createErrorResponse(
+      'INTERNAL_SERVER_ERROR',
+      'サーバーエラーが発生しました',
+      error instanceof Error ? error.message : '不明なエラー',
+      500
+    )
   }
 }
 
@@ -132,271 +132,139 @@ export async function PUT(
   { params }: { params: { user_id: string } }
 ) {
   try {
+    // 認証チェック
+    const authResult = await verifyAuth(request)
+    if (!authResult.success) {
+      return createAuthErrorResponse()
+    }
+
     const { user_id } = params
     const body = await request.json()
 
-    // 入力値検証
-    if (!user_id) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'ユーザーIDは必須です',
-          details: [{ field: 'user_id', message: 'ユーザーIDが指定されていません' }]
-        }
-      }, { status: 400 })
-    }
-
+    // 必須パラメータチェック
     if (!body.goal_id) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: '目標IDは必須です',
-          details: [{ field: 'goal_id', message: '目標IDが指定されていません' }]
-        }
-      }, { status: 400 })
+      return createValidationErrorResponse([
+        { field: 'goal_id', message: '目標IDは必須です' }
+      ])
     }
 
-    if (!body.update_type) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: '更新タイプは必須です',
-          details: [{ field: 'update_type', message: '更新タイプが指定されていません' }]
-        }
-      }, { status: 400 })
+    // 既存の目標を検索
+    const existingGoal = await prisma.goalProgress.findFirst({
+      where: {
+        OR: [
+          { goal_id: body.goal_id },
+          { id: body.goal_id }
+        ],
+        employee_id: user_id,
+        is_deleted: false
+      }
+    })
+
+    if (!existingGoal) {
+      return createErrorResponse(
+        'GOAL_NOT_FOUND',
+        '指定された目標が見つかりません',
+        undefined,
+        404
+      )
     }
 
-    const validUpdateTypes = ['status', 'action_plan', 'milestone', 'skill_level', 'feedback']
-    if (!validUpdateTypes.includes(body.update_type)) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: '無効な更新タイプです',
-          details: [{ 
-            field: 'update_type', 
-            message: `更新タイプは次のいずれかを指定してください: ${validUpdateTypes.join(', ')}` 
-          }]
-        }
-      }, { status: 400 })
+    // 更新データの準備
+    const updateData: any = {
+      updated_at: new Date(),
+      updated_by: user_id
     }
 
-    if (!body.update_data) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: '更新データは必須です',
-          details: [{ field: 'update_data', message: '更新データが指定されていません' }]
-        }
-      }, { status: 400 })
+    // 進捗率の更新
+    if (body.progress_rate !== undefined) {
+      const rate = Math.max(0, Math.min(100, body.progress_rate))
+      updateData.progress_rate = new Prisma.Decimal(rate)
+      
+      // 100%になった場合は自動的に完了ステータスに
+      if (rate === 100 && !body.status) {
+        updateData.achievement_status = 'completed'
+        updateData.completion_date = new Date()
+        updateData.achievement_rate = new Prisma.Decimal(100)
+      }
     }
 
-    // 更新タイプ別の詳細検証
-    const validationError = validateUpdateData(body.update_type, body.update_data)
-    if (validationError) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: validationError.message,
-          details: validationError.details
-        }
-      }, { status: 400 })
+    // 達成率の更新
+    if (body.achievement_rate !== undefined) {
+      updateData.achievement_rate = new Prisma.Decimal(
+        Math.max(0, Math.min(100, body.achievement_rate))
+      )
     }
 
-    // 更新者情報を取得（実際の実装では認証情報から取得）
-    const updatedBy = request.headers.get('x-user-id') || user_id
+    // ステータスの更新
+    if (body.status) {
+      updateData.achievement_status = body.status
+      if (body.status === 'completed') {
+        updateData.completion_date = new Date()
+        if (!body.progress_rate) {
+          updateData.progress_rate = new Prisma.Decimal(100)
+        }
+        if (!body.achievement_rate) {
+          updateData.achievement_rate = new Prisma.Decimal(100)
+        }
+      }
+    }
 
-    // 目標進捗を更新
-    const updateResult = await updateGoalProgress(
-      user_id,
-      {
-        goal_id: body.goal_id,
-        update_type: body.update_type,
-        update_data: body.update_data,
-        comment: body.comment
+    // 自己評価の更新
+    if (body.self_evaluation !== undefined) {
+      updateData.self_evaluation = body.self_evaluation
+    }
+
+    // 評価コメントの更新
+    if (body.evaluation_comments !== undefined) {
+      updateData.evaluation_comments = body.evaluation_comments
+    }
+
+    // マイルストーンの更新
+    if (body.milestones) {
+      updateData.milestones = JSON.stringify(body.milestones)
+    }
+
+    // 障害事項の更新
+    if (body.obstacles !== undefined) {
+      updateData.obstacles = body.obstacles
+    }
+
+    // 必要なサポートの更新
+    if (body.support_needed !== undefined) {
+      updateData.support_needed = body.support_needed
+    }
+
+    // データベース更新
+    const updatedGoal = await prisma.goalProgress.update({
+      where: {
+        id: existingGoal.id
       },
-      updatedBy
-    )
+      data: updateData
+    })
 
-    return NextResponse.json({
-      success: true,
-      data: updateResult,
-      timestamp: new Date().toISOString()
+    // レスポンスデータの整形
+    const responseData = {
+      id: updatedGoal.id,
+      goal_id: updatedGoal.goal_id,
+      title: updatedGoal.goal_title,
+      status: updatedGoal.achievement_status,
+      progress_rate: updatedGoal.progress_rate ? Number(updatedGoal.progress_rate) : 0,
+      achievement_rate: updatedGoal.achievement_rate ? Number(updatedGoal.achievement_rate) : 0,
+      updated_at: updatedGoal.updated_at.toISOString()
+    }
+
+    return createSuccessResponse({
+      message: '進捗が更新されました',
+      progress: responseData
     })
 
   } catch (error) {
-    console.error('目標進捗更新API エラー:', error)
-
-    if (error instanceof Error) {
-      switch (error.message) {
-        case 'GOAL_NOT_FOUND':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'GOAL_NOT_FOUND',
-              message: '指定された目標が見つかりません'
-            }
-          }, { status: 404 })
-
-        case 'INVALID_UPDATE_TYPE':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'INVALID_UPDATE_TYPE',
-              message: '無効な更新タイプです'
-            }
-          }, { status: 400 })
-
-        case 'ACTION_PLAN_NOT_FOUND':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'ACTION_PLAN_NOT_FOUND',
-              message: '指定された行動計画が見つかりません'
-            }
-          }, { status: 404 })
-
-        case 'MILESTONE_NOT_FOUND':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'MILESTONE_NOT_FOUND',
-              message: '指定されたマイルストーンが見つかりません'
-            }
-          }, { status: 404 })
-
-        case 'SKILL_NOT_FOUND':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'SKILL_NOT_FOUND',
-              message: '指定されたスキルが見つかりません'
-            }
-          }, { status: 404 })
-
-        case 'STATUS_UPDATE_ERROR':
-        case 'ACTION_PLAN_UPDATE_ERROR':
-        case 'MILESTONE_UPDATE_ERROR':
-        case 'SKILL_LEVEL_UPDATE_ERROR':
-        case 'FEEDBACK_ADD_ERROR':
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: error.message,
-              message: '更新処理に失敗しました'
-            }
-          }, { status: 500 })
-
-        default:
-          return NextResponse.json({
-            success: false,
-            error: {
-              code: 'INTERNAL_SERVER_ERROR',
-              message: 'システムエラーが発生しました'
-            }
-          }, { status: 500 })
-      }
-    }
-
-    return NextResponse.json({
-      success: false,
-      error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'システムエラーが発生しました'
-      }
-    }, { status: 500 })
+    console.error('目標進捗更新エラー:', error)
+    return createErrorResponse(
+      'INTERNAL_SERVER_ERROR',
+      'サーバーエラーが発生しました',
+      error instanceof Error ? error.message : '不明なエラー',
+      500
+    )
   }
-}
-
-/**
- * 更新データの詳細検証
- */
-function validateUpdateData(updateType: string, updateData: any): { message: string; details: any[] } | null {
-  switch (updateType) {
-    case 'status':
-      if (!updateData.status) {
-        return {
-          message: 'ステータスは必須です',
-          details: [{ field: 'status', message: 'ステータスが指定されていません' }]
-        }
-      }
-      const validStatuses = ['not_started', 'in_progress', 'completed', 'postponed', 'cancelled']
-      if (!validStatuses.includes(updateData.status)) {
-        return {
-          message: '無効なステータスです',
-          details: [{ 
-            field: 'status', 
-            message: `ステータスは次のいずれかを指定してください: ${validStatuses.join(', ')}` 
-          }]
-        }
-      }
-      break
-
-    case 'action_plan':
-      if (!updateData.action_id) {
-        return {
-          message: '行動計画IDは必須です',
-          details: [{ field: 'action_id', message: '行動計画IDが指定されていません' }]
-        }
-      }
-      if (!updateData.status) {
-        return {
-          message: 'ステータスは必須です',
-          details: [{ field: 'status', message: 'ステータスが指定されていません' }]
-        }
-      }
-      break
-
-    case 'milestone':
-      if (!updateData.milestone_id) {
-        return {
-          message: 'マイルストーンIDは必須です',
-          details: [{ field: 'milestone_id', message: 'マイルストーンIDが指定されていません' }]
-        }
-      }
-      if (!updateData.status) {
-        return {
-          message: 'ステータスは必須です',
-          details: [{ field: 'status', message: 'ステータスが指定されていません' }]
-        }
-      }
-      break
-
-    case 'skill_level':
-      if (!updateData.skill_id) {
-        return {
-          message: 'スキルIDは必須です',
-          details: [{ field: 'skill_id', message: 'スキルIDが指定されていません' }]
-        }
-      }
-      if (typeof updateData.current_level !== 'number' || updateData.current_level < 1 || updateData.current_level > 4) {
-        return {
-          message: 'スキルレベルは1から4の範囲で指定してください',
-          details: [{ field: 'current_level', message: '無効なスキルレベルです' }]
-        }
-      }
-      break
-
-    case 'feedback':
-      if (!updateData.feedback_text || updateData.feedback_text.trim() === '') {
-        return {
-          message: 'フィードバック内容は必須です',
-          details: [{ field: 'feedback_text', message: 'フィードバック内容が指定されていません' }]
-        }
-      }
-      if (updateData.feedback_text.length > 1000) {
-        return {
-          message: 'フィードバック内容は1000文字以内で入力してください',
-          details: [{ field: 'feedback_text', message: 'フィードバック内容が長すぎます' }]
-        }
-      }
-      break
-  }
-
-  return null
 }

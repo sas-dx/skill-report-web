@@ -96,7 +96,7 @@ export async function GET(
     // ユーザーの上司情報を取得
     const employee = await prisma.employee.findFirst({
       where: {
-        id: userId,
+        employee_code: userId,
         is_deleted: false
       }
     });
@@ -120,7 +120,7 @@ export async function GET(
     if (employee.manager_id) {
       managerInfo = await prisma.employee.findFirst({
         where: {
-          id: employee.manager_id,
+          employee_code: employee.manager_id,
           is_deleted: false
         }
       });

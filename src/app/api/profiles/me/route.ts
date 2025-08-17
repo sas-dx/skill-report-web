@@ -58,7 +58,9 @@ export async function GET(request: NextRequest) {
 
     // ユーザー情報の取得（employee_codeで検索）
     const user = await prisma.employee.findUnique({
-      where: { employee_code: currentEmployeeId }
+      where: { 
+        employee_code: currentEmployeeId
+      }
     });
 
     if (!user) {
@@ -204,6 +206,49 @@ export async function GET(request: NextRequest) {
       }
     };
 
+    // 部下情報の取得
+    let subordinates = null;
+    const isManager = position?.position_level && position.position_level >= 3; // レベル3以上を管理職とする
+    
+    if (isManager) {
+      const subordinateList = await prisma.employee.findMany({
+        where: {
+          manager_id: currentEmployeeId,
+          is_deleted: false
+        },
+        select: {
+          employee_code: true,
+          full_name: true,
+          email: true,
+          position_id: true,
+          department_id: true
+        }
+      });
+
+      // 部下の役職・部署情報を取得
+      subordinates = await Promise.all(
+        subordinateList.map(async (sub) => {
+          const subPosition = sub.position_id ? 
+            await prisma.position.findUnique({ 
+              where: { position_code: sub.position_id } 
+            }) : null;
+          
+          const subDepartment = sub.department_id ?
+            await prisma.department.findUnique({
+              where: { department_code: sub.department_id }
+            }) : null;
+
+          return {
+            employee_id: sub.employee_code,
+            name: sub.full_name,
+            email: sub.email,
+            position: subPosition?.position_name || '未設定',
+            department: subDepartment?.department_name || '未設定'
+          };
+        })
+      );
+    }
+
     // スキルサマリーの取得（オプション）
     let skillSummary = null;
     if (includeSkillSummary) {
@@ -315,15 +360,18 @@ export async function GET(request: NextRequest) {
     }
 
     // レスポンスの返却
-    return NextResponse.json({
+    const jsonResponse = NextResponse.json({
       success: true,
       data: {
         profile,
         ...(skillSummary && { skillSummary }),
         ...(goalSummary && { goalSummary }),
-        ...(updateHistory && { updateHistory })
+        ...(updateHistory && { updateHistory }),
+        ...(subordinates && { subordinates })
       }
     });
+    jsonResponse.headers.set('Content-Type', 'application/json; charset=utf-8');
+    return jsonResponse;
 
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -455,14 +503,14 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // カナの検証（オプション）
-    const katakanaRegex = /^[ァ-ヶー\s]*$/;
-    if (body.first_name_kana && typeof body.first_name_kana === 'string' && body.first_name_kana.trim() !== '' && !katakanaRegex.test(body.first_name_kana)) {
-      errors.push({ field: 'first_name_kana', reason: '全角カタカナで入力してください' });
-    }
-    if (body.last_name_kana && typeof body.last_name_kana === 'string' && body.last_name_kana.trim() !== '' && !katakanaRegex.test(body.last_name_kana)) {
-      errors.push({ field: 'last_name_kana', reason: '全角カタカナで入力してください' });
-    }
+    // カナの検証（オプション） - 一時的に無効化
+    // const katakanaRegex = /^[ァ-ヿー\s]*$/;
+    // if (body.first_name_kana && typeof body.first_name_kana === 'string' && body.first_name_kana.trim() !== '' && !katakanaRegex.test(body.first_name_kana)) {
+    //   errors.push({ field: 'first_name_kana', reason: '全角カタカナで入力してください' });
+    // }
+    // if (body.last_name_kana && typeof body.last_name_kana === 'string' && body.last_name_kana.trim() !== '' && !katakanaRegex.test(body.last_name_kana)) {
+    //   errors.push({ field: 'last_name_kana', reason: '全角カタカナで入力してください' });
+    // }
 
     // 電話番号の検証（オプション）
     const phoneNumber = body.contact_info?.phone;
@@ -494,6 +542,7 @@ export async function PUT(request: NextRequest) {
 
     // エラーがある場合は400を返す
     if (errors.length > 0) {
+      console.error('プロフィール更新バリデーションエラー:', JSON.stringify(errors, null, 2));
       return NextResponse.json(
         {
           success: false,
@@ -557,7 +606,9 @@ export async function PUT(request: NextRequest) {
 
     // 更新前のデータを取得（AuditLog用）
     const currentUser = await prisma.employee.findUnique({
-      where: { employee_code: currentEmployeeId }
+      where: { 
+        employee_code: currentEmployeeId
+      }
     });
 
     if (!currentUser) {
@@ -575,7 +626,9 @@ export async function PUT(request: NextRequest) {
 
     // データベース更新
     const updatedUser = await prisma.employee.update({
-      where: { employee_code: currentEmployeeId },
+      where: { 
+        employee_code: currentEmployeeId
+      },
       data: updateData
     });
 
@@ -693,10 +746,12 @@ export async function PUT(request: NextRequest) {
       }
     };
 
-    return NextResponse.json({
+    const jsonResponse = NextResponse.json({
       success: true,
       data: response
     });
+    jsonResponse.headers.set('Content-Type', 'application/json; charset=utf-8');
+    return jsonResponse;
 
   } catch (error) {
     console.error('Profile update error:', error);

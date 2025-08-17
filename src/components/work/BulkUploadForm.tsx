@@ -57,6 +57,7 @@ interface ValidationResult {
     success_rate: number;
   };
   validation_result: ValidationResultItem[];
+  records?: BulkWorkRecord[];
 }
 
 interface ExecutionResult {
@@ -131,7 +132,7 @@ export function BulkUploadForm() {
     }
   };
 
-  // API-101: ファイルアップロード・バリデーション
+  // ファイルアップロード・バリデーション
   const handleUpload = async () => {
     if (!selectedFile) {
       alert('ファイルを選択してください');
@@ -142,18 +143,55 @@ export function BulkUploadForm() {
     setValidationResult(null);
 
     try {
+      // Step 1: ファイルをパース
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const response = await fetch('/api/work/bulk/validate', {
+      const parseResponse = await fetch('/api/work/bulk/parse', {
         method: 'POST',
         body: formData
       });
 
-      const result: ValidationResult = await response.json();
-      setValidationResult(result);
+      const parseResult = await parseResponse.json();
 
-      if (result.success) {
+      if (!parseResult.success) {
+        alert(parseResult.error || 'ファイルの解析に失敗しました');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Step 2: パースしたデータをバリデーション（現在は簡易的にクライアント側で）
+      const employeeId = localStorage.getItem('employeeId') || '000001';
+      const validateResponse = await fetch('/api/work/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          employee_id: employeeId,
+          records: parseResult.records,
+          validate_only: true  // バリデーションのみ実行フラグ
+        })
+      });
+
+      const result = await validateResponse.json();
+      
+      // バリデーション結果を設定
+      setValidationResult({
+        success: result.success || false,
+        message: result.message || result.error,
+        summary: {
+          total_count: parseResult.records.length,
+          success_count: result.success ? parseResult.records.length : 0,
+          error_count: result.validation_errors ? result.validation_errors.length : 0,
+          success_rate: result.success ? 100 : 0
+        },
+        validation_result: result.validation_errors || [],
+        records: parseResult.records,
+        validation_id: `val_${Date.now()}`
+      });
+
+      if (!result.validation_errors || result.validation_errors.length === 0) {
         setCurrentStep('validation');
       }
 
@@ -175,10 +213,10 @@ export function BulkUploadForm() {
     }
   };
 
-  // API-102: 一括登録実行
+  // 一括登録実行
   const handleExecute = async () => {
-    if (!validationResult?.validation_id) {
-      alert('バリデーション結果が見つかりません');
+    if (!validationResult?.records) {
+      alert('登録データが見つかりません');
       return;
     }
 
@@ -186,13 +224,15 @@ export function BulkUploadForm() {
     setExecutionResult(null);
 
     try {
-      const response = await fetch('/api/work/bulk/execute', {
+      const employeeId = localStorage.getItem('employeeId') || '000001';
+      const response = await fetch('/api/work/bulk', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          validation_id: validationResult.validation_id
+          employee_id: employeeId,
+          records: validationResult.records
         })
       });
 

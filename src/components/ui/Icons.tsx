@@ -645,3 +645,175 @@ export function XCircleIcon({ className = '', size = 24 }: IconProps) {
     </svg>
   );
 }
+
+// User Group Icon
+export function UserGroupIcon({ className = '', size = 24 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  );
+}
+
+// User Plus Icon
+export function UserPlusIcon({ className = '', size = 24 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="8.5" cy="7" r="4"></circle>
+      <line x1="20" y1="8" x2="20" y2="14"></line>
+      <line x1="23" y1="11" x2="17" y2="11"></line>
+    </svg>
+  );
+}
+
+// Envelope Icon (Email)
+export function EnvelopeIcon({ className = '', size = 24 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+      <polyline points="22,6 12,13 2,6"></polyline>
+    </svg>
+  );
+}
+
+// Building Office Icon
+export function BuildingOfficeIcon({ className = '', size = 24 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 21h18"></path>
+      <path d="M5 21V7l8-4v18"></path>
+      <path d="M19 21V11l-6-3"></path>
+      <rect x="9" y="9" width="4" height="4"></rect>
+      <rect x="9" y="14" width="4" height="4"></rect>
+      <rect x="2" y="14" width="3" height="3"></rect>
+      <rect x="16" y="14" width="3" height="3"></rect>
+    </svg>
+  );
+}
+
+// Globe Icon
+export function GlobeIcon({ className = '', size = 24 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="2" y1="12" x2="22" y2="12"></line>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+    </svg>
+  );
+}
+
+// Arrow Right Icon
+export function ArrowRightIcon({ className = '', size = 24 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12,5 19,12 12,19"></polyline>
+    </svg>
+  );
+}
+
+// Icons オブジェクトとしてエクスポート（後方互換性のため）
+export const Icons = {
+  Plus: PlusIcon,
+  ChartBar: ChartBarIcon,
+  DocumentText: DocumentTextIcon,
+  Calendar: CalendarIcon,
+  AcademicCap: AcademicCapIcon,
+  Eye: EyeIcon,
+  EyeSlash: EyeSlashIcon,
+  User: UserIcon,
+  Settings: SettingsIcon,
+  LogOut: LogOutIcon,
+  Bell: BellIcon,
+  Home: HomeIcon,
+  Briefcase: BriefcaseIcon,
+  BookOpen: BookOpenIcon,
+  Target: TargetIcon,
+  FileText: FileTextIcon,
+  Menu: MenuIcon,
+  X: XIcon,
+  ChevronDown: ChevronDownIcon,
+  Search: SearchIcon,
+  Edit: EditIcon,
+  Trash: TrashIcon,
+  Check: CheckIcon,
+  AlertCircle: AlertCircleIcon,
+  Info: InfoIcon,
+  Pencil: PencilIcon,
+  Flag: FlagIcon,
+  CheckCircle: CheckCircleIcon,
+  Clock: ClockIcon,
+  ExclamationTriangle: ExclamationTriangleIcon,
+  XCircle: XCircleIcon,
+  UserGroup: UserGroupIcon,
+  UserPlus: UserPlusIcon,
+  Envelope: EnvelopeIcon,
+  BuildingOffice: BuildingOfficeIcon,
+  Building: BuildingOfficeIcon, // エイリアス
+  Globe: GlobeIcon,
+  ArrowRight: ArrowRightIcon
+};

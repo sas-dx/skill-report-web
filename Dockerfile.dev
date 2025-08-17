@@ -6,17 +6,26 @@ FROM node:18-alpine AS base
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# システムの依存関係をインストール
+# システムの依存関係とロケール設定をインストール
 RUN apk add --no-cache \
     libc6-compat \
     openssl \
-    git
+    git \
+    tzdata && \
+    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    echo "Asia/Tokyo" > /etc/timezone
+
+# 日本語ロケール環境変数を設定
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV TZ=Asia/Tokyo
 
 # package.json と package-lock.json をコピー
 COPY package*.json ./
 
 # 依存関係をインストール（開発用依存関係も含む）
-RUN npm ci
+# npm ciではなくnpm installを使用してpackage.jsonの変更を反映
+RUN npm install
 
 # Prismaクライアントを生成
 COPY src/database/prisma ./src/database/prisma

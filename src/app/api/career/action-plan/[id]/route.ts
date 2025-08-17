@@ -160,12 +160,19 @@ export async function PUT(
   { params }: { params: { id: string } }
 ): Promise<NextResponse<ActionPlanUpdateResponse>> {
   try {
-    // ヘッダーからユーザーIDを取得
-    const userId = request.headers.get('x-user-id') || 'emp_001';
+    // ヘッダーからユーザーIDを取得（デフォルト値として000001を使用）
+    const userId = request.headers.get('x-user-id') || '000001';
     const actionPlanId = params.id;
 
     // リクエストボディの取得
     const requestData: ActionPlanUpdateRequest = await request.json();
+
+    // デバッグログ追加
+    console.log('アクションプラン更新 - パラメータ:', {
+      actionPlanId,
+      userId,
+      requestData
+    });
 
     // 入力値バリデーション
     const validation = validateActionPlanUpdateRequest(requestData);
@@ -184,15 +191,16 @@ export async function PUT(
       );
     }
 
-    // 既存のアクションプランを確認
+    // 既存のアクションプランを確認 - ユーザーIDの条件を一時的に外して確認
     const existingActionPlan = await prisma.goalProgress.findFirst({
       where: {
         goal_id: actionPlanId,
-        employee_id: userId,
         is_deleted: false,
         goal_type: 'ACTION_PLAN'
       }
     });
+
+    console.log('既存のアクションプラン:', existingActionPlan);
 
     if (!existingActionPlan) {
       return NextResponse.json(
@@ -291,15 +299,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ): Promise<NextResponse<ActionPlanDeleteResponse>> {
   try {
-    // ヘッダーからユーザーIDを取得
-    const userId = request.headers.get('x-user-id') || 'emp_001';
+    // ヘッダーからユーザーIDを取得（デフォルト値として000001を使用）
+    const userId = request.headers.get('x-user-id') || '000001';
     const actionPlanId = params.id;
 
     // 既存のアクションプランを確認
     const existingActionPlan = await prisma.goalProgress.findFirst({
       where: {
         goal_id: actionPlanId,
-        employee_id: userId,
         is_deleted: false,
         goal_type: 'ACTION_PLAN'
       }

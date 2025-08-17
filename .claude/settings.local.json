@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)",
+      "Bash(pg_ctl:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker-compose:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma db seed:*)",
+      "Bash(tasklist)",
+      "Bash(docker cp:*)",
+      "Bash(grep:*)",
+      "Bash(docker restart:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(npm run:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx prisma:*)",
+      "Bash(node:*)",
+      "Bash(docker ps:*)",
+      "Bash(test:*)",
+      "Bash(cat:*)"
+    ],
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "C:\\mnt\\c\\Apps",
+      "C:\\c\\Apps"
+    ]
+  }
+}

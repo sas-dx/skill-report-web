@@ -15,9 +15,12 @@ export default function DashboardPage() {
   const userName = 'テストユーザー';
 
   const handleLogout = () => {
-    // TODO: 実際のログアウト処理を実装
-    console.log('ログアウト処理');
-    router.push('/login');
+    // ログアウト処理
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tenant');
+    router.push('/');
   };
 
   const handleMenuClick = () => {

@@ -66,7 +66,10 @@ export function Select({
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const selectRef = useRef<HTMLDivElement>(null);
-  const selectedOption = options.find((o) => o.value === value);
+  
+  // optionsがundefinedの場合は空配列をデフォルトにする
+  const safeOptions = options || [];
+  const selectedOption = safeOptions.find((o) => o.value === value);
 
   // ----- error handling -----
   const hasError = !!error;
@@ -93,7 +96,7 @@ export function Select({
       case ' ':
         e.preventDefault();
         if (isOpen && focusedIndex >= 0) {
-          const opt = options[focusedIndex];
+          const opt = safeOptions[focusedIndex];
           if (!opt.disabled) {
             onChange?.(opt.value);
             setIsOpen(false);
@@ -110,7 +113,7 @@ export function Select({
       case 'ArrowDown':
         e.preventDefault();
         if (!isOpen) openDropdown();
-        else setFocusedIndex((i) => Math.min(i + 1, options.length - 1));
+        else setFocusedIndex((i) => Math.min(i + 1, safeOptions.length - 1));
         break;
       case 'ArrowUp':
         e.preventDefault();
@@ -126,7 +129,7 @@ export function Select({
 
   const openDropdown = () => {
     setIsOpen(true);
-    setFocusedIndex(value ? options.findIndex((o) => o.value === value) : 0);
+    setFocusedIndex(value ? safeOptions.findIndex((o) => o.value === value) : 0);
   };
 
   const handleOptionClick = (opt: SelectOption) => {
@@ -174,7 +177,7 @@ export function Select({
           aria-label={ariaLabel}
           className="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none divide-y divide-gray-100"
         >
-          {options.map((opt, i) => {
+          {safeOptions.map((opt, i) => {
             const active = i === focusedIndex;
             const selected = opt.value === value;
             return (
@@ -236,6 +239,9 @@ export function NativeSelect({
 }: NativeSelectProps) {
   const hasError = !!error;
   const errorMessage = typeof error === 'string' ? error : undefined;
+  
+  // optionsがundefinedの場合は空配列をデフォルトにする
+  const safeOptions = options || [];
 
   const base =
     'w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed';
@@ -255,7 +261,7 @@ export function NativeSelect({
         <option value="" disabled>
           {placeholder}
         </option>
-        {options.map((opt) => (
+        {safeOptions.map((opt) => (
           <option key={opt.value} value={opt.value} disabled={opt.disabled}>
             {opt.label}
           </option>

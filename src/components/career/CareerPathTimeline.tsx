@@ -10,19 +10,36 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { RefreshCw, MapPin, Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { RefreshCw, MapPin, Calendar, CheckCircle, Clock, AlertCircle, Plus, Edit2, Trash2, X } from 'lucide-react';
+import { CareerPathForm, CareerPathStep as FormCareerPathStep } from './CareerPathForm';
+import { PlusIcon, PencilIcon, TrashIcon, XIcon } from '@/components/ui/Icons';
 
 // 型定義
+interface RequiredSkill {
+  skill_id: string;
+  skill_name: string;
+  required_level: number;
+  current_level: number;
+  is_achieved: boolean;
+}
+
 interface CareerPathStep {
   step_id: string;
-  step_name: string;
-  step_description: string;
-  target_date: string;
+  position_name?: string;
+  position_level?: number;
+  step_name?: string;
+  step_description?: string;
+  description?: string;
+  target_date?: string;
+  estimated_duration?: string;
   completion_date?: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'overdue';
-  required_skills: string[];
-  milestones: string[];
-  progress_percentage: number;
+  status?: 'not_started' | 'in_progress' | 'completed' | 'overdue';
+  required_skills?: RequiredSkill[];
+  prerequisites?: string[];
+  milestones?: string[];
+  progress_percentage?: number;
+  is_current?: boolean;
+  is_completed?: boolean;
 }
 
 interface CareerPathTimelineProps {
@@ -37,6 +54,9 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
   const [careerPath, setCareerPath] = useState<CareerPathStep[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingStep, setEditingStep] = useState<CareerPathStep | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
    * キャリアパスデータを取得
@@ -64,9 +84,16 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
       }
 
       const data = await response.json();
+      console.log('キャリアパスAPIレスポンス:', data);
 
       if (data.success && data.data) {
-        setCareerPath(data.data.career_path_steps);
+        const steps = data.data.career_path?.steps || [];
+        console.log('キャリアパスステップ:', steps);
+        // 各ステップのstep_idを確認
+        steps.forEach((step: CareerPathStep, index: number) => {
+          console.log(`ステップ${index + 1}: step_id=${step.step_id}, position_name=${step.position_name}`);
+        });
+        setCareerPath(steps);
       } else {
         throw new Error(data.error?.message || 'キャリアパスデータの取得に失敗しました');
       }
@@ -82,6 +109,106 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
   useEffect(() => {
     fetchCareerPath();
   }, [userId]);
+
+  /**
+   * ステップ編集ハンドラー
+   */
+  const handleEditStep = (step: CareerPathStep) => {
+    console.log('編集するステップ:', step);
+    // step_idが文字列として存在し、空文字でないかチェック
+    if (!step.step_id || step.step_id === '') {
+      console.error('ステップIDが存在しません:', step);
+      setError('このステップは編集できません（IDが不明です）');
+      return;
+    }
+    setEditingStep(step);
+    setIsDialogOpen(true);
+  };
+
+  /**
+   * ステップ削除ハンドラー
+   */
+  const handleDeleteStep = async (stepId: string) => {
+    if (!stepId || stepId === '') {
+      console.error('ステップIDが指定されていません');
+      return;
+    }
+    if (!window.confirm('このキャリアパスステップを削除してもよろしいですか？')) {
+      return;
+    }
+
+    try {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      const response = await fetch(`/api/career/path/${stepId}`, {
+        method: 'DELETE',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      await fetchCareerPath();
+    } catch (err) {
+      console.error('キャリアパス削除エラー:', err);
+      setError(err instanceof Error ? err.message : '削除に失敗しました');
+    }
+  };
+
+  /**
+   * フォーム送信ハンドラー
+   */
+  const handleSubmit = async (formData: FormCareerPathStep) => {
+    try {
+      setIsSubmitting(true);
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (userId) {
+        headers['x-user-id'] = userId;
+      }
+
+      // デバッグログ追加
+      console.log('編集中のステップ:', editingStep);
+      console.log('送信データ:', formData);
+      
+      // 編集時は、step_idがあるか確認
+      const stepId = editingStep?.step_id || formData.step_id;
+      
+      const url = editingStep && stepId
+        ? `/api/career/path/${stepId}`
+        : '/api/career/path';
+      
+      const method = editingStep && stepId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setIsDialogOpen(false);
+      setEditingStep(null);
+      await fetchCareerPath();
+    } catch (err) {
+      console.error('キャリアパス保存エラー:', err);
+      setError(err instanceof Error ? err.message : '保存に失敗しました');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   /**
    * ステータスに応じたアイコンを取得
@@ -202,7 +329,11 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-gray-500">キャリアパスが設定されていません</p>
+            <p className="text-gray-500 mb-4">キャリアパスが設定されていません</p>
+            <Button onClick={() => { setEditingStep(null); setIsDialogOpen(true); }}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              キャリアパスを作成
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -222,9 +353,15 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
               目標達成までのステップを段階的に表示
             </CardDescription>
           </div>
-          <Button onClick={fetchCareerPath} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button onClick={() => { setEditingStep(null); setIsDialogOpen(true); }} variant="secondary" size="sm">
+              <PlusIcon className="h-4 w-4 mr-1" />
+              追加
+            </Button>
+            <Button onClick={fetchCareerPath} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -246,69 +383,98 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
                 {/* ステップ内容 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      {step.step_name}
-                    </h4>
-                    <Badge variant={getStatusVariant(step.status)}>
-                      {getStatusText(step.status)}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-lg font-semibold text-gray-900">
+                        {step.position_name || step.step_name || ''}
+                      </h4>
+                      {step.status && (
+                        <Badge variant={getStatusVariant(step.status)}>
+                          {getStatusText(step.status)}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleEditStep(step)}
+                        className="text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => step.step_id && handleDeleteStep(step.step_id)}
+                        className="text-gray-400 hover:text-red-600 transition-colors"
+                        disabled={!step.step_id}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-3">
-                    {step.step_description}
+                    {step.description || step.step_description || ''}
                   </p>
 
                   {/* 日付情報 */}
-                  <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>目標: {formatDate(step.target_date)}</span>
+                  {(step.estimated_duration || step.target_date || step.completion_date) && (
+                    <div className="flex items-center gap-4 mb-3 text-sm text-gray-500">
+                      {step.estimated_duration && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>期間: {step.estimated_duration}</span>
+                        </div>
+                      )}
+                      {step.completion_date && (
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>完了: {formatDate(step.completion_date)}</span>
+                        </div>
+                      )}
                     </div>
-                    {step.completion_date && (
-                      <div className="flex items-center gap-1">
-                        <CheckCircle className="h-4 w-4" />
-                        <span>完了: {formatDate(step.completion_date)}</span>
-                      </div>
-                    )}
-                  </div>
+                  )}
 
                   {/* 進捗バー */}
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">進捗</span>
-                      <span className="text-sm text-gray-500">{step.progress_percentage}%</span>
+                  {step.progress_percentage !== undefined && (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">進捗</span>
+                        <span className="text-sm text-gray-500">{step.progress_percentage || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${step.progress_percentage || 0}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${step.progress_percentage}%` }}
-                      />
-                    </div>
-                  </div>
+                  )}
 
                   {/* 必要スキル */}
-                  {step.required_skills.length > 0 && (
+                  {step.required_skills && step.required_skills.length > 0 && (
                     <div className="mb-3">
                       <h5 className="text-sm font-medium text-gray-700 mb-2">必要スキル</h5>
                       <div className="flex flex-wrap gap-1">
                         {step.required_skills.map((skill, skillIndex) => (
-                          <Badge key={skillIndex} variant="outline" className="text-xs">
-                            {skill}
+                          <Badge 
+                            key={skillIndex} 
+                            variant={skill.is_achieved ? "secondary" : "outline"} 
+                            className="text-xs"
+                          >
+                            {skill.skill_name} (Lv.{skill.current_level}/{skill.required_level})
                           </Badge>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* マイルストーン */}
-                  {step.milestones.length > 0 && (
+                  {/* 前提条件 */}
+                  {step.prerequisites && step.prerequisites.length > 0 && (
                     <div>
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">マイルストーン</h5>
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">前提条件</h5>
                       <ul className="text-sm text-gray-600 space-y-1">
-                        {step.milestones.map((milestone, milestoneIndex) => (
-                          <li key={milestoneIndex} className="flex items-start gap-2">
+                        {step.prerequisites.map((prerequisite, index) => (
+                          <li key={index} className="flex items-start gap-2">
                             <span className="text-gray-400 mt-1">•</span>
-                            <span>{milestone}</span>
+                            <span>{prerequisite}</span>
                           </li>
                         ))}
                       </ul>
@@ -329,25 +495,64 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {careerPath.filter(step => step.status === 'completed').length}
+                {careerPath.filter(step => step.is_completed === true).length}
               </div>
               <div className="text-xs text-gray-500">完了</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">
-                {careerPath.filter(step => step.status === 'in_progress').length}
+                {careerPath.filter(step => step.is_current === true).length}
               </div>
-              <div className="text-xs text-gray-500">進行中</div>
+              <div className="text-xs text-gray-500">現在</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {careerPath.filter(step => step.status === 'overdue').length}
+              <div className="text-2xl font-bold text-gray-600">
+                {careerPath.filter(step => !step.is_completed && !step.is_current).length}
               </div>
-              <div className="text-xs text-gray-500">遅延</div>
+              <div className="text-xs text-gray-500">未着手</div>
             </div>
           </div>
         </div>
       </CardContent>
+
+      {/* キャリアパス作成・編集ダイアログ */}
+      {isDialogOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* オーバーレイ */}
+            <div 
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+              onClick={() => setIsDialogOpen(false)}
+            />
+            
+            {/* ダイアログコンテンツ */}
+            <div className="relative bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              {/* ヘッダー */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-medium text-gray-900">
+                  {editingStep ? 'キャリアパスを編集' : '新しいキャリアパスを作成'}
+                </h2>
+                <button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
+                >
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
+              
+              {/* フォーム */}
+              <div className="px-6 py-4">
+                <CareerPathForm
+                  step={editingStep as FormCareerPathStep}
+                  onSubmit={handleSubmit}
+                  onCancel={() => setIsDialogOpen(false)}
+                  isLoading={isSubmitting}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
       '公開参照可能フラグ'
     ];
 
-    // サンプルデータ
-    const sampleData = [
+    // サンプルデータ（実際にインポート可能な値）
+    const sampleData1 = [
       'ECサイト構築プロジェクト',
       'PROJ-2024-001',
       '株式会社サンプル',
@@ -90,11 +90,36 @@ export async function GET(request: NextRequest) {
       'React Hooks活用、TypeScript型安全性',
       '5',
       '1000万円以上',
-      '完了',
+      'completed',  // ステータス: planning, active, completed, on_hold, cancelled
       '4',
       '期待以上の成果を達成',
       'false',
       'true'
+    ];
+
+    const sampleData2 = [
+      '在庫管理システム改修',
+      'PROJ-2024-002',
+      'テクノ商事株式会社',
+      'システム改修',
+      '小規模',
+      '2024-07-01',
+      '',  // 終了日は空でもOK
+      '50',
+      'バックエンドエンジニア',
+      'API開発、データベース最適化',
+      'Node.js, Express, PostgreSQL, Docker',
+      'バックエンド開発、データベース設計',
+      'クエリ最適化により処理速度3倍向上',
+      'レガシーコードのリファクタリング',
+      'マイクロサービス化の重要性',
+      '3',
+      '300万円未満',
+      'active',  // 現在進行中
+      '3',
+      '順調に進行中',
+      'false',
+      'false'
     ];
 
     if (format === 'csv') {
@@ -102,7 +127,8 @@ export async function GET(request: NextRequest) {
       const csvContent = [
         japaneseHeaders.join(','),
         headers.join(','),
-        sampleData.join(',')
+        sampleData1.join(','),
+        sampleData2.join(',')
       ].join('\n');
 
       return new NextResponse(csvContent, {
@@ -120,7 +146,8 @@ export async function GET(request: NextRequest) {
       const worksheetData = [
         japaneseHeaders,  // 1行目: 日本語ヘッダー
         headers,          // 2行目: 英語ヘッダー（システム用）
-        sampleData        // 3行目: サンプルデータ
+        sampleData1,      // 3行目: サンプルデータ1
+        sampleData2       // 4行目: サンプルデータ2
       ];
       
       // ワークシートを作成
@@ -132,6 +159,43 @@ export async function GET(request: NextRequest) {
       
       // ワークシートをワークブックに追加
       XLSX.utils.book_append_sheet(workbook, worksheet, '作業実績テンプレート');
+      
+      // 説明シートを追加
+      const instructionData = [
+        ['作業実績一括登録テンプレート 使用方法'],
+        [''],
+        ['【入力ルール】'],
+        ['1. 2行目の英語ヘッダーは削除しないでください（システムで使用します）'],
+        ['2. 3行目以降にデータを入力してください（サンプルデータは削除して構いません）'],
+        ['3. 必須項目：プロジェクト名、プロジェクトコード、役割、開始日、プロジェクトステータス'],
+        [''],
+        ['【プロジェクトステータスの値】'],
+        ['planning: 計画中'],
+        ['active: 進行中'],
+        ['completed: 完了'],
+        ['on_hold: 保留中'],
+        ['cancelled: キャンセル'],
+        [''],
+        ['【日付形式】'],
+        ['YYYY-MM-DD形式で入力（例：2024-01-15）'],
+        [''],
+        ['【数値項目】'],
+        ['参画率: 0-100の数値（%記号は不要）'],
+        ['チーム規模: 1以上の整数'],
+        ['評価点数: 1-5の整数'],
+        [''],
+        ['【真偽値項目】'],
+        ['機密情報フラグ、公開参照可能フラグ: true または false'],
+        [''],
+        ['【注意事項】'],
+        ['・プロジェクトコードは重複できません'],
+        ['・1度に登録できるのは100件までです'],
+        ['・CSVで保存する場合はUTF-8エンコーディングを使用してください']
+      ];
+      
+      const instructionSheet = XLSX.utils.aoa_to_sheet(instructionData);
+      instructionSheet['!cols'] = [{ wch: 80 }];
+      XLSX.utils.book_append_sheet(workbook, instructionSheet, '使用方法');
       
       // Excelファイルをバッファとして生成
       const excelBuffer = XLSX.write(workbook, { 

@@ -6,13 +6,14 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { CareerPlanContent } from '@/components/career/CareerPlanContent';
 
 export default function CareerPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const handleMenuClick = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -22,8 +23,37 @@ export default function CareerPage() {
     setIsSidebarOpen(false);
   };
 
-  // 仮のユーザーID（実際の実装では認証システムから取得）
-  const userId = 'user_001';
+  // ログインユーザーの情報を取得
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    console.log('Career Page - User from localStorage:', user);
+    
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        console.log('Career Page - Parsed userData:', userData);
+        
+        // employeeIdまたはuserIdを使用
+        const id = userData.employeeId || userData.userId;
+        if (id) {
+          console.log('Career Page - Setting userId:', id);
+          setUserId(id);
+        } else {
+          console.error('ユーザーIDが見つかりません');
+          // デフォルト値として000001を使用（テスト用）
+          setUserId('000001');
+        }
+      } catch (error) {
+        console.error('ユーザー情報の解析エラー:', error);
+        // デフォルト値として000001を使用（テスト用）
+        setUserId('000001');
+      }
+    } else {
+      console.log('Career Page - No user info in localStorage, using default');
+      // デフォルト値として000001を使用（テスト用）
+      setUserId('000001');
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,7 +74,7 @@ export default function CareerPage() {
         {/* メインコンテンツエリア */}
         <div className="flex-1 lg:ml-64">
           <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <CareerPlanContent userId={userId} />
+            {userId && <CareerPlanContent userId={userId} />}
           </div>
         </div>
       </div>

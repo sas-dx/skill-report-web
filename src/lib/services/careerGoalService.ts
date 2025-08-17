@@ -90,7 +90,7 @@ export async function getCareerGoals(
   try {
     const currentYear = year || new Date().getFullYear()
     const startDate = new Date(`${currentYear}-01-01`)
-    const endDate = new Date(`${currentYear + 1}-01-01`)
+    const endDate = new Date(`${currentYear}-12-31T23:59:59`)
 
     // ステータスフィルタの設定
     let statusFilter: any = {}
@@ -106,13 +106,24 @@ export async function getCareerGoals(
       }
     }
 
+    // 目標日が指定年度内にあるもの、または作成日が指定年度内にあるものを取得
     const goals = await prisma.goalProgress.findMany({
       where: {
         employee_id: userId,
-        start_date: {
-          gte: startDate,
-          lt: endDate
-        },
+        OR: [
+          {
+            target_date: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          {
+            created_at: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        ],
         is_deleted: false,
         ...statusFilter
       },

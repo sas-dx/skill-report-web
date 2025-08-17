@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
-import { Icons } from '@/components/ui/Icons';
+import { SearchIcon, BuildingOfficeIcon, GlobeIcon, ArrowRightIcon } from '@/components/ui/Icons';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 
@@ -131,7 +131,7 @@ export default function TenantSelectPage() {
           <div className="mb-8">
             <div className="relative max-w-md mx-auto">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icons.Search className="h-5 w-5 text-gray-400" />
+                <SearchIcon className="h-5 w-5 text-gray-400" />
               </div>
               <Input
                 type="text"
@@ -152,7 +152,7 @@ export default function TenantSelectPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTenants.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <Icons.Building className="mx-auto h-12 w-12 text-gray-400" />
+                  <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">
                     テナントが見つかりません
                   </h3>
@@ -172,7 +172,7 @@ export default function TenantSelectPage() {
                         <div className="flex items-center">
                           <div className="flex-shrink-0">
                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <Icons.Building className="w-6 h-6 text-blue-600" />
+                              <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
                             </div>
                           </div>
                           <div className="ml-3">
@@ -189,7 +189,7 @@ export default function TenantSelectPage() {
 
                       <div className="space-y-2">
                         <div className="flex items-center text-sm text-gray-600">
-                          <Icons.Globe className="w-4 h-4 mr-2" />
+                          <GlobeIcon className="w-4 h-4 mr-2" />
                           {tenant.domain_name}
                         </div>
                       </div>
@@ -203,7 +203,7 @@ export default function TenantSelectPage() {
                             handleTenantSelect(tenant);
                           }}
                         >
-                          <Icons.ArrowRight className="w-4 h-4 mr-2" />
+                          <ArrowRightIcon className="w-4 h-4 mr-2" />
                           このテナントでログイン
                         </Button>
                       </div>

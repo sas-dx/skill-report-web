@@ -257,14 +257,15 @@ export function TenantManagement() {
                 <Select
                   value={formData.tenant_type}
                   onChange={(value) => setFormData({ ...formData, tenant_type: value })}
-                >
-                  <option value="corporate">企業</option>
-                  <option value="government">官公庁</option>
-                  <option value="nonprofit">非営利団体</option>
-                  <option value="educational">教育機関</option>
-                  <option value="healthcare">医療機関</option>
-                  <option value="other">その他</option>
-                </Select>
+                  options={[
+                    { value: 'corporate', label: '企業' },
+                    { value: 'government', label: '官公庁' },
+                    { value: 'nonprofit', label: '非営利団体' },
+                    { value: 'educational', label: '教育機関' },
+                    { value: 'healthcare', label: '医療機関' },
+                    { value: 'other', label: 'その他' }
+                  ]}
+                />
               </div>
               
               <div>
@@ -313,12 +314,13 @@ export function TenantManagement() {
                 <Select
                   value={formData.subscription_plan}
                   onChange={(value) => setFormData({ ...formData, subscription_plan: value })}
-                >
-                  <option value="basic">ベーシック</option>
-                  <option value="standard">スタンダード</option>
-                  <option value="premium">プレミアム</option>
-                  <option value="enterprise">エンタープライズ</option>
-                </Select>
+                  options={[
+                    { value: 'basic', label: 'ベーシック' },
+                    { value: 'standard', label: 'スタンダード' },
+                    { value: 'premium', label: 'プレミアム' },
+                    { value: 'enterprise', label: 'エンタープライズ' }
+                  ]}
+                />
               </div>
             </div>
             

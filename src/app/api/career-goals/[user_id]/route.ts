@@ -112,7 +112,11 @@ export async function GET(
   { params }: { params: { user_id: string } }
 ) {
   try {
-    const { user_id } = params
+    // URLパラメータとヘッダーの両方から取得し、ヘッダーを優先
+    const urlUserId = params.user_id
+    const headerUserId = request.headers.get('x-user-id')
+    const user_id = headerUserId || urlUserId
+    
     const { searchParams } = new URL(request.url)
     const year = searchParams.get('year')
     const status = searchParams.get('status')
@@ -206,7 +210,11 @@ export async function POST(
   { params }: { params: { user_id: string } }
 ) {
   try {
-    const { user_id } = params
+    // URLパラメータとヘッダーの両方から取得し、ヘッダーを優先
+    const urlUserId = params.user_id
+    const headerUserId = request.headers.get('x-user-id')
+    const user_id = headerUserId || urlUserId
+    
     const body = await request.json()
 
     // デバッグ用ログ追加
@@ -345,7 +353,11 @@ export async function PUT(
   { params }: { params: { user_id: string } }
 ) {
   try {
-    const { user_id } = params
+    // URLパラメータとヘッダーの両方から取得し、ヘッダーを優先
+    const urlUserId = params.user_id
+    const headerUserId = request.headers.get('x-user-id')
+    const user_id = headerUserId || urlUserId
+    
     const body = await request.json()
 
     // パラメータバリデーション
@@ -476,7 +488,11 @@ export async function DELETE(
   { params }: { params: { user_id: string } }
 ) {
   try {
-    const { user_id } = params
+    // URLパラメータとヘッダーの両方から取得し、ヘッダーを優先
+    const urlUserId = params.user_id
+    const headerUserId = request.headers.get('x-user-id')
+    const user_id = headerUserId || urlUserId
+    
     const { searchParams } = new URL(request.url)
     const goal_id = searchParams.get('goal_id')
 

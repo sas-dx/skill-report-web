@@ -136,11 +136,11 @@ export function useActionPlans(options: UseActionPlansOptions = {}): UseActionPl
         params.append('category', fetchOptions?.category || category!);
       }
 
-      const response = await fetch(`/api/career/action-plan?${params.toString()}`, {
+      const response = await fetch(`/api/career/action-plans?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001' // 実際の実装では認証から取得
+          'x-user-id': '000001' // 実際の実装では認証から取得
         }
       });
 
@@ -172,11 +172,11 @@ export function useActionPlans(options: UseActionPlansOptions = {}): UseActionPl
     setCreating({ isLoading: true, error: null, isSuccess: false });
 
     try {
-      const response = await fetch('/api/career/action-plan', {
+      const response = await fetch('/api/career/action-plans', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001' // 実際の実装では認証から取得
+          'x-user-id': '000001' // 実際の実装では認証から取得
         },
         body: JSON.stringify(data)
       });
@@ -212,11 +212,11 @@ export function useActionPlans(options: UseActionPlansOptions = {}): UseActionPl
     setUpdating({ isLoading: true, error: null, isSuccess: false });
 
     try {
-      const response = await fetch(`/api/career/action-plan/${id}`, {
+      const response = await fetch(`/api/career/action-plans/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001' // 実際の実装では認証から取得
+          'x-user-id': '000001' // 実際の実装では認証から取得
         },
         body: JSON.stringify(data)
       });
@@ -252,11 +252,11 @@ export function useActionPlans(options: UseActionPlansOptions = {}): UseActionPl
     setDeleting({ isLoading: true, error: null, isSuccess: false });
 
     try {
-      const response = await fetch(`/api/career/action-plan/${id}`, {
+      const response = await fetch(`/api/career/action-plans/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001' // 実際の実装では認証から取得
+          'x-user-id': '000001' // 実際の実装では認証から取得
         }
       });
 
@@ -366,11 +366,11 @@ export function useActionPlan(actionPlanId: string): UseActionPlanReturn {
 
     try {
       // 一覧APIから該当IDのアクションプランを取得
-      const response = await fetch('/api/career/action-plan', {
+      const response = await fetch('/api/career/action-plans', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001'
+          'x-user-id': '000001'
         }
       });
 
@@ -401,11 +401,11 @@ export function useActionPlan(actionPlanId: string): UseActionPlanReturn {
     setUpdating({ isLoading: true, error: null, isSuccess: false });
 
     try {
-      const response = await fetch(`/api/career/action-plan/${actionPlanId}`, {
+      const response = await fetch(`/api/career/action-plans/${actionPlanId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001'
+          'x-user-id': '000001'
         },
         body: JSON.stringify(data)
       });
@@ -438,11 +438,11 @@ export function useActionPlan(actionPlanId: string): UseActionPlanReturn {
     setDeleting({ isLoading: true, error: null, isSuccess: false });
 
     try {
-      const response = await fetch(`/api/career/action-plan/${actionPlanId}`, {
+      const response = await fetch(`/api/career/action-plans/${actionPlanId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': 'emp_001'
+          'x-user-id': '000001'
         }
       });
 

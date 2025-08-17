@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCareerInit } from '@/hooks/useCareerInit';
 import { useCareerGoals } from '@/hooks/useCareerGoals';
+import { useCareerGoalsList } from '@/hooks/useCareerGoalsList';
 import { CareerGoalForm } from './CareerGoalForm';
 import { CareerGoalList } from './CareerGoalList';
 import { CareerProgressChart } from './CareerProgressChart';
@@ -59,6 +60,14 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
     error: initError,
     refetch 
   } = useCareerInit(userId, selectedYear);
+  
+  // 目標一覧を取得
+  const {
+    goals: careerGoalsList,
+    isLoading: goalsListLoading,
+    error: goalsListError,
+    refetch: refetchGoalsList
+  } = useCareerGoalsList(userId || '', selectedYear);
 
   const {
     addCareerGoal,
@@ -82,8 +91,9 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
       setShowGoalForm(false);
       setEditingGoal(null);
       refetch();
+      refetchGoalsList();  // 目標一覧も再取得
     }
-  }, [isSuccess, refetch]);
+  }, [isSuccess, refetch, refetchGoalsList]);
 
   /**
    * 新規目標追加ハンドラー
@@ -350,7 +360,7 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
                 goal={editingGoal}
                 skillCategories={skillCategories}
                 positions={positions}
-                userId={userId || 'emp_001'}
+                userId={userId || ''}
                 onSubmit={handleFormSubmit}
                 onCancel={handleFormCancel}
                 isLoading={goalLoading}
@@ -361,16 +371,32 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
           {/* タブコンテンツ */}
           {activeTab === 'goals' && (
             <CareerGoalList
-              careerGoal={careerGoal}
+              careerGoals={careerGoalsList.map(goal => ({
+                id: goal.goal_id || goal.id,  // goal_idを正しく設定
+                goal_id: goal.goal_id,  // goal_idも追加
+                goal_type: goal.goal_type as any,
+                target_position: goal.title,
+                target_description: goal.description,
+                target_date: goal.target_date,
+                plan_status: goal.status === 'not_started' ? 'INACTIVE' :
+                            goal.status === 'in_progress' ? 'ACTIVE' :
+                            goal.status === 'completed' ? 'COMPLETED' :
+                            goal.status === 'cancelled' ? 'CANCELLED' :
+                            goal.status === 'postponed' ? 'POSTPONED' : 'INACTIVE',
+                progress_percentage: goal.progress_percentage || 0,
+                priority: goal.priority,
+                created_at: goal.created_at,
+                updated_at: goal.updated_at
+              }))}
               onEdit={handleEditGoal}
               onDelete={handleDeleteGoal}
-              isLoading={goalLoading}
+              isLoading={goalsListLoading}
             />
           )}
 
-          {activeTab === 'progress' && careerGoal && (
+          {activeTab === 'progress' && (
             <CareerProgressChart
-              careerGoal={careerGoal}
+              goals={careerGoalsList}
               year={selectedYear}
             />
           )}
@@ -379,26 +405,27 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
             <ActionPlanSection
               careerGoal={careerGoal}
               year={selectedYear}
+              userId={userId}
             />
           )}
 
           {activeTab === 'skillgap' && (
             <SkillGapRadarChart
-              userId={userId || 'emp_001'}
+              userId={userId}
               className="w-full"
             />
           )}
 
           {activeTab === 'path' && (
             <CareerPathTimeline
-              userId={userId || 'emp_001'}
+              userId={userId}
               className="w-full"
             />
           )}
 
           {activeTab === 'feedback' && (
             <ManagerFeedbackSection
-              userId={userId || 'emp_001'}
+              userId={userId}
               className="w-full"
             />
           )}

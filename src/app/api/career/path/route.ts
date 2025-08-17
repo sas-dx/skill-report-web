@@ -21,6 +21,7 @@ interface CareerPathStep {
   }>;
   estimated_duration: string;
   prerequisites: string[];
+  milestones: string[];  // milestonesを追加
   description: string;
   is_current: boolean;
   is_completed: boolean;
@@ -78,6 +79,70 @@ function calculateCompletionPercentage(steps: CareerPathStep[]): number {
 }
 
 /**
+ * キャリアパス作成API
+ * POST /api/career/path
+ */
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse> {
+  try {
+    // ヘッダーからユーザーIDを取得
+    const userId = request.headers.get('x-user-id') || '000001';
+    const body = await request.json();
+
+    // キャリアパスステップをTRN_GoalProgressに保存
+    const id = `CAREER_PATH_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newCareerPath = await prisma.goalProgress.create({
+      data: {
+        id: id,  // 主キー
+        goal_id: id,  // ユニークキー
+        employee_id: userId,
+        goal_type: 'CAREER_PATH',
+        goal_title: body.position_name,
+        goal_description: body.description,
+        goal_category: 'CAREER',
+        priority_level: String(body.position_level || 1),
+        target_date: body.target_date ? new Date(body.target_date) : null,
+        start_date: new Date(),
+        achievement_status: 'NOT_STARTED',
+        milestones: JSON.stringify(body.milestones || []),
+        obstacles: JSON.stringify(body.prerequisites || []),
+        support_needed: JSON.stringify(body.required_skills || []),
+        related_skill_items: JSON.stringify(body.required_skills || []),
+        tenant_id: 'default',
+        created_by: userId,
+        updated_by: userId,
+        created_at: new Date(),
+        updated_at: new Date(),
+        is_deleted: false
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        step_id: newCareerPath.id,
+        message: 'キャリアパスステップが作成されました'
+      }
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('キャリアパス作成エラー:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'CAREER_PATH_CREATE_ERROR',
+          message: 'キャリアパスの作成に失敗しました',
+          details: error instanceof Error ? error.message : '不明なエラー'
+        }
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * キャリアパス取得API
  * GET /api/career/path
  */
@@ -86,7 +151,7 @@ export async function GET(
 ): Promise<NextResponse<CareerPathResponse | ErrorResponse>> {
   try {
     // ヘッダーからユーザーIDを取得
-    const userId = request.headers.get('x-user-id') || 'emp_001';
+    const userId = request.headers.get('x-user-id') || '000001';
 
     // クエリパラメータを取得
     const { searchParams } = new URL(request.url);
@@ -95,7 +160,7 @@ export async function GET(
     // ユーザーの現在のポジション情報を取得
     const employee = await prisma.employee.findFirst({
       where: {
-        id: userId,
+        employee_code: userId,
         is_deleted: false
       }
     });
@@ -114,12 +179,15 @@ export async function GET(
       );
     }
 
-    // ユーザーのキャリアプランを取得
-    const careerPlan = await prisma.careerPlan.findFirst({
+    // ユーザーのキャリアパスを取得（TRN_GoalProgressから）
+    const careerPlans = await prisma.goalProgress.findMany({
       where: {
         employee_id: userId,
-        is_deleted: false,
-        plan_status: 'ACTIVE'
+        goal_type: 'CAREER_PATH',
+        is_deleted: false
+      },
+      orderBy: {
+        created_at: 'asc'
       }
     });
 
@@ -166,14 +234,77 @@ export async function GET(
     const currentPositionInfo = positions.find(p => p.position_code === currentPosition);
 
     // 目標ポジションを決定
-    const targetPos = targetPosition || careerPlan?.target_position_id || 'SENIOR_ENGINEER';
+    const targetPos = targetPosition || 'SENIOR_ENGINEER';
     const targetPositionInfo = positions.find(p => p.position_code === targetPos);
 
     // キャリアパスのステップを生成
     const careerSteps: CareerPathStep[] = [];
+    
+    // 代替キャリアパスを定義（スコープ外でも使用するため、ここで定義）
+    const alternativePaths = [
+      {
+        path_id: 'path_002',
+        path_name: 'プロダクトマネージャーパス',
+        target_position: 'プロダクトマネージャー',
+        estimated_duration: '24ヶ月'
+      },
+      {
+        path_id: 'path_003',
+        path_name: 'テックリードパス',
+        target_position: 'テックリード',
+        estimated_duration: '30ヶ月'
+      },
+      {
+        path_id: 'path_004',
+        path_name: 'アーキテクトパス',
+        target_position: 'ソリューションアーキテクト',
+        estimated_duration: '36ヶ月'
+      }
+    ];
 
-    // サンプルキャリアパスデータを生成
-    const sampleSteps = [
+    // 保存されたキャリアパスからステップを生成
+    console.log('取得したキャリアパス数:', careerPlans.length);
+    if (careerPlans.length > 0) {
+      careerPlans.forEach((plan, index) => {
+        console.log(`プラン${index}: id=${plan.id}, goal_title=${plan.goal_title}`);
+        
+        // スキル情報のパース
+        const requiredSkills = plan.support_needed ? 
+          (typeof plan.support_needed === 'string' ? 
+            JSON.parse(plan.support_needed) : plan.support_needed) : [];
+        
+        // 前提条件のパース
+        const prerequisites = plan.obstacles ? 
+          (typeof plan.obstacles === 'string' ? 
+            JSON.parse(plan.obstacles) : plan.obstacles) : [];
+        
+        // マイルストーンのパース
+        const milestones = plan.milestones ? 
+          (typeof plan.milestones === 'string' ? 
+            JSON.parse(plan.milestones) : plan.milestones) : [];
+
+        careerSteps.push({
+          step_id: plan.id,  // idフィールドを使用
+          position_name: plan.goal_title || '',
+          position_level: parseInt(plan.priority_level || '1'),
+          required_skills: requiredSkills.map((skill: any) => ({
+            skill_id: skill.skill_id || '',
+            skill_name: skill.skill_name || '',
+            required_level: skill.required_level || 1,
+            current_level: userSkillMap.get(skill.skill_id) || 1,
+            is_achieved: (userSkillMap.get(skill.skill_id) || 1) >= (skill.required_level || 1)
+          })),
+          estimated_duration: '',
+          prerequisites: prerequisites,
+          milestones: milestones,
+          description: plan.goal_description || '',
+          is_current: plan.achievement_status === 'IN_PROGRESS',
+          is_completed: plan.achievement_status === 'COMPLETED'
+        });
+      });
+    } else {
+      // データがない場合はサンプルデータを生成
+      const sampleSteps = [
       {
         step_id: 'step_001',
         position_name: 'ジュニアエンジニア',
@@ -196,6 +327,7 @@ export async function GET(
         ],
         estimated_duration: '6ヶ月',
         prerequisites: ['基本的なプログラミング知識'],
+        milestones: ['基礎研修完了', '初めてのプロジェクト参加'],
         description: 'Webアプリケーション開発の基礎を習得し、チームでの開発に参加できるレベル',
         is_current: currentPosition === 'JUNIOR_ENGINEER',
         is_completed: (userSkillMap.get('PROG_001') || 1) >= 2 && (userSkillMap.get('PROG_002') || 1) >= 2
@@ -222,6 +354,7 @@ export async function GET(
         ],
         estimated_duration: '12ヶ月',
         prerequisites: ['ジュニアエンジニアレベルのスキル習得'],
+        milestones: ['フルスタック開発経験', 'コードレビュー実施'],
         description: 'フロントエンド・バックエンド両方の開発ができ、独立してタスクを完了できるレベル',
         is_current: currentPosition === 'ENGINEER',
         is_completed: (userSkillMap.get('PROG_003') || 1) >= 3 && (userSkillMap.get('PROG_004') || 1) >= 2
@@ -248,45 +381,28 @@ export async function GET(
         ],
         estimated_duration: '18ヶ月',
         prerequisites: ['エンジニアレベルのスキル習得', '複数プロジェクトでの実績'],
+        milestones: ['アーキテクチャ設計経験', 'チームリード経験', '技術選定主導'],
         description: '技術的なリーダーシップを発揮し、アーキテクチャ設計やチーム指導ができるレベル',
         is_current: currentPosition === 'SENIOR_ENGINEER',
         is_completed: (userSkillMap.get('ARCH_001') || 1) >= 3 && (userSkillMap.get('MGMT_001') || 1) >= 2
       }
     ];
 
-    // 代替キャリアパスを生成
-    const alternativePaths = [
-      {
-        path_id: 'path_002',
-        path_name: 'プロダクトマネージャーパス',
-        target_position: 'プロダクトマネージャー',
-        estimated_duration: '24ヶ月'
-      },
-      {
-        path_id: 'path_003',
-        path_name: 'テックリードパス',
-        target_position: 'テックリード',
-        estimated_duration: '30ヶ月'
-      },
-      {
-        path_id: 'path_004',
-        path_name: 'アーキテクトパス',
-        target_position: 'ソリューションアーキテクト',
-        estimated_duration: '36ヶ月'
-      }
-    ];
+      // サンプルデータをキャリアステップに追加
+      careerSteps.push(...sampleSteps);
+    }
 
     // 完了率を計算
-    const completionPercentage = calculateCompletionPercentage(sampleSteps);
+    const completionPercentage = calculateCompletionPercentage(careerSteps);
 
     const careerPathData: CareerPathData = {
-      path_id: careerPlan?.career_plan_id || 'default_path_001',
-      path_name: careerPlan?.plan_name || 'エンジニアキャリアパス',
+      path_id: careerPlans[0]?.id || 'default_path_001',
+      path_name: 'エンジニアキャリアパス',
       current_position: currentPositionInfo?.position_name || 'ジュニアエンジニア',
       target_position: targetPositionInfo?.position_name || 'シニアエンジニア',
       total_duration: '36ヶ月',
       completion_percentage: completionPercentage,
-      steps: sampleSteps,
+      steps: careerSteps,
       alternative_paths: alternativePaths
     };
 

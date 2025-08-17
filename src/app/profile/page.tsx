@@ -17,6 +17,7 @@ import { getProfile, updateProfile, ProfileData, ProfileUpdateRequest } from '@/
 import { useOrganization, Department, Position } from '@/hooks/useOrganization';
 import { useManagerInfo } from '@/hooks/useManagerInfo';
 import { useUpdateHistory } from '@/hooks/useUpdateHistory';
+import { SubordinatesSection } from '@/components/profile/SubordinatesSection';
 
 interface EditableProfile {
   firstName: string;
@@ -40,6 +41,8 @@ export default function ProfilePage() {
   const [editedProfile, setEditedProfile] = useState<EditableProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [subordinates, setSubordinates] = useState<any[]>([]);
+  const [isManager, setIsManager] = useState(false);
 
   // 組織情報取得フック
   const { data: organizationData, loading: orgLoading, error: orgError } = useOrganization();
@@ -88,6 +91,12 @@ export default function ProfilePage() {
             departmentId: profileResponse.data.profile.organizationInfo.departmentId,
             positionId: profileResponse.data.profile.organizationInfo.positionId,
           });
+          
+          // 部下情報を設定
+          if (profileResponse.data.subordinates) {
+            setSubordinates(profileResponse.data.subordinates);
+            setIsManager(profileResponse.data.subordinates.length > 0);
+          }
         } else {
           setError(profileResponse.error?.message || 'プロフィール情報の取得に失敗しました');
         }
@@ -264,6 +273,37 @@ export default function ProfilePage() {
         ...validationErrors,
         [field]: ''
       });
+    }
+  };
+
+  // 部下管理ハンドラー
+  const handleAddSubordinate = () => {
+    // TODO: 部下追加ダイアログを開く
+    console.log('部下追加');
+  };
+
+  const handleEditSubordinate = (subordinate: any) => {
+    // TODO: 部下編集ダイアログを開く
+    console.log('部下編集:', subordinate);
+  };
+
+  const handleRemoveSubordinate = async (employeeId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/subordinates?subordinateId=${employeeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        setSubordinates(subordinates.filter(s => s.employee_id !== employeeId));
+      } else {
+        console.error('部下削除に失敗しました');
+      }
+    } catch (error) {
+      console.error('部下削除エラー:', error);
     }
   };
 
@@ -618,6 +658,17 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
+
+                {/* 部下情報 */}
+                {isManager && (
+                  <SubordinatesSection
+                    subordinates={subordinates}
+                    isManager={isManager}
+                    onAddSubordinate={handleAddSubordinate}
+                    onEditSubordinate={handleEditSubordinate}
+                    onRemoveSubordinate={handleRemoveSubordinate}
+                  />
+                )}
 
                 {/* 更新履歴 */}
                 <div className="bg-white shadow rounded-lg">

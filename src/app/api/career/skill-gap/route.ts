@@ -114,8 +114,8 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<SkillGapResponse | ErrorResponse>> {
   try {
-    // ヘッダーからユーザーIDを取得
-    const userId = request.headers.get('x-user-id') || 'emp_001';
+    // ヘッダーからユーザーIDを取得（デフォルト値として000001を使用）
+    const userId = request.headers.get('x-user-id') || '000001';
 
     // ユーザーの現在のスキルレベルを取得
     const currentSkills = await prisma.skillRecord.findMany({
@@ -125,11 +125,17 @@ export async function GET(
       }
     });
 
+    console.log(`スキルギャップ分析 - ユーザー: ${userId}, 取得スキル数: ${currentSkills.length}`);
+
     // スキルカテゴリ一覧を取得
     const skillCategories = await prisma.skillCategory.findMany({
       where: {
         is_deleted: false,
-        category_status: 'ACTIVE'
+        OR: [
+          { category_status: 'ACTIVE' },
+          { category_status: 'active' },
+          { category_status: null }
+        ]
       },
       orderBy: {
         display_order: 'asc'

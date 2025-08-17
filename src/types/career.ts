@@ -9,6 +9,57 @@
 // ============================================================================
 
 /**
+ * キャリア目標操作API統一レスポンス型 
+ * (API-031, API-032用)
+ */
+export interface CareerGoalApiResponse {
+  success: boolean;
+  data?: {
+    goal?: CareerGoalResponse;
+    goals?: CareerGoalResponse[];
+    stats?: CareerGoalStatsResponse;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string | any[];
+  };
+  timestamp: string;
+}
+
+/**
+ * キャリア目標レスポンス項目
+ */
+export interface CareerGoalResponse {
+  id: string;
+  goal_id: string;
+  title: string;
+  description?: string;
+  goal_type: string;
+  goal_category?: string;
+  priority: number;
+  target_date: string;
+  status: string;
+  progress_rate: number;
+  achievement_rate: number;
+  related_skills?: any[];
+  action_plans?: any[];
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * キャリア目標統計情報レスポンス
+ */
+export interface CareerGoalStatsResponse {
+  totalGoals: number;
+  completedGoals: number;
+  inProgressGoals: number;
+  notStartedGoals: number;
+  completionRate: number;
+}
+
+/**
  * API-700: キャリア初期データ取得APIのレスポンス型
  */
 export interface CareerInitResponse {
@@ -31,6 +82,7 @@ export interface CareerInitResponse {
  */
 export interface CareerGoalData {
   id?: string;
+  goal_id?: string;  // goal_idを追加
   goal_type?: CareerGoalType;
   target_position?: string;
   target_date?: string;
@@ -38,9 +90,12 @@ export interface CareerGoalData {
   current_level?: string;
   target_level?: string;
   progress_percentage?: number;
-  plan_status?: 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
+  plan_status?: 'ACTIVE' | 'INACTIVE' | 'COMPLETED' | 'CANCELLED' | 'POSTPONED';
   last_review_date?: string | null;
   next_review_date?: string | null;
+  priority?: number;  // 優先度を追加
+  created_at?: string;  // 作成日時を追加
+  updated_at?: string;  // 更新日時を追加
 }
 
 /**
@@ -274,6 +329,8 @@ export type CareerGoalStatus = 'not_started' | 'in_progress' | 'completed' | 'po
 
 /**
  * キャリア目標優先度
+ * フロントエンド: 1=高, 2=中, 3=低
+ * バックエンド: 1-5の範囲で、priority_levelとして "high"|"medium"|"low" に変換される
  */
 export type CareerGoalPriority = 1 | 2 | 3; // 1: high, 2: medium, 3: low
 
@@ -318,7 +375,7 @@ export interface ActionPlanItem {
 }
 
 /**
- * スキルギャップデータ
+ * スキルギャップデータ（APIレスポンス用）
  */
 export interface SkillGapData {
   label: string;
@@ -326,6 +383,80 @@ export interface SkillGapData {
   target: number;
   category?: string;
   skill_id?: string;
+}
+
+/**
+ * API-702: スキルギャップ取得APIのレスポンス型
+ */
+export interface SkillGapApiResponse {
+  success: boolean;
+  data?: {
+    skill_gap_data: {
+      skill_categories: Array<{
+        category_id: string;
+        category_name: string;
+        current_level: number;
+        target_level: number;
+        gap_score: number;
+        skills: Array<{
+          skill_id: string;
+          skill_name: string;
+          current_level: number;
+          target_level: number;
+          gap_score: number;
+          priority: 'HIGH' | 'MEDIUM' | 'LOW';
+        }>;
+      }>;
+      overall_gap_score: number;
+      priority_skills: Array<{
+        skill_id: string;
+        skill_name: string;
+        category_name: string;
+        gap_score: number;
+        recommended_actions: string[];
+      }>;
+      radar_chart_data: {
+        labels: string[];
+        current_levels: number[];
+        target_levels: number[];
+      };
+    };
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+  timestamp: string;
+}
+
+/**
+ * API-704: 上司コメント取得APIのレスポンス型
+ */
+export interface ManagerCommentApiResponse {
+  success: boolean;
+  data?: {
+    comments: Array<{
+      comment_id: string;
+      comment_type: 'CAREER_ADVICE' | 'SKILL_FEEDBACK' | 'GOAL_REVIEW' | 'GENERAL';
+      comment_text: string;
+      comment_date: string;
+      manager_name: string;
+      manager_position: string;
+      priority: 'HIGH' | 'MEDIUM' | 'LOW';
+      status: 'UNREAD' | 'READ' | 'ACKNOWLEDGED';
+      related_goal_id?: string;
+      related_skill_id?: string;
+    }>;
+    unread_count: number;
+    latest_comment_date?: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+  timestamp: string;
 }
 
 /**

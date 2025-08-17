@@ -102,14 +102,32 @@ export async function POST(request: NextRequest) {
         validationErrors.push({ row, field: 'evaluation_score', message: '評価スコアは1-5の範囲で入力してください' });
       }
 
-      // ステータス値チェック
-      const validStatuses = ['planning', 'active', 'completed', 'on_hold', 'cancelled'];
-      if (record.project_status && !validStatuses.includes(record.project_status)) {
-        validationErrors.push({ 
-          row, 
-          field: 'project_status', 
-          message: `プロジェクトステータスは次のいずれかを指定してください: ${validStatuses.join(', ')}` 
-        });
+      // ステータス値チェック（日本語の値も受け付けて変換）
+      const statusMapping: { [key: string]: string } = {
+        '計画中': 'planning',
+        '進行中': 'active',
+        '完了': 'completed',
+        '保留中': 'on_hold',
+        'キャンセル': 'cancelled',
+        'planning': 'planning',
+        'active': 'active',
+        'completed': 'completed',
+        'on_hold': 'on_hold',
+        'cancelled': 'cancelled'
+      };
+      
+      if (record.project_status) {
+        const mappedStatus = statusMapping[record.project_status];
+        if (!mappedStatus) {
+          validationErrors.push({ 
+            row, 
+            field: 'project_status', 
+            message: `プロジェクトステータスは次のいずれかを指定してください: planning(計画中), active(進行中), completed(完了), on_hold(保留中), cancelled(キャンセル)` 
+          });
+        } else {
+          // 日本語の値を英語に変換
+          record.project_status = mappedStatus;
+        }
       }
     });
 

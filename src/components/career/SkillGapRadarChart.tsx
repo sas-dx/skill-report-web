@@ -72,16 +72,38 @@ export function SkillGapRadarChart({ userId, className }: SkillGapRadarChartProp
 
       const data = await response.json();
 
-      if (data.success && data.data) {
+      if (data.success && data.data && data.data.skill_gap_data) {
         // APIレスポンスをチャート用データに変換
-        const chartData = data.data.skill_gaps.map((item: any) => ({
-          skill: item.skill_name,
-          current: item.current_level,
-          target: item.target_level,
-          gap: item.target_level - item.current_level,
-          category: item.skill_category,
-          priority: item.gap_level > 2 ? 'high' : item.gap_level > 1 ? 'medium' : 'low'
-        }));
+        const skillGapData = data.data.skill_gap_data;
+        const chartData: SkillGapData[] = [];
+        
+        // カテゴリごとのデータを展開
+        if (skillGapData.skill_categories) {
+          skillGapData.skill_categories.forEach((category: any) => {
+            if (category.skills && Array.isArray(category.skills)) {
+              category.skills.forEach((skill: any) => {
+                chartData.push({
+                  skill: skill.skill_name,
+                  current: skill.current_level,
+                  target: skill.target_level,
+                  gap: skill.gap_score / 25, // gap_scoreを0-4スケールに変換
+                  category: category.category_name,
+                  priority: skill.priority.toLowerCase() as 'high' | 'medium' | 'low'
+                });
+              });
+            } else {
+              // カテゴリレベルのデータ
+              chartData.push({
+                skill: category.category_name,
+                current: category.current_level,
+                target: category.target_level,
+                gap: category.gap_score / 25,
+                category: category.category_name,
+                priority: category.gap_score >= 75 ? 'high' : category.gap_score >= 50 ? 'medium' : 'low'
+              });
+            }
+          });
+        }
 
         setSkillGapData(chartData);
       } else {

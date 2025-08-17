@@ -49,7 +49,8 @@ interface Position {
 interface CareerInitResponse {
   success: true;
   data: {
-    career_goal: CareerGoalData;
+    career_goal: CareerGoalData;  // 互換性のため残す
+    career_goals: CareerGoalData[];  // 複数目標に対応
     skill_categories: SkillCategory[];
     positions: Position[];
   };
@@ -132,17 +133,19 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const year = searchParams.get('year') ? parseInt(searchParams.get('year')!) : new Date().getFullYear();
 
-    // 1. キャリアプランデータを取得
-    const careerPlan = await prisma.careerPlan.findFirst({
+    // 1. キャリアプランデータを取得（複数）
+    const careerPlans = await prisma.careerPlan.findMany({
       where: {
         employee_id: userId,
-        is_deleted: false,
-        plan_status: 'ACTIVE'
+        is_deleted: false
       },
       orderBy: {
         created_at: 'desc'
       }
     });
+    
+    // アクティブなプランを優先
+    const careerPlan = careerPlans.find(plan => plan.plan_status === 'ACTIVE') || careerPlans[0];
 
     // 2. スキルカテゴリデータを取得
     const skillCategories = await prisma.skillCategory.findMany({
@@ -170,7 +173,8 @@ export async function GET(
     const responseData: CareerInitResponse = {
       success: true,
       data: {
-        career_goal: transformCareerPlanToAPI(careerPlan),
+        career_goal: transformCareerPlanToAPI(careerPlan),  // 互換性のため残す
+        career_goals: careerPlans.map(transformCareerPlanToAPI),  // 複数目標を返す
         skill_categories: skillCategories.map(transformSkillCategoryToAPI),
         positions: positions.map(transformPositionToAPI)
       },

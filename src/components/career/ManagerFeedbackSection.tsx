@@ -67,7 +67,21 @@ export function ManagerFeedbackSection({ userId, className }: ManagerFeedbackSec
       const data = await response.json();
 
       if (data.success && data.data) {
-        setFeedbacks(data.data.manager_comments);
+        // APIレスポンスをコンポーネント用データに変換
+        const transformedFeedbacks = data.data.comments?.map((comment: any) => ({
+          feedback_id: comment.comment_id,
+          manager_name: comment.manager_name,
+          manager_position: comment.manager_position,
+          feedback_type: mapCommentTypeToFeedbackType(comment.comment_type),
+          feedback_content: comment.comment_text,
+          rating: undefined, // APIレスポンスに含まれていない場合
+          created_date: comment.comment_date,
+          is_read: comment.status === 'READ' || comment.status === 'ACKNOWLEDGED',
+          priority: mapPriorityLevel(comment.priority),
+          related_goal: comment.related_goal_id
+        })) || [];
+        
+        setFeedbacks(transformedFeedbacks);
       } else {
         throw new Error(data.error?.message || 'フィードバックデータの取得に失敗しました');
       }
@@ -83,6 +97,38 @@ export function ManagerFeedbackSection({ userId, className }: ManagerFeedbackSec
   useEffect(() => {
     fetchFeedbacks();
   }, [userId]);
+
+  /**
+   * APIのコメントタイプをフィードバックタイプに変換
+   */
+  const mapCommentTypeToFeedbackType = (commentType: string): ManagerFeedback['feedback_type'] => {
+    switch (commentType) {
+      case 'CAREER_ADVICE':
+        return 'advice';
+      case 'SKILL_FEEDBACK':
+        return 'review';
+      case 'GOAL_REVIEW':
+        return 'review';
+      case 'GENERAL':
+      default:
+        return 'advice';
+    }
+  };
+
+  /**
+   * APIの優先度を変換
+   */
+  const mapPriorityLevel = (priority: string): ManagerFeedback['priority'] => {
+    switch (priority) {
+      case 'HIGH':
+        return 'high';
+      case 'LOW':
+        return 'low';
+      case 'MEDIUM':
+      default:
+        return 'medium';
+    }
+  };
 
   /**
    * フィードバックタイプに応じたアイコンを取得

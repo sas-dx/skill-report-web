@@ -18,6 +18,8 @@ interface Skill {
   last_used?: string;
   certification?: string;
   notes?: string;
+  skillRecordId?: string;
+  skillItemId?: string;
 }
 
 interface SkillCategory {
@@ -37,9 +39,10 @@ export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [skillCategories, setSkillCategories] = useState<SkillCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'add' | 'edit'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [newSkill, setNewSkill] = useState<Partial<Skill>>({
     category: '',
     subcategory: '',
@@ -59,81 +62,93 @@ export default function SkillsPage() {
     setIsSidebarOpen(false);
   };
 
-  // モックデータの初期化
+  // API呼び出しによるデータ取得
   useEffect(() => {
     const loadData = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        setIsLoading(true);
+        
+        // 認証トークンを取得
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('認証トークンが見つかりません');
+        }
+        
+        // スキルカテゴリマスタをAPIから取得
+        const [categoriesResponse, skillsResponse] = await Promise.all([
+          fetch('/api/skill-categories', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            }
+          }),
+          fetch('/api/skills/me', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            }
+          })
+        ]);
 
-        const mockCategories: SkillCategory[] = [
-          {
-            id: '1',
-            name: 'プログラミング言語',
-            subcategories: [
-              { id: '1-1', name: 'フロントエンド', skills: ['JavaScript', 'TypeScript', 'React', 'Vue.js', 'Angular'] },
-              { id: '1-2', name: 'バックエンド', skills: ['Node.js', 'Python', 'Java', 'C#', 'Go'] },
-              { id: '1-3', name: 'モバイル', skills: ['React Native', 'Flutter', 'Swift', 'Kotlin'] }
-            ]
-          },
-          {
-            id: '2',
-            name: 'インフラ・クラウド',
-            subcategories: [
-              { id: '2-1', name: 'クラウドサービス', skills: ['AWS', 'Azure', 'GCP', 'Vercel', 'Netlify'] },
-              { id: '2-2', name: 'コンテナ', skills: ['Docker', 'Kubernetes', 'Docker Compose'] },
-              { id: '2-3', name: 'CI/CD', skills: ['GitHub Actions', 'Jenkins', 'GitLab CI'] }
-            ]
-          },
-          {
-            id: '3',
-            name: 'データベース',
-            subcategories: [
-              { id: '3-1', name: 'リレーショナル', skills: ['PostgreSQL', 'MySQL', 'SQL Server'] },
-              { id: '3-2', name: 'NoSQL', skills: ['MongoDB', 'Redis', 'DynamoDB'] }
-            ]
-          }
-        ];
+        if (!categoriesResponse.ok || !skillsResponse.ok) {
+          throw new Error('APIエラー');
+        }
 
-        const mockSkills: Skill[] = [
-          {
-            id: '1',
-            category: 'プログラミング言語',
-            subcategory: 'フロントエンド',
-            name: 'JavaScript',
-            level: 4,
-            experience_years: 5,
-            last_used: '2025-05-30',
-            certification: '',
-            notes: 'ES6+の機能を活用した開発経験豊富'
-          },
-          {
-            id: '2',
-            category: 'プログラミング言語',
-            subcategory: 'フロントエンド',
-            name: 'React',
-            level: 4,
-            experience_years: 3,
-            last_used: '2025-05-30',
-            certification: '',
-            notes: 'Hooks、Context API、Next.jsでの開発経験あり'
-          },
-          {
-            id: '3',
-            category: 'インフラ・クラウド',
-            subcategory: 'クラウドサービス',
-            name: 'AWS',
-            level: 3,
-            experience_years: 2,
-            last_used: '2025-05-15',
-            certification: 'AWS Solutions Architect Associate',
-            notes: 'EC2、S3、RDS、Lambda等の基本サービス利用経験'
-          }
-        ];
+        const categoriesData = await categoriesResponse.json();
+        const skillsData = await skillsResponse.json();
 
-        setSkillCategories(mockCategories);
-        setSkills(mockSkills);
+        if (categoriesData.success) {
+          console.log('Categories API response:', categoriesData.data);
+          
+          // APIレスポンスをフロントエンドの形式に変換
+          // flatCategoriesを使用（階層構造は含まれているため）
+          const categoriesSource = categoriesData.data.flatCategories || [];
+          
+          // flatCategoriesの場合、categoryIdとcategoryNameをid/nameにマッピング
+          const transformedCategories = categoriesSource.map((cat: any) => ({
+            id: cat.categoryId,  // APIからのcategoryIdをそのまま使用
+            name: cat.categoryName,  // APIからのcategoryNameをそのまま使用
+            subcategories: cat.children?.map((sub: any) => ({
+              id: sub.categoryId,
+              name: sub.categoryName,
+              skills: sub.skills || []
+            })) || []
+          }));
+          
+          console.log('Transformed categories:', transformedCategories);
+          setSkillCategories(transformedCategories);
+        }
+
+        if (skillsData.success) {
+          // APIレスポンスをフロントエンドの形式に変換
+          const transformedSkills: Skill[] = [];
+          skillsData.data.skills?.forEach((category: any) => {
+            category.skills?.forEach((skill: any) => {
+              transformedSkills.push({
+                id: skill.skillRecordId,
+                skillRecordId: skill.skillRecordId,
+                skillItemId: skill.skillItemId,
+                category: category.categoryName,
+                subcategory: skill.subcategory || '',
+                name: skill.skillName,
+                level: skill.skillLevel,
+                experience_years: skill.projectExperienceCount || 0,
+                last_used: skill.lastUsedDate || '',
+                certification: skill.certification || '',
+                notes: skill.evidenceDescription || ''
+              });
+            });
+          });
+          setSkills(transformedSkills);
+        } else {
+          // エラー時は空データを設定
+          setSkills([]);
+        }
       } catch (error) {
         console.error('データ読み込みエラー:', error);
+        // エラー時は空データを設定
+        setSkillCategories([]);
+        setSkills([]);
       } finally {
         setIsLoading(false);
       }
@@ -160,36 +175,144 @@ export default function SkillsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddSkill = () => {
-    if (!newSkill.name || !newSkill.category || !newSkill.subcategory) {
+  const handleAddSkill = async () => {
+    if (!newSkill.name || !newSkill.category) {
       alert('必須項目を入力してください');
       return;
     }
 
-    const skill: Skill = {
-      id: Date.now().toString(),
-      category: newSkill.category!,
-      subcategory: newSkill.subcategory!,
-      name: newSkill.name!,
-      level: newSkill.level || 1,
-      experience_years: newSkill.experience_years || 0,
-      last_used: newSkill.last_used || '',
-      certification: newSkill.certification || '',
-      notes: newSkill.notes || ''
-    };
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('認証トークンが見つかりません');
+        return;
+      }
 
-    setSkills([...skills, skill]);
-    setNewSkill({
-      category: '',
-      subcategory: '',
-      name: '',
-      level: 1,
-      experience_years: 0,
-      last_used: '',
-      certification: '',
-      notes: ''
-    });
-    setActiveTab('list');
+      // カテゴリ名からカテゴリIDを取得
+      const selectedCategoryObj = skillCategories.find(cat => cat.name === newSkill.category);
+      const categoryId = selectedCategoryObj?.id || newSkill.category;
+      
+      // スキルアイテムIDを生成（スキル名から）
+      const skillItemId = `SKILL_${newSkill.name.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_${Date.now()}`;
+      
+      const response = await fetch('/api/skills', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          skillItemId: skillItemId,  // 生成したスキルアイテムID
+          skillName: newSkill.name,  // スキル名も送信
+          skillCategoryId: categoryId,  // カテゴリIDを使用
+          skillLevel: newSkill.level || 1,
+          selfAssessment: newSkill.level || 1,
+          projectExperienceCount: newSkill.experience_years,
+          lastUsedDate: newSkill.last_used,
+          evidenceDescription: newSkill.notes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('スキルの追加に失敗しました');
+      }
+
+      // データを再取得
+      window.location.reload();
+    } catch (error) {
+      console.error('スキル追加エラー:', error);
+      alert('スキルの追加に失敗しました');
+    }
+  };
+
+  const handleEditSkill = (skill: Skill) => {
+    setEditingSkill(skill);
+    setActiveTab('edit');
+  };
+
+  const handleUpdateSkill = async () => {
+    if (!editingSkill) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('認証トークンが見つかりません');
+        return;
+      }
+
+      // デバッグ: editingSkillの内容を確認
+      console.log('Editing skill:', editingSkill);
+      console.log('skillRecordId:', editingSkill.skillRecordId);
+      console.log('experience_years:', editingSkill.experience_years);
+      console.log('last_used:', editingSkill.last_used);
+
+      if (!editingSkill.skillRecordId) {
+        alert('スキルIDが見つかりません。一覧を再読み込みしてください。');
+        window.location.reload();
+        return;
+      }
+
+      const requestBody = {
+        skillRecordId: editingSkill.skillRecordId || editingSkill.id,
+        skillLevel: editingSkill.level,
+        selfAssessment: editingSkill.level,
+        learningHours: editingSkill.experience_years ? editingSkill.experience_years * 200 : 0,
+        projectExperienceCount: editingSkill.experience_years || 0,
+        lastUsedDate: editingSkill.last_used || '',
+        evidenceDescription: editingSkill.notes || '',
+      };
+
+      console.log('Request body:', requestBody);
+
+      const response = await fetch('/api/skills', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error('スキルの更新に失敗しました');
+      }
+
+      window.location.reload();
+    } catch (error) {
+      console.error('スキル更新エラー:', error);
+      alert('スキルの更新に失敗しました');
+    }
+  };
+
+  const handleDeleteSkill = async (skillId: string) => {
+    if (!confirm('このスキルを削除してもよろしいですか？')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('認証トークンが見つかりません');
+        return;
+      }
+
+      const response = await fetch(`/api/skills?skillRecordId=${skillId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('スキルの削除に失敗しました');
+      }
+
+      window.location.reload();
+    } catch (error) {
+      console.error('スキル削除エラー:', error);
+      alert('スキルの削除に失敗しました');
+    }
   };
 
   if (isLoading) {
@@ -291,11 +414,15 @@ export default function SkillsPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">すべてのカテゴリ</option>
-                        {skillCategories.map(category => (
-                          <option key={category.id} value={category.name}>
-                            {category.name}
-                          </option>
-                        ))}
+                        {skillCategories.length > 0 ? (
+                          skillCategories.map(category => (
+                            <option key={category.id} value={category.name}>
+                              {category.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>カテゴリを読み込み中...</option>
+                        )}
                       </select>
                     </div>
                   </div>
@@ -348,10 +475,16 @@ export default function SkillsPage() {
                             {skill.last_used}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button className="text-blue-600 hover:text-blue-900 mr-3">
+                            <button 
+                              onClick={() => handleEditSkill(skill)}
+                              className="text-blue-600 hover:text-blue-900 mr-3"
+                            >
                               編集
                             </button>
-                            <button className="text-red-600 hover:text-red-900">
+                            <button 
+                              onClick={() => handleDeleteSkill(skill.skillRecordId || skill.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
                               削除
                             </button>
                           </td>
@@ -376,38 +509,33 @@ export default function SkillsPage() {
                     </label>
                     <select
                       value={newSkill.category}
-                      onChange={(e) => setNewSkill({...newSkill, category: e.target.value, subcategory: ''})}
+                      onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="">カテゴリを選択</option>
-                      {skillCategories.map(category => (
-                        <option key={category.id} value={category.name}>
-                          {category.name}
-                        </option>
-                      ))}
+                      {skillCategories.length > 0 ? (
+                        skillCategories.map(category => (
+                          <option key={category.id} value={category.name}>
+                            {category.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>カテゴリを読み込み中...</option>
+                      )}
                     </select>
                   </div>
 
-                  {/* サブカテゴリ */}
+                  {/* サブカテゴリ（オプション） */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      サブカテゴリ <span className="text-red-500">*</span>
+                      サブカテゴリ（任意）
                     </label>
-                    <select
+                    <Input
                       value={newSkill.subcategory}
                       onChange={(e) => setNewSkill({...newSkill, subcategory: e.target.value})}
+                      placeholder="例: Frontend, Backend など（任意）"
                       disabled={!newSkill.category}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50"
-                    >
-                      <option value="">サブカテゴリを選択</option>
-                      {skillCategories
-                        .find(cat => cat.name === newSkill.category)
-                        ?.subcategories.map(sub => (
-                          <option key={sub.id} value={sub.name}>
-                            {sub.name}
-                          </option>
-                        ))}
-                    </select>
+                    />
                   </div>
 
                   {/* スキル名 */}
@@ -504,6 +632,125 @@ export default function SkillsPage() {
                     variant="primary"
                   >
                     スキルを追加
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* スキル編集タブ */}
+            {activeTab === 'edit' && editingSkill && (
+              <div className="bg-white shadow rounded-lg p-6">
+                <h2 className="text-lg font-medium text-gray-900 mb-6">スキルを編集</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* スキル名（読み取り専用） */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      スキル名
+                    </label>
+                    <Input
+                      value={editingSkill.name}
+                      disabled
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  {/* カテゴリ（読み取り専用） */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      カテゴリ
+                    </label>
+                    <Input
+                      value={editingSkill.category}
+                      disabled
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  {/* レベル */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      レベル <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={editingSkill.level}
+                      onChange={(e) => setEditingSkill({...editingSkill, level: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value={1}>× - 未経験</option>
+                      <option value={2}>△ - 基礎レベル</option>
+                      <option value={3}>○ - 実務レベル</option>
+                      <option value={4}>◎ - エキスパート</option>
+                    </select>
+                  </div>
+
+                  {/* 経験年数 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      経験年数
+                    </label>
+                    <Input
+                      type="number"
+                      value={editingSkill.experience_years}
+                      onChange={(e) => setEditingSkill({...editingSkill, experience_years: parseInt(e.target.value)})}
+                      min={0}
+                    />
+                  </div>
+
+                  {/* 最終使用 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      最終使用
+                    </label>
+                    <Input
+                      type="date"
+                      value={editingSkill.last_used}
+                      onChange={(e) => setEditingSkill({...editingSkill, last_used: e.target.value})}
+                    />
+                  </div>
+
+                  {/* 資格・認定 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      関連資格・認定
+                    </label>
+                    <Input
+                      value={editingSkill.certification}
+                      onChange={(e) => setEditingSkill({...editingSkill, certification: e.target.value})}
+                      placeholder="例: AWS Solutions Architect Associate"
+                    />
+                  </div>
+
+                  {/* 備考 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      備考・詳細
+                    </label>
+                    <textarea
+                      value={editingSkill.notes}
+                      onChange={(e) => setEditingSkill({...editingSkill, notes: e.target.value})}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="スキルの詳細や特記事項を入力"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-3">
+                  <Button
+                    onClick={() => {
+                      setEditingSkill(null);
+                      setActiveTab('list');
+                    }}
+                    variant="secondary"
+                  >
+                    キャンセル
+                  </Button>
+                  <Button
+                    onClick={handleUpdateSkill}
+                    variant="primary"
+                  >
+                    更新する
                   </Button>
                 </div>
               </div>

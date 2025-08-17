@@ -7,7 +7,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 履歴系テーブル
+model Tenant {
+  tenant_id           String    @id @default(uuid())
+  tenant_code         String?   @unique
+  tenant_name         String?
+  tenant_name_en      String?
+  tenant_short_name   String?
+  tenant_type         String?
+  parent_tenant_id    String?
+  tenant_level        Int?
+  domain_name         String?   @unique
+  subdomain           String?   @unique
+  logo_url            String?
+  primary_color       String?
+  secondary_color     String?
+  timezone            String?
+  locale              String?
+  currency_code       String?
+  admin_email         String?
+  contact_email       String?
+  phone_number        String?
+  address             String?
+  postal_code         String?
+  country_code        String?
+  subscription_plan   String?
+  max_users           Int?
+  max_storage_gb      Int?
+  contract_start_date DateTime?
+  contract_end_date   DateTime?
+  status              String?
+  created_at          DateTime  @default(now())
+  is_deleted          Boolean   @default(false)
+  updated_at          DateTime  @updatedAt
+
+  @@map("MST_Tenant")
+}
+
+model TenantSettings {
+  id                   String    @id @default(uuid())
+  tenant_id            String
+  setting_category     String?
+  setting_key          String
+  setting_name         String?
+  setting_description  String?
+  data_type            String?
+  setting_value        String?
+  default_value        String?
+  validation_rules     String?
+  is_required          Boolean?
+  is_encrypted         Boolean?
+  is_system_managed    Boolean?
+  is_user_configurable Boolean?
+  display_order        Int?
+  effective_from       DateTime?
+  effective_until      DateTime?
+  last_modified_by     String?
+  created_at           DateTime  @default(now())
+  is_deleted           Boolean   @default(false)
+  updated_at           DateTime  @updatedAt
+
+  @@unique([tenant_id, setting_key])
+  @@map("MST_TenantSettings")
+}
+
 model AuditLog {
   id                String    @id
   user_id           String?
@@ -56,9 +118,9 @@ model NotificationLog {
   error_details         String?
   integration_config_id String?
   priority_level        String?
+  is_deleted            Boolean   @default(false)
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  is_deleted            Boolean   @default(false)
 
   @@map("HIS_NotificationLog")
 }
@@ -88,9 +150,9 @@ model TenantBilling {
   paid_date            DateTime?
   payment_method       String?
   notes                String?
+  is_deleted           Boolean   @default(false)
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
-  is_deleted           Boolean   @default(false)
 
   @@map("HIS_TenantBilling")
 }
@@ -123,7 +185,6 @@ model ReportGeneration {
   @@map("HIS_ReportGeneration")
 }
 
-// マスタ系テーブル
 model CareerPlan {
   career_plan_id          String    @id
   employee_id             String?
@@ -166,14 +227,14 @@ model CareerPlan {
   custom_fields           String?
   notes                   String?
   created_at              DateTime  @default(now())
-  updated_at              DateTime  @updatedAt
   is_deleted              Boolean   @default(false)
+  updated_at              DateTime  @updatedAt
 
   @@map("MST_CareerPlan")
 }
 
 model Certification {
-  certification_code     String    @id
+  certification_code     String   @id
   certification_name     String?
   certification_name_en  String?
   issuer                 String?
@@ -191,9 +252,9 @@ model Certification {
   skill_category_id      String?
   is_recommended         Boolean?
   is_active              Boolean?
-  created_at             DateTime  @default(now())
-  updated_at             DateTime  @updatedAt
-  is_deleted             Boolean   @default(false)
+  created_at             DateTime @default(now())
+  is_deleted             Boolean  @default(false)
+  updated_at             DateTime @updatedAt
 
   @@map("MST_Certification")
 }
@@ -242,8 +303,8 @@ model CertificationRequirement {
   review_date                   DateTime?
   notes                         String?
   created_at                    DateTime  @default(now())
-  updated_at                    DateTime  @updatedAt
   is_deleted                    Boolean   @default(false)
+  updated_at                    DateTime  @updatedAt
 
   @@map("MST_CertificationRequirement")
 }
@@ -268,14 +329,13 @@ model Department {
   sort_order            Int?
   description           String?
   created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
   is_deleted            Boolean   @default(false)
+  updated_at            DateTime  @updatedAt
 
   @@map("MST_Department")
 }
 
 model Employee {
-  id                String    @id
   employee_code     String    @unique
   full_name         String?
   full_name_kana    String?
@@ -291,14 +351,14 @@ model Employee {
   manager_id        String?
   employee_status   String?
   created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  id                String    @id
   is_deleted        Boolean   @default(false)
+  updated_at        DateTime  @updatedAt
 
   @@map("MST_Employee")
 }
 
 model EmployeeDepartment {
-  id                   String    @id
   employee_id          String
   department_id        String?
   assignment_type      String?
@@ -313,14 +373,14 @@ model EmployeeDepartment {
   approved_by          String?
   approved_at          DateTime?
   created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
+  id                   String    @id
   is_deleted           Boolean   @default(false)
+  updated_at           DateTime  @updatedAt
 
   @@map("MST_EmployeeDepartment")
 }
 
 model EmployeeJobType {
-  id                          String    @id
   employee_id                 String?
   job_type_id                 String?
   assignment_type             String?
@@ -362,14 +422,14 @@ model EmployeeJobType {
   approval_date               DateTime?
   notes                       String?
   created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt
+  id                          String    @id
   is_deleted                  Boolean   @default(false)
+  updated_at                  DateTime  @updatedAt
 
   @@map("MST_EmployeeJobType")
 }
 
 model EmployeePosition {
-  id                   String    @id
   employee_id          String
   position_id          String?
   appointment_type     String?
@@ -386,14 +446,15 @@ model EmployeePosition {
   performance_target   String?
   delegation_authority String?
   created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
+  id                   String    @id
   is_deleted           Boolean   @default(false)
+  updated_at           DateTime  @updatedAt
 
   @@map("MST_EmployeePosition")
 }
 
 model JobType {
-  job_type_code             String    @id
+  job_type_code             String   @id
   job_type_name             String?
   job_type_name_en          String?
   job_category              String?
@@ -410,15 +471,14 @@ model JobType {
   travel_frequency          String?
   sort_order                Int?
   is_active                 Boolean?
-  created_at                DateTime  @default(now())
-  updated_at                DateTime  @updatedAt
-  is_deleted                Boolean   @default(false)
+  created_at                DateTime @default(now())
+  is_deleted                Boolean  @default(false)
+  updated_at                DateTime @updatedAt
 
   @@map("MST_JobType")
 }
 
 model JobTypeSkill {
-  id                     String    @id
   job_type_id            String
   skill_item_id          String
   required_level         Int?
@@ -435,15 +495,15 @@ model JobTypeSkill {
   alternative_skills     String?
   prerequisite_skills    String?
   created_at             DateTime  @default(now())
-  updated_at             DateTime  @updatedAt
+  id                     String    @id
   is_deleted             Boolean   @default(false)
+  updated_at             DateTime  @updatedAt
 
   @@unique([job_type_id, skill_item_id])
   @@map("MST_JobTypeSkill")
 }
 
 model JobTypeSkillGrade {
-  id                         String    @id
   job_type_id                String
   skill_grade_id             String
   grade_requirement_type     String?
@@ -463,15 +523,16 @@ model JobTypeSkillGrade {
   next_grade_path            String?
   evaluation_frequency       String?
   created_at                 DateTime  @default(now())
-  updated_at                 DateTime  @updatedAt
+  id                         String    @id
   is_deleted                 Boolean   @default(false)
+  updated_at                 DateTime  @updatedAt
 
   @@unique([job_type_id, skill_grade_id])
   @@map("MST_JobTypeSkillGrade")
 }
 
 model NotificationSettings {
-  id                String    @id
+  id                String   @id
   tenant_id         String
   setting_key       String
   setting_name      String?
@@ -484,16 +545,16 @@ model NotificationSettings {
   channel_config    String?
   is_enabled        Boolean?
   priority_level    String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  is_deleted        Boolean   @default(false)
+  created_at        DateTime @default(now())
+  is_deleted        Boolean  @default(false)
+  updated_at        DateTime @updatedAt
 
   @@unique([tenant_id, setting_key])
   @@map("MST_NotificationSettings")
 }
 
 model NotificationTemplate {
-  id                String    @id
+  id                String   @id
   tenant_id         String
   template_key      String
   template_name     String?
@@ -507,9 +568,9 @@ model NotificationTemplate {
   is_default        Boolean?
   is_active         Boolean?
   version           String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  is_deleted        Boolean   @default(false)
+  created_at        DateTime @default(now())
+  is_deleted        Boolean  @default(false)
+  updated_at        DateTime @updatedAt
 
   @@unique([tenant_id, template_key, notification_type, language_code])
   @@map("MST_NotificationTemplate")
@@ -536,14 +597,14 @@ model Permission {
   sort_order            Int?
   description           String?
   created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
   is_deleted            Boolean   @default(false)
+  updated_at            DateTime  @updatedAt
 
   @@map("MST_Permission")
 }
 
 model Position {
-  position_code       String    @id
+  position_code       String   @id
   position_name       String?
   position_name_short String?
   position_level      Int?
@@ -561,15 +622,15 @@ model Position {
   position_status     String?
   sort_order          Int?
   description         String?
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
-  is_deleted          Boolean   @default(false)
+  created_at          DateTime @default(now())
+  is_deleted          Boolean  @default(false)
+  updated_at          DateTime @updatedAt
 
   @@map("MST_Position")
 }
 
 model ReportTemplate {
-  id                 String    @id
+  id                 String   @id
   tenant_id          String
   template_key       String
   template_name      String?
@@ -587,9 +648,9 @@ model ReportTemplate {
   is_active          Boolean?
   version            String?
   preview_image_url  String?
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
-  is_deleted         Boolean   @default(false)
+  created_at         DateTime @default(now())
+  is_deleted         Boolean  @default(false)
+  updated_at         DateTime @updatedAt
 
   @@unique([tenant_id, template_key, language_code])
   @@map("MST_ReportTemplate")
@@ -613,54 +674,54 @@ model Role {
   sort_order             Int?
   description            String?
   created_at             DateTime  @default(now())
-  updated_at             DateTime  @updatedAt
   is_deleted             Boolean   @default(false)
+  updated_at             DateTime  @updatedAt
 
   @@map("MST_Role")
 }
 
 model RolePermission {
-  id                String    @id
+  id                 String    @id
   role_permission_id String?
-  role_id           String?
-  permission_id     String?
-  is_active         Boolean?
-  granted_at        DateTime?
-  granted_by        String?
-  revoked_at        DateTime?
-  revoked_by        String?
-  notes             String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  is_deleted        Boolean   @default(false)
+  role_id            String?
+  permission_id      String?
+  is_active          Boolean?
+  granted_at         DateTime?
+  granted_by         String?
+  revoked_at         DateTime?
+  revoked_by         String?
+  notes              String?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  is_deleted         Boolean   @default(false)
 
   @@map("MST_RolePermission")
 }
 
 model Skill {
-  id                    String    @id
-  skill_name            String?
-  skill_name_en         String?
-  category_id           String?
-  skill_type            String?
-  difficulty_level      Int?
-  description           String?
-  evaluation_criteria   String?
+  id                         String    @id
+  skill_name                 String?
+  skill_name_en              String?
+  category_id                String?
+  skill_type                 String?
+  difficulty_level           Int?
+  description                String?
+  evaluation_criteria        String?
   required_experience_months Int?
-  related_skills        String?
-  prerequisite_skills   String?
-  certification_info    String?
-  learning_resources    String?
-  market_demand         String?
-  technology_trend      String?
-  is_core_skill         Boolean?
-  display_order         Int?
-  is_active             Boolean?
-  effective_from        DateTime?
-  effective_to          DateTime?
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  is_deleted            Boolean   @default(false)
+  related_skills             String?
+  prerequisite_skills        String?
+  certification_info         String?
+  learning_resources         String?
+  market_demand              String?
+  technology_trend           String?
+  is_core_skill              Boolean?
+  display_order              Int?
+  is_active                  Boolean?
+  effective_from             DateTime?
+  effective_to               DateTime?
+  created_at                 DateTime  @default(now())
+  updated_at                 DateTime  @updatedAt
+  is_deleted                 Boolean   @default(false)
 
   @@map("MST_Skill")
 }
@@ -688,17 +749,17 @@ model SkillCategory {
   effective_to        DateTime?
   description         String?
   created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
   is_deleted          Boolean   @default(false)
+  updated_at          DateTime  @updatedAt
 
   @@map("MST_SkillCategory")
 }
 
 model SkillGrade {
-  grade_code                 String    @id
+  grade_code                 String   @id
   grade_name                 String?
   grade_name_short           String?
-  grade_level                Int?      @unique
+  grade_level                Int?     @unique
   description                String?
   evaluation_criteria        String?
   required_experience_months Int?
@@ -713,15 +774,14 @@ model SkillGrade {
   color_code                 String?
   sort_order                 Int?
   is_active                  Boolean?
-  created_at                 DateTime  @default(now())
-  updated_at                 DateTime  @updatedAt
-  is_deleted                 Boolean   @default(false)
+  created_at                 DateTime @default(now())
+  is_deleted                 Boolean  @default(false)
+  updated_at                 DateTime @updatedAt
 
   @@map("MST_SkillGrade")
 }
 
 model SkillGradeRequirement {
-  id                        String    @id
   skill_grade_id            String
   requirement_category      String?
   requirement_name          String?
@@ -742,14 +802,15 @@ model SkillGradeRequirement {
   expiry_date               DateTime?
   revision_notes            String?
   created_at                DateTime  @default(now())
-  updated_at                DateTime  @updatedAt
+  id                        String    @id
   is_deleted                Boolean   @default(false)
+  updated_at                DateTime  @updatedAt
 
   @@map("MST_SkillGradeRequirement")
 }
 
 model SkillHierarchy {
-  skill_id        String    @id
+  skill_id        String   @id
   parent_skill_id String?
   hierarchy_level Int?
   skill_path      String?
@@ -758,29 +819,29 @@ model SkillHierarchy {
   skill_category  String?
   description     String?
   is_active       Boolean?
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  is_deleted      Boolean   @default(false)
+  created_at      DateTime @default(now())
+  is_deleted      Boolean  @default(false)
+  updated_at      DateTime @updatedAt
 
   @@map("MST_SkillHierarchy")
 }
 
 model SkillItem {
-  skill_code        String    @id
+  skill_code        String   @id
   skill_name        String?
   skill_category_id String?
   skill_type        String?
   difficulty_level  Int?
   importance_level  Int?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  is_deleted        Boolean   @default(false)
+  created_at        DateTime @default(now())
+  is_deleted        Boolean  @default(false)
+  updated_at        DateTime @updatedAt
 
   @@map("MST_SkillItem")
 }
 
 model SystemConfig {
-  config_key           String    @id
+  config_key           String   @id
   config_name          String?
   config_value         String?
   config_type          String?
@@ -798,74 +859,11 @@ model SystemConfig {
   last_modified_reason String?
   sort_order           Int?
   is_active            Boolean?
-  created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
-  is_deleted           Boolean   @default(false)
+  created_at           DateTime @default(now())
+  is_deleted           Boolean  @default(false)
+  updated_at           DateTime @updatedAt
 
   @@map("MST_SystemConfig")
-}
-
-model Tenant {
-  tenant_id           String    @id
-  tenant_code         String?   @unique
-  tenant_name         String?
-  tenant_name_en      String?
-  tenant_short_name   String?
-  tenant_type         String?
-  parent_tenant_id    String?
-  tenant_level        Int?
-  domain_name         String?   @unique
-  subdomain           String?   @unique
-  logo_url            String?
-  primary_color       String?
-  secondary_color     String?
-  timezone            String?
-  locale              String?
-  currency_code       String?
-  admin_email         String?
-  contact_email       String?
-  phone_number        String?
-  address             String?
-  postal_code         String?
-  country_code        String?
-  subscription_plan   String?
-  max_users           Int?
-  max_storage_gb      Int?
-  status              String?
-  contract_start_date DateTime?
-  contract_end_date   DateTime?
-  is_deleted          Boolean   @default(false)
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
-
-  @@map("MST_Tenant")
-}
-
-model TenantSettings {
-  id                   String    @id
-  tenant_id            String
-  setting_category     String?
-  setting_key          String
-  setting_name         String?
-  setting_description  String?
-  data_type            String?
-  setting_value        String?
-  default_value        String?
-  validation_rules     String?
-  is_required          Boolean?
-  is_encrypted         Boolean?
-  is_system_managed    Boolean?
-  is_user_configurable Boolean?
-  display_order        Int?
-  effective_from       DateTime?
-  effective_until      DateTime?
-  last_modified_by     String?
-  created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
-  is_deleted           Boolean   @default(false)
-
-  @@unique([tenant_id, setting_key])
-  @@map("MST_TenantSettings")
 }
 
 model TrainingProgram {
@@ -913,8 +911,8 @@ model TrainingProgram {
   revision_notes          String?
   tags                    String?
   created_at              DateTime  @default(now())
-  updated_at              DateTime  @updatedAt
   is_deleted              Boolean   @default(false)
+  updated_at              DateTime  @updatedAt
 
   @@map("MST_TrainingProgram")
 }
@@ -940,14 +938,13 @@ model UserAuth {
   external_auth_provider    String?
   external_auth_id          String?
   created_at                DateTime  @default(now())
-  updated_at                DateTime  @updatedAt
   is_deleted                Boolean   @default(false)
+  updated_at                DateTime  @updatedAt
 
   @@map("MST_UserAuth")
 }
 
 model UserRole {
-  id                        String    @id
   user_id                   String
   role_id                   String
   assignment_type           String?
@@ -969,16 +966,15 @@ model UserRole {
   last_used_at              DateTime?
   usage_count               Int?
   created_at                DateTime  @default(now())
-  updated_at                DateTime  @updatedAt
+  id                        String    @id
   is_deleted                Boolean   @default(false)
+  updated_at                DateTime  @updatedAt
 
   @@unique([user_id, role_id])
   @@map("MST_UserRole")
 }
 
-// システム系テーブル
 model BackupHistory {
-  id                    String    @id
   backup_id             String?   @unique
   backup_type           String?
   backup_scope          String?
@@ -998,9 +994,10 @@ model BackupHistory {
   error_message         String?
   recovery_tested       Boolean?
   recovery_test_date    DateTime?
+  id                    String    @id
+  is_deleted            Boolean   @default(false)
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  is_deleted            Boolean   @default(false)
 
   @@map("SYS_BackupHistory")
 }
@@ -1024,16 +1021,15 @@ model IntegrationConfig {
   health_check_url      String?
   last_health_check     DateTime?
   health_status         String?
+  is_deleted            Boolean   @default(false)
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  is_deleted            Boolean   @default(false)
 
   @@unique([tenant_id, integration_key])
   @@map("SYS_IntegrationConfig")
 }
 
 model MasterData {
-  id                String    @id
   master_key        String?   @unique
   master_category   String?
   master_name       String?
@@ -1050,9 +1046,10 @@ model MasterData {
   last_modified_by  String?
   last_modified_at  DateTime?
   version           Int?
+  id                String    @id
+  is_deleted        Boolean   @default(false)
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
-  is_deleted        Boolean   @default(false)
 
   @@map("SYS_MasterData")
 }
@@ -1073,15 +1070,14 @@ model SkillIndex {
   search_count     Int?
   last_searched_at DateTime?
   index_updated_at DateTime?
+  is_deleted       Boolean   @default(false)
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
-  is_deleted       Boolean   @default(false)
 
   @@map("SYS_SkillIndex")
 }
 
 model SkillMatrix {
-  id                 String    @id
   employee_id        String?
   skill_id           String?
   skill_level        Int?
@@ -1093,16 +1089,16 @@ model SkillMatrix {
   notes              String?
   next_target_level  Int?
   target_date        DateTime?
+  id                 String    @id
+  is_deleted         Boolean   @default(false)
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
-  is_deleted         Boolean   @default(false)
 
   @@unique([employee_id, skill_id])
   @@map("SYS_SkillMatrix")
 }
 
 model SystemLog {
-  id              String    @id
   log_level       String?
   log_category    String?
   message         String?
@@ -1120,15 +1116,15 @@ model SystemLog {
   component_name  String?
   thread_name     String?
   server_name     String?
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  is_deleted      Boolean   @default(false)
+  id              String   @id
+  is_deleted      Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   @@map("SYS_SystemLog")
 }
 
 model TenantUsage {
-  id                    String    @id
   usage_date            DateTime?
   tenant_id             String?
   active_users          Int?
@@ -1150,9 +1146,10 @@ model TenantUsage {
   uptime_percentage     Decimal?
   billing_amount        Decimal?
   collection_timestamp  DateTime?
+  id                    String    @id
+  is_deleted            Boolean   @default(false)
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  is_deleted            Boolean   @default(false)
 
   @@unique([usage_date, tenant_id])
   @@map("SYS_TenantUsage")
@@ -1175,16 +1172,14 @@ model TokenStore {
   is_revoked         Boolean?
   revoked_at         DateTime?
   revoked_reason     String?
+  is_deleted         Boolean   @default(false)
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
-  is_deleted         Boolean   @default(false)
 
   @@map("SYS_TokenStore")
 }
 
-// トランザクション系テーブル
 model EmployeeSkillGrade {
-  id                   String    @id
   employee_id          String?
   job_type_id          String?
   skill_grade          String?
@@ -1196,18 +1191,18 @@ model EmployeeSkillGrade {
   evaluation_comment   String?
   certification_flag   Boolean?
   next_evaluation_date DateTime?
+  id                   String    @id
+  is_deleted           Boolean   @default(false)
   tenant_id            String
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   created_by           String
   updated_by           String
-  is_deleted           Boolean   @default(false)
 
   @@map("TRN_EmployeeSkillGrade")
 }
 
 model GoalProgress {
-  id                     String    @id
   goal_id                String?   @unique
   employee_id            String?
   goal_title             String?
@@ -1238,18 +1233,18 @@ model GoalProgress {
   support_needed         String?
   last_updated_at        DateTime?
   next_review_date       DateTime?
+  id                     String    @id
+  is_deleted             Boolean   @default(false)
   tenant_id              String
   created_at             DateTime  @default(now())
   updated_at             DateTime  @updatedAt
   created_by             String
   updated_by             String
-  is_deleted             Boolean   @default(false)
 
   @@map("TRN_GoalProgress")
 }
 
 model Notification {
-  id                    String    @id
   notification_id       String?   @unique
   recipient_id          String?
   sender_id             String?
@@ -1284,18 +1279,18 @@ model Notification {
   device_type           String?
   is_bulk_notification  Boolean?
   personalization_data  String?
+  id                    String    @id
+  is_deleted            Boolean   @default(false)
   tenant_id             String
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
   created_by            String
   updated_by            String
-  is_deleted            Boolean   @default(false)
 
   @@map("TRN_Notification")
 }
 
 model PDU {
-  id                   String    @id
   pdu_id               String?   @unique
   employee_id          String?
   certification_id     String?
@@ -1329,18 +1324,18 @@ model PDU {
   recurrence_pattern   String?
   related_training_id  String?
   related_project_id   String?
+  id                   String    @id
+  is_deleted           Boolean   @default(false)
   tenant_id            String
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   created_by           String
   updated_by           String
-  is_deleted           Boolean   @default(false)
 
   @@map("TRN_PDU")
 }
 
 model ProjectRecord {
-  id                  String    @id
   project_record_id   String?   @unique
   employee_id         String?
   project_name        String?
@@ -1365,18 +1360,18 @@ model ProjectRecord {
   evaluation_comment  String?
   is_confidential     Boolean?
   is_public_reference Boolean?
+  id                  String    @id
+  is_deleted          Boolean   @default(false)
   tenant_id           String
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
   created_by          String
   updated_by          String
-  is_deleted          Boolean   @default(false)
 
   @@map("TRN_ProjectRecord")
 }
 
 model SkillEvidence {
-  id                       String    @id
   evidence_id              String?   @unique
   employee_id              String?
   skill_id                 String?
@@ -1412,18 +1407,18 @@ model SkillEvidence {
   is_public                Boolean?
   is_portfolio_item        Boolean?
   tags                     String?
+  id                       String    @id
+  is_deleted               Boolean   @default(false)
   tenant_id                String
   created_at               DateTime  @default(now())
   updated_at               DateTime  @updatedAt
   created_by               String
   updated_by               String
-  is_deleted               Boolean   @default(false)
 
   @@map("TRN_SkillEvidence")
 }
 
 model SkillRecord {
-  id                       String    @id
   employee_id              String?
   skill_item_id            String?
   skill_level              Int?
@@ -1440,19 +1435,19 @@ model SkillRecord {
   skill_status             String?
   learning_hours           Int?
   project_experience_count Int?
+  id                       String    @id
+  is_deleted               Boolean   @default(false)
   tenant_id                String
   created_at               DateTime  @default(now())
   updated_at               DateTime  @updatedAt
   created_by               String
   updated_by               String
-  is_deleted               Boolean   @default(false)
 
   @@unique([employee_id, skill_item_id])
   @@map("TRN_SkillRecord")
 }
 
 model TrainingHistory {
-  id                   String    @id
   training_history_id  String?   @unique
   employee_id          String?
   training_program_id  String?
@@ -1484,19 +1479,18 @@ model TrainingHistory {
   follow_up_date       DateTime?
   manager_approval     Boolean?
   approved_by          String?
+  id                   String    @id
+  is_deleted           Boolean   @default(false)
   tenant_id            String
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
   created_by           String
   updated_by           String
-  is_deleted           Boolean   @default(false)
 
   @@map("TRN_TrainingHistory")
 }
 
-// ワーク系テーブル
 model BatchJobLog {
-  id                    String    @id
   job_id                String?   @unique
   job_name              String?
   job_type              String?
@@ -1514,9 +1508,10 @@ model BatchJobLog {
   progress_percentage   Decimal?
   execution_environment String?
   job_parameters        String?
+  id                    String    @id
+  is_deleted            Boolean   @default(false)
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  is_deleted            Boolean   @default(false)
 
   @@map("WRK_BatchJobLog")
 }

@@ -25,129 +25,250 @@ interface GeneratedReport {
 }
 
 export function ReportContent() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>([]);
   const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
   const [activeTab, setActiveTab] = useState<'templates' | 'history'>('templates');
+  const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
-  // モックデータの初期化
+  // データの初期化
   useEffect(() => {
-    const mockTemplates: ReportTemplate[] = [
-      {
-        id: '1',
-        name: 'スキル一覧レポート',
-        description: '全社員のスキル情報を一覧で出力',
-        category: 'スキル管理',
-        format: 'excel',
-        icon: '📊'
-      },
-      {
-        id: '2',
-        name: '個人スキル報告書',
-        description: '個人のスキル詳細情報をPDF形式で出力',
-        category: 'スキル管理',
-        format: 'pdf',
-        icon: '📄'
-      },
-      {
-        id: '3',
-        name: '研修実績レポート',
-        description: '研修参加実績と効果測定結果',
-        category: '研修管理',
-        format: 'excel',
-        icon: '🎓'
-      },
-      {
-        id: '4',
-        name: 'キャリア目標進捗レポート',
-        description: '部門別キャリア目標の進捗状況',
-        category: 'キャリア管理',
-        format: 'excel',
-        icon: '🎯'
-      },
-      {
-        id: '5',
-        name: '作業実績サマリー',
-        description: 'プロジェクト別作業実績の集計',
-        category: '作業管理',
-        format: 'csv',
-        icon: '📈'
-      },
-      {
-        id: '6',
-        name: '組織スキルマップ',
-        description: '組織全体のスキル分布状況',
-        category: '分析',
-        format: 'pdf',
-        icon: '🗺️'
-      }
-    ];
-
-    const mockGeneratedReports: GeneratedReport[] = [
-      {
-        id: '1',
-        name: 'スキル一覧レポート_2025年5月',
-        generatedAt: '2025-05-30 14:30',
-        format: 'Excel',
-        size: '2.3MB',
-        status: 'completed',
-        downloadUrl: '/downloads/skill-report-202505.xlsx'
-      },
-      {
-        id: '2',
-        name: '研修実績レポート_Q1',
-        generatedAt: '2025-05-28 09:15',
-        format: 'Excel',
-        size: '1.8MB',
-        status: 'completed',
-        downloadUrl: '/downloads/training-report-q1.xlsx'
-      },
-      {
-        id: '3',
-        name: '組織スキルマップ_2025年度',
-        generatedAt: '2025-05-25 16:45',
-        format: 'PDF',
-        size: '5.2MB',
-        status: 'completed',
-        downloadUrl: '/downloads/skill-map-2025.pdf'
-      }
-    ];
-
-    setReportTemplates(mockTemplates);
-    setGeneratedReports(mockGeneratedReports);
+    loadData();
   }, []);
 
-  const handleGenerateReport = async (templateId: string) => {
+  // 通知の自動非表示
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000); // 5秒後に自動で非表示
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const loadData = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      // TODO: 実際のレポート生成処理を実装
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 模擬的な処理時間
-      
-      // 生成完了後の処理
-      const template = reportTemplates.find(t => t.id === templateId);
-      if (template) {
-        const newReport: GeneratedReport = {
-          id: Date.now().toString(),
-          name: `${template.name}_${new Date().toLocaleDateString('ja-JP')}`,
-          generatedAt: new Date().toLocaleString('ja-JP'),
-          format: template.format.toUpperCase(),
-          size: '1.5MB',
-          status: 'completed',
-          downloadUrl: `/downloads/report-${Date.now()}.${template.format}`
-        };
-        setGeneratedReports(prev => [newReport, ...prev]);
-      }
+      await Promise.all([
+        loadReportTemplates(),
+        loadGeneratedReports()
+      ]);
     } catch (error) {
-      console.error('レポート生成エラー:', error);
+      console.error('データ読み込みエラー:', error);
+      setError('データの読み込みに失敗しました。ページを再読み込みしてください。');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const loadReportTemplates = async () => {
+    try {
+      const tenant = localStorage.getItem('tenant');
+      const tenantData = tenant ? JSON.parse(tenant) : null;
+      
+      const response = await fetch('/api/reports/templates', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'x-tenant-id': tenantData?.id || ''
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success && result.data?.templates) {
+        const formattedTemplates = result.data.templates.map((template: any) => ({
+          id: template.id,
+          name: template.templateName,
+          description: template.description,
+          category: template.category,
+          format: template.format,
+          icon: getCategoryIcon(template.category)
+        }));
+        setReportTemplates(formattedTemplates);
+      }
+    } catch (error) {
+      console.error('レポートテンプレート読み込みエラー:', error);
+    }
+  };
+
+  const loadGeneratedReports = async () => {
+    try {
+      const tenant = localStorage.getItem('tenant');
+      const tenantData = tenant ? JSON.parse(tenant) : null;
+      
+      const response = await fetch('/api/reports/history', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'x-tenant-id': tenantData?.id || ''
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success && result.data?.reports) {
+        const formattedReports = result.data.reports.map((report: any) => ({
+          id: report.id,
+          name: report.title,
+          generatedAt: report.completedAt ? new Date(report.completedAt).toLocaleString('ja-JP') : '処理中',
+          format: report.format.toUpperCase(),
+          size: formatFileSize(report.fileSize),
+          status: mapStatus(report.status),
+          downloadUrl: report.status === 'COMPLETED' ? `/api/reports/${report.id}/download` : undefined
+        }));
+        setGeneratedReports(formattedReports);
+      }
+    } catch (error) {
+      console.error('生成レポート履歴読み込みエラー:', error);
+    }
+  };
+
+  const getCategoryIcon = (category: string): string => {
+    const iconMap: { [key: string]: string } = {
+      'スキル管理': '📊',
+      '研修管理': '🎓',
+      'キャリア管理': '🎯',
+      '作業管理': '📈',
+      '分析': '🗺️'
+    };
+    return iconMap[category] || '📄';
+  };
+
+  const formatFileSize = (bytes: number | null): string => {
+    if (!bytes) return '';
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const mapStatus = (status: string): 'completed' | 'generating' | 'failed' => {
+    switch (status) {
+      case 'COMPLETED': return 'completed';
+      case 'PENDING':
+      case 'PROCESSING': return 'generating';
+      case 'FAILED':
+      case 'ERROR': return 'failed';
+      default: return 'generating';
+    }
+  };
+
+  const handleGenerateReport = async (templateId: string) => {
+    try {
+      const template = reportTemplates.find(t => t.id === templateId);
+      if (!template) {
+        throw new Error('テンプレートが見つかりません');
+      }
+
+      const tenant = localStorage.getItem('tenant');
+      const tenantData = tenant ? JSON.parse(tenant) : null;
+      
+      const response = await fetch('/api/reports/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'x-tenant-id': tenantData?.id || ''
+        },
+        body: JSON.stringify({
+          templateId,
+          reportTitle: `${template.name}_${new Date().toLocaleDateString('ja-JP')}`,
+          parameters: {
+            // デフォルトパラメータ（必要に応じて調整）
+            startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0]
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // 生成リクエスト成功の通知
+        setNotification({
+          message: 'レポート生成リクエストを受け付けました。生成が完了次第、履歴に表示されます。',
+          type: 'success'
+        });
+        
+        // 履歴を再読み込み
+        await loadGeneratedReports();
+      } else {
+        throw new Error(result.error?.message || 'レポート生成に失敗しました');
+      }
+    } catch (error) {
+      console.error('レポート生成エラー:', error);
+      setNotification({
+        message: 'レポート生成に失敗しました。しばらく時間をおいて再度お試しください。',
+        type: 'error'
+      });
+    }
+  };
+
   const handleDownload = (report: GeneratedReport) => {
-    if (report.downloadUrl) {
-      // TODO: 実際のダウンロード処理を実装
-      console.log('ダウンロード:', report.downloadUrl);
+    if (report.downloadUrl && report.status === 'completed') {
+      // ダウンロードリンクを開く
+      const link = document.createElement('a');
+      link.href = report.downloadUrl;
+      link.download = report.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm('このレポートを削除しますか？この操作は取り消せません。')) {
+      return;
+    }
+
+    try {
+      const tenant = localStorage.getItem('tenant');
+      const tenantData = tenant ? JSON.parse(tenant) : null;
+      
+      const response = await fetch(`/api/reports/${reportId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'x-tenant-id': tenantData?.id || ''
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setNotification({
+          message: 'レポートを削除しました。',
+          type: 'success'
+        });
+        // 履歴を再読み込み
+        await loadGeneratedReports();
+      } else {
+        throw new Error(result.error?.message || 'レポート削除に失敗しました');
+      }
+    } catch (error) {
+      console.error('レポート削除エラー:', error);
+      setNotification({
+        message: 'レポート削除に失敗しました。',
+        type: 'error'
+      });
     }
   };
 
@@ -191,6 +312,40 @@ export function ReportContent() {
         <p className="text-gray-600 mt-1">各種レポートの生成とダウンロードを行います</p>
       </div>
 
+      {/* 通知表示 */}
+      {notification && (
+        <div className={`mb-6 p-4 rounded-md ${
+          notification.type === 'success' 
+            ? 'bg-green-100 border border-green-400 text-green-700' 
+            : 'bg-red-100 border border-red-400 text-red-700'
+        }`}>
+          <div className="flex justify-between items-center">
+            <span>{notification.message}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-3 text-lg font-semibold leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* エラー表示 */}
+      {error && (
+        <div className="mb-6 p-4 rounded-md bg-red-100 border border-red-400 text-red-700">
+          <div className="flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="ml-3 text-lg font-semibold leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* タブナビゲーション */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
@@ -222,112 +377,134 @@ export function ReportContent() {
       {/* レポートテンプレートタブ */}
       {activeTab === 'templates' && (
         <div>
-          {/* カテゴリ別グリッド表示 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reportTemplates.map((template) => (
-              <div key={template.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <span className="text-2xl mr-3">{template.icon}</span>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
-                      <p className="text-sm text-gray-500">{template.category}</p>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Spinner size="lg" />
+              <p className="text-gray-600 mt-4">テンプレートを読み込み中...</p>
+            </div>
+          ) : reportTemplates.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">レポートテンプレートがありません</h3>
+              <p className="text-gray-500">利用可能なレポートテンプレートがありません。</p>
+            </div>
+          ) : (
+            /* カテゴリ別グリッド表示 */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reportTemplates.map((template) => (
+                <div key={template.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center">
+                      <span className="text-2xl mr-3">{template.icon}</span>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
+                        <p className="text-sm text-gray-500">{template.category}</p>
+                      </div>
                     </div>
+                    {getFormatBadge(template.format)}
                   </div>
-                  {getFormatBadge(template.format)}
+                  
+                  <p className="text-gray-600 text-sm mb-4">{template.description}</p>
+                  
+                  <Button
+                    onClick={() => handleGenerateReport(template.id)}
+                    variant="primary"
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    レポート生成
+                  </Button>
                 </div>
-                
-                <p className="text-gray-600 text-sm mb-4">{template.description}</p>
-                
-                <Button
-                  onClick={() => handleGenerateReport(template.id)}
-                  variant="primary"
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? '生成中...' : 'レポート生成'}
-                </Button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* 生成履歴タブ */}
       {activeTab === 'history' && (
         <div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      レポート名
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      生成日時
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      形式
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      サイズ
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ステータス
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      操作
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {generatedReports.map((report) => (
-                    <tr key={report.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{report.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {report.generatedAt}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getFormatBadge(report.format)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {report.size}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(report.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {report.status === 'completed' && (
-                          <button
-                            onClick={() => handleDownload(report)}
-                            className="text-blue-600 hover:text-blue-900 mr-3"
-                          >
-                            ダウンロード
-                          </button>
-                        )}
-                        <button className="text-red-600 hover:text-red-900">削除</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Spinner size="lg" />
+              <p className="text-gray-600 mt-4">履歴を読み込み中...</p>
             </div>
-          </div>
+          ) : generatedReports.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📂</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">生成履歴がありません</h3>
+              <p className="text-gray-500">まだレポートが生成されていません。テンプレートからレポートを生成してください。</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        レポート名
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        生成日時
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        形式
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        サイズ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ステータス
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        操作
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {generatedReports.map((report) => (
+                      <tr key={report.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{report.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {report.generatedAt}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getFormatBadge(report.format)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {report.size}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(report.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {report.status === 'completed' && (
+                            <button
+                              onClick={() => handleDownload(report)}
+                              className="text-blue-600 hover:text-blue-900 mr-3"
+                            >
+                              ダウンロード
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => handleDeleteReport(report.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            削除
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* ローディング表示 */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
-            <Spinner size="md" />
-            <span className="text-gray-700">レポートを生成しています...</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

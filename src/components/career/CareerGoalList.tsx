@@ -29,7 +29,7 @@ import {
  * キャリア目標一覧のプロパティ
  */
 interface CareerGoalListProps {
-  careerGoal: CareerGoalData | null;
+  careerGoals: CareerGoalData[];
   onEdit: (goal: CareerGoal) => void;
   onDelete: (goal: CareerGoal) => void;
   isLoading?: boolean;
@@ -86,7 +86,7 @@ const PRIORITY_CONFIG = {
  * - 進捗率の視覚的表示
  */
 export function CareerGoalList({ 
-  careerGoal, 
+  careerGoals, 
   onEdit, 
   onDelete, 
   isLoading = false 
@@ -104,6 +104,10 @@ export function CareerGoalList({
       case 'COMPLETED':
         return 'completed';
       case 'INACTIVE':
+        return 'not_started';
+      case 'CANCELLED':
+        return 'cancelled';
+      case 'POSTPONED':
         return 'postponed';
       default:
         return 'not_started';
@@ -121,26 +125,24 @@ export function CareerGoalList({
 
   // CareerGoalDataからCareerGoal配列を生成
   const convertedGoals: CareerGoal[] = useMemo(() => {
-    if (!careerGoal) return [];
+    if (!careerGoals || careerGoals.length === 0) return [];
 
-    // CareerGoalDataからCareerGoalに変換
-    const convertedGoal: CareerGoal = {
-      id: careerGoal.id || `goal_${Date.now()}`,
-      goal_id: careerGoal.id || `goal_${Date.now()}`, // goal_idを追加
-      user_id: 'current_user', // 実際のユーザーIDは親コンポーネントから取得
+    // CareerGoalData配列からCareerGoal配列に変換
+    return careerGoals.map((careerGoal) => ({
+      id: careerGoal.id || `goal_${Date.now()}_${Math.random()}`,
+      goal_id: careerGoal.id || `goal_${Date.now()}_${Math.random()}`,
+      user_id: 'current_user',
       title: careerGoal.target_position || '',
       description: careerGoal.target_description || '',
-      goal_type: careerGoal.goal_type || 'mid_term', // goal_typeを追加（デフォルト値設定）
+      goal_type: careerGoal.goal_type || 'mid_term',
       status: mapPlanStatusToCareerStatus(careerGoal.plan_status),
-      priority: estimatePriority(careerGoal.progress_percentage || 0),
+      priority: careerGoal.priority || estimatePriority(careerGoal.progress_percentage || 0),
       progress_percentage: careerGoal.progress_percentage || 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      ...(careerGoal.target_date && { target_date: careerGoal.target_date }), // 条件付きでプロパティを追加
-    };
-
-    return [convertedGoal];
-  }, [careerGoal]);
+      created_at: careerGoal.created_at || new Date().toISOString(),
+      updated_at: careerGoal.updated_at || new Date().toISOString(),
+      ...(careerGoal.target_date && { target_date: careerGoal.target_date }),
+    }));
+  }, [careerGoals]);
 
   // フィルタリングとソート
   const filteredAndSortedGoals = useMemo(() => {
