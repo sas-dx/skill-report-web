@@ -72,11 +72,12 @@ export async function GET(request: NextRequest) {
           is_deleted: false
         }
       }),
-      // 資格数 - TrainingHistoryテーブルから資格取得済み(certificate_obtained=true)をカウント
-      prisma.trainingHistory.count({
+      // 資格数 - PDUテーブルから資格取得済み(activity_type='certification', approval_status='approved')をカウント
+      prisma.pDU.count({
         where: {
           employee_id: employeeId,
-          certificate_obtained: true,
+          activity_type: 'certification',
+          approval_status: 'approved',
           is_deleted: false
         }
       }),
