@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
     const employeeId = authResult.employeeId || userId;
     const tenantId = 'default'; // TODO: テナントIDを取得
 
-    console.log('Dashboard API - Auth result:', { userId, employeeId });
+    console.log('Dashboard API - Auth result:', authResult);
+    console.log('Dashboard API - Using:', { userId, employeeId });
 
     // ユーザー情報を取得
     const user = await prisma.employee.findFirst({
@@ -31,7 +32,11 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    console.log('Dashboard API - User found:', { found: !!user, employeeId });
+    console.log('Dashboard API - User found:', { 
+      found: !!user, 
+      searchedBy: employeeId,
+      foundUser: user ? { id: user.id, code: user.employee_code } : null 
+    });
 
     if (!user) {
       return NextResponse.json(
@@ -56,8 +61,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // employee.idを使用（emp_001など）
-    const actualEmployeeId = user.id;
+    // キャリアプランと同じユーザーIDを使用するためemployee_codeを使用
+    // キャリアプランは'000001'を使用している
+    const actualEmployeeId = user.employee_code || user.id;
+    console.log('Dashboard API - Using actualEmployeeId:', actualEmployeeId);
 
     // 並列でデータを取得
     const [
@@ -214,6 +221,8 @@ async function getSkillSummary(userId: string, tenantId: string) {
 
 // 目標サマリー取得
 async function getGoalSummary(userId: string, tenantId: string) {
+  console.log('[getGoalSummary] userId:', userId);
+  
   const goals = await prisma.goalProgress.findMany({
     where: {
       employee_id: userId,
@@ -223,6 +232,8 @@ async function getGoalSummary(userId: string, tenantId: string) {
       target_date: 'asc'
     }
   });
+  
+  console.log('[getGoalSummary] 目標数:', goals.length);
 
   // 目標をステータス別に分類
   const completedGoals = goals.filter((g: any) => 
@@ -256,6 +267,8 @@ async function getGoalSummary(userId: string, tenantId: string) {
   const overallProgress = goals.length > 0 
     ? totalProgress / goals.length 
     : 0;
+  
+  console.log('[getGoalSummary] 総進捗:', totalProgress, '目標数:', goals.length, '平均:', Math.round(overallProgress) + '%');
 
   // 期限が近い目標（30日以内）
   const thirtyDaysFromNow = new Date();
