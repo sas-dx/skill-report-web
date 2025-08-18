@@ -280,16 +280,15 @@ async function getGoalSummary(userId: string, tenantId: string) {
 
 // 資格サマリー取得
 async function getCertificationSummary(userId: string, tenantId: string) {
-  // PDUテーブルから資格取得済みのデータを取得
-  const userCertifications = await prisma.pDU.findMany({
+  // TrainingHistoryテーブルから資格取得済みのデータを取得
+  const userCertifications = await prisma.trainingHistory.findMany({
     where: {
       employee_id: userId,
-      activity_type: 'certification',
-      approval_status: 'approved',
+      certificate_obtained: true,
       is_deleted: false
     },
     orderBy: {
-      activity_date: 'desc'
+      start_date: 'desc'
     }
   });
 
@@ -319,9 +318,9 @@ async function getCertificationSummary(userId: string, tenantId: string) {
 
   // 最近取得した資格（最新5件）
   const recentCertifications = userCertifications.slice(0, 5).map(cert => ({
-    certification_id: cert.pdu_id || cert.certificate_number || '',
-    certification_name: cert.activity_name || '',
-    acquired_date: cert.activity_date || new Date()
+    certification_id: cert.id || cert.certificate_number || '',
+    certification_name: cert.training_name || '',
+    acquired_date: cert.start_date || new Date()
   }));
 
   return {
