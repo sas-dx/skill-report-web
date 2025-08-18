@@ -236,39 +236,25 @@ async function getGoalSummary(userId: string, tenantId: string) {
     g.achievement_status === 'NOT_STARTED'
   );
   
-  // キャンセルや延期は進捗率計算から除外
-  const activeGoals = goals.filter((g: any) => 
-    g.achievement_status !== 'cancelled' && 
-    g.achievement_status !== 'postponed'
-  );
-  
-  // 全体進捗率計算（アクティブな目標のみ）
+  // キャリアプランAPIと同じ計算ロジックを使用
+  // 全目標のprogress_rateの平均を計算（キャンセル・延期も含む）
   let totalProgress = 0;
-  let activeGoalCount = activeGoals.length;
   
-  // 各目標の進捗率を加算
-  activeGoals.forEach((goal: any) => {
-    if (goal.achievement_status === 'completed' || goal.achievement_status === 'achieved') {
-      totalProgress += 100;
-    } else {
-      // Prisma Decimal型の変換処理
-      let progressValue = 0;
-      if (goal.progress_rate !== null && goal.progress_rate !== undefined) {
-        // Decimalオブジェクトの場合、toString()で文字列に変換
-        progressValue = typeof goal.progress_rate === 'object' 
-          ? parseFloat(goal.progress_rate.toString()) 
-          : Number(goal.progress_rate);
-      } else if (goal.achievement_rate !== null && goal.achievement_rate !== undefined) {
-        progressValue = typeof goal.achievement_rate === 'object'
-          ? parseFloat(goal.achievement_rate.toString())
-          : Number(goal.achievement_rate);
-      }
-      totalProgress += progressValue;
+  goals.forEach((goal: any) => {
+    // Prisma Decimal型の変換処理
+    let progressValue = 0;
+    if (goal.progress_rate !== null && goal.progress_rate !== undefined) {
+      // Decimalオブジェクトの場合、toString()で文字列に変換
+      progressValue = typeof goal.progress_rate === 'object' 
+        ? parseFloat(goal.progress_rate.toString()) 
+        : Number(goal.progress_rate);
     }
+    totalProgress += progressValue;
   });
   
-  const overallProgress = activeGoalCount > 0 
-    ? totalProgress / activeGoalCount 
+  // キャリアプランと同じ計算：全目標のprogress_rateの平均
+  const overallProgress = goals.length > 0 
+    ? totalProgress / goals.length 
     : 0;
 
   // 期限が近い目標（30日以内）
