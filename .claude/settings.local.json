@@ -30,7 +30,8 @@
       "Bash(rm:*)",
       "Bash(wsl:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [

@@ -244,10 +244,29 @@ export async function POST(
     const tenantContext = await getTenantFromRequest(request);
     const tenantId = tenantContext?.tenantId || (authResult as any).tenantId;
 
-    const body: TrainingRecord = await request.json();
+    const body = await request.json();
+    
+    // デバッグログ
+    console.log('受信したデータ:', JSON.stringify(body, null, 2));
+
+    // フィールド名のマッピング（フロントエンドからのデータを正規化）
+    const normalizedBody: TrainingRecord = {
+      ...body,
+      trainingName: body.trainingName || body.certificationName || body.name,
+      trainingType: body.trainingType || body.type || 'EXTERNAL',
+      trainingCategory: body.trainingCategory || body.description || body.category || '技術研修',
+      providerName: body.providerName || body.organization || body.provider || '',
+      startDate: body.startDate || body.acquiredDate || body.start_date,
+      endDate: body.endDate || body.expiryDate || body.end_date || body.startDate || body.acquiredDate,
+      durationHours: body.durationHours || body.duration_hours || 0,
+      attendanceStatus: body.attendanceStatus || (body.status === 'acquired' ? 'COMPLETED' : body.status) || 'REGISTERED',
+      certificateObtained: body.certificateObtained !== undefined ? body.certificateObtained : (body.status === 'acquired' || false),
+      testScore: body.testScore || body.score || null,
+      completionRate: body.completionRate || (body.status === 'acquired' ? 100 : 0)
+    };
 
     // 入力検証
-    if (!body.trainingName || !body.trainingType || !body.startDate || !body.endDate) {
+    if (!normalizedBody.trainingName || !normalizedBody.startDate) {
       return NextResponse.json(
         {
           success: false,
@@ -267,33 +286,33 @@ export async function POST(
         id: `training_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         training_history_id: `TRN_${Date.now()}`,
         employee_id: authResult.employeeId || authResult.userId || '',
-        training_program_id: body.trainingProgramId || null,
-        training_name: body.trainingName,
-        training_type: body.trainingType,
-        training_category: body.trainingCategory,
-        provider_name: body.providerName,
-        instructor_name: body.instructorName || null,
-        start_date: new Date(body.startDate),
-        end_date: new Date(body.endDate),
-        duration_hours: body.durationHours,
-        location: body.location || null,
-        cost: body.cost || null,
-        cost_covered_by: body.costCoveredBy || null,
-        attendance_status: body.attendanceStatus || 'REGISTERED',
-        completion_rate: body.completionRate || 0,
-        test_score: body.testScore || null,
-        grade: body.grade || null,
-        certificate_obtained: body.certificateObtained || false,
-        certificate_number: body.certificateNumber || null,
-        pdu_earned: body.pduEarned || null,
-        skills_acquired: body.skillsAcquired?.join(',') || null,
-        learning_objectives: body.learningObjectives || null,
-        learning_outcomes: body.learningOutcomes || null,
-        feedback: body.feedback || null,
-        satisfaction_score: body.satisfactionScore || null,
-        recommendation_score: body.recommendationScore || null,
-        follow_up_required: body.followUpRequired || false,
-        follow_up_date: body.followUpDate ? new Date(body.followUpDate) : null,
+        training_program_id: normalizedBody.trainingProgramId || null,
+        training_name: normalizedBody.trainingName,
+        training_type: normalizedBody.trainingType,
+        training_category: normalizedBody.trainingCategory,
+        provider_name: normalizedBody.providerName,
+        instructor_name: normalizedBody.instructorName || null,
+        start_date: new Date(normalizedBody.startDate),
+        end_date: normalizedBody.endDate ? new Date(normalizedBody.endDate) : new Date(normalizedBody.startDate),
+        duration_hours: normalizedBody.durationHours,
+        location: normalizedBody.location || null,
+        cost: normalizedBody.cost || null,
+        cost_covered_by: normalizedBody.costCoveredBy || null,
+        attendance_status: normalizedBody.attendanceStatus || 'REGISTERED',
+        completion_rate: normalizedBody.completionRate || 0,
+        test_score: normalizedBody.testScore || null,
+        grade: normalizedBody.grade || null,
+        certificate_obtained: normalizedBody.certificateObtained || false,
+        certificate_number: normalizedBody.certificateNumber || null,
+        pdu_earned: normalizedBody.pduEarned || null,
+        skills_acquired: normalizedBody.skillsAcquired?.join(',') || null,
+        learning_objectives: normalizedBody.learningObjectives || null,
+        learning_outcomes: normalizedBody.learningOutcomes || null,
+        feedback: normalizedBody.feedback || null,
+        satisfaction_score: normalizedBody.satisfactionScore || null,
+        recommendation_score: normalizedBody.recommendationScore || null,
+        follow_up_required: normalizedBody.followUpRequired || false,
+        follow_up_date: normalizedBody.followUpDate ? new Date(normalizedBody.followUpDate) : null,
         tenant_id: tenantId,
         created_by: authResult.userId || '',
         updated_by: authResult.userId || '',
