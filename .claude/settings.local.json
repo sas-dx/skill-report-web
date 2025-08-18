@@ -28,7 +28,9 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(rm:*)",
-      "Bash(wsl:*)"
+      "Bash(wsl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
