@@ -24,8 +24,10 @@ import {
   RefreshCw,
   Download,
   Edit,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface TrainingRecord {
   id?: string;
@@ -47,6 +49,7 @@ interface TrainingRecord {
 }
 
 export default function TrainingsPage() {
+  const router = useRouter();
   const [records, setRecords] = useState<TrainingRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -178,8 +181,20 @@ export default function TrainingsPage() {
     <div className="container mx-auto py-8">
       {/* ヘッダー */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">研修記録管理</h1>
-        <p className="text-gray-600">研修参加履歴と学習成果を管理</p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">研修記録管理</h1>
+            <p className="text-gray-600">研修参加履歴と学習成果を管理</p>
+          </div>
+          <Button
+            onClick={() => router.push('/dashboard')}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            ダッシュボードに戻る
+          </Button>
+        </div>
       </div>
 
       {/* 統計カード */}
