@@ -2,60 +2,48 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function checkGoals() {
-  console.log('=== TRN_GoalProgress テーブル確認 ===');
-  
-  const goals = await prisma.goalProgress.findMany({
-    where: {
-      employee_id: '000001',
-      is_deleted: false
-    },
-    orderBy: {
-      created_at: 'desc'
-    }
-  });
-  
-  console.log(`\n総目標数: ${goals.length}`);
-  
-  goals.forEach((goal, index) => {
-    console.log(`\n--- 目標 ${index + 1} ---`);
-    console.log(`ID: ${goal.id}`);
-    console.log(`Goal ID: ${goal.goal_id}`);
-    console.log(`タイトル: ${goal.goal_title}`);
-    console.log(`タイプ: ${goal.goal_type}`);
-    console.log(`ステータス: ${goal.achievement_status}`);
-    console.log(`目標日: ${goal.target_date}`);
-    console.log(`作成日: ${goal.created_at}`);
-    console.log(`優先度: ${goal.priority_level}`);
-  });
-
-  console.log('\n=== TRN_CareerPlan テーブル確認 ===');
-  
-  const careerPlans = await prisma.careerPlan.findMany({
-    where: {
-      employee_id: '000001',
-      is_deleted: false
-    },
-    orderBy: {
-      created_at: 'desc'
-    }
-  });
-  
-  console.log(`\n総キャリアプラン数: ${careerPlans.length}`);
-  
-  careerPlans.forEach((plan, index) => {
-    console.log(`\n--- プラン ${index + 1} ---`);
-    console.log(`ID: ${plan.career_plan_id}`);
-    console.log(`名前: ${plan.plan_name}`);
-    console.log(`説明: ${plan.plan_description}`);
-    console.log(`ステータス: ${plan.plan_status}`);
-    console.log(`開始日: ${plan.plan_start_date}`);
-    console.log(`終了日: ${plan.plan_end_date}`);
-  });
+  try {
+    // emp_001のGoalProgressを確認
+    const goals = await prisma.goalProgress.findMany({
+      where: {
+        employee_id: 'emp_001',
+        is_deleted: false
+      }
+    });
+    
+    console.log('emp_001の目標数: ' + goals.length);
+    
+    const currentGoals = goals.filter(g => g.achievement_status === 'in_progress' || g.achievement_status === 'pending');
+    const completedGoals = goals.filter(g => g.achievement_status === 'completed' || g.achievement_status === 'achieved');
+    
+    console.log('進行中の目標: ' + currentGoals.length + '個');
+    console.log('完了済みの目標: ' + completedGoals.length + '個');
+    
+    // 計算ロジック再現
+    let totalProgress = 0;
+    let totalGoalCount = goals.length;
+    
+    totalProgress += completedGoals.length * 100;
+    totalProgress += currentGoals.reduce((sum, goal) => {
+      const progress = goal.progress_rate || goal.achievement_rate || 0;
+      console.log('目標: ' + goal.goal_name + ', 進捗率: ' + progress + '%');
+      return sum + Number(progress);
+    }, 0);
+    
+    const overallProgress = totalGoalCount > 0 
+      ? totalProgress / totalGoalCount 
+      : 0;
+    
+    console.log('\n計算結果:');
+    console.log('totalProgress: ' + totalProgress);
+    console.log('totalGoalCount: ' + totalGoalCount);
+    console.log('目標達成率: ' + Math.round(overallProgress) + '%');
+    
+  } catch (error) {
+    console.error('エラー:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-checkGoals()
-  .then(() => prisma.$disconnect())
-  .catch(err => {
-    console.error(err);
-    prisma.$disconnect();
-  });
+checkGoals();

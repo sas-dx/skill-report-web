@@ -224,24 +224,40 @@ async function getGoalSummary(userId: string, tenantId: string) {
     }
   });
 
-  const currentGoals = goals.filter((g: any) => g.achievement_status === 'in_progress' || g.achievement_status === 'pending');
-  const completedGoals = goals.filter((g: any) => g.achievement_status === 'completed' || g.achievement_status === 'achieved');
-
-  // 全体進捗率計算（完了済みは100%として計算）
+  // 目標をステータス別に分類
+  const completedGoals = goals.filter((g: any) => 
+    g.achievement_status === 'completed' || 
+    g.achievement_status === 'achieved'
+  );
+  
+  const currentGoals = goals.filter((g: any) => 
+    g.achievement_status === 'in_progress' || 
+    g.achievement_status === 'pending' ||
+    g.achievement_status === 'NOT_STARTED'
+  );
+  
+  // キャンセルや延期は進捗率計算から除外
+  const activeGoals = goals.filter((g: any) => 
+    g.achievement_status !== 'cancelled' && 
+    g.achievement_status !== 'postponed'
+  );
+  
+  // 全体進捗率計算（アクティブな目標のみ）
   let totalProgress = 0;
-  let totalGoalCount = goals.length;
+  let activeGoalCount = activeGoals.length;
   
-  // 完了済み目標は100%として加算
-  totalProgress += completedGoals.length * 100;
+  // 各目標の進捗率を加算
+  activeGoals.forEach((goal: any) => {
+    if (goal.achievement_status === 'completed' || goal.achievement_status === 'achieved') {
+      totalProgress += 100;
+    } else {
+      const progress = goal.progress_rate || goal.achievement_rate || 0;
+      totalProgress += Number(progress);
+    }
+  });
   
-  // 進行中目標の進捗率を加算
-  totalProgress += currentGoals.reduce((sum: number, goal: any) => {
-    const progress = goal.progress_rate || goal.achievement_rate || 0;
-    return sum + Number(progress);
-  }, 0);
-  
-  const overallProgress = totalGoalCount > 0 
-    ? totalProgress / totalGoalCount 
+  const overallProgress = activeGoalCount > 0 
+    ? totalProgress / activeGoalCount 
     : 0;
 
   // 期限が近い目標（30日以内）
