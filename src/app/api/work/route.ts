@@ -64,6 +64,15 @@ export async function POST(request: NextRequest) {
     }
 
     // プロジェクトコードの重複チェック
+    if (!employeeId) {
+      return createErrorResponse(
+        'EMPLOYEE_ID_REQUIRED',
+        '従業員IDが必要です',
+        undefined,
+        400
+      );
+    }
+    
     const existingProject = await prisma.projectRecord.findFirst({
       where: {
         employee_id: employeeId,
@@ -155,6 +164,15 @@ export async function PUT(request: NextRequest) {
     }
 
     // 既存レコードの確認
+    if (!employeeId) {
+      return createErrorResponse(
+        'EMPLOYEE_ID_REQUIRED',
+        '従業員IDが必要です',
+        undefined,
+        400
+      );
+    }
+    
     const existingRecord = await prisma.projectRecord.findFirst({
       where: {
         project_record_id: body.id,
@@ -225,7 +243,7 @@ export async function PUT(request: NextRequest) {
 
     Object.keys(fieldMapping).forEach(apiField => {
       const dbField = fieldMapping[apiField];
-      if (body[apiField] !== undefined) {
+      if (dbField && body[apiField] !== undefined) {
         if (apiField === 'start_date' || apiField === 'end_date') {
           updateData[dbField] = body[apiField] ? new Date(body[apiField]) : null;
         } else if (apiField === 'technologies' || apiField === 'achievements') {
@@ -286,6 +304,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 既存レコードの確認
+    if (!employeeId) {
+      return createErrorResponse(
+        'EMPLOYEE_ID_REQUIRED',
+        '従業員IDが必要です',
+        undefined,
+        400
+      );
+    }
+    
     const existingRecord = await prisma.projectRecord.findFirst({
       where: {
         project_record_id: id,

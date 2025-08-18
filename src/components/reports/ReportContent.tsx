@@ -45,6 +45,7 @@ export function ReportContent() {
       }, 5000); // 5秒後に自動で非表示
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [notification]);
 
   const loadData = async () => {

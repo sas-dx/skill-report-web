@@ -148,7 +148,7 @@ export function useCareerGoalDefaults() {
     return {
       ...goal,
       // 日付フィールドの正規化
-      target_date: goal.target_date.split('T')[0],
+      target_date: goal.target_date ? goal.target_date.split('T')[0] : '',
       last_review_date: goal.last_review_date ? goal.last_review_date.split('T')[0] : null,
       next_review_date: goal.next_review_date ? goal.next_review_date.split('T')[0] : null,
     };

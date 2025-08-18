@@ -147,6 +147,7 @@ export const useDashboard = () => {
 
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [settings?.refresh_interval]);
 
   return {

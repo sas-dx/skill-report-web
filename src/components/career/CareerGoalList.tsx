@@ -136,7 +136,7 @@ export function CareerGoalList({
       description: careerGoal.target_description || '',
       goal_type: careerGoal.goal_type || 'mid_term',
       status: mapPlanStatusToCareerStatus(careerGoal.plan_status),
-      priority: careerGoal.priority || estimatePriority(careerGoal.progress_percentage || 0),
+      priority: (careerGoal.priority || estimatePriority(careerGoal.progress_percentage || 0)) as CareerGoalPriority,
       progress_percentage: careerGoal.progress_percentage || 0,
       created_at: careerGoal.created_at || new Date().toISOString(),
       updated_at: careerGoal.updated_at || new Date().toISOString(),

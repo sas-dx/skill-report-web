@@ -19,7 +19,7 @@ export interface CareerPathStep {
   position_level: number;
   description: string;
   estimated_duration: string;
-  target_date?: string;
+  target_date?: string | undefined;
   prerequisites: string[];
   required_skills: Array<{
     skill_id: string;
@@ -52,7 +52,7 @@ export function CareerPathForm({
     position_level: 1,
     description: '',
     estimated_duration: '',
-    target_date: '',
+    target_date: undefined,
     prerequisites: [],
     required_skills: [],
     milestones: [],
@@ -74,13 +74,13 @@ export function CareerPathForm({
         position_level: step.position_level || 1,
         description: step.description || '',
         estimated_duration: step.estimated_duration || '',
-        target_date: step.target_date ? step.target_date.split('T')[0] : '',
+        target_date: step.target_date ? step.target_date.split('T')[0] : undefined,
         prerequisites: step.prerequisites || [],
         required_skills: step.required_skills || [],
         milestones: step.milestones || [],
         status: step.status || 'not_started',
         progress_percentage: step.progress_percentage || 0,
-        step_id: step.step_id
+        step_id: step.step_id || ''
       });
     }
   }, [step]);
@@ -92,7 +92,9 @@ export function CareerPathForm({
     setFormData(prev => ({ ...prev, [field]: value }));
     // エラーをクリア
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      const newErrors = { ...errors };
+      delete newErrors[field];
+      setErrors(newErrors);
     }
   };
 

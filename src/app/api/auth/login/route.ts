@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
         permissions
       },
       process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '24h' }
+      { expiresIn: '24h' as const }
     );
     
     // リフレッシュトークンも生成
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest) {
         type: 'refresh'
       },
       process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '7d' }
+      { expiresIn: '7d' as const }
     );
     
     // トークンを保存（TokenStoreテーブルが存在しない場合はスキップ）

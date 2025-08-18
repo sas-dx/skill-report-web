@@ -1191,5 +1191,11 @@ if (require.main === module) {
     })
 }
 
+// runSampleSeed関数をエクスポート（run-seed.ts用）
+export async function runSampleSeed() {
+  console.log('🔄 runSampleSeed経由でrunWorkingSeedを実行します...');
+  return await runWorkingSeed();
+}
+
 // エクスポート
 export default runWorkingSeed

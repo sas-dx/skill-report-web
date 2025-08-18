@@ -160,12 +160,12 @@ export function CareerProgressChart({ goals, year }: CareerProgressChartProps) {
                       </span>
                     )}
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                      ${goal.status === 'completed' || goal.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                        goal.status === 'in_progress' || goal.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                        goal.status === 'postponed' || goal.status === 'POSTPONED' ? 'bg-yellow-100 text-yellow-800' :
-                        goal.status === 'cancelled' || goal.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                      ${goal.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        goal.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                        goal.status === 'postponed' ? 'bg-yellow-100 text-yellow-800' :
+                        goal.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-800'}`}>
-                      {(statusConfig[goal.status || 'not_started'] || statusConfig['not_started']).label}
+                      {statusConfig[goal.status || 'not_started']?.label || '未着手'}
                     </span>
                   </div>
                 </div>
@@ -197,13 +197,13 @@ export function CareerProgressChart({ goals, year }: CareerProgressChartProps) {
       <div className="bg-blue-50 rounded-lg p-4">
         <h4 className="text-sm font-semibold text-blue-900 mb-2">進捗分析</h4>
         <ul className="space-y-1 text-sm text-blue-800">
-          {statusCounts.completed > 0 && (
+          {(statusCounts.completed || 0) > 0 && (
             <li>✓ {statusCounts.completed}個の目標が完了しています</li>
           )}
-          {statusCounts.in_progress > 0 && (
+          {(statusCounts.in_progress || 0) > 0 && (
             <li>→ {statusCounts.in_progress}個の目標が進行中です</li>
           )}
-          {statusCounts.not_started > 0 && (
+          {(statusCounts.not_started || 0) > 0 && (
             <li>○ {statusCounts.not_started}個の目標が未着手です</li>
           )}
           {overallProgress >= 70 && (

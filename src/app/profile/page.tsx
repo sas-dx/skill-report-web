@@ -91,12 +91,6 @@ export default function ProfilePage() {
             departmentId: profileResponse.data.profile.organizationInfo.departmentId,
             positionId: profileResponse.data.profile.organizationInfo.positionId,
           });
-          
-          // 部下情報を設定
-          if (profileResponse.data.subordinates) {
-            setSubordinates(profileResponse.data.subordinates);
-            setIsManager(profileResponse.data.subordinates.length > 0);
-          }
         } else {
           setError(profileResponse.error?.message || 'プロフィール情報の取得に失敗しました');
         }

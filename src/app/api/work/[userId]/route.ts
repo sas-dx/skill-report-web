@@ -174,7 +174,7 @@ export async function GET(
     // 技術スタックの集計
     const allTechnologies = new Set<string>();
     formattedRecords.forEach(record => {
-      record.technologies.forEach(tech => allTechnologies.add(tech));
+      record.technologies.forEach((tech: string) => allTechnologies.add(tech));
     });
     
     const summaryWithTech = {

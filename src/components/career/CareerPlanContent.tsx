@@ -373,11 +373,11 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
             <CareerGoalList
               careerGoals={careerGoalsList.map(goal => ({
                 id: goal.goal_id || goal.id,  // goal_idを正しく設定
-                goal_id: goal.goal_id,  // goal_idも追加
+                goal_id: goal.goal_id || '',  // goal_idも追加
                 goal_type: goal.goal_type as any,
                 target_position: goal.title,
-                target_description: goal.description,
-                target_date: goal.target_date,
+                target_description: goal.description || '',
+                target_date: goal.target_date || '',
                 plan_status: goal.status === 'not_started' ? 'INACTIVE' :
                             goal.status === 'in_progress' ? 'ACTIVE' :
                             goal.status === 'completed' ? 'COMPLETED' :
@@ -405,27 +405,27 @@ export function CareerPlanContent({ userId, year }: CareerPlanContentProps) {
             <ActionPlanSection
               careerGoal={careerGoal}
               year={selectedYear}
-              userId={userId}
+              userId={userId || 'current_user'}
             />
           )}
 
           {activeTab === 'skillgap' && (
             <SkillGapRadarChart
-              userId={userId}
+              userId={userId || 'current_user'}
               className="w-full"
             />
           )}
 
           {activeTab === 'path' && (
             <CareerPathTimeline
-              userId={userId}
+              userId={userId || 'current_user'}
               className="w-full"
             />
           )}
 
           {activeTab === 'feedback' && (
             <ManagerFeedbackSection
-              userId={userId}
+              userId={userId || 'current_user'}
               className="w-full"
             />
           )}

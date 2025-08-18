@@ -97,7 +97,7 @@ export function Select({
         e.preventDefault();
         if (isOpen && focusedIndex >= 0) {
           const opt = safeOptions[focusedIndex];
-          if (!opt.disabled) {
+          if (opt && !opt.disabled) {
             onChange?.(opt.value);
             setIsOpen(false);
             setFocusedIndex(-1);

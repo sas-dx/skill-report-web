@@ -54,10 +54,10 @@ export function ActionPlanForm({
       setFormData({
         title: plan.title,
         description: plan.description || '',
-        goal_id: plan.goal_id || '',
+        goal_id: '',
         related_skill_id: plan.related_skill_id || '',
         due_date: plan.due_date,
-        priority: plan.priority || 2,
+        priority: plan.priority === 'high' ? 3 : plan.priority === 'medium' ? 2 : 1,
         status: plan.status
       });
     }
@@ -112,14 +112,19 @@ export function ActionPlanForm({
     try {
       setIsSubmitting(true);
       // priorityを文字列に変換してAPIに送信
-      const submitData: ActionPlanCreateRequest = {
+      const submitData: any = {
         title: formData.title,
-        description: formData.description,
         due_date: formData.due_date,
         priority: formData.priority === 1 ? 'high' : formData.priority === 3 ? 'low' : 'medium',
-        related_skill_id: formData.related_skill_id,
-        // statusとgoal_idはActionPlanCreateRequestには含まれないため除外
       };
+      
+      if (formData.description) {
+        submitData.description = formData.description;
+      }
+      
+      if (formData.related_skill_id) {
+        submitData.related_skill_id = formData.related_skill_id;
+      }
       await onSubmit(submitData);
     } catch (error) {
       console.error('フォーム送信エラー:', error);

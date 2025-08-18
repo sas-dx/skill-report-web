@@ -33,7 +33,19 @@ export async function POST(request: NextRequest) {
     // xlsxライブラリでパース
     const workbook = XLSX.read(data, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
+    if (!sheetName) {
+      return NextResponse.json({
+        success: false,
+        error: 'ファイルにシートがありません。'
+      }, { status: 400 });
+    }
     const worksheet = workbook.Sheets[sheetName];
+    if (!worksheet) {
+      return NextResponse.json({
+        success: false,
+        error: 'ワークシートが見つかりません。'
+      }, { status: 400 });
+    }
     
     // JSONに変換（ヘッダー行を使用）
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];

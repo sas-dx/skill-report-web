@@ -377,7 +377,7 @@ export function CareerPathTimeline({ userId, className }: CareerPathTimelineProp
                 
                 {/* ステップアイコン */}
                 <div className="flex-shrink-0 w-12 h-12 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center relative z-10">
-                  {getStatusIcon(step.status)}
+                  {getStatusIcon(step.status || 'not_started')}
                 </div>
 
                 {/* ステップ内容 */}
