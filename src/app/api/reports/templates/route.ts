@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     // テナントID追加
-    whereConditions.tenant_id = authResult.tenantId || 'default-tenant';
+    whereConditions.tenant_id = (authResult as any).tenantId || 'default-tenant';
 
     console.log('ReportTemplates GET API - Where conditions:', JSON.stringify(whereConditions, null, 2));
 

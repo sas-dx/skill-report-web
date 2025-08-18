@@ -10,7 +10,7 @@ import { verifyAuth } from '@/lib/auth';
 
 interface TrainingRecord {
   id?: string;
-  trainingProgramId?: string;
+  trainingProgramId?: string | undefined;
   trainingName: string;
   trainingType: string;
   trainingCategory: string;
@@ -85,7 +85,7 @@ export async function GET(
 
     // テナント情報を取得
     const tenantContext = await getTenantFromRequest(request);
-    const tenantId = tenantContext?.tenantId || authResult.tenantId;
+    const tenantId = tenantContext?.tenantId || (authResult as any).tenantId;
 
     // クエリパラメータを取得
     const { searchParams } = new URL(request.url);
@@ -138,7 +138,7 @@ export async function GET(
     const programMap = new Map(programs.map(p => [p.training_program_id, p]));
 
     // レスポンス用に変換
-    const records: TrainingRecord[] = trainingRecords.map(record => {
+    const records = trainingRecords.map(record => {
       const program = record.training_program_id ? programMap.get(record.training_program_id) : null;
       
       return {
@@ -146,8 +146,8 @@ export async function GET(
         trainingProgramId: record.training_program_id || undefined,
         trainingName: record.training_name || program?.program_name || '',
         trainingType: record.training_type || program?.program_type || '',
-        trainingCategory: record.training_category || program?.category || '',
-        providerName: record.provider_name || program?.provider || '',
+        trainingCategory: record.training_category || (program as any)?.category || '',
+        providerName: record.provider_name || (program as any)?.provider || '',
         instructorName: record.instructor_name || undefined,
         startDate: record.start_date?.toISOString() || '',
         endDate: record.end_date?.toISOString() || '',
@@ -189,7 +189,7 @@ export async function GET(
       {
         success: true,
         data: {
-          records,
+          records: records as TrainingRecord[],
           totalCount: records.length,
           categories,
           statistics
@@ -197,7 +197,7 @@ export async function GET(
         timestamp: new Date().toISOString()
       },
       { status: 200 }
-    );
+    ) as NextResponse<TrainingRecordsResponse>;
 
   } catch (error) {
     console.error('研修記録取得APIエラー:', error);
@@ -242,7 +242,7 @@ export async function POST(
 
     // テナント情報を取得
     const tenantContext = await getTenantFromRequest(request);
-    const tenantId = tenantContext?.tenantId || authResult.tenantId;
+    const tenantId = tenantContext?.tenantId || (authResult as any).tenantId;
 
     const body: TrainingRecord = await request.json();
 
@@ -267,31 +267,31 @@ export async function POST(
         id: `training_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         training_history_id: `TRN_${Date.now()}`,
         employee_id: authResult.employeeId || authResult.userId || '',
-        training_program_id: body.trainingProgramId,
+        training_program_id: body.trainingProgramId || null,
         training_name: body.trainingName,
         training_type: body.trainingType,
         training_category: body.trainingCategory,
         provider_name: body.providerName,
-        instructor_name: body.instructorName,
+        instructor_name: body.instructorName || null,
         start_date: new Date(body.startDate),
         end_date: new Date(body.endDate),
         duration_hours: body.durationHours,
-        location: body.location,
-        cost: body.cost,
-        cost_covered_by: body.costCoveredBy,
+        location: body.location || null,
+        cost: body.cost || null,
+        cost_covered_by: body.costCoveredBy || null,
         attendance_status: body.attendanceStatus || 'REGISTERED',
         completion_rate: body.completionRate || 0,
-        test_score: body.testScore,
-        grade: body.grade,
+        test_score: body.testScore || null,
+        grade: body.grade || null,
         certificate_obtained: body.certificateObtained || false,
-        certificate_number: body.certificateNumber,
-        pdu_earned: body.pduEarned,
-        skills_acquired: body.skillsAcquired?.join(','),
-        learning_objectives: body.learningObjectives,
-        learning_outcomes: body.learningOutcomes,
-        feedback: body.feedback,
-        satisfaction_score: body.satisfactionScore,
-        recommendation_score: body.recommendationScore,
+        certificate_number: body.certificateNumber || null,
+        pdu_earned: body.pduEarned || null,
+        skills_acquired: body.skillsAcquired?.join(',') || null,
+        learning_objectives: body.learningObjectives || null,
+        learning_outcomes: body.learningOutcomes || null,
+        feedback: body.feedback || null,
+        satisfaction_score: body.satisfactionScore || null,
+        recommendation_score: body.recommendationScore || null,
         follow_up_required: body.followUpRequired || false,
         follow_up_date: body.followUpDate ? new Date(body.followUpDate) : null,
         tenant_id: tenantId,
@@ -376,7 +376,7 @@ export async function PUT(
 
     // テナント情報を取得
     const tenantContext = await getTenantFromRequest(request);
-    const tenantId = tenantContext?.tenantId || authResult.tenantId;
+    const tenantId = tenantContext?.tenantId || (authResult as any).tenantId;
 
     const body: TrainingRecord = await request.json();
 
@@ -425,26 +425,26 @@ export async function PUT(
         training_type: body.trainingType,
         training_category: body.trainingCategory,
         provider_name: body.providerName,
-        instructor_name: body.instructorName,
+        instructor_name: body.instructorName || null,
         start_date: new Date(body.startDate),
         end_date: new Date(body.endDate),
         duration_hours: body.durationHours,
-        location: body.location,
-        cost: body.cost,
-        cost_covered_by: body.costCoveredBy,
+        location: body.location || null,
+        cost: body.cost || null,
+        cost_covered_by: body.costCoveredBy || null,
         attendance_status: body.attendanceStatus,
         completion_rate: body.completionRate,
-        test_score: body.testScore,
-        grade: body.grade,
+        test_score: body.testScore || null,
+        grade: body.grade || null,
         certificate_obtained: body.certificateObtained,
-        certificate_number: body.certificateNumber,
-        pdu_earned: body.pduEarned,
-        skills_acquired: body.skillsAcquired?.join(','),
-        learning_objectives: body.learningObjectives,
-        learning_outcomes: body.learningOutcomes,
-        feedback: body.feedback,
-        satisfaction_score: body.satisfactionScore,
-        recommendation_score: body.recommendationScore,
+        certificate_number: body.certificateNumber || null,
+        pdu_earned: body.pduEarned || null,
+        skills_acquired: body.skillsAcquired?.join(',') || null,
+        learning_objectives: body.learningObjectives || null,
+        learning_outcomes: body.learningOutcomes || null,
+        feedback: body.feedback || null,
+        satisfaction_score: body.satisfactionScore || null,
+        recommendation_score: body.recommendationScore || null,
         follow_up_required: body.followUpRequired,
         follow_up_date: body.followUpDate ? new Date(body.followUpDate) : null,
         updated_by: authResult.userId || '',
@@ -528,7 +528,7 @@ export async function DELETE(
 
     // テナント情報を取得
     const tenantContext = await getTenantFromRequest(request);
-    const tenantId = tenantContext?.tenantId || authResult.tenantId;
+    const tenantId = tenantContext?.tenantId || (authResult as any).tenantId;
 
     const { searchParams } = new URL(request.url);
     const recordId = searchParams.get('id');

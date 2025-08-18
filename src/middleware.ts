@@ -67,8 +67,8 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.next();
     response.headers.set('x-user-id', authResult.userId || '');
     response.headers.set('x-employee-id', authResult.employeeId || '');
-    response.headers.set('x-tenant-id', authResult.tenantId || '');
-    response.headers.set('x-user-role', authResult.role || '');
+    response.headers.set('x-tenant-id', (authResult as any).tenantId || '');
+    response.headers.set('x-user-role', (authResult as any).role || '');
 
     return response;
   }

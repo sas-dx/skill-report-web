@@ -26,7 +26,9 @@
       "Bash(node:*)",
       "Bash(docker ps:*)",
       "Bash(test:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(rm:*)",
+      "Bash(wsl:*)"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [

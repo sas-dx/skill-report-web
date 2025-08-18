@@ -46,13 +46,14 @@ export async function POST(request: NextRequest) {
 
     // 管理職権限の確認
     const manager = await prisma.employee.findUnique({
-      where: { employee_code: managerId },
-      include: {
-        position: true
-      }
+      where: { employee_code: managerId }
     });
 
-    if (!manager || !manager.position || manager.position.position_level < 3) {
+    const position = manager?.position_id ? await prisma.position.findUnique({
+      where: { position_code: manager.position_id }
+    }) : null;
+
+    if (!manager || !position || (position as any).position_level < 3) {
       return NextResponse.json(
         {
           success: false,

@@ -104,7 +104,7 @@ export function generateAvatarColor(displayName: string): string {
 
   // ハッシュ値から色を選択
   const colorIndex = Math.abs(hash) % colors.length;
-  return colors[colorIndex];
+  return colors[colorIndex] || 'bg-gray-500';
 }
 
 /**

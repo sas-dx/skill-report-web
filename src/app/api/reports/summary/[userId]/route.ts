@@ -76,7 +76,7 @@ export async function GET(
       // スキル記録の取得
       prisma.skillRecord.findMany({
         where: {
-          employee_id: targetUserId,
+          employee_id: targetUserId || '',
           is_deleted: false,
           created_at: {
             gte: startOfYear,
@@ -88,7 +88,7 @@ export async function GET(
       // プロジェクト記録の取得
       prisma.projectRecord.findMany({
         where: {
-          employee_id: targetUserId,
+          employee_id: targetUserId || '',
           is_deleted: false,
           start_date: {
             gte: startOfYear,
@@ -100,7 +100,7 @@ export async function GET(
       // キャリア目標の総数
       prisma.goalProgress.count({
         where: {
-          employee_id: targetUserId,
+          employee_id: targetUserId || '',
           is_deleted: false,
           created_at: {
             gte: startOfYear,
@@ -112,7 +112,7 @@ export async function GET(
       // 完了したキャリア目標
       prisma.goalProgress.count({
         where: {
-          employee_id: targetUserId,
+          employee_id: targetUserId || '',
           is_deleted: false,
           progress_rate: 100,
           created_at: {
@@ -128,30 +128,30 @@ export async function GET(
 
     // スキル分析
     const skillsByCategory = skillRecords.reduce((acc, record) => {
-      const category = record.skill_category || 'その他';
+      const category = (record as any).skill_category_id || 'その他';
       if (!acc[category]) {
         acc[category] = [];
       }
       acc[category].push({
-        name: record.skill_name || '不明',
+        name: (record as any).skill_name || '不明',
         level: record.skill_level || 1,
-        score: record.self_assessment_score || 0
+        score: (record as any).self_assessment || 0
       });
       return acc;
     }, {} as Record<string, Array<{ name: string; level: number; score: number }>>);
 
     // プロジェクト分析
     const projectsByStatus = projectRecords.reduce((acc, record) => {
-      const status = record.status || 'active';
+      const status = (record as any).status || 'active';
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     // 技術スタック分析
     const technologies = projectRecords
-      .map(record => record.technologies_used || '')
+      .map(record => (record as any).technologies_used || '')
       .filter(tech => tech)
-      .flatMap(tech => tech.split(',').map(t => t.trim()))
+      .flatMap((tech: string) => tech.split(',').map((t: string) => t.trim()))
       .reduce((acc, tech) => {
         acc[tech] = (acc[tech] || 0) + 1;
         return acc;
@@ -202,7 +202,7 @@ export async function GET(
       projectAnalysis: {
         byStatus: projectsByStatus,
         technologies: Object.entries(technologies)
-          .sort(([, a], [, b]) => b - a)
+          .sort(([, a], [, b]) => (b as number) - (a as number))
           .slice(0, 10)
           .map(([name, count]) => ({ name, count })),
         totalDuration: projectRecords.reduce((sum, record) => {

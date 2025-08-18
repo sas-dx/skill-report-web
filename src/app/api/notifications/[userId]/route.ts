@@ -185,7 +185,7 @@ export async function PUT(
         notification_id: {
           in: body.notificationIds
         },
-        recipient_id: targetUserId || undefined,
+        ...(targetUserId && { recipient_id: targetUserId }),
         read_status: 'unread'
       },
       data: {

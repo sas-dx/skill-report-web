@@ -68,14 +68,14 @@ export async function GET(request: NextRequest) {
 
     // 設定データを構築
     const dashboardSettings: DashboardSettings = {
-      user_id: settings.employee_id || userId,
-      layout: (settings.layout || 'default') as 'default' | 'compact',
-      visible_sections: settings.visible_sections || defaultSettings.visible_sections,
-      section_order: settings.section_order || defaultSettings.section_order,
-      refresh_interval: settings.refresh_interval || defaultSettings.refresh_interval,
-      theme: (settings.theme || 'light') as 'light' | 'dark' | 'auto',
-      chart_type: (settings.chart_type || 'line') as 'line' | 'bar' | 'radar',
-      notifications_enabled: settings.notifications_enabled ?? true
+      user_id: (settings as any).employee_id || userId,
+      layout: ((settings as any).layout || 'default') as 'default' | 'compact',
+      visible_sections: (settings as any).visible_sections || defaultSettings.visible_sections,
+      section_order: (settings as any).section_order || defaultSettings.section_order,
+      refresh_interval: (settings as any).refresh_interval || defaultSettings.refresh_interval,
+      theme: ((settings as any).theme || 'light') as 'light' | 'dark' | 'auto',
+      chart_type: ((settings as any).chart_type || 'line') as 'line' | 'bar' | 'radar',
+      notifications_enabled: (settings as any).notifications_enabled ?? true
     };
 
     return NextResponse.json({

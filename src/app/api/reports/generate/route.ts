@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         id: body.templateId,
         is_active: true,
         is_deleted: false,
-        tenant_id: authResult.tenantId || 'default-tenant'
+        tenant_id: (authResult as any).tenantId || 'default-tenant'
       }
     });
 
