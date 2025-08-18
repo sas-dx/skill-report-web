@@ -51,23 +51,24 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // employee.idを使用（emp_001など）
-    const employeeId = user.id;
+    // データによって異なるユーザーIDを使用
+    const dataEmployeeId = user.id;  // emp_001 - 資格・スキル・研修データ用
+    const goalEmployeeId = user.employee_code;  // 000001 - 目標データ用
 
     // 統計情報を取得
     const [skillCount, goalCount, certificationCount, trainingCount] = await Promise.all([
       // スキル数
       prisma.skillRecord.count({
         where: {
-          employee_id: employeeId,
+          employee_id: dataEmployeeId,
           skill_level: { gt: 0 },
           is_deleted: false
         }
       }),
-      // 目標数
+      // 目標数 - employee_codeを使用
       prisma.goalProgress.count({
         where: {
-          employee_id: employeeId,
+          employee_id: goalEmployeeId,
           OR: [
             { achievement_status: 'in_progress' },
             { achievement_status: 'pending' }
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
       // 資格数 - PDUテーブルから資格取得済みをカウント
       prisma.pDU.count({
         where: {
-          employee_id: employeeId,
+          employee_id: dataEmployeeId,
           activity_type: 'certification',
           approval_status: 'approved',
           is_deleted: false
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       // 研修数 - TrainingHistoryテーブルから完了済み研修をカウント
       prisma.trainingHistory.count({
         where: {
-          employee_id: employeeId,
+          employee_id: dataEmployeeId,
           attendance_status: 'completed',
           is_deleted: false
         }
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
     // 目標達成率を計算
     const completedGoals = await prisma.goalProgress.count({
       where: {
-        employee_id: employeeId,
+        employee_id: goalEmployeeId,
         OR: [
           { achievement_status: 'completed' },
           { achievement_status: 'achieved' }

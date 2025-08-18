@@ -61,10 +61,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // キャリアプランと同じユーザーIDを使用するためemployee_codeを使用
-    // キャリアプランは'000001'を使用している
-    const actualEmployeeId = user.employee_code || user.id;
-    console.log('Dashboard API - Using actualEmployeeId:', actualEmployeeId);
+    // データによって異なるユーザーIDを使用
+    // 目標データ: employee_code (000001)を使用 - キャリアプランと同じ
+    // 資格・スキルデータ: user.id (emp_001)を使用 - 実際のデータがここに保存されている
+    const goalEmployeeId = user.employee_code || user.id;  // 000001
+    const dataEmployeeId = user.id;  // emp_001
+    console.log('Dashboard API - Using IDs:', { goalEmployeeId, dataEmployeeId });
 
     // 並列でデータを取得
     const [
@@ -76,14 +78,14 @@ export async function GET(request: NextRequest) {
       taskData,
       teamData
     ] = await Promise.all([
-      getSkillSummary(actualEmployeeId, tenantId),
-      getGoalSummary(actualEmployeeId, tenantId),
-      getCertificationSummary(actualEmployeeId, tenantId),
-      getWorkSummary(actualEmployeeId, tenantId),
+      getSkillSummary(dataEmployeeId, tenantId),  // emp_001でスキルデータを取得
+      getGoalSummary(goalEmployeeId, tenantId),  // 000001で目標データを取得
+      getCertificationSummary(dataEmployeeId, tenantId),  // emp_001で資格データを取得
+      getWorkSummary(dataEmployeeId, tenantId),  // emp_001で作業データを取得
       getNotifications(userId, tenantId),
       getTasks(userId, tenantId),
       user.position_id && isManagerPosition(user.position_id) 
-        ? getTeamSummary(actualEmployeeId, tenantId) 
+        ? getTeamSummary(dataEmployeeId, tenantId) 
         : null
     ]);
 
