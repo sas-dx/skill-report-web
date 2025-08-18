@@ -251,8 +251,19 @@ async function getGoalSummary(userId: string, tenantId: string) {
     if (goal.achievement_status === 'completed' || goal.achievement_status === 'achieved') {
       totalProgress += 100;
     } else {
-      const progress = goal.progress_rate || goal.achievement_rate || 0;
-      totalProgress += Number(progress);
+      // Prisma Decimal型の変換処理
+      let progressValue = 0;
+      if (goal.progress_rate !== null && goal.progress_rate !== undefined) {
+        // Decimalオブジェクトの場合、toString()で文字列に変換
+        progressValue = typeof goal.progress_rate === 'object' 
+          ? parseFloat(goal.progress_rate.toString()) 
+          : Number(goal.progress_rate);
+      } else if (goal.achievement_rate !== null && goal.achievement_rate !== undefined) {
+        progressValue = typeof goal.achievement_rate === 'object'
+          ? parseFloat(goal.achievement_rate.toString())
+          : Number(goal.achievement_rate);
+      }
+      totalProgress += progressValue;
     }
   });
   
@@ -271,7 +282,9 @@ async function getGoalSummary(userId: string, tenantId: string) {
       goal_id: goal.goal_id,
       goal_title: goal.goal_title || '',
       deadline: goal.target_date!,
-      progress: Number(goal.progress_rate || goal.achievement_rate || 0)
+      progress: typeof goal.progress_rate === 'object'
+        ? parseFloat(goal.progress_rate.toString())
+        : Number(goal.progress_rate || goal.achievement_rate || 0)
     }));
 
   // 最近の達成（最新5件）
