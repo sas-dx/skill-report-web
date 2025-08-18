@@ -52,15 +52,15 @@ export async function GET(request: NextRequest) {
     }
 
     // データによって異なるユーザーIDを使用
-    const dataEmployeeId = user.id;  // emp_001 - 資格・スキル・研修データ用
-    const goalEmployeeId = user.employee_code;  // 000001 - 目標データ用
+    const dataEmployeeId = user.id;  // emp_001 - 資格(PDU)・研修データ用
+    const goalEmployeeId = user.employee_code;  // 000001 - スキル・目標データ用
 
     // 統計情報を取得
     const [skillCount, goalCount, certificationCount, trainingCount] = await Promise.all([
-      // スキル数
+      // スキル数 - employee_codeを使用
       prisma.skillRecord.count({
         where: {
-          employee_id: dataEmployeeId,
+          employee_id: goalEmployeeId,
           skill_level: { gt: 0 },
           is_deleted: false
         }
