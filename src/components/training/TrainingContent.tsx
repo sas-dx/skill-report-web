@@ -113,12 +113,13 @@ export function TrainingContent() {
             const formattedCerts = certData.data.certifications.map((item: any) => ({
               id: item.id || item.pdu_id || `cert-${Math.random()}`,
               certificationName: item.certification_name || item.activity_name || '不明な資格',
-              organization: item.issuer || item.certification_provider || '不明',
-              acquiredDate: item.activity_date ? new Date(item.activity_date).toISOString().split('T')[0] : '-',
+              organization: item.issuer || item.issuing_organization || item.certification_provider || '不明',
+              acquiredDate: item.acquisition_date || item.activity_date ? 
+                new Date(item.acquisition_date || item.activity_date).toISOString().split('T')[0] : '-',
               expiryDate: item.expiry_date ? new Date(item.expiry_date).toISOString().split('T')[0] : '無期限',
-              status: (item.approval_status || 'active').toLowerCase(),
-              score: item.certificate_number || item.pdu_points?.toString() || '-',
-              description: item.pdu_category || item.certification_level || ''
+              status: item.status || (item.approval_status === 'approved' ? 'acquired' : 'pending'),
+              score: item.score || item.certificate_number || item.pdu_points?.toString() || '-',
+              description: item.description || item.pdu_category || item.certification_level || ''
             }));
             setCertificationRecords(formattedCerts);
             console.log('資格データ取得成功:', formattedCerts);
@@ -354,16 +355,16 @@ export function TrainingContent() {
         const recordData: CertificationRecord = {
           id: formData.id || result.data.certification.id || `cert-${Date.now()}`,
           certificationName: result.data.certification.certification_name || formData.certificationName,
-          organization: result.data.certification.issuer || formData.issuingOrganization,
-          acquiredDate: result.data.certification.activity_date ? 
-            new Date(result.data.certification.activity_date).toISOString().split('T')[0] : 
+          organization: result.data.certification.issuing_organization || result.data.certification.issuer || formData.issuingOrganization,
+          acquiredDate: result.data.certification.acquisition_date || result.data.certification.activity_date ? 
+            new Date(result.data.certification.acquisition_date || result.data.certification.activity_date).toISOString().split('T')[0] : 
             (formData.acquisitionDate || formData.plannedDate || ''),
           expiryDate: result.data.certification.expiry_date ? 
             new Date(result.data.certification.expiry_date).toISOString().split('T')[0] : 
             (formData.expiryDate || '無期限'),
-          status: result.data.certification.approval_status || formData.status,
-          score: result.data.certification.certificate_number || formData.score?.toString() || '-',
-          description: result.data.certification.pdu_category || formData.description
+          status: result.data.certification.status || formData.status || 'acquired',
+          score: result.data.certification.score || result.data.certification.certificate_number || formData.score?.toString() || '-',
+          description: result.data.certification.description || result.data.certification.pdu_category || formData.description
         };
 
         if (isEditing) {
