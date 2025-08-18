@@ -56,6 +56,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // employee.idを使用（emp_001など）
+    const actualEmployeeId = user.id;
+
     // 並列でデータを取得
     const [
       skillData,
@@ -66,14 +69,14 @@ export async function GET(request: NextRequest) {
       taskData,
       teamData
     ] = await Promise.all([
-      getSkillSummary(employeeId, tenantId),
-      getGoalSummary(employeeId, tenantId),
-      getCertificationSummary(employeeId, tenantId),
-      getWorkSummary(employeeId, tenantId),
+      getSkillSummary(actualEmployeeId, tenantId),
+      getGoalSummary(actualEmployeeId, tenantId),
+      getCertificationSummary(actualEmployeeId, tenantId),
+      getWorkSummary(actualEmployeeId, tenantId),
       getNotifications(userId, tenantId),
       getTasks(userId, tenantId),
       user.position_id && isManagerPosition(user.position_id) 
-        ? getTeamSummary(employeeId, tenantId) 
+        ? getTeamSummary(actualEmployeeId, tenantId) 
         : null
     ]);
 
@@ -280,15 +283,16 @@ async function getGoalSummary(userId: string, tenantId: string) {
 
 // 資格サマリー取得
 async function getCertificationSummary(userId: string, tenantId: string) {
-  // TrainingHistoryテーブルから資格取得済みのデータを取得
-  const userCertifications = await prisma.trainingHistory.findMany({
+  // PDUテーブルから資格取得済みのデータを取得
+  const userCertifications = await prisma.pDU.findMany({
     where: {
       employee_id: userId,
-      certificate_obtained: true,
+      activity_type: 'certification',
+      approval_status: 'approved',
       is_deleted: false
     },
     orderBy: {
-      start_date: 'desc'
+      activity_date: 'desc'
     }
   });
 
@@ -318,9 +322,9 @@ async function getCertificationSummary(userId: string, tenantId: string) {
 
   // 最近取得した資格（最新5件）
   const recentCertifications = userCertifications.slice(0, 5).map(cert => ({
-    certification_id: cert.id || cert.certificate_number || '',
-    certification_name: cert.training_name || '',
-    acquired_date: cert.start_date || new Date()
+    certification_id: cert.pdu_id || cert.certificate_number || '',
+    certification_name: cert.activity_name || '',
+    acquired_date: cert.activity_date || new Date()
   }));
 
   return {

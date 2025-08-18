@@ -17,13 +17,13 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = authResult.userId;
-    const employeeId = authResult.employeeId || userId;
+    const employeeCode = authResult.employeeId || userId;
     const tenantId = 'default'; // TODO: テナントIDを取得
 
     // ユーザー情報を取得
     const user = await prisma.employee.findFirst({
       where: {
-        employee_code: employeeId,
+        employee_code: employeeCode,
         is_deleted: false
       }
     });
@@ -51,6 +51,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // employee.idを使用（emp_001など）
+    const employeeId = user.id;
+
     // 統計情報を取得
     const [skillCount, goalCount, certificationCount, trainingCount] = await Promise.all([
       // スキル数
@@ -72,11 +75,12 @@ export async function GET(request: NextRequest) {
           is_deleted: false
         }
       }),
-      // 資格数 - TrainingHistoryテーブルから資格取得済み(certificate_obtained=true)をカウント
-      prisma.trainingHistory.count({
+      // 資格数 - PDUテーブルから資格取得済みをカウント
+      prisma.pDU.count({
         where: {
           employee_id: employeeId,
-          certificate_obtained: true,
+          activity_type: 'certification',
+          approval_status: 'approved',
           is_deleted: false
         }
       }),
