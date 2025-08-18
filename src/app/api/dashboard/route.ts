@@ -280,9 +280,18 @@ async function getGoalSummary(userId: string, tenantId: string) {
 
 // 資格サマリー取得
 async function getCertificationSummary(userId: string, tenantId: string) {
-  // TODO: 将来的にはTRN_CertificationRecordテーブルからユーザーの資格取得記録を取得
-  // 現在は資格取得記録テーブルが存在しないため、空のデータを返す
-  
+  // TrainingHistoryテーブルから資格取得済みの研修履歴を取得
+  const userCertifications = await prisma.trainingHistory.findMany({
+    where: {
+      employee_id: userId,
+      certificate_obtained: true,
+      is_deleted: false
+    },
+    orderBy: {
+      end_date: 'desc'
+    }
+  });
+
   // 推奨資格の取得（参考情報として）
   const recommendedCertifications = await prisma.certification.findMany({
     where: {
@@ -295,31 +304,24 @@ async function getCertificationSummary(userId: string, tenantId: string) {
     take: 5
   });
 
-  // 実際のユーザー資格取得記録は将来実装
-  // const userCertifications = await prisma.certificationRecord.findMany({
-  //   where: {
-  //     employee_id: userId,
-  //     is_deleted: false
-  //   },
-  //   include: {
-  //     certification: true
-  //   },
-  //   orderBy: {
-  //     acquired_date: 'desc'
-  //   }
-  // });
+  // 有効な資格をカウント（現在は全て有効とみなす）
+  // 将来的には資格マスタと連携して有効期限を管理
+  const activeCertifications = userCertifications;
 
-  // 現在は空のデータを返す（将来の実装準備）
-  const userCertifications: any[] = [];
-  const activeCertifications = userCertifications.filter((c: any) => 
-    !c.expiry_date || c.expiry_date > new Date()
-  );
+  // 期限切れが近い資格（現在は空配列を返す）
+  // 将来的には資格マスタの有効期限情報と連携
+  const expiringSoon: Array<{
+    certification_id: string;
+    certification_name: string;
+    expiry_date: Date;
+  }> = [];
 
-  // 期限切れが近い資格（90日以内） - 現在は空
-  const expiringSoon: any[] = [];
-
-  // 最近取得した資格（最新5件） - 現在は空
-  const recentCertifications: any[] = [];
+  // 最近取得した資格（最新5件）
+  const recentCertifications = userCertifications.slice(0, 5).map(cert => ({
+    certification_id: cert.training_history_id || cert.certificate_number || '',
+    certification_name: cert.training_name || '',
+    acquired_date: cert.end_date || new Date()
+  }));
 
   return {
     total_certifications: userCertifications.length,

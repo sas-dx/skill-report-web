@@ -72,23 +72,22 @@ export async function GET(request: NextRequest) {
           is_deleted: false
         }
       }),
-      // 資格数 (TODO: 将来的にはTRN_CertificationRecordテーブルから取得)
-      Promise.resolve(0), // 現在は資格取得記録テーブルが存在しないため0を返す
-      // prisma.certificationRecord.count({
-      //   where: {
-      //     employee_id: employeeId,
-      //     is_deleted: false
-      //   }
-      // }),
-      // 研修数 (モデルが存在しないため0を返す)
-      Promise.resolve(0)
-      /*prisma.trainingRecord.count({
+      // 資格数 - TrainingHistoryテーブルから資格取得済み(certificate_obtained=true)をカウント
+      prisma.trainingHistory.count({
         where: {
-          employee_id: userId,
-          status: 'completed',
+          employee_id: employeeId,
+          certificate_obtained: true,
           is_deleted: false
         }
-      })*/
+      }),
+      // 研修数 - TrainingHistoryテーブルから完了済み研修をカウント
+      prisma.trainingHistory.count({
+        where: {
+          employee_id: employeeId,
+          attendance_status: 'completed',
+          is_deleted: false
+        }
+      })
     ]);
 
     // 目標達成率を計算
