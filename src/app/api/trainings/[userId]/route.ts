@@ -244,3 +244,142 @@ export async function POST(
     );
   }
 }
+
+// 研修記録更新API (API-053)
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { userId: string } }
+) {
+  try {
+    const { userId } = params;
+    const body = await request.json();
+
+    // training_idが必須
+    if (!body.training_id) {
+      return createErrorResponse(
+        'INVALID_PARAMETER',
+        '研修IDは必須です',
+        'Missing training_id',
+        400
+      );
+    }
+
+    // 研修記録の存在確認
+    const existingTraining = await prisma.trainingHistory.findUnique({
+      where: { id: body.training_id }
+    });
+
+    if (!existingTraining) {
+      return createErrorResponse(
+        'TRAINING_NOT_FOUND',
+        '指定された研修記録が見つかりません',
+        `Training ID: ${body.training_id}`,
+        404
+      );
+    }
+
+    // 権限チェック（自分の記録のみ更新可能）
+    if (existingTraining.employee_id !== userId) {
+      return createErrorResponse(
+        'FORBIDDEN',
+        'この研修記録を更新する権限がありません',
+        `User ${userId} cannot update training for employee ${existingTraining.employee_id}`,
+        403
+      );
+    }
+
+    // 更新データの準備
+    const updateData: any = {
+      updated_by: userId,
+      updated_at: new Date()
+    };
+
+    // 更新可能なフィールドのマッピング
+    const updateableFields = {
+      'name': 'training_name',
+      'category': 'training_category',
+      'type': 'training_type',
+      'provider': 'provider_name',
+      'instructor': 'instructor_name',
+      'start_date': 'start_date',
+      'end_date': 'end_date',
+      'duration_hours': 'duration_hours',
+      'location': 'location',
+      'cost': 'cost',
+      'status': 'attendance_status',
+      'completion_rate': 'completion_rate',
+      'score': 'test_score',
+      'grade': 'grade',
+      'certificate_obtained': 'certificate_obtained',
+      'certificate_number': 'certificate_number',
+      'skills_acquired': 'skills_acquired',
+      'feedback': 'feedback',
+      'satisfaction_score': 'satisfaction_score'
+    };
+
+    // 各フィールドの更新
+    for (const [clientField, dbField] of Object.entries(updateableFields)) {
+      if (body[clientField] !== undefined) {
+        // 日付フィールドの処理
+        if (clientField === 'start_date' || clientField === 'end_date') {
+          updateData[dbField] = new Date(body[clientField]);
+        } else {
+          updateData[dbField] = body[clientField];
+        }
+      }
+    }
+
+    // 日付の検証
+    if (updateData.start_date && updateData.end_date) {
+      if (updateData.start_date > updateData.end_date) {
+        return createErrorResponse(
+          'INVALID_PARAMETER',
+          '開始日は終了日以前の日付を指定してください',
+          `Start: ${body.start_date}, End: ${body.end_date}`,
+          400
+        );
+      }
+    }
+
+    // 研修記録の更新
+    const updatedTraining = await prisma.trainingHistory.update({
+      where: { id: body.training_id },
+      data: updateData
+    });
+
+    // レスポンスの生成
+    const response = {
+      training_id: updatedTraining.id,
+      user_id: userId,
+      name: updatedTraining.training_name,
+      category: updatedTraining.training_category,
+      type: updatedTraining.training_type,
+      provider: updatedTraining.provider_name,
+      instructor: updatedTraining.instructor_name,
+      start_date: updatedTraining.start_date?.toISOString().split('T')[0],
+      end_date: updatedTraining.end_date?.toISOString().split('T')[0],
+      duration_hours: Number(updatedTraining.duration_hours),
+      location: updatedTraining.location,
+      status: updatedTraining.attendance_status,
+      completion_rate: Number(updatedTraining.completion_rate),
+      score: updatedTraining.test_score ? Number(updatedTraining.test_score) : null,
+      certificate_obtained: updatedTraining.certificate_obtained,
+      certificate_number: updatedTraining.certificate_number,
+      skills_acquired: updatedTraining.skills_acquired,
+      feedback: updatedTraining.feedback,
+      updated_at: updatedTraining.updated_at.toISOString(),
+      updated_by: userId
+    };
+
+    return createSuccessResponse(response);
+
+  } catch (error) {
+    console.error('研修記録更新エラー:', error);
+    return createErrorResponse(
+      'SYSTEM_ERROR',
+      'システムエラーが発生しました',
+      error instanceof Error ? error.message : '不明なエラー',
+      500
+    );
+  }
+}

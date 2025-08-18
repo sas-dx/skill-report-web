@@ -90,8 +90,13 @@ export default function TrainingsPage() {
     const tenant = localStorage.getItem('tenant');
     const tenantData = tenant ? JSON.parse(tenant) : null;
     
+    // 更新の場合は個別のエンドポイントを使用
+    const url = record.id 
+      ? `/api/trainings/records/${record.id}`
+      : '/api/trainings/records';
+    
     const method = record.id ? 'PUT' : 'POST';
-    const response = await fetch('/api/trainings/records', {
+    const response = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -116,7 +121,7 @@ export default function TrainingsPage() {
     const tenant = localStorage.getItem('tenant');
     const tenantData = tenant ? JSON.parse(tenant) : null;
     
-    const response = await fetch(`/api/trainings/records?id=${recordId}`, {
+    const response = await fetch(`/api/trainings/records/${recordId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
