@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { getTenantFromRequest } from '@/lib/tenant-context';
+import { getTenantContext } from '@/lib/tenant-context';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
         tenantId = tenant.tenant_id;
       }
     } else {
-      // リクエストからテナント情報を取得
-      const tenantContext = await getTenantFromRequest(request);
+      // リクエストからテナント情報を取得（現在はデフォルトテナントを使用）
+      const tenantContext = getTenantContext();
       if (tenantContext) {
         tenantId = tenantContext.tenantId;
       }
