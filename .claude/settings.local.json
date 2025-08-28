@@ -31,12 +31,37 @@
       "Bash(wsl:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "mcp__obsidian-mcp-tools__list_vault_files",
+      "mcp__obsidian-mcp-tools__get_server_info",
+      "WebFetch(domain:guides.rubyonrails.org)",
+      "Bash(claude mcp:*)",
+      "Bash(npx:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(npm search:*)",
+      "Bash(BRAVE_API_KEY=\"BSA0_JA6JE_KBooi7NZwDui6kRzPpYX\" npx -y brave-search-mcp --version)",
+      "Bash(ls:*)",
+      "WebSearch",
+      "Bash(where python)",
+      "Bash(cmd.exe /c \"where python\")",
+      "Bash(pip install:*)",
+      "Bash(~/.local/bin/uvx:*)",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__list_memories",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__write_memory",
+      "mcp__serena__think_about_collected_information",
+      "mcp__serena__think_about_whether_you_are_done"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "C:\\mnt\\c\\Apps",
       "C:\\c\\Apps"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": false
 }
