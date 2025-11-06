@@ -331,12 +331,15 @@ graph LR
 
 ### よくある問題と解決方法
 
-| 問題 | 原因 | 解決方法 |
-|------|------|---------|
-| テストが遅い | モック未使用、並列実行なし | MSW導入、並列実行設定 |
-| カバレッジが上がらない | エッジケース未考慮 | 境界値テスト追加 |
-| E2Eテストが不安定 | タイミング依存、セレクタ脆弱 | 明示的待機、data-testid使用 |
-| CI/CDでテスト失敗 | 環境差異、依存関係 | Docker使用、package-lock.json固定 |
+| 問題 | 原因 | 解決方法 | 参照ドキュメント |
+|------|------|---------|----------------|
+| テストが遅い | モック未使用、並列実行なし | MSW導入、並列実行設定 | `03_ユニットテスト実装ガイド.md` |
+| カバレッジが上がらない | エッジケース未考慮 | 境界値テスト追加、分岐網羅率確認 | `02_テスト設計書.md` |
+| E2Eテストが不安定 | タイミング依存、セレクタ脆弱 | 明示的待機、data-testid使用、Playwright Healer活用 | `05_E2Eテスト実装ガイド.md` |
+| CI/CDでテスト失敗 | 環境差異、依存関係 | Docker使用、package-lock.json固定 | `02_テスト設計書.md` |
+| パフォーマンス劣化 | 最適化不足、リソース肥大化 | Lighthouse分析、Core Web Vitals改善 | `06_パフォーマンステスト実装ガイド.md` |
+| セキュリティ脆弱性 | 依存関係の脆弱性、コーディング問題 | npm audit、OWASP ZAPスキャン | `08_セキュリティテスト詳細実装ガイド.md` |
+| アクセシビリティ違反 | WCAG準拠不足 | axe-coreチェック、スクリーンリーダーテスト | `10_アクセシビリティテスト実装ガイド.md` |
 
 ---
 
@@ -344,9 +347,11 @@ graph LR
 
 テストドキュメントに関する質問や改善提案は以下までお願いします：
 
-- **Slackチャンネル**: #qa-testing
-- **メール**: qa-team@example.com
-- **GitHub Issues**: [skill-report-web/issues](https://github.com/your-org/skill-report-web/issues)
+- **GitHub Issues**: [skill-report-web/issues](https://github.com/sas-dx/skill-report-web/issues)
+- **プロジェクトメンバー**:
+  - 責任者: 黒澤 (@yusuke-kurosawa) - kurosawa@sas-com.com
+  - PM: 中島 (@SAS-nakajima) - nakajima@sas-com.com
+  - PL: 笹尾 (@SAS-sasao) - sasao@sas-com.com
 
 ---
 
@@ -354,9 +359,22 @@ graph LR
 
 | 日付 | バージョン | 更新内容 | 更新者 |
 |------|-----------|---------|--------|
-| 2024-07-04 | v1.0.0 | 初版作成 | QAチーム |
-| - | - | - | - |
+| 2025-07-04 | v1.0.0 | 初版作成（テスト計画書～機能テスト実行計画書） | QAチーム |
+| 2025-07-04 | v1.1.0 | 非機能テストガイド追加（セキュリティ・信頼性・アクセシビリティ） | QAチーム |
+| 2025-07-04 | v1.2.0 | Playwright Agents統合、テスト戦略包括的改訂 | テックリード |
+| 2025-11-06 | v1.3.0 | 連絡先情報更新、GitHub Issues リンク修正 | プロジェクトチーム |
 
 ---
 
-*このドキュメントは継続的に更新されます。最新情報はGitHubリポジトリをご確認ください。*
+## 📚 関連リンク
+
+- **プロジェクトREADME**: [README.md](../../README.md)
+- **API設計**: [docs/design/api/](../design/api/)
+- **画面設計**: [docs/design/screens/](../design/screens/)
+- **データベース設計**: [docs/design/database/](../design/database/)
+- **開発ルール**: [.clinerules/](.clinerules/)
+- **プロジェクト管理**: [memory-bank/](../../memory-bank/)
+
+---
+
+*このドキュメントは継続的に更新されます。最新情報は[GitHubリポジトリ](https://github.com/sas-dx/skill-report-web)をご確認ください。*
