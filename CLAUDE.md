@@ -103,3 +103,4 @@ npm run build
 - API仕様: `docs/design/api/`
 - 画面仕様: `docs/design/screens/`
 - DB設計: `docs/design/database/`
+- テスト関連: [docs/testing/](https://github.com/sas-dx/skill-report-web/tree/master/docs/testing#-%E5%90%84%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88%E3%81%AE%E6%A6%82%E8%A6%81%E4%B8%80%E8%A6%A7)
