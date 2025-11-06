@@ -1,0 +1,83 @@
+# グローバルデフォルト設定
+# 全ツール・全プロジェクトで共通利用される基本設定
+
+# システム情報
+system:
+  name: "統合設計ツールシステム"
+  version: "1.0.0"
+  description: "AI駆動開発支援ツール統合システム"
+  author: "AI駆動開発チーム"
+
+# 基本ディレクトリ構造
+directories:
+  docs: "docs"
+  design: "docs/design"
+  tools: "docs/tools"
+  output: "output"
+  temp: "temp"
+  config: "config"
+
+# ファイル命名規則
+naming_conventions:
+  timestamp_format: "%Y%m%d_%H%M%S"
+  file_separator: "_"
+  id_separator: "-"
+  
+# 文字エンコーディング
+encoding:
+  default: "utf-8"
+  fallback: "utf-8"
+
+# ログ設定
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_enabled: true
+  console_enabled: true
+
+# 品質基準
+quality_standards:
+  executive_summary:
+    min_length: 150
+    max_length: 500
+    required: true
+  documentation:
+    required_sections:
+      - "revision_history"
+      - "overview"
+      - "notes"
+      - "rules"
+  validation:
+    strict_mode: true
+    auto_fix: false
+
+# テンプレート設定
+templates:
+  engine: "jinja2"
+  base_directory: "templates"
+  auto_escape: true
+  trim_blocks: true
+  lstrip_blocks: true
+
+# 国際化設定
+i18n:
+  default_locale: "ja_JP"
+  supported_locales:
+    - "ja_JP"
+    - "en_US"
+  timezone: "Asia/Tokyo"
+
+# セキュリティ設定
+security:
+  sanitize_input: true
+  validate_paths: true
+  max_file_size: "10MB"
+  allowed_extensions:
+    - ".yaml"
+    - ".yml"
+    - ".json"
+    - ".md"
+    - ".txt"
+    - ".py"
+    - ".ts"
+    - ".js"

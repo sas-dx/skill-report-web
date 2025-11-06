@@ -1,95 +1,132 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 統一設計ツールシステム
 
+全ての設計ツールで共通利用される統一基盤システムです。
+設定管理、バリデーション、生成、統合、分析の各エンジンを提供します。
+
 要求仕様ID: PLT.1-WEB.1
 設計書: docs/design/architecture/技術スタック設計書.md
-
-統一された設計ツールシステムのメインパッケージ。
-データベース、API、画面設計ツールを統合し、一貫したインターフェースを提供します。
 """
 
-__version__ = "2.0.0"
-__author__ = "Design Integration Team"
-__description__ = "統一設計ツールシステム - 設計統合・品質保証・自動化"
-
-# 統一設定管理
 from .config.manager import UnifiedConfigManager
-from .config.schema import ConfigSchema, ToolConfig
+from .config.schema import UnifiedConfig
+from .config.validator import UnifiedConfigValidator
 
-# コア機能
-from .core.validation import UnifiedValidator
-from .core.generation import UnifiedGenerator
-from .core.integration import ToolIntegrator
-from .core.analysis import DesignAnalyzer
+from .core.validation import (
+    UnifiedValidationEngine,
+    ValidationReport,
+    ValidationIssue,
+    ValidationCategory,
+    ValidationSeverity
+)
 
-# 主要クラスのエクスポート
+from .core.generation import (
+    UnifiedGenerationEngine,
+    GenerationContext,
+    GenerationResult,
+    GenerationType,
+    GenerationTemplate
+)
+
+from .core.integration import (
+    UnifiedIntegrationEngine,
+    IntegrationTask,
+    IntegrationResult,
+    IntegrationType,
+    WorkflowStage,
+    WorkflowContext
+)
+
+from .core.analysis import (
+    UnifiedAnalysisEngine,
+    AnalysisResult,
+    AnalysisMetric,
+    AnalysisType,
+    MetricType
+)
+
+__version__ = "1.0.0"
+__author__ = "統一設計ツールシステム開発チーム"
+
+# 統一エンジンのファクトリー関数
+def create_unified_system(project_name: str = "default"):
+    """統一設計ツールシステムを作成"""
+    return UnifiedDesignToolSystem(project_name)
+
+
+class UnifiedDesignToolSystem:
+    """統一設計ツールシステム メインクラス"""
+    
+    def __init__(self, project_name: str = "default"):
+        self.project_name = project_name
+        
+        # 各エンジンを初期化
+        self.config_manager = UnifiedConfigManager(project_name)
+        self.validation_engine = UnifiedValidationEngine(project_name)
+        self.generation_engine = UnifiedGenerationEngine(project_name)
+        self.integration_engine = UnifiedIntegrationEngine(project_name)
+        self.analysis_engine = UnifiedAnalysisEngine(project_name)
+    
+    def get_config(self) -> UnifiedConfig:
+        """設定を取得"""
+        return self.config_manager.load_config()
+    
+    def validate_project(self, target_path: str = None) -> ValidationReport:
+        """プロジェクト全体をバリデーション"""
+        if target_path is None:
+            target_path = self.get_config().project_root
+        return self.validation_engine.validate_directory(target_path, "*")
+    
+    def analyze_project(self, target_path: str = None):
+        """プロジェクト全体を分析"""
+        if target_path is None:
+            target_path = self.get_config().project_root
+        return self.analysis_engine.comprehensive_analysis(target_path)
+    
+    def generate_dashboard_data(self, target_path: str = None):
+        """ダッシュボード用データを生成"""
+        if target_path is None:
+            target_path = self.get_config().project_root
+        return self.analysis_engine.generate_dashboard_data(target_path)
+
+
+# 便利な関数をエクスポート
 __all__ = [
+    # メインクラス
+    "UnifiedDesignToolSystem",
+    "create_unified_system",
+    
     # 設定管理
     "UnifiedConfigManager",
-    "ConfigSchema", 
-    "ToolConfig",
+    "UnifiedConfig",
+    "UnifiedConfigValidator",
     
-    # コア機能
-    "UnifiedValidator",
-    "UnifiedGenerator", 
-    "ToolIntegrator",
-    "DesignAnalyzer",
+    # バリデーション
+    "UnifiedValidationEngine",
+    "ValidationReport",
+    "ValidationIssue",
+    "ValidationCategory",
+    "ValidationSeverity",
     
-    # バージョン情報
-    "__version__",
-    "__author__",
-    "__description__"
+    # 生成
+    "UnifiedGenerationEngine",
+    "GenerationContext",
+    "GenerationResult",
+    "GenerationType",
+    "GenerationTemplate",
+    
+    # 統合
+    "UnifiedIntegrationEngine",
+    "IntegrationTask",
+    "IntegrationResult",
+    "IntegrationType",
+    "WorkflowStage",
+    "WorkflowContext",
+    
+    # 分析
+    "UnifiedAnalysisEngine",
+    "AnalysisResult",
+    "AnalysisMetric",
+    "AnalysisType",
+    "MetricType"
 ]
-
-# グローバル設定インスタンス
-_global_config_manager = None
-
-def get_config_manager(project_name: str = "skill-report-web") -> UnifiedConfigManager:
-    """
-    グローバル設定管理インスタンスを取得
-    
-    Args:
-        project_name: プロジェクト名
-        
-    Returns:
-        統一設定管理インスタンス
-    """
-    global _global_config_manager
-    if _global_config_manager is None:
-        _global_config_manager = UnifiedConfigManager(project_name)
-    return _global_config_manager
-
-def reset_config_manager():
-    """グローバル設定管理インスタンスをリセット"""
-    global _global_config_manager
-    _global_config_manager = None
-
-# 便利関数
-def get_tool_config(tool_name: str, project_name: str = "skill-report-web") -> ToolConfig:
-    """
-    指定ツールの設定を取得
-    
-    Args:
-        tool_name: ツール名（database, api, screens, testing）
-        project_name: プロジェクト名
-        
-    Returns:
-        ツール設定オブジェクト
-    """
-    config_manager = get_config_manager(project_name)
-    return config_manager.get_tool_config(tool_name)
-
-def validate_project_config(project_name: str = "skill-report-web") -> dict:
-    """
-    プロジェクト設定の検証
-    
-    Args:
-        project_name: プロジェクト名
-        
-    Returns:
-        検証結果辞書
-    """
-    config_manager = get_config_manager(project_name)
-    return config_manager.validate_config()

@@ -1,0 +1,36 @@
+{
+  "generation_info": {
+    "tool_name": "UI画像生成ツール",
+    "tool_version": "1.0.0",
+    "generated_at": "20250703_232301",
+    "screen_type": "login"
+  },
+  "project_info": {
+    "name": "年間スキル報告書WEB化PJT",
+    "version": "1.0.0"
+  },
+  "config_hash": "093d7978",
+  "image_config": {
+    "default_size": {
+      "width": 1792,
+      "height": 1024
+    },
+    "output_format": "png",
+    "quality": 95,
+    "dpi": 72
+  },
+  "screen_config": {
+    "spec_id": "TNT.3-AUTH.1",
+    "screen_id": "SCR_AUT_Login",
+    "title": "ログイン",
+    "description": "システムへのログイン画面",
+    "layout_type": "login",
+    "show_company_logo": true,
+    "show_system_title": true,
+    "template": "login_screen.j2",
+    "special_layout": true,
+    "center_content": true,
+    "show_header": false,
+    "show_sidebar": false
+  }
+}

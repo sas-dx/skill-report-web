@@ -1,0 +1,60 @@
+{
+  "test_suite": "Multiple Tables Validation",
+  "test_date": "2025-07-04T10:35:20.648039",
+  "total_tables": 5,
+  "passed_tables": 5,
+  "failed_tables": 0,
+  "pass_rate": "100.0%",
+  "individual_results": [
+    {
+      "test_target": "MST_Department",
+      "test_date": "2025-07-04T10:35:20.319404",
+      "test_results": {
+        "yaml_validation": true,
+        "file_existence": true,
+        "data_consistency": true
+      },
+      "overall_result": "PASS"
+    },
+    {
+      "test_target": "MST_Position",
+      "test_date": "2025-07-04T10:35:20.398460",
+      "test_results": {
+        "yaml_validation": true,
+        "file_existence": true,
+        "data_consistency": true
+      },
+      "overall_result": "PASS"
+    },
+    {
+      "test_target": "MST_JobType",
+      "test_date": "2025-07-04T10:35:20.468811",
+      "test_results": {
+        "yaml_validation": true,
+        "file_existence": true,
+        "data_consistency": true
+      },
+      "overall_result": "PASS"
+    },
+    {
+      "test_target": "MST_Skill",
+      "test_date": "2025-07-04T10:35:20.551574",
+      "test_results": {
+        "yaml_validation": true,
+        "file_existence": true,
+        "data_consistency": true
+      },
+      "overall_result": "PASS"
+    },
+    {
+      "test_target": "MST_SkillCategory",
+      "test_date": "2025-07-04T10:35:20.647130",
+      "test_results": {
+        "yaml_validation": true,
+        "file_existence": true,
+        "data_consistency": true
+      },
+      "overall_result": "PASS"
+    }
+  ]
+}

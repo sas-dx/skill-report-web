@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>統一設計ツール - ダッシュボード</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- ヘッダー -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-tools"></i> 統一設計ツール
+                </a>
+                <div class="navbar-nav ms-auto">
+                    <span class="navbar-text" id="status-indicator">
+                        <i class="fas fa-circle text-success"></i> Ready
+                    </span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- メインコンテンツ -->
+        <div class="row">
+            <!-- サイドバー -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="list-group list-group-flush">
+                    <a href="#dashboard" class="list-group-item list-group-item-action active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i> ダッシュボード
+                    </a>
+                    <a href="#tools" class="list-group-item list-group-item-action" data-tab="tools">
+                        <i class="fas fa-tools"></i> ツール実行
+                    </a>
+                    <a href="#analytics" class="list-group-item list-group-item-action" data-tab="analytics">
+                        <i class="fas fa-chart-bar"></i> 分析結果
+                    </a>
+                    <a href="#config" class="list-group-item list-group-item-action" data-tab="config">
+                        <i class="fas fa-cog"></i> 設定
+                    </a>
+                    <a href="#logs" class="list-group-item list-group-item-action" data-tab="logs">
+                        <i class="fas fa-file-alt"></i> ログ
+                    </a>
+                </div>
+            </div>
+
+            <!-- メインエリア -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- ダッシュボードタブ -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-tachometer-alt"></i> ダッシュボード</h2>
+                        <button class="btn btn-primary" id="refresh-btn">
+                            <i class="fas fa-sync-alt"></i> 更新
+                        </button>
+                    </div>
+
+                    <!-- ステータスカード -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card status-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">システム状態</h5>
+                                    <p class="card-text" id="system-status">Ready</p>
+                                    <div class="progress">
+                                        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card status-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">実行中タスク</h5>
+                                    <p class="card-text" id="running-tasks">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card status-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">完了タスク</h5>
+                                    <p class="card-text" id="completed-tasks">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card status-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">エラー</h5>
+                                    <p class="card-text text-danger" id="error-count">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 最近のアクティビティ -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-history"></i> 最近のアクティビティ</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-activity">
+                                <p class="text-muted">アクティビティはありません</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ツール実行タブ -->
+                <div id="tools-tab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-tools"></i> ツール実行</h2>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-database"></i> データベースツール</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>YAML検証、DDL生成、整合性チェック</p>
+                                    <button class="btn btn-primary" onclick="executeTools('database')">
+                                        <i class="fas fa-play"></i> 実行
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-robot"></i> AIツール</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>AI分析、プロンプト処理、レポート生成</p>
+                                    <button class="btn btn-primary" onclick="executeTools('ai')">
+                                        <i class="fas fa-play"></i> 実行
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-cogs"></i> 全ツール実行</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>すべてのツールを順次実行します</p>
+                                    <button class="btn btn-success btn-lg" onclick="executeTools('all')">
+                                        <i class="fas fa-play-circle"></i> 全ツール実行
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分析結果タブ -->
+                <div id="analytics-tab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-chart-bar"></i> 分析結果</h2>
+                        <button class="btn btn-primary" onclick="loadAnalytics()">
+                            <i class="fas fa-sync-alt"></i> 更新
+                        </button>
+                    </div>
+
+                    <div id="analytics-content">
+                        <p class="text-muted">分析結果を読み込み中...</p>
+                    </div>
+                </div>
+
+                <!-- 設定タブ -->
+                <div id="config-tab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-cog"></i> 設定</h2>
+                        <button class="btn btn-success" onclick="saveConfig()">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="config-form">
+                                <div class="mb-3">
+                                    <label class="form-label">プロジェクト名</label>
+                                    <input type="text" class="form-control" id="project-name" value="skill-report-web">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">データベースパス</label>
+                                    <input type="text" class="form-control" id="database-path" value="docs/design/database/">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">出力ディレクトリ</label>
+                                    <input type="text" class="form-control" id="output-dir" value="docs/tools/reports/">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ログタブ -->
+                <div id="logs-tab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-file-alt"></i> ログ</h2>
+                        <button class="btn btn-primary" onclick="loadLogs()">
+                            <i class="fas fa-sync-alt"></i> 更新
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="logs-content" style="height: 400px; overflow-y: auto; font-family: monospace; background-color: #f8f9fa; padding: 15px;">
+                                <p class="text-muted">ログを読み込み中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <!-- カスタムJS -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

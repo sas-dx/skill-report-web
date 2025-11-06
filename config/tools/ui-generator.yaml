@@ -1,0 +1,172 @@
+# UI画像生成ツール設定
+# 画面設計書に基づくUI画像生成の専用設定
+
+# ツール情報
+tool_info:
+  name: "UI画像生成ツール"
+  version: "1.0.0"
+  description: "画面設計書に基づくUI画像生成"
+  category: "design"
+
+# 画像生成設定
+image_generation:
+  default_size:
+    width: 1792
+    height: 1024
+  output_format: "png"
+  quality: 95
+  dpi: 72
+  
+# カラーパレット設定
+color_palette:
+  primary: "#3399cc"
+  secondary: "#f0f0f0"
+  accent: "#ff6b35"
+  text: "#333333"
+  text_light: "#666666"
+  border: "#c8c8c8"
+  background: "#ffffff"
+  background_light: "#f8f9fa"
+  success: "#28a745"
+  warning: "#ffc107"
+  error: "#dc3545"
+  info: "#17a2b8"
+
+# フォント設定
+fonts:
+  japanese_candidates:
+    - "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf"
+    - "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf"
+    - "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
+    - "/System/Library/Fonts/Hiragino Sans GB.ttc"
+    - "/System/Library/Fonts/Arial Unicode MS.ttf"
+  fallback: "default"
+  sizes:
+    title: 20
+    header: 16
+    text: 14
+    small: 12
+    tiny: 10
+
+# レイアウト設定
+layout:
+  margins:
+    top: 20
+    bottom: 20
+    left: 20
+    right: 20
+  padding:
+    default: 10
+    small: 5
+    large: 15
+  spacing:
+    component: 15
+    section: 25
+    element: 8
+
+# 画面タイプ別設定
+screen_types:
+  login:
+    template: "login_screen.j2"
+    special_layout: true
+    center_content: true
+    show_header: false
+    show_sidebar: false
+  dashboard:
+    template: "dashboard_screen.j2"
+    sidebar_enabled: true
+    header_enabled: true
+    content_area: "main"
+  form:
+    template: "form_screen.j2"
+    validation_display: true
+    form_layout: "vertical"
+    show_buttons: true
+  list:
+    template: "list_screen.j2"
+    pagination: true
+    search_enabled: true
+    filters_enabled: true
+  detail:
+    template: "detail_screen.j2"
+    breadcrumb: true
+    action_buttons: true
+
+# コンポーネント設定
+components:
+  header:
+    height: 60
+    background: "#ffffff"
+    border_bottom: true
+    logo_position: "left"
+    user_menu_position: "right"
+  sidebar:
+    width: 250
+    background: "#f8f9fa"
+    border_right: true
+    collapsible: true
+  button:
+    border_radius: 4
+    padding: "8px 16px"
+    font_weight: "normal"
+  input:
+    border_radius: 4
+    padding: "8px 12px"
+    border_color: "#c8c8c8"
+  card:
+    border_radius: 8
+    shadow: "0 2px 4px rgba(0,0,0,0.1)"
+    padding: 16
+
+# アイコン設定
+icons:
+  style: "outline"
+  size: 20
+  color: "#666666"
+  mapping:
+    home: "🏠"
+    user: "👤"
+    skills: "🎯"
+    career: "📈"
+    work: "💼"
+    training: "📚"
+    reports: "📊"
+    settings: "⚙️"
+    logout: "🚪"
+    edit: "✏️"
+    save: "💾"
+    cancel: "❌"
+    delete: "🗑️"
+    search: "🔍"
+    filter: "🔽"
+    add: "➕"
+    download: "⬇️"
+
+# 出力設定
+output:
+  base_directory: "docs/design/screens"
+  filename_pattern: "{screen_type}_ui_mockup_{timestamp}.png"
+  metadata_enabled: true
+  metadata_format: "json"
+  backup_enabled: false
+  
+# メタデータ設定
+metadata:
+  include_generation_info: true
+  include_config_hash: true
+  include_timestamp: true
+  include_tool_version: true
+
+# 検証設定
+validation:
+  check_font_availability: true
+  validate_colors: true
+  check_output_directory: true
+  verify_template_exists: true
+
+# デバッグ設定
+debug:
+  save_intermediate_steps: false
+  verbose_logging: false
+  show_component_bounds: false
+  highlight_clickable_areas: false

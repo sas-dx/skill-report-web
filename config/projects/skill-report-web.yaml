@@ -1,0 +1,402 @@
+# プロジェクト固有設定: 年間スキル報告書WEB化PJT
+# このプロジェクト専用の設定とカスタマイズ
+
+# プロジェクト基本情報
+project_info:
+  name: "年間スキル報告書WEB化PJT"
+  system_title: "年間スキル報告書システム"
+  version: "1.0.0"
+  description: "AI駆動開発による年間スキル報告書のWEB化システム"
+  organization: "SAS Institute Japan"
+  development_period: "2025年5月-7月"
+
+# 要求仕様ID体系
+requirement_id_system:
+  categories:
+    TNT: "Multi-Tenant (マルチテナント基盤要件)"
+    PLT: "Platform (システム基盤要件)"
+    ACC: "Access Control (ユーザー権限管理)"
+    PRO: "Profile (個人プロフィール管理)"
+    SKL: "Skill (スキル情報管理)"
+    CAR: "Career (目標・キャリア管理)"
+    WPM: "Work Performance Mgmt (作業実績管理)"
+    TRN: "Training (研修・セミナー管理)"
+    RPT: "Report (レポート出力)"
+    NTF: "Notification (通知・連携サービス)"
+
+# 画面固有設定
+screens:
+  login:
+    spec_id: "TNT.3-AUTH.1"
+    screen_id: "SCR_AUT_Login"
+    title: "ログイン"
+    description: "システムへのログイン画面"
+    layout_type: "login"
+    show_company_logo: true
+    show_system_title: true
+  home:
+    spec_id: "PLT.1-WEB.1"
+    screen_id: "SCR_CMN_Home"
+    title: "ホーム"
+    description: "ダッシュボード・ホーム画面"
+    layout_type: "dashboard"
+    show_welcome_message: true
+    show_quick_actions: true
+  profile:
+    spec_id: "PRO.1-BASE.1"
+    screen_id: "SCR_PRO_Profile"
+    title: "プロフィール"
+    description: "個人プロフィール管理画面"
+    layout_type: "form"
+    editable_fields: true
+    show_photo: true
+  skill:
+    spec_id: "SKL.1-HIER.1"
+    screen_id: "SCR_SKL_Skill"
+    title: "スキル情報"
+    description: "スキル管理・スキルマップ画面"
+    layout_type: "detail"
+    show_radar_chart: true
+    show_skill_tree: true
+  career:
+    spec_id: "CAR.1-PLAN.1"
+    screen_id: "SCR_CAR_Career"
+    title: "キャリアプラン"
+    description: "キャリア目標・進捗管理画面"
+    layout_type: "detail"
+    show_timeline: true
+    show_progress_chart: true
+
+# メニュー・ナビゲーション構成
+navigation:
+  sidebar_items:
+    - name: "ホーム"
+      key: "ホーム"
+      icon: "home"
+      route: "/dashboard"
+      spec_id: "PLT.1-WEB.1"
+    - name: "プロフィール"
+      key: "プロフィール"
+      icon: "user"
+      route: "/profile"
+      spec_id: "PRO.1-BASE.1"
+    - name: "スキル情報"
+      key: "スキル"
+      icon: "skills"
+      route: "/skills"
+      spec_id: "SKL.1-HIER.1"
+    - name: "キャリアプラン"
+      key: "キャリア"
+      icon: "career"
+      route: "/career"
+      spec_id: "CAR.1-PLAN.1"
+    - name: "作業実績"
+      key: "作業実績"
+      icon: "work"
+      route: "/work"
+      spec_id: "WPM.1-DET.1"
+    - name: "研修管理"
+      key: "研修"
+      icon: "training"
+      route: "/training"
+      spec_id: "TRN.1-ATT.1"
+    - name: "レポート"
+      key: "レポート"
+      icon: "reports"
+      route: "/reports"
+      spec_id: "RPT.1-EXCEL.1"
+
+# ブランディング・デザイン設定
+branding:
+  company_name: "SAS Institute Japan"
+  system_name: "年間スキル報告書システム"
+  logo_text: "SAS"
+  primary_color: "#3399cc"
+  secondary_color: "#f0f0f0"
+  accent_color: "#ff6b35"
+
+# フォーム項目設定
+form_fields:
+  profile:
+    personal_info:
+      - name: "emp_no"
+        label: "社員番号"
+        type: "text"
+        required: true
+        readonly: true
+      - name: "name"
+        label: "氏名"
+        type: "text"
+        required: true
+      - name: "email"
+        label: "メールアドレス"
+        type: "email"
+        required: true
+      - name: "department"
+        label: "部署"
+        type: "select"
+        required: true
+      - name: "position"
+        label: "役職"
+        type: "select"
+        required: false
+    contact_info:
+      - name: "phone"
+        label: "電話番号"
+        type: "tel"
+        required: false
+      - name: "extension"
+        label: "内線番号"
+        type: "text"
+        required: false
+
+# スキル関連設定
+skills:
+  categories:
+    - name: "プログラミング言語"
+      key: "programming"
+      icon: "💻"
+    - name: "フレームワーク・ライブラリ"
+      key: "framework"
+      icon: "🔧"
+    - name: "データベース"
+      key: "database"
+      icon: "🗄️"
+    - name: "クラウド・インフラ"
+      key: "cloud"
+      icon: "☁️"
+    - name: "ツール・その他"
+      key: "tools"
+      icon: "🛠️"
+  levels:
+    1: "初級"
+    2: "中級"
+    3: "上級"
+    4: "エキスパート"
+
+# レポート設定
+reports:
+  formats:
+    - "Excel"
+    - "PDF"
+    - "CSV"
+  templates:
+    - name: "個人スキル報告書"
+      key: "personal_skill"
+      format: "Excel"
+    - name: "部署別スキル一覧"
+      key: "department_skill"
+      format: "Excel"
+    - name: "スキルマップ"
+      key: "skill_map"
+      format: "PDF"
+
+# 通知設定
+notifications:
+  channels:
+    - "メール"
+    - "システム内通知"
+  events:
+    - name: "スキル情報更新"
+      key: "skill_update"
+      default_enabled: true
+    - name: "目標進捗更新"
+      key: "goal_progress"
+      default_enabled: true
+    - name: "研修完了"
+      key: "training_complete"
+      default_enabled: true
+
+# 開発・テスト設定
+development:
+  mock_data_enabled: true
+  debug_mode: false
+  api_base_url: "http://localhost:3000/api"
+  
+# 品質基準（プロジェクト固有）
+quality_standards:
+  response_time: "1秒以内"
+  accessibility: "WCAG 2.1 AA準拠"
+  browser_support:
+    - "Chrome 90+"
+    - "Firefox 88+"
+    - "Safari 14+"
+    - "Edge 90+"
+  mobile_support: true
+  
+# セキュリティ設定
+security:
+  authentication_required: true
+  session_timeout: 3600  # 1時間
+  password_policy:
+    min_length: 8
+    require_uppercase: true
+    require_lowercase: true
+    require_numbers: true
+    require_symbols: false
+
+# 設計統合ツール - プロジェクト固有設定
+design_integration:
+  # プロジェクト固有パス設定
+  paths:
+    # 設計書ディレクトリ
+    design_root: "docs/design"
+    database_specs: "docs/design/database/table-details"
+    api_specs: "docs/design/api/specs"
+    screen_specs: "docs/design/screens/specs"
+    
+    # 生成物出力ディレクトリ
+    output_root: "docs/design"
+    ddl_output: "docs/design/database/ddl"
+    documentation_output: "docs/design/generated"
+    reports_output: "docs/design/reports"
+    
+    # バックアップディレクトリ
+    backup_root: "docs/design/backups"
+  
+  # プロジェクト固有命名規則
+  naming_conventions:
+    # テーブル命名
+    table_naming:
+      prefix_patterns:
+        master: "MST_"
+        transaction: "TRN_"
+        history: "HIS_"
+        system: "SYS_"
+        work: "WRK_"
+      case_style: "UPPER_SNAKE_CASE"
+    
+    # API命名
+    api_naming:
+      endpoint_pattern: "/api/v1/{resource}"
+      method_conventions:
+        get_single: "GET /{resource}/{id}"
+        get_list: "GET /{resource}"
+        create: "POST /{resource}"
+        update: "PUT /{resource}/{id}"
+        delete: "DELETE /{resource}/{id}"
+    
+    # 画面命名
+    screen_naming:
+      id_pattern: "SCR_{category}_{name}"
+      file_pattern: "画面設計書_SCR-{id}_{name}.md"
+  
+  # プロジェクト固有検証ルール
+  validation_rules:
+    # データベース固有ルール
+    database:
+      required_columns:
+        - "created_at"
+        - "updated_at"
+      forbidden_column_names:
+        - "password"
+        - "secret"
+      max_table_columns: 50
+      require_primary_key: true
+    
+    # API固有ルール
+    api:
+      required_headers:
+        - "Content-Type"
+        - "Authorization"
+      response_format: "json"
+      error_format: "standard"
+      require_pagination: true
+    
+    # 画面固有ルール
+    screen:
+      required_components:
+        - "header"
+        - "navigation"
+        - "main_content"
+      accessibility_level: "WCAG_2_1_AA"
+      responsive_breakpoints:
+        - "mobile: 768px"
+        - "tablet: 1024px"
+        - "desktop: 1200px"
+  
+  # プロジェクト固有生成設定
+  generation_settings:
+    # データベース生成
+    database:
+      target_db: "postgresql"
+      include_indexes: true
+      include_constraints: true
+      include_comments: true
+      generate_seed_data: true
+    
+    # API生成
+    api:
+      spec_format: "openapi_3.0"
+      include_examples: true
+      include_security: true
+      generate_mock_responses: true
+    
+    # 画面生成
+    screen:
+      mockup_style: "modern_flat"
+      include_interactions: true
+      include_responsive_views: true
+      generate_component_specs: true
+  
+  # プロジェクト固有品質基準
+  quality_metrics:
+    # 設計書品質
+    documentation:
+      completeness_threshold: 95  # %
+      consistency_threshold: 98   # %
+      traceability_threshold: 100 # %
+    
+    # 実装品質
+    implementation:
+      api_coverage: 100           # %
+      screen_coverage: 100        # %
+      database_coverage: 100      # %
+    
+    # 統合品質
+    integration:
+      cross_reference_accuracy: 100  # %
+      naming_consistency: 100        # %
+      requirement_mapping: 100       # %
+  
+  # プロジェクト固有レポート設定
+  reporting:
+    # 定期レポート
+    scheduled_reports:
+      - name: "週次品質レポート"
+        frequency: "weekly"
+        recipients: ["PL", "PM"]
+        format: "markdown"
+      - name: "月次統合レポート"
+        frequency: "monthly"
+        recipients: ["PL", "PM", "開発チーム"]
+        format: "html"
+    
+    # カスタムレポート
+    custom_reports:
+      - name: "要求仕様トレーサビリティ"
+        template: "traceability_matrix"
+        output_format: "excel"
+      - name: "設計品質ダッシュボード"
+        template: "quality_dashboard"
+        output_format: "html"
+  
+  # プロジェクト固有統合設定
+  integration_settings:
+    # 要求仕様連携
+    requirement_integration:
+      requirement_file: "docs/requirements/要件定義.md"
+      id_extraction_pattern: "([A-Z]{3}\\.[0-9]+-[A-Z]+\\.[0-9]+)"
+      mapping_validation: true
+    
+    # Git連携
+    git_integration:
+      commit_message_validation: true
+      branch_naming_validation: true
+      pr_template_validation: true
+    
+    # 外部ツール連携
+    external_tools:
+      figma_integration: false
+      confluence_integration: false
+      jira_integration: false

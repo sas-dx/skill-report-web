@@ -1,0 +1,24 @@
+{
+  "generated_at": "2025-07-03T19:16:48.850848",
+  "type": "mock_ui_image_japanese_fixed",
+  "description": "プロフィール管理画面のモックUI画像（日本語対応版）",
+  "size": "1792x1024",
+  "filename": "profile_ui_mockup_fixed_20250703_191648.png",
+  "specification_id": "PRO.1-BASE.1",
+  "screen_id": "SCR-PROFILE",
+  "design_document": "docs/design/screens/specs/画面定義書_SCR_PRO_Profile_プロフィール画面.md",
+  "improvements": [
+    "日本語フォント対応（IPAゴシック使用）",
+    "フォントサイズの階層化（タイトル20px、ヘッダー16px、本文14px、小文字12px）",
+    "フォント検出・フォールバック機能",
+    "レイアウト調整（フィールド幅拡張）"
+  ],
+  "features": [
+    "ヘッダー（タイトル、ユーザードロップダウン、通知、ログアウト）",
+    "サイドバーナビゲーション（プロフィールがハイライト）",
+    "基本情報フォーム（社員番号、氏名、メール、生年月日、入社日）",
+    "所属情報フォーム（部署、役職、グループ、上長）",
+    "更新履歴テーブル（日時、項目、変更前、変更後、変更者）",
+    "アクションボタン（キャンセル、保存）"
+  ]
+}

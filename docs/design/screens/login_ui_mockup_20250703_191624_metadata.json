@@ -1,0 +1,10 @@
+{
+  "generated_at": "2025-07-03T19:16:24.587365",
+  "type": "mock_ui_image_login",
+  "description": "login画面のモックUI画像（日本語対応版）",
+  "size": "1792x1024",
+  "filename": "login_ui_mockup_20250703_191624.png",
+  "specification_id": "TNT.3-AUTH.1",
+  "screen_id": "SCR_AUT_Login",
+  "screen_type": "login"
+}

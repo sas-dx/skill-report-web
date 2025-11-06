@@ -5,7 +5,7 @@
  * 実装内容: ファイル内容の検証のみ実施、DB登録は行わない
  */
 import { NextRequest, NextResponse } from 'next/server';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 // 一時データストレージ（メモリベース）
 // 実際の実装では共有ストレージ（Redis等）を使用
@@ -111,19 +111,27 @@ export async function POST(request: NextRequest) {
         records = parseCSV(text);
       } else {
         // Excel読み込み
-        const workbook = XLSX.read(buffer, { type: 'buffer' });
-        if (workbook.SheetNames.length === 0) {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        
+        if (workbook.worksheets.length === 0) {
           throw new Error('Excelファイルにシートが見つかりません');
         }
-        const sheetName = workbook.SheetNames[0];
-        if (!sheetName) {
-          throw new Error('Excelシートが見つかりません');
-        }
-        const worksheet = workbook.Sheets[sheetName];
+        
+        const worksheet = workbook.worksheets[0];
         if (!worksheet) {
           throw new Error('Excelシートの読み込みに失敗しました');
         }
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        const jsonData: any[][] = [];
+        worksheet.eachRow((row) => {
+          const rowData: any[] = [];
+          row.eachCell({ includeEmpty: true }, (cell) => {
+            rowData.push(cell.value);
+          });
+          jsonData.push(rowData);
+        });
+        
         records = parseExcelData(jsonData);
       }
     } catch (parseError) {

@@ -2,7 +2,7 @@
 // WRK.2-BULK.3: 作業実績一括登録テンプレート取得
 
 import { NextRequest, NextResponse } from 'next/server';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export async function GET(request: NextRequest) {
   try {
@@ -140,27 +140,23 @@ export async function GET(request: NextRequest) {
       });
     } else {
       // Excel形式でテンプレート生成
-      const workbook = XLSX.utils.book_new();
-      
-      // ワークシートデータを作成（配列の配列形式）
-      const worksheetData = [
-        japaneseHeaders,  // 1行目: 日本語ヘッダー
-        headers,          // 2行目: 英語ヘッダー（システム用）
-        sampleData1,      // 3行目: サンプルデータ1
-        sampleData2       // 4行目: サンプルデータ2
-      ];
+      const workbook = new ExcelJS.Workbook();
       
       // ワークシートを作成
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const worksheet = workbook.addWorksheet('作業実績テンプレート');
       
-      // 列幅を設定（見やすくするため）
-      const colWidths = japaneseHeaders.map(() => ({ wch: 20 }));
-      worksheet['!cols'] = colWidths;
+      // ヘッダー行とサンプルデータを追加
+      worksheet.addRow(japaneseHeaders);  // 1行目: 日本語ヘッダー
+      worksheet.addRow(headers);          // 2行目: 英語ヘッダー（システム用）
+      worksheet.addRow(sampleData1);      // 3行目: サンプルデータ1
+      worksheet.addRow(sampleData2);      // 4行目: サンプルデータ2
       
-      // ワークシートをワークブックに追加
-      XLSX.utils.book_append_sheet(workbook, worksheet, '作業実績テンプレート');
+      // 列幅を設定
+      worksheet.columns = japaneseHeaders.map(() => ({ width: 20 }));
       
       // 説明シートを追加
+      const instructionSheet = workbook.addWorksheet('使用方法');
+      
       const instructionData = [
         ['作業実績一括登録テンプレート 使用方法'],
         [''],
@@ -193,15 +189,11 @@ export async function GET(request: NextRequest) {
         ['・CSVで保存する場合はUTF-8エンコーディングを使用してください']
       ];
       
-      const instructionSheet = XLSX.utils.aoa_to_sheet(instructionData);
-      instructionSheet['!cols'] = [{ wch: 80 }];
-      XLSX.utils.book_append_sheet(workbook, instructionSheet, '使用方法');
+      instructionData.forEach(row => instructionSheet.addRow(row));
+      instructionSheet.getColumn(1).width = 80;
       
       // Excelファイルをバッファとして生成
-      const excelBuffer = XLSX.write(workbook, { 
-        type: 'buffer', 
-        bookType: 'xlsx' 
-      });
+      const excelBuffer = await workbook.xlsx.writeBuffer();
 
       return new NextResponse(excelBuffer, {
         status: 200,

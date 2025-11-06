@@ -1,0 +1,243 @@
+# 設計統合ツール - ツール固有設定
+# 設計統合ツール特有の機能設定
+
+# ツール情報
+tool_info:
+  name: "Design Integration Tools"
+  version: "2.0.0"
+  description: "統合設計管理・検証・生成ツール"
+
+# 機能有効/無効設定
+features:
+  # コア機能
+  core:
+    database_management: true
+    api_management: true
+    screen_management: true
+    integration_checking: true
+    report_generation: true
+  
+  # 高度な機能
+  advanced:
+    ai_recommendations: true
+    auto_generation: true
+    cross_validation: true
+    dependency_analysis: true
+    pattern_recognition: true
+  
+  # 実験的機能
+  experimental:
+    machine_learning_validation: false
+    predictive_analysis: false
+    auto_refactoring: false
+
+# データベース管理設定
+database_management:
+  # 検証機能
+  validation:
+    yaml_format_check: true
+    required_sections_check: true
+    data_type_validation: true
+    foreign_key_validation: true
+    index_optimization_check: true
+  
+  # 生成機能
+  generation:
+    ddl_generation: true
+    documentation_generation: true
+    sample_data_generation: true
+    migration_script_generation: false
+  
+  # 分析機能
+  analysis:
+    table_relationship_analysis: true
+    performance_analysis: true
+    normalization_analysis: true
+
+# API管理設定
+api_management:
+  # 検証機能
+  validation:
+    endpoint_validation: true
+    method_validation: true
+    parameter_validation: true
+    response_validation: true
+    security_validation: true
+  
+  # 生成機能
+  generation:
+    openapi_spec_generation: true
+    documentation_generation: true
+    mock_server_generation: false
+    client_sdk_generation: false
+  
+  # 分析機能
+  analysis:
+    api_coverage_analysis: true
+    performance_analysis: true
+    security_analysis: true
+
+# 画面管理設定
+screen_management:
+  # 検証機能
+  validation:
+    component_validation: true
+    navigation_validation: true
+    accessibility_validation: true
+    responsive_validation: true
+  
+  # 生成機能
+  generation:
+    mockup_generation: true
+    component_documentation: true
+    style_guide_generation: true
+    prototype_generation: false
+  
+  # 分析機能
+  analysis:
+    ux_analysis: true
+    component_reuse_analysis: true
+    accessibility_analysis: true
+
+# 統合チェック設定
+integration_checking:
+  # 横断検証
+  cross_validation:
+    requirement_traceability: true
+    design_consistency: true
+    naming_convention: true
+    data_flow_validation: true
+  
+  # 依存関係分析
+  dependency_analysis:
+    component_dependencies: true
+    api_dependencies: true
+    database_dependencies: true
+    circular_dependency_detection: true
+  
+  # 影響分析
+  impact_analysis:
+    change_impact_analysis: true
+    breaking_change_detection: true
+    backward_compatibility_check: true
+
+# レポート生成設定
+report_generation:
+  # レポート種類
+  report_types:
+    summary_report: true
+    detailed_report: true
+    technical_report: true
+    executive_report: true
+    quality_report: true
+  
+  # 出力形式
+  output_formats:
+    markdown: true
+    html: true
+    pdf: false
+    json: true
+    excel: false
+  
+  # 内容設定
+  content:
+    include_charts: true
+    include_recommendations: true
+    include_code_examples: true
+    include_best_practices: true
+
+# AI機能設定
+ai_features:
+  # 自動推奨
+  recommendations:
+    design_improvements: true
+    performance_optimizations: true
+    security_enhancements: true
+    best_practice_suggestions: true
+  
+  # パターン認識
+  pattern_recognition:
+    design_patterns: true
+    anti_patterns: true
+    code_smells: true
+    architecture_patterns: true
+  
+  # 品質評価
+  quality_assessment:
+    design_quality_scoring: true
+    maintainability_scoring: true
+    scalability_scoring: true
+    security_scoring: true
+
+# 外部ツール連携
+external_integrations:
+  # バージョン管理
+  version_control:
+    git_integration: true
+    commit_hooks: false
+    branch_analysis: false
+  
+  # CI/CD
+  ci_cd:
+    pipeline_integration: false
+    automated_validation: false
+    deployment_checks: false
+  
+  # 開発ツール
+  development_tools:
+    ide_integration: false
+    linter_integration: false
+    formatter_integration: false
+
+# カスタマイズ設定
+customization:
+  # カスタムルール
+  custom_rules:
+    enabled: true
+    rule_directory: "custom_rules"
+    auto_discovery: true
+  
+  # カスタムテンプレート
+  custom_templates:
+    enabled: true
+    template_directory: "custom_templates"
+    override_defaults: false
+  
+  # カスタムプラグイン
+  custom_plugins:
+    enabled: true
+    plugin_directory: "plugins"
+    auto_load: true
+
+# デバッグ設定
+debug:
+  # デバッグモード
+  debug_mode: false
+  verbose_logging: false
+  trace_execution: false
+  
+  # 開発者機能
+  developer_features:
+    profiling: false
+    memory_monitoring: false
+    performance_metrics: false
+
+# 実験的機能詳細
+experimental_features:
+  # 機械学習
+  machine_learning:
+    auto_classification: false
+    pattern_learning: false
+    anomaly_detection: false
+  
+  # 予測分析
+  predictive_analysis:
+    quality_prediction: false
+    maintenance_prediction: false
+    performance_prediction: false
+  
+  # 自動リファクタリング
+  auto_refactoring:
+    design_optimization: false
+    code_generation: false
+    structure_improvement: false

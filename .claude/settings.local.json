@@ -55,7 +55,9 @@
       "mcp__serena__search_for_pattern",
       "mcp__serena__write_memory",
       "mcp__serena__think_about_collected_information",
-      "mcp__serena__think_about_whether_you_are_done"
+      "mcp__serena__think_about_whether_you_are_done",
+      "Bash(git stash:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n📚 docs: testing ディレクトリの包括的な README を追加\n\n- 全10件のテストドキュメントの概要一覧を作成\n- ドキュメント体系を3カテゴリで整理（計画・設計、機能テスト、非機能テスト）\n- テスト戦略とテストピラミッドの説明を追加\n- 技術スタック（Vitest, Playwright, k6等）の詳細を記載\n- 品質目標とKPIを明確化\n- クイックスタートガイドとCI/CD統合情報を提供\n- 役割別（開発者、QA、PM、デザイナー）の読み方ガイドを追加\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "defaultMode": "acceptEdits",
     "additionalDirectories": [

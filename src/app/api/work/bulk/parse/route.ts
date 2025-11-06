@@ -1,6 +1,6 @@
 // WPM.1-BULK.2: CSVパース用API
 import { NextRequest, NextResponse } from 'next/server';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,25 +30,40 @@ export async function POST(request: NextRequest) {
     const buffer = await file.arrayBuffer();
     const data = Buffer.from(buffer);
     
-    // xlsxライブラリでパース
-    const workbook = XLSX.read(data, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    if (!sheetName) {
+    // ExcelJSライブラリでパース
+    const workbook = new ExcelJS.Workbook();
+    
+    if (isCSV) {
+      // CSVの場合は文字列として読み込んでワークシートに変換
+      const text = new TextDecoder('utf-8').decode(data);
+      const lines = text.split('\n').filter(line => line.trim());
+      const worksheet = workbook.addWorksheet('Sheet1');
+      
+      lines.forEach(line => {
+        const values = line.split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
+        worksheet.addRow(values);
+      });
+    } else {
+      await workbook.xlsx.load(data);
+    }
+    
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) {
       return NextResponse.json({
         success: false,
         error: 'ファイルにシートがありません。'
       }, { status: 400 });
     }
-    const worksheet = workbook.Sheets[sheetName];
-    if (!worksheet) {
-      return NextResponse.json({
-        success: false,
-        error: 'ワークシートが見つかりません。'
-      }, { status: 400 });
-    }
     
     // JSONに変換（ヘッダー行を使用）
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+    const jsonData: any[][] = [];
+    worksheet.eachRow((row, rowNumber) => {
+      const rowData: any[] = [];
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        rowData.push(cell.value);
+      });
+      jsonData.push(rowData);
+    });
     
     if (jsonData.length < 3) {
       return NextResponse.json({
@@ -118,12 +133,15 @@ export async function POST(request: NextRequest) {
           record[header] = value === 'true' || value === true;
         } else if (header === 'start_date' || header === 'end_date') {
           // Excelの日付形式を処理
-          if (value && typeof value === 'number') {
-            // Excelのシリアル値を日付に変換
-            const date = XLSX.SSF.parse_date_code(value);
-            record[header] = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
+          if (value instanceof Date) {
+            const y = value.getFullYear();
+            const m = String(value.getMonth() + 1).padStart(2, '0');
+            const d = String(value.getDate()).padStart(2, '0');
+            record[header] = `${y}-${m}-${d}`;
+          } else if (value) {
+            record[header] = String(value).trim();
           } else {
-            record[header] = value || '';
+            record[header] = '';
           }
         } else {
           record[header] = value ? String(value).trim() : '';

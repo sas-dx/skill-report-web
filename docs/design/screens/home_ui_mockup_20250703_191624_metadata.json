@@ -1,0 +1,10 @@
+{
+  "generated_at": "2025-07-03T19:16:24.629037",
+  "type": "mock_ui_image_home",
+  "description": "home画面のモックUI画像（日本語対応版）",
+  "size": "1792x1024",
+  "filename": "home_ui_mockup_20250703_191624.png",
+  "specification_id": "PLT.1-WEB.1",
+  "screen_id": "SCR_CMN_Home",
+  "screen_type": "home"
+}

@@ -1,0 +1,395 @@
+/* 統一設計ツール - ダッシュボード CSS */
+
+/* 基本レイアウト */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+/* サイドバー */
+.sidebar {
+    background-color: #ffffff;
+    min-height: calc(100vh - 56px);
+    border-right: 1px solid #dee2e6;
+    padding: 0;
+}
+
+.sidebar .list-group-item {
+    border: none;
+    border-radius: 0;
+    padding: 15px 20px;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+.sidebar .list-group-item:hover {
+    background-color: #e9ecef;
+    color: #007bff;
+}
+
+.sidebar .list-group-item.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.sidebar .list-group-item i {
+    margin-right: 10px;
+    width: 16px;
+}
+
+/* メインコンテンツ */
+.main-content {
+    padding: 30px;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 56px);
+}
+
+/* タブコンテンツ */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ステータスカード */
+.status-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.status-card .card-title {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.status-card .card-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* プログレスバー */
+.progress {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+/* カード */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 20px;
+}
+
+.card-header h5 {
+    margin: 0;
+    color: #495057;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* ボタン */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn i {
+    margin-right: 8px;
+}
+
+/* ステータスインジケーター */
+#status-indicator {
+    font-weight: 500;
+}
+
+#status-indicator i {
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* ステータス別色分け */
+.status-ready #status-indicator i { color: #28a745; }
+.status-running #status-indicator i { color: #ffc107; }
+.status-error #status-indicator i { color: #dc3545; }
+.status-completed #status-indicator i { color: #17a2b8; }
+
+/* アクティビティリスト */
+#recent-activity {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.activity-message {
+    margin: 5px 0;
+}
+
+.activity-status {
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.activity-status.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.activity-status.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.activity-status.running {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* ログエリア */
+#logs-content {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    padding: 5px 0;
+}
+
+.log-timestamp {
+    color: #6c757d;
+    margin-right: 10px;
+}
+
+.log-level {
+    font-weight: bold;
+    margin-right: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+}
+
+.log-level.INFO {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.log-level.ERROR {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.log-level.WARNING {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.log-level.DEBUG {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* 分析結果 */
+.analytics-metric {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+
+.analytics-metric h4 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.analytics-metric .metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.analytics-metric .metric-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* フォーム */
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .main-content {
+        padding: 15px;
+    }
+    
+    .status-card .card-text {
+        font-size: 1.2rem;
+    }
+    
+    .card-header,
+    .card-body {
+        padding: 15px;
+    }
+}
+
+/* ローディングアニメーション */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 成功・エラーメッセージ */
+.alert {
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* ツールカード */
+.tool-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.tool-card .card-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.tool-card.database .card-header {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.tool-card.ai .card-header {
+    background: linear-gradient(135deg, #17a2b8, #117a8b);
+}
+
+.tool-card.all .card-header {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #212529;
+}

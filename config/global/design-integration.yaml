@@ -1,0 +1,183 @@
+# 設計統合ツール - グローバル設定
+# 全プロジェクト共通の設定項目
+
+# バージョン情報
+version: "1.0.0"
+schema_version: "1.0"
+
+# 検証設定
+validation:
+  # データベース検証
+  database:
+    required_sections:
+      - "revision_history"
+      - "overview" 
+      - "notes"
+      - "rules"
+    min_overview_length: 50
+    min_notes_count: 3
+    min_rules_count: 3
+    supported_data_types:
+      - "VARCHAR"
+      - "INTEGER"
+      - "TIMESTAMP"
+      - "BOOLEAN"
+      - "TEXT"
+      - "DECIMAL"
+      - "DATE"
+      - "TIME"
+    
+  # API検証
+  api:
+    required_sections:
+      - "endpoint"
+      - "method"
+      - "parameters"
+      - "responses"
+    supported_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "PATCH"
+    response_format_validation: true
+    
+  # 画面検証
+  screen:
+    required_sections:
+      - "screen_id"
+      - "screen_name"
+      - "components"
+      - "navigation"
+    supported_devices:
+      - "desktop"
+      - "tablet"
+      - "mobile"
+    accessibility_check: true
+
+# 生成設定
+generation:
+  # 出力形式
+  output_formats:
+    - "markdown"
+    - "html"
+    - "json"
+    - "yaml"
+  
+  # テンプレート設定
+  templates:
+    database_ddl: "postgresql"
+    api_spec: "openapi_3.0"
+    screen_mockup: "figma_style"
+  
+  # 自動生成機能
+  auto_generation:
+    enabled: true
+    backup_before_generation: true
+    validate_after_generation: true
+
+# 統合チェック設定
+integration:
+  # 横断チェック
+  cross_validation:
+    requirement_mapping: true
+    cross_references: true
+    naming_consistency: true
+    data_flow_validation: true
+  
+  # 整合性チェック
+  consistency_checks:
+    api_database_mapping: true
+    screen_api_mapping: true
+    component_reuse_validation: true
+
+# レポート設定
+reporting:
+  # 出力設定
+  output:
+    include_statistics: true
+    include_recommendations: true
+    include_charts: true
+    include_dependency_graph: true
+  
+  # 詳細レベル
+  detail_levels:
+    summary: true
+    detailed: true
+    technical: true
+  
+  # AI機能
+  ai_features:
+    auto_recommendations: true
+    pattern_analysis: true
+    quality_scoring: true
+
+# ログ設定
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+  console_output: true
+
+# パフォーマンス設定
+performance:
+  # 並列処理
+  parallel_processing:
+    enabled: true
+    max_workers: 4
+  
+  # キャッシュ
+  caching:
+    enabled: true
+    cache_duration: 3600  # 1時間
+    cache_size_limit: 100  # MB
+
+# セキュリティ設定
+security:
+  # ファイルアクセス制限
+  file_access:
+    allowed_extensions:
+      - ".yaml"
+      - ".yml" 
+      - ".md"
+      - ".json"
+      - ".sql"
+    blocked_paths:
+      - "/etc"
+      - "/var"
+      - "/usr"
+  
+  # 実行制限
+  execution:
+    allow_shell_commands: false
+    sandbox_mode: true
+
+# 品質基準
+quality_standards:
+  # 最低品質基準
+  minimum_requirements:
+    documentation_coverage: 80  # %
+    validation_pass_rate: 95   # %
+    consistency_score: 90      # %
+  
+  # 推奨品質基準
+  recommended_requirements:
+    documentation_coverage: 95  # %
+    validation_pass_rate: 98   # %
+    consistency_score: 95      # %
+
+# 拡張機能設定
+extensions:
+  # プラグイン
+  plugins:
+    enabled: true
+    auto_discovery: true
+    custom_validators: true
+    custom_generators: true
+  
+  # 外部ツール連携
+  external_tools:
+    git_integration: true
+    ci_cd_integration: true
+    issue_tracker_integration: false

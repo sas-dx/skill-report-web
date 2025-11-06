@@ -1,0 +1,502 @@
+{
+  "generated_at": "2025-07-04T06:16:27.596699",
+  "total_tables_analyzed": 52,
+  "suggestions": [
+    {
+      "table": "HIS_AuditLog",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "HIS_NotificationLog",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "HIS_ReportGeneration",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "HIS_TenantBilling",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_CareerPlan",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Certification",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_CertificationRequirement",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Department",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Employee",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_EmployeeDepartment",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_EmployeeJobType",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_EmployeePosition",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_JobType",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_JobTypeSkill",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_JobTypeSkillGrade",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_NotificationSettings",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_NotificationTemplate",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Permission",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Position",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_ReportTemplate",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Role",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Skill",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_SkillCategory",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_SkillGrade",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_SkillGradeRequirement",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_SkillHierarchy",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_SkillItem",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_SystemConfig",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Tenant",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_TenantSettings",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_TrainingProgram",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_UserAuth",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_BackupHistory",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_IntegrationConfig",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_MasterData",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_SkillIndex",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_SkillMatrix",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_SystemLog",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_TenantUsage",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "SYS_TokenStore",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TEMPLATE",
+      "type": "documentation",
+      "priority": "low",
+      "issue": "テーブル概要が簡潔すぎます",
+      "suggestion": "より詳細な説明を追加してください",
+      "impact": "maintainability"
+    },
+    {
+      "table": "TRN_EmployeeSkillGrade",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_GoalProgress",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_Notification",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_PDU",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_ProjectRecord",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_SkillEvidence",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_SkillRecord",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "TRN_TrainingHistory",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "WRK_BatchJobLog",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    }
+  ],
+  "priority_actions": [
+    {
+      "table": "HIS_AuditLog",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "HIS_NotificationLog",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "HIS_ReportGeneration",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "HIS_TenantBilling",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_CareerPlan",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Certification",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_CertificationRequirement",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Department",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_Employee",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    },
+    {
+      "table": "MST_EmployeeDepartment",
+      "type": "integrity",
+      "priority": "medium",
+      "issue": "外部キー制約が不足している可能性があります",
+      "suggestion": "参照整合性を保つため外部キー制約を追加してください",
+      "impact": "data_integrity"
+    }
+  ],
+  "estimated_impact": {
+    "impact_distribution": {
+      "data_integrity": 49,
+      "maintainability": 1
+    },
+    "priority_distribution": {
+      "high": 0,
+      "medium": 49,
+      "low": 1
+    },
+    "total_suggestions": 50,
+    "estimated_effort_hours": 100,
+    "risk_level": "medium"
+  }
+}
