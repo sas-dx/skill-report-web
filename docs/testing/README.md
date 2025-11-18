@@ -143,12 +143,78 @@ npm run test:agents:heal
 | テストタイプ | 主要ツール | 補助ツール | 用途 |
 |------------|-----------|-----------|-----|
 | **ユニットテスト** | Vitest | React Testing Library<br>MSW<br>@testing-library/user-event | コンポーネントテスト<br>APIモック<br>ユーザー操作シミュレーション |
-| **統合テスト** | Vitest | Supertest<br>Prisma<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
+| **統合テスト** | Jest | Prisma<br>PostgreSQL 15<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
 | **E2Eテスト** | Playwright 1.56+ | @playwright/test<br>Playwright Agents<br>Allure Report | ブラウザ自動化<br>AI駆動テスト生成・修復<br>テストレポート |
 | **パフォーマンス** | k6 | Lighthouse<br>Web Vitals<br>Chrome DevTools | 負荷テスト<br>パフォーマンス測定<br>プロファイリング |
 | **セキュリティ** | OWASP ZAP | Snyk<br>npm audit<br>ESLint Security Plugin | 脆弱性スキャン<br>依存関係チェック<br>静的解析 |
 | **アクセシビリティ** | axe-core | Pa11y<br>WAVE<br>NVDA/JAWS | 自動検証<br>CI統合<br>スクリーンリーダーテスト |
 | **ハイブリッド** ⭐ NEW | 上記全て + AI | @faker-js/faker<br>@anthropic-ai/sdk<br>@cucumber/cucumber | Data Builder<br>AI自動保守<br>BDD統合 |
+
+---
+
+## ✅ 実装済みテスト
+
+### 統合テスト実装状況
+
+**フレームワーク**: Jest 29.7.0 + Prisma 5.14.0 + PostgreSQL 15
+**実装開始日**: 2025-11-18
+**ドキュメント**: [04_統合テスト実装ガイド.md](./04_統合テスト実装ガイド.md)
+
+#### 実装済みAPIテスト
+
+| API | テストファイル | テストケース数 | カバレッジ | 状態 |
+|-----|--------------|--------------|-----------|------|
+| **認証API** | `test/integration/api/auth/login.test.ts` | 9件 | 100% | ✅ 完了 |
+| **スキル管理API** | `test/integration/api/skills/get-skills.test.ts` | 10件 | 95% | ✅ 完了 |
+| **作業実績管理API** | `test/integration/api/work/get-work.test.ts` | 11件 | 90% | ✅ 完了 |
+| **キャリア目標API** | `test/integration/api/career-goals/get-career-goals.test.ts` | 10件 | 95% | ✅ 完了 |
+| **スキルカテゴリマスタAPI** | `test/integration/api/skill-categories/get-categories.test.ts` | 10件 | 90% | ✅ 完了 |
+| **通知API** | `test/integration/api/notifications/get-notifications.test.ts` | 18件 | 95% | ✅ 完了 |
+| **レポート生成API** | `test/integration/api/reports/generate-report.test.ts` | 10件 | 90% | ✅ 完了 |
+
+**合計**: 7 API / 78 テストケース / 平均カバレッジ 93.6%
+
+#### テストヘルパー
+
+統合テストを効率的に実装するためのヘルパー関数群（**合計47関数**）：
+
+| ヘルパー | ファイル | 関数数 | 機能 |
+|---------|---------|--------|-----|
+| **DBセットアップ** | `test/helpers/setup.ts` | 3 | テストDBのセットアップ・クリーンアップ・マイグレーション |
+| **リクエストモック** | `test/helpers/mock-request.ts` | 5 | NextRequest モックの生成・認証付きリクエスト |
+| **テストデータファクトリー** | `test/helpers/test-data-factory.ts` | 17 | 各種テストデータの生成（Tenant, Employee, Skill, Notification, Reportなど） |
+| **アサーションヘルパー** | `test/helpers/assertion-helpers.ts` | 16 | 共通アサーション（レスポンス検証、エラーチェック、日付形式検証など） |
+| **セットアップパターン** | `test/helpers/test-setup-helpers.ts` | 6 | テストコンテキスト作成、バッチデータ生成、日付生成 |
+| **統合エクスポート** | `test/helpers/index.ts` | - | すべてのヘルパーを一括インポート可能 |
+
+**詳細**: [test/helpers/README.md](../../test/helpers/README.md)
+
+#### テストコマンド
+
+```bash
+# 統合テストのみ実行
+npm run test:integration
+
+# ウォッチモード
+npm run test:integration:watch
+
+# カバレッジ計測
+npm run test:integration:coverage
+
+# テストDB環境セットアップ
+npm run test:db:setup
+npm run test:db:migrate
+
+# クリーンアップ
+npm run test:db:cleanup
+```
+
+#### 次の実装予定
+
+- プロフィールAPI統合テスト（`/api/profiles/[userId]`）
+- 研修API統合テスト（`/api/trainings/*`）
+- レポート履歴API統合テスト（`/api/reports/history`）
+- レポートサマリーAPI統合テスト（`/api/reports/summary/[userId]`）
 
 ---
 
@@ -429,6 +495,10 @@ graph LR
 
 | 日付 | バージョン | 更新内容 | 更新者 |
 |------|-----------|---------|--------|
+| 2025-11-18 | v2.4.0 | テストヘルパー関数の大規模リファクタリング<br>- アサーションヘルパー追加（16関数）<br>- セットアップパターン追加（6関数）<br>- テストデータファクトリー拡充（通知・レポート対応）<br>- 統合エクスポート機能追加<br>- ヘルパー関数ドキュメント作成<br>**合計47ヘルパー関数利用可能** | Claude Code |
+| 2025-11-18 | v2.3.0 | 通知・レポート生成API統合テスト追加（計78件）<br>通知API: 18テスト、レポート生成API: 10テスト | Claude Code |
+| 2025-11-18 | v2.2.0 | キャリア目標・スキルカテゴリマスタAPI統合テスト追加（計50件）<br>平均カバレッジ94%達成 | Claude Code |
+| 2025-11-18 | v2.1.0 | 統合テスト実装状況セクション追加<br>認証・スキル・作業実績APIテスト完了（30件） | Claude Code |
 | 2025-11-06 | v2.0.0 | ハイブリッドアーキテクチャ追加 | AI推進チーム |
 | 2024-07-04 | v1.0.0 | 初版作成 | QAチーム |
 

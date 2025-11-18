@@ -46,8 +46,10 @@ jest.mock('next/navigation', () => ({
 
 // Mock environment variables
 process.env.NODE_ENV = 'test'
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db'
-process.env.JWT_SECRET = 'test-jwt-secret'
+process.env.DATABASE_URL = 'postgresql://test_user:test_password@localhost:5434/skill_report_test_db'
+process.env.TEST_DATABASE_URL = 'postgresql://test_user:test_password@localhost:5434/skill_report_test_db'
+process.env.JWT_SECRET = 'test-jwt-secret-for-testing'
+process.env.JWT_EXPIRES_IN = '24h'
 
 // Mock Next.js Web APIs
 global.Request = class MockRequest {
