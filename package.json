@@ -153,7 +153,9 @@
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.11.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "web-streams-polyfill": "^4.2.0",
+    "whatwg-fetch": "^3.6.20"
   },
   "prisma": {
     "schema": "src/database/prisma/schema.prisma",

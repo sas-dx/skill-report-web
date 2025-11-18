@@ -62,7 +62,7 @@ export const handlers = [
   }),
 
   http.post('/api/skills/:userId', async ({ request }) => {
-    const skill = await request.json()
+    const skill = await request.json() as Record<string, unknown>
     return HttpResponse.json(
       {
         success: true,
@@ -78,7 +78,7 @@ export const handlers = [
 
   http.put('/api/skills/:userId/:skillId', async ({ request, params }) => {
     const { skillId } = params
-    const skill = await request.json()
+    const skill = await request.json() as Record<string, unknown>
     return HttpResponse.json({
       success: true,
       data: {
@@ -146,7 +146,7 @@ export const handlers = [
   }),
 
   http.put('/api/profile/:userId', async ({ request }) => {
-    const profile = await request.json()
+    const profile = await request.json() as Record<string, unknown>
     return HttpResponse.json({
       success: true,
       data: {

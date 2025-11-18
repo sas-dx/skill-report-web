@@ -1,3 +1,17 @@
+// Polyfill for Fetch API (required for MSW)
+import 'whatwg-fetch'
+
+// Polyfill for TextEncoder/TextDecoder (required for MSW)
+import { TextEncoder, TextDecoder } from 'util'
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+
+// Polyfill for Streams API (required for MSW)
+import { ReadableStream, WritableStream, TransformStream } from 'web-streams-polyfill'
+global.ReadableStream = ReadableStream
+global.WritableStream = WritableStream
+global.TransformStream = TransformStream
+
 import '@testing-library/jest-dom'
 
 // Mock Next.js router
@@ -131,9 +145,17 @@ global.Headers = class MockHeaders {
 // Global test utilities
 global.fetch = jest.fn()
 
+// Prisma Mock Setup
+// Prismaクライアントのモックをセットアップ
+require('./src/__mocks__/prisma')
+
 // MSW Server Setup (Mock Service Worker)
 // APIモックサーバーのセットアップ
-import { server } from './src/__mocks__/server'
+// TODO: MSW v2はESM-onlyの依存関係が多く、Jestとの統合に課題があります
+// 将来的にJestのESMサポートが改善されたら、以下のコメントを解除してください
+/*
+// Use require() instead of import to ensure polyfills are loaded first
+const { server } = require('./src/__mocks__/server')
 
 beforeAll(() => {
   // MSWサーバーを起動（未処理のリクエストを警告表示）
@@ -150,4 +172,11 @@ afterEach(() => {
 afterAll(() => {
   // すべてのテスト終了後にサーバーをクローズ
   server.close()
+})
+*/
+
+// MSW統合が完了するまでの暫定対応
+afterEach(() => {
+  // モックをクリア
+  jest.clearAllMocks()
 })

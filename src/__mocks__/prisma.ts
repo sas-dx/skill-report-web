@@ -7,14 +7,13 @@ import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended'
  */
 
 // Prismaクライアントのモック化
-jest.mock('@/database/prisma/client', () => ({
+jest.mock('@/lib/prisma', () => ({
   __esModule: true,
-  default: mockDeep<PrismaClient>(),
   prisma: mockDeep<PrismaClient>(),
 }))
 
 // モックインスタンスの取得
-import prisma from '@/database/prisma/client'
+import { prisma } from '@/lib/prisma'
 
 // テスト前にモックをリセット
 beforeEach(() => {
