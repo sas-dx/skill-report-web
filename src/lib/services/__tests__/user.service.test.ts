@@ -14,22 +14,7 @@ import {
   deleteUser,
 } from '../user.service'
 import type { MST_User } from '@prisma/client'
-
-/**
- * テストデータのファクトリ関数
- */
-function createMockUser(overrides?: Partial<MST_User>): MST_User {
-  return {
-    user_id: 1,
-    employee_id: 'EMP001',
-    name: 'テストユーザー',
-    email: 'test@example.com',
-    role: 'user',
-    created_at: new Date('2024-01-01'),
-    updated_at: new Date('2024-01-01'),
-    ...overrides,
-  }
-}
+import { createMockUser } from '@/__tests__/helpers/prismaFactories'
 
 describe('ユーザーサービス', () => {
   describe('getUserById', () => {
