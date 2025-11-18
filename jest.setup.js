@@ -131,7 +131,23 @@ global.Headers = class MockHeaders {
 // Global test utilities
 global.fetch = jest.fn()
 
-// Clean up after each test
+// MSW Server Setup (Mock Service Worker)
+// APIモックサーバーのセットアップ
+import { server } from './src/__mocks__/server'
+
+beforeAll(() => {
+  // MSWサーバーを起動（未処理のリクエストを警告表示）
+  server.listen({ onUnhandledRequest: 'warn' })
+})
+
 afterEach(() => {
+  // 各テスト後にハンドラーをリセット
+  server.resetHandlers()
+  // モックをクリア
   jest.clearAllMocks()
+})
+
+afterAll(() => {
+  // すべてのテスト終了後にサーバーをクローズ
+  server.close()
 })
