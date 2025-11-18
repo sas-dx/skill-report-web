@@ -4,9 +4,17 @@
 
 このドキュメントでは、GitHub Actionsを使用したテストとカバレッジの自動化について説明します。
 
-## 🚀 実装済みのワークフロー
+> **注意**: 完全なワークフローファイルのサンプルは [`examples/github-actions-test-workflow.yml`](./examples/github-actions-test-workflow.yml) を参照してください。
+
+## 🚀 推奨ワークフロー
 
 ### `.github/workflows/test.yml`
+
+権限の制約により、ワークフローファイルは手動で作成する必要があります。
+以下の手順に従ってください：
+
+1. **ファイルパス**: `.github/workflows/test.yml`
+2. **ファイル内容**: [`examples/github-actions-test-workflow.yml`](./examples/github-actions-test-workflow.yml) をコピー
 
 #### トリガー条件
 - **Push**: `master`, `main`, `develop` ブランチへのプッシュ
