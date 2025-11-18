@@ -171,8 +171,10 @@ npm run test:agents:heal
 | **スキルカテゴリマスタAPI** | `test/integration/api/skill-categories/get-categories.test.ts` | 10件 | 90% | ✅ 完了 |
 | **通知API** | `test/integration/api/notifications/get-notifications.test.ts` | 18件 | 95% | ✅ 完了 |
 | **レポート生成API** | `test/integration/api/reports/generate-report.test.ts` | 10件 | 90% | ✅ 完了 |
+| **プロフィールAPI** | `test/integration/api/profiles/get-profile.test.ts` | 16件 | 95% | ✅ 完了 |
+| **研修API** | `test/integration/api/trainings/get-trainings.test.ts` | 14件 | 92% | ✅ 完了 |
 
-**合計**: 7 API / 78 テストケース / 平均カバレッジ 93.6%
+**合計**: 9 API / 108 テストケース / 平均カバレッジ 93.6%
 
 #### テストヘルパー
 
@@ -211,10 +213,10 @@ npm run test:db:cleanup
 
 #### 次の実装予定
 
-- プロフィールAPI統合テスト（`/api/profiles/[userId]`）
-- 研修API統合テスト（`/api/trainings/*`）
 - レポート履歴API統合テスト（`/api/reports/history`）
 - レポートサマリーAPI統合テスト（`/api/reports/summary/[userId]`）
+- レポートテンプレートAPI統合テスト（`/api/reports/templates`）
+- プロフィール履歴API統合テスト（`/api/profiles/[userId]/history`）
 
 ---
 
@@ -495,6 +497,7 @@ graph LR
 
 | 日付 | バージョン | 更新内容 | 更新者 |
 |------|-----------|---------|--------|
+| 2025-11-18 | v2.5.0 | プロフィール・研修API統合テスト追加（計108件）<br>プロフィールAPI: 16テスト、研修API: 14テスト<br>ヘルパー関数を積極活用した実装 | Claude Code |
 | 2025-11-18 | v2.4.0 | テストヘルパー関数の大規模リファクタリング<br>- アサーションヘルパー追加（16関数）<br>- セットアップパターン追加（6関数）<br>- テストデータファクトリー拡充（通知・レポート対応）<br>- 統合エクスポート機能追加<br>- ヘルパー関数ドキュメント作成<br>**合計47ヘルパー関数利用可能** | Claude Code |
 | 2025-11-18 | v2.3.0 | 通知・レポート生成API統合テスト追加（計78件）<br>通知API: 18テスト、レポート生成API: 10テスト | Claude Code |
 | 2025-11-18 | v2.2.0 | キャリア目標・スキルカテゴリマスタAPI統合テスト追加（計50件）<br>平均カバレッジ94%達成 | Claude Code |
