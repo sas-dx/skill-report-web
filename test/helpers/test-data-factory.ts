@@ -434,3 +434,119 @@ export async function createTestUserComplete(
     userAuth
   }
 }
+
+/**
+ * 通知データの作成
+ */
+export async function createTestNotification(
+  prisma: PrismaClient,
+  recipientId: string,
+  tenantId: string = 'TENANT001',
+  overrides: Partial<{
+    notification_type: string
+    title: string
+    message: string
+    read_status: string
+    priority_level: string
+  }> = {}
+) {
+  const timestamp = Date.now()
+  const defaultData = {
+    id: `notif_${timestamp}`,
+    notification_id: `notif_${timestamp}`,
+    tenant_id: tenantId,
+    recipient_id: recipientId,
+    notification_type: overrides.notification_type || 'info',
+    title: overrides.title || 'テスト通知',
+    message: overrides.message || 'テスト通知メッセージ',
+    read_status: overrides.read_status || 'unread',
+    priority_level: overrides.priority_level || 'normal',
+    is_deleted: false,
+    created_by: 'system'
+  }
+
+  return await prisma.notification.create({
+    data: defaultData
+  })
+}
+
+/**
+ * レポートテンプレートデータの作成
+ */
+export async function createTestReportTemplate(
+  prisma: PrismaClient,
+  tenantId: string = 'TENANT001',
+  overrides: Partial<{
+    template_code: string
+    template_name: string
+    report_category: string
+    output_format: string
+  }> = {}
+) {
+  const timestamp = Date.now()
+  const defaultData = {
+    id: `template_${timestamp}`,
+    tenant_id: tenantId,
+    template_code: overrides.template_code || `TPL_${timestamp}`,
+    template_name: overrides.template_name || 'テストレポートテンプレート',
+    description: 'テスト用レポートテンプレート',
+    report_category: overrides.report_category || 'GENERAL',
+    output_format: overrides.output_format || 'PDF',
+    is_active: true,
+    is_deleted: false,
+    created_by: 'system'
+  }
+
+  return await prisma.reportTemplate.create({
+    data: defaultData
+  })
+}
+
+/**
+ * レポート生成データの作成
+ */
+export async function createTestReportGeneration(
+  prisma: PrismaClient,
+  templateId: string,
+  requestedBy: string,
+  tenantId: string = 'TENANT001',
+  overrides: Partial<{
+    report_title: string
+    generation_status: string
+    parameters?: Record<string, any>
+  }> = {}
+) {
+  const timestamp = Date.now()
+  const fileName = `${overrides.report_title || 'report'}_${Date.now()}.pdf`
+  const filePath = `/reports/generated/${requestedBy}/${fileName}`
+
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 30)
+
+  const defaultData = {
+    id: `report_${timestamp}`,
+    tenant_id: tenantId,
+    template_id: templateId,
+    requested_by: requestedBy,
+    report_title: overrides.report_title || 'テストレポート',
+    report_category: 'GENERAL',
+    output_format: 'PDF',
+    generation_status: overrides.generation_status || 'PENDING',
+    parameters: overrides.parameters ? JSON.stringify(overrides.parameters) : null,
+    file_path: filePath,
+    file_size: null,
+    download_count: 0,
+    last_downloaded_at: null,
+    requested_at: new Date(),
+    started_at: null,
+    completed_at: null,
+    processing_time_ms: null,
+    error_message: null,
+    error_details: null,
+    expires_at: expiresAt
+  }
+
+  return await prisma.reportGeneration.create({
+    data: defaultData
+  })
+}
