@@ -169,8 +169,10 @@ npm run test:agents:heal
 | **作業実績管理API** | `test/integration/api/work/get-work.test.ts` | 11件 | 90% | ✅ 完了 |
 | **キャリア目標API** | `test/integration/api/career-goals/get-career-goals.test.ts` | 10件 | 95% | ✅ 完了 |
 | **スキルカテゴリマスタAPI** | `test/integration/api/skill-categories/get-categories.test.ts` | 10件 | 90% | ✅ 完了 |
+| **通知API** | `test/integration/api/notifications/get-notifications.test.ts` | 18件 | 95% | ✅ 完了 |
+| **レポート生成API** | `test/integration/api/reports/generate-report.test.ts` | 10件 | 90% | ✅ 完了 |
 
-**合計**: 5 API / 50 テストケース / 平均カバレッジ 94%
+**合計**: 7 API / 78 テストケース / 平均カバレッジ 93.6%
 
 #### テストヘルパー
 
@@ -204,10 +206,10 @@ npm run test:db:cleanup
 
 #### 次の実装予定
 
-- 通知API統合テスト（`/api/notifications/[userId]`）
-- レポート生成API統合テスト（`/api/reports/*`）
 - プロフィールAPI統合テスト（`/api/profiles/[userId]`）
 - 研修API統合テスト（`/api/trainings/*`）
+- レポート履歴API統合テスト（`/api/reports/history`）
+- レポートサマリーAPI統合テスト（`/api/reports/summary/[userId]`）
 
 ---
 
@@ -488,6 +490,7 @@ graph LR
 
 | 日付 | バージョン | 更新内容 | 更新者 |
 |------|-----------|---------|--------|
+| 2025-11-18 | v2.3.0 | 通知・レポート生成API統合テスト追加（計78件）<br>通知API: 18テスト、レポート生成API: 10テスト | Claude Code |
 | 2025-11-18 | v2.2.0 | キャリア目標・スキルカテゴリマスタAPI統合テスト追加（計50件）<br>平均カバレッジ94%達成 | Claude Code |
 | 2025-11-18 | v2.1.0 | 統合テスト実装状況セクション追加<br>認証・スキル・作業実績APIテスト完了（30件） | Claude Code |
 | 2025-11-06 | v2.0.0 | ハイブリッドアーキテクチャ追加 | AI推進チーム |
