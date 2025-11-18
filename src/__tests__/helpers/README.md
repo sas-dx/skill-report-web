@@ -10,6 +10,9 @@ Next.js の `NextRequest` オブジェクトをモックするためのヘルパ
 ### `prismaFactories.ts`
 Prisma モデルのテストデータを生成するファクトリ関数
 
+### `apiResponse.helper.ts`
+API レスポンスの検証を簡素化するヘルパー関数
+
 ## 🔧 使用方法
 
 ### NextRequest モックの作成
@@ -213,19 +216,137 @@ describe('API テスト', () => {
 });
 ```
 
+### API レスポンスの検証
+
+#### 基本的な使い方
+
+```typescript
+import {
+  expectSuccessResponse,
+  expectErrorResponse,
+  expectCompleteSuccessResponse,
+  getResponseData,
+} from '@/__tests__/helpers/apiResponse.helper';
+
+describe('API テスト', () => {
+  test('成功レスポンスを検証', async () => {
+    const GET = await import('./route').then(m => m.GET);
+    const request = createAuthenticatedRequest('emp_001');
+
+    const response = await GET(request);
+    const { status, data } = await getResponseData(response);
+
+    // 基本的な成功レスポンスの検証
+    expectSuccessResponse(response, data);
+
+    // または、完全な検証（タイムスタンプ含む）
+    const validatedData = await expectCompleteSuccessResponse(
+      response,
+      ['career_goal', 'skill_categories', 'positions']  // 期待するプロパティ
+    );
+  });
+
+  test('エラーレスポンスを検証', async () => {
+    const response = await GET(invalidRequest);
+    const { status, data } = await getResponseData(response);
+
+    expectErrorResponse(response, data, 400);  // 400 Bad Request
+  });
+});
+```
+
+#### 利用可能な検証ヘルパー
+
+**成功レスポンス系**:
+- `expectSuccessResponse(response, data)` - 基本的な成功レスポンス検証
+- `expectCompleteSuccessResponse(response, properties?)` - 完全な検証（推奨）
+- `expectCreatedResponse(response, properties?)` - 作成成功（201 Created）
+- `expectUpdatedResponse(response)` - 更新成功（200 OK）
+- `expectDeletedResponse(response)` - 削除成功（200/204）
+
+**エラーレスポンス系**:
+- `expectErrorResponse(response, data, status)` - カスタムエラー検証
+- `expectUnauthorizedResponse(response, data)` - 401 Unauthorized
+- `expectNotFoundResponse(response, data)` - 404 Not Found
+- `expectValidationErrorResponse(response, data)` - 400 Bad Request
+- `expectServerErrorResponse(response, data)` - 500 Internal Server Error
+
+**データ構造検証系**:
+- `expectArrayResponse(data)` - 配列レスポンスの検証
+- `expectArrayResponseWithLength(data, length)` - 長さ指定の配列検証
+- `expectEmptyArrayResponse(data)` - 空配列の検証
+- `expectPaginatedResponse(data)` - ページネーション検証
+- `expectResponseDataToHaveProperties(data, properties)` - プロパティ存在確認
+
+#### 実践例
+
+```typescript
+import {
+  expectCompleteSuccessResponse,
+  expectArrayResponseWithLength,
+  expectCreatedResponse,
+} from '@/__tests__/helpers/apiResponse.helper';
+
+describe('実践的な API テスト', () => {
+  test('リスト取得APIの検証', async () => {
+    const response = await GET(request);
+
+    // 完全な成功レスポンス検証
+    const data = await expectCompleteSuccessResponse(response, ['items']);
+
+    // データが配列で要素数が5であることを検証
+    expectArrayResponseWithLength(data.data.items, 5);
+  });
+
+  test('データ作成APIの検証', async () => {
+    const response = await POST(request);
+
+    // 201 Createdレスポンスを検証
+    const data = await expectCreatedResponse(response, ['id', 'name', 'created_at']);
+
+    // 作成されたデータのIDが存在することを確認
+    expect(data.data.id).toBeDefined();
+  });
+});
+```
+
 ## 📦 利用可能なファクトリ一覧
 
 ### 単一データ作成
-- `createMockCareerPlan(overrides?)`
-- `createMockSkillCategory(overrides?)`
-- `createMockPosition(overrides?)`
-- `createMockUser(overrides?)`
+
+**キャリア・目標関連**:
+- `createMockCareerPlan(overrides?)` - キャリアプラン
+- `createMockGoalProgress(overrides?)` - 目標進捗
+
+**マスタデータ**:
+- `createMockSkillCategory(overrides?)` - スキルカテゴリ
+- `createMockPosition(overrides?)` - ポジション
+- `createMockUser(overrides?)` - ユーザー
+- `createMockDepartment(overrides?)` - 部署
+- `createMockEmployee(overrides?)` - 社員
+- `createMockCertification(overrides?)` - 資格
+- `createMockSkill(overrides?)` - スキル
+
+**業務記録**:
+- `createMockProjectRecord(overrides?)` - プロジェクト記録
 
 ### 複数データ作成
-- `createMockCareerPlans(count, baseOverrides?)`
-- `createMockSkillCategories(count, baseOverrides?)`
-- `createMockPositions(count, baseOverrides?)`
-- `createMockUsers(count, baseOverrides?)`
+
+**キャリア・目標関連**:
+- `createMockCareerPlans(count, baseOverrides?)` - 複数のキャリアプラン
+- `createMockGoalProgresses(count, baseOverrides?)` - 複数の目標進捗
+
+**マスタデータ**:
+- `createMockSkillCategories(count, baseOverrides?)` - 複数のスキルカテゴリ
+- `createMockPositions(count, baseOverrides?)` - 複数のポジション
+- `createMockUsers(count, baseOverrides?)` - 複数のユーザー
+- `createMockDepartments(count, baseOverrides?)` - 複数の部署
+- `createMockEmployees(count, baseOverrides?)` - 複数の社員
+- `createMockCertifications(count, baseOverrides?)` - 複数の資格
+- `createMockSkills(count, baseOverrides?)` - 複数のスキル
+
+**業務記録**:
+- `createMockProjectRecords(count, baseOverrides?)` - 複数のプロジェクト記録
 
 ## 🔄 今後の拡張
 

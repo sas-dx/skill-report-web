@@ -13,6 +13,10 @@ import {
   createMockSkillCategory,
   createMockPosition,
 } from '@/__tests__/helpers/prismaFactories';
+import {
+  expectCompleteSuccessResponse,
+  expectArrayResponse,
+} from '@/__tests__/helpers/apiResponse.helper';
 
 // モックレスポンスデータ
 const mockCareerGoalResponse = {
@@ -89,13 +93,17 @@ describe('API-700: キャリア初期データ取得API', () => {
         const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
-        const responseData = await response.json();
 
-        expect(response.status).toBe(200);
-        expect(responseData.success).toBe(true);
-        expect(responseData.data).toHaveProperty('career_goal');
-        expect(responseData.data).toHaveProperty('skill_categories');
-        expect(responseData.data).toHaveProperty('positions');
+        // 新しいヘルパーを使用した検証
+        const data = await expectCompleteSuccessResponse(response, [
+          'career_goal',
+          'skill_categories',
+          'positions',
+        ]);
+
+        // skill_categoriesとpositionsが配列であることを検証
+        expectArrayResponse({ ...data, data: data.data.skill_categories });
+        expectArrayResponse({ ...data, data: data.data.positions });
       });
 
       test('ユーザーIDがヘッダーにない場合、デフォルトユーザーIDを使用すること', async () => {
