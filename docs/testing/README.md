@@ -143,12 +143,69 @@ npm run test:agents:heal
 | テストタイプ | 主要ツール | 補助ツール | 用途 |
 |------------|-----------|-----------|-----|
 | **ユニットテスト** | Vitest | React Testing Library<br>MSW<br>@testing-library/user-event | コンポーネントテスト<br>APIモック<br>ユーザー操作シミュレーション |
-| **統合テスト** | Vitest | Supertest<br>Prisma<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
+| **統合テスト** | Jest | Prisma<br>PostgreSQL 15<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
 | **E2Eテスト** | Playwright 1.56+ | @playwright/test<br>Playwright Agents<br>Allure Report | ブラウザ自動化<br>AI駆動テスト生成・修復<br>テストレポート |
 | **パフォーマンス** | k6 | Lighthouse<br>Web Vitals<br>Chrome DevTools | 負荷テスト<br>パフォーマンス測定<br>プロファイリング |
 | **セキュリティ** | OWASP ZAP | Snyk<br>npm audit<br>ESLint Security Plugin | 脆弱性スキャン<br>依存関係チェック<br>静的解析 |
 | **アクセシビリティ** | axe-core | Pa11y<br>WAVE<br>NVDA/JAWS | 自動検証<br>CI統合<br>スクリーンリーダーテスト |
 | **ハイブリッド** ⭐ NEW | 上記全て + AI | @faker-js/faker<br>@anthropic-ai/sdk<br>@cucumber/cucumber | Data Builder<br>AI自動保守<br>BDD統合 |
+
+---
+
+## ✅ 実装済みテスト
+
+### 統合テスト実装状況
+
+**フレームワーク**: Jest 29.7.0 + Prisma 5.14.0 + PostgreSQL 15
+**実装開始日**: 2025-11-18
+**ドキュメント**: [04_統合テスト実装ガイド.md](./04_統合テスト実装ガイド.md)
+
+#### 実装済みAPIテスト
+
+| API | テストファイル | テストケース数 | カバレッジ | 状態 |
+|-----|--------------|--------------|-----------|------|
+| **認証API** | `test/integration/api/auth/login.test.ts` | 9件 | 100% | ✅ 完了 |
+| **スキル管理API** | `test/integration/api/skills/get-skills.test.ts` | 10件 | 95% | ✅ 完了 |
+| **作業実績管理API** | `test/integration/api/work/get-work.test.ts` | 11件 | 90% | ✅ 完了 |
+
+**合計**: 3 API / 30 テストケース
+
+#### テストヘルパー
+
+統合テストを効率的に実装するためのヘルパー関数群：
+
+| ヘルパー | ファイル | 機能 |
+|---------|---------|-----|
+| **DBセットアップ** | `test/helpers/setup.ts` | テストDBのセットアップ・クリーンアップ・マイグレーション |
+| **リクエストモック** | `test/helpers/mock-request.ts` | NextRequest モックの生成・認証付きリクエスト |
+| **テストデータファクトリー** | `test/helpers/test-data-factory.ts` | 各種テストデータの生成（Tenant, Employee, Skill, Workなど） |
+
+#### テストコマンド
+
+```bash
+# 統合テストのみ実行
+npm run test:integration
+
+# ウォッチモード
+npm run test:integration:watch
+
+# カバレッジ計測
+npm run test:integration:coverage
+
+# テストDB環境セットアップ
+npm run test:db:setup
+npm run test:db:migrate
+
+# クリーンアップ
+npm run test:db:cleanup
+```
+
+#### 次の実装予定
+
+- キャリアプランAPI統合テスト
+- スキルカテゴリマスタAPI統合テスト
+- 通知API統合テスト
+- レポート生成API統合テスト
 
 ---
 
@@ -429,6 +486,7 @@ graph LR
 
 | 日付 | バージョン | 更新内容 | 更新者 |
 |------|-----------|---------|--------|
+| 2025-11-18 | v2.1.0 | 統合テスト実装状況セクション追加<br>認証・スキル・作業実績APIテスト完了（30件） | Claude Code |
 | 2025-11-06 | v2.0.0 | ハイブリッドアーキテクチャ追加 | AI推進チーム |
 | 2024-07-04 | v1.0.0 | 初版作成 | QAチーム |
 
