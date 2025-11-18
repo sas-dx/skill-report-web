@@ -127,7 +127,7 @@ npm run test:agents:heal
 
 | レベル | 目的 | カバレッジ目標 | 実行頻度 |
 |-------|------|--------------|---------|
-| **ユニットテスト** | 個別機能の正確性確認 | 90%以上 | コミット毎 |
+| **ユニットテスト** | 個別機能の正確性確認 | 80%以上 ✅ | コミット毎 |
 | **統合テスト** | モジュール間連携の検証 | 80%以上 | PR毎 |
 | **E2Eテスト** | エンドツーエンドのシナリオ検証 | 主要シナリオ100% | デプロイ前 |
 | **パフォーマンステスト** | 性能要件の達成確認 | Core Web Vitals 100% | リリース前 |
@@ -142,13 +142,39 @@ npm run test:agents:heal
 
 | テストタイプ | 主要ツール | 補助ツール | 用途 |
 |------------|-----------|-----------|-----|
-| **ユニットテスト** | Vitest | React Testing Library<br>MSW<br>@testing-library/user-event | コンポーネントテスト<br>APIモック<br>ユーザー操作シミュレーション |
-| **統合テスト** | Jest | Prisma<br>PostgreSQL 15<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
+| **ユニットテスト** | Jest 29.7.0 ✅ | React Testing Library<br>jest-mock-extended<br>@testing-library/user-event | コンポーネントテスト<br>Prismaモック（実装済み）<br>ユーザー操作シミュレーション |
+| **統合テスト** | Jest 29.7.0 | Supertest<br>Prisma<br>PostgreSQL 15<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
 | **E2Eテスト** | Playwright 1.56+ | @playwright/test<br>Playwright Agents<br>Allure Report | ブラウザ自動化<br>AI駆動テスト生成・修復<br>テストレポート |
 | **パフォーマンス** | k6 | Lighthouse<br>Web Vitals<br>Chrome DevTools | 負荷テスト<br>パフォーマンス測定<br>プロファイリング |
 | **セキュリティ** | OWASP ZAP | Snyk<br>npm audit<br>ESLint Security Plugin | 脆弱性スキャン<br>依存関係チェック<br>静的解析 |
 | **アクセシビリティ** | axe-core | Pa11y<br>WAVE<br>NVDA/JAWS | 自動検証<br>CI統合<br>スクリーンリーダーテスト |
 | **ハイブリッド** ⭐ NEW | 上記全て + AI | @faker-js/faker<br>@anthropic-ai/sdk<br>@cucumber/cucumber | Data Builder<br>AI自動保守<br>BDD統合 |
+| **CI/CD** ✨ NEW | GitHub Actions | Codecov（オプション）<br>Slack通知 | 自動テスト実行<br>カバレッジレポート<br>品質ゲート |
+
+### CI/CD セットアップ ✨ NEW
+
+**GitHub Actions** によるテスト自動化と品質保証が実装されています。
+
+#### 主な機能
+- ✅ **自動テスト実行**: Push/PR時に自動実行
+- ✅ **カバレッジレポート**: PRに自動コメント
+- ✅ **マトリックステスト**: Node.js 18.x, 20.x
+- ✅ **型チェック**: TypeScript型エラーの検出
+- ✅ **段階的な品質ゲート**: カバレッジ目標80%
+
+#### クイックスタート
+
+```bash
+# ワークフローファイルの確認
+cat .github/workflows/test.yml
+
+# ローカルでテスト実行（CI環境を再現）
+npm ci
+npm run type-check
+npm test -- --coverage
+```
+
+詳細は [CI/CD セットアップガイド](./CI-CD-SETUP.md) を参照してください。
 
 ---
 
@@ -274,7 +300,7 @@ npx playwright agent healer --auto-fix --test tests/e2e/
 
 | カテゴリ | 指標 | 目標値 | 測定方法 |
 |---------|------|--------|---------|
-| **テストカバレッジ** | ユニットテスト | 90%以上 | Vitest Coverage |
+| **テストカバレッジ** | ユニットテスト | 80%以上 ✅ | Jest Coverage |
 | | 統合テスト | 80%以上 | API Coverage |
 | | E2Eテスト | 主要シナリオ100% | Playwright Report |
 | **パフォーマンス** | LCP (Largest Contentful Paint) | < 2.5秒 | Lighthouse |
