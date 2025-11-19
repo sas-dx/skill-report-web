@@ -63,20 +63,19 @@ ENV NODE_ENV=production
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV TZ=Asia/Tokyo
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# 依存関係をコピー
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-
-# ビルドされたアプリケーションをコピー
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/next.config.js ./
+# Next.js standalone出力を使用
+# standalone出力には必要最小限の依存関係が含まれる
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Prismaクライアントファイルをコピー
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/src/database/prisma ./src/database/prisma
 
 # 非rootユーザーに切り替え
 USER nextjs
@@ -84,9 +83,9 @@ USER nextjs
 # Next.jsのポートを公開
 EXPOSE 3000
 
-# ヘルスチェック設定
+# ヘルスチェック設定（standaloneでは直接server.jsを起動）
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
 
-# Next.jsアプリケーションを起動
-CMD ["npm", "start"]
+# Next.js standalone server.jsを起動
+CMD ["node", "server.js"]
