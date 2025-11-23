@@ -79,8 +79,14 @@ const nextConfig = {
   }),
 
   // 本番環境の最適化
-  ...(process.env.NODE_ENV === 'production' && {
+  // Vercel環境ではstandaloneを使用しない（Vercelは独自のビルドシステムを使用）
+  // Docker環境（VERCEL環境変数が未設定）ではstandaloneを使用
+  ...(process.env.NODE_ENV === 'production' && !process.env.VERCEL && {
     output: 'standalone',
+  }),
+
+  // SWCミニファイは常に有効（Vercel、Docker両対応）
+  ...(process.env.NODE_ENV === 'production' && {
     swcMinify: true,
   }),
 };
