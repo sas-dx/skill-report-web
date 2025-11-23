@@ -176,6 +176,15 @@ npm run test:agents:heal
 
 **合計**: 9 API / 108 テストケース / 平均カバレッジ 93.6%
 
+#### 実装済みデータベーステスト ⭐ NEW
+
+| テストカテゴリ | テストファイル | テストケース数 | 機能 | 状態 |
+|--------------|--------------|--------------|-----|------|
+| **Prismaトランザクション** | `test/integration/database/transaction.test.ts` | 13件 | 複数レコード一括作成、ロールバック、エラーハンドリング、インタラクティブトランザクション | ✅ 完了 |
+| **データ整合性** | `test/integration/database/data-integrity.test.ts` | 17件 | 一意制約、論理削除、外部キー制約、NOT NULL制約、データ型検証 | ✅ 完了 |
+
+**合計**: 2 カテゴリ / 30 テストケース / データベース統合テスト100%カバー
+
 #### テストヘルパー
 
 統合テストを効率的に実装するためのヘルパー関数群（**合計47関数**）：
@@ -203,13 +212,49 @@ npm run test:integration:watch
 # カバレッジ計測
 npm run test:integration:coverage
 
+# API統合テストのみ実行 ⭐ NEW
+npm run test:integration:api
+
+# データベーステストのみ実行 ⭐ NEW
+npm run test:integration:db
+
 # テストDB環境セットアップ
 npm run test:db:setup
 npm run test:db:migrate
 
+# テストDBリセット ⭐ NEW
+npm run test:db:reset
+
+# テストDBシード ⭐ NEW
+npm run test:db:seed
+
 # クリーンアップ
 npm run test:db:cleanup
 ```
+
+#### CI/CD統合 ⭐ NEW
+
+統合テストは GitHub Actions で自動実行されます：
+
+**ワークフローファイル**: `.github/workflows/integration-test.yml`
+
+**自動実行トリガー**:
+- `main`, `develop` ブランチへのプッシュ
+- `main`, `develop` ブランチへのプルリクエスト
+- `claude/**` ブランチへのプッシュ
+
+**実行内容**:
+1. PostgreSQL 15 テストデータベースのセットアップ
+2. Prisma マイグレーション実行
+3. API統合テストの実行
+4. データベース統合テストの実行
+5. カバレッジレポートの生成とアップロード（Codecov）
+6. 品質ゲートチェック（全テスト成功確認）
+
+**品質ゲート基準**:
+- 統合テストカバレッジ: 80%以上
+- 全テストケース: 成功率 100%
+- データベーステスト: 成功率 100%
 
 #### 次の実装予定
 
