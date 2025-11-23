@@ -1,0 +1,128 @@
+name: Test and Coverage
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: true
+
+      - name: Run type check
+        run: npm run type-check
+        continue-on-error: true
+
+      - name: Run tests
+        run: npm test -- --coverage --coverageReporters=json-summary --coverageReporters=text
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: matrix.node-version == '20.x'
+        with:
+          files: ./coverage/coverage-summary.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Generate coverage badge
+        if: matrix.node-version == '20.x'
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')
+          echo "Coverage: ${COVERAGE}%"
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+
+            const statements = coverage.total.statements.pct.toFixed(2);
+            const branches = coverage.total.branches.pct.toFixed(2);
+            const functions = coverage.total.functions.pct.toFixed(2);
+            const lines = coverage.total.lines.pct.toFixed(2);
+
+            const comment = `## 📊 Test Coverage Report
+
+            | Metric | Coverage | Status |
+            |--------|----------|--------|
+            | Statements | ${statements}% | ${statements >= 80 ? '✅' : '⚠️'} |
+            | Branches | ${branches}% | ${branches >= 80 ? '✅' : '⚠️'} |
+            | Functions | ${functions}% | ${functions >= 80 ? '✅' : '⚠️'} |
+            | Lines | ${lines}% | ${lines >= 80 ? '✅' : '⚠️'} |
+
+            **Target**: 80% for all metrics
+
+            ${statements >= 80 && branches >= 80 && functions >= 80 && lines >= 80
+              ? '🎉 All coverage targets met!'
+              : '⚠️ Some coverage targets not met. Please add more tests.'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Check coverage thresholds
+        if: matrix.node-version == '20.x'
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')
+          echo "Current coverage: ${COVERAGE}%"
+
+          # Note: Currently we don't enforce 80% threshold in CI
+          # as the project is still building up test coverage.
+          # Uncomment the following lines when ready to enforce:
+          # if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          #   echo "❌ Coverage is below 80% threshold"
+          #   exit 1
+          # fi
+
+          echo "✅ Coverage check completed (enforcement disabled)"
+
+  lint:
+    name: Run Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: true
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true

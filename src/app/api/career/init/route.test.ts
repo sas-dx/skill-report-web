@@ -6,20 +6,17 @@
  */
 
 import { NextRequest } from 'next/server';
-
-// テストヘルパー関数
-function createMockRequest(headers: Record<string, string> = {}) {
-  const defaultHeaders: Record<string, string> = {
-    'x-user-id': 'emp_001',
-    ...headers
-  };
-
-  return {
-    headers: {
-      get: (name: string) => defaultHeaders[name.toLowerCase()] || null
-    }
-  } as unknown as NextRequest;
-}
+import { prismaMock } from '@/__mocks__/prisma';
+import { createAuthenticatedRequest } from '@/__tests__/helpers/nextRequest.helper';
+import {
+  createMockCareerPlan,
+  createMockSkillCategory,
+  createMockPosition,
+} from '@/__tests__/helpers/prismaFactories';
+import {
+  expectCompleteSuccessResponse,
+  expectArrayResponse,
+} from '@/__tests__/helpers/apiResponse.helper';
 
 // モックレスポンスデータ
 const mockCareerGoalResponse = {
@@ -72,24 +69,46 @@ async function importGETFunction() {
 
 describe('API-700: キャリア初期データ取得API', () => {
   describe('GET /api/career/init', () => {
+    // 各テスト前にPrismaモックをセットアップ
+    beforeEach(() => {
+      // キャリアプランのモック
+      prismaMock.careerPlan.findMany.mockResolvedValue([
+        createMockCareerPlan() as any,
+      ]);
+
+      // スキルカテゴリのモック
+      prismaMock.skillCategory.findMany.mockResolvedValue([
+        createMockSkillCategory() as any,
+      ]);
+
+      // ポジションのモック
+      prismaMock.position.findMany.mockResolvedValue([
+        createMockPosition() as any,
+      ]);
+    });
+
     describe('正常系', () => {
       test('キャリア初期データを正常に取得できること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
-        const responseData = await response.json();
 
-        expect(response.status).toBe(200);
-        expect(responseData.success).toBe(true);
-        expect(responseData.data).toHaveProperty('career_goal');
-        expect(responseData.data).toHaveProperty('skill_categories');
-        expect(responseData.data).toHaveProperty('positions');
+        // 新しいヘルパーを使用した検証
+        const data = await expectCompleteSuccessResponse(response, [
+          'career_goal',
+          'skill_categories',
+          'positions',
+        ]);
+
+        // skill_categoriesとpositionsが配列であることを検証
+        expectArrayResponse({ ...data, data: data.data.skill_categories });
+        expectArrayResponse({ ...data, data: data.data.positions });
       });
 
       test('ユーザーIDがヘッダーにない場合、デフォルトユーザーIDを使用すること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest({ 'x-user-id': '' });
+        const request = createAuthenticatedRequest('', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -100,7 +119,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('キャリアプランが存在しない場合、空のキャリア目標を返すこと', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest({ 'x-user-id': 'emp_999' });
+        const request = createAuthenticatedRequest('emp_999', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -116,7 +135,7 @@ describe('API-700: キャリア初期データ取得API', () => {
     describe('レスポンス形式テスト', () => {
       test('レスポンスが正しい形式であること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -130,7 +149,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('キャリア目標データの形式が正しいこと', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -146,7 +165,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('スキルカテゴリデータの形式が正しいこと', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -166,7 +185,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('ポジションデータの形式が正しいこと', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -188,7 +207,7 @@ describe('API-700: キャリア初期データ取得API', () => {
     describe('パフォーマンステスト', () => {
       test('レスポンス時間が1秒以内であること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const startTime = Date.now();
         const response = await GET(request);
@@ -201,7 +220,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('複数回の連続リクエストが正常に処理されること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const promises = Array.from({ length: 5 }, () => GET(request));
         const responses = await Promise.all(promises);
@@ -215,7 +234,7 @@ describe('API-700: キャリア初期データ取得API', () => {
     describe('エラーハンドリングテスト', () => {
       test('不正なヘッダーでもエラーにならないこと', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest({ 'x-user-id': 'invalid-user-id' });
+        const request = createAuthenticatedRequest('invalid-user-id', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -226,7 +245,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('空のヘッダーでもエラーにならないこと', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest({});
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -239,7 +258,7 @@ describe('API-700: キャリア初期データ取得API', () => {
     describe('データ型テスト', () => {
       test('progress_percentageが数値型であること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -252,7 +271,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('日付フィールドが正しい形式であること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();
@@ -267,7 +286,7 @@ describe('API-700: キャリア初期データ取得API', () => {
 
       test('配列フィールドが正しい型であること', async () => {
         const GET = await importGETFunction();
-        const request = createMockRequest();
+        const request = createAuthenticatedRequest('emp_001', {}, 'http://localhost:3000/api/career/init');
 
         const response = await GET(request);
         const responseData = await response.json();

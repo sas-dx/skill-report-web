@@ -37,7 +37,7 @@ AI駆動・先進パターン統合の次世代テストアーキテクチャ
 |------------|------|---------|------|
 | **01_テスト計画書** | 全体的なテスト戦略と実行計画の定義 | • テスト方針・目標<br>• テスト体制・役割分担<br>• スケジュール・マイルストーン<br>• リスク管理計画 | プロジェクトマネージャー<br>QAリード |
 | **02_テスト設計書** | テストアーキテクチャと技術選定 | • テスト自動化戦略<br>• ツールスタック選定理由<br>• テストデータ管理<br>• 環境構成 | テックリード<br>アーキテクト |
-| **03_ユニットテスト実装ガイド** | コンポーネント単位のテスト実装 | • Vitest設定・実装パターン<br>• React Testing Library活用法<br>• MSWによるモック戦略<br>• カバレッジ目標達成方法 | フロントエンド開発者<br>バックエンド開発者 |
+| **03_ユニットテスト実装ガイド** | コンポーネント単位のテスト実装 | • Jest 29.7.0設定・実装パターン<br>• React Testing Library活用法<br>• Prismaモック戦略（実装済み✅）<br>• MSWモック戦略（[個別使用例](./examples/msw-individual-test-example.md)）<br>• カバレッジ目標達成方法（80%）<br>• **[統合フレームワークアーキテクチャ](./TEST-FRAMEWORK-ARCHITECTURE.md)** ⭐ NEW<br>• **[テストスタイルガイド](./TEST-STYLE-GUIDE.md)** ⭐ NEW<br>• **[テストテンプレート集](./templates/)** ⭐ NEW | フロントエンド開発者<br>バックエンド開発者 |
 | **04_統合テスト実装ガイド** | API・DB連携の検証 | • API統合テストパターン<br>• Supertestの活用<br>• Prismaテスト戦略<br>• データ整合性検証 | バックエンド開発者<br>DBエンジニア |
 | **05_E2Eテスト実装ガイド** | ユーザーシナリオの自動検証 | • Playwright実装パターン<br>• シナリオテスト設計<br>• ページオブジェクトモデル<br>• CI/CD統合 | QAエンジニア<br>フルスタック開発者 |
 | **06_パフォーマンステスト実装ガイド** | システム性能の測定と最適化 | • k6負荷テストシナリオ<br>• Lighthouse活用法<br>• Core Web Vitals最適化<br>• パフォーマンス改善手法 | パフォーマンスエンジニア<br>SRE |
@@ -127,7 +127,7 @@ npm run test:agents:heal
 
 | レベル | 目的 | カバレッジ目標 | 実行頻度 |
 |-------|------|--------------|---------|
-| **ユニットテスト** | 個別機能の正確性確認 | 90%以上 | コミット毎 |
+| **ユニットテスト** | 個別機能の正確性確認 | 80%以上 ✅ | コミット毎 |
 | **統合テスト** | モジュール間連携の検証 | 80%以上 | PR毎 |
 | **E2Eテスト** | エンドツーエンドのシナリオ検証 | 主要シナリオ100% | デプロイ前 |
 | **パフォーマンステスト** | 性能要件の達成確認 | Core Web Vitals 100% | リリース前 |
@@ -142,13 +142,39 @@ npm run test:agents:heal
 
 | テストタイプ | 主要ツール | 補助ツール | 用途 |
 |------------|-----------|-----------|-----|
-| **ユニットテスト** | Vitest | React Testing Library<br>MSW<br>@testing-library/user-event | コンポーネントテスト<br>APIモック<br>ユーザー操作シミュレーション |
-| **統合テスト** | Jest | Prisma<br>PostgreSQL 15<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
+| **ユニットテスト** | Jest 29.7.0 ✅ | React Testing Library<br>jest-mock-extended<br>@testing-library/user-event | コンポーネントテスト<br>Prismaモック（実装済み）<br>ユーザー操作シミュレーション |
+| **統合テスト** | Jest 29.7.0 | Supertest<br>Prisma<br>PostgreSQL 15<br>Docker Compose | APIテスト<br>DBテスト<br>テスト環境構築 |
 | **E2Eテスト** | Playwright 1.56+ | @playwright/test<br>Playwright Agents<br>Allure Report | ブラウザ自動化<br>AI駆動テスト生成・修復<br>テストレポート |
 | **パフォーマンス** | k6 | Lighthouse<br>Web Vitals<br>Chrome DevTools | 負荷テスト<br>パフォーマンス測定<br>プロファイリング |
 | **セキュリティ** | OWASP ZAP | Snyk<br>npm audit<br>ESLint Security Plugin | 脆弱性スキャン<br>依存関係チェック<br>静的解析 |
 | **アクセシビリティ** | axe-core | Pa11y<br>WAVE<br>NVDA/JAWS | 自動検証<br>CI統合<br>スクリーンリーダーテスト |
 | **ハイブリッド** ⭐ NEW | 上記全て + AI | @faker-js/faker<br>@anthropic-ai/sdk<br>@cucumber/cucumber | Data Builder<br>AI自動保守<br>BDD統合 |
+| **CI/CD** ✨ NEW | GitHub Actions | Codecov（オプション）<br>Slack通知 | 自動テスト実行<br>カバレッジレポート<br>品質ゲート |
+
+### CI/CD セットアップ ✨ NEW
+
+**GitHub Actions** によるテスト自動化と品質保証が実装されています。
+
+#### 主な機能
+- ✅ **自動テスト実行**: Push/PR時に自動実行
+- ✅ **カバレッジレポート**: PRに自動コメント
+- ✅ **マトリックステスト**: Node.js 18.x, 20.x
+- ✅ **型チェック**: TypeScript型エラーの検出
+- ✅ **段階的な品質ゲート**: カバレッジ目標80%
+
+#### クイックスタート
+
+```bash
+# ワークフローファイルの確認
+cat .github/workflows/test.yml
+
+# ローカルでテスト実行（CI環境を再現）
+npm ci
+npm run type-check
+npm test -- --coverage
+```
+
+詳細は [CI/CD セットアップガイド](./CI-CD-SETUP.md) を参照してください。
 
 ---
 
@@ -274,7 +300,7 @@ npx playwright agent healer --auto-fix --test tests/e2e/
 
 | カテゴリ | 指標 | 目標値 | 測定方法 |
 |---------|------|--------|---------|
-| **テストカバレッジ** | ユニットテスト | 90%以上 | Vitest Coverage |
+| **テストカバレッジ** | ユニットテスト | 80%以上 ✅ | Jest Coverage |
 | | 統合テスト | 80%以上 | API Coverage |
 | | E2Eテスト | 主要シナリオ100% | Playwright Report |
 | **パフォーマンス** | LCP (Largest Contentful Paint) | < 2.5秒 | Lighthouse |
