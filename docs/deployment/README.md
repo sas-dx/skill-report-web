@@ -1,17 +1,138 @@
 # デプロイメント設定ガイド
 
-## CI/CDワークフローの設定
+## 📋 概要
 
-### 概要
+このディレクトリには、skill-report-webアプリケーションのデプロイに関するドキュメントが含まれています。
 
-このディレクトリには、GitHub Actionsを使用したCI/CDパイプラインの設定ファイルが含まれています。
+## 🚀 クイックスタート
 
-### ワークフローファイルの配置
+### Vercelへのデプロイ（推奨）
 
-GitHub Appの権限制限により、ワークフローファイルは自動的にプッシュできません。
-以下の手順で手動で配置してください：
+最も簡単で高速なデプロイ方法です：
 
-#### 手順
+1. **[環境変数設定チェックリスト](./VERCEL_ENV_CHECKLIST.md)**に従って環境変数を設定
+2. mainブランチにマージ
+3. 自動的にVercelにデプロイされます
+
+詳細: [Vercelデプロイメントガイド](./VERCEL_DEPLOYMENT_GUIDE.md)
+
+### Dockerへのデプロイ（セルフホスト）
+
+自前のサーバーでホストする場合：
+
+1. `.env.production.example`をコピーして`.env`を作成
+2. `docker-compose -f docker-compose.prod.yml up -d`
+
+詳細: [Dockerデプロイメントガイド](./DEPLOYMENT_GUIDE.md)
+
+## 📚 ドキュメント一覧
+
+### 1. [VERCEL_ENV_CHECKLIST.md](./VERCEL_ENV_CHECKLIST.md) ⭐ 必読
+**Vercelへのデプロイ前に必ず確認**
+
+- ✅ 環境変数設定の完全なチェックリスト
+- ✅ コピー&ペースト用のテンプレート
+- ✅ シークレット生成方法
+- ✅ 設定後の確認手順
+
+**対象者:** すべての開発者、DevOps担当者
+
+### 2. [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)
+**Vercelデプロイの詳細ガイド**
+
+- Vercelプロジェクトのセットアップ
+- Neonデータベースとの連携
+- カスタムドメイン設定
+- トラブルシューティング
+- モニタリングとログ
+
+**対象者:** DevOps担当者、インフラ担当者
+
+### 3. [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+**Dockerデプロイの詳細ガイド**
+
+- Docker Composeでのデプロイ
+- PostgreSQLコンテナ設定
+- Nginxリバースプロキシ
+- SSL/TLS証明書設定
+- バックアップとロールバック
+
+**対象者:** セルフホスト担当者、オンプレミス環境管理者
+
+### 4. [ci-cd-workflow.yml](./ci-cd-workflow.yml)
+**GitHub Actions CI/CDワークフロー定義**
+
+- コード品質チェック
+- ビルドテスト
+- Dockerイメージビルド
+- 自動デプロイ設定
+
+**対象者:** DevOps担当者
+
+**注意:** GitHub Appの権限制限により、このファイルは手動で`.github/workflows/`に配置する必要があります。
+
+## 🎯 デプロイ方法の選択
+
+### Vercelを選ぶべき場合
+
+- ✅ 最も簡単で高速なデプロイ
+- ✅ 自動スケーリング
+- ✅ グローバルCDN
+- ✅ SSL証明書の自動発行
+- ✅ メンテナンスフリー
+
+**推奨環境:** 開発、ステージング、本番（SaaS型）
+
+### Dockerを選ぶべき場合
+
+- ✅ 完全なコントロール
+- ✅ オンプレミス要件
+- ✅ カスタムインフラ
+- ✅ コスト最適化（大規模）
+
+**推奨環境:** 本番（セルフホスト）、エンタープライズ環境
+
+## 🔧 必須環境変数（両環境共通）
+
+| 環境変数 | 説明 | 生成方法 |
+|---------|------|---------|
+| `DATABASE_URL` | PostgreSQL接続文字列（Pooled） | Neonから取得 |
+| `DIRECT_URL` | PostgreSQL接続文字列（Direct） | Neonから取得 |
+| `NEXTAUTH_URL` | アプリケーションURL | デプロイ先のURL |
+| `NEXTAUTH_SECRET` | NextAuth署名キー | `openssl rand -base64 32` |
+| `JWT_SECRET` | JWT署名キー | `openssl rand -base64 32` |
+| `ENCRYPTION_KEY` | 暗号化キー（32文字） | `openssl rand -hex 16` |
+
+詳細: [VERCEL_ENV_CHECKLIST.md](./VERCEL_ENV_CHECKLIST.md)
+
+## 🛠️ トラブルシューティング
+
+### ビルドエラー
+
+**Vercel:**
+1. [Vercel Dashboard](https://vercel.com/dashboard) > Deployments > ビルドログ確認
+2. 環境変数が正しく設定されているか確認
+3. [VERCEL_ENV_CHECKLIST.md](./VERCEL_ENV_CHECKLIST.md)を再確認
+
+**Docker:**
+1. `docker-compose logs app`でログ確認
+2. `.env`ファイルが正しく設定されているか確認
+3. [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)のトラブルシューティング参照
+
+### データベース接続エラー
+
+**共通:**
+1. DATABASE_URLが正しいか確認
+2. データベースが起動しているか確認
+3. ネットワーク接続を確認
+
+詳細: [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md#トラブルシューティング)
+
+## CI/CDワークフローの設定（オプション）
+
+GitHub Actionsを使用したCI/CDパイプラインの設定方法：
+
+### 手順
 
 1. **ワークフローファイルのコピー**
    ```bash
@@ -22,152 +143,35 @@ GitHub Appの権限制限により、ワークフローファイルは自動的�
    ```bash
    git add .github/workflows/ci-cd.yml
    git commit -m "ci: GitHub Actions CI/CDワークフローを追加"
-   ```
-
-3. **プッシュ**
-   ```bash
    git push
    ```
 
 ### ワークフローの機能
 
-`ci-cd-workflow.yml` には以下の機能が含まれています：
+- コード品質チェック（ESLint、TypeScript）
+- ビルドテスト
+- ユニットテスト（PostgreSQL統合）
+- Dockerイメージビルド（GHCR）
+- 自動デプロイ（本番・ステージング）
 
-#### 1. コード品質チェック (quality-check)
-- ESLintによる静的解析
-- TypeScriptの型チェック
-- コードフォーマットチェック
+詳細は [ci-cd-workflow.yml](./ci-cd-workflow.yml) を参照してください。
 
-#### 2. ビルドテスト (build)
-- Next.jsアプリケーションのビルド
-- Prismaクライアントの生成
-- ビルド成果物のアップロード
+## 📞 サポート
 
-#### 3. ユニットテスト (test)
-- PostgreSQLサービスコンテナを使用
-- データベースマイグレーション実行
-- カバレッジレポート生成
-- Codecovへのアップロード（オプション）
+問題が解決しない場合：
 
-#### 4. Dockerイメージビルド (docker-build)
-- マルチステージビルド
-- GitHub Container Registryへのプッシュ
-- タグ管理（ブランチ、PR、SHA、latest）
-- ビルドキャッシュの活用
+1. 各ガイドのトラブルシューティングセクション確認
+2. [GitHub Issues](https://github.com/sas-dx/skill-report-web/issues)で報告
+3. ログファイルとエラーメッセージを添付
 
-#### 5. デプロイ
-- **本番環境** (deploy-production): mainブランチへのプッシュ時
-- **ステージング環境** (deploy-staging): developブランチへのプッシュ時
+## 🔄 更新履歴
 
-### トリガー条件
+- 2024-01-01: Vercel環境変数チェックリスト追加
+- 2024-01-01: Vercelデプロイメントガイド追加
+- 2024-01-01: Dockerデプロイメントガイド追加
+- 2024-01-01: CI/CDワークフロー追加
 
-#### プッシュイベント
-- `main`, `master`, `develop`, `release/**` ブランチ
+---
 
-#### プルリクエスト
-- `main`, `master`, `develop` ブランチへのPR
-
-### 必要なシークレット設定
-
-本番デプロイを有効にする場合、以下のGitHub Secretsを設定してください：
-
-#### デプロイ用（SSH経由の場合）
-```
-DEPLOY_HOST         # デプロイ先サーバーのホスト名
-DEPLOY_USER         # SSHユーザー名
-DEPLOY_SSH_KEY      # SSH秘密鍵
-```
-
-#### その他（オプション）
-```
-CODECOV_TOKEN       # Codecovトークン（カバレッジレポート用）
-```
-
-### デプロイ方法のカスタマイズ
-
-ワークフローファイルの `deploy-production` および `deploy-staging` ジョブには、
-コメントアウトされたデプロイ手順の例が含まれています。
-
-使用する環境に応じて、以下のいずれかの方法でカスタマイズしてください：
-
-#### SSH経由でのデプロイ
-```yaml
-- name: Deploy to server
-  uses: appleboy/ssh-action@v1.0.0
-  with:
-    host: ${{ secrets.DEPLOY_HOST }}
-    username: ${{ secrets.DEPLOY_USER }}
-    key: ${{ secrets.DEPLOY_SSH_KEY }}
-    script: |
-      cd /opt/skill-report-web
-      docker-compose pull
-      docker-compose up -d
-      docker-compose exec app npx prisma migrate deploy
-```
-
-#### AWS ECS へのデプロイ
-```yaml
-- name: Deploy to ECS
-  uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-  with:
-    task-definition: task-definition.json
-    service: skill-report-service
-    cluster: skill-report-cluster
-```
-
-#### Kubernetes へのデプロイ
-```yaml
-- name: Deploy to Kubernetes
-  uses: azure/k8s-deploy@v4
-  with:
-    manifests: |
-      k8s/deployment.yml
-      k8s/service.yml
-    images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-```
-
-### Dockerイメージの利用
-
-ビルドされたDockerイメージは以下の形式で取得できます：
-
-```bash
-# 最新版
-docker pull ghcr.io/sas-dx/skill-report-web:latest
-
-# 特定のブランチ
-docker pull ghcr.io/sas-dx/skill-report-web:develop
-
-# 特定のコミット
-docker pull ghcr.io/sas-dx/skill-report-web:main-abc1234
-```
-
-### トラブルシューティング
-
-#### ワークフローが起動しない
-- `.github/workflows/` ディレクトリにファイルが正しく配置されているか確認
-- トリガー条件（ブランチ名）が正しいか確認
-
-#### ビルドが失敗する
-- ローカルで `npm run build` が成功するか確認
-- 環境変数が正しく設定されているか確認
-
-#### テストが失敗する
-- ローカルで `npm run test` が成功するか確認
-- データベース接続設定を確認
-
-#### Dockerイメージのプッシュが失敗する
-- GitHub Package の権限設定を確認
-- `GITHUB_TOKEN` に適切な権限があるか確認
-
-## 関連ファイル
-
-- `Dockerfile` - Dockerイメージのビルド定義
-- `docker-compose.prod.yml` - 本番環境のDocker Compose設定
-- `nginx.conf` - Nginxリバースプロキシ設定
-- `.dockerignore` - Dockerビルドコンテキストの除外設定
-
-## 参考資料
-
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Docker Documentation](https://docs.docker.com/)
-- [Next.js Deployment](https://nextjs.org/docs/deployment)
+**最終更新:** 2024-01-01
+**メンテナー:** SAS Team
